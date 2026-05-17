@@ -6,8 +6,10 @@ import { saveRaceGoalAndPlan } from '@/app/onboarding/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Search, Trophy, Calendar, Zap, Flag, Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export function RaceFinder() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<'catalog' | 'custom'>('catalog');
   
   // Estado para Catálogo Oficial
@@ -91,12 +93,18 @@ export function RaceFinder() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await saveRaceGoalAndPlan({
+      const result = await saveRaceGoalAndPlan({
         target_race_name: currentGoal.name,
         target_race_date: currentGoal.date,
         target_race_distance: currentGoal.distance,
         target_race_modality: currentGoal.modality
       });
+      if (result && result.error) {
+        console.error('Error del servidor:', result.error);
+        setLoading(false);
+      } else {
+        router.push('/dashboard');
+      }
     } catch (error) {
       console.error('Error al guardar objetivo:', error);
       setLoading(false);

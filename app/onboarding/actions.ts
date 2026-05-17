@@ -220,6 +220,6 @@ export async function saveRaceGoalAndPlan(formData: {
     }
   }
 
-  redirect('/dashboard');
+  return { success: true };
 }
 
