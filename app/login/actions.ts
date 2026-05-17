@@ -74,7 +74,7 @@ export async function signInWithOAuth(provider: 'apple' | 'google') {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()}/auth/v1/callback`,
     },
   })
 
