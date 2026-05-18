@@ -4,7 +4,6 @@ import { redirect } from 'next/navigation';
 import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
 import { WeeklyNav } from '@/components/dashboard/weekly-nav';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
-import { GlobalWatchStatusBar } from '@/components/dashboard/global-watch-status-bar';
 import { getDailyBiometrics } from '@/app/dashboard/biometrics-actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -133,9 +132,6 @@ export default async function DashboardPage() {
             <BiometricsCard initialBiometrics={biometrics} />
           </section>
         )}
-
-        {/* Barra Global de Relojes (Garmin/Strava) */}
-        <GlobalWatchStatusBar isConnected={isConnected} provider={devices?.[0]?.provider || (profile.garmin_connected ? 'garmin' : profile.strava_connected ? 'strava' : null)} />
 
         {/* Barra de Navegación Semanal */}
         <section className="space-y-3">

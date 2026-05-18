@@ -7,6 +7,7 @@ import { ArrowLeft, Settings } from 'lucide-react';
 import { RaceGoalCard } from '@/components/settings/race-goal-card';
 import { PhysiologicalCard } from '@/components/settings/physiological-card';
 import { VirtualGarageCard } from '@/components/settings/virtual-garage-card';
+import { TelemetryConnectCard } from '@/components/settings/telemetry-connect-card';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -76,10 +77,19 @@ export default async function SettingsPage() {
               />
             </div>
             
-            <div className="flex-1">
-              <VirtualGarageCard 
-                initialGarage={profile.virtual_garage || []}
-              />
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="h-full">
+                <VirtualGarageCard 
+                  initialGarage={profile.virtual_garage || []}
+                />
+              </div>
+              <div className="h-full">
+                <TelemetryConnectCard 
+                  isConnected={!!(profile.garmin_connected || profile.strava_connected)}
+                  provider={profile.garmin_connected ? 'Garmin' : profile.strava_connected ? 'Strava' : null}
+                  lastSyncTime={null}
+                />
+              </div>
             </div>
           </div>
         </div>
