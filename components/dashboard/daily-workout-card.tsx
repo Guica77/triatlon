@@ -369,12 +369,13 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
               variant="ghost"
               className="py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-bold shadow-lg shadow-orange-500/10"
               onClick={() => {
-                setToastMsg('📥 Generando archivo .FIT estructurado... Abriendo app de Garmin/Coros para sincronizar por Bluetooth.');
+                setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
+                window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
                 setTimeout(() => setToastMsg(null), 6000);
               }}
             >
               <Download className="w-5 h-5 text-orange-400 animate-bounce" />
-              <span>Enviar al Reloj (.FIT)</span>
+              <span>Enviar al Reloj (.TCX)</span>
             </AnimatedButton>
 
             {isCompleted && (
