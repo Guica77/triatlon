@@ -83,20 +83,28 @@ export default async function MarketplacePage({
     <div className="min-h-screen bg-[var(--color-background)] pb-24">
       
       {/* Top Navbar */}
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-background)]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shadow-inner">
-            <ShoppingBag className="w-4 h-4 text-cyan-400" />
+      <header className="border-b border-[var(--color-border)] bg-[var(--color-background)]/80 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
+        <div className="flex items-center justify-between w-full sm:w-auto gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shadow-inner shrink-0">
+              <ShoppingBag className="w-4 h-4 text-cyan-400" />
+            </div>
+            <div>
+              <h1 className="text-sm sm:text-base font-semibold text-zinc-50 tracking-tight">Marketplace de Segunda Mano</h1>
+              <p className="text-[11px] sm:text-xs text-zinc-400 capitalize line-clamp-1">
+                {activePlan?.name || 'Plan de Entrenamiento'} • Atleta: {profile?.first_name || 'Triatleta'}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-base font-medium text-zinc-50">Marketplace de Segunda Mano</h1>
-            <p className="text-xs text-zinc-400 capitalize">
-              {activePlan?.name || 'Plan de Entrenamiento'} • Atleta: {profile?.first_name || 'Triatleta'}
-            </p>
-          </div>
+          <Link href="/dashboard" className="sm:hidden">
+            <AnimatedButton variant="ghost" size="sm" className="border border-zinc-800 flex items-center gap-1 px-2.5 py-1 text-xs">
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Dashboard</span>
+            </AnimatedButton>
+          </Link>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-3">
           <Link href="/dashboard">
             <AnimatedButton variant="ghost" size="sm" className="border border-zinc-800 flex items-center gap-2">
               <ArrowLeft className="w-4 h-4" />
