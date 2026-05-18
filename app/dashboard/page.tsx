@@ -156,7 +156,7 @@ export default async function DashboardPage() {
 
           {todayWorkouts.length > 0 ? (
             todayWorkouts.map(w => (
-              <DailyWorkoutCard key={w.id} workout={w as any} initialIsConnected={isConnected} />
+              <DailyWorkoutCard key={w.id} workout={w as any} initialIsConnected={isConnected} virtualGarage={profile.virtual_garage || []} />
             ))
           ) : (
             <ProCard className="text-center py-12 space-y-3 bg-zinc-900/30">
@@ -176,7 +176,7 @@ export default async function DashboardPage() {
 
           {tomorrowWorkouts.length > 0 ? (
             tomorrowWorkouts.map(w => (
-              <DailyWorkoutCard key={w.id} workout={w as any} initialIsConnected={isConnected} />
+              <DailyWorkoutCard key={w.id} workout={w as any} initialIsConnected={isConnected} virtualGarage={profile.virtual_garage || []} />
             ))
           ) : (
             <ProCard className="text-center py-8 bg-zinc-900/20 border-zinc-800/60">

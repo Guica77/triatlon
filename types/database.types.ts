@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -133,8 +138,12 @@ export type Database = {
       profiles: {
         Row: {
           active_plan_id: string | null
+          baseline_training_hours: string | null
           coach_id: string | null
           created_at: string
+          current_ftp: number | null
+          current_run_pace: string | null
+          current_swim_pace: string | null
           external_athlete_id: string | null
           first_name: string | null
           ftp: number | null
@@ -148,16 +157,22 @@ export type Database = {
           strava_auth_tokens: Json | null
           strava_connected: boolean | null
           swim_pace: string | null
+          target_finish_time: string | null
           target_race_date: string | null
           target_race_distance: string | null
           target_race_modality: string | null
           target_race_name: string | null
           updated_at: string
+          virtual_garage: string[] | null
         }
         Insert: {
           active_plan_id?: string | null
+          baseline_training_hours?: string | null
           coach_id?: string | null
           created_at?: string
+          current_ftp?: number | null
+          current_run_pace?: string | null
+          current_swim_pace?: string | null
           external_athlete_id?: string | null
           first_name?: string | null
           ftp?: number | null
@@ -171,16 +186,22 @@ export type Database = {
           strava_auth_tokens?: Json | null
           strava_connected?: boolean | null
           swim_pace?: string | null
+          target_finish_time?: string | null
           target_race_date?: string | null
           target_race_distance?: string | null
           target_race_modality?: string | null
           target_race_name?: string | null
           updated_at?: string
+          virtual_garage?: string[] | null
         }
         Update: {
           active_plan_id?: string | null
+          baseline_training_hours?: string | null
           coach_id?: string | null
           created_at?: string
+          current_ftp?: number | null
+          current_run_pace?: string | null
+          current_swim_pace?: string | null
           external_athlete_id?: string | null
           first_name?: string | null
           ftp?: number | null
@@ -194,11 +215,13 @@ export type Database = {
           strava_auth_tokens?: Json | null
           strava_connected?: boolean | null
           swim_pace?: string | null
+          target_finish_time?: string | null
           target_race_date?: string | null
           target_race_distance?: string | null
           target_race_modality?: string | null
           target_race_name?: string | null
           updated_at?: string
+          virtual_garage?: string[] | null
         }
         Relationships: [
           {
@@ -253,6 +276,7 @@ export type Database = {
           day_name: string
           description: string
           duration_min: number | null
+          gear_needed: string[] | null
           id: string
           plan_id: string | null
           sport_type: string
@@ -263,6 +287,7 @@ export type Database = {
           day_name: string
           description: string
           duration_min?: number | null
+          gear_needed?: string[] | null
           id?: string
           plan_id?: string | null
           sport_type: string
@@ -273,6 +298,7 @@ export type Database = {
           day_name?: string
           description?: string
           duration_min?: number | null
+          gear_needed?: string[] | null
           id?: string
           plan_id?: string | null
           sport_type?: string
@@ -758,4 +784,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

@@ -24,12 +24,13 @@ export interface MarketplaceItem {
 interface MarketplaceGridProps {
   initialItems: MarketplaceItem[];
   initialCategory?: string;
+  initialSearchQuery?: string;
   userWorkoutGearNeeded?: string[];
 }
 
-export function MarketplaceAggregatorGrid({ initialItems, initialCategory = 'todos', userWorkoutGearNeeded = [] }: MarketplaceGridProps) {
+export function MarketplaceAggregatorGrid({ initialItems, initialCategory = 'todos', initialSearchQuery = '', userWorkoutGearNeeded = [] }: MarketplaceGridProps) {
   const [items, setItems] = useState<MarketplaceItem[]>(initialItems);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [selectedCondition, setSelectedCondition] = useState('todos');
   const [sortBy, setSortBy] = useState<'recent' | 'price-asc' | 'price-desc' | 'discount'>('discount');

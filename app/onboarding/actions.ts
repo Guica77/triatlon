@@ -99,6 +99,12 @@ export async function saveRaceGoalAndPlan(formData: {
   target_race_date: string;
   target_race_distance: 'sprint' | 'olimpico' | 'half' | 'full';
   target_race_modality?: string;
+  target_finish_time?: string;
+  baseline_training_hours?: string;
+  current_ftp?: number;
+  current_swim_pace?: string;
+  current_run_pace?: string;
+  virtual_garage?: string[];
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -107,7 +113,31 @@ export async function saveRaceGoalAndPlan(formData: {
     redirect('/login')
   }
 
-  const { target_race_name, target_race_date, target_race_distance, target_race_modality = 'triatlon' } = formData;
+  const { 
+    target_race_name, target_race_date, target_race_distance, target_race_modality = 'triatlon',
+    target_finish_time, baseline_training_hours, virtual_garage = []
+  } = formData;
+
+  // AI Estimation Fallback Logic for Physiological Metrics
+  let { current_ftp, current_swim_pace, current_run_pace } = formData;
+  
+  if (!current_ftp) {
+    if (baseline_training_hours?.includes('12+')) current_ftp = 280;
+    else if (baseline_training_hours?.includes('7-10')) current_ftp = 230;
+    else current_ftp = 180;
+  }
+  
+  if (!current_swim_pace) {
+    if (baseline_training_hours?.includes('12+')) current_swim_pace = '01:30';
+    else if (baseline_training_hours?.includes('7-10')) current_swim_pace = '01:45';
+    else current_swim_pace = '02:00';
+  }
+
+  if (!current_run_pace) {
+    if (baseline_training_hours?.includes('12+')) current_run_pace = '04:15';
+    else if (baseline_training_hours?.includes('7-10')) current_run_pace = '04:45';
+    else current_run_pace = '05:30';
+  }
 
   // 1. Obtener todos los planes para buscar el que mejor coincida con la distancia
   const { data: plans } = await supabase
@@ -136,7 +166,7 @@ export async function saveRaceGoalAndPlan(formData: {
     redirect('/dashboard');
   }
 
-  // 2. Upsert perfil con los objetivos de carrera, modalidad y plan activo
+  // 2. Upsert perfil con los objetivos de carrera, modalidad, plan activo, métricas fisiológicas y garaje virtual
   const { error: profileError } = await supabase
     .from('profiles')
     .upsert({
@@ -148,6 +178,12 @@ export async function saveRaceGoalAndPlan(formData: {
       target_race_date,
       target_race_distance,
       target_race_modality,
+      target_finish_time,
+      baseline_training_hours,
+      current_ftp,
+      current_swim_pace,
+      current_run_pace,
+      virtual_garage,
       active_plan_id: selectedPlanId
     });
 

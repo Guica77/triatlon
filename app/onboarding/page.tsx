@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { RaceFinder } from '@/components/onboarding/race-finder';
+import { HybridWizard } from '@/components/onboarding/hybrid-wizard';
 
 export default async function OnboardingPage() {
   const supabase = await createClient();
@@ -17,16 +17,17 @@ export default async function OnboardingPage() {
         
         {/* Header */}
         <header className="text-center space-y-3 max-w-xl mx-auto">
-          <p className="text-xs text-cyan-400 uppercase tracking-widest font-semibold">Paso 1 de 1</p>
+          <p className="text-xs text-cyan-400 uppercase tracking-widest font-semibold">Onboarding Pro</p>
           <h1 className="text-4xl font-light tracking-tight text-zinc-50">Configura tu Objetivo</h1>
           <p className="text-sm text-zinc-400 font-normal leading-relaxed">
-            Selecciona una prueba en el circuito internacional o define tu propio desafío. 
-            Calcularemos las semanas restantes y generaremos tu periodización de rendimiento al instante.
+            Define tu meta, calibra tu fisiología y configura tu Garaje Virtual. La Inteligencia Artificial generará tu periodización de rendimiento al instante.
           </p>
         </header>
 
-        {/* Módulo Interactivo de Búsqueda y Periodización */}
-        <RaceFinder />
+        {/* 3-Step Wizard */}
+        <div className="flex justify-center w-full">
+          <HybridWizard />
+        </div>
 
       </div>
     </div>

@@ -71,13 +71,21 @@ async function main() {
       plan.plan_semana_a_semana.forEach(semana => {
         if (semana.sesiones) {
           semana.sesiones.forEach(sesion => {
+            const text = (sesion.descripcion || '').toLowerCase();
+            const gear = [];
+            if (text.includes('palas')) gear.push('Palas de Natación');
+            if (text.includes('aletas')) gear.push('Aletas de Natación');
+            if (text.includes('potenciómetro') || text.includes('potenciometro') || text.includes('vatios')) gear.push('Potenciómetro');
+            if (text.includes('cabra') || text.includes('acoples')) gear.push('Cabra Triatlón');
+
             sessionInserts.push({
               plan_id: planData.id,
               week_number: semana.semana,
               day_name: sesion.dia,
               sport_type: sesion.deporte || 'descanso',
               duration_min: sesion.duracion_min || 0,
-              description: sesion.descripcion || 'Entrenamiento del día'
+              description: sesion.descripcion || 'Entrenamiento del día',
+              gear_needed: gear
             });
           });
         }
@@ -119,13 +127,21 @@ async function main() {
             let dayName = diaItem.dia || 'Lunes';
             if (dayName === 'Sabado') dayName = 'Sábado';
 
+            const gear = [];
+            const descLower = desc.toLowerCase();
+            if (descLower.includes('palas')) gear.push('Palas de Natación');
+            if (descLower.includes('aletas')) gear.push('Aletas de Natación');
+            if (descLower.includes('potenciómetro') || descLower.includes('potenciometro') || descLower.includes('vatios')) gear.push('Potenciómetro');
+            if (descLower.includes('cabra') || descLower.includes('acoples')) gear.push('Cabra Triatlón');
+
             sessionInserts.push({
               plan_id: planData.id,
               week_number: w,
               day_name: dayName,
               sport_type: sport,
               duration_min: duration,
-              description: desc
+              description: desc,
+              gear_needed: gear
             });
           });
         }

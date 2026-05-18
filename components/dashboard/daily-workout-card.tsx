@@ -13,6 +13,7 @@ import Link from 'next/link';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
+  virtualGarage?: string[];
   workout: {
     id: string;
     scheduled_date: string;
@@ -24,6 +25,7 @@ interface WorkoutCardProps {
       duration_min: number;
       description: string;
       day_name: string;
+      gear_needed?: string[] | null;
     };
     universal_telemetry?: {
       source_provider: string;
@@ -63,7 +65,7 @@ function parseWorkoutDescription(desc: string, sportType: string) {
   return { main, warmup, cooldown, gear };
 }
 
-export function DailyWorkoutCard({ workout, initialIsConnected = false }: WorkoutCardProps) {
+export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [] }: WorkoutCardProps) {
   const [status, setStatus] = React.useState(workout.status);
   const [loading, setLoading] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry'>('main');
@@ -100,6 +102,9 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
   }, [initialIsConnected, status, workout.id, session?.sport_type]);
 
   if (!session) return null;
+
+  const gearNeeded = session.gear_needed || [];
+  const missingGear = gearNeeded.filter(g => !virtualGarage.includes(g));
 
   const sportBgGlow: Record<string, string> = {
     natacion: 'bg-[var(--color-swim)]/5',
@@ -173,6 +178,28 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
       {session.sport_type !== 'descanso' ? (
         <div className="space-y-4 relative z-10">
           
+          {/* Alerta de Material Faltante (IA Gear Match Loop) */}
+          {missingGear.length > 0 && !isCompleted && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-orange-500/5 mb-4"
+            >
+              <div className="flex items-start gap-3">
+                <ShoppingBag className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-bold text-orange-400">⚠️ Material Faltante</p>
+                  <p className="text-xs text-orange-300/80 mt-0.5">El entreno pide: <strong className="text-orange-300">{missingGear.join(', ')}</strong> y no lo tienes en tu Garaje.</p>
+                </div>
+              </div>
+              <Link href={`/marketplace?category=accesorios&search=${encodeURIComponent(missingGear[0])}`} className="shrink-0 w-full sm:w-auto">
+                <button className="w-full sm:w-auto px-4 py-2 bg-orange-500 text-black font-bold text-xs rounded-lg hover:bg-orange-400 transition-colors shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+                  <Sparkles className="w-3.5 h-3.5" /> Buscar Chollos IA
+                </button>
+              </Link>
+            </motion.div>
+          )}
+
           {/* Navegación de Pestañas */}
           <div className="flex flex-wrap gap-2 border-b border-zinc-800 pb-2">
             <button

@@ -11,7 +11,7 @@ export const revalidate = 60; // Refrescar caché de chollos cada 60 segundos
 export default async function MarketplacePage({
   searchParams,
 }: {
-  searchParams?: { category?: string };
+  searchParams?: { category?: string; search?: string };
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -23,7 +23,7 @@ export default async function MarketplacePage({
   // 1. Obtener perfil activo
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, level, training_plans(name)')
+    .select('first_name, level, virtual_garage, training_plans(name)')
     .eq('id', user.id)
     .single();
 
@@ -53,26 +53,29 @@ export default async function MarketplacePage({
 
   const { data: workouts } = await supabase
     .from('user_workouts')
-    .select('*, training_sessions(description)')
+    .select('*, training_sessions(description, gear_needed)')
     .eq('user_id', user.id)
     .gte('scheduled_date', monday.toISOString().split('T')[0])
     .lte('scheduled_date', sunday.toISOString().split('T')[0]);
 
+  const virtualGarage = profile?.virtual_garage || [];
   const gearNeeded: string[] = [];
   workouts?.forEach(w => {
+    const sessionGear = w.training_sessions?.gear_needed || [];
+    sessionGear.forEach((gear: string) => {
+      if (!virtualGarage.includes(gear) && !gearNeeded.includes(gear)) {
+        gearNeeded.push(gear);
+      }
+    });
+    
+    // Fallback Legacy
     const desc = w.training_sessions?.description?.toLowerCase() || '';
-    if (desc.includes('palas') && !gearNeeded.includes('Palas de Natación')) gearNeeded.push('Palas de Natación');
-    if (desc.includes('aletas') && !gearNeeded.includes('Aletas de Natación')) gearNeeded.push('Aletas de Natación');
-    if (desc.includes('potenciometro') && !gearNeeded.includes('Potenciómetro')) gearNeeded.push('Potenciómetro');
-    if (desc.includes('ruedas') && !gearNeeded.includes('Ruedas de Perfil')) gearNeeded.push('Ruedas de Perfil');
-    if (desc.includes('cabra') && !gearNeeded.includes('Bicicleta Contrarreloj')) gearNeeded.push('Bicicleta Contrarreloj');
+    if (desc.includes('palas') && !virtualGarage.includes('Palas de Natación') && !gearNeeded.includes('Palas de Natación')) gearNeeded.push('Palas de Natación');
+    if (desc.includes('aletas') && !virtualGarage.includes('Aletas de Natación') && !gearNeeded.includes('Aletas de Natación')) gearNeeded.push('Aletas de Natación');
   });
 
-  if (gearNeeded.length === 0) {
-    gearNeeded.push('Palas de Natación', 'Aletas de Natación'); // Sugerencia por defecto
-  }
-
   const initialCategory = searchParams?.category || 'todos';
+  const initialSearchQuery = searchParams?.search || '';
   const formattedItems: MarketplaceItem[] = (items || []).map(item => ({
     ...item,
     is_active: item.is_active ?? true,
@@ -131,6 +134,7 @@ export default async function MarketplacePage({
         <MarketplaceAggregatorGrid 
           initialItems={formattedItems} 
           initialCategory={initialCategory}
+          initialSearchQuery={initialSearchQuery}
           userWorkoutGearNeeded={gearNeeded}
         />
 
