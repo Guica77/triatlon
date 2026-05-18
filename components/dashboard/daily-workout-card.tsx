@@ -106,6 +106,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
     ciclismo: 'bg-[var(--color-bike)]/5',
     carrera: 'bg-[var(--color-run)]/5',
     brick: 'bg-amber-400/5',
+    fuerza: 'bg-purple-500/10',
     descanso: 'bg-transparent',
   };
 
@@ -143,7 +144,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
       <div className="flex justify-between items-start border-b border-[var(--color-border)] pb-4 relative z-10">
         <div>
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className={`w-2 h-2 rounded-full ${session.sport_type === 'natacion' ? 'bg-[var(--color-swim)]' : session.sport_type === 'ciclismo' ? 'bg-[var(--color-bike)]' : session.sport_type === 'carrera' ? 'bg-[var(--color-run)]' : 'bg-amber-400'}`} />
+            <span className={`w-2 h-2 rounded-full ${session.sport_type === 'natacion' ? 'bg-[var(--color-swim)]' : session.sport_type === 'ciclismo' ? 'bg-[var(--color-bike)]' : session.sport_type === 'carrera' ? 'bg-[var(--color-run)]' : session.sport_type === 'fuerza' ? 'bg-purple-400' : 'bg-amber-400'}`} />
             <p className="text-zinc-400 font-medium tracking-wider uppercase text-xs">
               {session.sport_type} • {session.day_name}
             </p>
@@ -155,7 +156,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
             )}
           </div>
           <h3 className="text-xl font-semibold text-zinc-50 capitalize">
-            {session.sport_type === 'descanso' ? 'Día de Descanso Activo' : `Sesión de ${session.sport_type}`}
+            {session.sport_type === 'descanso' ? 'Día de Descanso Activo' : session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
           </h3>
         </div>
 

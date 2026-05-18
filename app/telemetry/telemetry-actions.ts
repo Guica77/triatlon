@@ -157,9 +157,9 @@ export async function simulateWatchIngestion(workoutId: string, sportType: strin
     const userId = authData.user.id;
 
     // Generar telemetría realista con exceso de fatiga para demostrar el recálculo dinámico
-    const actualDuration = sportType === 'ciclismo' ? 120 : sportType === 'carrera' ? 75 : 60;
-    const actualDistance = sportType === 'ciclismo' ? 62.5 : sportType === 'carrera' ? 14.2 : 3.2;
-    const actualTss = sportType === 'ciclismo' ? 145 : sportType === 'carrera' ? 110 : 85;
+    const actualDuration = sportType === 'ciclismo' ? 120 : sportType === 'carrera' ? 75 : sportType === 'fuerza' ? 50 : 60;
+    const actualDistance = sportType === 'ciclismo' ? 62.5 : sportType === 'carrera' ? 14.2 : sportType === 'fuerza' ? 0 : 3.2;
+    const actualTss = sportType === 'ciclismo' ? 145 : sportType === 'carrera' ? 110 : sportType === 'fuerza' ? 45 : 85;
 
     const payload: TelemetryPayload = {
       workout_id: workoutId,
@@ -169,15 +169,15 @@ export async function simulateWatchIngestion(workoutId: string, sportType: strin
       actual_duration_min: actualDuration,
       moving_time_min: actualDuration - 3,
       actual_distance_km: actualDistance,
-      elevation_gain_m: sportType === 'ciclismo' ? 850 : 180,
+      elevation_gain_m: sportType === 'ciclismo' ? 850 : sportType === 'fuerza' ? 0 : 180,
       actual_tss: actualTss,
-      avg_hr: 152,
-      max_hr: 178,
+      avg_hr: sportType === 'fuerza' ? 128 : 152,
+      max_hr: sportType === 'fuerza' ? 158 : 178,
       avg_power: sportType === 'ciclismo' ? 215 : undefined,
       normalized_power: sportType === 'ciclismo' ? 230 : undefined,
-      avg_cadence: sportType === 'carrera' ? 176 : 92,
-      training_effect_aerobic: 4.2,
-      training_effect_anaerobic: 2.1,
+      avg_cadence: sportType === 'carrera' ? 176 : sportType === 'fuerza' ? undefined : 92,
+      training_effect_aerobic: sportType === 'fuerza' ? 2.2 : 4.2,
+      training_effect_anaerobic: sportType === 'fuerza' ? 2.8 : 2.1,
       raw_payload: { simulated: true, device: 'Garmin Forerunner 965', firmware: '18.22' }
     };
 
