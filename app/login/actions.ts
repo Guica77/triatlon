@@ -69,12 +69,19 @@ export async function signup(formData: FormData) {
   redirect('/onboarding')
 }
 
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.trim();
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.trim()}`;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL.trim()}`;
+  return 'http://localhost:3000';
+};
+
 export async function signInWithOAuth(provider: 'apple' | 'google') {
   const supabase = await createClient()
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()}/auth/v1/callback`,
+      redirectTo: `${getBaseUrl()}/auth/callback`,
     },
   })
 
