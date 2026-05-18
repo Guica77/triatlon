@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { pushWorkoutToDevice } from '@/app/telemetry/workout-push-actions';
 
 export interface TelemetryPayload {
   workout_id: string;
@@ -184,5 +185,79 @@ export async function simulateWatchIngestion(workoutId: string, sportType: strin
 
   } catch (error: any) {
     return { error: error.message || 'Error en la simulación' };
+  }
+}
+
+/**
+ * Sincronización Total Inteligente (Batch Sync & Automatic Workout Push)
+ * Ingesta todas las sesiones pasadas/actuales pendientes y envía las futuras al reloj.
+ */
+export async function syncAllPendingWorkouts() {
+  try {
+    const supabase = await createClient();
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData?.user) return { error: 'No autorizado' };
+
+    const userId = authData.user.id;
+
+    // Obtener todos los entrenamientos de la semana actual
+    const now = new Date();
+    const currentDay = now.getDay() || 7;
+    const monday = new Date(now);
+    monday.setDate(monday.getDate() - currentDay + 1);
+    monday.setHours(0, 0, 0, 0);
+
+    const sunday = new Date(monday);
+    sunday.setDate(sunday.getDate() + 6);
+    sunday.setHours(23, 59, 59, 999);
+
+    const { data: workouts } = await supabase
+      .from('user_workouts')
+      .select('*, training_sessions(*)')
+      .eq('user_id', userId)
+      .gte('scheduled_date', monday.toISOString().split('T')[0])
+      .lte('scheduled_date', sunday.toISOString().split('T')[0])
+      .order('scheduled_date', { ascending: true });
+
+    if (!workouts || workouts.length === 0) {
+      return { success: true, count: 0, pushedCount: 0, message: 'No se encontraron entrenamientos programados para esta semana' };
+    }
+
+    const todayStr = now.toISOString().split('T')[0];
+    let syncedCount = 0;
+    let pushedCount = 0;
+
+    for (const w of workouts) {
+      if (w.training_sessions?.sport_type === 'descanso') continue;
+
+      if (w.scheduled_date <= todayStr && w.status === 'pending') {
+        // INGESTA AUTOMÁTICA: Sincronizar telemetría de sesiones pasadas/hoy
+        const res = await simulateWatchIngestion(w.id, w.training_sessions.sport_type || 'ciclismo');
+        if (res?.success) {
+          syncedCount++;
+        }
+      } else if (w.scheduled_date > todayStr && w.status === 'pending') {
+        // PUSH AUTOMÁTICO AL RELOJ: Enviar sesiones futuras al calendario del dispositivo (Garmin/Strava)
+        const pushRes = await pushWorkoutToDevice(w.id, 'garmin');
+        if (pushRes?.success) {
+          pushedCount++;
+        }
+      }
+    }
+
+    revalidatePath('/dashboard');
+    revalidatePath('/analytics');
+    revalidatePath('/coach-portal');
+
+    return { 
+      success: true, 
+      count: syncedCount, 
+      pushedCount, 
+      message: `¡Sincronización Total Inteligente completada! ${syncedCount} sesiones leídas y ${pushedCount} entrenamientos enviados a tu reloj.` 
+    };
+
+  } catch (error: any) {
+    console.error('Error en syncAllPendingWorkouts:', error);
+    return { error: error.message || 'Error en la sincronización total' };
   }
 }

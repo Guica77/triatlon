@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { RefreshCw, CheckCircle2, AlertCircle, Watch } from 'lucide-react';
+import { syncAllPendingWorkouts } from '@/app/telemetry/telemetry-actions';
 
 interface GlobalWatchStatusBarProps {
   isConnected: boolean;
@@ -12,16 +13,27 @@ interface GlobalWatchStatusBarProps {
 export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyncTime }: GlobalWatchStatusBarProps) {
   const [syncing, setSyncing] = React.useState(false);
   const [lastSync, setLastSync] = React.useState<string | null>(lastSyncTime || 'Hace unos instantes');
-  const [successToast, setSuccessToast] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState<string | null>(null);
 
   const handleForceSync = async () => {
+    if (syncing) return;
     setSyncing(true);
-    // Simular llamada de sincronización en segundo plano
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setSyncing(false);
-    setLastSync('Justo ahora');
-    setSuccessToast(true);
-    setTimeout(() => setSuccessToast(false), 3000);
+    setToastMessage(null);
+
+    try {
+      const res = await syncAllPendingWorkouts();
+      setLastSync('Justo ahora');
+      if (res?.success) {
+        setToastMessage(res.message || 'Sincronizado correctamente');
+      } else {
+        setToastMessage(res?.error || 'Error en la sincronización');
+      }
+    } catch (err: any) {
+      setToastMessage('Error de conexión al sincronizar');
+    } finally {
+      setSyncing(false);
+      setTimeout(() => setToastMessage(null), 6000);
+    }
   };
 
   if (!isConnected) {
@@ -69,16 +81,16 @@ export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyn
         </div>
       </div>
 
-      <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-        {successToast && (
-          <span className="text-xs text-green-400 font-medium flex items-center gap-1 animate-fade-in">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Sincronizado
+      <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap sm:flex-nowrap">
+        {toastMessage && (
+          <span className="text-xs text-green-400 font-medium flex items-center gap-1 animate-fade-in bg-green-500/10 px-3 py-1.5 rounded-xl border border-green-500/20 shadow-sm">
+            <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> <span className="line-clamp-1">{toastMessage}</span>
           </span>
         )}
         <button
           onClick={handleForceSync}
           disabled={syncing}
-          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-zinc-100 text-xs font-semibold transition-all flex items-center justify-center gap-2 border border-zinc-700/50 disabled:opacity-50"
+          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-zinc-100 text-xs font-semibold transition-all flex items-center justify-center gap-2 border border-zinc-700/50 disabled:opacity-50 shrink-0"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin text-green-400' : ''}`} />
           {syncing ? 'Sincronizando...' : 'Forzar Sincronización'}
