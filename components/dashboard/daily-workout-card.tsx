@@ -101,8 +101,6 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
 
   if (!session) return null;
 
-  const isCompleted = status === 'completed';
-
   const sportBgGlow: Record<string, string> = {
     natacion: 'bg-[var(--color-swim)]/5',
     ciclismo: 'bg-[var(--color-bike)]/5',
