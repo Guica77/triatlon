@@ -11,11 +11,15 @@ export async function selectPlan(planId: string) {
     redirect('/login')
   }
 
-  // 1. Actualizar perfil
+  // 1. Upsert perfil
   const { error: profileError } = await supabase
     .from('profiles')
-    .update({ active_plan_id: planId })
-    .eq('id', user.id)
+    .upsert({ 
+      id: user.id,
+      first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Triatleta',
+      level: 'intermedio',
+      active_plan_id: planId 
+    })
 
   if (profileError) {
     console.error("Error actualizando plan en perfil:", profileError)
@@ -132,17 +136,20 @@ export async function saveRaceGoalAndPlan(formData: {
     redirect('/dashboard');
   }
 
-  // 2. Actualizar perfil con los objetivos de carrera, modalidad y plan activo
+  // 2. Upsert perfil con los objetivos de carrera, modalidad y plan activo
   const { error: profileError } = await supabase
     .from('profiles')
-    .update({
+    .upsert({
+      id: user.id,
+      first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Triatleta',
+      last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.last_name || '',
+      level: 'intermedio',
       target_race_name,
       target_race_date,
       target_race_distance,
       target_race_modality,
       active_plan_id: selectedPlanId
-    })
-    .eq('id', user.id);
+    });
 
   if (profileError) {
     console.error("Error actualizando objetivos de carrera en perfil:", profileError);
