@@ -52,6 +52,11 @@ export type Database = {
           target_race_distance: string | null
           target_race_modality: string | null
           coach_id: string | null
+          garmin_connected: boolean | null
+          strava_connected: boolean | null
+          external_athlete_id: string | null
+          garmin_auth_tokens: any | null
+          strava_auth_tokens: any | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -70,6 +75,11 @@ export type Database = {
           target_race_distance?: string | null
           target_race_modality?: string | null
           coach_id?: string | null
+          garmin_connected?: boolean | null
+          strava_connected?: boolean | null
+          external_athlete_id?: string | null
+          garmin_auth_tokens?: any | null
+          strava_auth_tokens?: any | null
         }
         Update: {
           active_plan_id?: string | null
@@ -88,6 +98,11 @@ export type Database = {
           target_race_distance?: string | null
           target_race_modality?: string | null
           coach_id?: string | null
+          garmin_connected?: boolean | null
+          strava_connected?: boolean | null
+          external_athlete_id?: string | null
+          garmin_auth_tokens?: any | null
+          strava_auth_tokens?: any | null
         }
         Relationships: [
           {

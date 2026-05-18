@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const { error: profileError } = await supabase
     .from('profiles')
-    .update(updateData)
+    .update(updateData as any)
     .eq('id', user.id);
 
   if (profileError) {

@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     .from('user_connected_devices')
     .select('provider')
     .eq('user_id', user.id);
-  const isConnected = profile.garmin_connected || profile.strava_connected || (devices && devices.length > 0);
+  const isConnected = Boolean(profile.garmin_connected || profile.strava_connected || (devices && devices.length > 0));
 
   // 2. Obtener entrenamientos de la semana actual
   const now = new Date();
