@@ -23,8 +23,8 @@ const marketplaceItems = [
     source_portal: "Tuvalum",
     external_url: "https://tuvalum.com/bicicletas-ciclismo/canyon-speedmax",
     external_images: [
-      "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1485965120184-e220f721d03e?q=80&w=1200&auto=format&fit=crop"
+      "https://images.immediate.co.uk/production/volatile/sites/21/2021/03/Canyon-Speedmax-CF-8-Disc-02-1a4b656.jpg",
+      "https://cdn.bikeradar.com/image/upload/v1617188722/Canyon-Speedmax-CF-8-Disc-01-0bc07e2.jpg"
     ],
     location: "Madrid, España",
     seller_name: "Tuvalum Certified",
@@ -39,8 +39,8 @@ const marketplaceItems = [
     source_portal: "Wallapop",
     external_url: "https://es.wallapop.com/app/search?keywords=orca%20apex%20flex",
     external_images: [
-      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1518611012118-696072aa579a?q=80&w=1200&auto=format&fit=crop"
+      "https://triathlonwetsuitstore.com/wp-content/uploads/2022/04/Orca-Apex-Flex-Mens-Triathlon-Wetsuit-1.jpg",
+      "https://cdn.shopify.com/s/files/1/0554/7445/0585/files/Apex_Flex_Men_2.jpg"
     ],
     location: "Barcelona, España",
     seller_name: "Carlos Tri",
@@ -55,8 +55,8 @@ const marketplaceItems = [
     source_portal: "ForoMTB",
     external_url: "https://foromtb.com/threads/ruedas-zipp-404-firecrest.123456/",
     external_images: [
-      "https://images.unsplash.com/photo-1576435728678-68dd0f6a0c54?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1511994298241-608e28f14fde?q=80&w=1200&auto=format&fit=crop"
+      "https://cdn.sigmasports.com/images/products/56795/1000/zipp-404-firecrest-carbon-clincher-wheelset-1.jpg",
+      "https://sram-cdn-pull-zone.sram.com/media/catalog/product/w/h/wh-404-ftub-a1-main.jpg"
     ],
     location: "Valencia, España",
     seller_name: "Ironman77",
@@ -71,8 +71,8 @@ const marketplaceItems = [
     source_portal: "TuTriatlon",
     external_url: "https://tutriatlon.com/favero-assioma-duo",
     external_images: [
-      "https://images.unsplash.com/photo-1528629297340-d1d466945dc5?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?q=80&w=1200&auto=format&fit=crop"
+      "https://cyclingpro.com/wp-content/uploads/2018/06/assioma_duo_pack.jpg",
+      "https://cdn.shopify.com/s/files/1/0280/8404/3829/products/favero-assioma-duo-power-meter-pedals-3_1024x1024.jpg"
     ],
     location: "Sevilla, España",
     seller_name: "TuTriatlon Store",
@@ -87,8 +87,8 @@ const marketplaceItems = [
     source_portal: "Wallapop",
     external_url: "https://es.wallapop.com/app/search?keywords=giro%20aerohead",
     external_images: [
-      "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1561037404-61cd46aa615b?q=80&w=1200&auto=format&fit=crop"
+      "https://cdn.sigmasports.com/images/products/47941/1000/giro-aerohead-mips-time-trial-helmet-1.jpg",
+      "https://images.immediate.co.uk/production/volatile/sites/21/2019/03/1490977226992-1k1qzz20s7s33-d9ea217.jpg"
     ],
     location: "Bilbao, España",
     seller_name: "Marta_Swim",
@@ -103,8 +103,8 @@ const marketplaceItems = [
     source_portal: "Wallapop",
     external_url: "https://es.wallapop.com/app/search?keywords=palas%20arena%20aletas",
     external_images: [
-      "https://images.unsplash.com/photo-1530549387789-4c1017266635?q=80&w=1200&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1519315901367-f34f91e36324?q=80&w=1200&auto=format&fit=crop"
+      "https://cdn.swimoutlet.com/photos/options/8115682-27756-zoom.jpg",
+      "https://m.media-amazon.com/images/I/61Gg29rXJPL._AC_SL1500_.jpg"
     ],
     location: "Zaragoza, España",
     seller_name: "Alex_Tri",
