@@ -5,10 +5,11 @@ import { toggleWorkoutStatus } from '@/app/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
+import Link from 'next/link';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
@@ -206,9 +207,20 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
                   </div>
                 )}
                 {activeTab === 'gear' && (
-                  <div>
-                    <p className="font-semibold text-purple-400 mb-2">🎒 Equipamiento Recomendado:</p>
+                  <div className="space-y-3">
+                    <p className="font-semibold text-purple-400 mb-1">🎒 Equipamiento Recomendado:</p>
                     <p>{parsed.gear}</p>
+                    <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between flex-wrap gap-2">
+                      <span className="text-xs text-zinc-400 flex items-center gap-1.5">
+                        <ShoppingBag className="w-3.5 h-3.5 text-cyan-400" />
+                        ¿Te falta material para esta sesión?
+                      </span>
+                      <Link href="/marketplace">
+                        <span className="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-sm">
+                          💡 Buscar chollos locales en Marketplace ➔
+                        </span>
+                      </Link>
+                    </div>
                   </div>
                 )}
               </motion.div>

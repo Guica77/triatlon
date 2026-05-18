@@ -127,9 +127,14 @@ export async function getCoachDashboardData(): Promise<{
         .order('created_at', { ascending: false })
         .limit(5);
 
+      const formattedFeedbacks = (feedbacks || []).map(f => ({
+        ...f,
+        created_at: f.created_at ?? new Date().toISOString()
+      }));
+
       athletesWithFeedback.push({
         ...ath,
-        recent_feedbacks: feedbacks || []
+        recent_feedbacks: formattedFeedbacks
       });
     }
 
@@ -140,9 +145,15 @@ export async function getCoachDashboardData(): Promise<{
       .eq('coach_id', coachId)
       .order('created_at', { ascending: false });
 
+    const formattedSuggestions = (suggestionsData || []).map(s => ({
+      ...s,
+      status: s.status ?? 'pending',
+      created_at: s.created_at ?? new Date().toISOString()
+    }));
+
     return {
       athletes: athletesWithFeedback,
-      suggestions: suggestionsData || []
+      suggestions: formattedSuggestions
     };
   } catch (error) {
     console.error('Error en getCoachDashboardData:', error);

@@ -8,14 +8,14 @@ export interface DailyBiometrics {
   id?: string
   user_id: string
   date: string
-  hrv: number
-  rhr: number
-  sleep_hours: number
-  sleep_score: number
-  weight: number
-  fatigue_rating: number // 1 a 5
-  stress_level: number // 1 a 5
-  readiness_score: number
+  hrv: number | null
+  rhr: number | null
+  sleep_hours: number | null
+  sleep_score: number | null
+  weight: number | null
+  fatigue_rating: number | null // 1 a 5
+  stress_level: number | null // 1 a 5
+  readiness_score: number | null
 }
 
 export async function calculateReadiness(
@@ -93,11 +93,11 @@ export async function getDailyBiometrics(): Promise<{ data?: DailyBiometrics; er
     }
 
     const { data: calc } = await calculateReadiness(
-      defaultBiometrics.hrv,
-      defaultBiometrics.rhr,
-      defaultBiometrics.sleep_hours,
-      defaultBiometrics.fatigue_rating,
-      defaultBiometrics.stress_level
+      defaultBiometrics.hrv || 68,
+      defaultBiometrics.rhr || 48,
+      defaultBiometrics.sleep_hours || 7.8,
+      defaultBiometrics.fatigue_rating || 2,
+      defaultBiometrics.stress_level || 2
     )
     defaultBiometrics.readiness_score = calc.readiness_score
 

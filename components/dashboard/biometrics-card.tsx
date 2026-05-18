@@ -25,11 +25,11 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
     async function loadStatus() {
       if (biometrics) {
         const res = await calculateReadiness(
-          biometrics.hrv,
-          biometrics.rhr,
-          biometrics.sleep_hours,
-          biometrics.fatigue_rating,
-          biometrics.stress_level
+          biometrics.hrv || 68,
+          biometrics.rhr || 48,
+          biometrics.sleep_hours || 7.8,
+          biometrics.fatigue_rating || 2,
+          biometrics.stress_level || 2
         )
         if (res?.data) {
           setStatusLabels({

@@ -185,7 +185,7 @@ export async function pushWorkoutToDevice(workoutId: string, provider: string) {
       syncLog = newLog;
     } else {
       await supabase.from('workout_sync_logs').update({
-        attempt_count: syncLog.attempt_count + 1,
+        attempt_count: (syncLog.attempt_count || 0) + 1,
         status: 'pending'
       }).eq('id', syncLog.id);
     }
@@ -197,7 +197,7 @@ export async function pushWorkoutToDevice(workoutId: string, provider: string) {
     const isRateLimited = Math.random() < 0.1;
 
     if (isRateLimited) {
-      const attempt = syncLog.attempt_count + 1;
+      const attempt = (syncLog.attempt_count || 0) + 1;
       const backoffMinutes = attempt === 2 ? 1 : attempt === 3 ? 5 : 15;
       const nextRetry = new Date(Date.now() + backoffMinutes * 60000).toISOString();
 

@@ -8,7 +8,7 @@ import { GlobalWatchStatusBar } from '@/components/dashboard/global-watch-status
 import { getDailyBiometrics } from '@/app/dashboard/biometrics-actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2 } from 'lucide-react';
+import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function DashboardPage() {
@@ -90,7 +90,13 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <Link href="/marketplace">
+            <AnimatedButton variant="ghost" size="sm" className="border border-cyan-500/30 bg-cyan-500/10 flex items-center gap-2 text-cyan-400 hover:text-cyan-300 shadow-sm">
+              <ShoppingBag className="w-4 h-4" />
+              <span>Material 2ª Mano</span>
+            </AnimatedButton>
+          </Link>
           <Link href="/analytics">
             <AnimatedButton variant="ghost" size="sm" className="border border-zinc-800 flex items-center gap-2 text-cyan-400 hover:text-cyan-300">
               <BarChart2 className="w-4 h-4" />
