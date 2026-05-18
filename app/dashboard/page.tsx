@@ -116,9 +116,10 @@ export default async function DashboardPage() {
               <span className="font-medium">Analíticas</span>
             </AnimatedButton>
           </Link>
-          <Link href="/onboarding" className="shrink-0">
-            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/60 transition-all duration-200">
-              <span className="font-medium">Cambiar Plan</span>
+          <Link href="/settings" className="shrink-0">
+            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/60 transition-all duration-200 flex items-center gap-1.5">
+              <Settings className="w-3.5 h-3.5" />
+              <span className="font-medium">Ajustes y Perfil</span>
             </AnimatedButton>
           </Link>
         </div>
