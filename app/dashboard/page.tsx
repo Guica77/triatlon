@@ -34,6 +34,13 @@ export default async function DashboardPage() {
   // 1.5 Obtener Biometría del Día (con auto-simulación inicial)
   const { data: biometrics } = await getDailyBiometrics();
 
+  // 1.8 Verificar conexiones de dispositivos OAuth activas (Garmin / Strava)
+  const { data: devices } = await supabase
+    .from('user_connected_devices')
+    .select('provider')
+    .eq('user_id', user.id);
+  const isConnected = profile.garmin_connected || profile.strava_connected || (devices && devices.length > 0);
+
   // 2. Obtener entrenamientos de la semana actual
   const now = new Date();
   const currentDay = now.getDay() || 7;
@@ -131,7 +138,7 @@ export default async function DashboardPage() {
 
           {todayWorkouts.length > 0 ? (
             todayWorkouts.map(w => (
-              <DailyWorkoutCard key={w.id} workout={w as any} />
+              <DailyWorkoutCard key={w.id} workout={w as any} initialIsConnected={isConnected} />
             ))
           ) : (
             <ProCard className="text-center py-12 space-y-3 bg-zinc-900/30">
@@ -151,7 +158,7 @@ export default async function DashboardPage() {
 
           {tomorrowWorkouts.length > 0 ? (
             tomorrowWorkouts.map(w => (
-              <DailyWorkoutCard key={w.id} workout={w as any} />
+              <DailyWorkoutCard key={w.id} workout={w as any} initialIsConnected={isConnected} />
             ))
           ) : (
             <ProCard className="text-center py-8 bg-zinc-900/20 border-zinc-800/60">

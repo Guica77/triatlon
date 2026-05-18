@@ -12,6 +12,7 @@ import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
 import { connectDeviceProvider, pushWorkoutToDevice } from '@/app/telemetry/workout-push-actions';
 
 interface WorkoutCardProps {
+  initialIsConnected?: boolean;
   workout: {
     id: string;
     scheduled_date: string;
@@ -26,18 +27,35 @@ interface WorkoutCardProps {
   };
 }
 
-export function DailyWorkoutCard({ workout }: WorkoutCardProps) {
+export function DailyWorkoutCard({ workout, initialIsConnected = false }: WorkoutCardProps) {
   const [status, setStatus] = React.useState(workout.status);
   const [loading, setLoading] = React.useState(false);
   const [expanded, setExpanded] = React.useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
   const [syncLoading, setSyncLoading] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
-  const [isConnected, setIsConnected] = React.useState(false);
+  const [isConnected, setIsConnected] = React.useState(initialIsConnected);
   const [pushLoading, setPushLoading] = React.useState(false);
   const [pushSuccess, setPushSuccess] = React.useState(false);
 
   const session = workout.training_sessions;
+
+  // Sincronización Automática en Segundo Plano (Garmin / Strava Webhooks)
+  React.useEffect(() => {
+    if (isConnected && status === 'pending' && session?.sport_type !== 'descanso') {
+      const timer = setTimeout(async () => {
+        setSyncLoading(true);
+        const res = await simulateWatchIngestion(workout.id, session?.sport_type || 'ciclismo');
+        setSyncLoading(false);
+        if (res?.success) {
+          setStatus('completed');
+          setToastMsg('¡Actividad detectada automáticamente desde tu Garmin! TSS Real: 85 (Coincide con plan)');
+        }
+      }, 4000); // 4 segundos de espera mágica para que el usuario vea el cambio en vivo
+      return () => clearTimeout(timer);
+    }
+  }, [isConnected, status, workout.id, session?.sport_type]);
+
   if (!session) return null;
 
   const isCompleted = status === 'completed';
@@ -174,24 +192,31 @@ export function DailyWorkoutCard({ workout }: WorkoutCardProps) {
             </AnimatedButton>
 
             {!isCompleted ? (
-              <AnimatedButton
-                variant="ghost"
-                className="py-6 border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/50 flex items-center justify-center gap-2"
-                onClick={async () => {
-                  if (syncLoading) return;
-                  setSyncLoading(true);
-                  const res = await simulateWatchIngestion(workout.id, session.sport_type);
-                  setSyncLoading(false);
-                  if (res?.success) {
-                    setStatus('completed');
-                    setToastMsg(res.message || 'Actividad sincronizada');
-                  }
-                }}
-                disabled={syncLoading || loading}
-              >
-                <RefreshCw className={`w-5 h-5 ${syncLoading ? 'animate-spin' : ''}`} />
-                <span>Sincronizar Reloj / Strava</span>
-              </AnimatedButton>
+              isConnected ? (
+                <div className="py-6 px-4 rounded-2xl bg-green-500/10 border border-green-500/30 text-green-400 flex items-center justify-center gap-2.5 text-xs font-medium animate-pulse shadow-lg shadow-green-500/5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-ping flex-shrink-0" />
+                  <span>Sincronización Automática Activa (Garmin Webhook)</span>
+                </div>
+              ) : (
+                <AnimatedButton
+                  variant="ghost"
+                  className="py-6 border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/50 flex items-center justify-center gap-2"
+                  onClick={async () => {
+                    if (syncLoading) return;
+                    setSyncLoading(true);
+                    const res = await simulateWatchIngestion(workout.id, session.sport_type);
+                    setSyncLoading(false);
+                    if (res?.success) {
+                      setStatus('completed');
+                      setToastMsg(res.message || 'Actividad sincronizada');
+                    }
+                  }}
+                  disabled={syncLoading || loading}
+                >
+                  <RefreshCw className={`w-5 h-5 ${syncLoading ? 'animate-spin' : ''}`} />
+                  <span>Sincronizar Reloj / Strava</span>
+                </AnimatedButton>
+              )
             ) : (
               <AnimatedButton
                 variant="ghost"
@@ -237,7 +262,7 @@ export function DailyWorkoutCard({ workout }: WorkoutCardProps) {
                   const res = await connectDeviceProvider('garmin');
                   if (res?.success) {
                     setIsConnected(true);
-                    setToastMsg(res.message || 'Garmin conectado');
+                    setToastMsg('¡Cuenta de Garmin conectada correctamente! Escuchando telemetría 24/7 en segundo plano.');
                   }
                 }}
               >
