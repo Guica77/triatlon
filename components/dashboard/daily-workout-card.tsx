@@ -5,7 +5,7 @@ import { toggleWorkoutStatus } from '@/app/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
@@ -363,6 +363,18 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
                   <span>Marcar como Completado</span>
                 </>
               )}
+            </AnimatedButton>
+
+            <AnimatedButton
+              variant="ghost"
+              className="py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-bold shadow-lg shadow-orange-500/10"
+              onClick={() => {
+                setToastMsg('📥 Generando archivo .FIT estructurado... Abriendo app de Garmin/Coros para sincronizar por Bluetooth.');
+                setTimeout(() => setToastMsg(null), 6000);
+              }}
+            >
+              <Download className="w-5 h-5 text-orange-400 animate-bounce" />
+              <span>Enviar al Reloj (.FIT)</span>
             </AnimatedButton>
 
             {isCompleted && (

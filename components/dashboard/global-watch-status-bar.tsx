@@ -40,43 +40,43 @@ export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyn
     return (
       <div className="mb-6 p-4 rounded-2xl bg-[#18181b] border border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-zinc-700">
         <div className="flex items-center gap-3 text-center sm:text-left">
-          <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-400">
+          <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center text-orange-500">
             <Watch className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-semibold text-zinc-100">Sin reloj conectado</h4>
-            <p className="text-xs text-zinc-400">Conecta tu Garmin o Strava para activar la sincronización automática 24/7</p>
+            <h4 className="text-sm font-semibold text-zinc-100">Sin conexión a Strava</h4>
+            <p className="text-xs text-zinc-400">Conecta tu cuenta de Strava para importar telemetría automáticamente de cualquier reloj (Garmin, Coros, Suunto)</p>
           </div>
         </div>
         <a 
-          href="/api/auth/telemetry/connect?provider=garmin"
-          className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-bold transition-all shadow-lg shadow-cyan-500/20 whitespace-nowrap"
+          href="/api/auth/telemetry/connect?provider=strava"
+          className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold transition-all shadow-lg shadow-orange-500/20 whitespace-nowrap"
         >
-          Conectar Reloj
+          Conectar Strava
         </a>
       </div>
     );
   }
 
   return (
-    <div className="mb-6 p-4 rounded-2xl bg-green-500/5 border border-green-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-green-500/30 relative overflow-hidden">
+    <div className="mb-6 p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-orange-500/30 relative overflow-hidden">
       <div className="flex items-center gap-3 text-center sm:text-left w-full sm:w-auto">
-        <div className="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 relative">
+        <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 relative">
           <Watch className="w-5 h-5 animate-pulse" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-500 animate-ping" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-500" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-orange-500 animate-ping" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-orange-500" />
         </div>
         <div className="flex-grow">
           <div className="flex items-center gap-2 justify-center sm:justify-start">
             <h4 className="text-sm font-semibold text-zinc-100 capitalize">
-              {provider || 'Garmin'} Connect Activo
+              {provider === 'strava' ? 'Strava Telemetría Activa' : 'Strava Telemetría Activa'}
             </h4>
-            <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-[10px] font-bold border border-green-500/30">
+            <span className="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-bold border border-orange-500/30">
               Auto 24/7
             </span>
           </div>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Sincronización bidireccional activa • Última act: <span className="text-zinc-300 font-medium">{lastSync}</span>
+            Sincronización de telemetría activa • Última act: <span className="text-zinc-300 font-medium">{lastSync}</span>
           </p>
         </div>
       </div>
