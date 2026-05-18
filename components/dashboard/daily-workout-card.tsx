@@ -5,11 +5,10 @@ import { toggleWorkoutStatus } from '@/app/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, ChevronDown, ChevronUp, Flame, MessageSquarePlus, RefreshCw, Bell, Watch, Send, Check } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
-import { connectDeviceProvider, pushWorkoutToDevice } from '@/app/telemetry/workout-push-actions';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
@@ -27,46 +26,56 @@ interface WorkoutCardProps {
   };
 }
 
+function parseWorkoutDescription(desc: string, sportType: string) {
+  let main = desc || 'Sesión de entrenamiento aeróbico de construcción base.';
+  let warmup = '15 mins de calentamiento progresivo de Z1 a Z2 con movilidad articular.';
+  let cooldown = '10 mins de vuelta a la calma en Z1 y estiramientos suaves descontracturantes.';
+  let gear = sportType === 'natacion' 
+    ? '🩱 Palas, aletas cortas y pullbuoy.' 
+    : sportType === 'ciclismo' 
+    ? '🚴‍♂️ Potenciómetro calibrado, bidones de sales y geles de carbohidratos.' 
+    : '🏃‍♂️ Zapatillas mixtas y banda pectoral de frecuencia cardíaca.';
+
+  if (desc.includes('Calentamiento:') || desc.includes('Parte principal:') || desc.includes('Enfriamiento:')) {
+    const warmupMatch = desc.match(/Calentamiento:\s*([^\n]+)/i);
+    if (warmupMatch) warmup = warmupMatch[1].replace('Parte principal:', '').trim();
+
+    const mainMatch = desc.match(/Parte principal:\s*([^\n]+)/i);
+    if (mainMatch) main = mainMatch[1].replace('Enfriamiento:', '').trim();
+
+    const cooldownMatch = desc.match(/Enfriamiento:\s*([^\n]+)/i);
+    if (cooldownMatch) cooldown = cooldownMatch[1].trim();
+  }
+
+  return { main, warmup, cooldown, gear };
+}
+
 export function DailyWorkoutCard({ workout, initialIsConnected = false }: WorkoutCardProps) {
   const [status, setStatus] = React.useState(workout.status);
   const [loading, setLoading] = React.useState(false);
-  const [expanded, setExpanded] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear'>('main');
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
-  const [syncLoading, setSyncLoading] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
-  const [isConnected, setIsConnected] = React.useState(initialIsConnected);
-  const [pushLoading, setPushLoading] = React.useState(false);
-  const [pushSuccess, setPushSuccess] = React.useState(false);
 
   const session = workout.training_sessions;
 
   // Sincronización Automática en Segundo Plano (Garmin / Strava Webhooks)
   React.useEffect(() => {
-    if (isConnected && status === 'pending' && session?.sport_type !== 'descanso') {
+    if (initialIsConnected && status === 'pending' && session?.sport_type !== 'descanso') {
       const timer = setTimeout(async () => {
-        setSyncLoading(true);
         const res = await simulateWatchIngestion(workout.id, session?.sport_type || 'ciclismo');
-        setSyncLoading(false);
         if (res?.success) {
           setStatus('completed');
-          setToastMsg('¡Actividad detectada automáticamente desde tu Garmin! TSS Real: 85 (Coincide con plan)');
+          setToastMsg('¡Actividad detectada y sincronizada automáticamente desde tu reloj! TSS Real: 85');
         }
-      }, 4000); // 4 segundos de espera mágica para que el usuario vea el cambio en vivo
+      }, 3500);
       return () => clearTimeout(timer);
     }
-  }, [isConnected, status, workout.id, session?.sport_type]);
+  }, [initialIsConnected, status, workout.id, session?.sport_type]);
 
   if (!session) return null;
 
   const isCompleted = status === 'completed';
-
-  const sportColors: Record<string, string> = {
-    natacion: 'text-[var(--color-swim)] border-[var(--color-swim)]',
-    ciclismo: 'text-[var(--color-bike)] border-[var(--color-bike)]',
-    carrera: 'text-[var(--color-run)] border-[var(--color-run)]',
-    brick: 'text-amber-400 border-amber-400',
-    descanso: 'text-zinc-500 border-zinc-500',
-  };
 
   const sportBgGlow: Record<string, string> = {
     natacion: 'bg-[var(--color-swim)]/5',
@@ -92,19 +101,21 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
     }
   }
 
-  // Parsear descripción para extraer zonas si es posible o mostrar badges genéricos
   const desc = session.description || '';
+  const parsed = parseWorkoutDescription(desc, session.sport_type);
+
   const hasZ1 = desc.includes('Zona 1') || desc.includes('Z1');
   const hasZ2 = desc.includes('Zona 2') || desc.includes('Z2') || desc.includes('suave') || desc.includes('fácil');
   const hasZ3 = desc.includes('Zona 3') || desc.includes('Z3') || desc.includes('ritmo') || desc.includes('crol');
   const hasZ4 = desc.includes('Zona 4') || desc.includes('Z4') || desc.includes('series') || desc.includes('fuerte');
 
   return (
-    <ProCard className={`space-y-6 transition-all duration-300 ${isCompleted ? 'border-zinc-800 bg-zinc-900/40 opacity-70' : ''}`}>
+    <ProCard className={`space-y-6 transition-all duration-300 relative overflow-hidden ${isCompleted ? 'border-zinc-800 bg-zinc-900/40 opacity-80' : ''}`}>
       
       {/* Esquina decorativa con el color del deporte */}
       <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none ${sportBgGlow[session.sport_type] || 'bg-transparent'}`} />
 
+      {/* Cabecera Limpia */}
       <div className="flex justify-between items-start border-b border-[var(--color-border)] pb-4 relative z-10">
         <div>
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -119,8 +130,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
               </span>
             )}
           </div>
-          <h3 className="text-xl font-medium text-zinc-50 capitalize">
-            {session.sport_type === 'descanso' ? 'Día de Descanso' : `Sesión de ${session.sport_type}`}
+          <h3 className="text-xl font-semibold text-zinc-50 capitalize">
+            {session.sport_type === 'descanso' ? 'Día de Descanso Activo' : `Sesión de ${session.sport_type}`}
           </h3>
         </div>
 
@@ -133,13 +144,78 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
         )}
       </div>
 
-      <div className="space-y-4 relative z-10">
-        <p className={`text-sm text-zinc-300 leading-relaxed font-normal ${expanded ? '' : 'line-clamp-2'}`}>
-          {desc}
-        </p>
+      {/* Contenido Principal con Pestañas (Tabbed View) */}
+      {session.sport_type !== 'descanso' ? (
+        <div className="space-y-4 relative z-10">
+          
+          {/* Navegación de Pestañas */}
+          <div className="flex flex-wrap gap-2 border-b border-zinc-800 pb-2">
+            <button
+              onClick={() => setActiveTab('main')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'main' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'}`}
+            >
+              <Target className="w-3.5 h-3.5" /> Bloque Principal
+            </button>
+            <button
+              onClick={() => setActiveTab('warmup')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'warmup' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'}`}
+            >
+              <Sparkles className="w-3.5 h-3.5" /> Calentamiento (15')
+            </button>
+            <button
+              onClick={() => setActiveTab('cooldown')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'cooldown' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'}`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" /> Enfriamiento (10')
+            </button>
+            <button
+              onClick={() => setActiveTab('gear')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'gear' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'}`}
+            >
+              <Dumbbell className="w-3.5 h-3.5" /> Material
+            </button>
+          </div>
 
-        {/* Zonas detectadas */}
-        {session.sport_type !== 'descanso' && (
+          {/* Contenido de la Pestaña Activa */}
+          <div className="p-4 rounded-xl bg-[#121214] border border-zinc-800/80 min-h-[80px] flex items-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className="text-sm text-zinc-300 leading-relaxed font-normal w-full"
+              >
+                {activeTab === 'main' && (
+                  <div>
+                    <p className="font-semibold text-cyan-400 mb-2">🎯 Objetivo Principal de la Sesión:</p>
+                    <p>{parsed.main}</p>
+                  </div>
+                )}
+                {activeTab === 'warmup' && (
+                  <div>
+                    <p className="font-semibold text-amber-400 mb-2">🔥 Activación y Calentamiento:</p>
+                    <p>{parsed.warmup}</p>
+                  </div>
+                )}
+                {activeTab === 'cooldown' && (
+                  <div>
+                    <p className="font-semibold text-green-400 mb-2">🛡️ Vuelta a la Calma y Recuperación:</p>
+                    <p>{parsed.cooldown}</p>
+                  </div>
+                )}
+                {activeTab === 'gear' && (
+                  <div>
+                    <p className="font-semibold text-purple-400 mb-2">🎒 Equipamiento Recomendado:</p>
+                    <p>{parsed.gear}</p>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Zonas detectadas */}
           <div className="flex flex-wrap gap-2 pt-1">
             {hasZ1 && <ZoneBadge zone={1} label="Z1 Recuperación" />}
             {hasZ2 && <ZoneBadge zone={2} label="Z2 Resistencia Base" />}
@@ -147,8 +223,12 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
             {hasZ4 && <ZoneBadge zone={4} label="Z4 Umbral" />}
             {!hasZ1 && !hasZ2 && !hasZ3 && !hasZ4 && <ZoneBadge zone={2} label="Z2 Aeróbico Base" />}
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="p-6 rounded-xl bg-zinc-900/50 border border-zinc-800 text-center text-sm text-zinc-400 leading-relaxed">
+          Día dedicado a la asimilación del entrenamiento y supercompensación glucogénica. Aprovecha para hidratarte y realizar estiramientos suaves.
+        </div>
+      )}
 
       {/* Toast Notificación Proactiva de Recálculo Dinámico */}
       <AnimatePresence>
@@ -168,20 +248,20 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
         )}
       </AnimatePresence>
 
-      {/* Botones de acción principales */}
+      {/* Botones de acción principales limpios */}
       <div className="pt-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center relative z-10">
         {session.sport_type !== 'descanso' ? (
           <div className="flex-1 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
             <AnimatedButton 
               variant={isCompleted ? "secondary" : "primary"} 
-              className="flex-1 justify-center py-6"
+              className="flex-1 justify-center py-6 text-sm font-semibold shadow-lg shadow-cyan-500/10"
               onClick={handleToggle}
-              disabled={loading || syncLoading}
+              disabled={loading}
             >
               {isCompleted ? (
                 <>
                   <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  <span className="text-zinc-300">Completado</span>
+                  <span className="text-zinc-200">✓ Entrenamiento Completado (Sincronizado)</span>
                 </>
               ) : (
                 <>
@@ -191,33 +271,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
               )}
             </AnimatedButton>
 
-            {!isCompleted ? (
-              isConnected ? (
-                <div className="py-6 px-4 rounded-2xl bg-green-500/10 border border-green-500/30 text-green-400 flex items-center justify-center gap-2.5 text-xs font-medium animate-pulse shadow-lg shadow-green-500/5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-ping flex-shrink-0" />
-                  <span>Sincronización Automática Activa (Garmin Webhook)</span>
-                </div>
-              ) : (
-                <AnimatedButton
-                  variant="ghost"
-                  className="py-6 border border-blue-500/30 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:border-blue-500/50 flex items-center justify-center gap-2"
-                  onClick={async () => {
-                    if (syncLoading) return;
-                    setSyncLoading(true);
-                    const res = await simulateWatchIngestion(workout.id, session.sport_type);
-                    setSyncLoading(false);
-                    if (res?.success) {
-                      setStatus('completed');
-                      setToastMsg(res.message || 'Actividad sincronizada');
-                    }
-                  }}
-                  disabled={syncLoading || loading}
-                >
-                  <RefreshCw className={`w-5 h-5 ${syncLoading ? 'animate-spin' : ''}`} />
-                  <span>Sincronizar Reloj / Strava</span>
-                </AnimatedButton>
-              )
-            ) : (
+            {isCompleted && (
               <AnimatedButton
                 variant="ghost"
                 className="py-6 border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50 flex items-center justify-center gap-2"
@@ -229,76 +283,11 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false }: Workou
             )}
           </div>
         ) : (
-          <div className="flex-1 p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-center text-xs text-zinc-500 uppercase tracking-widest">
-            Disfruta tu py-descanso
+          <div className="flex-1 p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-center text-xs text-zinc-500 uppercase tracking-widest font-semibold">
+            ✓ Descanso Programado
           </div>
         )}
-
-        <AnimatedButton 
-          variant="secondary" 
-          size="icon"
-          onClick={() => setExpanded(!expanded)}
-          aria-label="Ver detalles"
-          className="self-center"
-        >
-          {expanded ? <ChevronUp className="w-5 h-5 text-zinc-400" /> : <ChevronDown className="w-5 h-5 text-zinc-400" />}
-        </AnimatedButton>
       </div>
-
-      {/* Sección de Exportación y Push a Relojes (Garmin / Strava / Coros) */}
-      {session.sport_type !== 'descanso' && !isCompleted && (
-        <div className="pt-2 border-t border-[var(--color-border)] flex flex-col sm:flex-row items-center justify-between gap-3 relative z-10">
-          <div className="flex items-center gap-2 text-xs text-zinc-400">
-            <Watch className="w-4 h-4 text-purple-400" />
-            <span>Sincronización Estructurada (Series & Potencia):</span>
-          </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            {!isConnected ? (
-              <AnimatedButton
-                variant="ghost"
-                className="w-full sm:w-auto py-4 px-4 border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-500/50 flex items-center justify-center gap-2 text-xs"
-                onClick={async () => {
-                  const res = await connectDeviceProvider('garmin');
-                  if (res?.success) {
-                    setIsConnected(true);
-                    setToastMsg('¡Cuenta de Garmin conectada correctamente! Escuchando telemetría 24/7 en segundo plano.');
-                  }
-                }}
-              >
-                <Watch className="w-4 h-4" />
-                <span>Conectar con Garmin / Strava</span>
-              </AnimatedButton>
-            ) : pushSuccess ? (
-              <span className="px-3 py-2 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-medium flex items-center gap-1.5">
-                <Check className="w-4 h-4" />
-                <span>⌚ Sincronizado con Garmin</span>
-              </span>
-            ) : (
-              <AnimatedButton
-                variant="ghost"
-                className="w-full sm:w-auto py-4 px-4 border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 hover:border-purple-500/50 flex items-center justify-center gap-2 text-xs"
-                onClick={async () => {
-                  if (pushLoading) return;
-                  setPushLoading(true);
-                  const res = await pushWorkoutToDevice(workout.id, 'garmin');
-                  setPushLoading(false);
-                  if (res?.success) {
-                    setPushSuccess(true);
-                    setToastMsg(res.message || 'Enviado a reloj');
-                  } else if (res?.error) {
-                    setToastMsg(res.error);
-                  }
-                }}
-                disabled={pushLoading}
-              >
-                <Send className={`w-4 h-4 ${pushLoading ? 'animate-bounce' : ''}`} />
-                <span>{pushLoading ? 'Enviando...' : 'Enviar a Reloj'}</span>
-              </AnimatedButton>
-            )}
-          </div>
-        </div>
-      )}
 
       <WorkoutFeedbackModal
         isOpen={isFeedbackOpen}
