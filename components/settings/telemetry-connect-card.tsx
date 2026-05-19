@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { disconnectTelemetry, syncPacesFromStravaAction } from '@/app/settings/actions';
-import { Watch, Link as LinkIcon, Info, Activity, ArrowRight, RefreshCw } from 'lucide-react';
+import { disconnectTelemetry, syncPacesFromStravaAction, pushWeekWorkoutsToGarminAction } from '@/app/settings/actions';
+import { Watch, Link as LinkIcon, Info, Activity, ArrowRight, RefreshCw, UploadCloud } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 interface TelemetryConnectCardProps {
@@ -15,6 +15,7 @@ interface TelemetryConnectCardProps {
 export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: TelemetryConnectCardProps) {
   const [isDisconnecting, setIsDisconnecting] = React.useState(false);
   const [isSyncing, setIsSyncing] = React.useState(false);
+  const [isPushingWorkouts, setIsPushingWorkouts] = React.useState(false);
 
   const handleDisconnect = async () => {
     if (!confirm('¿Estás seguro de que quieres desconectar tu cuenta de Strava?')) return;
@@ -41,6 +42,22 @@ export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: Te
       console.error(e);
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const handlePushWorkouts = async () => {
+    setIsPushingWorkouts(true);
+    try {
+      const res = await pushWeekWorkoutsToGarminAction();
+      if (res.error) {
+        alert(res.error);
+      } else {
+        alert(`¡Éxito! Se han enviado ${res.count} entrenamientos estructurados a tu calendario de Garmin para la próxima semana. Deberías verlos en tu reloj en la próxima sincronización.`);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsPushingWorkouts(false);
     }
   };
 
@@ -74,8 +91,17 @@ export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: Te
 
           <div className="space-y-2">
             <button
+              onClick={handlePushWorkouts}
+              disabled={isPushingWorkouts || isSyncing || isDisconnecting}
+              className="w-full py-2.5 text-xs font-bold rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-cyan-500/20"
+            >
+              <UploadCloud className={`w-3.5 h-3.5 ${isPushingWorkouts ? 'animate-bounce' : ''}`} />
+              {isPushingWorkouts ? 'Enviando a Garmin...' : 'Enviar Entrenos de la Semana a Garmin'}
+            </button>
+
+            <button
               onClick={handleSyncPaces}
-              disabled={isSyncing || isDisconnecting}
+              disabled={isSyncing || isDisconnecting || isPushingWorkouts}
               className="w-full py-2.5 text-xs font-bold rounded-xl bg-orange-500 hover:bg-orange-400 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
@@ -84,7 +110,7 @@ export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: Te
 
             <button
               onClick={handleDisconnect}
-              disabled={isDisconnecting || isSyncing}
+              disabled={isDisconnecting || isSyncing || isPushingWorkouts}
               className="w-full py-2 text-xs font-semibold rounded-xl bg-zinc-950/60 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-zinc-850 hover:border-red-500/20 transition-all disabled:opacity-50 cursor-pointer"
             >
               {isDisconnecting ? 'Desconectando...' : 'Desconectar cuenta'}

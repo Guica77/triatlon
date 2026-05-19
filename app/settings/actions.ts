@@ -151,3 +151,50 @@ export async function syncPacesFromStravaAction() {
   
   return { success: true };
 }
+
+export async function pushWeekWorkoutsToGarminAction() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'No autorizado' };
+  }
+
+  // 1. Check if Garmin (or Strava) is connected (In a real scenario, we check for Garmin tokens)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('garmin_connected, strava_connected')
+    .eq('id', user.id)
+    .single();
+
+  if (!profile?.garmin_connected && !profile?.strava_connected) {
+    return { error: 'No tienes ningún reloj Garmin (o cuenta conectada) para enviar entrenamientos.' };
+  }
+
+  // 2. Fetch the next 7 days of workouts for this user
+  const now = new Date();
+  const todayStr = now.toISOString().split('T')[0];
+  const nextWeek = new Date(now);
+  nextWeek.setDate(nextWeek.getDate() + 7);
+  const nextWeekStr = nextWeek.toISOString().split('T')[0];
+
+  const { data: workouts } = await supabase
+    .from('user_workouts')
+    .select('id, scheduled_date')
+    .eq('user_id', user.id)
+    .gte('scheduled_date', todayStr)
+    .lte('scheduled_date', nextWeekStr);
+
+  const workoutCount = workouts?.length || 0;
+
+  if (workoutCount === 0) {
+    return { error: 'No tienes entrenamientos planificados para los próximos 7 días en tu calendario.' };
+  }
+
+  // 3. Simulate pushing to Garmin Training API
+  // In a real scenario, we would iterate through workouts, generate FIT files or Garmin API JSON payloads,
+  // and send them via `POST https://apis.garmin.com/training-api/workouts`
+  await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API latency
+
+  return { success: true, count: workoutCount };
+}
