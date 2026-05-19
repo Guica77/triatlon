@@ -4,6 +4,7 @@ import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Watch, Link as LinkIcon, Info, Activity, ArrowRight } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
+import { disconnectTelemetry } from '@/app/settings/actions';
 
 interface TelemetryConnectCardProps {
   isConnected: boolean;
@@ -12,6 +13,20 @@ interface TelemetryConnectCardProps {
 }
 
 export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: TelemetryConnectCardProps) {
+  const [isDisconnecting, setIsDisconnecting] = React.useState(false);
+
+  const handleDisconnect = async () => {
+    if (!confirm('¿Estás seguro de que quieres desconectar tu cuenta de Strava?')) return;
+    setIsDisconnecting(true);
+    try {
+      await disconnectTelemetry('strava');
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsDisconnecting(false);
+    }
+  };
+
   if (isConnected) {
     return (
       <div className="p-6 rounded-2xl bg-orange-500/10 border border-orange-500/30 shadow-xl relative h-full flex flex-col group overflow-hidden">
@@ -27,16 +42,26 @@ export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: Te
           </div>
         </div>
 
-        <div className="flex-1 bg-black/20 rounded-xl p-4 border border-orange-500/20 relative z-10">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-zinc-400 font-medium">Estado del Sincronizador</span>
-            <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-[10px] font-bold border border-green-500/30 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> Activo
-            </span>
+        <div className="flex-1 flex flex-col justify-between gap-4 relative z-10">
+          <div className="bg-black/20 rounded-xl p-4 border border-orange-500/20">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-xs text-zinc-400 font-medium">Estado del Sincronizador</span>
+              <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-[10px] font-bold border border-green-500/30 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> Activo
+              </span>
+            </div>
+            <p className="text-[11px] text-zinc-400">
+              La IA está leyendo automáticamente tus entrenamientos. Última sincronización: <strong className="text-white">{lastSyncTime || 'Hoy'}</strong>
+            </p>
           </div>
-          <p className="text-[11px] text-zinc-400">
-            La IA está leyendo automáticamente tus entrenamientos. Última sincronización: <strong className="text-white">{lastSyncTime || 'Hoy'}</strong>
-          </p>
+
+          <button
+            onClick={handleDisconnect}
+            disabled={isDisconnecting}
+            className="w-full py-2 text-xs font-semibold rounded-xl bg-zinc-950/60 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-zinc-850 hover:border-red-500/20 transition-all disabled:opacity-50"
+          >
+            {isDisconnecting ? 'Desconectando...' : 'Desconectar cuenta'}
+          </button>
         </div>
       </div>
     );

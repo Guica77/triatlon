@@ -65,3 +65,60 @@ export async function updateVirtualGarage(virtual_garage: string[]) {
   
   return { success: true };
 }
+
+export async function disconnectTelemetry(provider: 'strava' | 'garmin') {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'No autorizado' };
+  }
+
+  const updateData: Record<string, any> = {
+    updated_at: new Date().toISOString(),
+  };
+
+  if (provider === 'strava') {
+    updateData.strava_connected = false;
+    updateData.strava_auth_tokens = null;
+  } else if (provider === 'garmin') {
+    updateData.garmin_connected = false;
+    updateData.garmin_auth_tokens = null;
+  }
+
+  // If both disconnected, clear external_athlete_id
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('strava_connected, garmin_connected')
+    .eq('id', user.id)
+    .single();
+
+  const willBeStravaConnected = provider === 'strava' ? false : !!profile?.strava_connected;
+  const willBeGarminConnected = provider === 'garmin' ? false : !!profile?.garmin_connected;
+
+  if (!willBeStravaConnected && !willBeGarminConnected) {
+    updateData.external_athlete_id = null;
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update(updateData as any)
+    .eq('id', user.id);
+
+  if (error) {
+    console.error('Error disconnecting telemetry:', error);
+    return { error: 'Error al desconectar el dispositivo' };
+  }
+
+  // Also delete from user_connected_devices
+  await supabase
+    .from('user_connected_devices')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('provider', provider);
+
+  revalidatePath('/settings');
+  revalidatePath('/dashboard');
+  
+  return { success: true };
+}
