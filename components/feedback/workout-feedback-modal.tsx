@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, AlertTriangle, Smile, Frown, ThumbsUp } from 'lucide-react';
+import { X, CheckCircle, AlertTriangle, Smile, Frown, ThumbsUp, Moon, Activity } from 'lucide-react';
 import { submitWorkoutFeedback } from '@/app/feedback/feedback-actions';
 
 interface WorkoutFeedbackModalProps {
@@ -19,9 +19,23 @@ const FEELINGS = [
   { id: 'lesionado', label: 'Lesionado', icon: Frown, color: 'text-rose-400 bg-rose-500/10 border-rose-500/30' }
 ];
 
+const SLEEP_QUALITY = [
+  { id: 'mala', label: 'Mala ( <6h )', color: 'text-rose-400 border-rose-500/30 hover:bg-rose-500/10' },
+  { id: 'regular', label: 'Regular ( 6-7h )', color: 'text-amber-400 border-amber-500/30 hover:bg-amber-500/10' },
+  { id: 'buena', label: 'Buena ( 7-8h )', color: 'text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10' },
+];
+
+const PAIN_LEVELS = [
+  { id: 'ninguno', label: 'Ninguno', color: 'text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10' },
+  { id: 'ligero', label: 'Ligera molestia', color: 'text-amber-400 border-amber-500/30 hover:bg-amber-500/10' },
+  { id: 'fuerte', label: 'Dolor fuerte', color: 'text-rose-400 border-rose-500/30 hover:bg-rose-500/10' },
+];
+
 export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle }: WorkoutFeedbackModalProps) {
   const [rpe, setRpe] = useState<number>(5);
   const [feeling, setFeeling] = useState<string>('buena');
+  const [sleep, setSleep] = useState<string>('buena');
+  const [pain, setPain] = useState<string>('ninguno');
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -34,11 +48,13 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
     setIsSubmitting(true);
     setErrorMessage(null);
 
+    const compiledNotes = `Descanso: ${sleep} | Molestias: ${pain} ${notes ? `| Notas: ${notes}` : ''}`;
+
     const res = await submitWorkoutFeedback({
       workout_id: workoutId,
       rpe_score: rpe,
       feeling,
-      notes
+      notes: compiledNotes
     });
 
     setIsSubmitting(false);
@@ -76,10 +92,10 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg overflow-hidden border rounded-3xl bg-zinc-900/90 border-zinc-800 shadow-2xl backdrop-blur-xl"
+          className="relative w-full max-w-lg overflow-hidden border rounded-3xl bg-zinc-900/90 border-zinc-800 shadow-2xl backdrop-blur-xl max-h-[90vh] overflow-y-auto"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-zinc-800/80">
+          <div className="flex items-center justify-between p-6 border-b border-zinc-800/80 sticky top-0 bg-zinc-900/90 backdrop-blur-xl z-10">
             <div>
               <h3 className="text-xl font-bold tracking-tight text-white">Evaluación Post-Entrenamiento</h3>
               <p className="text-sm text-zinc-400 mt-1">{workoutTitle}</p>
@@ -146,7 +162,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
 
                 {/* Feeling Selector */}
                 <div>
-                  <label className="block text-sm font-semibold text-zinc-300 mb-3">¿Cómo te has sentido?</label>
+                  <label className="block text-sm font-semibold text-zinc-300 mb-3">¿Cómo te has sentido hoy?</label>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {FEELINGS.map((f) => {
                       const Icon = f.icon;
@@ -170,18 +186,62 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
+                  {/* Sleep Selector */}
+                  <div>
+                    <label className="text-sm font-semibold text-zinc-300 mb-3 flex items-center gap-2">
+                      <Moon className="w-4 h-4 text-cyan-400" /> Descanso Previo
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      {SLEEP_QUALITY.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          onClick={() => setSleep(s.id)}
+                          className={`text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-all ${
+                            sleep === s.id ? s.color + ' ring-1 ring-current bg-zinc-800/80' : 'text-zinc-500 border-zinc-800 hover:border-zinc-700'
+                          }`}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Pain Selector */}
+                  <div>
+                    <label className="text-sm font-semibold text-zinc-300 mb-3 flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-rose-400" /> Molestias / Dolor
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      {PAIN_LEVELS.map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setPain(p.id)}
+                          className={`text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-all ${
+                            pain === p.id ? p.color + ' ring-1 ring-current bg-zinc-800/80' : 'text-zinc-500 border-zinc-800 hover:border-zinc-700'
+                          }`}
+                        >
+                          {p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Notes Input */}
-                <div>
+                <div className="pt-2">
                   <label htmlFor="feedback-notes" className="block text-sm font-semibold text-zinc-300 mb-2">
-                    Notas para tu py-entrenador (Opcional)
+                    Notas adicionales (Opcional)
                   </label>
                   <textarea
                     id="feedback-notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    rows={3}
-                    placeholder="Ej: Sensaciones espectaculares en las series de carrera, pero algo cargado de isquios..."
-                    className="w-full p-4.5 text-sm text-white placeholder-zinc-500 border rounded-2xl bg-zinc-800/50 border-zinc-700/80 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all resize-none"
+                    rows={2}
+                    placeholder="Ej: Sensaciones espectaculares en las series, pero gemelo algo cargado..."
+                    className="w-full p-4 text-sm text-white placeholder-zinc-500 border rounded-2xl bg-zinc-800/50 border-zinc-700/80 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all resize-none"
                   />
                 </div>
 
@@ -189,7 +249,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 text-sm font-bold text-black transition-all rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 shadow-lg shadow-cyan-500/20 flex items-center justify-center disabled:opacity-50"
+                  className="w-full py-4 text-sm font-bold text-black transition-all rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 shadow-lg shadow-cyan-500/20 flex items-center justify-center disabled:opacity-50 mt-4"
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
