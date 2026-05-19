@@ -22,6 +22,21 @@ export function PerformanceChartCard({
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
   const [activeHelp, setActiveHelp] = React.useState<'ctl' | 'atl' | 'tsb' | null>(null);
   const [showVolume, setShowVolume] = React.useState(false);
+  const [visibleLines, setVisibleLines] = React.useState({
+    ctl: true,
+    atl: true,
+    tsb: true,
+    swim: true,
+    bike: true,
+    run: true,
+  });
+
+  const toggleLine = (lineKey: keyof typeof visibleLines) => {
+    setVisibleLines((prev) => ({
+      ...prev,
+      [lineKey]: !prev[lineKey],
+    }));
+  };
 
   const height = 240;
   const width = 800;
@@ -347,33 +362,55 @@ export function PerformanceChartCard({
       <div className="relative w-full pt-6 pb-2">
         {/* Leyenda Visual */}
         <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 mb-4 text-xs font-medium">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => toggleLine('ctl')}
+            className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.ctl ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+          >
             <span className="w-3 h-0.5 bg-cyan-400 rounded-full" />
-            <span className="text-zinc-400">Fitness (CTL)</span>
-          </div>
-          <div className="flex items-center gap-2">
+            <span>Fitness (CTL)</span>
+          </button>
+          
+          <button
+            onClick={() => toggleLine('atl')}
+            className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.atl ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+          >
             <span className="w-3 h-0.5 bg-rose-500 rounded-full border border-dashed border-rose-500" />
-            <span className="text-zinc-400">Fatiga (ATL)</span>
-          </div>
-          <div className="flex items-center gap-2">
+            <span>Fatiga (ATL)</span>
+          </button>
+          
+          <button
+            onClick={() => toggleLine('tsb')}
+            className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.tsb ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+          >
             <span className="w-3 h-0.5 bg-amber-500 rounded-full" />
-            <span className="text-zinc-400">Forma (TSB)</span>
-          </div>
+            <span>Forma (TSB)</span>
+          </button>
 
           {showVolume && (
             <>
-              <div className="flex items-center gap-2 border-l border-zinc-800 pl-4">
+              <button
+                onClick={() => toggleLine('swim')}
+                className={`flex items-center gap-2 border-l border-zinc-800 pl-4 transition-all hover:opacity-100 ${visibleLines.swim ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+              >
                 <span className="w-3 h-0.5 bg-purple-400 rounded-full opacity-70" />
-                <span className="text-zinc-400">Vol. Natación</span>
-              </div>
-              <div className="flex items-center gap-2">
+                <span>Vol. Natación</span>
+              </button>
+              
+              <button
+                onClick={() => toggleLine('bike')}
+                className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.bike ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+              >
                 <span className="w-3 h-0.5 bg-sky-400 rounded-full opacity-70" />
-                <span className="text-zinc-400">Vol. Ciclismo</span>
-              </div>
-              <div className="flex items-center gap-2">
+                <span>Vol. Ciclismo</span>
+              </button>
+              
+              <button
+                onClick={() => toggleLine('run')}
+                className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.run ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+              >
                 <span className="w-3 h-0.5 bg-emerald-400 rounded-full opacity-70" />
-                <span className="text-zinc-400">Vol. Carrera</span>
-              </div>
+                <span>Vol. Carrera</span>
+              </button>
             </>
           )}
         </div>
@@ -401,73 +438,85 @@ export function PerformanceChartCard({
             {showVolume && (
               <>
                 {/* Natación: morado */}
-                <path
-                  d={swimPoints}
-                  fill="none"
-                  stroke="#c084fc"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="transition-all duration-500 opacity-60"
-                />
+                {visibleLines.swim && (
+                  <path
+                    d={swimPoints}
+                    fill="none"
+                    stroke="#c084fc"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="transition-all duration-500 opacity-60"
+                  />
+                )}
 
                 {/* Ciclismo: azul celeste */}
-                <path
-                  d={bikePoints}
-                  fill="none"
-                  stroke="#38bdf8"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="transition-all duration-500 opacity-60"
-                />
+                {visibleLines.bike && (
+                  <path
+                    d={bikePoints}
+                    fill="none"
+                    stroke="#38bdf8"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="transition-all duration-500 opacity-60"
+                  />
+                )}
 
                 {/* Carrera: verde esmeralda */}
-                <path
-                  d={runPoints}
-                  fill="none"
-                  stroke="#34d399"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="transition-all duration-500 opacity-60"
-                />
+                {visibleLines.run && (
+                  <path
+                    d={runPoints}
+                    fill="none"
+                    stroke="#34d399"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="transition-all duration-500 opacity-60"
+                  />
+                )}
               </>
             )}
 
             {/* Curva de Fitness (Azul Celeste) */}
-            <path
-              d={ctlPoints}
-              fill="none"
-              stroke="#22d3ee"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="transition-all duration-500"
-            />
+            {visibleLines.ctl && (
+              <path
+                d={ctlPoints}
+                fill="none"
+                stroke="#22d3ee"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="transition-all duration-500"
+              />
+            )}
 
             {/* Curva de Fatiga (Rosa Coral - Dashed) */}
-            <path
-              d={atlPoints}
-              fill="none"
-              stroke="#f43f5e"
-              strokeWidth="2"
-              strokeDasharray="6,6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="transition-all duration-500 opacity-80"
-            />
+            {visibleLines.atl && (
+              <path
+                d={atlPoints}
+                fill="none"
+                stroke="#f43f5e"
+                strokeWidth="2"
+                strokeDasharray="6,6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="transition-all duration-500 opacity-80"
+              />
+            )}
 
             {/* Curva de Forma (Amarillo Ámbar) */}
-            <path
-              d={tsbPoints}
-              fill="none"
-              stroke="#f59e0b"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="transition-all duration-500 opacity-90"
-            />
+            {visibleLines.tsb && (
+              <path
+                d={tsbPoints}
+                fill="none"
+                stroke="#f59e0b"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="transition-all duration-500 opacity-90"
+              />
+            )}
 
             {/* Líneas Guía Interactiva y Nodos */}
             {hoveredIndex !== null && activePoint && (
@@ -484,20 +533,26 @@ export function PerformanceChartCard({
                 />
                 
                 {/* Nodos resaltados principales */}
-                <circle cx={hoverX} cy={hoverCtlY} r="5" fill="#22d3ee" stroke="#09090b" strokeWidth="2.5" pointerEvents="none" />
-                <circle cx={hoverX} cy={hoverAtlY} r="5" fill="#f43f5e" stroke="#09090b" strokeWidth="2.5" pointerEvents="none" />
-                <circle cx={hoverX} cy={hoverTsbY} r="5" fill="#f59e0b" stroke="#09090b" strokeWidth="2.5" pointerEvents="none" />
+                {visibleLines.ctl && (
+                  <circle cx={hoverX} cy={hoverCtlY} r="5" fill="#22d3ee" stroke="#09090b" strokeWidth="2.5" pointerEvents="none" />
+                )}
+                {visibleLines.atl && (
+                  <circle cx={hoverX} cy={hoverAtlY} r="5" fill="#f43f5e" stroke="#09090b" strokeWidth="2.5" pointerEvents="none" />
+                )}
+                {visibleLines.tsb && (
+                  <circle cx={hoverX} cy={hoverTsbY} r="5" fill="#f59e0b" stroke="#09090b" strokeWidth="2.5" pointerEvents="none" />
+                )}
 
                 {/* Nodos de volumen resaltados si showVolume está activo */}
                 {showVolume && (
                   <>
-                    {activePoint.swimDistance > 0 && (
+                    {visibleLines.swim && activePoint.swimDistance > 0 && (
                       <circle cx={hoverX} cy={hoverSwimY} r="4" fill="#c084fc" stroke="#09090b" strokeWidth="1.5" pointerEvents="none" />
                     )}
-                    {activePoint.bikeDistance > 0 && (
+                    {visibleLines.bike && activePoint.bikeDistance > 0 && (
                       <circle cx={hoverX} cy={hoverBikeY} r="4" fill="#38bdf8" stroke="#09090b" strokeWidth="1.5" pointerEvents="none" />
                     )}
-                    {activePoint.runDistance > 0 && (
+                    {visibleLines.run && activePoint.runDistance > 0 && (
                       <circle cx={hoverX} cy={hoverRunY} r="4" fill="#34d399" stroke="#09090b" strokeWidth="1.5" pointerEvents="none" />
                     )}
                   </>
@@ -518,35 +573,42 @@ export function PerformanceChartCard({
               <p className="font-bold text-zinc-200 border-b border-zinc-850 pb-1 mb-1.5">
                 {activePoint.date}
               </p>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                <span>Fitness (CTL): <strong className="text-zinc-200">{activePoint.ctl}</strong></span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-                <span>Fatiga (ATL): <strong className="text-zinc-200">{activePoint.atl}</strong></span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                <span>Forma (TSB): <strong className={activePoint.tsb >= 0 ? 'text-green-400' : 'text-amber-500'}>{activePoint.tsb > 0 ? `+${activePoint.tsb}` : activePoint.tsb}</strong></span>
-              </div>
+              {visibleLines.ctl && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                  <span>Fitness (CTL): <strong className="text-zinc-200">{activePoint.ctl}</strong></span>
+                </div>
+              )}
+              {visibleLines.atl && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  <span>Fatiga (ATL): <strong className="text-zinc-200">{activePoint.atl}</strong></span>
+                </div>
+              )}
+              {visibleLines.tsb && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <span>Forma (TSB): <strong className={activePoint.tsb >= 0 ? 'text-green-400' : 'text-amber-500'}>{activePoint.tsb > 0 ? `+${activePoint.tsb}` : activePoint.tsb}</strong></span>
+                </div>
+              )}
 
-              {/* Distancias si el punto las tiene */}
-              {((activePoint.bikeDistance && activePoint.bikeDistance > 0) || 
-                (activePoint.runDistance && activePoint.runDistance > 0) || 
-                (activePoint.swimDistance && activePoint.swimDistance > 0)) && (
+              {/* Distancias si el punto las tiene y las líneas están activas */}
+              {showVolume && 
+               ((visibleLines.bike && activePoint.bikeDistance > 0) || 
+                (visibleLines.run && activePoint.runDistance > 0) || 
+                (visibleLines.swim && activePoint.swimDistance > 0)) && (
                 <div className="border-t border-zinc-800/60 pt-1 mt-1.5 space-y-0.5">
-                  {activePoint.swimDistance > 0 && (
+                  {visibleLines.swim && activePoint.swimDistance > 0 && (
                     <div className="flex items-center gap-1 text-[9px] text-purple-400">
                       <span>Nadar: <strong>{activePoint.swimDistance} m</strong></span>
                     </div>
                   )}
-                  {activePoint.bikeDistance > 0 && (
+                  {visibleLines.bike && activePoint.bikeDistance > 0 && (
                     <div className="flex items-center gap-1 text-[9px] text-sky-400">
                       <span>Bici: <strong>{activePoint.bikeDistance} km</strong></span>
                     </div>
                   )}
-                  {activePoint.runDistance > 0 && (
+                  {visibleLines.run && activePoint.runDistance > 0 && (
                     <div className="flex items-center gap-1 text-[9px] text-emerald-400">
                       <span>Correr: <strong>{activePoint.runDistance} km</strong></span>
                     </div>
