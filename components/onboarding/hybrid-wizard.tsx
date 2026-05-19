@@ -448,8 +448,18 @@ export function HybridWizard() {
                   </ul>
                 </div>
 
-                <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-200/90 leading-relaxed text-center font-medium">
-                  Para activar todo este flujo, necesitamos conectarnos con tu telemetría real. Usamos <strong>Strava</strong> como puente seguro.
+                <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-200/90 leading-relaxed font-medium space-y-2">
+                  <p className="text-center text-sm font-bold text-white mb-2">¿Cómo conecto mi reloj?</p>
+                  <p>
+                    Usamos <strong>Strava</strong> como puente universal y seguro. Sigue estos 2 pasos:
+                  </p>
+                  <ol className="list-decimal pl-4 space-y-1.5 text-orange-100/80">
+                    <li>Haz click en uno de los botones de abajo. Te redirigiremos de forma segura a Strava.</li>
+                    <li>Inicia sesión con tu cuenta de Strava y dale a "Autorizar". ¡Listo!</li>
+                  </ol>
+                  <p className="pt-1 text-orange-300/80 italic text-[11px]">
+                    * Si tienes un Garmin, Coros o Apple Watch, asegúrate de que tu reloj esté vinculado a tu app de Strava para que podamos leer tus datos a través de ella.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
