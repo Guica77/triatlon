@@ -226,16 +226,16 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
           {/* Navegación de Pestañas */}
           <div className="flex flex-wrap gap-2 border-b border-zinc-800 pb-2">
             <button
-              onClick={() => setActiveTab('main')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'main' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'}`}
-            >
-              <Target className="w-3.5 h-3.5" /> Bloque Principal
-            </button>
-            <button
               onClick={() => setActiveTab('warmup')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'warmup' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'}`}
             >
               <Sparkles className="w-3.5 h-3.5" /> Calentamiento (15')
+            </button>
+            <button
+              onClick={() => setActiveTab('main')}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'main' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-300 border border-zinc-700/50 hover:text-zinc-100 hover:bg-zinc-800/50'}`}
+            >
+              <Target className="w-3.5 h-3.5" /> Bloque Principal
             </button>
             <button
               onClick={() => setActiveTab('cooldown')}
