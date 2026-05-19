@@ -242,19 +242,22 @@ export function PerformanceChartCard({
 
           {/* Help Overlay */}
           {activeHelp === 'ctl' && (
-            <div className="absolute inset-0 bg-zinc-950/95 border border-cyan-500/30 rounded-xl p-3.5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+            <div 
+              onClick={() => setActiveHelp(null)}
+              className="absolute inset-0 bg-zinc-950/95 border border-cyan-500/30 rounded-xl p-3 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 cursor-pointer select-none"
+            >
               <div className="space-y-1">
-                <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">¿Qué es el Fitness (CTL)?</p>
-                <p className="text-[10px] text-zinc-300 leading-relaxed">
-                  Mide tu condición física y resistencia aeróbica a largo plazo (promedio de los últimos 42 días). Cuanto mayor sea tu Fitness, más volumen e intensidad de entrenamiento podrás asimilar sin lesionarte.
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">¿Qué es el Fitness (CTL)?</p>
+                  <span className="text-[9px] text-zinc-500 hover:text-white transition-colors">✕</span>
+                </div>
+                <p className="text-[9.5px] text-zinc-300 leading-relaxed">
+                  Mide tu condición física a largo plazo (promedio de 42 días). A mayor valor, más volumen e intensidad podrás asimilar.
                 </p>
               </div>
-              <button 
-                onClick={() => setActiveHelp(null)}
-                className="text-[9px] font-bold text-zinc-400 hover:text-white uppercase tracking-wider text-right w-full"
-              >
-                Entendido
-              </button>
+              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-right w-full mt-1">
+                Haz clic para cerrar
+              </p>
             </div>
           )}
         </div>
@@ -286,19 +289,22 @@ export function PerformanceChartCard({
 
           {/* Help Overlay */}
           {activeHelp === 'atl' && (
-            <div className="absolute inset-0 bg-zinc-950/95 border border-rose-500/30 rounded-xl p-3.5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+            <div 
+              onClick={() => setActiveHelp(null)}
+              className="absolute inset-0 bg-zinc-950/95 border border-rose-500/30 rounded-xl p-3 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 cursor-pointer select-none"
+            >
               <div className="space-y-1">
-                <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">¿Qué es la Fatiga (ATL)?</p>
-                <p className="text-[10px] text-zinc-300 leading-relaxed">
-                  Mide el cansancio acumulado a corto plazo (promedio de los últimos 7 días). Sube exponencialmente tras entrenamientos intensos. Si sube demasiado rápido, indica alto riesgo de sobreentrenamiento.
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">¿Qué es la Fatiga (ATL)?</p>
+                  <span className="text-[9px] text-zinc-500 hover:text-white transition-colors">✕</span>
+                </div>
+                <p className="text-[9.5px] text-zinc-300 leading-relaxed">
+                  Mide el cansancio a corto plazo (promedio de 7 días). Sube rápido tras sesiones duras y avisa del riesgo de sobreentrenamiento.
                 </p>
               </div>
-              <button 
-                onClick={() => setActiveHelp(null)}
-                className="text-[9px] font-bold text-zinc-400 hover:text-white uppercase tracking-wider text-right w-full"
-              >
-                Entendido
-              </button>
+              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-right w-full mt-1">
+                Haz clic para cerrar
+              </p>
             </div>
           )}
         </div>
@@ -338,21 +344,24 @@ export function PerformanceChartCard({
 
           {/* Help Overlay */}
           {activeHelp === 'tsb' && (
-            <div className="absolute inset-0 bg-zinc-950/95 border border-amber-500/30 rounded-xl p-3.5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+            <div 
+              onClick={() => setActiveHelp(null)}
+              className="absolute inset-0 bg-zinc-950/95 border border-amber-500/30 rounded-xl p-3 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 cursor-pointer select-none"
+            >
               <div className="space-y-1">
-                <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">¿Qué es la Forma (TSB)?</p>
-                <p className="text-[10px] text-zinc-300 leading-relaxed">
-                  Es la diferencia entre tu Fitness y tu Fatiga (CTL - ATL).
-                  <br />• <strong>-10 a -30:</strong> Zona productiva de entrenamiento.
-                  <br />• <strong>+5 a +25:</strong> Zona óptima para competir (Tapering / Frescura).
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">¿Qué es la Forma (TSB)?</p>
+                  <span className="text-[9px] text-zinc-500 hover:text-white transition-colors">✕</span>
+                </div>
+                <p className="text-[9px] text-zinc-300 leading-relaxed">
+                  Diferencia entre Fitness y Fatiga (CTL - ATL).
+                  <br />• <strong>-10 a -30:</strong> Zona productiva.
+                  <br />• <strong>+5 a +25:</strong> Zona óptima para competir (frescura).
                 </p>
               </div>
-              <button 
-                onClick={() => setActiveHelp(null)}
-                className="text-[9px] font-bold text-zinc-400 hover:text-white uppercase tracking-wider text-right w-full"
-              >
-                Entendido
-              </button>
+              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-right w-full mt-1">
+                Haz clic para cerrar
+              </p>
             </div>
           )}
         </div>
