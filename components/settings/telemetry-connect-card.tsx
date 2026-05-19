@@ -93,19 +93,20 @@ export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: Te
         </div>
       </div>
 
-      <a href="/api/auth/telemetry/connect?provider=strava" className="block mt-auto">
-        <AnimatedButton variant="primary" className="w-full py-3 text-sm !bg-[#FC4C02] hover:!bg-[#E34402] !text-white flex justify-center shadow-lg shadow-[#FC4C02]/20 font-bold border border-[#FC4C02]/50">
-          <LinkIcon className="w-4 h-4 mr-2" />
-          Conectar Reloj vía Strava
-        </AnimatedButton>
-      </a>
-      
-      <div className="mt-3 flex items-center justify-center gap-3 opacity-50">
-        <span className="text-[10px] font-bold text-zinc-500">Garmin</span>
-        <span className="text-[10px] font-bold text-zinc-500">•</span>
-        <span className="text-[10px] font-bold text-zinc-500">Coros</span>
-        <span className="text-[10px] font-bold text-zinc-500">•</span>
-        <span className="text-[10px] font-bold text-zinc-500">Suunto</span>
+      <div className="flex flex-col gap-2 mt-auto">
+        <a href="/api/auth/telemetry/connect?provider=strava" className="block w-full">
+          <AnimatedButton variant="primary" className="w-full py-2.5 text-xs !bg-[#FC4C02] hover:!bg-[#E34402] !text-white flex justify-center shadow-lg shadow-[#FC4C02]/10 font-bold border border-[#FC4C02]/30">
+            <LinkIcon className="w-3.5 h-3.5 mr-1.5" />
+            Conectar Garmin (vía Strava)
+          </AnimatedButton>
+        </a>
+
+        <a href="/api/auth/telemetry/connect?provider=strava" className="block w-full">
+          <AnimatedButton variant="primary" className="w-full py-2.5 text-xs !bg-orange-650 hover:!bg-orange-600 !text-white flex justify-center shadow-lg shadow-orange-600/10 font-bold border border-orange-600/30">
+            <LinkIcon className="w-3.5 h-3.5 mr-1.5" />
+            Conectar Coros/Suunto (vía Strava)
+          </AnimatedButton>
+        </a>
       </div>
     </div>
   );

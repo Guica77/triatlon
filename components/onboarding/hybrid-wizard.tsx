@@ -107,12 +107,40 @@ export function HybridWizard() {
     }
   };
 
+  const handleSaveAndConnect = async () => {
+    setLoading(true);
+    try {
+      const result = await saveRaceGoalAndPlan({
+        target_race_name: currentGoal.name,
+        target_race_date: currentGoal.date,
+        target_race_distance: currentGoal.distance as any,
+        target_race_modality: currentGoal.modality,
+        target_finish_time: targetFinishTime,
+        baseline_training_hours: baselineHours,
+        current_ftp: currentFtp ? parseInt(currentFtp) : undefined,
+        current_swim_pace: currentSwimPace || undefined,
+        current_run_pace: currentRunPace || undefined,
+        virtual_garage: virtualGarage
+      });
+      if (result && result.error) {
+        console.error('Error:', result.error);
+        setLoading(false);
+      } else {
+        // Redirect to real Strava connection
+        window.location.href = '/api/auth/telemetry/connect?provider=strava';
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl space-y-8">
       {/* Stepper Header */}
       <div className="flex items-center justify-between relative mb-12">
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-zinc-800 -z-10" />
-        {[1, 2, 3].map(num => (
+        {[1, 2, 3, 4].map(num => (
           <div key={num} className="flex flex-col items-center gap-2 bg-[var(--color-background)] px-4">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-colors ${
               step >= num ? 'bg-cyan-500 border-cyan-400 text-black shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-zinc-900 border-zinc-700 text-zinc-500'
@@ -120,7 +148,7 @@ export function HybridWizard() {
               {step > num ? <Check className="w-5 h-5" /> : num}
             </div>
             <span className={`text-[10px] uppercase tracking-wider font-semibold ${step >= num ? 'text-cyan-400' : 'text-zinc-500'}`}>
-              {num === 1 ? 'Ambición' : num === 2 ? 'Fisiología' : 'Garaje'}
+              {num === 1 ? 'Ambición' : num === 2 ? 'Fisiología' : num === 3 ? 'Garaje' : 'Conexión'}
             </span>
           </div>
         ))}
@@ -268,9 +296,65 @@ export function HybridWizard() {
               
               <div className="flex justify-between pt-4 border-t border-zinc-800/80">
                 <button onClick={() => setStep(2)} className="px-6 py-3 text-sm font-semibold text-zinc-400 hover:text-white transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
-                <AnimatedButton variant="primary" onClick={handleSave} disabled={loading} className="px-8 py-3 text-sm !bg-amber-500 hover:!bg-amber-400 !text-black shadow-amber-500/20">
-                  {loading ? 'Generando IA Plan...' : 'Finalizar y Entrar'} <Check className="w-4 h-4 ml-2" />
+                <AnimatedButton variant="primary" onClick={() => setStep(4)} className="px-8 py-3 text-sm !bg-amber-500 hover:!bg-amber-400 !text-black shadow-amber-500/20">
+                  Continuar <ChevronRight className="w-4 h-4 ml-1" />
                 </AnimatedButton>
+              </div>
+            </ProCard>
+          </motion.div>
+        )}
+
+        {step === 4 && (
+          <motion.div key="step4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
+            <ProCard className="space-y-6">
+              <div className="border-b border-zinc-800/80 pb-4">
+                <h2 className="text-xl font-medium text-zinc-100 flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-orange-500 animate-pulse" /> Conectar Reloj y Telemetría
+                </h2>
+                <p className="text-sm text-zinc-400 mt-1">
+                  Sincroniza tus entrenamientos reales automáticamente. La Inteligencia Artificial necesita leer tu pulso, ritmos y fatiga para ajustar tu periodización diaria.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/20 text-xs text-orange-200/80 leading-relaxed">
+                  Usamos <strong>Strava</strong> como puente seguro de telemetría. Tanto si usas Garmin como si usas Coros, Suunto, Apple Watch o Polar, podrás vincular tus entrenamientos al instante a través de este puente.
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Garmin Connect button */}
+                  <button
+                    onClick={handleSaveAndConnect}
+                    disabled={loading}
+                    className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden"
+                  >
+                    <span className="text-3xl mb-3 block">🛰️</span>
+                    <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">Conectar Garmin</span>
+                    <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Vía Strava Bridge</span>
+                  </button>
+
+                  {/* Coros/Suunto/Otros button */}
+                  <button
+                    onClick={handleSaveAndConnect}
+                    disabled={loading}
+                    className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden"
+                  >
+                    <span className="text-3xl mb-3 block">⌚</span>
+                    <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">Conectar Coros / Suunto / Otros</span>
+                    <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Vía Strava Bridge</span>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex justify-between pt-4 border-t border-zinc-800/80">
+                <button onClick={() => setStep(3)} className="px-6 py-3 text-sm font-semibold text-zinc-400 hover:text-white transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+                <button
+                  onClick={handleSave}
+                  disabled={loading}
+                  className="px-6 py-3 text-sm font-semibold text-zinc-500 hover:text-zinc-300 transition-all"
+                >
+                  {loading ? 'Generando IA Plan...' : 'Saltar y finalizar'}
+                </button>
               </div>
             </ProCard>
           </motion.div>
