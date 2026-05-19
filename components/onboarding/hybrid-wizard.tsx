@@ -445,6 +445,12 @@ export function HybridWizard() {
                         <strong className="text-white">Marketplace IA:</strong> Si te falta material (ej. Neopreno), nuestro rastreador automático de Wallapop te buscará chollos rebajados.
                       </p>
                     </li>
+                    <li className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0 mt-0.5">5</div>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        <strong className="text-white">Sincronización Mágica:</strong> Cuando terminas de sudar, tu reloj sube la actividad a Strava. Nuestra IA la lee al instante, la vincula con tu sesión planificada y recalcula tu fatiga y progreso diario.
+                      </p>
+                    </li>
                   </ul>
                 </div>
 
