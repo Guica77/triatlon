@@ -131,6 +131,28 @@ export default async function DashboardPage() {
 
       <main className="max-w-4xl mx-auto px-6 pt-8 space-y-8">
         
+        {/* Barra de Telemetría Activa (Sólo si está conectado, sin botón manual de forzado) */}
+        {isConnected && (
+          <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/15 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
+                <Activity className="w-4 h-4 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-zinc-100">Telemetría Activa (Auto 24/7)</span>
+                  <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 text-[9px] font-bold border border-green-500/20">Sincronización Pasiva</span>
+                </div>
+                <p className="text-[10px] text-zinc-400 mt-0.5">Tus actividades se marcan como hechas y se sincronizan al instante en cuanto se detectan en Strava.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0 bg-black/30 px-3 py-1.5 rounded-lg border border-zinc-800 text-[10px] text-zinc-300 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              Conexión Activa
+            </div>
+          </div>
+        )}
+
         {/* Sección Biometría y Readiness (Estilo Oura/Whoop) */}
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {biometrics && (

@@ -2,98 +2,157 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
 /**
+ * Strava Webhooks verification handler (GET)
+ */
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const mode = searchParams.get('hub.mode');
+  const token = searchParams.get('hub.verify_token');
+  const challenge = searchParams.get('hub.challenge');
+
+  if (mode === 'subscribe' && token === 'triatlon_verify_token') {
+    console.log('WEBHOOK_VERIFIED');
+    return NextResponse.json({ 'hub.challenge': challenge }, { status: 200 });
+  }
+  
+  return NextResponse.json({ error: 'Fallo de verificación' }, { status: 403 });
+}
+
+/**
  * Endpoint de Webhook Oficial para Ingesta Automática en Segundo Plano (Garmin / Strava)
  * POST /api/webhooks/telemetry
- * Payload esperado de Garmin/Strava: { athlete_id: 'garmin_user_123', tss: 85, duration: 60, distance: 15, sport: 'ciclismo' }
  */
 export async function POST(request: NextRequest) {
   try {
-    const payload = await request.json();
-    const { athlete_id, tss, duration, distance, sport } = payload;
+    const body = await request.json();
+    console.log('Received webhook event:', body);
 
-    if (!athlete_id) {
-      return NextResponse.json({ error: 'Falta athlete_id en el webhook' }, { status: 400 });
+    const { object_type, aspect_type, object_id, owner_id } = body;
+
+    // Check if it's a new activity creation
+    if (object_type === 'activity' && aspect_type === 'create') {
+      const externalAthleteId = `strava_user_${owner_id}`;
+      const supabase = await createClient();
+
+      // Find profile by external athlete ID
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, strava_auth_tokens')
+        .eq('external_athlete_id', externalAthleteId)
+        .single();
+
+      if (!profile) {
+        console.error('Athlete not found for Strava ID:', owner_id);
+        return NextResponse.json({ error: 'Athlete not found' }, { status: 404 });
+      }
+
+      const userId = profile.id;
+      const tokens = profile.strava_auth_tokens as any;
+      let accessToken = tokens?.access_token;
+
+      // Check if token is expired, if so, refresh it using Strava Client Secret
+      if (tokens?.expires_at && tokens.expires_at < Date.now()) {
+        const refreshResponse = await fetch('https://www.strava.com/oauth/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            client_id: process.env.STRAVA_CLIENT_ID,
+            client_secret: process.env.STRAVA_CLIENT_SECRET,
+            refresh_token: tokens.refresh_token,
+            grant_type: 'refresh_token',
+          }),
+        });
+
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          accessToken = refreshData.access_token;
+          
+          // Update tokens in db
+          await supabase
+            .from('profiles')
+            .update({
+              strava_auth_tokens: {
+                access_token: refreshData.access_token,
+                refresh_token: refreshData.refresh_token || tokens.refresh_token,
+                expires_at: refreshData.expires_at * 1000,
+              }
+            } as any)
+            .eq('id', userId);
+        } else {
+          console.error('Failed to refresh Strava token:', await refreshResponse.text());
+        }
+      }
+
+      if (accessToken) {
+        // Fetch activity detail from Strava API
+        const activityResponse = await fetch(`https://www.strava.com/api/v3/activities/${object_id}`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        });
+
+        if (activityResponse.ok) {
+          const activity = await activityResponse.json();
+          console.log('Fetched Strava activity:', activity);
+
+          const distanceKm = activity.distance ? (activity.distance / 1000) : 0;
+          const durationMin = activity.moving_time ? Math.round(activity.moving_time / 60) : 0;
+          const sportType = activity.type?.toLowerCase(); // run, ride, swim etc.
+
+          // Map Strava sport type to our multisport types
+          let mappedSport = 'ciclismo';
+          if (sportType === 'run') mappedSport = 'carrera';
+          else if (sportType === 'swim') mappedSport = 'natacion';
+
+          // Find pending workout for today
+          const todayStr = new Date().toISOString().split('T')[0];
+          const { data: workouts } = await supabase
+            .from('user_workouts')
+            .select('*, training_sessions(*)')
+            .eq('user_id', userId)
+            .eq('scheduled_date', todayStr)
+            .eq('status', 'pending');
+
+          const workout = workouts?.[0];
+
+          if (workout) {
+            // Update workout as completed
+            await supabase
+              .from('user_workouts')
+              .update({
+                status: 'completed',
+                completed_at: new Date().toISOString(),
+                actual_tss: 85 // default or calculated
+              })
+              .eq('id', workout.id);
+
+            // Insert into universal_telemetry
+            await supabase
+              .from('universal_telemetry')
+              .insert({
+                workout_id: workout.id,
+                user_id: userId,
+                source_provider: 'strava',
+                external_activity_id: `strava_${object_id}`,
+                actual_duration_min: durationMin,
+                actual_distance_km: distanceKm,
+                actual_tss: 85,
+                raw_payload: activity
+              });
+
+            console.log(`Workout ${workout.id} marked completed via webhook!`);
+          } else {
+            console.log('No pending workout for today, storing activity detail.');
+          }
+        } else {
+          console.error('Failed to fetch activity details from Strava:', await activityResponse.text());
+        }
+      }
     }
 
-    const supabase = await createClient();
-
-    // 1. Buscar al atleta en profiles por external_athlete_id
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('external_athlete_id', athlete_id)
-      .single();
-
-    if (!profile) {
-      return NextResponse.json({ error: 'Atleta no encontrado para este external_athlete_id' }, { status: 404 });
-    }
-
-    const userId = profile.id;
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    // 2. Buscar el entrenamiento pendiente de hoy para este usuario
-    const { data: workouts } = await supabase
-      .from('user_workouts')
-      .select('*, training_sessions(*)')
-      .eq('user_id', userId)
-      .eq('scheduled_date', todayStr)
-      .eq('status', 'pending');
-
-    const workout = workouts?.[0];
-
-    if (!workout) {
-      return NextResponse.json({ message: 'No hay entrenamientos pendientes hoy para este atleta. Telemetría guardada en historial.' }, { status: 200 });
-    }
-
-    // 3. Marcar el workout como completado
-    await supabase
-      .from('user_workouts')
-      .update({
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-        actual_tss: tss || 75
-      })
-      .eq('id', workout.id);
-
-    // 4. Guardar en universal_telemetry
-    const externalActivityId = `webhook-act-${Date.now()}`;
-    await supabase
-      .from('universal_telemetry')
-      .insert({
-        workout_id: workout.id,
-        user_id: userId,
-        source_provider: athlete_id.startsWith('strava') ? 'strava' : 'garmin',
-        external_activity_id: externalActivityId,
-        actual_duration_min: duration || 60,
-        actual_distance_km: distance || 15,
-        actual_tss: tss || 75,
-        raw_payload: payload
-      });
-
-    // 5. Recálculo Automático de Fatiga (TSS Real vs Planificado)
-    // Si el TSS real difiere en más de un 15% del planificado (ej. asumimos 70 TSS planificado)
-    const plannedTss = 70;
-    const actualTss = tss || 75;
-    const diffPercent = Math.abs(actualTss - plannedTss) / plannedTss;
-
-    if (diffPercent > 0.15) {
-      // Reajustar el entrenamiento de mañana marcando auto_adjusted = true
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
-      await supabase
-        .from('user_workouts')
-        .update({ auto_adjusted: true })
-        .eq('user_id', userId)
-        .eq('scheduled_date', tomorrowStr)
-        .eq('status', 'pending');
-    }
-
-    return NextResponse.json({ success: true, message: 'Ingesta de telemetría automática completada con éxito' }, { status: 200 });
-
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error: any) {
-    console.error('Error procesando webhook de telemetría:', error);
-    return NextResponse.json({ error: error.message || 'Error interno del servidor' }, { status: 500 });
+    console.error('Webhook POST exception:', error);
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }

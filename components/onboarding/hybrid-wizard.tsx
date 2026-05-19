@@ -37,6 +37,9 @@ export function HybridWizard() {
 
   const [targetFinishTime, setTargetFinishTime] = React.useState('');
   const [baselineHours, setBaselineHours] = React.useState('7-10h');
+  const [swimHours, setSwimHours] = React.useState(2);
+  const [bikeHours, setBikeHours] = React.useState(4);
+  const [runHours, setRunHours] = React.useState(3);
 
   // Step 2: Physiological
   const [currentFtp, setCurrentFtp] = React.useState('');
@@ -93,7 +96,10 @@ export function HybridWizard() {
         current_ftp: currentFtp ? parseInt(currentFtp) : undefined,
         current_swim_pace: currentSwimPace || undefined,
         current_run_pace: currentRunPace || undefined,
-        virtual_garage: virtualGarage
+        virtual_garage: virtualGarage,
+        swim_weekly_hours: swimHours,
+        bike_weekly_hours: bikeHours,
+        run_weekly_hours: runHours
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -120,7 +126,10 @@ export function HybridWizard() {
         current_ftp: currentFtp ? parseInt(currentFtp) : undefined,
         current_swim_pace: currentSwimPace || undefined,
         current_run_pace: currentRunPace || undefined,
-        virtual_garage: virtualGarage
+        virtual_garage: virtualGarage,
+        swim_weekly_hours: swimHours,
+        bike_weekly_hours: bikeHours,
+        run_weekly_hours: runHours
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -217,6 +226,67 @@ export function HybridWizard() {
                   <div>
                     <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Timer className="w-3.5 h-3.5" /> Tiempo Objetivo</label>
                     <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={targetFinishTime} onChange={e => setTargetFinishTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none" />
+                  </div>
+                </div>
+
+                <div className="border-t border-zinc-800/80 pt-6 space-y-4">
+                  <label className="text-xs font-medium text-zinc-400 block uppercase tracking-wider flex items-center gap-1.5">
+                    <Activity className="w-4 h-4 text-cyan-400" /> Tiempo semanal por disciplina (Horas)
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="space-y-2 bg-zinc-950/40 p-3.5 rounded-xl border border-zinc-800/50">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-zinc-300 font-semibold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-sky-400" /> Natación
+                        </span>
+                        <strong className="text-sm font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{swimHours}h</strong>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="10" 
+                        value={swimHours} 
+                        onChange={e => setSwimHours(parseInt(e.target.value))}
+                        className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                      />
+                      <p className="text-[10px] text-zinc-500">Estimado semanal a nado</p>
+                    </div>
+
+                    <div className="space-y-2 bg-zinc-950/40 p-3.5 rounded-xl border border-zinc-800/50">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-zinc-300 font-semibold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-amber-400" /> Ciclismo
+                        </span>
+                        <strong className="text-sm font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{bikeHours}h</strong>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="20" 
+                        value={bikeHours} 
+                        onChange={e => setBikeHours(parseInt(e.target.value))}
+                        className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                      />
+                      <p className="text-[10px] text-zinc-500">Horas rodando en bici</p>
+                    </div>
+
+                    <div className="space-y-2 bg-zinc-950/40 p-3.5 rounded-xl border border-zinc-800/50">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-zinc-300 font-semibold flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-rose-400" /> Carrera
+                        </span>
+                        <strong className="text-sm font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{runHours}h</strong>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="15" 
+                        value={runHours} 
+                        onChange={e => setRunHours(parseInt(e.target.value))}
+                        className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+                      />
+                      <p className="text-[10px] text-zinc-500">Horas corriendo a pie</p>
+                    </div>
                   </div>
                 </div>
 
