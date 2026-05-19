@@ -9,6 +9,7 @@ import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sp
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
+import { GymTrackerModal } from '@/components/workouts/gym-tracker-modal';
 import Link from 'next/link';
 
 interface WorkoutCardProps {
@@ -70,6 +71,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const [loading, setLoading] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry'>('main');
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
+  const [isGymModeOpen, setIsGymModeOpen] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
 
   const session = workout.training_sessions;
@@ -460,6 +462,17 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               </AnimatedButton>
             )}
 
+            {!isCompleted && !isMissed && session.sport_type === 'fuerza' && (
+              <AnimatedButton
+                variant="ghost"
+                className="flex-1 justify-center py-6 border border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 flex items-center gap-2 font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)]"
+                onClick={() => setIsGymModeOpen(true)}
+              >
+                <Dumbbell className="w-5 h-5 text-purple-400 animate-pulse" />
+                <span>Iniciar Modo Gym</span>
+              </AnimatedButton>
+            )}
+
             {isCompleted && (
               <AnimatedButton
                 variant="ghost"
@@ -484,6 +497,14 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
         workoutId={workout.id}
         workoutTitle={`Sesión de ${session.sport_type} • ${session.day_name}`}
       />
+
+      {session.sport_type === 'fuerza' && (
+        <GymTrackerModal
+          isOpen={isGymModeOpen}
+          onClose={() => setIsGymModeOpen(false)}
+          workoutTitle={`Fuerza: ${parsed.main.substring(0, 20)}...`}
+        />
+      )}
     </ProCard>
   );
 }
