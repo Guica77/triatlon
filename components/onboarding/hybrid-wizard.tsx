@@ -416,8 +416,40 @@ export function HybridWizard() {
               </div>
 
               <div className="space-y-6">
-                <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/20 text-xs text-orange-200/80 leading-relaxed">
-                  Usamos <strong>Strava</strong> como puente seguro de telemetría. Tanto si usas Garmin como si usas Coros, Suunto, Apple Watch o Polar, podrás vincular tus entrenamientos al instante a través de este puente.
+                <div className="p-5 rounded-xl bg-orange-500/5 border border-orange-500/20">
+                  <h3 className="text-sm font-bold text-orange-400 mb-3 flex items-center gap-2">
+                    <Zap className="w-4 h-4" /> ¿Cómo funciona el ecosistema Triatlon Pro?
+                  </h3>
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0 mt-0.5">1</div>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        <strong className="text-white">IA Dinámica:</strong> Cada día la Inteligencia Artificial analiza tus métricas y genera tus entrenamientos (series, ritmos, potencias) a medida en el Dashboard.
+                      </p>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0 mt-0.5">2</div>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        <strong className="text-white">Envío a tu Reloj:</strong> Una vez completado el onboarding, en la pestaña <strong>Configuración</strong> tendrás un botón para "Enviar Entrenos a Garmin/Coros". Esto volcará toda la semana en tu reloj.
+                      </p>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0 mt-0.5">3</div>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        <strong className="text-white">Entrenamiento Guiado:</strong> Simplemente dale a "Iniciar Entrenamiento" en tu reloj. Tu dispositivo te guiará y vibrará en cada serie (ej. "Rueda a 250W por 5 min").
+                      </p>
+                    </li>
+                    <li className="flex items-start gap-2.5">
+                      <div className="w-5 h-5 rounded bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-300 shrink-0 mt-0.5">4</div>
+                      <p className="text-xs text-zinc-300 leading-relaxed">
+                        <strong className="text-white">Marketplace IA:</strong> Si te falta material (ej. Neopreno), nuestro rastreador automático de Wallapop te buscará chollos rebajados.
+                      </p>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-200/90 leading-relaxed text-center font-medium">
+                  Para activar todo este flujo, necesitamos conectarnos con tu telemetría real. Usamos <strong>Strava</strong> como puente seguro.
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -439,7 +471,7 @@ export function HybridWizard() {
                     className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden"
                   >
                     <span className="text-3xl mb-3 block">⌚</span>
-                    <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">Conectar Coros / Suunto / Otros</span>
+                    <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">Conectar Coros / Suunto</span>
                     <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Vía Strava Bridge</span>
                   </button>
                 </div>
