@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { syncPhysiologyFromStrava } from '@/lib/telemetry/strava-sync';
 
 function getBaseUrl(request: NextRequest) {
   const url = new URL(request.url);
@@ -81,6 +82,9 @@ export async function GET(request: NextRequest) {
     if (deviceError) {
       console.error('Error upserting to user_connected_devices:', deviceError);
     }
+
+    // Sync physiological metrics from Strava activities and athlete profile
+    await syncPhysiologyFromStrava(user.id, access_token);
 
     return NextResponse.redirect(new URL('/settings?telemetry_connected=true', request.url));
   } catch (err) {

@@ -2,9 +2,9 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Watch, Link as LinkIcon, Info, Activity, ArrowRight } from 'lucide-react';
+import { disconnectTelemetry, syncPacesFromStravaAction } from '@/app/settings/actions';
+import { Watch, Link as LinkIcon, Info, Activity, ArrowRight, RefreshCw } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { disconnectTelemetry } from '@/app/settings/actions';
 
 interface TelemetryConnectCardProps {
   isConnected: boolean;
@@ -14,6 +14,7 @@ interface TelemetryConnectCardProps {
 
 export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: TelemetryConnectCardProps) {
   const [isDisconnecting, setIsDisconnecting] = React.useState(false);
+  const [isSyncing, setIsSyncing] = React.useState(false);
 
   const handleDisconnect = async () => {
     if (!confirm('¿Estás seguro de que quieres desconectar tu cuenta de Strava?')) return;
@@ -24,6 +25,22 @@ export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: Te
       console.error(e);
     } finally {
       setIsDisconnecting(false);
+    }
+  };
+
+  const handleSyncPaces = async () => {
+    setIsSyncing(true);
+    try {
+      const res = await syncPacesFromStravaAction();
+      if (res.error) {
+        alert(res.error);
+      } else {
+        alert('Tus métricas fisiológicas y de ritmos se han recalculado exitosamente con tus actividades de Strava.');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -55,13 +72,24 @@ export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: Te
             </p>
           </div>
 
-          <button
-            onClick={handleDisconnect}
-            disabled={isDisconnecting}
-            className="w-full py-2 text-xs font-semibold rounded-xl bg-zinc-950/60 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-zinc-850 hover:border-red-500/20 transition-all disabled:opacity-50"
-          >
-            {isDisconnecting ? 'Desconectando...' : 'Desconectar cuenta'}
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={handleSyncPaces}
+              disabled={isSyncing || isDisconnecting}
+              className="w-full py-2.5 text-xs font-bold rounded-xl bg-orange-500 hover:bg-orange-400 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              {isSyncing ? 'Recalculando Ritmos...' : 'Recalcular Ritmos desde Strava'}
+            </button>
+
+            <button
+              onClick={handleDisconnect}
+              disabled={isDisconnecting || isSyncing}
+              className="w-full py-2 text-xs font-semibold rounded-xl bg-zinc-950/60 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-zinc-850 hover:border-red-500/20 transition-all disabled:opacity-50 cursor-pointer"
+            >
+              {isDisconnecting ? 'Desconectando...' : 'Desconectar cuenta'}
+            </button>
+          </div>
         </div>
       </div>
     );

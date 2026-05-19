@@ -122,3 +122,32 @@ export async function disconnectTelemetry(provider: 'strava' | 'garmin') {
   
   return { success: true };
 }
+
+export async function syncPacesFromStravaAction() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'No autorizado' };
+  }
+
+  // Get current Strava token
+  const { data: device } = await supabase
+    .from('user_connected_devices')
+    .select('access_token')
+    .eq('user_id', user.id)
+    .eq('provider', 'strava')
+    .maybeSingle();
+
+  if (!device?.access_token) {
+    return { error: 'No tienes una cuenta de Strava conectada.' };
+  }
+
+  const { syncPhysiologyFromStrava } = await import('@/lib/telemetry/strava-sync');
+  await syncPhysiologyFromStrava(user.id, device.access_token);
+
+  revalidatePath('/settings');
+  revalidatePath('/dashboard');
+  
+  return { success: true };
+}
