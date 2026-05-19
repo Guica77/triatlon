@@ -88,6 +88,7 @@ export default async function AnalyticsPage() {
           {/* Bloque 3: Distribución por Deporte */}
           <SportDistributionCard
             distribution={analyticsData.sportDistribution}
+            weeklyDistance={analyticsData.weeklyDistance}
           />
         </div>
 

@@ -10,9 +10,14 @@ interface SportDistributionCardProps {
     ciclismo: { tss: number; percentage: number };
     carrera: { tss: number; percentage: number };
   };
+  weeklyDistance: {
+    natacion: number; // metros
+    ciclismo: number; // km
+    carrera: number; // km
+  };
 }
 
-export function SportDistributionCard({ distribution }: SportDistributionCardProps) {
+export function SportDistributionCard({ distribution, weeklyDistance }: SportDistributionCardProps) {
   const [showHelp, setShowHelp] = React.useState(false);
   const { natacion, ciclismo, carrera } = distribution;
 
@@ -39,13 +44,13 @@ export function SportDistributionCard({ distribution }: SportDistributionCardPro
               ¿Qué es la Distribución de Esfuerzo?
             </h4>
             <p className="text-[11px] text-zinc-300 leading-relaxed">
-              Muestra el porcentaje del esfuerzo físico total (**TSS**) que has dedicado a cada deporte durante esta semana:
+              Muestra el porcentaje del esfuerzo físico total (**TSS**) y el volumen real (**distancia**) que has dedicado a cada deporte durante esta semana:
               <br /><br />
-              • <strong className="text-purple-400">Natación 🟣</strong>
+              • <strong className="text-purple-400">Natación 🟣</strong> (en metros)
               <br />
-              • <strong className="text-sky-400">Ciclismo 🔵</strong>
+              • <strong className="text-sky-400">Ciclismo 🔵</strong> (en kilómetros)
               <br />
-              • <strong className="text-emerald-400">Carrera a Pie 🟢</strong>
+              • <strong className="text-emerald-400">Carrera a Pie 🟢</strong> (en kilómetros)
               <br /><br />
               Te sirve para verificar visualmente que tu volumen e intensidad por deporte coincidan con el balance planificado para tus objetivos de triatlón.
             </p>
@@ -79,7 +84,7 @@ export function SportDistributionCard({ distribution }: SportDistributionCardPro
           </div>
         </div>
         <span className="text-xs font-medium px-3 py-1 rounded-full border text-zinc-400 bg-zinc-900/50 border-zinc-800">
-          TSS Semanal
+          Volumen Semanal
         </span>
       </div>
 
@@ -155,7 +160,7 @@ export function SportDistributionCard({ distribution }: SportDistributionCardPro
         {/* Leyenda de Disciplinas */}
         <div className="space-y-4 w-full sm:w-auto">
           {/* Ciclismo */}
-          <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/60 min-w-[160px]">
+          <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/60 min-w-[170px]">
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-sky-400" />
               <span className="text-sm font-medium text-zinc-300">Ciclismo</span>
@@ -164,12 +169,14 @@ export function SportDistributionCard({ distribution }: SportDistributionCardPro
               <span className="text-sm font-semibold text-zinc-100">
                 {ciclismo.percentage}%
               </span>
-              <span className="text-xs text-zinc-500 block">{ciclismo.tss} TSS</span>
+              <span className="text-xs text-zinc-450 block">
+                {ciclismo.tss} TSS • <strong className="text-sky-400/90">{weeklyDistance.ciclismo} km</strong>
+              </span>
             </div>
           </div>
 
           {/* Carrera */}
-          <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/60 min-w-[160px]">
+          <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/60 min-w-[170px]">
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-emerald-400" />
               <span className="text-sm font-medium text-zinc-300">Carrera</span>
@@ -178,12 +185,14 @@ export function SportDistributionCard({ distribution }: SportDistributionCardPro
               <span className="text-sm font-semibold text-zinc-100">
                 {carrera.percentage}%
               </span>
-              <span className="text-xs text-zinc-500 block">{carrera.tss} TSS</span>
+              <span className="text-xs text-zinc-450 block">
+                {carrera.tss} TSS • <strong className="text-emerald-400/90">{weeklyDistance.carrera} km</strong>
+              </span>
             </div>
           </div>
 
           {/* Natación */}
-          <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/60 min-w-[160px]">
+          <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/60 min-w-[170px]">
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-purple-400" />
               <span className="text-sm font-medium text-zinc-300">Natación</span>
@@ -192,7 +201,9 @@ export function SportDistributionCard({ distribution }: SportDistributionCardPro
               <span className="text-sm font-semibold text-zinc-100">
                 {natacion.percentage}%
               </span>
-              <span className="text-xs text-zinc-500 block">{natacion.tss} TSS</span>
+              <span className="text-xs text-zinc-450 block">
+                {natacion.tss} TSS • <strong className="text-purple-400/90">{weeklyDistance.natacion} m</strong>
+              </span>
             </div>
           </div>
         </div>

@@ -21,6 +21,7 @@ export function PerformanceChartCard({
   const [timeRange, setTimeRange] = React.useState<number>(30); // 30, 60 o 90 días
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
   const [activeHelp, setActiveHelp] = React.useState<'ctl' | 'atl' | 'tsb' | null>(null);
+  const [showVolume, setShowVolume] = React.useState(false);
 
   const height = 240;
   const width = 800;
@@ -125,25 +126,40 @@ export function PerformanceChartCard({
           </h3>
         </div>
 
-        {/* Pestañas de Rango Temporal */}
-        <div className="flex items-center bg-zinc-900/80 p-1 rounded-lg border border-zinc-800/80">
-          {[
-            { label: '4 Sem', value: 30 },
-            { label: '8 Sem', value: 60 },
-            { label: '3 Meses', value: 90 },
-          ].map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setTimeRange(tab.value)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                timeRange === tab.value
-                  ? 'bg-zinc-800 text-zinc-100 shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-3">
+          {/* Toggle de Volumen */}
+          <button
+            onClick={() => setShowVolume(!showVolume)}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 ${
+              showVolume
+                ? 'bg-cyan-950/30 border-cyan-500/40 text-cyan-400'
+                : 'bg-zinc-900/80 border-zinc-800/80 text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${showVolume ? 'bg-cyan-450 animate-pulse' : 'bg-zinc-600'}`} />
+            {showVolume ? 'Volumen en vivo' : 'Ver volumen'}
+          </button>
+
+          {/* Pestañas de Rango Temporal */}
+          <div className="flex items-center bg-zinc-900/80 p-1 rounded-lg border border-zinc-800/80">
+            {[
+              { label: '4 Sem', value: 30 },
+              { label: '8 Sem', value: 60 },
+              { label: '3 Meses', value: 90 },
+            ].map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setTimeRange(tab.value)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                  timeRange === tab.value
+                    ? 'bg-zinc-800 text-zinc-100 shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -329,6 +345,65 @@ export function PerformanceChartCard({
             className="w-full h-full overflow-visible"
             preserveAspectRatio="none"
           >
+            {/* Barras de volumen si showVolume es true */}
+            {showVolume && filteredData.map((d, index) => {
+              const x = index * step;
+              const bars = [];
+              
+              // Ciclismo: barra azul. Escalamos hasta 100km -> 50px de alto
+              if (d.bikeDistance && d.bikeDistance > 0) {
+                const h = Math.min((d.bikeDistance / 100) * 50, 50);
+                bars.push(
+                  <rect
+                    key={`bike-${index}`}
+                    x={x - 2}
+                    y={height - h}
+                    width={4}
+                    height={h}
+                    fill="#38bdf8"
+                    opacity="0.35"
+                    className="transition-all"
+                  />
+                );
+              }
+
+              // Carrera: barra verde. Escalamos hasta 25km -> 50px de alto
+              if (d.runDistance && d.runDistance > 0) {
+                const h = Math.min((d.runDistance / 25) * 50, 50);
+                bars.push(
+                  <rect
+                    key={`run-${index}`}
+                    x={x - 2}
+                    y={height - h}
+                    width={4}
+                    height={h}
+                    fill="#34d399"
+                    opacity="0.35"
+                    className="transition-all"
+                  />
+                );
+              }
+
+              // Natación: barra morada. Escalamos hasta 4000m -> 50px de alto
+              if (d.swimDistance && d.swimDistance > 0) {
+                const h = Math.min((d.swimDistance / 4000) * 50, 50);
+                bars.push(
+                  <rect
+                    key={`swim-${index}`}
+                    x={x - 2}
+                    y={height - h}
+                    width={4}
+                    height={h}
+                    fill="#c084fc"
+                    opacity="0.35"
+                    className="transition-all"
+                  />
+                );
+              }
+
+              return bars;
+            })}
+
             {/* Curva de Fitness (Azul Celeste) */}
             <path
               d={ctlPoints}
@@ -409,6 +484,29 @@ export function PerformanceChartCard({
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                 <span>Forma (TSB): <strong className={activePoint.tsb >= 0 ? 'text-green-400' : 'text-amber-500'}>{activePoint.tsb > 0 ? `+${activePoint.tsb}` : activePoint.tsb}</strong></span>
               </div>
+
+              {/* Distancias si el punto las tiene */}
+              {((activePoint.bikeDistance && activePoint.bikeDistance > 0) || 
+                (activePoint.runDistance && activePoint.runDistance > 0) || 
+                (activePoint.swimDistance && activePoint.swimDistance > 0)) && (
+                <div className="border-t border-zinc-800/60 pt-1 mt-1.5 space-y-0.5">
+                  {activePoint.swimDistance > 0 && (
+                    <div className="flex items-center gap-1 text-[9px] text-purple-400">
+                      <span>Nadar: <strong>{activePoint.swimDistance} m</strong></span>
+                    </div>
+                  )}
+                  {activePoint.bikeDistance > 0 && (
+                    <div className="flex items-center gap-1 text-[9px] text-sky-400">
+                      <span>Bici: <strong>{activePoint.bikeDistance} km</strong></span>
+                    </div>
+                  )}
+                  {activePoint.runDistance > 0 && (
+                    <div className="flex items-center gap-1 text-[9px] text-emerald-400">
+                      <span>Correr: <strong>{activePoint.runDistance} km</strong></span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

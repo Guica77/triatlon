@@ -7,6 +7,9 @@ export interface PmcPoint {
   ctl: number; // Fitness (Carga Crónica - 42 días)
   atl: number; // Fatiga (Carga Aguda - 7 días)
   tsb: number; // Balance de Forma (CTL - ATL)
+  swimDistance: number; // en metros
+  bikeDistance: number; // en km
+  runDistance: number; // en km
 }
 
 export interface AnalyticsDashboardData {
@@ -20,6 +23,11 @@ export interface AnalyticsDashboardData {
     natacion: { tss: number; percentage: number };
     ciclismo: { tss: number; percentage: number };
     carrera: { tss: number; percentage: number };
+  };
+  weeklyDistance: {
+    natacion: number; // metros
+    ciclismo: number; // km
+    carrera: number; // km
   };
 }
 
@@ -115,10 +123,19 @@ function generateSimulatedPmcData(): PmcPoint[] {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
     
-    // Simular un entrenamiento realista cada ciertos días usando Math.sin para que sea 100% determinista (evita Hydration Error)
     const isWorkoutDay = i % 7 !== 0; // Descanso 1 día a la semana
     const pseudoRandom = Math.abs(Math.sin(i));
     const dailyTss = isWorkoutDay ? Math.floor(pseudoRandom * 60) + 40 : 0; // Entre 40 y 100 TSS
+
+    let swimDistance = 0;
+    let bikeDistance = 0;
+    let runDistance = 0;
+
+    if (isWorkoutDay) {
+      if (i % 3 === 0) swimDistance = Math.round(1500 + pseudoRandom * 1500);
+      else if (i % 3 === 1) bikeDistance = Math.round(30 + pseudoRandom * 50);
+      else runDistance = Math.round(8 + pseudoRandom * 12);
+    }
 
     // Fórmulas de Media Móvil Exponencial (EWMA)
     currentCtl = currentCtl + (dailyTss - currentCtl) * (1 / 42);
@@ -129,7 +146,10 @@ function generateSimulatedPmcData(): PmcPoint[] {
       date: d.toISOString().split('T')[0],
       ctl: Math.round(currentCtl),
       atl: Math.round(currentAtl),
-      tsb: Math.round(currentTsb)
+      tsb: Math.round(currentTsb),
+      swimDistance,
+      bikeDistance,
+      runDistance
     });
   }
 
@@ -162,10 +182,16 @@ export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardDat
     }
 
     const tssByDate: Record<string, number> = {};
+    const dailyDistance: Record<string, { swim: number; bike: number; run: number }> = {};
     const sportTssCurrentWeek = {
       natacion: 0,
       ciclismo: 0,
       carrera: 0
+    };
+    const sportDistanceCurrentWeek = {
+      natacion: 0, // metros
+      ciclismo: 0, // km
+      carrera: 0  // km
     };
 
     const now = new Date();
@@ -227,15 +253,32 @@ export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardDat
 
               tssByDate[dateStr] = (tssByDate[dateStr] || 0) + tss;
 
-              // Aggregate current week distribution
+              const distMeters = act.distance || 0;
+              const sport = (act.type || '').toLowerCase();
               const workoutDate = new Date(act.start_date);
-              if (workoutDate >= startOfCurrentWeek) {
-                const sport = (act.type || '').toLowerCase();
-                if (sport === 'swim') {
+              
+              if (!dailyDistance[dateStr]) {
+                dailyDistance[dateStr] = { swim: 0, bike: 0, run: 0 };
+              }
+
+              if (sport === 'swim') {
+                dailyDistance[dateStr].swim += distMeters;
+                if (workoutDate >= startOfCurrentWeek) {
+                  sportDistanceCurrentWeek.natacion += distMeters;
                   sportTssCurrentWeek.natacion += tss;
-                } else if (sport === 'ride' || sport === 'virtualride') {
+                }
+              } else if (sport === 'ride' || sport === 'virtualride') {
+                const distKm = distMeters / 1000;
+                dailyDistance[dateStr].bike += distKm;
+                if (workoutDate >= startOfCurrentWeek) {
+                  sportDistanceCurrentWeek.ciclismo += distKm;
                   sportTssCurrentWeek.ciclismo += tss;
-                } else if (sport === 'run') {
+                }
+              } else if (sport === 'run') {
+                const distKm = distMeters / 1000;
+                dailyDistance[dateStr].run += distKm;
+                if (workoutDate >= startOfCurrentWeek) {
+                  sportDistanceCurrentWeek.carrera += distKm;
                   sportTssCurrentWeek.carrera += tss;
                 }
               }
@@ -274,15 +317,38 @@ export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardDat
         // Keep highest if there is overlap on the same date
         tssByDate[dateStr] = Math.max(tssByDate[dateStr] || 0, tss);
 
-        // Aggregate current week distribution only if not connected to Strava
+        const sport = (session.sport_type || '').toLowerCase();
+        let estimatedDistance = 0;
+
+        if (sport.includes('swim') || sport.includes('natación')) {
+          estimatedDistance = (session.duration_min || 0) * 40; // metros
+        } else if (sport.includes('bike') || sport.includes('ciclismo')) {
+          estimatedDistance = (session.duration_min || 0) * 0.4; // km
+        } else if (sport.includes('run') || sport.includes('carrera')) {
+          estimatedDistance = (session.duration_min || 0) * 0.2; // km
+        }
+
+        if (!dailyDistance[dateStr]) {
+          dailyDistance[dateStr] = { swim: 0, bike: 0, run: 0 };
+        }
+
         const workoutDate = new Date(w.completed_at);
-        if (workoutDate >= startOfCurrentWeek && !profile.strava_connected) {
-          const sport = (session.sport_type || '').toLowerCase();
-          if (sport.includes('swim') || sport.includes('natación')) {
+        if (sport.includes('swim') || sport.includes('natación')) {
+          dailyDistance[dateStr].swim = Math.max(dailyDistance[dateStr].swim, estimatedDistance);
+          if (workoutDate >= startOfCurrentWeek && !profile.strava_connected) {
+            sportDistanceCurrentWeek.natacion += estimatedDistance;
             sportTssCurrentWeek.natacion += tss;
-          } else if (sport.includes('bike') || sport.includes('ciclismo')) {
+          }
+        } else if (sport.includes('bike') || sport.includes('ciclismo')) {
+          dailyDistance[dateStr].bike = Math.max(dailyDistance[dateStr].bike, estimatedDistance);
+          if (workoutDate >= startOfCurrentWeek && !profile.strava_connected) {
+            sportDistanceCurrentWeek.ciclismo += estimatedDistance;
             sportTssCurrentWeek.ciclismo += tss;
-          } else if (sport.includes('run') || sport.includes('carrera')) {
+          }
+        } else if (sport.includes('run') || sport.includes('carrera')) {
+          dailyDistance[dateStr].run = Math.max(dailyDistance[dateStr].run, estimatedDistance);
+          if (workoutDate >= startOfCurrentWeek && !profile.strava_connected) {
+            sportDistanceCurrentWeek.carrera += estimatedDistance;
             sportTssCurrentWeek.carrera += tss;
           }
         }
@@ -308,11 +374,16 @@ export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardDat
       currentAtl = currentAtl + (dailyTss - currentAtl) * (1 / 7);
       const currentTsb = currentCtl - currentAtl;
 
+      const dist = dailyDistance[dateStr] || { swim: 0, bike: 0, run: 0 };
+
       pmcData.push({
         date: dateStr,
         ctl: Math.round(currentCtl),
         atl: Math.round(currentAtl),
-        tsb: Math.round(currentTsb)
+        tsb: Math.round(currentTsb),
+        swimDistance: Math.round(dist.swim),
+        bikeDistance: Number(dist.bike.toFixed(1)),
+        runDistance: Number(dist.run.toFixed(1))
       });
     }
 
@@ -342,6 +413,11 @@ export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardDat
           tss: sportTssCurrentWeek.carrera,
           percentage: Math.round((sportTssCurrentWeek.carrera / totalCurrentTss) * 100)
         }
+      },
+      weeklyDistance: {
+        natacion: Math.round(sportDistanceCurrentWeek.natacion),
+        ciclismo: Number(sportDistanceCurrentWeek.ciclismo.toFixed(1)),
+        carrera: Number(sportDistanceCurrentWeek.carrera.toFixed(1))
       }
     };
 
@@ -369,6 +445,11 @@ function getFallbackAnalyticsData(): AnalyticsDashboardData {
       natacion: { tss: 75, percentage: 19 },
       ciclismo: { tss: 195, percentage: 51 },
       carrera: { tss: 115, percentage: 30 }
+    },
+    weeklyDistance: {
+      natacion: 4500, // metros
+      ciclismo: 120, // km
+      carrera: 28 // km
     }
   };
 }
