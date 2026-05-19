@@ -39,6 +39,7 @@ export function MarketplaceAggregatorGrid({ initialItems, initialCategory = 'tod
 
   const categories = [
     { id: 'todos', label: '🏊‍♂️ Todo el Material' },
+    ...(userWorkoutGearNeeded.length > 0 ? [{ id: 'necesarios', label: '✨ Lo que Necesitas' }] : []),
     { id: 'bicicletas', label: '🚴‍♂️ Bicicletas & Cabras' },
     { id: 'neoprenos', label: '🩱 Neoprenos' },
     { id: 'ruedas', label: '⭕ Ruedas Carbono' },
@@ -60,7 +61,18 @@ export function MarketplaceAggregatorGrid({ initialItems, initialCategory = 'tod
         item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.location && item.location.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      const matchesCategory = selectedCategory === 'todos' || item.category.toLowerCase() === selectedCategory.toLowerCase();
+      let matchesCategory = false;
+      if (selectedCategory === 'todos') {
+        matchesCategory = true;
+      } else if (selectedCategory === 'necesarios') {
+        matchesCategory = userWorkoutGearNeeded.some(gear => 
+          item.title.toLowerCase().includes(gear.toLowerCase()) || 
+          item.category.toLowerCase().includes(gear.toLowerCase())
+        );
+      } else {
+        matchesCategory = item.category.toLowerCase() === selectedCategory.toLowerCase();
+      }
+
       const matchesCondition = selectedCondition === 'todos' || item.condition.toLowerCase() === selectedCondition.toLowerCase();
 
       return matchesSearch && matchesCategory && matchesCondition;

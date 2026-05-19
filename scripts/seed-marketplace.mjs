@@ -15,23 +15,23 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 const marketplaceItems = [
   {
-    title: "Canyon Speedmax CF 8 Di2 (2023)",
+    title: "Canyon Speedmax CF 8 Di2 (2023) - Talla M",
     price: 2450,
     original_price: 4199,
     category: "bicicletas",
     condition: "Excelente",
-    source_portal: "Tuvalum",
-    external_url: "https://tuvalum.com/bicicletas-ciclismo/canyon-speedmax",
+    source_portal: "Wallapop",
+    external_url: "https://es.wallapop.com/app/search?keywords=canyon%20speedmax",
     external_images: [
-      "https://images.immediate.co.uk/production/volatile/sites/21/2021/03/Canyon-Speedmax-CF-8-Disc-02-1a4b656.jpg",
-      "https://cdn.bikeradar.com/image/upload/v1617188722/Canyon-Speedmax-CF-8-Disc-01-0bc07e2.jpg"
+      "https://images.unsplash.com/photo-1618886487325-f66f5087405e?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&q=80&w=800"
     ],
     location: "Madrid, España",
-    seller_name: "Tuvalum Certified",
+    seller_name: "Alberto R.",
     is_active: true
   },
   {
-    title: "Neopreno Orca Apex Flex (Talla MT)",
+    title: "Neopreno Orca Apex Flex (Talla MT) - Poco Uso",
     price: 320,
     original_price: 699,
     category: "neoprenos",
@@ -39,43 +39,42 @@ const marketplaceItems = [
     source_portal: "Wallapop",
     external_url: "https://es.wallapop.com/app/search?keywords=orca%20apex%20flex",
     external_images: [
-      "https://triathlonwetsuitstore.com/wp-content/uploads/2022/04/Orca-Apex-Flex-Mens-Triathlon-Wetsuit-1.jpg",
-      "https://cdn.shopify.com/s/files/1/0554/7445/0585/files/Apex_Flex_Men_2.jpg"
+      "https://images.unsplash.com/photo-1629813200922-35dbdce3d5be?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80&w=800"
     ],
     location: "Barcelona, España",
     seller_name: "Carlos Tri",
     is_active: true
   },
   {
-    title: "Ruedas Zipp 404 Firecrest Carbono (Zapata)",
-    price: 850,
-    original_price: 1900,
-    category: "ruedas",
+    title: "Garmin Forerunner 945 - Batería al 90%",
+    price: 210,
+    original_price: 450,
+    category: "gps",
     condition: "Buen Estado",
-    source_portal: "ForoMTB",
-    external_url: "https://foromtb.com/threads/ruedas-zipp-404-firecrest.123456/",
+    source_portal: "Wallapop",
+    external_url: "https://es.wallapop.com/app/search?keywords=garmin%20forerunner%20945",
     external_images: [
-      "https://cdn.sigmasports.com/images/products/56795/1000/zipp-404-firecrest-carbon-clincher-wheelset-1.jpg",
-      "https://sram-cdn-pull-zone.sram.com/media/catalog/product/w/h/wh-404-ftub-a1-main.jpg"
+      "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&q=80&w=800"
     ],
     location: "Valencia, España",
     seller_name: "Ironman77",
     is_active: true
   },
   {
-    title: "Pedales Favero Assioma Duo (Potenciómetro)",
-    price: 450,
-    original_price: 695,
-    category: "potenciometros",
-    condition: "Excelente",
-    source_portal: "TuTriatlon",
-    external_url: "https://tutriatlon.com/favero-assioma-duo",
+    title: "Ruedas Zipp 404 Firecrest Carbono",
+    price: 850,
+    original_price: 1900,
+    category: "ruedas",
+    condition: "Buen Estado",
+    source_portal: "Tuvalum",
+    external_url: "https://tuvalum.com/ruedas",
     external_images: [
-      "https://cyclingpro.com/wp-content/uploads/2018/06/assioma_duo_pack.jpg",
-      "https://cdn.shopify.com/s/files/1/0280/8404/3829/products/favero-assioma-duo-power-meter-pedals-3_1024x1024.jpg"
+      "https://images.unsplash.com/photo-1611078519159-20f78117d69d?auto=format&fit=crop&q=80&w=800"
     ],
     location: "Sevilla, España",
-    seller_name: "TuTriatlon Store",
+    seller_name: "Tuvalum Certified",
     is_active: true
   },
   {
@@ -87,24 +86,22 @@ const marketplaceItems = [
     source_portal: "Wallapop",
     external_url: "https://es.wallapop.com/app/search?keywords=giro%20aerohead",
     external_images: [
-      "https://cdn.sigmasports.com/images/products/47941/1000/giro-aerohead-mips-time-trial-helmet-1.jpg",
-      "https://images.immediate.co.uk/production/volatile/sites/21/2019/03/1490977226992-1k1qzz20s7s33-d9ea217.jpg"
+      "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=800"
     ],
     location: "Bilbao, España",
     seller_name: "Marta_Swim",
     is_active: true
   },
   {
-    title: "Palas de Natación Arena Elite + Aletas de Silicona",
+    title: "Palas de Natación Arena Elite + Aletas de Silicona (Lote)",
     price: 25,
     original_price: 55,
     category: "accesorios",
-    condition: "Como Nuevo",
+    condition: "Buen Estado",
     source_portal: "Wallapop",
     external_url: "https://es.wallapop.com/app/search?keywords=palas%20arena%20aletas",
     external_images: [
-      "https://cdn.swimoutlet.com/photos/options/8115682-27756-zoom.jpg",
-      "https://m.media-amazon.com/images/I/61Gg29rXJPL._AC_SL1500_.jpg"
+      "https://images.unsplash.com/photo-1530020302381-807c4b4d7f5f?auto=format&fit=crop&q=80&w=800"
     ],
     location: "Zaragoza, España",
     seller_name: "Alex_Tri",
@@ -113,7 +110,7 @@ const marketplaceItems = [
 ];
 
 async function seedMarketplace() {
-  console.log("Iniciando seedeo de chollos de marketplace...");
+  console.log("Iniciando seedeo de chollos de marketplace con fotos Wallapop-style...");
 
   // Limpiar datos existentes
   await supabase.from('marketplace_items').delete().neq('id', 'dummy');
