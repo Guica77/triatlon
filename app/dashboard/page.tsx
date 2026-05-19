@@ -5,6 +5,8 @@ import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
 import { WeeklyNav } from '@/components/dashboard/weekly-nav';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
 import { getDailyBiometrics } from '@/app/dashboard/biometrics-actions';
+import { getAnalyticsDashboardData } from '@/app/analytics/analytics-actions';
+import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2, ShoppingBag } from 'lucide-react';
@@ -33,6 +35,9 @@ export default async function DashboardPage() {
 
   // 1.5 Obtener Biometría del Día (con auto-simulación inicial)
   const { data: biometrics } = await getDailyBiometrics();
+
+  // 1.6 Obtener Datos PMC para el FormStatusWidget
+  const analyticsData = await getAnalyticsDashboardData();
 
   // 1.8 Verificar conexiones de dispositivos OAuth activas (Garmin / Strava)
   const { data: devices } = await supabase
@@ -127,11 +132,16 @@ export default async function DashboardPage() {
       <main className="max-w-4xl mx-auto px-6 pt-8 space-y-8">
         
         {/* Sección Biometría y Readiness (Estilo Oura/Whoop) */}
-        {biometrics && (
-          <section className="space-y-3">
-            <BiometricsCard initialBiometrics={biometrics} />
-          </section>
-        )}
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {biometrics && (
+            <div className="h-full">
+              <BiometricsCard initialBiometrics={biometrics} />
+            </div>
+          )}
+          <div className="h-full">
+            <FormStatusWidget tsb={analyticsData.currentTsb} />
+          </div>
+        </section>
 
         {/* Barra de Navegación Semanal */}
         <section className="space-y-3">
