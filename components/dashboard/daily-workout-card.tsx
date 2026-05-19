@@ -503,6 +503,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
           isOpen={isGymModeOpen}
           onClose={() => setIsGymModeOpen(false)}
           workoutTitle={`Fuerza: ${parsed.main.substring(0, 20)}...`}
+          workoutId={workout.id}
         />
       )}
     </ProCard>
