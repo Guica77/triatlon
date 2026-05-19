@@ -346,7 +346,7 @@ export function PerformanceChartCard({
       {/* Gráfico SVG Principal Interactivo */}
       <div className="relative w-full pt-6 pb-2">
         {/* Leyenda Visual */}
-        <div className="flex items-center justify-end gap-6 mb-4 text-xs font-medium">
+        <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 mb-4 text-xs font-medium">
           <div className="flex items-center gap-2">
             <span className="w-3 h-0.5 bg-cyan-400 rounded-full" />
             <span className="text-zinc-400">Fitness (CTL)</span>
@@ -359,6 +359,23 @@ export function PerformanceChartCard({
             <span className="w-3 h-0.5 bg-amber-500 rounded-full" />
             <span className="text-zinc-400">Forma (TSB)</span>
           </div>
+
+          {showVolume && (
+            <>
+              <div className="flex items-center gap-2 border-l border-zinc-800 pl-4">
+                <span className="w-3 h-0.5 bg-purple-400 rounded-full opacity-70" />
+                <span className="text-zinc-400">Vol. Natación</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-0.5 bg-sky-400 rounded-full opacity-70" />
+                <span className="text-zinc-400">Vol. Ciclismo</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-0.5 bg-emerald-400 rounded-full opacity-70" />
+                <span className="text-zinc-400">Vol. Carrera</span>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Contenedor del SVG con gestos e interacción del cursor */}
