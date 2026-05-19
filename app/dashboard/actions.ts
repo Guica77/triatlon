@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export async function toggleWorkoutStatus(workoutId: string, currentStatus: string) {
+export async function updateWorkoutStatus(workoutId: string, newStatus: 'pending' | 'completed' | 'missed') {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -11,7 +11,6 @@ export async function toggleWorkoutStatus(workoutId: string, currentStatus: stri
     throw new Error("No autenticado")
   }
 
-  const newStatus = currentStatus === 'completed' ? 'pending' : 'completed'
   const completedAt = newStatus === 'completed' ? new Date().toISOString() : null
 
   const { error } = await supabase
@@ -30,4 +29,9 @@ export async function toggleWorkoutStatus(workoutId: string, currentStatus: stri
 
   revalidatePath('/dashboard')
   return { status: newStatus }
+}
+
+export async function toggleWorkoutStatus(workoutId: string, currentStatus: string) {
+  const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+  return updateWorkoutStatus(workoutId, newStatus);
 }

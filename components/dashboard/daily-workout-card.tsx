@@ -1,11 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { toggleWorkoutStatus } from '@/app/dashboard/actions';
+import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
@@ -74,6 +74,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
   const session = workout.training_sessions;
   const isCompleted = status === 'completed';
+  const isMissed = status === 'missed';
 
   const telemetry = workout.universal_telemetry?.[0] || (isCompleted ? {
     source_provider: 'garmin',
@@ -131,6 +132,22 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     }
   }
 
+  async function handleToggleMissed() {
+    if (loading) return;
+    setLoading(true);
+    const prevStatus = status;
+    const nextStatus = isMissed ? 'pending' : 'missed';
+    setStatus(nextStatus); // Optimistic
+
+    try {
+      await updateWorkoutStatus(workout.id, nextStatus as any);
+    } catch (error) {
+      setStatus(prevStatus); // Revert
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const desc = session.description || '';
   const parsed = parseWorkoutDescription(desc, session.sport_type);
 
@@ -140,7 +157,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const hasZ4 = desc.includes('Zona 4') || desc.includes('Z4') || desc.includes('series') || desc.includes('fuerte');
 
   return (
-    <ProCard className={`space-y-6 transition-all duration-300 relative overflow-hidden ${isCompleted ? 'border-zinc-800 bg-zinc-900/40 opacity-80' : ''}`}>
+    <ProCard className={`space-y-6 transition-all duration-300 relative overflow-hidden ${isCompleted ? 'border-zinc-800 bg-zinc-900/40 opacity-80' : isMissed ? 'border-zinc-900 bg-zinc-950/20 opacity-60' : ''}`}>
       
       {/* Esquina decorativa con el color del deporte */}
       <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none ${sportBgGlow[session.sport_type] || 'bg-transparent'}`} />
@@ -157,6 +174,12 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[10px] font-bold flex items-center gap-1 animate-pulse">
                 <Flame className="w-3 h-3" />
                 <span>Reajustado por Fatiga</span>
+              </span>
+            )}
+            {isMissed && (
+              <span className="px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] font-bold flex items-center gap-1">
+                <XCircle className="w-3 h-3 text-red-400" />
+                <span>Sesión Saltada</span>
               </span>
             )}
           </div>
@@ -373,38 +396,69 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
       {/* Botones de acción principales limpios */}
       <div className="pt-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center relative z-10">
         {session.sport_type !== 'descanso' ? (
-          <div className="flex-1 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-            <AnimatedButton 
-              variant={isCompleted ? "secondary" : "primary"} 
-              className="flex-1 justify-center py-6 text-sm font-semibold shadow-lg shadow-cyan-500/10"
-              onClick={handleToggle}
-              disabled={loading}
-            >
-              {isCompleted ? (
-                <>
-                  <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  <span className="text-zinc-200">✓ Entrenamiento Completado (Sincronizado)</span>
-                </>
-              ) : (
-                <>
+          <div className="flex-1 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full">
+            {!isCompleted && !isMissed && (
+              <>
+                <AnimatedButton 
+                  variant="primary" 
+                  className="flex-[3] justify-center py-6 text-sm font-semibold shadow-lg shadow-cyan-500/10"
+                  onClick={handleToggle}
+                  disabled={loading}
+                >
                   <Circle className="w-5 h-5 text-zinc-400" />
                   <span>Marcar como Completado</span>
-                </>
-              )}
-            </AnimatedButton>
+                </AnimatedButton>
 
-            <AnimatedButton
-              variant="ghost"
-              className="py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-bold shadow-lg shadow-orange-500/10"
-              onClick={() => {
-                setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
-                window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
-                setTimeout(() => setToastMsg(null), 6000);
-              }}
-            >
-              <Download className="w-5 h-5 text-orange-400 animate-bounce" />
-              <span>Enviar al Reloj (.TCX)</span>
-            </AnimatedButton>
+                <AnimatedButton
+                  variant="ghost"
+                  className="flex-[1] justify-center py-6 border border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 flex items-center gap-2"
+                  onClick={handleToggleMissed}
+                  disabled={loading}
+                >
+                  <XCircle className="w-5 h-5 text-zinc-500" />
+                  <span>Saltar</span>
+                </AnimatedButton>
+              </>
+            )}
+
+            {isCompleted && (
+              <AnimatedButton 
+                variant="secondary" 
+                className="flex-1 justify-center py-6 text-sm font-semibold"
+                onClick={handleToggle}
+                disabled={loading}
+              >
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+                <span className="text-zinc-200">✓ Entrenamiento Completado (Sincronizado)</span>
+              </AnimatedButton>
+            )}
+
+            {isMissed && (
+              <AnimatedButton 
+                variant="secondary" 
+                className="flex-1 justify-center py-6 text-sm font-semibold border-red-500/20 bg-red-950/10 hover:bg-red-950/20"
+                onClick={handleToggleMissed}
+                disabled={loading}
+              >
+                <XCircle className="w-5 h-5 text-red-500" />
+                <span className="text-red-400">✓ Entrenamiento Saltado (Clic para Restaurar)</span>
+              </AnimatedButton>
+            )}
+
+            {!isMissed && (
+              <AnimatedButton
+                variant="ghost"
+                className="py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-bold shadow-lg shadow-orange-500/10"
+                onClick={() => {
+                  setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
+                  window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
+                  setTimeout(() => setToastMsg(null), 6000);
+                }}
+              >
+                <Download className="w-5 h-5 text-orange-400 animate-bounce" />
+                <span>Enviar al Reloj (.TCX)</span>
+              </AnimatedButton>
+            )}
 
             {isCompleted && (
               <AnimatedButton
