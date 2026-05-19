@@ -12,54 +12,133 @@ export function FormStatusWidget({ tsb }: FormStatusWidgetProps) {
   let label = '';
   let description = '';
   let color = '';
+  let strokeColor = '';
+  let glowColor = '';
   let bgClass = '';
   
   if (tsb > 25) {
     label = 'Pérdida de Forma';
     description = 'Demasiado descanso, perdiendo condición.';
     color = 'text-zinc-400';
-    bgClass = 'bg-zinc-500/10 border-zinc-500/20';
+    strokeColor = '#a1a1aa';
+    glowColor = 'rgba(161, 161, 170, 0.15)';
+    bgClass = 'bg-zinc-950/40 border-zinc-800/80 hover:border-zinc-700/80';
   } else if (tsb >= 5) {
     label = 'Pico de Forma';
     description = 'Frescura alta. Listo para competir.';
     color = 'text-emerald-400';
-    bgClass = 'bg-emerald-500/10 border-emerald-500/20';
+    strokeColor = '#34d399';
+    glowColor = 'rgba(52, 211, 153, 0.15)';
+    bgClass = 'bg-zinc-950/40 border-emerald-500/20 hover:border-emerald-500/40';
   } else if (tsb >= -10) {
     label = 'Entrenamiento Óptimo';
     description = 'Asimilando cargas correctamente.';
     color = 'text-blue-400';
-    bgClass = 'bg-blue-500/10 border-blue-500/20';
+    strokeColor = '#60a5fa';
+    glowColor = 'rgba(96, 165, 250, 0.15)';
+    bgClass = 'bg-zinc-950/40 border-blue-500/20 hover:border-blue-500/40';
   } else if (tsb >= -25) {
     label = 'Sobrecarga Controlada';
     description = 'Semana de impacto. La fatiga es alta.';
     color = 'text-yellow-400';
-    bgClass = 'bg-yellow-500/10 border-yellow-500/20';
+    strokeColor = '#facc15';
+    glowColor = 'rgba(250, 204, 21, 0.15)';
+    bgClass = 'bg-zinc-950/40 border-yellow-500/20 hover:border-yellow-500/40';
   } else {
     label = 'Alerta de Fatiga';
     description = 'Riesgo de lesión. Considera descansar.';
     color = 'text-red-400';
-    bgClass = 'bg-red-500/10 border-red-500/20';
+    strokeColor = '#f87171';
+    glowColor = 'rgba(248, 113, 113, 0.15)';
+    bgClass = 'bg-zinc-950/40 border-red-500/20 hover:border-red-500/40';
   }
+
+  // Calcular porcentaje del dial (rango de -50 a +50)
+  const clampedTsb = Math.min(Math.max(tsb, -50), 50);
+  const percentage = (clampedTsb + 50) / 100;
+  
+  // Parámetros de la circunferencia del círculo (r = 38)
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius; // ~238.76
+  const strokeDashoffset = circumference * (1 - percentage);
 
   return (
     <Link href="/analytics" className="block group w-full h-full">
-      <div className={`p-4 sm:p-5 rounded-2xl border ${bgClass} shadow-lg transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full relative overflow-hidden`}>
-        <div className="flex items-start justify-between mb-2">
+      <div className={`p-5 sm:p-6 rounded-2xl border ${bgClass} shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full relative overflow-hidden backdrop-blur-md`}>
+        {/* Glow de fondo dinámico en base al color del estado */}
+        <div 
+          className="absolute inset-0 pointer-events-none transition-all duration-300 opacity-30 group-hover:opacity-40"
+          style={{
+            background: `radial-gradient(circle 80px at 50% 50%, ${glowColor}, transparent)`
+          }}
+        />
+
+        {/* Encabezado */}
+        <div className="flex items-start justify-between mb-4 relative z-10">
           <div className="flex items-center gap-2">
-            <Zap className={`w-5 h-5 ${color} fill-current/20`} />
-            <h3 className="text-sm font-bold text-white tracking-tight">Estado de Forma</h3>
+            <Zap className={`w-4 h-4 ${color} fill-current/10`} />
+            <h3 className="text-xs font-bold text-zinc-300 tracking-wider uppercase">Estado de Forma</h3>
           </div>
-          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <span className="text-[10px] text-zinc-400 font-medium">Ver PMC</span>
-            <ArrowRight className="w-3 h-3 text-zinc-400" />
+          <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+            <span className="text-[10px] text-zinc-400 font-medium">Ver análisis</span>
+            <ArrowRight className="w-3 h-3 text-zinc-400 transition-transform group-hover:translate-x-0.5" />
           </div>
         </div>
         
-        <div>
-          <div className="flex items-baseline gap-2 mb-0.5">
-            <span className={`text-xl font-black ${color}`}>{label}</span>
+        {/* Visualización Central - Dial SVG */}
+        <div className="flex-1 flex flex-col items-center justify-center py-4 relative z-10">
+          <div className="relative w-28 h-28 flex items-center justify-center">
+            {/* SVG del Dial */}
+            <svg className="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 100 100">
+              {/* Círculo de fondo (pista) */}
+              <circle
+                cx="50"
+                cy="50"
+                r={radius}
+                className="stroke-zinc-800/60"
+                strokeWidth="4"
+                fill="transparent"
+              />
+              {/* Círculo activo coloreado */}
+              <circle
+                cx="50"
+                cy="50"
+                r={radius}
+                stroke={strokeColor}
+                strokeWidth="5"
+                fill="transparent"
+                strokeDasharray={circumference}
+                strokeDashoffset={strokeDashoffset}
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+                style={{
+                  filter: `drop-shadow(0 0 4px ${strokeColor}40)`
+                }}
+              />
+            </svg>
+
+            {/* Texto interior del dial */}
+            <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
+              <span className="text-2xl font-black text-white leading-none tracking-tight">
+                {tsb > 0 ? `+${tsb}` : tsb}
+              </span>
+              <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold mt-0.5">
+                balance
+              </span>
+            </div>
           </div>
-          <p className="text-xs text-zinc-400 line-clamp-1">{description}</p>
+        </div>
+
+        {/* Textos inferiores del estado */}
+        <div className="relative z-10 mt-2">
+          <div className="flex items-baseline gap-2">
+            <span className={`text-base font-black tracking-tight ${color}`}>
+              {label}
+            </span>
+          </div>
+          <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">
+            {description}
+          </p>
         </div>
       </div>
     </Link>
