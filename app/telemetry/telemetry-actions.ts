@@ -261,3 +261,83 @@ export async function syncAllPendingWorkouts() {
     return { error: error.message || 'Error en la sincronización total' };
   }
 }
+
+export async function getRecentStravaActivities() {
+  try {
+    const supabase = await createClient();
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData?.user) return { error: 'No autorizado' };
+
+    const userId = authData.user.id;
+
+    // Find profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('strava_connected, strava_auth_tokens')
+      .eq('id', userId)
+      .single();
+
+    if (!profile || !profile.strava_connected) {
+      return { activities: [] };
+    }
+
+    const tokens = profile.strava_auth_tokens as any;
+    let accessToken = tokens?.access_token;
+
+    if (!accessToken) {
+      return { activities: [] };
+    }
+
+    // Refresh if needed
+    if (tokens?.expires_at && tokens.expires_at < Date.now()) {
+      const refreshResponse = await fetch('https://www.strava.com/oauth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: process.env.STRAVA_CLIENT_ID,
+          client_secret: process.env.STRAVA_CLIENT_SECRET,
+          refresh_token: tokens.refresh_token,
+          grant_type: 'refresh_token',
+        }),
+      });
+
+      if (refreshResponse.ok) {
+        const refreshData = await refreshResponse.json();
+        accessToken = refreshData.access_token;
+        
+        await supabase
+          .from('profiles')
+          .update({
+            strava_auth_tokens: {
+              access_token: refreshData.access_token,
+              refresh_token: refreshData.refresh_token || tokens.refresh_token,
+              expires_at: refreshData.expires_at * 1000,
+            }
+          } as any)
+          .eq('id', userId);
+      } else {
+        console.error('Failed to refresh Strava token:', await refreshResponse.text());
+        return { error: 'Error al refrescar credenciales de Strava' };
+      }
+    }
+
+    // Fetch last 10 activities
+    const activitiesResponse = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=10', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!activitiesResponse.ok) {
+      const errorText = await activitiesResponse.text();
+      console.error('Failed to fetch Strava activities:', errorText);
+      return { error: 'Error al obtener actividades desde Strava' };
+    }
+
+    const activities = await activitiesResponse.json();
+    return { activities };
+  } catch (error: any) {
+    console.error('Error in getRecentStravaActivities:', error);
+    return { error: error.message || 'Error inesperado' };
+  }
+}

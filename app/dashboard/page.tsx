@@ -11,6 +11,7 @@ import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -213,6 +214,13 @@ export default async function DashboardPage() {
             </ProCard>
           )}
         </section>
+
+        {/* Historial de Actividades Recientes de Strava (Sólo si está conectado) */}
+        {isConnected && (
+          <section className="space-y-4 pt-6 border-t border-zinc-900/50">
+            <ActivitiesFeed />
+          </section>
+        )}
 
       </main>
     </div>
