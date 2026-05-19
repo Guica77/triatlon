@@ -21,7 +21,7 @@ export function PerformanceChartCard({
   const [timeRange, setTimeRange] = React.useState<number>(30); // 30, 60 o 90 días
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
   const [activeHelp, setActiveHelp] = React.useState<'ctl' | 'atl' | 'tsb' | null>(null);
-  const [showVolume, setShowVolume] = React.useState(false);
+  const [showVolume, setShowVolume] = React.useState(true);
   const [visibleLines, setVisibleLines] = React.useState({
     ctl: true,
     atl: true,
@@ -35,6 +35,17 @@ export function PerformanceChartCard({
     setVisibleLines((prev) => ({
       ...prev,
       [lineKey]: !prev[lineKey],
+    }));
+  };
+
+  const toggleAllVolume = () => {
+    const nextShow = !showVolume;
+    setShowVolume(nextShow);
+    setVisibleLines((prev) => ({
+      ...prev,
+      swim: nextShow,
+      bike: nextShow,
+      run: nextShow,
     }));
   };
 
@@ -179,7 +190,7 @@ export function PerformanceChartCard({
         <div className="flex items-center gap-3">
           {/* Toggle de Volumen */}
           <button
-            onClick={() => setShowVolume(!showVolume)}
+            onClick={toggleAllVolume}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 ${
               showVolume
                 ? 'bg-cyan-950/30 border-cyan-500/40 text-cyan-400'
