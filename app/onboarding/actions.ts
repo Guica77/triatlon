@@ -108,6 +108,9 @@ export async function saveRaceGoalAndPlan(formData: {
   swim_weekly_hours?: number;
   bike_weekly_hours?: number;
   run_weekly_hours?: number;
+  target_swim_time?: string;
+  target_bike_time?: string;
+  target_run_time?: string;
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -119,7 +122,8 @@ export async function saveRaceGoalAndPlan(formData: {
   const { 
     target_race_name, target_race_date, target_race_distance, target_race_modality = 'triatlon',
     target_finish_time, baseline_training_hours, virtual_garage = [],
-    swim_weekly_hours = 2, bike_weekly_hours = 4, run_weekly_hours = 3
+    swim_weekly_hours = 2, bike_weekly_hours = 4, run_weekly_hours = 3,
+    target_swim_time, target_bike_time, target_run_time
   } = formData;
 
   // AI Estimation Fallback Logic for Physiological Metrics
@@ -170,7 +174,7 @@ export async function saveRaceGoalAndPlan(formData: {
     redirect('/dashboard');
   }
 
-  // 2. Upsert perfil con los objetivos de carrera, modalidad, plan activo, métricas fisiológicas, garaje virtual y horas semanales
+  // 2. Upsert perfil con los objetivos de carrera, modalidad, plan activo, métricas fisiológicas, garaje virtual, horas semanales y marcas de segmento
   const { error: profileError } = await supabase
     .from('profiles')
     .upsert({
@@ -191,6 +195,9 @@ export async function saveRaceGoalAndPlan(formData: {
       swim_weekly_hours,
       bike_weekly_hours,
       run_weekly_hours,
+      target_swim_time,
+      target_bike_time,
+      target_run_time,
       active_plan_id: selectedPlanId
     });
 

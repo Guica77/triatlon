@@ -63,6 +63,9 @@ export default async function SettingsPage() {
               targetRaceName={profile.target_race_name}
               targetRaceDate={profile.target_race_date}
               targetFinishTime={profile.target_finish_time}
+              targetSwimTime={profile.target_swim_time}
+              targetBikeTime={profile.target_bike_time}
+              targetRunTime={profile.target_run_time}
             />
           </div>
 

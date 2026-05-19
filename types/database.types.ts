@@ -167,6 +167,9 @@ export type Database = {
           swim_weekly_hours: number | null
           bike_weekly_hours: number | null
           run_weekly_hours: number | null
+          target_swim_time: string | null
+          target_bike_time: string | null
+          target_run_time: string | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -199,6 +202,9 @@ export type Database = {
           swim_weekly_hours?: number | null
           bike_weekly_hours?: number | null
           run_weekly_hours?: number | null
+          target_swim_time?: string | null
+          target_bike_time?: string | null
+          target_run_time?: string | null
         }
         Update: {
           active_plan_id?: string | null
@@ -231,6 +237,9 @@ export type Database = {
           swim_weekly_hours?: number | null
           bike_weekly_hours?: number | null
           run_weekly_hours?: number | null
+          target_swim_time?: string | null
+          target_bike_time?: string | null
+          target_run_time?: string | null
         }
         Relationships: [
           {

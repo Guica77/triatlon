@@ -40,6 +40,9 @@ export function HybridWizard() {
   const [swimHours, setSwimHours] = React.useState(2);
   const [bikeHours, setBikeHours] = React.useState(4);
   const [runHours, setRunHours] = React.useState(3);
+  const [targetSwimTime, setTargetSwimTime] = React.useState('');
+  const [targetBikeTime, setTargetBikeTime] = React.useState('');
+  const [targetRunTime, setTargetRunTime] = React.useState('');
 
   // Step 2: Physiological
   const [currentFtp, setCurrentFtp] = React.useState('');
@@ -99,7 +102,10 @@ export function HybridWizard() {
         virtual_garage: virtualGarage,
         swim_weekly_hours: swimHours,
         bike_weekly_hours: bikeHours,
-        run_weekly_hours: runHours
+        run_weekly_hours: runHours,
+        target_swim_time: targetSwimTime || undefined,
+        target_bike_time: targetBikeTime || undefined,
+        target_run_time: targetRunTime || undefined
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -129,7 +135,10 @@ export function HybridWizard() {
         virtual_garage: virtualGarage,
         swim_weekly_hours: swimHours,
         bike_weekly_hours: bikeHours,
-        run_weekly_hours: runHours
+        run_weekly_hours: runHours,
+        target_swim_time: targetSwimTime || undefined,
+        target_bike_time: targetBikeTime || undefined,
+        target_run_time: targetRunTime || undefined
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -224,8 +233,28 @@ export function HybridWizard() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Timer className="w-3.5 h-3.5" /> Tiempo Objetivo</label>
+                    <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Timer className="w-3.5 h-3.5" /> Tiempo Objetivo Total</label>
                     <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={targetFinishTime} onChange={e => setTargetFinishTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none" />
+                  </div>
+                </div>
+
+                <div className="border-t border-zinc-800/80 pt-6 space-y-4">
+                  <label className="text-xs font-medium text-zinc-400 block uppercase tracking-wider flex items-center gap-1.5">
+                    <Trophy className="w-4 h-4 text-cyan-400" /> Marcas / Tiempos Objetivo por Segmento (Opcional)
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Natación split</label>
+                      <input type="text" placeholder="Ej. 35 min o 0:35" value={targetSwimTime} onChange={e => setTargetSwimTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:border-cyan-500 outline-none" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Ciclismo split</label>
+                      <input type="text" placeholder="Ej. 2h 45m o 2:45" value={targetBikeTime} onChange={e => setTargetBikeTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:border-cyan-500 outline-none" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Carrera split</label>
+                      <input type="text" placeholder="Ej. 1h 35m o 1:35" value={targetRunTime} onChange={e => setTargetRunTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:border-cyan-500 outline-none" />
+                    </div>
                   </div>
                 </div>
 

@@ -10,9 +10,20 @@ interface RaceGoalCardProps {
   targetRaceName: string | null;
   targetRaceDate: string | null;
   targetFinishTime: string | null;
+  targetSwimTime?: string | null;
+  targetBikeTime?: string | null;
+  targetRunTime?: string | null;
 }
 
-export function RaceGoalCard({ planName, targetRaceName, targetRaceDate, targetFinishTime }: RaceGoalCardProps) {
+export function RaceGoalCard({ 
+  planName, 
+  targetRaceName, 
+  targetRaceDate, 
+  targetFinishTime,
+  targetSwimTime,
+  targetBikeTime,
+  targetRunTime
+}: RaceGoalCardProps) {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
@@ -40,14 +51,34 @@ export function RaceGoalCard({ planName, targetRaceName, targetRaceDate, targetF
                 <p>{targetRaceDate ? new Date(targetRaceDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Fecha por definir'}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-zinc-300 text-sm font-medium bg-zinc-900/50 p-2.5 rounded-lg border border-zinc-800/80">
-              <div className="w-8 h-8 rounded-md bg-cyan-500/10 flex items-center justify-center shrink-0">
-                <Target className="w-4 h-4 text-cyan-400" />
+            
+            <div className="flex flex-col gap-2 bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/80">
+              <div className="flex items-center gap-2 text-zinc-300 text-sm font-medium">
+                <div className="w-8 h-8 rounded-md bg-cyan-500/10 flex items-center justify-center shrink-0">
+                  <Target className="w-4 h-4 text-cyan-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Meta o Marca Total</p>
+                  <p className="text-cyan-100 font-bold">{targetFinishTime || 'Terminar / Disfrutar'}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px] text-zinc-500 uppercase tracking-wider">Meta o Marca</p>
-                <p className="text-cyan-100 font-bold">{targetFinishTime || 'Terminar / Disfrutar'}</p>
-              </div>
+              
+              {(targetSwimTime || targetBikeTime || targetRunTime) && (
+                <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-zinc-800/50 text-center">
+                  <div className="bg-zinc-950/40 p-1.5 rounded border border-zinc-800/30">
+                    <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Natación</span>
+                    <span className="text-xs text-sky-400 font-bold block mt-0.5">{targetSwimTime || '--'}</span>
+                  </div>
+                  <div className="bg-zinc-950/40 p-1.5 rounded border border-zinc-800/30">
+                    <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Ciclismo</span>
+                    <span className="text-xs text-amber-400 font-bold block mt-0.5">{targetBikeTime || '--'}</span>
+                  </div>
+                  <div className="bg-zinc-950/40 p-1.5 rounded border border-zinc-800/30">
+                    <span className="text-[9px] text-zinc-500 uppercase font-semibold block">Carrera</span>
+                    <span className="text-xs text-rose-400 font-bold block mt-0.5">{targetRunTime || '--'}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
