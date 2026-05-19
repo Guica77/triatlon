@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { ProCard } from '@/components/ui/pro-card';
+import { HelpCircle } from 'lucide-react';
 
 interface WeeklyTssCardProps {
   actualTss: number;
@@ -9,6 +10,8 @@ interface WeeklyTssCardProps {
 }
 
 export function WeeklyTssCard({ actualTss, targetTss }: WeeklyTssCardProps) {
+  const [showHelp, setShowHelp] = React.useState(false);
+
   const percent = React.useMemo(() => {
     if (!targetTss) return 0;
     return Math.round((actualTss / targetTss) * 100);
@@ -37,16 +40,47 @@ export function WeeklyTssCard({ actualTss, targetTss }: WeeklyTssCardProps) {
   }, [percent]);
 
   return (
-    <ProCard className="flex flex-col justify-between space-y-6 md:col-span-1">
+    <ProCard className="relative flex flex-col justify-between space-y-6 md:col-span-1 overflow-hidden">
+      {/* Help Overlay */}
+      {showHelp && (
+        <div className="absolute inset-0 bg-zinc-950/95 border border-cyan-500/20 rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+          <div className="space-y-2">
+            <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-widest">
+              ¿Qué es el Progreso de TSS?
+            </h4>
+            <p className="text-[11px] text-zinc-300 leading-relaxed">
+              El **TSS (Training Stress Score)** cuantifica el esfuerzo fisiológico de tus entrenamientos (duración x intensidad).
+              <br /><br />
+              Este panel suma tu TSS de lunes a domingo. Te ayuda a controlar que no acumules carga de golpe (evitando lesiones) y que cumplas con la dosis semanal óptima diseñada por el plan.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowHelp(false)}
+            className="text-[10px] font-bold text-zinc-400 hover:text-white uppercase tracking-wider text-right w-full pt-4"
+          >
+            Entendido
+          </button>
+        </div>
+      )}
+
       {/* Encabezado */}
-      <div className="flex justify-between items-start border-b border-[var(--color-border)] pb-6">
+      <div className="flex justify-between items-start border-b border-[var(--color-border)] pb-6 relative z-10">
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
             Carga Semanal Acumulada
           </span>
-          <h3 className="text-2xl font-light text-zinc-50 mt-1">
-            Progreso de TSS
-          </h3>
+          <div className="flex items-center gap-2 mt-1">
+            <h3 className="text-2xl font-light text-zinc-50">
+              Progreso de TSS
+            </h3>
+            <button
+              onClick={() => setShowHelp(true)}
+              className="text-zinc-500 hover:text-cyan-400 transition-colors p-0.5"
+              title="¿Qué es esto?"
+            >
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          </div>
         </div>
         <span
           className={`text-xs font-medium px-3 py-1 rounded-full border ${statusInfo.color}`}
