@@ -44,15 +44,31 @@ export function PerformanceChartCard({
     return max * 1.2; // 20% de margen superior
   }, [filteredData]);
 
+  // Encontrar máximos de distancia para calcular coordenadas del hover y curvas
+  const { maxSwim, maxBike, maxRun } = React.useMemo(() => {
+    let swim = 1000;
+    let bike = 10;
+    let run = 5;
+    filteredData.forEach((d) => {
+      if (d.swimDistance && d.swimDistance > swim) swim = d.swimDistance;
+      if (d.bikeDistance && d.bikeDistance > bike) bike = d.bikeDistance;
+      if (d.runDistance && d.runDistance > run) run = d.runDistance;
+    });
+    return { maxSwim: swim, maxBike: bike, maxRun: run };
+  }, [filteredData]);
+
   // Generar puntos SVG para las líneas
-  const { ctlPoints, atlPoints, tsbPoints } = React.useMemo(() => {
-    if (filteredData.length === 0) return { ctlPoints: '', atlPoints: '', tsbPoints: '' };
+  const { ctlPoints, atlPoints, tsbPoints, swimPoints, bikePoints, runPoints } = React.useMemo(() => {
+    if (filteredData.length === 0) return { ctlPoints: '', atlPoints: '', tsbPoints: '', swimPoints: '', bikePoints: '', runPoints: '' };
 
     const step = width / (filteredData.length - 1 || 1);
 
     let ctlStr = '';
     let atlStr = '';
     let tsbStr = '';
+    let swimStr = '';
+    let bikeStr = '';
+    let runStr = '';
 
     filteredData.forEach((d, index) => {
       const x = index * step;
@@ -60,13 +76,28 @@ export function PerformanceChartCard({
       const yAtl = height - (d.atl / maxVal) * height;
       const yTsb = height * 0.7 - (d.tsb / maxVal) * (height * 0.5);
 
+      const ySwim = height - ((d.swimDistance || 0) / maxSwim) * (height * 0.4);
+      const yBike = height - ((d.bikeDistance || 0) / maxBike) * (height * 0.4);
+      const yRun = height - ((d.runDistance || 0) / maxRun) * (height * 0.4);
+
       ctlStr += `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${yCtl.toFixed(1)} `;
       atlStr += `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${yAtl.toFixed(1)} `;
       tsbStr += `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${yTsb.toFixed(1)} `;
+
+      swimStr += `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${ySwim.toFixed(1)} `;
+      bikeStr += `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${yBike.toFixed(1)} `;
+      runStr += `${index === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${yRun.toFixed(1)} `;
     });
 
-    return { ctlPoints: ctlStr, atlPoints: atlStr, tsbPoints: tsbStr };
-  }, [filteredData, maxVal]);
+    return { 
+      ctlPoints: ctlStr, 
+      atlPoints: atlStr, 
+      tsbPoints: tsbStr, 
+      swimPoints: swimStr, 
+      bikePoints: bikeStr, 
+      runPoints: runStr 
+    };
+  }, [filteredData, maxVal, maxSwim, maxBike, maxRun]);
 
   // Manejo de Interacción del Cursor
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -92,6 +123,10 @@ export function PerformanceChartCard({
   const hoverCtlY = activePoint ? height - (activePoint.ctl / maxVal) * height : 0;
   const hoverAtlY = activePoint ? height - (activePoint.atl / maxVal) * height : 0;
   const hoverTsbY = activePoint ? height * 0.7 - (activePoint.tsb / maxVal) * (height * 0.5) : 0;
+
+  const hoverSwimY = activePoint ? height - ((activePoint.swimDistance || 0) / maxSwim) * (height * 0.4) : 0;
+  const hoverBikeY = activePoint ? height - ((activePoint.bikeDistance || 0) / maxBike) * (height * 0.4) : 0;
+  const hoverRunY = activePoint ? height - ((activePoint.runDistance || 0) / maxRun) * (height * 0.4) : 0;
 
   // Valores a mostrar (Dinámicos si el cursor está encima)
   const displayCtl = activePoint ? activePoint.ctl : currentCtl;
@@ -345,64 +380,43 @@ export function PerformanceChartCard({
             className="w-full h-full overflow-visible"
             preserveAspectRatio="none"
           >
-            {/* Barras de volumen si showVolume es true */}
-            {showVolume && filteredData.map((d, index) => {
-              const x = index * step;
-              const bars = [];
-              
-              // Ciclismo: barra azul. Escalamos hasta 100km -> 50px de alto
-              if (d.bikeDistance && d.bikeDistance > 0) {
-                const h = Math.min((d.bikeDistance / 100) * 50, 50);
-                bars.push(
-                  <rect
-                    key={`bike-${index}`}
-                    x={x - 2}
-                    y={height - h}
-                    width={4}
-                    height={h}
-                    fill="#38bdf8"
-                    opacity="0.35"
-                    className="transition-all"
-                  />
-                );
-              }
+            {/* Líneas de volumen si showVolume es true */}
+            {showVolume && (
+              <>
+                {/* Natación: morado */}
+                <path
+                  d={swimPoints}
+                  fill="none"
+                  stroke="#c084fc"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="transition-all duration-500 opacity-60"
+                />
 
-              // Carrera: barra verde. Escalamos hasta 25km -> 50px de alto
-              if (d.runDistance && d.runDistance > 0) {
-                const h = Math.min((d.runDistance / 25) * 50, 50);
-                bars.push(
-                  <rect
-                    key={`run-${index}`}
-                    x={x - 2}
-                    y={height - h}
-                    width={4}
-                    height={h}
-                    fill="#34d399"
-                    opacity="0.35"
-                    className="transition-all"
-                  />
-                );
-              }
+                {/* Ciclismo: azul celeste */}
+                <path
+                  d={bikePoints}
+                  fill="none"
+                  stroke="#38bdf8"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="transition-all duration-500 opacity-60"
+                />
 
-              // Natación: barra morada. Escalamos hasta 4000m -> 50px de alto
-              if (d.swimDistance && d.swimDistance > 0) {
-                const h = Math.min((d.swimDistance / 4000) * 50, 50);
-                bars.push(
-                  <rect
-                    key={`swim-${index}`}
-                    x={x - 2}
-                    y={height - h}
-                    width={4}
-                    height={h}
-                    fill="#c084fc"
-                    opacity="0.35"
-                    className="transition-all"
-                  />
-                );
-              }
-
-              return bars;
-            })}
+                {/* Carrera: verde esmeralda */}
+                <path
+                  d={runPoints}
+                  fill="none"
+                  stroke="#34d399"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="transition-all duration-500 opacity-60"
+                />
+              </>
+            )}
 
             {/* Curva de Fitness (Azul Celeste) */}
             <path
@@ -452,10 +466,25 @@ export function PerformanceChartCard({
                   pointerEvents="none"
                 />
                 
-                {/* Nodos resaltados */}
+                {/* Nodos resaltados principales */}
                 <circle cx={hoverX} cy={hoverCtlY} r="5" fill="#22d3ee" stroke="#09090b" strokeWidth="2.5" pointerEvents="none" />
                 <circle cx={hoverX} cy={hoverAtlY} r="5" fill="#f43f5e" stroke="#09090b" strokeWidth="2.5" pointerEvents="none" />
                 <circle cx={hoverX} cy={hoverTsbY} r="5" fill="#f59e0b" stroke="#09090b" strokeWidth="2.5" pointerEvents="none" />
+
+                {/* Nodos de volumen resaltados si showVolume está activo */}
+                {showVolume && (
+                  <>
+                    {activePoint.swimDistance > 0 && (
+                      <circle cx={hoverX} cy={hoverSwimY} r="4" fill="#c084fc" stroke="#09090b" strokeWidth="1.5" pointerEvents="none" />
+                    )}
+                    {activePoint.bikeDistance > 0 && (
+                      <circle cx={hoverX} cy={hoverBikeY} r="4" fill="#38bdf8" stroke="#09090b" strokeWidth="1.5" pointerEvents="none" />
+                    )}
+                    {activePoint.runDistance > 0 && (
+                      <circle cx={hoverX} cy={hoverRunY} r="4" fill="#34d399" stroke="#09090b" strokeWidth="1.5" pointerEvents="none" />
+                    )}
+                  </>
+                )}
               </>
             )}
           </svg>
