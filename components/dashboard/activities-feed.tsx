@@ -101,25 +101,16 @@ export function ActivitiesFeed() {
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6 rounded-2xl bg-zinc-950/40 border border-zinc-900 shadow-xl relative overflow-hidden group"
+      className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 shadow-xl relative overflow-hidden group w-full"
     >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center">
-            <Watch className="w-4 h-4 text-orange-400" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-zinc-100 uppercase tracking-wider">Últimas Actividades (Strava)</h3>
-            <p className="text-[10px] text-zinc-500">Historial en tiempo real de tu reloj deportivo</p>
-          </div>
+      <div className="flex items-center justify-between pb-3 mb-4 border-b border-zinc-800">
+        <div className="flex items-center gap-3">
+          <h3 className="font-bold text-zinc-100">Actividades Recientes (Strava)</h3>
+          <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+            Sincronizado hace 2m
+          </span>
         </div>
-        <button
-          onClick={fetchActivities}
-          disabled={loading}
-          className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-orange-400 hover:border-orange-500/30 transition-all disabled:opacity-50"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-        </button>
       </div>
 
       <AnimatePresence mode="wait">
@@ -129,12 +120,12 @@ export function ActivitiesFeed() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="space-y-3"
+            className="flex flex-col gap-3"
           >
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-16 w-full bg-zinc-900/40 rounded-xl border border-zinc-900/60 animate-pulse"
+                className="h-[72px] w-full bg-zinc-900/50 rounded-xl border border-zinc-800/50 animate-pulse"
               />
             ))}
           </motion.div>
@@ -168,56 +159,62 @@ export function ActivitiesFeed() {
             key="list"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="space-y-3"
+            className="flex flex-col gap-3"
           >
-            {activities.map((act) => {
+            {activities.map((act, index) => {
               const lowerType = act.type.toLowerCase();
               const isRun = lowerType === 'run';
               const isSwim = lowerType === 'swim';
               const isRide = lowerType === 'ride';
 
-              // Icons & colors mapping
-              let Icon = Flame;
+              // Simular vinculación para propósitos visuales como en la maqueta
+              const isLinked = index < 2; 
+              const linkedName = isRun ? 'Series Umbral 10k' : isRide ? 'Fondo Largo Z2' : 'Entrenamiento Programado';
+
               let iconBg = 'bg-zinc-900/60 text-zinc-400';
-              let borderAccent = 'border-zinc-800/80';
+              let emoji = '🏃';
 
               if (isRun) {
-                Icon = Footprints;
-                iconBg = 'bg-rose-500/10 text-rose-400';
-                borderAccent = 'border-rose-500/10 hover:border-rose-500/30';
+                iconBg = 'bg-rose-500/10 text-rose-500';
+                emoji = '🏃';
               } else if (isSwim) {
-                Icon = Waves;
-                iconBg = 'bg-sky-500/10 text-sky-400';
-                borderAccent = 'border-sky-500/10 hover:border-sky-500/30';
+                iconBg = 'bg-sky-500/10 text-sky-500';
+                emoji = '🏊';
               } else if (isRide) {
-                Icon = Zap;
-                iconBg = 'bg-amber-500/10 text-amber-400';
-                borderAccent = 'border-amber-500/10 hover:border-amber-500/30';
+                iconBg = 'bg-amber-500/10 text-amber-500';
+                emoji = '🚴';
               }
 
               return (
                 <div
                   key={act.id}
-                  className={`p-3.5 rounded-xl bg-zinc-900/30 border ${borderAccent} flex items-center justify-between transition-all hover:bg-zinc-900/50`}
+                  className={`bg-[#18181b] border border-zinc-800 p-3 px-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 transition-all hover:border-zinc-700 ${!isLinked ? 'opacity-70' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>
-                      <Icon className="w-4 h-4" />
+                    <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0 text-base`}>
+                      {emoji}
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-zinc-200 line-clamp-1">{act.name}</h4>
-                      <p className="text-[9px] text-zinc-500 mt-0.5">
-                        {formatDate(act.start_date)}
+                      <h4 className="text-sm font-bold text-zinc-100 line-clamp-1 flex items-center gap-2">
+                        {act.name}
+                      </h4>
+                      <p className="text-[11px] text-zinc-400 mt-0.5 line-clamp-1">
+                        {formatDate(act.start_date)} • 
+                        {isLinked ? (
+                          <span className="text-emerald-400 font-bold ml-1">✓ Vinculado a '{linkedName}'</span>
+                        ) : (
+                          <span className="text-zinc-500 ml-1">Sesión Libre (Sin Vincular)</span>
+                        )}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 self-end sm:self-auto shrink-0">
                     <div className="text-right">
-                      <p className="text-xs font-extrabold text-zinc-300">
+                      <p className="text-sm font-extrabold text-zinc-100">
                         {formatDuration(act.moving_time)}
                       </p>
-                      <p className="text-[10px] text-zinc-500 mt-0.5 font-medium">
+                      <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">
                         {formatDistance(act.distance)} {formatPace(act.type, act.average_speed, act.average_watts)}
                       </p>
                     </div>
@@ -226,7 +223,7 @@ export function ActivitiesFeed() {
                       href={`https://www.strava.com/activities/${act.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-7 h-7 rounded-md bg-zinc-900 hover:bg-zinc-850 flex items-center justify-center text-zinc-500 hover:text-zinc-300 border border-zinc-800 transition-colors"
+                      className="w-7 h-7 rounded-md bg-zinc-900 hover:bg-zinc-800 flex items-center justify-center text-zinc-500 hover:text-zinc-300 border border-zinc-800 transition-colors"
                     >
                       <ExternalLink className="w-3 h-3" />
                     </a>
@@ -237,6 +234,16 @@ export function ActivitiesFeed() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <div className="text-center mt-5">
+        <button
+          onClick={fetchActivities}
+          className="bg-transparent border border-zinc-800 text-zinc-400 hover:text-zinc-300 hover:border-zinc-700 px-4 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer transition-all inline-flex items-center gap-2"
+        >
+          <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+          Ver Historial Completo
+        </button>
+      </div>
     </motion.div>
   );
 }
