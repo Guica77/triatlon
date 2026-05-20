@@ -189,51 +189,61 @@ export default async function DashboardPage() {
 
         {/* Barra de Navegación Semanal */}
         <section className="space-y-3">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap gap-2">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Semana Actual</h2>
-            <span className="text-xs text-zinc-400">{completedCount} de {totalCount} completados ({progressPercent}%)</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-zinc-400">{completedCount} de {totalCount} completados ({progressPercent}%)</span>
+              <a 
+                href="/api/workouts/export-calendar" 
+                download="calendario_semanal.ics"
+                className="px-3 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-zinc-100 text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                title="Descargar toda la semana en tu Apple Calendar, Google Calendar o Garmin Calendar"
+              >
+                <Calendar className="w-3.5 h-3.5 text-orange-400" />
+                <span>Exportar Semana (.ICS)</span>
+              </a>
+            </div>
           </div>
           <WeeklyNav workouts={(workouts as any) || []} />
         </section>
 
-        {/* Sección Principal: Hoy */}
-        <section className="space-y-4">
+        {/* Plan Semanal y Sesiones */}
+        <section className="space-y-4 pt-2">
           <div className="flex justify-between items-center">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
-              <Flame className="w-4 h-4 text-amber-500" /> Entrenamientos de Hoy
+              <Flame className="w-4 h-4 text-amber-500" /> Entrenamientos y Sesiones
             </h2>
-            <span className="text-xs text-zinc-400">{todayStr}</span>
+            <span className="text-xs text-zinc-400">Lun - Dom</span>
           </div>
 
-          {todayWorkouts.length > 0 ? (
-            todayWorkouts.map(w => (
-              <DailyWorkoutCard key={w.id} workout={w as any} initialIsConnected={isConnected} virtualGarage={profile.virtual_garage || []} />
-            ))
-          ) : (
-            <ProCard className="text-center py-12 space-y-3 bg-zinc-900/30">
-              <Activity className="w-8 h-8 text-zinc-600 mx-auto" />
-              <p className="text-sm font-medium text-zinc-300">No hay sesiones programadas para hoy</p>
-              <p className="text-xs text-zinc-500">Aprovecha para estirar o enfocar en tu nutrición y descanso.</p>
-            </ProCard>
-          )}
-        </section>
-
-        {/* Sección Secundaria: Mañana */}
-        <section className="space-y-4 pt-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Próxima Sesión (Mañana)</h2>
-            <span className="text-xs text-zinc-400">{tomorrowStr}</span>
+          <div className="space-y-4">
+            {workouts && workouts.length > 0 ? (
+              workouts.map(w => {
+                const isToday = w.scheduled_date === todayStr;
+                const isTomorrow = w.scheduled_date === tomorrowStr;
+                return (
+                  <div key={w.id} className={isToday ? "ring-2 ring-cyan-500/30 rounded-2xl p-0.5" : ""}>
+                    {isToday && (
+                      <div className="px-4 py-1.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-cyan-500/20">
+                        Hoy
+                      </div>
+                    )}
+                    {isTomorrow && (
+                      <div className="px-4 py-1.5 bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-zinc-700/30">
+                        Mañana
+                      </div>
+                    )}
+                    <DailyWorkoutCard workout={w as any} initialIsConnected={isConnected} virtualGarage={profile.virtual_garage || []} />
+                  </div>
+                );
+              })
+            ) : (
+              <ProCard className="text-center py-12 space-y-3 bg-zinc-900/30">
+                <Activity className="w-8 h-8 text-zinc-600 mx-auto" />
+                <p className="text-sm font-medium text-zinc-300">No hay sesiones para esta semana</p>
+              </ProCard>
+            )}
           </div>
-
-          {tomorrowWorkouts.length > 0 ? (
-            tomorrowWorkouts.map(w => (
-              <DailyWorkoutCard key={w.id} workout={w as any} initialIsConnected={isConnected} virtualGarage={profile.virtual_garage || []} />
-            ))
-          ) : (
-            <ProCard className="text-center py-8 bg-zinc-900/20 border-zinc-800/60">
-              <p className="text-xs text-zinc-500">Día de descanso programado para mañana</p>
-            </ProCard>
-          )}
         </section>
 
         {/* Historial de Actividades Recientes de Strava (Sólo si está conectado) */}
