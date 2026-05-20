@@ -30,23 +30,25 @@ const stressDescriptions: Record<number, { title: string; desc: string }> = {
 }
 
 export function BiometricsModal({ isOpen, onClose, initialData, onSave }: BiometricsModalProps) {
-  const [sleepHours, setSleepHours] = React.useState(initialData?.sleep_hours?.toString() || '7.5')
-  const [hrv, setHrv] = React.useState(initialData?.hrv?.toString() || '65')
-  const [rhr, setRhr] = React.useState(initialData?.rhr?.toString() || '52')
-  const [weight, setWeight] = React.useState(initialData?.weight?.toString() || '72.0')
-  const [fatigueRating, setFatigueRating] = React.useState(initialData?.fatigue_rating || 2)
-  const [stressLevel, setStressLevel] = React.useState(initialData?.stress_level || 2)
+  const [sleepHours, setSleepHours] = React.useState(initialData?.sleep_hours !== null && initialData?.sleep_hours !== undefined ? initialData.sleep_hours.toString() : '')
+  const [hrv, setHrv] = React.useState(initialData?.hrv !== null && initialData?.hrv !== undefined ? initialData.hrv.toString() : '')
+  const [rhr, setRhr] = React.useState(initialData?.rhr !== null && initialData?.rhr !== undefined ? initialData.rhr.toString() : '')
+  const [weight, setWeight] = React.useState(initialData?.weight !== null && initialData?.weight !== undefined ? initialData.weight.toString() : '')
+  const [fatigueRating, setFatigueRating] = React.useState<number | null>(initialData?.fatigue_rating ?? null)
+  const [stressLevel, setStressLevel] = React.useState<number | null>(initialData?.stress_level ?? null)
   const [loading, setLoading] = React.useState(false)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
   // Sincronizar estado si cambia initialData
   React.useEffect(() => {
     if (initialData) {
-      setSleepHours(initialData.sleep_hours?.toString() || '7.5')
-      setHrv(initialData.hrv?.toString() || '65')
-      setRhr(initialData.rhr?.toString() || '52')
-      setWeight(initialData.weight?.toString() || '72.0')
-      setFatigueRating(initialData.fatigue_rating || 2)
-      setStressLevel(initialData.stress_level || 2)
+      setSleepHours(initialData.sleep_hours !== null && initialData.sleep_hours !== undefined ? initialData.sleep_hours.toString() : '')
+      setHrv(initialData.hrv !== null && initialData.hrv !== undefined ? initialData.hrv.toString() : '')
+      setRhr(initialData.rhr !== null && initialData.rhr !== undefined ? initialData.rhr.toString() : '')
+      setWeight(initialData.weight !== null && initialData.weight !== undefined ? initialData.weight.toString() : '')
+      setFatigueRating(initialData.fatigue_rating)
+      setStressLevel(initialData.stress_level)
+      setErrorMessage(null)
     }
   }, [initialData])
 
@@ -55,27 +57,51 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (loading) return
+
+    // Validar métricas obligatorias
+    if (!sleepHours || !hrv || !rhr || !weight) {
+      setErrorMessage('Por favor, rellena todas las métricas objetivas (Sueño, HRV, RHR y Peso).')
+      return
+    }
+
+    if (fatigueRating === null || fatigueRating === 0) {
+      setErrorMessage('Por favor, selecciona tu nivel de Fatiga Muscular.')
+      return
+    }
+
+    if (stressLevel === null || stressLevel === 0) {
+      setErrorMessage('Por favor, selecciona tu nivel de Estrés/Carga Mental.')
+      return
+    }
+
     setLoading(true)
+    setErrorMessage(null)
 
     try {
       await onSave({
-        sleep_hours: parseFloat(sleepHours) || 7.5,
-        hrv: parseInt(hrv, 10) || 65,
-        rhr: parseInt(rhr, 10) || 52,
-        weight: parseFloat(weight) || 72.0,
+        sleep_hours: parseFloat(sleepHours),
+        hrv: parseInt(hrv, 10),
+        rhr: parseInt(rhr, 10),
+        weight: parseFloat(weight),
         fatigue_rating: fatigueRating,
         stress_level: stressLevel,
       })
       onClose()
     } catch (err) {
       console.error(err)
+      setErrorMessage('Ocurrió un error al guardar la biometría.')
     } finally {
       setLoading(false)
     }
   }
 
-  const currentFatigue = fatigueDescriptions[fatigueRating] || fatigueDescriptions[2]
-  const currentStress = stressDescriptions[stressLevel] || stressDescriptions[2]
+  const currentFatigue = fatigueRating !== null && fatigueRating > 0
+    ? fatigueDescriptions[fatigueRating]
+    : { title: 'Sin seleccionar', desc: 'Por favor, selecciona tu nivel de fatiga para hoy (1-5).' }
+
+  const currentStress = stressLevel !== null && stressLevel > 0
+    ? stressDescriptions[stressLevel]
+    : { title: 'Sin seleccionar', desc: 'Por favor, selecciona tu nivel de carga mental para hoy (1-5).' }
 
   return (
     <AnimatePresence>
@@ -94,7 +120,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
           >
             <X className="w-5 h-5" />
           </button>
-
+ 
           <div className="mb-6">
             <h2 className="text-2xl font-light tracking-tight text-zinc-50">Diario Biométrico del Atleta</h2>
             <p className="text-sm text-zinc-400 mt-1">
@@ -134,6 +160,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                     max="24"
                     value={sleepHours}
                     onChange={(e) => setSleepHours(e.target.value)}
+                    placeholder="7.5"
                     className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-lg font-medium text-zinc-100 text-center focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
@@ -158,6 +185,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                     max="250"
                     value={hrv}
                     onChange={(e) => setHrv(e.target.value)}
+                    placeholder="65"
                     className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-lg font-medium text-zinc-100 text-center focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
@@ -182,6 +210,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                     max="150"
                     value={rhr}
                     onChange={(e) => setRhr(e.target.value)}
+                    placeholder="52"
                     className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-lg font-medium text-zinc-100 text-center focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
@@ -198,6 +227,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                   max="200"
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
+                  placeholder="72.0"
                   className="w-28 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-100 text-right focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
@@ -218,7 +248,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                     Fatiga y Dolor Muscular (RPE)
                   </span>
                   <span className="text-xs font-semibold px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    Nivel {fatigueRating} / 5
+                    Nivel {fatigueRating !== null && fatigueRating > 0 ? fatigueRating : 'Pendiente'} / 5
                   </span>
                 </div>
 
@@ -254,7 +284,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                     Nivel de Estrés Mental / Laboral
                   </span>
                   <span className="text-xs font-semibold px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    Nivel {stressLevel} / 5
+                    Nivel {stressLevel !== null && stressLevel > 0 ? stressLevel : 'Pendiente'} / 5
                   </span>
                 </div>
 
@@ -284,11 +314,17 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
 
             </div>
 
+            {errorMessage && (
+              <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-450 text-xs font-medium text-center">
+                {errorMessage}
+              </div>
+            )}
+
             {/* Botón Guardar */}
             <AnimatedButton
               type="submit"
               variant="primary"
-              className="w-full justify-center py-6 text-base font-medium"
+              className="w-full justify-center py-6 text-base font-medium hover:shadow-emerald-500/10"
               disabled={loading}
             >
               {loading ? 'Guardando y Recalculando...' : 'Guardar Biometría y Recalcular Readiness'}

@@ -15,19 +15,21 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
   const [biometrics, setBiometrics] = React.useState<DailyBiometrics>(initialBiometrics)
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [statusLabels, setStatusLabels] = React.useState({
-    sleepStatus: 'Óptimo',
-    hrvStatus: '+12% vs Media',
-    rhrStatus: 'Óptimo',
+    sleepStatus: 'Pendiente',
+    hrvStatus: 'Pendiente',
+    rhrStatus: 'Pendiente',
   })
 
-  // Calcular etiquetas de estado iniciales
+  const isRegistered = biometrics.readiness_score !== null
+
+  // Calcular etiquetas de estado cuando las métricas son reales
   React.useEffect(() => {
     async function loadStatus() {
-      if (biometrics) {
+      if (biometrics && biometrics.readiness_score !== null && biometrics.hrv !== null) {
         const res = await calculateReadiness(
-          biometrics.hrv || 68,
-          biometrics.rhr || 48,
-          biometrics.sleep_hours || 7.8,
+          biometrics.hrv,
+          biometrics.rhr || 52,
+          biometrics.sleep_hours || 7.5,
           biometrics.fatigue_rating || 2,
           biometrics.stress_level || 2
         )
@@ -37,20 +39,46 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
             hrvStatus: res.data.hrvStatus,
             rhrStatus: res.data.rhrStatus,
           })
-          setBiometrics(prev => ({ ...prev, readiness_score: res.data.readiness_score }))
+          if (biometrics.readiness_score !== res.data.readiness_score) {
+            setBiometrics(prev => ({ ...prev, readiness_score: res.data.readiness_score }))
+          }
         }
+      } else {
+        setStatusLabels({
+          sleepStatus: 'Pendiente',
+          hrvStatus: 'Pendiente',
+          rhrStatus: 'Pendiente',
+        })
       }
     }
     loadStatus()
-  }, [biometrics?.hrv, biometrics?.rhr, biometrics?.sleep_hours, biometrics?.fatigue_rating, biometrics?.stress_level])
+  }, [biometrics?.hrv, biometrics?.rhr, biometrics?.sleep_hours, biometrics?.fatigue_rating, biometrics?.stress_level, biometrics?.readiness_score])
 
   if (!biometrics) return null
 
   async function handleSaveBiometrics(formData: Partial<DailyBiometrics>) {
-    // Actualizar estado local optimista
+    // Calcular optimísticamente a nivel local de forma instantánea
+    const hrv = formData.hrv ?? 65
+    const rhr = formData.rhr ?? 52
+    const sleep_hours = formData.sleep_hours ?? 7.5
+    const fatigue_rating = formData.fatigue_rating ?? 2
+    const stress_level = formData.stress_level ?? 2
+
+    const res = await calculateReadiness(hrv, rhr, sleep_hours, fatigue_rating, stress_level)
+    const readiness_score = res.data?.readiness_score ?? 85
+
+    if (res?.data) {
+      setStatusLabels({
+        sleepStatus: res.data.sleepStatus,
+        hrvStatus: res.data.hrvStatus,
+        rhrStatus: res.data.rhrStatus,
+      })
+    }
+
     const updated: DailyBiometrics = {
       ...biometrics,
       ...formData,
+      readiness_score,
     }
     setBiometrics(updated)
 
@@ -62,13 +90,17 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
   const isOptimal = score >= 80
   const isModerate = score >= 60 && score < 80
 
-  const ringColor = isOptimal
+  const ringColor = !isRegistered
+    ? 'border-dashed border-zinc-700 text-zinc-500 bg-zinc-950/20'
+    : isOptimal
     ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
     : isModerate
     ? 'border-amber-500 text-amber-400 bg-amber-500/10'
     : 'border-rose-500 text-rose-400 bg-rose-500/10'
 
-  const statusText = isOptimal
+  const statusText = !isRegistered
+    ? 'Completa tu registro matutino para calcular tu Readiness y recibir recomendaciones.'
+    : isOptimal
     ? 'Cuerpo recuperado y listo para alta intensidad'
     : isModerate
     ? 'Recuperación moderada. Prioriza rodajes aeróbicos'
@@ -87,27 +119,41 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
             <span className="text-xs font-semibold tracking-widest text-zinc-400 uppercase">Biometría y Preparación</span>
           </div>
           <AnimatedButton
-            variant="secondary"
+            variant={isRegistered ? 'secondary' : 'primary'}
             size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs py-1.5 px-3 border-zinc-700 hover:border-zinc-600"
+            className={`flex items-center gap-1.5 text-xs py-1.5 px-3 transition-all duration-300 ${
+              !isRegistered
+                ? 'bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-bold border-transparent shadow-lg shadow-emerald-500/10'
+                : 'border-zinc-700 hover:border-zinc-600'
+            }`}
           >
-            <Settings className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Ajustar Diario</span>
+            <Settings className={`w-3.5 h-3.5 ${!isRegistered ? 'text-zinc-950' : 'text-zinc-400'}`} />
+            <span>{isRegistered ? 'Ajustar Diario' : 'Registrar Hoy'}</span>
           </AnimatedButton>
         </div>
 
         {/* Sección Principal: Anillo y Estado */}
         <div className="flex flex-col md:flex-row items-center gap-6 relative z-10 py-2">
-          <div className={`w-24 h-24 rounded-full border-8 flex items-center justify-center shadow-lg ${ringColor}`}>
-            <span className="text-3xl font-light tracking-tight text-zinc-50">{score}</span>
+          <div 
+            onClick={() => !isRegistered && setIsModalOpen(true)}
+            className={`w-24 h-24 rounded-full border-8 flex flex-col items-center justify-center shadow-lg transition-all duration-300 ${
+              !isRegistered 
+                ? 'border-dashed border-zinc-850 text-zinc-500 bg-zinc-950/40 cursor-pointer hover:border-emerald-500/40 hover:bg-emerald-500/5 hover:scale-105' 
+                : ringColor
+            }`}
+          >
+            <span className="text-3xl font-light tracking-tight text-zinc-100">
+              {isRegistered ? score : '--'}
+            </span>
+            {!isRegistered && <span className="text-[8px] text-emerald-400/80 font-bold uppercase tracking-wider mt-0.5 animate-pulse text-center leading-none">REGISTRAR</span>}
           </div>
           <div className="text-center md:text-left space-y-1">
             <div className="flex items-center justify-center md:justify-start gap-2">
               <h3 className="text-xl font-medium text-zinc-50">
-                {isOptimal ? 'Readiness Óptimo' : isModerate ? 'Readiness Moderado' : 'Descanso Recomendado'}
+                {!isRegistered ? 'Métricas Pendientes' : isOptimal ? 'Readiness Óptimo' : isModerate ? 'Readiness Moderado' : 'Descanso Recomendado'}
               </h3>
-              <span className={`w-2 h-2 rounded-full ${isOptimal ? 'bg-emerald-400 shadow-lg shadow-emerald-400/50' : isModerate ? 'bg-amber-400' : 'bg-rose-400'}`} />
+              <span className={`w-2 h-2 rounded-full ${!isRegistered ? 'bg-zinc-650 animate-pulse' : isOptimal ? 'bg-emerald-400 shadow-lg shadow-emerald-400/50' : isModerate ? 'bg-amber-400' : 'bg-rose-400'}`} />
             </div>
             <p className="text-sm text-zinc-400 max-w-sm leading-relaxed">
               {statusText}
@@ -125,10 +171,10 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
               <Moon className="w-3.5 h-3.5" />
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-semibold text-zinc-100">{biometrics.sleep_hours}</span>
-              <span className="text-xs text-zinc-500">h</span>
+              <span className="text-xl font-semibold text-zinc-100">{isRegistered ? biometrics.sleep_hours : '--'}</span>
+              {isRegistered && <span className="text-xs text-zinc-500">h</span>}
             </div>
-            <span className="text-[11px] font-medium text-emerald-400">{statusLabels.sleepStatus}</span>
+            <span className={`text-[11px] font-medium ${isRegistered ? 'text-emerald-400' : 'text-zinc-550'}`}>{statusLabels.sleepStatus}</span>
           </div>
 
           {/* HRV */}
@@ -138,10 +184,10 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
               <Heart className="w-3.5 h-3.5" />
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-semibold text-zinc-100">{biometrics.hrv}</span>
-              <span className="text-xs text-zinc-500">ms</span>
+              <span className="text-xl font-semibold text-zinc-100">{isRegistered ? biometrics.hrv : '--'}</span>
+              {isRegistered && <span className="text-xs text-zinc-500">ms</span>}
             </div>
-            <span className="text-[11px] font-medium text-emerald-400">{statusLabels.hrvStatus}</span>
+            <span className={`text-[11px] font-medium ${isRegistered ? 'text-emerald-400' : 'text-zinc-550'}`}>{statusLabels.hrvStatus}</span>
           </div>
 
           {/* RHR */}
@@ -151,10 +197,10 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
               <Activity className="w-3.5 h-3.5" />
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-semibold text-zinc-100">{biometrics.rhr}</span>
-              <span className="text-xs text-zinc-500">bpm</span>
+              <span className="text-xl font-semibold text-zinc-100">{isRegistered ? biometrics.rhr : '--'}</span>
+              {isRegistered && <span className="text-xs text-zinc-500">bpm</span>}
             </div>
-            <span className="text-[11px] font-medium text-emerald-400">{statusLabels.rhrStatus}</span>
+            <span className={`text-[11px] font-medium ${isRegistered ? 'text-emerald-400' : 'text-zinc-550'}`}>{statusLabels.rhrStatus}</span>
           </div>
 
         </div>
@@ -163,11 +209,11 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
         <div className="flex flex-wrap gap-3 pt-2 relative z-10 border-t border-zinc-800/60 mt-4">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950/40 border border-zinc-800 text-xs text-zinc-300">
             <Flame className="w-3.5 h-3.5 text-amber-500" />
-            <span>Fatiga Muscular: <strong className="text-amber-400">Nivel {biometrics.fatigue_rating}/5</strong></span>
+            <span>Fatiga Muscular: <strong className="text-amber-400">{isRegistered ? `Nivel ${biometrics.fatigue_rating}/5` : 'Pendiente'}</strong></span>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-950/40 border border-zinc-800 text-xs text-zinc-300">
             <Brain className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Carga Mental: <strong className="text-emerald-400">Nivel {biometrics.stress_level}/5</strong></span>
+            <span>Carga Mental: <strong className="text-emerald-400">{isRegistered ? `Nivel ${biometrics.stress_level}/5` : 'Pendiente'}</strong></span>
           </div>
         </div>
 

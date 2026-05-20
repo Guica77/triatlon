@@ -78,42 +78,21 @@ export async function getDailyBiometrics(): Promise<{ data?: DailyBiometrics; er
       return { data: existing }
     }
 
-    // Generar Simulación Inicial Automática
+    // Retornar objeto vacío puesto a cero para el día de hoy (sin guardar en base de datos)
     const defaultBiometrics: DailyBiometrics = {
       user_id: user.id,
       date: today,
-      hrv: 68,
-      rhr: 48,
-      sleep_hours: 7.8,
-      sleep_score: 88,
-      weight: 72.0,
-      fatigue_rating: 2,
-      stress_level: 2,
-      readiness_score: 88,
+      hrv: null,
+      rhr: null,
+      sleep_hours: null,
+      sleep_score: null,
+      weight: null,
+      fatigue_rating: null,
+      stress_level: null,
+      readiness_score: null,
     }
 
-    const { data: calc } = await calculateReadiness(
-      defaultBiometrics.hrv || 68,
-      defaultBiometrics.rhr || 48,
-      defaultBiometrics.sleep_hours || 7.8,
-      defaultBiometrics.fatigue_rating || 2,
-      defaultBiometrics.stress_level || 2
-    )
-    defaultBiometrics.readiness_score = calc.readiness_score
-
-    const { data: inserted, error: insertError } = await supabase
-      .from('user_biometrics')
-      .insert(defaultBiometrics)
-      .select()
-      .single()
-
-    if (insertError) {
-      console.error("Error insertando biometría por defecto:", insertError)
-      // Devolver los datos en memoria para que la UI funcione aunque falle BD
-      return { data: defaultBiometrics }
-    }
-
-    return { data: inserted }
+    return { data: defaultBiometrics }
   } catch (err: any) {
     console.error("Excepción en getDailyBiometrics:", err)
     return { error: err.message || "Error al obtener biometría" }
