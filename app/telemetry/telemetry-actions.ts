@@ -74,7 +74,7 @@ export async function ingestActivityTelemetry(payload: TelemetryPayload) {
 
     revalidatePath('/dashboard');
     revalidatePath('/analytics');
-    revalidatePath('/coach-portal');
+    revalidatePath('/feedback');
 
     return { 
       success: true, 
@@ -247,7 +247,7 @@ export async function syncAllPendingWorkouts() {
 
     revalidatePath('/dashboard');
     revalidatePath('/analytics');
-    revalidatePath('/coach-portal');
+    revalidatePath('/feedback');
 
     return { 
       success: true, 

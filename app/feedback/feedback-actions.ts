@@ -49,7 +49,7 @@ export async function submitWorkoutFeedback(formData: WorkoutFeedbackData) {
 
     revalidatePath('/dashboard');
     revalidatePath('/analytics');
-    revalidatePath('/coach-portal');
+    revalidatePath('/feedback');
     return { success: true };
   } catch (error: any) {
     return { error: error.message || 'Error al guardar el feedback' };
@@ -71,7 +71,7 @@ export async function submitCoachFeedback(formData: CoachFeedbackData) {
 
     if (error) return { error: error.message };
 
-    revalidatePath('/coach-portal');
+    revalidatePath('/feedback');
     return { success: true };
   } catch (error: any) {
     return { error: error.message || 'Error al enviar la sugerencia' };

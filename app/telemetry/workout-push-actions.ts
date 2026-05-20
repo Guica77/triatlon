@@ -224,7 +224,7 @@ export async function pushWorkoutToDevice(workoutId: string, provider: string) {
     }).eq('id', syncLog.id);
 
     revalidatePath('/dashboard');
-    revalidatePath('/coach-portal');
+    revalidatePath('/feedback');
 
     return { 
       success: true, 
@@ -262,7 +262,7 @@ export async function connectDeviceProvider(provider: string) {
     if (error) return { error: error.message };
 
     revalidatePath('/dashboard');
-    revalidatePath('/coach-portal');
+    revalidatePath('/feedback');
 
     return { success: true, message: `¡Cuenta de ${provider} conectada correctamente!` };
 
