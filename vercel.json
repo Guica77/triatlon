@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/marketplace",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/reminders/morning",
+      "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/reminders/evening",
+      "schedule": "0 19 * * *"
     }
   ]
 }
