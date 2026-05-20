@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const RESEND_API_KEY = process.env.RESEND_API_KEY || 're_HSBC365p_Ha1DQjjAJHDBjLM4DzdtN3Y3';
+const RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 
 export async function GET(request: Request) {
   // 1. Verificación de seguridad de Vercel Cron
@@ -20,6 +20,11 @@ export async function GET(request: Request) {
     !isLocalDev
   ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (!RESEND_API_KEY) {
+    console.error('Error: RESEND_API_KEY no está configurada en las variables de entorno.');
+    return NextResponse.json({ error: 'Resend API key missing' }, { status: 500 });
   }
 
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
