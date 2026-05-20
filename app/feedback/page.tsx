@@ -6,7 +6,7 @@ import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { CoachSuggestionForm } from '@/components/feedback/coach-suggestion-form';
 import { SuggestionsList } from '@/components/feedback/suggestions-list';
-import { Trophy, Users, MessageSquare, Clock, Activity, CheckCircle2, BarChart2 } from 'lucide-react';
+import { MessageSquare, Clock, Activity, CheckCircle2, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function FeedbackPage() {
@@ -17,7 +17,7 @@ export default async function FeedbackPage() {
     redirect('/login');
   }
 
-  const { athletes, suggestions } = await getCoachDashboardData();
+  const { suggestions } = await getCoachDashboardData();
 
   const pendingCount = suggestions.filter(s => s.status === 'pending').length;
   const reviewedCount = suggestions.filter(s => s.status === 'reviewed').length;
@@ -53,19 +53,10 @@ export default async function FeedbackPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 pt-8 space-y-8">
+      <main className="max-w-5xl mx-auto px-6 pt-8 space-y-8">
         
         {/* Bento Grid Header Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <ProCard className="bg-gradient-to-br from-zinc-900 to-zinc-800/80 border-zinc-800">
-            <div className="flex justify-between items-start">
-              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Atletas Asignados</p>
-              <Users className="w-5 h-5 text-cyan-400" />
-            </div>
-            <p className="text-3xl font-bold text-white mt-2">{athletes.length}</p>
-            <p className="text-xs text-zinc-500 mt-1">Supervisión en tiempo real</p>
-          </ProCard>
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <ProCard className="bg-gradient-to-br from-zinc-900 to-zinc-800/80 border-zinc-800">
             <div className="flex justify-between items-start">
               <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Sugerencias Pendientes</p>
@@ -95,99 +86,20 @@ export default async function FeedbackPage() {
         </div>
 
         {/* Bento Grid Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           
-          {/* Columna Izquierda: Lista de Atletas y Feedbacks Recientes (2 Columnas del Bento) */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-cyan-400" /> Estado Biométrico y RPE de Atletas
-              </h2>
-              <span className="text-xs text-zinc-500">Actualizado al instante</span>
-            </div>
-
-            <div className="space-y-4">
-              {athletes.map((ath) => {
-                const latestFb = ath.recent_feedbacks[0];
-                return (
-                  <ProCard key={ath.id} className="border-zinc-800/80 bg-zinc-900/40 hover:border-zinc-700 transition-all">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/60 pb-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-bold text-white">{ath.first_name} {ath.last_name}</h3>
-                          <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-cyan-400 font-medium">
-                            {ath.level}
-                          </span>
-                        </div>
-                        {ath.target_race_name && (
-                          <p className="text-xs text-zinc-400 flex items-center gap-1.5">
-                            <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                            {ath.target_race_name} • <span className="text-zinc-500">{ath.target_race_date}</span>
-                          </p>
-                        )}
-                      </div>
-
-                      {/* RPE & Feeling Badge */}
-                      {latestFb ? (
-                        <div className="flex items-center gap-3 bg-zinc-800/40 p-3 rounded-2xl border border-zinc-700/50 self-start sm:self-auto">
-                          <div className="text-center px-3 py-1 rounded-xl bg-zinc-900 border border-zinc-700">
-                            <p className="text-[10px] uppercase font-semibold text-zinc-500">RPE</p>
-                            <p className={`text-lg font-bold ${latestFb.rpe_score >= 8 ? 'text-rose-400' : latestFb.rpe_score >= 6 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                              {latestFb.rpe_score}/10
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-zinc-200 capitalize">Sensación: {latestFb.feeling}</p>
-                            <p className="text-[11px] text-zinc-500 font-mono">{new Date(latestFb.created_at).toLocaleDateString()}</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="text-xs text-zinc-500 italic self-center">Sin evaluaciones recientes</div>
-                      )}
-                    </div>
-
-                    {/* Notas del Atleta */}
-                    {latestFb?.notes && (
-                      <div className="pt-4">
-                        <p className="text-xs font-semibold text-zinc-400 mb-1">Notas del py-atleta:</p>
-                        <p className="text-sm text-zinc-300 bg-zinc-800/30 p-3.5 rounded-xl border border-zinc-800/80 italic">
-                          &ldquo;{latestFb.notes}&rdquo;
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Histórico de los últimos 5 */}
-                    {ath.recent_feedbacks.length > 1 && (
-                      <div className="pt-4 flex items-center gap-2 overflow-x-auto pb-1">
-                        <span className="text-[11px] font-semibold text-zinc-500 uppercase mr-1">Histórico RPE:</span>
-                        {ath.recent_feedbacks.slice(1).map((fb, idx) => (
-                          <div key={idx} className="flex items-center gap-1 bg-zinc-800/40 px-2.5 py-1 rounded-lg border border-zinc-700/40 text-xs">
-                            <span className={`font-bold ${fb.rpe_score >= 8 ? 'text-rose-400' : fb.rpe_score >= 6 ? 'text-amber-400' : 'text-emerald-400'}`}>
-                              {fb.rpe_score}
-                            </span>
-                            <span className="text-zinc-500">({fb.feeling[0].toUpperCase()})</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </ProCard>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Columna Derecha: Formulario de Sugerencias y Estado de Reportes (1 Columna del Bento) */}
-          <div className="space-y-6">
+          {/* Columna Izquierda: Formulario de Sugerencias */}
+          <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
                 <MessageSquare className="w-4 h-4 text-cyan-400" /> Proponer Mejoras a la App
               </h2>
             </div>
+            <CoachSuggestionForm />
+          </div>
 
-            {/* Formulario Interactivo */}
-            <CoachSuggestionForm athletes={athletes} />
-
-            {/* Listado con filtros */}
+          {/* Columna Derecha: Listado con filtros */}
+          <div className="space-y-4">
             <SuggestionsList initialSuggestions={suggestions} />
           </div>
 

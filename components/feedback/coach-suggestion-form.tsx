@@ -6,19 +6,8 @@ import { submitCoachFeedback } from '@/app/feedback/feedback-actions';
 import { Send, CheckCircle2, AlertCircle, FileText, Settings, User } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 
-interface AthleteOption {
-  id: string;
-  first_name: string | null;
-  last_name: string | null;
-}
-
-interface CoachSuggestionFormProps {
-  athletes: AthleteOption[];
-}
-
-export function CoachSuggestionForm({ athletes }: CoachSuggestionFormProps) {
+export function CoachSuggestionForm() {
   const [feedbackType, setFeedbackType] = useState<string>('platform_improvement');
-  const [athleteId, setAthleteId] = useState<string>('');
   const [content, setContent] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -35,10 +24,8 @@ export function CoachSuggestionForm({ athletes }: CoachSuggestionFormProps) {
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    // Limit to 2000 chars
     const text = e.target.value.slice(0, 2000);
     setContent(text);
-    // Defer height adjustment slightly to let React complete its update
     requestAnimationFrame(adjustTextareaHeight);
   };
 
@@ -50,7 +37,6 @@ export function CoachSuggestionForm({ athletes }: CoachSuggestionFormProps) {
     setErrorMessage(null);
 
     const res = await submitCoachFeedback({
-      athlete_id: athleteId || undefined,
       feedback_type: feedbackType,
       content
     });
@@ -135,31 +121,6 @@ export function CoachSuggestionForm({ athletes }: CoachSuggestionFormProps) {
           </div>
         </div>
 
-        {/* Selector de py-atleta (Opcional según tipo) */}
-        {(feedbackType === 'plan_adjustment' || feedbackType === 'athlete_review') && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0, y: -10 }} 
-            animate={{ opacity: 1, height: 'auto', y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            <label htmlFor="athlete-select" className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-              Atleta Relacionado
-            </label>
-            <select
-              id="athlete-select"
-              value={athleteId}
-              onChange={(e) => setAthleteId(e.target.value)}
-              className="w-full p-3.5 text-sm text-white border rounded-xl bg-zinc-800/60 border-zinc-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all cursor-pointer"
-            >
-              <option value="">-- Seleccionar Atleta (Opcional) --</option>
-              {athletes.map(a => (
-                <option key={a.id} value={a.id}>{a.first_name} {a.last_name}</option>
-              ))}
-            </select>
-          </motion.div>
-        )}
-
         {/* Contenido / Texto */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center">
@@ -178,7 +139,9 @@ export function CoachSuggestionForm({ athletes }: CoachSuggestionFormProps) {
             placeholder={
               feedbackType === 'platform_improvement'
                 ? 'Ej: Propongo añadir soporte para sensores de temperatura corporal Core en la vista de analíticas...'
-                : 'Ej: Ajustar el volumen de carrera de Carlos para asimilar la carga del fin de semana...'
+                : feedbackType === 'plan_adjustment'
+                ? 'Ej: Ajustar el volumen aeróbico general para asimilar la carga de entrenamiento...'
+                : 'Ej: Evaluar el rendimiento del atleta en la transición de carrera...'
             }
             className="w-full p-4 text-sm text-white placeholder-zinc-500 border rounded-2xl bg-zinc-800/30 border-zinc-800/80 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/60 transition-all resize-none min-height-[100px] overflow-hidden leading-relaxed"
           />
