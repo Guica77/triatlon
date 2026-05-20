@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 
 export async function getStrengthExercisesForUser() {
   try {
-    const supabase = await createClient();
+    const supabase = (await createClient()) as any;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return getFallbackExercises();
 
@@ -22,8 +22,8 @@ export async function getStrengthExercisesForUser() {
       .eq('user_id', user.id);
 
     // 3. Mezclar y enviar al Frontend
-    return exercises.map(ex => {
-      const userMetric = metrics?.find(m => m.exercise_id === ex.id);
+    return (exercises as any[]).map((ex: any) => {
+      const userMetric = (metrics as any[])?.find((m: any) => m.exercise_id === ex.id);
       return {
         id: ex.id,
         name: ex.name,
@@ -42,7 +42,7 @@ export async function getStrengthExercisesForUser() {
 
 export async function logStrengthSet(workoutId: string, exerciseId: string, setNumber: number, weight: number, reps: number, rir: number) {
   try {
-    const supabase = await createClient();
+    const supabase = (await createClient()) as any;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error("No autenticado");
 

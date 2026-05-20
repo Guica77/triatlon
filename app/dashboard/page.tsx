@@ -12,6 +12,7 @@ import { AnimatedButton } from '@/components/ui/animated-button';
 import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
+import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -22,16 +23,17 @@ export default async function DashboardPage() {
   }
 
   // 1. Obtener perfil y plan activo
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from('profiles')
     .select('*, training_plans(*)')
     .eq('id', user.id)
     .single();
 
-  if (!profile || !profile.active_plan_id) {
+  if (!profileData || !(profileData as any).active_plan_id) {
     redirect('/onboarding');
   }
 
+  const profile = profileData as any;
   const activePlan = profile.training_plans;
 
   // 1.5 Obtener Biometría del Día (con auto-simulación inicial)
@@ -80,8 +82,27 @@ export default async function DashboardPage() {
   const totalCount = workouts?.filter(w => w.training_sessions?.sport_type !== 'descanso').length || 0;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+  // 4. Calcular días transcurridos desde registro para disparar feedback modal (NPS)
+  const createdDate = new Date(profile.created_at || new Date());
+  const diffTime = Math.abs(now.getTime() - createdDate.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  const feedbackHistory = Array.isArray(profile.feedback_history)
+    ? profile.feedback_history
+    : [];
+
+  let activeFeedbackDays: number | null = null;
+  if (diffDays >= 7 && diffDays < 21 && !feedbackHistory.includes(7)) {
+    activeFeedbackDays = 7;
+  } else if (diffDays >= 21 && !feedbackHistory.includes(21)) {
+    activeFeedbackDays = 21;
+  }
+
   return (
     <div className="min-h-screen bg-[var(--color-background)] pb-24">
+      {activeFeedbackDays !== null && (
+        <AppFeedbackModal daysUsed={activeFeedbackDays} />
+      )}
       
       {/* Upper Deck (Bento Header / Doble Nivel) */}
       <header className="sticky top-0 z-50 bg-[var(--color-background)]/90 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm transition-all duration-300">

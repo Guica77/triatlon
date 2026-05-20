@@ -78,6 +78,72 @@ export async function submitCoachFeedback(formData: CoachFeedbackData) {
   }
 }
 
+export interface AppFeedbackData {
+  days_used: number;
+  rating: number;
+  comments?: string;
+}
+
+export async function submitAppFeedback(formData: AppFeedbackData) {
+  try {
+    const supabase = (await createClient()) as any;
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData?.user) return { error: 'No autorizado' };
+
+    const userId = authData.user.id;
+
+    // 1. Guardar en app_feedback
+    const { error: insertError } = await supabase.from('app_feedback').insert({
+      user_id: userId,
+      days_used: formData.days_used,
+      rating: formData.rating,
+      comments: formData.comments || null
+    });
+
+    if (insertError) {
+      console.error('Error al insertar feedback de app:', insertError);
+      return { error: insertError.message };
+    }
+
+    // 2. Obtener el historial de feedback actual del usuario
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('feedback_history')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) {
+      console.error('Error al consultar historial de feedback:', profileError);
+      return { error: profileError.message };
+    }
+
+    const history = Array.isArray((profile as any)?.feedback_history) 
+      ? [...(profile as any).feedback_history] 
+      : [];
+
+    if (!history.includes(formData.days_used)) {
+      history.push(formData.days_used);
+    }
+
+    // 3. Actualizar perfil con el historial actualizado
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ feedback_history: history } as any)
+      .eq('id', userId);
+
+    if (updateError) {
+      console.error('Error al actualizar historial de feedback:', updateError);
+      return { error: updateError.message };
+    }
+
+    revalidatePath('/dashboard');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Excepción en submitAppFeedback:', error);
+    return { error: error.message || 'Error inesperado al guardar el feedback' };
+  }
+}
+
 export async function getCoachDashboardData(): Promise<{
   athletes: AthleteSummary[];
   suggestions: {
