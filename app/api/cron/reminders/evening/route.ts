@@ -34,6 +34,10 @@ export async function GET(request: Request) {
   const resend = new Resend(RESEND_API_KEY);
 
   try {
+    const host = request.headers.get('host') || 'triatlon-app-mocha.vercel.app';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const baseUrl = `${protocol}://${host}`;
+
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
 
@@ -207,7 +211,7 @@ export async function GET(request: Request) {
                 </div>
                 ` : ''}
 
-                <a href="https://triatlon-app.vercel.app/dashboard" class="btn">Replanificar / Registrar Sesión</a>
+                <a href="${baseUrl}/dashboard" class="btn">Replanificar / Registrar Sesión</a>
               </div>
               <div class="footer">
                 Enviado de forma autónoma por tu Entrenador de IA. <br>
@@ -274,7 +278,7 @@ export async function GET(request: Request) {
                 </div>
                 ` : ''}
 
-                <a href="https://triatlon-app.vercel.app/dashboard" class="btn">Ver Estadísticas de Progreso</a>
+                <a href="${baseUrl}/dashboard" class="btn">Ver Estadísticas de Progreso</a>
               </div>
               <div class="footer">
                 Enviado de forma autónoma por tu Entrenador de IA. <br>
