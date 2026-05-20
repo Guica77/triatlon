@@ -9,18 +9,28 @@ import { Apple } from 'lucide-react'; // Usamos iconos limpios o SVG custom
 export default function LoginPage() {
   const [isSignUp, setIsSignUp] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
     const formData = new FormData(event.currentTarget);
 
-    const result = isSignUp ? await signup(formData) : await login(formData);
-    if (result && result.error) {
-      setError(result.error);
-      setLoading(false);
+    const result: any = isSignUp ? await signup(formData) : await login(formData);
+    if (result) {
+      if (result.error) {
+        setError(result.error);
+        setLoading(false);
+      } else if (result.emailConfirmRequired) {
+        setSuccessMessage(
+          '¡Cuenta creada con éxito! Te hemos enviado un correo de confirmación. Por favor, revisa tu bandeja de entrada (y la carpeta de spam o correo no deseado) para activar tu cuenta antes de iniciar sesión.'
+        );
+        setIsSignUp(false);
+        setLoading(false);
+      }
     }
   }
 
@@ -84,6 +94,12 @@ export default function LoginPage() {
             {error && (
               <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">
                 {error}
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs text-center leading-relaxed">
+                {successMessage}
               </div>
             )}
 

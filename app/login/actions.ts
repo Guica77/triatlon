@@ -66,6 +66,11 @@ export async function signup(formData: FormData) {
     }
   }
 
+  // Si requiere confirmación de email (la sesión no está activa tras el signup)
+  if (!authData.session) {
+    return { success: true, emailConfirmRequired: true }
+  }
+
   redirect('/onboarding')
 }
 
