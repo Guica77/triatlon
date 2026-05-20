@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { submitCoachFeedback } from '@/app/feedback/feedback-actions';
-import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle, FileText, Settings, User } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 
 interface AthleteOption {
@@ -23,6 +23,24 @@ export function CoachSuggestionForm({ athletes }: CoachSuggestionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustTextareaHeight = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    // Limit to 2000 chars
+    const text = e.target.value.slice(0, 2000);
+    setContent(text);
+    // Defer height adjustment slightly to let React complete its update
+    requestAnimationFrame(adjustTextareaHeight);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,62 +62,87 @@ export function CoachSuggestionForm({ athletes }: CoachSuggestionFormProps) {
     } else {
       setSuccessMessage('¡Sugerencia enviada con éxito al equipo de desarrollo!');
       setContent('');
-      setTimeout(() => setSuccessMessage(null), 3000);
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
+      setTimeout(() => setSuccessMessage(null), 4000);
     }
   };
 
-  return (
-    <ProCard className="bg-zinc-900/60 border-zinc-800 space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        
-        {successMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center gap-3 text-emerald-400 text-sm font-semibold"
-          >
-            <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-            <span>{successMessage}</span>
-          </motion.div>
-        )}
+  const categories = [
+    { id: 'platform_improvement', label: 'Mejora App', icon: Settings },
+    { id: 'plan_adjustment', label: 'Ajuste Plan', icon: FileText },
+    { id: 'athlete_review', label: 'Revisión Atleta', icon: User }
+  ];
 
-        {errorMessage && (
-          <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-3 text-rose-400 text-sm font-semibold">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            <span>{errorMessage}</span>
-          </div>
-        )}
+  return (
+    <ProCard className="bg-zinc-900/60 border-zinc-800/80 space-y-6 shadow-xl relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 to-blue-500" />
+      
+      <form onSubmit={handleSubmit} className="space-y-5">
+        
+        <AnimatePresence mode="wait">
+          {successMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.95 }}
+              className="p-4 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl flex items-center gap-3 text-emerald-400 text-sm font-semibold shadow-sm"
+            >
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+              <span>{successMessage}</span>
+            </motion.div>
+          )}
+
+          {errorMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -15, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -15, scale: 0.95 }}
+              className="p-4 bg-rose-500/10 border border-rose-500/25 rounded-2xl flex items-center gap-3 text-rose-400 text-sm font-semibold shadow-sm"
+            >
+              <AlertCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
+              <span>{errorMessage}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Tipo de Sugerencia */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2.5">
             Tipo de Sugerencia
           </label>
           <div className="grid grid-cols-3 gap-2">
-            {[
-              { id: 'platform_improvement', label: 'Mejora App' },
-              { id: 'plan_adjustment', label: 'Ajuste Plan' },
-              { id: 'athlete_review', label: 'Revisión Atleta' }
-            ].map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setFeedbackType(t.id)}
-                className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all border ${
-                  feedbackType === t.id
-                    ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 shadow-md shadow-cyan-500/10'
-                    : 'bg-zinc-800/50 border-zinc-700/50 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
-                }`}
-              >
-                {t.label}
-              </button>
-            ))}
+            {categories.map((t) => {
+              const Icon = t.icon;
+              const isSelected = feedbackType === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setFeedbackType(t.id)}
+                  className={`py-3 px-3 rounded-xl text-xs font-bold transition-all border flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer select-none ${
+                    isSelected
+                      ? 'bg-cyan-500/15 border-cyan-500/70 text-cyan-300 shadow-md shadow-cyan-500/5'
+                      : 'bg-zinc-800/40 border-zinc-800/80 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-cyan-400' : 'text-zinc-500'}`} />
+                  <span>{t.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Selector de py-atleta (Opcional según tipo) */}
         {(feedbackType === 'plan_adjustment' || feedbackType === 'athlete_review') && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
+          <motion.div 
+            initial={{ opacity: 0, height: 0, y: -10 }} 
+            animate={{ opacity: 1, height: 'auto', y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
             <label htmlFor="athlete-select" className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
               Atleta Relacionado
             </label>
@@ -107,7 +150,7 @@ export function CoachSuggestionForm({ athletes }: CoachSuggestionFormProps) {
               id="athlete-select"
               value={athleteId}
               onChange={(e) => setAthleteId(e.target.value)}
-              className="w-full p-3.5 text-sm text-white border rounded-xl bg-zinc-800/80 border-zinc-700 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
+              className="w-full p-3.5 text-sm text-white border rounded-xl bg-zinc-800/60 border-zinc-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all cursor-pointer"
             >
               <option value="">-- Seleccionar Atleta (Opcional) --</option>
               {athletes.map(a => (
@@ -118,29 +161,37 @@ export function CoachSuggestionForm({ athletes }: CoachSuggestionFormProps) {
         )}
 
         {/* Contenido / Texto */}
-        <div>
-          <label htmlFor="suggestion-content" className="block text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-            Detalle de la Propuesta / Mejora
-          </label>
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center">
+            <label htmlFor="suggestion-content" className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+              Detalle de la Propuesta / Mejora
+            </label>
+            <span className={`text-[10px] font-mono transition-colors duration-200 ${content.length >= 1900 ? 'text-rose-400 font-bold' : 'text-zinc-500'}`}>
+              {content.length} / 2000
+            </span>
+          </div>
           <textarea
             id="suggestion-content"
+            ref={textareaRef}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={4}
+            onChange={handleContentChange}
             placeholder={
               feedbackType === 'platform_improvement'
                 ? 'Ej: Propongo añadir soporte para sensores de temperatura corporal Core en la vista de analíticas...'
                 : 'Ej: Ajustar el volumen de carrera de Carlos para asimilar la carga del fin de semana...'
             }
-            className="w-full p-4 text-sm text-white placeholder-zinc-500 border rounded-2xl bg-zinc-800/50 border-zinc-700/80 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all resize-none"
+            className="w-full p-4 text-sm text-white placeholder-zinc-500 border rounded-2xl bg-zinc-800/30 border-zinc-800/80 focus:outline-none focus:ring-2 focus:ring-cyan-500/40 focus:border-cyan-500/60 transition-all resize-none min-height-[100px] overflow-hidden leading-relaxed"
           />
+          <p className="text-[10px] text-zinc-500 italic">
+            Escribe sin límites de espacio. La caja de texto se expandirá de forma automática.
+          </p>
         </div>
 
         {/* Submit Button */}
         <button
           type="submit"
           disabled={isSubmitting || !content.trim()}
-          className="w-full py-4 text-sm font-bold text-black transition-all rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full py-4 text-sm font-bold text-black transition-all rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 shadow-lg shadow-cyan-500/15 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed select-none cursor-pointer"
         >
           {isSubmitting ? (
             <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />

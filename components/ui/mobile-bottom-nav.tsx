@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BarChart2, Users, Settings } from 'lucide-react';
+import { Home, BarChart2, MessageSquare, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export function MobileBottomNav() {
@@ -17,7 +17,7 @@ export function MobileBottomNav() {
   const navItems = [
     { href: '/dashboard', label: 'Inicio', icon: Home },
     { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
-    { href: '/coach-portal', label: 'Entrenador', icon: Users },
+    { href: '/feedback', label: 'Feedback', icon: MessageSquare },
     { href: '/onboarding', label: 'Ajustes', icon: Settings },
   ];
 

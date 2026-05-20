@@ -5,10 +5,11 @@ import { getCoachDashboardData } from '@/app/feedback/feedback-actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { CoachSuggestionForm } from '@/components/feedback/coach-suggestion-form';
-import { Trophy, Users, MessageSquare, AlertCircle, CheckCircle2, Clock, Activity, BarChart2, ArrowRight } from 'lucide-react';
+import { SuggestionsList } from '@/components/feedback/suggestions-list';
+import { Trophy, Users, MessageSquare, Clock, Activity, CheckCircle2, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default async function CoachPortalPage() {
+export default async function FeedbackPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -29,11 +30,11 @@ export default async function CoachPortalPage() {
       <header className="border-b border-[var(--color-border)] bg-[var(--color-background)]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center shadow-inner">
-            <Users className="w-4 h-4 text-cyan-400" />
+            <MessageSquare className="w-4 h-4 text-cyan-400" />
           </div>
           <div>
-            <h1 className="text-base font-medium text-zinc-50">Portal de Entrenadores</h1>
-            <p className="text-xs text-cyan-400 font-mono">Modo Supervisión Pro Max</p>
+            <h1 className="text-base font-medium text-zinc-50">Centro de Feedback</h1>
+            <p className="text-xs text-cyan-400 font-mono">Buzón de Sugerencias Pro Max</p>
           </div>
         </div>
 
@@ -186,34 +187,8 @@ export default async function CoachPortalPage() {
             {/* Formulario Interactivo */}
             <CoachSuggestionForm athletes={athletes} />
 
-            {/* Lista de Sugerencias Enviadas */}
-            <div className="space-y-3 pt-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Tus Sugerencias Enviadas</h3>
-              {suggestions.length > 0 ? (
-                suggestions.map((s) => (
-                  <ProCard key={s.id} className="p-4 bg-zinc-900/30 border-zinc-800/60 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">
-                        {s.feedback_type === 'platform_improvement' ? 'Mejora de App' : s.feedback_type === 'plan_adjustment' ? 'Ajuste de Plan' : 'Revisión'}
-                      </span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        s.status === 'implemented' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' :
-                        s.status === 'reviewed' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
-                        'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                      }`}>
-                        {s.status === 'implemented' ? 'Implementado' : s.status === 'reviewed' ? 'En Revisión' : 'Pendiente'}
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-300 line-clamp-3 leading-relaxed">{s.content}</p>
-                    <p className="text-[10px] text-zinc-500 font-mono">{new Date(s.created_at).toLocaleDateString()}</p>
-                  </ProCard>
-                ))
-              ) : (
-                <p className="text-xs text-zinc-500 italic text-center py-6 bg-zinc-900/20 rounded-2xl border border-zinc-800/40">
-                  Aún no has enviado sugerencias de mejora.
-                </p>
-              )}
-            </div>
+            {/* Listado con filtros */}
+            <SuggestionsList initialSuggestions={suggestions} />
           </div>
 
         </div>
