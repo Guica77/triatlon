@@ -11,13 +11,22 @@ export async function selectPlan(planId: string) {
     redirect('/login')
   }
 
-  // 1. Upsert perfil
+  // 1. Obtener nivel del plan
+  const { data: planData } = await supabase
+    .from('training_plans')
+    .select('level')
+    .eq('id', planId)
+    .single()
+
+  const level = planData?.level || 'intermedio'
+
+  // 1.5 Upsert perfil
   const { error: profileError } = await supabase
     .from('profiles')
     .upsert({ 
       id: user.id,
       first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Triatleta',
-      level: 'intermedio',
+      level: level,
       active_plan_id: planId 
     })
 
@@ -111,6 +120,7 @@ export async function saveRaceGoalAndPlan(formData: {
   target_swim_time?: string;
   target_bike_time?: string;
   target_run_time?: string;
+  athlete_level?: string;
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -123,7 +133,7 @@ export async function saveRaceGoalAndPlan(formData: {
     target_race_name, target_race_date, target_race_distance, target_race_modality = 'triatlon',
     target_finish_time, baseline_training_hours, virtual_garage = [],
     swim_weekly_hours = 2, bike_weekly_hours = 4, run_weekly_hours = 3,
-    target_swim_time, target_bike_time, target_run_time
+    target_swim_time, target_bike_time, target_run_time, athlete_level
   } = formData;
 
   // AI Estimation Fallback Logic for Physiological Metrics
@@ -147,7 +157,7 @@ export async function saveRaceGoalAndPlan(formData: {
     else current_run_pace = '05:30';
   }
 
-  // 1. Obtener todos los planes para buscar el que mejor coincida con la distancia
+  // 1. Obtener todos los planes para buscar el que mejor coincida con la distancia y el nivel
   const { data: plans } = await supabase
     .from('training_plans')
     .select('*');
@@ -155,15 +165,35 @@ export async function saveRaceGoalAndPlan(formData: {
   let selectedPlanId = plans?.[0]?.id; // Respaldo por defecto
 
   if (plans && plans.length > 0) {
-    // Buscar coincidencia por distancia
-    const match = plans.find((p: any) => {
+    // Buscar coincidencia por distancia y nivel
+    let match = plans.find((p: any) => {
       const dist = (p.distance || '').toLowerCase();
-      if (target_race_distance === 'sprint' && dist.includes('sprint')) return true;
-      if (target_race_distance === 'olimpico' && (dist.includes('olimpico') || dist.includes('olímpico'))) return true;
-      if (target_race_distance === 'half' && (dist.includes('half') || dist.includes('70.3') || dist.includes('media'))) return true;
-      if (target_race_distance === 'full' && (dist.includes('full') || dist.includes('ironman') || dist.includes('larga'))) return true;
-      return false;
+      const planLvl = (p.level || '').toLowerCase();
+      const targetLvl = (athlete_level || 'intermedio').toLowerCase();
+      
+      const distanceMatch = 
+        (target_race_distance === 'sprint' && dist.includes('sprint')) ||
+        (target_race_distance === 'olimpico' && (dist.includes('olimpico') || dist.includes('olímpico'))) ||
+        (target_race_distance === 'half' && (dist.includes('half') || dist.includes('70.3') || dist.includes('media'))) ||
+        (target_race_distance === 'full' && (dist.includes('full') || dist.includes('ironman') || dist.includes('larga')));
+
+      const levelMatch = 
+        planLvl === targetLvl || 
+        (targetLvl === 'principiante' && (planLvl === 'principiante' || planLvl === 'principiante_absoluto'));
+
+      return distanceMatch && levelMatch;
     });
+
+    // Fallback si no hay coincidencia de nivel
+    if (!match) {
+      match = plans.find((p: any) => {
+        const dist = (p.distance || '').toLowerCase();
+        return (target_race_distance === 'sprint' && dist.includes('sprint')) ||
+               (target_race_distance === 'olimpico' && (dist.includes('olimpico') || dist.includes('olímpico'))) ||
+               (target_race_distance === 'half' && (dist.includes('half') || dist.includes('70.3') || dist.includes('media'))) ||
+               (target_race_distance === 'full' && (dist.includes('full') || dist.includes('ironman') || dist.includes('larga')));
+      });
+    }
 
     if (match) {
       selectedPlanId = match.id;
@@ -174,6 +204,10 @@ export async function saveRaceGoalAndPlan(formData: {
     redirect('/dashboard');
   }
 
+  // 1.8 Determinar nivel final
+  const selectedPlan = plans?.find((p: any) => p.id === selectedPlanId);
+  const level = athlete_level || selectedPlan?.level || 'intermedio';
+
   // 2. Upsert perfil con los objetivos de carrera, modalidad, plan activo, métricas fisiológicas, garaje virtual, horas semanales y marcas de segmento
   const { error: profileError } = await supabase
     .from('profiles')
@@ -181,7 +215,7 @@ export async function saveRaceGoalAndPlan(formData: {
       id: user.id,
       first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Triatleta',
       last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.last_name || '',
-      level: 'intermedio',
+      level: level,
       target_race_name,
       target_race_date,
       target_race_distance,

@@ -1,6 +1,8 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { unstable_cache } from 'next/cache';
+import { createClient as createDirectClient } from '@supabase/supabase-js';
 
 export interface PmcPoint {
   date: string;
@@ -10,6 +12,20 @@ export interface PmcPoint {
   swimDistance: number; // en metros
   bikeDistance: number; // en km
   runDistance: number; // en km
+}
+
+export interface PacePowerPoint {
+  date: string;
+  ftp: number;
+  runPaceSeconds: number;
+  swimPaceSeconds: number;
+}
+
+export interface ZonePoint {
+  zone: string;
+  percentage: number;
+  color: string;
+  hours: number;
 }
 
 export interface AnalyticsDashboardData {
@@ -29,6 +45,8 @@ export interface AnalyticsDashboardData {
     ciclismo: number; // km
     carrera: number; // km
   };
+  pacePowerHistory: PacePowerPoint[];
+  hrZoneDistribution: ZonePoint[];
 }
 
 function calculateStravaActivityTss(activity: any, profile: any): number {
@@ -157,18 +175,20 @@ function generateSimulatedPmcData(): PmcPoint[] {
 }
 
 /**
- * Obtiene y calcula los datos completos del dashboard de analíticas.
+ * Realiza la consulta directa y los cálculos para el dashboard.
+ * Esta función no usa cookies y es segura de ejecutar dentro de unstable_cache.
  */
-export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardData> {
+export async function fetchAndCalculateAnalytics(userId: string): Promise<AnalyticsDashboardData> {
   try {
-    const supabase = await createClient();
-    const { data: authData } = await supabase.auth.getUser();
-    
-    if (!authData?.user) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('fetchAndCalculateAnalytics: Supabase credentials missing');
       return getFallbackAnalyticsData();
     }
 
-    const userId = authData.user.id;
+    const supabase = createDirectClient(supabaseUrl, supabaseServiceKey);
 
     // Fetch user profile to read strava connection and thresholds
     const { data: profile } = await supabase
@@ -393,6 +413,65 @@ export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardDat
 
     const totalCurrentTss = weeklyTssActual || 1;
 
+    // Obtener datos de zonas
+    let totalZ1 = 0, totalZ2 = 0, totalZ3 = 0, totalZ4 = 0, totalZ5 = 0;
+    let hasZoneData = false;
+    
+    // Obtener telemetría de base de datos
+    const { data: telemetryLogs } = await supabase
+      .from('universal_telemetry')
+      .select('created_at, avg_power, actual_duration_min, actual_distance_km, source_provider, hr_zones_summary')
+      .eq('user_id', userId);
+
+    if (telemetryLogs && telemetryLogs.length > 0) {
+      telemetryLogs.forEach(log => {
+        if (log.hr_zones_summary) {
+          const summary = log.hr_zones_summary as any;
+          if (summary.Z1 || summary.Z2 || summary.Z3 || summary.Z4 || summary.Z5) {
+            hasZoneData = true;
+            totalZ1 += Number(summary.Z1 || 0);
+            totalZ2 += Number(summary.Z2 || 0);
+            totalZ3 += Number(summary.Z3 || 0);
+            totalZ4 += Number(summary.Z4 || 0);
+            totalZ5 += Number(summary.Z5 || 0);
+          }
+        }
+      });
+    }
+
+    let hrZoneDistribution: ZonePoint[] = [];
+    if (hasZoneData) {
+      const grandTotal = totalZ1 + totalZ2 + totalZ3 + totalZ4 + totalZ5 || 1;
+      hrZoneDistribution = [
+        { zone: 'Z1 - Recuperación', percentage: Math.round((totalZ1 / grandTotal) * 100), color: 'bg-zinc-650', hours: Number((totalZ1 / 3600).toFixed(1)) },
+        { zone: 'Z2 - Aeróbico Base', percentage: Math.round((totalZ2 / grandTotal) * 100), color: 'bg-[var(--color-run)]', hours: Number((totalZ2 / 3600).toFixed(1)) },
+        { zone: 'Z3 - Tempo', percentage: Math.round((totalZ3 / grandTotal) * 100), color: 'bg-amber-400', hours: Number((totalZ3 / 3600).toFixed(1)) },
+        { zone: 'Z4 - Umbral Láctico', percentage: Math.round((totalZ4 / grandTotal) * 100), color: 'bg-orange-500', hours: Number((totalZ4 / 3600).toFixed(1)) },
+        { zone: 'Z5 - VO2 Máx / Anaeróbico', percentage: Math.round((totalZ5 / grandTotal) * 100), color: 'bg-red-500', hours: Number((totalZ5 / 3600).toFixed(1)) }
+      ];
+    } else {
+      hrZoneDistribution = generateSimulatedHrZoneDistribution(profile.level || 'intermedio');
+    }
+
+    // Calcular historial de ritmos y FTP
+    const profileFtp = profile.current_ftp || 200;
+    let profileRunSec = 300;
+    if (profile.current_run_pace) {
+      const parts = profile.current_run_pace.split(':');
+      if (parts.length === 2) {
+        profileRunSec = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      }
+    }
+    let profileSwimSec = 105;
+    if (profile.current_swim_pace) {
+      const parts = profile.current_swim_pace.split(':');
+      if (parts.length === 2) {
+        profileSwimSec = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      }
+    }
+
+    const pacePowerHistory = generatePacePowerHistory(profileFtp, profileRunSec, profileSwimSec);
+
     return {
       pmcData,
       currentCtl: lastPoint.ctl,
@@ -418,9 +497,80 @@ export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardDat
         natacion: Math.round(sportDistanceCurrentWeek.natacion),
         ciclismo: Number(sportDistanceCurrentWeek.ciclismo.toFixed(1)),
         carrera: Number(sportDistanceCurrentWeek.carrera.toFixed(1))
-      }
+      },
+      pacePowerHistory,
+      hrZoneDistribution
     };
 
+  } catch (error) {
+    console.error('Error in fetchAndCalculateAnalytics:', error);
+    return getFallbackAnalyticsData();
+  }
+}
+
+/**
+ * Funciones de simulación y generación de datos auxiliares para analíticas
+ */
+function generatePacePowerHistory(ftp: number, runSec: number, swimSec: number): PacePowerPoint[] {
+  const points: PacePowerPoint[] = [];
+  const today = new Date();
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i * 7);
+    
+    const progressFactor = (11 - i) / 11; // 0 en semana 1, 1 hoy
+    const currentFtp = Math.round(ftp * (0.88 + progressFactor * 0.12) + Math.sin(i) * 3);
+    const currentRunPace = Math.round(runSec * (1.12 - progressFactor * 0.12) + Math.cos(i) * 4);
+    const currentSwimPace = Math.round(swimSec * (1.10 - progressFactor * 0.10) + Math.sin(i) * 2);
+
+    points.push({
+      date: d.toISOString().split('T')[0],
+      ftp: currentFtp,
+      runPaceSeconds: currentRunPace,
+      swimPaceSeconds: currentSwimPace
+    });
+  }
+  return points;
+}
+
+function generateSimulatedHrZoneDistribution(level: string): ZonePoint[] {
+  const isBeginner = level === 'principiante';
+  return [
+    { zone: 'Z1 - Recuperación Activa', percentage: isBeginner ? 15 : 10, color: 'bg-zinc-650', hours: isBeginner ? 1.5 : 1.0 },
+    { zone: 'Z2 - Resistencia Aeróbica', percentage: isBeginner ? 75 : 68, color: 'bg-[var(--color-run)]', hours: isBeginner ? 7.5 : 6.8 },
+    { zone: 'Z3 - Tempo', percentage: isBeginner ? 7 : 12, color: 'bg-amber-400', hours: isBeginner ? 0.7 : 1.2 },
+    { zone: 'Z4 - Umbral Láctico', percentage: isBeginner ? 2 : 7, color: 'bg-orange-500', hours: isBeginner ? 0.2 : 0.7 },
+    { zone: 'Z5 - VO2 Máx / Anaeróbico', percentage: isBeginner ? 1 : 3, color: 'bg-red-500', hours: isBeginner ? 0.1 : 0.3 }
+  ];
+}
+
+/**
+ * Versión cacheada de la consulta de analíticas.
+ */
+const getCachedAnalyticsDashboardData = unstable_cache(
+  async (userId: string) => {
+    return fetchAndCalculateAnalytics(userId);
+  },
+  ['analytics-dashboard-data'],
+  {
+    revalidate: 300, // 5 minutos
+    tags: ['analytics']
+  }
+);
+
+/**
+ * Obtiene y calcula los datos completos del dashboard de analíticas de forma optimizada.
+ */
+export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardData> {
+  try {
+    const supabase = await createClient();
+    const { data: authData } = await supabase.auth.getUser();
+    
+    if (!authData?.user) {
+      return getFallbackAnalyticsData();
+    }
+
+    return getCachedAnalyticsDashboardData(authData.user.id);
   } catch (error) {
     console.error('Error in getAnalyticsDashboardData:', error);
     return getFallbackAnalyticsData();
@@ -430,7 +580,7 @@ export async function getAnalyticsDashboardData(): Promise<AnalyticsDashboardDat
 /**
  * Devuelve datos simulados espectaculares cuando no hay conexión o falta histórico.
  */
-function getFallbackAnalyticsData(): AnalyticsDashboardData {
+function getFallbackAnalyticsData(level: string = 'intermedio'): AnalyticsDashboardData {
   const pmcData = generateSimulatedPmcData();
   const lastPoint = pmcData[pmcData.length - 1];
 
@@ -450,6 +600,8 @@ function getFallbackAnalyticsData(): AnalyticsDashboardData {
       natacion: 4500, // metros
       ciclismo: 120, // km
       carrera: 28 // km
-    }
+    },
+    pacePowerHistory: generatePacePowerHistory(220, 300, 105),
+    hrZoneDistribution: generateSimulatedHrZoneDistribution(level)
   };
 }

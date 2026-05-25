@@ -10,6 +10,7 @@ interface PerformanceChartCardProps {
   currentCtl: number;
   currentAtl: number;
   currentTsb: number;
+  athleteLevel?: string;
 }
 
 export function PerformanceChartCard({
@@ -17,15 +18,17 @@ export function PerformanceChartCard({
   currentCtl,
   currentAtl,
   currentTsb,
+  athleteLevel = 'intermedio',
 }: PerformanceChartCardProps) {
+  const isBeginner = athleteLevel === 'principiante';
   const [timeRange, setTimeRange] = React.useState<number>(30); // 30, 60 o 90 días
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
   const [activeHelp, setActiveHelp] = React.useState<'ctl' | 'atl' | 'tsb' | null>(null);
   const [showVolume, setShowVolume] = React.useState(true);
   const [visibleLines, setVisibleLines] = React.useState({
-    ctl: true,
-    atl: true,
-    tsb: true,
+    ctl: !isBeginner,
+    atl: !isBeginner,
+    tsb: !isBeginner,
     swim: true,
     bike: true,
     run: true,
@@ -81,6 +84,18 @@ export function PerformanceChartCard({
       if (d.runDistance && d.runDistance > run) run = d.runDistance;
     });
     return { maxSwim: swim, maxBike: bike, maxRun: run };
+  }, [filteredData]);
+
+  const totals = React.useMemo(() => {
+    let swim = 0;
+    let bike = 0;
+    let run = 0;
+    filteredData.forEach((d) => {
+      swim += d.swimDistance || 0;
+      bike += d.bikeDistance || 0;
+      run += d.runDistance || 0;
+    });
+    return { swim, bike, run };
   }, [filteredData]);
 
   // Generar puntos SVG para las líneas
@@ -179,27 +194,29 @@ export function PerformanceChartCard({
           <div className="flex items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
             <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              Gestión de Rendimiento (PMC)
+              {isBeginner ? 'Volúmenes de Deporte' : 'Gestión de Rendimiento (PMC)'}
             </h2>
           </div>
           <h3 className="text-2xl font-light text-zinc-50 mt-1">
-            Evolución de Fitness & Fatiga
+            {isBeginner ? 'Registro de Distancias Acumuladas' : 'Evolución de Fitness & Fatiga'}
           </h3>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Toggle de Volumen */}
-          <button
-            onClick={toggleAllVolume}
-            className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 ${
-              showVolume
-                ? 'bg-cyan-950/30 border-cyan-500/40 text-cyan-400'
-                : 'bg-zinc-900/80 border-zinc-800/80 text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${showVolume ? 'bg-cyan-450 animate-pulse' : 'bg-zinc-600'}`} />
-            {showVolume ? 'Volumen en vivo' : 'Ver volumen'}
-          </button>
+          {!isBeginner && (
+            <button
+              onClick={toggleAllVolume}
+              className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all flex items-center gap-1.5 ${
+                showVolume
+                  ? 'bg-cyan-950/30 border-cyan-500/40 text-cyan-400'
+                  : 'bg-zinc-900/80 border-zinc-800/80 text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${showVolume ? 'bg-cyan-450 animate-pulse' : 'bg-zinc-600'}`} />
+              {showVolume ? 'Volumen en vivo' : 'Ver volumen'}
+            </button>
+          )}
 
           {/* Pestañas de Rango Temporal */}
           <div className="flex items-center bg-zinc-900/80 p-1 rounded-lg border border-zinc-800/80">
@@ -223,194 +240,233 @@ export function PerformanceChartCard({
           </div>
         </div>
       </div>
+      {isBeginner ? (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Natación */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-purple-950/20 to-zinc-900/50 p-4 border border-purple-500/20 backdrop-blur-sm transition-all">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-xl -mr-10 -mt-10 pointer-events-none" />
+            <p className="text-xs font-semibold uppercase tracking-wider text-purple-400">Natación Acumulada</p>
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-3xl font-light text-zinc-50">{totals.swim}</span>
+              <span className="text-xs text-purple-550 font-medium">m</span>
+            </div>
+            <p className="text-[10px] text-zinc-500 mt-1">Suma total en el período seleccionado</p>
+          </div>
 
-      {/* Tarjetas de Resumen Dinámicas (CTL, ATL, TSB) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Fitness (CTL) */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-cyan-950/20 to-zinc-900/50 p-4 border border-cyan-500/20 backdrop-blur-sm transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl -mr-10 -mt-10 pointer-events-none" />
-          
-          <div className="flex items-center justify-between relative z-10">
-            <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
-              Fitness (CTL)
+          {/* Ciclismo */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-sky-950/20 to-zinc-900/50 p-4 border border-sky-500/20 backdrop-blur-sm transition-all">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/10 rounded-full blur-xl -mr-10 -mt-10 pointer-events-none" />
+            <p className="text-xs font-semibold uppercase tracking-wider text-sky-400">Ciclismo Acumulado</p>
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-3xl font-light text-zinc-50">{totals.bike}</span>
+              <span className="text-xs text-sky-450 font-medium">km</span>
+            </div>
+            <p className="text-[10px] text-zinc-500 mt-1">Suma total en el período seleccionado</p>
+          </div>
+
+          {/* Carrera */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-950/20 to-zinc-900/50 p-4 border border-emerald-500/20 backdrop-blur-sm transition-all">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl -mr-10 -mt-10 pointer-events-none" />
+            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Carrera Acumulada</p>
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-3xl font-light text-zinc-50">{totals.run}</span>
+              <span className="text-xs text-emerald-450 font-medium">km</span>
+            </div>
+            <p className="text-[10px] text-zinc-500 mt-1">Suma total en el período seleccionado</p>
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Fitness (CTL) */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-cyan-950/20 to-zinc-900/50 p-4 border border-cyan-500/20 backdrop-blur-sm transition-all">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl -mr-10 -mt-10 pointer-events-none" />
+            
+            <div className="flex items-center justify-between relative z-10">
+              <p className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
+                Fitness (CTL)
+              </p>
+              <button 
+                onClick={() => setActiveHelp(activeHelp === 'ctl' ? null : 'ctl')}
+                className="text-zinc-500 hover:text-cyan-400 transition-colors p-0.5"
+                title="¿Qué significa Fitness?"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-3xl font-light text-zinc-50">{displayCtl}</span>
+              <span className="text-xs text-cyan-500/80 font-medium">pts / día</span>
+            </div>
+            <p className="text-[10px] text-zinc-500 mt-1">
+              {activePoint ? `Medido al ${formatDate(activePoint.date)}` : 'Carga crónica acumulada (42 días)'}
             </p>
-            <button 
-              onClick={() => setActiveHelp(activeHelp === 'ctl' ? null : 'ctl')}
-              className="text-zinc-500 hover:text-cyan-400 transition-colors p-0.5"
-              title="¿Qué significa Fitness?"
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-            </button>
-          </div>
 
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-light text-zinc-50">{displayCtl}</span>
-            <span className="text-xs text-cyan-500/80 font-medium">pts / día</span>
-          </div>
-          <p className="text-[10px] text-zinc-500 mt-1">
-            {activePoint ? `Medido al ${formatDate(activePoint.date)}` : 'Carga crónica acumulada (42 días)'}
-          </p>
-
-          {/* Help Overlay */}
-          {activeHelp === 'ctl' && (
-            <div 
-              onClick={() => setActiveHelp(null)}
-              className="absolute inset-0 bg-zinc-950/95 border border-cyan-500/30 rounded-xl p-3 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 cursor-pointer select-none"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">¿Qué es el Fitness (CTL)?</p>
-                  <span className="text-[9px] text-zinc-500 hover:text-white transition-colors">✕</span>
+            {/* Help Overlay */}
+            {activeHelp === 'ctl' && (
+              <div 
+                onClick={() => setActiveHelp(null)}
+                className="absolute inset-0 bg-zinc-950/95 border border-cyan-500/30 rounded-xl p-3 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 cursor-pointer select-none"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">¿Qué es el Fitness (CTL)?</p>
+                    <span className="text-[9px] text-zinc-500 hover:text-white transition-colors">✕</span>
+                  </div>
+                  <p className="text-[9.5px] text-zinc-300 leading-relaxed">
+                    Mide tu condición física a largo plazo (promedio de 42 días). A mayor valor, más volumen e intensidad podrás asimilar.
+                  </p>
                 </div>
-                <p className="text-[9.5px] text-zinc-300 leading-relaxed">
-                  Mide tu condición física a largo plazo (promedio de 42 días). A mayor valor, más volumen e intensidad podrás asimilar.
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-right w-full mt-1">
+                  Haz clic para cerrar
                 </p>
               </div>
-              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-right w-full mt-1">
-                Haz clic para cerrar
+            )}
+          </div>
+
+          {/* Fatiga (ATL) */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-950/20 to-zinc-900/50 p-4 border border-rose-500/20 backdrop-blur-sm transition-all">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-full blur-xl -mr-10 -mt-10 pointer-events-none" />
+            
+            <div className="flex items-center justify-between relative z-10">
+              <p className="text-xs font-semibold uppercase tracking-wider text-rose-400">
+                Fatiga (ATL)
               </p>
+              <button 
+                onClick={() => setActiveHelp(activeHelp === 'atl' ? null : 'atl')}
+                className="text-zinc-500 hover:text-rose-400 transition-colors p-0.5"
+                title="¿Qué significa Fatiga?"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+              </button>
             </div>
-          )}
-        </div>
 
-        {/* Fatiga (ATL) */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-950/20 to-zinc-900/50 p-4 border border-rose-500/20 backdrop-blur-sm transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 rounded-full blur-xl -mr-10 -mt-10 pointer-events-none" />
-          
-          <div className="flex items-center justify-between relative z-10">
-            <p className="text-xs font-semibold uppercase tracking-wider text-rose-400">
-              Fatiga (ATL)
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-3xl font-light text-zinc-50">{displayAtl}</span>
+              <span className="text-xs text-rose-500/80 font-medium">pts / día</span>
+            </div>
+            <p className="text-[10px] text-zinc-500 mt-1">
+              {activePoint ? `Medido al ${formatDate(activePoint.date)}` : 'Estrés agudo reciente (7 días)'}
             </p>
-            <button 
-              onClick={() => setActiveHelp(activeHelp === 'atl' ? null : 'atl')}
-              className="text-zinc-500 hover:text-rose-400 transition-colors p-0.5"
-              title="¿Qué significa Fatiga?"
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-            </button>
-          </div>
 
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-light text-zinc-50">{displayAtl}</span>
-            <span className="text-xs text-rose-500/80 font-medium">pts / día</span>
-          </div>
-          <p className="text-[10px] text-zinc-500 mt-1">
-            {activePoint ? `Medido al ${formatDate(activePoint.date)}` : 'Estrés agudo reciente (7 días)'}
-          </p>
-
-          {/* Help Overlay */}
-          {activeHelp === 'atl' && (
-            <div 
-              onClick={() => setActiveHelp(null)}
-              className="absolute inset-0 bg-zinc-950/95 border border-rose-500/30 rounded-xl p-3 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 cursor-pointer select-none"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">¿Qué es la Fatiga (ATL)?</p>
-                  <span className="text-[9px] text-zinc-500 hover:text-white transition-colors">✕</span>
+            {/* Help Overlay */}
+            {activeHelp === 'atl' && (
+              <div 
+                onClick={() => setActiveHelp(null)}
+                className="absolute inset-0 bg-zinc-950/95 border border-rose-500/30 rounded-xl p-3 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 cursor-pointer select-none"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-bold text-rose-400 uppercase tracking-widest">¿Qué es la Fatiga (ATL)?</p>
+                    <span className="text-[9px] text-zinc-500 hover:text-white transition-colors">✕</span>
+                  </div>
+                  <p className="text-[9.5px] text-zinc-300 leading-relaxed">
+                    Mide el cansancio a corto plazo (promedio de 7 días). Sube rápido tras sesiones duras y avisa del riesgo de sobreentrenamiento.
+                  </p>
                 </div>
-                <p className="text-[9.5px] text-zinc-300 leading-relaxed">
-                  Mide el cansancio a corto plazo (promedio de 7 días). Sube rápido tras sesiones duras y avisa del riesgo de sobreentrenamiento.
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-right w-full mt-1">
+                  Haz clic para cerrar
                 </p>
               </div>
-              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-right w-full mt-1">
-                Haz clic para cerrar
+            )}
+          </div>
+
+          {/* Forma (TSB) */}
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-950/20 to-zinc-900/50 p-4 border border-amber-500/20 backdrop-blur-sm transition-all">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-xl -mr-10 -mt-10 pointer-events-none" />
+            
+            <div className="flex items-center justify-between relative z-10">
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-400">
+                Forma (TSB)
               </p>
+              <button 
+                onClick={() => setActiveHelp(activeHelp === 'tsb' ? null : 'tsb')}
+                className="text-zinc-500 hover:text-amber-400 transition-colors p-0.5"
+                title="¿Qué significa Forma?"
+              >
+                <HelpCircle className="w-3.5 h-3.5" />
+              </button>
             </div>
-          )}
-        </div>
 
-        {/* Forma (TSB) */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-950/20 to-zinc-900/50 p-4 border border-amber-500/20 backdrop-blur-sm transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-xl -mr-10 -mt-10 pointer-events-none" />
-          
-          <div className="flex items-center justify-between relative z-10">
-            <p className="text-xs font-semibold uppercase tracking-wider text-amber-400">
-              Forma (TSB)
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className="text-3xl font-light text-zinc-50">
+                {displayTsb > 0 ? `+${displayTsb}` : displayTsb}
+              </span>
+              <span className="text-xs text-amber-500/80 font-medium">balance</span>
+            </div>
+            <p className="text-[10px] text-zinc-500 mt-1">
+              {activePoint 
+                ? `Medido al ${formatDate(activePoint.date)}`
+                : currentTsb >= -10 && currentTsb <= 10
+                ? 'Estado óptimo de frescura'
+                : currentTsb < -10
+                ? 'Carga alta / Fatiga acumulada'
+                : 'Descanso prolongado / Pérdida de fitness'}
             </p>
-            <button 
-              onClick={() => setActiveHelp(activeHelp === 'tsb' ? null : 'tsb')}
-              className="text-zinc-500 hover:text-amber-400 transition-colors p-0.5"
-              title="¿Qué significa Forma?"
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-            </button>
-          </div>
 
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-light text-zinc-50">
-              {displayTsb > 0 ? `+${displayTsb}` : displayTsb}
-            </span>
-            <span className="text-xs text-amber-500/80 font-medium">balance</span>
-          </div>
-          <p className="text-[10px] text-zinc-500 mt-1">
-            {activePoint 
-              ? `Medido al ${formatDate(activePoint.date)}`
-              : currentTsb >= -10 && currentTsb <= 10
-              ? 'Estado óptimo de frescura'
-              : currentTsb < -10
-              ? 'Carga alta / Fatiga acumulada'
-              : 'Descanso prolongado / Pérdida de fitness'}
-          </p>
-
-          {/* Help Overlay */}
-          {activeHelp === 'tsb' && (
-            <div 
-              onClick={() => setActiveHelp(null)}
-              className="absolute inset-0 bg-zinc-950/95 border border-amber-500/30 rounded-xl p-3 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 cursor-pointer select-none"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">¿Qué es la Forma (TSB)?</p>
-                  <span className="text-[9px] text-zinc-500 hover:text-white transition-colors">✕</span>
+            {/* Help Overlay */}
+            {activeHelp === 'tsb' && (
+              <div 
+                onClick={() => setActiveHelp(null)}
+                className="absolute inset-0 bg-zinc-950/95 border border-amber-500/30 rounded-xl p-3 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 cursor-pointer select-none"
+              >
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest">¿Qué es la Forma (TSB)?</p>
+                    <span className="text-[9px] text-zinc-500 hover:text-white transition-colors">✕</span>
+                  </div>
+                  <p className="text-[9px] text-zinc-300 leading-relaxed">
+                    Diferencia entre Fitness y Fatiga (CTL - ATL).
+                    <br />• <strong>-10 a -30:</strong> Zona productiva.
+                    <br />• <strong>+5 a +25:</strong> Zona óptima para competir (frescura).
+                  </p>
                 </div>
-                <p className="text-[9px] text-zinc-300 leading-relaxed">
-                  Diferencia entre Fitness y Fatiga (CTL - ATL).
-                  <br />• <strong>-10 a -30:</strong> Zona productiva.
-                  <br />• <strong>+5 a +25:</strong> Zona óptima para competir (frescura).
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-right w-full mt-1">
+                  Haz clic para cerrar
                 </p>
               </div>
-              <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-wider text-right w-full mt-1">
-                Haz clic para cerrar
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Gráfico SVG Principal Interactivo */}
       <div className="relative w-full pt-6 pb-2">
         {/* Leyenda Visual */}
         <div className="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 mb-4 text-xs font-medium">
-          <button
-            onClick={() => toggleLine('ctl')}
-            className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.ctl ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
-          >
-            <span className="w-3 h-0.5 bg-cyan-400 rounded-full" />
-            <span>Fitness (CTL)</span>
-          </button>
-          
-          <button
-            onClick={() => toggleLine('atl')}
-            className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.atl ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
-          >
-            <span className="w-3 h-0.5 bg-rose-500 rounded-full border border-dashed border-rose-500" />
-            <span>Fatiga (ATL)</span>
-          </button>
-          
-          <button
-            onClick={() => toggleLine('tsb')}
-            className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.tsb ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
-          >
-            <span className="w-3 h-0.5 bg-amber-500 rounded-full" />
-            <span>Forma (TSB)</span>
-          </button>
+          {!isBeginner && (
+            <>
+              <button
+                onClick={() => toggleLine('ctl')}
+                className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.ctl ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+              >
+                <span className="w-3 h-0.5 bg-cyan-400 rounded-full" />
+                <span>Fitness (CTL)</span>
+              </button>
+              
+              <button
+                onClick={() => toggleLine('atl')}
+                className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.atl ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+              >
+                <span className="w-3 h-0.5 bg-rose-500 rounded-full border border-dashed border-rose-500" />
+                <span>Fatiga (ATL)</span>
+              </button>
+              
+              <button
+                onClick={() => toggleLine('tsb')}
+                className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.tsb ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+              >
+                <span className="w-3 h-0.5 bg-amber-500 rounded-full" />
+                <span>Forma (TSB)</span>
+              </button>
+            </>
+          )}
 
           {showVolume && (
             <>
               <button
                 onClick={() => toggleLine('swim')}
-                className={`flex items-center gap-2 border-l border-zinc-800 pl-4 transition-all hover:opacity-100 ${visibleLines.swim ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'}`}
+                className={`flex items-center gap-2 transition-all hover:opacity-100 ${visibleLines.swim ? 'opacity-100' : 'opacity-30 line-through text-zinc-550'} ${!isBeginner ? 'border-l border-zinc-800 pl-4' : ''}`}
               >
                 <span className="w-3 h-0.5 bg-purple-400 rounded-full opacity-70" />
                 <span>Vol. Natación</span>

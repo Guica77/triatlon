@@ -33,16 +33,19 @@ async function main() {
   console.log("Limpiando planes antiguos...");
   await supabase.from('training_plans').delete().neq('id', 'dummy');
 
-  for (const [key, plan] of Object.entries(planes)) {
+  for (const plan of planes) {
+    const key = plan.id;
     console.log(`Insertando plan: ${plan.nombre || key}...`);
     
     // Asignar variables por defecto si no existen
-    let distance = key.includes('sprint') ? 'sprint' : 
+    let distance = plan.distancia || (
+                   key.includes('sprint') ? 'sprint' : 
                    key.includes('olimpico') ? 'olimpico' :
-                   key.includes('70_3') ? '70.3' : 'ironman';
+                   (key.includes('70_3') || key.includes('703') || key.includes('70.3')) ? '70.3' : 'ironman');
                    
-    let level = key.includes('cero') ? 'principiante' :
-                key.includes('sub10') ? 'avanzado' : 'intermedio';
+    let level = plan.nivel || (
+                key.includes('cero') || key.includes('principiante') ? 'principiante' :
+                key.includes('sub10') || key.includes('avanzado') ? 'avanzado' : 'intermedio');
 
     // Insertar el plan
     const { data: planData, error: planError } = await supabase
@@ -53,7 +56,7 @@ async function main() {
         distance: distance,
         duration_weeks: plan.duracion_semanas || (plan.plan_semana_a_semana ? plan.plan_semana_a_semana.length : 12),
         level: level,
-        description: `Plan estructurado para distancia ${distance}. Nivel: ${level}.`
+        description: plan.descripcion || `Plan estructurado para distancia ${distance}. Nivel: ${level}.`
       })
       .select()
       .single();

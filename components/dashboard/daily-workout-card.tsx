@@ -15,6 +15,7 @@ import Link from 'next/link';
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
   virtualGarage?: string[];
+  athleteLevel?: string;
   workout: {
     id: string;
     scheduled_date: string;
@@ -66,7 +67,7 @@ function parseWorkoutDescription(desc: string, sportType: string) {
   return { main, warmup, cooldown, gear };
 }
 
-export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [] }: WorkoutCardProps) {
+export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio' }: WorkoutCardProps) {
   const [status, setStatus] = React.useState(workout.status);
   const [loading, setLoading] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry'>('main');
@@ -107,7 +108,10 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   if (!session) return null;
 
   const gearNeeded = session.gear_needed || [];
-  const missingGear = gearNeeded.filter(g => !virtualGarage.includes(g));
+  let missingGear = gearNeeded.filter(g => !virtualGarage.includes(g));
+  if (athleteLevel === 'principiante') {
+    missingGear = missingGear.filter(g => !['Potenciómetro', 'Cabra Triatlón', 'Ruedas Carbono', 'Casco Aero'].includes(g));
+  }
 
   const sportBgGlow: Record<string, string> = {
     natacion: 'bg-[var(--color-swim)]/5',
@@ -152,6 +156,22 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
   const desc = session.description || '';
   const parsed = parseWorkoutDescription(desc, session.sport_type);
+  let durationMin = session.duration_min || 0;
+
+  if (workout.auto_adjusted) {
+    durationMin = Math.round(durationMin * 0.75);
+    parsed.main = `[SESIÓN ADAPTADA POR FATIGA] Duración principal reducida un 25%. Mantén un esfuerzo moderado y cómodo en Zona 1-2. Objetivo original: ${parsed.main}`;
+  }
+
+  if (athleteLevel === 'principiante') {
+    if (session.sport_type === 'natacion') {
+      parsed.gear = '🩱 Bañador y gafas de natación (palas o aletas opcionales).';
+    } else if (session.sport_type === 'ciclismo') {
+      parsed.gear = '🚴‍♂️ Cualquier bicicleta (de carretera, híbrida o montaña) y casco obligatorio.';
+    } else if (session.sport_type === 'carrera') {
+      parsed.gear = '🏃‍♂️ Zapatillas de running normales y ropa cómoda.';
+    }
+  }
 
   const hasZ1 = desc.includes('Zona 1') || desc.includes('Z1');
   const hasZ2 = desc.includes('Zona 2') || desc.includes('Z2') || desc.includes('suave') || desc.includes('fácil');
@@ -190,10 +210,10 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
           </h3>
         </div>
 
-        {session.duration_min > 0 && (
+        {durationMin > 0 && (
           <div className="text-right flex items-center gap-1.5 text-zinc-300 font-light">
             <Clock className="w-4 h-4 text-zinc-500" />
-            <span className="text-2xl font-light text-zinc-50">{session.duration_min}</span>
+            <span className="text-2xl font-light text-zinc-50">{durationMin}</span>
             <span className="text-xs text-zinc-500">min</span>
           </div>
         )}
@@ -330,15 +350,33 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                       </div>
 
                       <div className="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800/80">
-                        <p className="text-xs text-zinc-400 mb-1 flex items-center gap-1">⚡ Potencia Media</p>
-                        <p className="text-lg font-bold text-zinc-100">{telemetry.avg_power || (session?.sport_type === 'ciclismo' ? 215 : 240)} <span className="text-xs font-normal text-zinc-500">W</span></p>
-                        <p className="text-[10px] text-zinc-500 mt-0.5">Norm: {telemetry.normalized_power || (session?.sport_type === 'ciclismo' ? 230 : 255)} W</p>
+                        <p className="text-xs text-zinc-400 mb-1 flex items-center gap-1">
+                          ⚡ Potencia Media
+                          {athleteLevel === 'principiante' && <span className="text-[9px] text-zinc-550 font-normal ml-1">(Sensor Pro)</span>}
+                        </p>
+                        {athleteLevel === 'principiante' ? (
+                          <p className="text-xs text-zinc-500 italic mt-2">Opcional / No requerido</p>
+                        ) : (
+                          <>
+                            <p className="text-lg font-bold text-zinc-100">{telemetry.avg_power || (session?.sport_type === 'ciclismo' ? 215 : 240)} <span className="text-xs font-normal text-zinc-500">W</span></p>
+                            <p className="text-[10px] text-zinc-500 mt-0.5">Norm: {telemetry.normalized_power || (session?.sport_type === 'ciclismo' ? 230 : 255)} W</p>
+                          </>
+                        )}
                       </div>
 
                       <div className="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800/80">
-                        <p className="text-xs text-zinc-400 mb-1 flex items-center gap-1">🔄 Cadencia</p>
-                        <p className="text-lg font-bold text-zinc-100">{telemetry.avg_cadence || (session?.sport_type === 'carrera' ? 176 : 92)} <span className="text-xs font-normal text-zinc-500">ppm</span></p>
-                        <p className="text-[10px] text-green-400 font-medium mt-0.5">Óptima de carrera</p>
+                        <p className="text-xs text-zinc-400 mb-1 flex items-center gap-1">
+                          🔄 Cadencia
+                          {athleteLevel === 'principiante' && <span className="text-[9px] text-zinc-550 font-normal ml-1">(Sensor Pro)</span>}
+                        </p>
+                        {athleteLevel === 'principiante' ? (
+                          <p className="text-xs text-zinc-500 italic mt-2">Opcional / No requerido</p>
+                        ) : (
+                          <>
+                            <p className="text-lg font-bold text-zinc-100">{telemetry.avg_cadence || (session?.sport_type === 'carrera' ? 176 : 92)} <span className="text-xs font-normal text-zinc-500">ppm</span></p>
+                            <p className="text-[10px] text-green-400 font-medium mt-0.5">Óptima de carrera</p>
+                          </>
+                        )}
                       </div>
 
                       <div className="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800/80">
@@ -348,12 +386,21 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                       </div>
 
                       <div className="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800/80 col-span-2 sm:col-span-2">
-                        <p className="text-xs text-zinc-400 mb-1 flex items-center gap-1">📊 Carga de Entrenamiento (TSS)</p>
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-lg font-bold text-cyan-400">{(workout as any).actual_tss || (telemetry as any).actual_tss || 145} <span className="text-xs font-normal text-zinc-500">TSS Real</span></p>
-                          <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 text-[10px] font-bold">Z2 Base</span>
-                        </div>
-                        <p className="text-[10px] text-zinc-500 mt-0.5">Sincronizado e integrado en predicción de fatiga</p>
+                        <p className="text-xs text-zinc-400 mb-1 flex items-center gap-1">
+                          📊 Carga de Entrenamiento (TSS)
+                          {athleteLevel === 'principiante' && <span className="text-[9px] text-zinc-550 font-normal ml-1">(Métrica Pro)</span>}
+                        </p>
+                        {athleteLevel === 'principiante' ? (
+                          <p className="text-xs text-zinc-500 italic mt-2">No necesario para tu nivel de inicio</p>
+                        ) : (
+                          <>
+                            <div className="flex items-baseline gap-2">
+                              <p className="text-lg font-bold text-cyan-400">{(workout as any).actual_tss || (telemetry as any).actual_tss || 145} <span className="text-xs font-normal text-zinc-500">TSS Real</span></p>
+                              <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 text-[10px] font-bold">Z2 Base</span>
+                            </div>
+                            <p className="text-[10px] text-zinc-500 mt-0.5">Sincronizado e integrado en predicción de fatiga</p>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -7,37 +7,53 @@ import { HelpCircle } from 'lucide-react';
 interface WeeklyTssCardProps {
   actualTss: number;
   targetTss: number;
+  athleteLevel?: string;
 }
 
-export function WeeklyTssCard({ actualTss, targetTss }: WeeklyTssCardProps) {
+export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio' }: WeeklyTssCardProps) {
+  const isBeginner = athleteLevel === 'principiante';
   const [showHelp, setShowHelp] = React.useState(false);
 
+  // Convert TSS to approximate training hours: 60 TSS is roughly 1 hour at moderate intensity, multiplied by an aerobic factor
+  const actualHours = React.useMemo(() => {
+    return Math.round((actualTss / 60 * 1.25) * 10) / 10;
+  }, [actualTss]);
+
+  const targetHours = React.useMemo(() => {
+    const hours = Math.round((targetTss / 60 * 1.25) * 10) / 10;
+    return hours > 0 ? hours : 5.0; // Default fallback to 5 hours meta for beginners
+  }, [targetTss]);
+
   const percent = React.useMemo(() => {
+    if (isBeginner) {
+      if (!targetHours) return 0;
+      return Math.round((actualHours / targetHours) * 100);
+    }
     if (!targetTss) return 0;
     return Math.round((actualTss / targetTss) * 100);
-  }, [actualTss, targetTss]);
+  }, [actualTss, targetTss, actualHours, targetHours, isBeginner]);
 
   const statusInfo = React.useMemo(() => {
     if (percent < 70) {
       return {
-        label: 'Recuperación / Carga Baja',
+        label: isBeginner ? 'Progreso Inicial' : 'Recuperación / Carga Baja',
         color: 'text-cyan-400 bg-cyan-950/30 border-cyan-500/30',
         barColor: 'bg-cyan-500'
       };
     } else if (percent <= 110) {
       return {
-        label: 'Carga Óptima',
+        label: isBeginner ? 'Volumen Óptimo' : 'Carga Óptima',
         color: 'text-emerald-400 bg-emerald-950/30 border-emerald-500/30',
         barColor: 'bg-emerald-500'
       };
     } else {
       return {
-        label: 'Sobrecarga / Pico de Estrés',
+        label: isBeginner ? 'Volumen Elevado' : 'Sobrecarga / Pico de Estrés',
         color: 'text-rose-400 bg-rose-950/30 border-rose-500/30',
         barColor: 'bg-rose-500'
       };
     }
-  }, [percent]);
+  }, [percent, isBeginner]);
 
   return (
     <ProCard className="relative flex flex-col justify-between space-y-6 md:col-span-1 overflow-hidden">
@@ -46,12 +62,22 @@ export function WeeklyTssCard({ actualTss, targetTss }: WeeklyTssCardProps) {
         <div className="absolute inset-0 bg-zinc-950/95 border border-cyan-500/20 rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
           <div className="space-y-2">
             <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-widest">
-              ¿Qué es el Progreso de TSS?
+              {isBeginner ? '¿Qué es el Tiempo Semanal?' : '¿Qué es el Progreso de TSS?'}
             </h4>
             <p className="text-[11px] text-zinc-300 leading-relaxed">
-              El **TSS (Training Stress Score)** cuantifica el esfuerzo fisiológico de tus entrenamientos (duración x intensidad).
-              <br /><br />
-              Este panel suma tu TSS de lunes a domingo. Te ayuda a controlar que no acumules carga de golpe (evitando lesiones) y que cumplas con la dosis semanal óptima diseñada por el plan.
+              {isBeginner ? (
+                <>
+                  Suma la duración estimada de todas tus sesiones de entrenamiento de la semana actual.
+                  <br /><br />
+                  La clave para terminar tu primer triatlón con éxito y sin lesiones es la constancia y el volumen acumulado de forma segura, no entrenar a intensidades extremas.
+                </>
+              ) : (
+                <>
+                  El **TSS (Training Stress Score)** cuantifica el esfuerzo fisiológico de tus entrenamientos (duración x intensidad).
+                  <br /><br />
+                  Este panel suma tu TSS de lunes a domingo. Te ayuda a controlar que no acumules carga de golpe (evitando lesiones) y que cumplas con la dosis semanal óptima diseñada por el plan.
+                </>
+              )}
             </p>
           </div>
           <button
@@ -67,11 +93,11 @@ export function WeeklyTssCard({ actualTss, targetTss }: WeeklyTssCardProps) {
       <div className="flex justify-between items-start border-b border-[var(--color-border)] pb-6 relative z-10">
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-            Carga Semanal Acumulada
+            {isBeginner ? 'Tiempo Semanal Acumulado' : 'Carga Semanal Acumulada'}
           </span>
           <div className="flex items-center gap-2 mt-1">
             <h3 className="text-2xl font-light text-zinc-50">
-              Progreso de TSS
+              {isBeginner ? 'Horas de Entrenamiento' : 'Progreso de TSS'}
             </h3>
             <button
               onClick={() => setShowHelp(true)}
@@ -94,14 +120,14 @@ export function WeeklyTssCard({ actualTss, targetTss }: WeeklyTssCardProps) {
         <div>
           <div className="flex items-baseline gap-2">
             <span className="text-5xl font-light tracking-tight text-zinc-50">
-              {actualTss}
+              {isBeginner ? actualHours : actualTss}
             </span>
             <span className="text-xl font-light text-zinc-500">
-              / {targetTss} TSS
+              / {isBeginner ? `${targetHours} h` : `${targetTss} TSS`}
             </span>
           </div>
           <p className="text-sm text-zinc-400 mt-1">
-            {percent}% del objetivo semanal completado
+            {percent}% {isBeginner ? 'de las horas semanales completadas' : 'del objetivo semanal completado'}
           </p>
         </div>
       </div>
@@ -115,15 +141,23 @@ export function WeeklyTssCard({ actualTss, targetTss }: WeeklyTssCardProps) {
           />
         </div>
         <div className="flex justify-between text-xs text-zinc-500 font-medium px-1 uppercase tracking-wider">
-          <span>0 TSS</span>
-          <span>Meta ({targetTss})</span>
+          <span>0 {isBeginner ? 'horas' : 'TSS'}</span>
+          <span>Meta ({isBeginner ? `${targetHours} h` : targetTss})</span>
         </div>
       </div>
 
       {/* Consejo de Entrenamiento */}
       <div className="bg-zinc-900/50 rounded-xl p-4 border border-zinc-800/60 mt-4">
         <p className="text-xs text-zinc-400 leading-relaxed">
-          <strong className="text-zinc-200">Consejo de Carga:</strong> El TSS mide tanto la duración como la intensidad. Mantener el cumplimiento entre el 90% y 110% asegura adaptaciones aeróbicas óptimas sin riesgo de lesión.
+          {isBeginner ? (
+            <>
+              <strong className="text-zinc-200">Consejo de Constancia:</strong> Distribuir tus horas a lo largo de la semana de forma regular es infinitamente mejor que intentar hacer entrenamientos largos de golpe. ¡Disfruta del camino!
+            </>
+          ) : (
+            <>
+              <strong className="text-zinc-200">Consejo de Carga:</strong> El TSS mide tanto la duración como la intensidad. Mantener el cumplimiento entre el 90% y 110% asegura adaptaciones aeróbicas óptimas sin riesgo de lesión.
+            </>
+          )}
         </p>
       </div>
     </ProCard>

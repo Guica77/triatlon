@@ -180,7 +180,7 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
           {/* HRV */}
           <div className="p-4 rounded-xl bg-zinc-950/40 border border-zinc-800/60 flex flex-col justify-between space-y-1">
             <div className="flex items-center justify-between text-zinc-500">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">HRV</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 cursor-help" title="Variabilidad del Ritmo Cardíaco (HRV): Mide el tiempo entre latidos. Un valor alto indica que tu sistema nervioso está recuperado y listo para entrenar.">HRV</span>
               <Heart className="w-3.5 h-3.5" />
             </div>
             <div className="flex items-baseline gap-1.5">
@@ -193,7 +193,7 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
           {/* RHR */}
           <div className="p-4 rounded-xl bg-zinc-950/40 border border-zinc-800/60 flex flex-col justify-between space-y-1">
             <div className="flex items-center justify-between text-zinc-500">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">RHR</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 cursor-help" title="Pulsaciones en Reposo (RHR): Mide tus latidos mínimos por minuto. Un valor más bajo suele indicar que tu corazón está bien descansado.">RHR</span>
               <Activity className="w-3.5 h-3.5" />
             </div>
             <div className="flex items-baseline gap-1.5">

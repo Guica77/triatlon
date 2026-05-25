@@ -3,6 +3,8 @@ import { getAnalyticsDashboardData } from './analytics-actions';
 import { PerformanceChartCard } from '@/components/analytics/performance-chart-card';
 import { WeeklyTssCard } from '@/components/analytics/weekly-tss-card';
 import { SportDistributionCard } from '@/components/analytics/sport-distribution-card';
+import { PacePowerHistoryCard } from '@/components/analytics/pace-power-history-card';
+import { TrainingZonesCard } from '@/components/analytics/training-zones-card';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -39,7 +41,9 @@ export default async function AnalyticsPage() {
             <BarChart2 className="w-4 h-4 text-cyan-400" />
           </div>
           <div>
-            <h1 className="text-base font-medium text-zinc-50">Analíticas Avanzadas</h1>
+            <h1 className="text-base font-medium text-zinc-50">
+              {profile?.level === 'principiante' ? 'Mi Progreso y Constancia' : 'Analíticas Avanzadas'}
+            </h1>
             <p className="text-xs text-zinc-400 capitalize">
               {activePlan?.name || 'Plan de Entrenamiento'} • Atleta: {profile?.first_name || 'Triatleta'}
             </p>
@@ -62,10 +66,12 @@ export default async function AnalyticsPage() {
         {/* Encabezado de Sección */}
         <div className="space-y-1">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
-            Panel de Rendimiento Unificado
+            {profile?.level === 'principiante' ? 'Progreso Semanal' : 'Panel de Rendimiento Unificado'}
           </h2>
           <p className="text-sm text-zinc-400">
-            Monitoriza tu carga acumulada (TSS), evita el sobreentrenamiento y planifica tus picos de forma con precisión milimétrica.
+            {profile?.level === 'principiante'
+              ? 'Sigue tu tiempo de entrenamiento acumulado, tu constancia semanal y la distribución de tus deportes.'
+              : 'Monitoriza tu carga acumulada (TSS), evita el sobreentrenamiento y planifica tus picos de forma con precisión milimétrica.'}
           </p>
         </div>
 
@@ -77,12 +83,14 @@ export default async function AnalyticsPage() {
             currentCtl={analyticsData.currentCtl}
             currentAtl={analyticsData.currentAtl}
             currentTsb={analyticsData.currentTsb}
+            athleteLevel={profile?.level || 'intermedio'}
           />
 
           {/* Bloque 2: Carga Semanal vs Objetivo */}
           <WeeklyTssCard
             actualTss={analyticsData.weeklyTssActual}
             targetTss={analyticsData.weeklyTssTarget}
+            athleteLevel={profile?.level || 'intermedio'}
           />
 
           {/* Bloque 3: Distribución por Deporte */}
@@ -90,6 +98,16 @@ export default async function AnalyticsPage() {
             distribution={analyticsData.sportDistribution}
             weeklyDistance={analyticsData.weeklyDistance}
           />
+
+          {/* Bloque 4: Historial de Ritmos y FTP (Ancho Completo) */}
+          <div className="md:col-span-2">
+            <PacePowerHistoryCard history={analyticsData.pacePowerHistory} />
+          </div>
+
+          {/* Bloque 5: Zonas de Entrenamiento (Ancho Completo) */}
+          <div className="md:col-span-2">
+            <TrainingZonesCard zones={analyticsData.hrZoneDistribution} athleteLevel={profile?.level || 'intermedio'} />
+          </div>
         </div>
 
       </main>

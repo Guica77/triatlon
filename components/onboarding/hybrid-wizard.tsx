@@ -26,6 +26,7 @@ export function HybridWizard() {
   const [loading, setLoading] = React.useState(false);
 
   // Step 1: Ambition & Availability
+  const [athleteLevel, setAthleteLevel] = React.useState('intermedio');
   const [activeTab, setActiveTab] = React.useState<'catalog' | 'custom'>('catalog');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedRace, setSelectedRace] = React.useState<RaceCatalogItem | null>(RACES_CATALOG[0]);
@@ -105,7 +106,8 @@ export function HybridWizard() {
         run_weekly_hours: runHours,
         target_swim_time: targetSwimTime || undefined,
         target_bike_time: targetBikeTime || undefined,
-        target_run_time: targetRunTime || undefined
+        target_run_time: targetRunTime || undefined,
+        athlete_level: athleteLevel
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -138,7 +140,8 @@ export function HybridWizard() {
         run_weekly_hours: runHours,
         target_swim_time: targetSwimTime || undefined,
         target_bike_time: targetBikeTime || undefined,
-        target_run_time: targetRunTime || undefined
+        target_run_time: targetRunTime || undefined,
+        athlete_level: athleteLevel
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -221,6 +224,39 @@ export function HybridWizard() {
                   )}
                 </div>
 
+                <div>
+                  <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">Nivel de Experiencia</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'principiante', label: 'Principiante', desc: 'Iniciación / Cero' },
+                      { id: 'intermedio', label: 'Intermedio', desc: 'Con base / Experiencia' },
+                      { id: 'avanzado', label: 'Avanzado', desc: 'Rendimiento / Pro' }
+                    ].map(lvl => (
+                      <button
+                        key={lvl.id}
+                        type="button"
+                        onClick={() => {
+                          setAthleteLevel(lvl.id);
+                          if (lvl.id === 'principiante') {
+                            setBaselineHours('4-6h');
+                            setSwimHours(2);
+                            setBikeHours(3);
+                            setRunHours(2);
+                          }
+                        }}
+                        className={`py-3 px-2 rounded-xl border text-sm font-semibold transition-all flex flex-col items-center justify-center text-center gap-1 ${
+                          athleteLevel === lvl.id
+                            ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-inner'
+                            : 'bg-zinc-950/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                        }`}
+                      >
+                        <span>{lvl.label}</span>
+                        <span className="text-[10px] text-zinc-500 font-normal">{lvl.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Disponibilidad Semanal</label>
@@ -238,25 +274,27 @@ export function HybridWizard() {
                   </div>
                 </div>
 
-                <div className="border-t border-zinc-800/80 pt-6 space-y-4">
-                  <label className="text-xs font-medium text-zinc-400 block uppercase tracking-wider flex items-center gap-1.5">
-                    <Trophy className="w-4 h-4 text-cyan-400" /> Marcas / Tiempos Objetivo por Segmento (Opcional)
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Natación split</label>
-                      <input type="text" placeholder="Ej. 35 min o 0:35" value={targetSwimTime} onChange={e => setTargetSwimTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:border-cyan-500 outline-none" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Ciclismo split</label>
-                      <input type="text" placeholder="Ej. 2h 45m o 2:45" value={targetBikeTime} onChange={e => setTargetBikeTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:border-cyan-500 outline-none" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Carrera split</label>
-                      <input type="text" placeholder="Ej. 1h 35m o 1:35" value={targetRunTime} onChange={e => setTargetRunTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:border-cyan-500 outline-none" />
+                {athleteLevel !== 'principiante' && (
+                  <div className="border-t border-zinc-800/80 pt-6 space-y-4">
+                    <label className="text-xs font-medium text-zinc-400 block uppercase tracking-wider flex items-center gap-1.5">
+                      <Trophy className="w-4 h-4 text-cyan-400" /> Marcas / Tiempos Objetivo por Segmento (Opcional)
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Natación split</label>
+                        <input type="text" placeholder="Ej. 35 min o 0:35" value={targetSwimTime} onChange={e => setTargetSwimTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:border-cyan-500 outline-none" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Ciclismo split</label>
+                        <input type="text" placeholder="Ej. 2h 45m o 2:45" value={targetBikeTime} onChange={e => setTargetBikeTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:border-cyan-500 outline-none" />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Carrera split</label>
+                        <input type="text" placeholder="Ej. 1h 35m o 1:35" value={targetRunTime} onChange={e => setTargetRunTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-zinc-100 focus:border-cyan-500 outline-none" />
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div className="border-t border-zinc-800/80 pt-6 space-y-4">
                   <label className="text-xs font-medium text-zinc-400 block uppercase tracking-wider flex items-center gap-1.5">
@@ -338,20 +376,34 @@ export function HybridWizard() {
                 <p className="text-sm text-zinc-400 mt-1">Introduce tus zonas actuales. Si no las sabes, las estimaremos automáticamente por IA.</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div>
-                  <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">FTP Ciclismo (W)</label>
-                  <input type="number" placeholder="Ej. 250" value={currentFtp} onChange={e => setCurrentFtp(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-emerald-500 outline-none" />
+              {athleteLevel === 'principiante' ? (
+                <div className="p-5 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 space-y-3">
+                  <p className="text-sm text-emerald-400 font-bold flex items-center gap-2">
+                    <Activity className="w-5 h-5 animate-pulse" /> Estimación Inteligente & Aeróbica
+                  </p>
+                  <p className="text-xs text-zinc-300 leading-relaxed">
+                    ¡Como principiante, no necesitas preocuparte por tests de FTP exhaustivos ni ritmos de carrera precisos! Estimaremos tus zonas aeróbicas básicas basándonos de forma adaptativa en tu edad y la percepción de tu esfuerzo diario (RPE).
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    Esto mantiene tu entrenamiento seguro, motivador y libre de presiones innecesarias. Podrás configurar estos valores de rendimiento más adelante en tu configuración de perfil si lo deseas.
+                  </p>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Natación (/100m)</label>
-                  <input type="text" placeholder="Ej. 01:45" value={currentSwimPace} onChange={e => setCurrentSwimPace(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-emerald-500 outline-none" />
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div>
+                    <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">FTP Ciclismo (W)</label>
+                    <input type="number" placeholder="Ej. 250" value={currentFtp} onChange={e => setCurrentFtp(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-emerald-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Natación (/100m)</label>
+                    <input type="text" placeholder="Ej. 01:45" value={currentSwimPace} onChange={e => setCurrentSwimPace(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-emerald-500 outline-none" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Carrera (/km)</label>
+                    <input type="text" placeholder="Ej. 04:30" value={currentRunPace} onChange={e => setCurrentRunPace(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-emerald-500 outline-none" />
+                  </div>
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Carrera (/km)</label>
-                  <input type="text" placeholder="Ej. 04:30" value={currentRunPace} onChange={e => setCurrentRunPace(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-emerald-500 outline-none" />
-                </div>
-              </div>
+              )}
               
               <div className="flex justify-between pt-4 border-t border-zinc-800/80">
                 <button onClick={() => setStep(1)} className="px-6 py-3 text-sm font-semibold text-zinc-400 hover:text-white transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>

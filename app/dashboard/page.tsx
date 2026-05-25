@@ -9,7 +9,7 @@ import { getAnalyticsDashboardData } from '@/app/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2, ShoppingBag } from 'lucide-react';
+import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2, ShoppingBag, BookOpen, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
@@ -130,6 +130,12 @@ export default async function DashboardPage() {
 
         {/* Nivel 2: Fila Inferior (Barra de Píldoras de Acción / Quick Actions) */}
         <div className="px-6 py-2.5 bg-zinc-950/60 flex items-center gap-2 overflow-x-auto scrollbar-none border-t border-zinc-900/30">
+          <Link href="/principiantes" className="shrink-0">
+            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 shadow-sm transition-all duration-200">
+              <BookOpen className="w-3.5 h-3.5" />
+              <span className="font-medium">Zona Principiantes</span>
+            </AnimatedButton>
+          </Link>
           <Link href="/marketplace" className="shrink-0">
             <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-cyan-500/30 bg-cyan-500/10 flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 shadow-sm transition-all duration-200">
               <ShoppingBag className="w-3.5 h-3.5" />
@@ -153,6 +159,36 @@ export default async function DashboardPage() {
 
       <main className="max-w-4xl mx-auto px-6 pt-8 space-y-8">
         
+        {/* Banner de Bienvenida a Principiantes */}
+        {profile.level === 'principiante' && (
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 relative overflow-hidden group shadow-md shadow-emerald-950/20">
+            {/* Ambient Background Light Glow */}
+            <div className="absolute -right-16 -top-16 w-36 h-36 rounded-full bg-emerald-500/10 blur-3xl group-hover:bg-emerald-500/15 transition-all duration-500" />
+            
+            <div className="flex gap-4 items-start relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5 shadow-inner">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
+                  ¡Bienvenido a tu viaje de triatlón, {profile.first_name || 'Triatleta'}! 🏁
+                </h3>
+                <p className="text-xs text-zinc-300 leading-relaxed max-w-2xl">
+                  Estás siguiendo un plan estructurado para principiantes. Recuerda que no necesitas relojes caros, potenciómetros ni bicicletas de miles de euros para empezar. Tu constancia y disfrutar del camino es lo único que importa.
+                </p>
+                <div className="pt-1.5 flex gap-3">
+                  <Link href="/principiantes">
+                    <AnimatedButton size="sm" className="!bg-emerald-500 hover:!bg-emerald-400 !text-black text-[11px] font-semibold py-1.5 px-3 rounded-lg shadow-sm shadow-emerald-950/25 flex items-center gap-1">
+                      <span>Explorar Zona Principiantes</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </AnimatedButton>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Barra de Telemetría Activa (Sólo si está conectado, sin botón manual de forzado) */}
         {isConnected && (
           <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/15 flex items-center justify-between gap-4">
@@ -183,7 +219,11 @@ export default async function DashboardPage() {
             </div>
           )}
           <div className="h-full">
-            <FormStatusWidget tsb={analyticsData.currentTsb} />
+            <FormStatusWidget 
+              tsb={analyticsData.currentTsb} 
+              athleteLevel={profile.level}
+              progressPercent={progressPercent}
+            />
           </div>
         </section>
 
@@ -233,7 +273,12 @@ export default async function DashboardPage() {
                         Mañana
                       </div>
                     )}
-                    <DailyWorkoutCard workout={w as any} initialIsConnected={isConnected} virtualGarage={profile.virtual_garage || []} />
+                    <DailyWorkoutCard 
+                      workout={w as any} 
+                      initialIsConnected={isConnected} 
+                      virtualGarage={profile.virtual_garage || []} 
+                      athleteLevel={profile.level} 
+                    />
                   </div>
                 );
               })

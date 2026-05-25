@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function updatePhysiologicalData(data: {
   current_ftp?: number | null;
@@ -32,6 +32,7 @@ export async function updatePhysiologicalData(data: {
     return { error: 'Error al actualizar los datos fisiológicos' };
   }
 
+  (revalidateTag as any)('analytics');
   revalidatePath('/settings');
   revalidatePath('/dashboard');
   
@@ -117,6 +118,7 @@ export async function disconnectTelemetry(provider: 'strava' | 'garmin') {
     .eq('user_id', user.id)
     .eq('provider', provider);
 
+  (revalidateTag as any)('analytics');
   revalidatePath('/settings');
   revalidatePath('/dashboard');
   
@@ -131,21 +133,16 @@ export async function syncPacesFromStravaAction() {
     return { error: 'No autorizado' };
   }
 
-  // Get current Strava token
-  const { data: device } = await supabase
-    .from('user_connected_devices')
-    .select('access_token')
-    .eq('user_id', user.id)
-    .eq('provider', 'strava')
-    .maybeSingle();
+  const { getOrRefreshStravaToken, syncPhysiologyFromStrava } = await import('@/lib/telemetry/strava-sync');
+  const token = await getOrRefreshStravaToken(user.id);
 
-  if (!device?.access_token) {
-    return { error: 'No tienes una cuenta de Strava conectada.' };
+  if (!token) {
+    return { error: 'No tienes una cuenta de Strava conectada o el token ha expirado y no se pudo refrescar.' };
   }
 
-  const { syncPhysiologyFromStrava } = await import('@/lib/telemetry/strava-sync');
-  await syncPhysiologyFromStrava(user.id, device.access_token);
+  await syncPhysiologyFromStrava(user.id, token);
 
+  (revalidateTag as any)('analytics');
   revalidatePath('/settings');
   revalidatePath('/dashboard');
   

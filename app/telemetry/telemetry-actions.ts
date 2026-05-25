@@ -1,8 +1,19 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { pushWorkoutToDevice } from '@/app/telemetry/workout-push-actions';
+import { sendWorkoutCompletionEmail } from '@/lib/email';
+
+function safeWaitUntil(promise: Promise<any>) {
+  if (typeof (globalThis as any).waitUntil === 'function') {
+    (globalThis as any).waitUntil(promise);
+  } else {
+    promise.catch(err => {
+      console.error('Error in safeWaitUntil background task:', err);
+    });
+  }
+}
 
 export interface TelemetryPayload {
   workout_id: string;
@@ -72,6 +83,20 @@ export async function ingestActivityTelemetry(payload: TelemetryPayload) {
     // 3. Evaluar cumplimiento y disparar recálculo dinámico si hay desviación > ±15%
     const adjustmentMsg = await evaluateAndAdjustTrainingPlan(payload.user_id, payload.workout_id, payload.actual_tss);
 
+    // Enviar correo de actividad completada de forma asíncrona no bloqueante
+    safeWaitUntil(
+      sendWorkoutCompletionEmail(
+        payload.user_id,
+        payload.workout_id,
+        payload.actual_tss,
+        payload.source_provider,
+        adjustmentMsg
+      ).catch(err => {
+        console.error('Error enviando correo de telemetría:', err);
+      })
+    );
+
+    (revalidateTag as any)('analytics');
     revalidatePath('/dashboard');
     revalidatePath('/analytics');
     revalidatePath('/feedback');
@@ -245,6 +270,7 @@ export async function syncAllPendingWorkouts() {
       }
     }
 
+    (revalidateTag as any)('analytics');
     revalidatePath('/dashboard');
     revalidatePath('/analytics');
     revalidatePath('/feedback');

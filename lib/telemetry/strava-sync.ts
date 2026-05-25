@@ -1,5 +1,85 @@
 import { createClient } from '@/lib/supabase/server';
 
+export async function getOrRefreshStravaToken(userId: string): Promise<string | null> {
+  const supabase = await createClient();
+
+  // 1. Obtener tokens de user_connected_devices
+  const { data: device } = await supabase
+    .from('user_connected_devices')
+    .select('access_token, refresh_token, expires_at')
+    .eq('user_id', userId)
+    .eq('provider', 'strava')
+    .maybeSingle();
+
+  if (!device) {
+    return null;
+  }
+
+  const expiresAt = new Date(device.expires_at).getTime();
+  
+  // Si no ha expirado (con un margen de seguridad de 5 minutos), lo retornamos directamente
+  if (expiresAt > Date.now() + 5 * 60 * 1000) {
+    return device.access_token;
+  }
+
+  // 2. Ha expirado, refrescamos el token usando las credenciales de Strava
+  if (!device.refresh_token) {
+    console.error('No refresh token found for Strava user:', userId);
+    return null;
+  }
+
+  try {
+    const refreshResponse = await fetch('https://www.strava.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: process.env.STRAVA_CLIENT_ID,
+        client_secret: process.env.STRAVA_CLIENT_SECRET,
+        refresh_token: device.refresh_token,
+        grant_type: 'refresh_token',
+      }),
+    });
+
+    if (!refreshResponse.ok) {
+      console.error('Failed to refresh Strava token:', await refreshResponse.text());
+      return null;
+    }
+
+    const refreshData = await refreshResponse.json();
+    const newAccessToken = refreshData.access_token;
+    const newRefreshToken = refreshData.refresh_token || device.refresh_token;
+    const newExpiresAt = refreshData.expires_at * 1000;
+
+    // Actualizar la tabla profiles (que contiene strava_auth_tokens para webhooks)
+    await supabase
+      .from('profiles')
+      .update({
+        strava_auth_tokens: {
+          access_token: newAccessToken,
+          refresh_token: newRefreshToken,
+          expires_at: newExpiresAt,
+        }
+      } as any)
+      .eq('id', userId);
+
+    // Actualizar la tabla user_connected_devices
+    await supabase
+      .from('user_connected_devices')
+      .update({
+        access_token: newAccessToken,
+        refresh_token: newRefreshToken,
+        expires_at: new Date(newExpiresAt).toISOString(),
+      })
+      .eq('user_id', userId)
+      .eq('provider', 'strava');
+
+    return newAccessToken;
+  } catch (error) {
+    console.error('Error refreshing Strava token:', error);
+    return null;
+  }
+}
+
 export async function syncPhysiologyFromStrava(userId: string, accessToken: string) {
   const supabase = await createClient();
 

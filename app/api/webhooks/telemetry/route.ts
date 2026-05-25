@@ -47,41 +47,8 @@ export async function POST(request: NextRequest) {
       }
 
       const userId = profile.id;
-      const tokens = profile.strava_auth_tokens as any;
-      let accessToken = tokens?.access_token;
-
-      // Check if token is expired, if so, refresh it using Strava Client Secret
-      if (tokens?.expires_at && tokens.expires_at < Date.now()) {
-        const refreshResponse = await fetch('https://www.strava.com/oauth/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            client_id: process.env.STRAVA_CLIENT_ID,
-            client_secret: process.env.STRAVA_CLIENT_SECRET,
-            refresh_token: tokens.refresh_token,
-            grant_type: 'refresh_token',
-          }),
-        });
-
-        if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
-          accessToken = refreshData.access_token;
-          
-          // Update tokens in db
-          await supabase
-            .from('profiles')
-            .update({
-              strava_auth_tokens: {
-                access_token: refreshData.access_token,
-                refresh_token: refreshData.refresh_token || tokens.refresh_token,
-                expires_at: refreshData.expires_at * 1000,
-              }
-            } as any)
-            .eq('id', userId);
-        } else {
-          console.error('Failed to refresh Strava token:', await refreshResponse.text());
-        }
-      }
+      const { getOrRefreshStravaToken } = await import('@/lib/telemetry/strava-sync');
+      const accessToken = await getOrRefreshStravaToken(userId);
 
       if (accessToken) {
         // Fetch activity detail from Strava API
