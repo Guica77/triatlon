@@ -162,32 +162,41 @@ export function HybridWizard() {
       <div className="flex items-center justify-between relative mb-12">
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-zinc-800 -z-10" />
         {[1, 2, 3, 4].map(num => (
-          <div key={num} className="flex flex-col items-center gap-2 bg-[var(--color-background)] px-4">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-colors ${
-              step >= num ? 'bg-cyan-500 border-cyan-400 text-black shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-zinc-900 border-zinc-700 text-zinc-500'
+          <button
+            key={num}
+            type="button"
+            onClick={() => setStep(num)}
+            className="flex flex-col items-center gap-2 bg-[var(--color-background)] px-4 cursor-pointer focus:outline-none group"
+          >
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all duration-200 ${
+              step >= num 
+                ? 'bg-cyan-500 border-cyan-400 text-black shadow-[0_0_15px_rgba(34,211,238,0.5)] scale-105' 
+                : 'bg-zinc-900 border-zinc-700 text-zinc-500 group-hover:border-zinc-500 group-hover:text-zinc-300'
             }`}>
               {step > num ? <Check className="w-5 h-5" /> : num}
             </div>
-            <span className={`text-[10px] uppercase tracking-wider font-semibold ${step >= num ? 'text-cyan-400' : 'text-zinc-500'}`}>
+            <span className={`text-[10px] uppercase tracking-wider font-semibold transition-colors duration-200 ${
+              step >= num ? 'text-cyan-400' : 'text-zinc-500 group-hover:text-zinc-300'
+            }`}>
               {num === 1 ? 'Ambición' : num === 2 ? 'Fisiología' : num === 3 ? 'Garaje' : 'Conexión'}
             </span>
-          </div>
+          </button>
         ))}
       </div>
 
       <AnimatePresence mode="wait">
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
-            <ProCard className="space-y-6">
-              <div className="border-b border-zinc-800/80 pb-4">
+            <ProCard className="space-y-4">
+              <div className="border-b border-zinc-800/80 pb-3">
                 <h2 className="text-xl font-medium text-zinc-100 flex items-center gap-2"><Trophy className="w-5 h-5 text-cyan-400" /> Objetivo & Disponibilidad</h2>
                 <p className="text-sm text-zinc-400 mt-1">Define tu gran meta y cuánto tiempo tienes para entrenar.</p>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
                   <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">¿Qué carrera estás preparando?</label>
-                  <div className="flex gap-2 p-1 bg-zinc-900/80 rounded-xl border border-zinc-800/80 mb-4">
+                  <div className="flex gap-2 p-1 bg-zinc-900/80 rounded-xl border border-zinc-800/80 mb-3">
                     <button onClick={() => setActiveTab('catalog')} className={`flex-1 py-2 text-sm font-semibold rounded-lg ${activeTab === 'catalog' ? 'bg-zinc-800 text-cyan-400 shadow-md' : 'text-zinc-500'}`}>Catálogo Oficial</button>
                     <button onClick={() => setActiveTab('custom')} className={`flex-1 py-2 text-sm font-semibold rounded-lg ${activeTab === 'custom' ? 'bg-zinc-800 text-cyan-400 shadow-md' : 'text-zinc-500'}`}>Carrera a Medida</button>
                   </div>
@@ -228,9 +237,9 @@ export function HybridWizard() {
                   <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">Nivel de Experiencia</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
-                      { id: 'principiante', label: 'Principiante', desc: 'Iniciación / Cero' },
-                      { id: 'intermedio', label: 'Intermedio', desc: 'Con base / Experiencia' },
-                      { id: 'avanzado', label: 'Avanzado', desc: 'Rendimiento / Pro' }
+                      { id: 'principiante', label: 'Principiante', desc: 'Iniciación' },
+                      { id: 'intermedio', label: 'Intermedio', desc: 'Con base' },
+                      { id: 'avanzado', label: 'Avanzado', desc: 'Rendimiento' }
                     ].map(lvl => (
                       <button
                         key={lvl.id}
@@ -244,7 +253,7 @@ export function HybridWizard() {
                             setRunHours(2);
                           }
                         }}
-                        className={`py-3 px-2 rounded-xl border text-sm font-semibold transition-all flex flex-col items-center justify-center text-center gap-1 ${
+                        className={`py-2 px-1.5 rounded-xl border text-sm font-semibold transition-all flex flex-col items-center justify-center text-center gap-0.5 ${
                           athleteLevel === lvl.id
                             ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-inner'
                             : 'bg-zinc-950/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
@@ -257,12 +266,12 @@ export function HybridWizard() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Disponibilidad Semanal</label>
                     <div className="grid grid-cols-3 gap-2">
                       {['4-6h', '7-10h', '12+h'].map(h => (
-                        <button key={h} onClick={() => setBaselineHours(h)} className={`py-3 rounded-xl border text-sm font-semibold transition-all ${baselineHours === h ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-inner' : 'bg-zinc-950/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}>
+                        <button key={h} onClick={() => setBaselineHours(h)} className={`py-2 rounded-xl border text-sm font-semibold transition-all ${baselineHours === h ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-inner' : 'bg-zinc-950/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}>
                           {h}
                         </button>
                       ))}
@@ -270,7 +279,7 @@ export function HybridWizard() {
                   </div>
                   <div>
                     <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Timer className="w-3.5 h-3.5" /> Tiempo Objetivo Total</label>
-                    <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={targetFinishTime} onChange={e => setTargetFinishTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none" />
+                    <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={targetFinishTime} onChange={e => setTargetFinishTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-zinc-100 focus:border-cyan-500 outline-none" />
                   </div>
                 </div>
 
