@@ -108,7 +108,7 @@ export function BiometricsCard({ initialBiometrics }: BiometricsCardProps) {
 
   return (
     <>
-      <ProCard className="space-y-6 relative overflow-hidden border-zinc-800/80 bg-zinc-900/60 backdrop-blur-xl">
+      <ProCard className="p-4 sm:p-6 space-y-6 relative overflow-hidden border-zinc-800/80 bg-zinc-900/60 backdrop-blur-xl">
         {/* Esquina decorativa de brillo */}
         <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
 

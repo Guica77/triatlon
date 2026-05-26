@@ -296,7 +296,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const hasZ4 = desc.includes('Zona 4') || desc.includes('Z4') || desc.includes('series') || desc.includes('fuerte');
 
   return (
-    <ProCard className={`space-y-6 transition-all duration-300 relative overflow-hidden ${isCompleted ? 'border-zinc-800 bg-zinc-900/40 opacity-80' : isMissed ? 'border-zinc-900 bg-zinc-950/20 opacity-60' : ''}`}>
+    <ProCard className={`p-4 sm:p-6 space-y-6 transition-all duration-300 relative overflow-hidden ${isCompleted ? 'border-zinc-800 bg-zinc-900/40 opacity-80' : isMissed ? 'border-zinc-900 bg-zinc-950/20 opacity-60' : ''}`}>
       
       {/* Esquina decorativa con el color del deporte */}
       <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none ${sportBgGlow[session.sport_type] || 'bg-transparent'}`} />
