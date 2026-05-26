@@ -13,6 +13,7 @@ import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2, S
 import Link from 'next/link';
 import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
+import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -49,8 +50,32 @@ export default async function DashboardPage() {
     .eq('user_id', user.id);
   const isConnected = Boolean(profile.garmin_connected || profile.strava_connected || (devices && devices.length > 0));
 
-  // 2. Obtener entrenamientos de la semana actual
+  // 2. Obtener entrenamientos del mes en curso (rango completo de calendario)
   const now = new Date();
+  
+  // Calcular primer día del mes actual, y luego retroceder al Lunes de esa semana
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startDayIdx = startOfMonth.getDay() || 7;
+  const calendarStart = new Date(startOfMonth);
+  calendarStart.setDate(calendarStart.getDate() - startDayIdx + 1);
+  calendarStart.setHours(0, 0, 0, 0);
+
+  // Calcular último día del mes actual, y luego avanzar al Domingo de esa semana
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const endDayIdx = endOfMonth.getDay() || 7;
+  const calendarEnd = new Date(endOfMonth);
+  calendarEnd.setDate(calendarEnd.getDate() + (7 - endDayIdx));
+  calendarEnd.setHours(23, 59, 59, 999);
+
+  const { data: workouts } = await supabase
+    .from('user_workouts')
+    .select('*, training_sessions(*), universal_telemetry(*)')
+    .eq('user_id', user.id)
+    .gte('scheduled_date', calendarStart.toISOString().split('T')[0])
+    .lte('scheduled_date', calendarEnd.toISOString().split('T')[0])
+    .order('scheduled_date', { ascending: true });
+
+  // 3. Identificar estadísticas rápidas de la semana actual
   const currentDay = now.getDay() || 7;
   const monday = new Date(now);
   monday.setDate(monday.getDate() - currentDay + 1);
@@ -60,26 +85,12 @@ export default async function DashboardPage() {
   sunday.setDate(sunday.getDate() + 6);
   sunday.setHours(23, 59, 59, 999);
 
-  const { data: workouts } = await supabase
-    .from('user_workouts')
-    .select('*, training_sessions(*), universal_telemetry(*)')
-    .eq('user_id', user.id)
-    .gte('scheduled_date', monday.toISOString().split('T')[0])
-    .lte('scheduled_date', sunday.toISOString().split('T')[0])
-    .order('scheduled_date', { ascending: true });
+  const monStr = monday.toISOString().split('T')[0];
+  const sunStr = sunday.toISOString().split('T')[0];
 
-  // 3. Identificar workout de Hoy y Mañana
-  const todayStr = now.toISOString().split('T')[0];
-  const tomorrow = new Date(now);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split('T')[0];
-
-  const todayWorkouts = workouts?.filter(w => w.scheduled_date === todayStr) || [];
-  const tomorrowWorkouts = workouts?.filter(w => w.scheduled_date === tomorrowStr) || [];
-
-  // Calcular estadísticas rápidas
-  const completedCount = workouts?.filter(w => w.status === 'completed').length || 0;
-  const totalCount = workouts?.filter(w => w.training_sessions?.sport_type !== 'descanso').length || 0;
+  const weeklyWorkouts = workouts?.filter(w => w.scheduled_date >= monStr && w.scheduled_date <= sunStr) || [];
+  const completedCount = weeklyWorkouts.filter(w => w.status === 'completed').length || 0;
+  const totalCount = weeklyWorkouts.filter(w => w.training_sessions?.sport_type !== 'descanso').length || 0;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   // 4. Calcular días transcurridos desde registro para disparar feedback modal (NPS)
@@ -224,71 +235,11 @@ export default async function DashboardPage() {
               athleteLevel={profile.level}
               progressPercent={progressPercent}
             />
-          </div>
-        </section>
-
-        {/* Barra de Navegación Semanal */}
-        <section className="space-y-3">
-          <div className="flex justify-between items-center flex-wrap gap-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Semana Actual</h2>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-zinc-400">{completedCount} de {totalCount} completados ({progressPercent}%)</span>
-              <a 
-                href="/api/workouts/export-calendar" 
-                download="calendario_semanal.ics"
-                className="px-3 py-1 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-zinc-100 text-[11px] font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
-                title="Descargar toda la semana en tu Apple Calendar, Google Calendar o Garmin Calendar"
-              >
-                <Calendar className="w-3.5 h-3.5 text-orange-400" />
-                <span>Exportar Semana (.ICS)</span>
-              </a>
-            </div>
-          </div>
-          <WeeklyNav workouts={(workouts as any) || []} />
-        </section>
-
-        {/* Plan Semanal y Sesiones */}
-        <section className="space-y-4 pt-2">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
-              <Flame className="w-4 h-4 text-amber-500" /> Entrenamientos y Sesiones
-            </h2>
-            <span className="text-xs text-zinc-400">Lun - Dom</span>
-          </div>
-
-          <div className="space-y-4">
-            {workouts && workouts.length > 0 ? (
-              workouts.map(w => {
-                const isToday = w.scheduled_date === todayStr;
-                const isTomorrow = w.scheduled_date === tomorrowStr;
-                return (
-                  <div key={w.id} className={isToday ? "ring-2 ring-cyan-500/30 rounded-2xl p-0.5" : ""}>
-                    {isToday && (
-                      <div className="px-4 py-1.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-cyan-500/20">
-                        Hoy
-                      </div>
-                    )}
-                    {isTomorrow && (
-                      <div className="px-4 py-1.5 bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-zinc-700/30">
-                        Mañana
-                      </div>
-                    )}
-                    <DailyWorkoutCard 
-                      workout={w as any} 
-                      initialIsConnected={isConnected} 
-                      virtualGarage={profile.virtual_garage || []} 
-                      athleteLevel={profile.level} 
-                    />
-                  </div>
-                );
-              })
-            ) : (
-              <ProCard className="text-center py-12 space-y-3 bg-zinc-900/30">
-                <Activity className="w-8 h-8 text-zinc-600 mx-auto" />
-                <p className="text-sm font-medium text-zinc-300">No hay sesiones para esta semana</p>
-              </ProCard>
-            )}
-          </div>
+             <DashboardViewTabs 
+          initialWorkouts={workouts || []} 
+          isConnected={isConnected} 
+          profile={profile} 
+        />         </div>
         </section>
 
         {/* Historial de Actividades Recientes de Strava (Sólo si está conectado) */}

@@ -393,7 +393,29 @@ export function MarketplaceAggregatorGrid({ initialItems, initialCategory = 'tod
                     {/* Botones de Acción */}
                     <div className="space-y-2 pt-2">
                       <button 
-                        onClick={() => window.open(item.external_url, '_blank')}
+                        onClick={() => {
+                          let url = item.external_url;
+                          if (!url || url === '#' || url.startsWith('http://localhost') || url.includes('placeholder') || url.includes('fake-url')) {
+                            // Limpiar el título de añadidos como "(Oportunidad)" o "- Muy Cuidado"
+                            const cleanTitle = item.title
+                              .replace(/\(oportunidad\)/i, '')
+                              .replace(/- muy cuidado/i, '')
+                              .replace(/\(.*?\)/g, '')
+                              .replace(/-.*$/g, '')
+                              .trim();
+                            const keywords = encodeURIComponent(cleanTitle);
+                            const portal = item.source_portal.toLowerCase();
+                            
+                            if (portal.includes('tuvalum')) {
+                              url = `https://tuvalum.com/buscar?q=${keywords}`;
+                            } else if (portal.includes('buycycle')) {
+                              url = `https://buycycle.com/es-es/bikes?q=${keywords}`;
+                            } else {
+                              url = `https://es.wallapop.com/search?keywords=${keywords}`;
+                            }
+                          }
+                          window.open(url, '_blank');
+                        }}
                         className="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-cyan-500/10 hover:shadow-cyan-500/20 cursor-pointer group/btn"
                       >
                         <span>Comprar en {item.source_portal}</span>

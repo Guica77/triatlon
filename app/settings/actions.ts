@@ -67,7 +67,7 @@ export async function updateVirtualGarage(virtual_garage: string[]) {
   return { success: true };
 }
 
-export async function disconnectTelemetry(provider: 'strava' | 'garmin') {
+export async function disconnectTelemetry(provider: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -79,36 +79,40 @@ export async function disconnectTelemetry(provider: 'strava' | 'garmin') {
     updated_at: new Date().toISOString(),
   };
 
-  if (provider === 'strava') {
-    updateData.strava_connected = false;
-    updateData.strava_auth_tokens = null;
-  } else if (provider === 'garmin') {
-    updateData.garmin_connected = false;
-    updateData.garmin_auth_tokens = null;
-  }
+  const isProfileProvider = provider === 'strava' || provider === 'garmin';
 
-  // If both disconnected, clear external_athlete_id
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('strava_connected, garmin_connected')
-    .eq('id', user.id)
-    .single();
+  if (isProfileProvider) {
+    if (provider === 'strava') {
+      updateData.strava_connected = false;
+      updateData.strava_auth_tokens = null;
+    } else if (provider === 'garmin') {
+      updateData.garmin_connected = false;
+      updateData.garmin_auth_tokens = null;
+    }
 
-  const willBeStravaConnected = provider === 'strava' ? false : !!profile?.strava_connected;
-  const willBeGarminConnected = provider === 'garmin' ? false : !!profile?.garmin_connected;
+    // If both disconnected, clear external_athlete_id
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('strava_connected, garmin_connected')
+      .eq('id', user.id)
+      .single();
 
-  if (!willBeStravaConnected && !willBeGarminConnected) {
-    updateData.external_athlete_id = null;
-  }
+    const willBeStravaConnected = provider === 'strava' ? false : !!profile?.strava_connected;
+    const willBeGarminConnected = provider === 'garmin' ? false : !!profile?.garmin_connected;
 
-  const { error } = await supabase
-    .from('profiles')
-    .update(updateData as any)
-    .eq('id', user.id);
+    if (!willBeStravaConnected && !willBeGarminConnected) {
+      updateData.external_athlete_id = null;
+    }
 
-  if (error) {
-    console.error('Error disconnecting telemetry:', error);
-    return { error: 'Error al desconectar el dispositivo' };
+    const { error } = await supabase
+      .from('profiles')
+      .update(updateData as any)
+      .eq('id', user.id);
+
+    if (error) {
+      console.error('Error disconnecting telemetry:', error);
+      return { error: 'Error al desconectar el dispositivo' };
+    }
   }
 
   // Also delete from user_connected_devices

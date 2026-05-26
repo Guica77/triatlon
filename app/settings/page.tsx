@@ -27,6 +27,18 @@ export default async function SettingsPage() {
     redirect('/onboarding');
   }
 
+  // 1.8 Obtener todos los dispositivos conectados de la base de datos
+  const { data: devices } = await supabase
+    .from('user_connected_devices')
+    .select('provider')
+    .eq('user_id', user.id);
+
+  const connectedProviders = [
+    ...(profile.garmin_connected ? ['garmin'] : []),
+    ...(profile.strava_connected ? ['strava'] : []),
+    ...(devices?.map(d => d.provider.toLowerCase()) || [])
+  ];
+
   return (
     <div className="min-h-screen bg-[var(--color-background)] pb-24">
       
@@ -88,8 +100,7 @@ export default async function SettingsPage() {
               </div>
               <div className="h-full">
                 <TelemetryConnectCard 
-                  isConnected={!!(profile.garmin_connected || profile.strava_connected)}
-                  provider={profile.garmin_connected ? 'Garmin' : profile.strava_connected ? 'Strava' : null}
+                  connectedProviders={connectedProviders}
                   lastSyncTime={null}
                 />
               </div>

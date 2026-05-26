@@ -5,7 +5,7 @@ import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/dashboard/action
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
@@ -205,9 +205,18 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               </span>
             )}
           </div>
-          <h3 className="text-xl font-semibold text-zinc-50 capitalize">
-            {session.sport_type === 'descanso' ? 'Día de Descanso Activo' : session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
-          </h3>
+          {session.sport_type !== 'descanso' ? (
+            <Link href={`/dashboard/workout/${workout.id}`} className="hover:text-cyan-400 hover:underline transition-colors decoration-cyan-400">
+              <h3 className="text-xl font-semibold text-zinc-50 capitalize inline-flex items-center gap-1.5 group">
+                {session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
+                <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-transform group-hover:translate-x-0.5" />
+              </h3>
+            </Link>
+          ) : (
+            <h3 className="text-xl font-semibold text-zinc-50 capitalize">
+              Día de Descanso Activo
+            </h3>
+          )}
         </div>
 
         {durationMin > 0 && (

@@ -3,29 +3,80 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { disconnectTelemetry, syncPacesFromStravaAction, pushWeekWorkoutsToGarminAction } from '@/app/settings/actions';
-import { Watch, Link as LinkIcon, Info, Activity, ArrowRight, RefreshCw, UploadCloud } from 'lucide-react';
+import { Watch, Link as LinkIcon, Info, Activity, RefreshCw, UploadCloud, Heart, Check, X, Smartphone } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 interface TelemetryConnectCardProps {
-  isConnected: boolean;
-  provider?: string | null;
+  connectedProviders: string[];
   lastSyncTime?: string | null;
 }
 
-export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: TelemetryConnectCardProps) {
-  const [isDisconnecting, setIsDisconnecting] = React.useState(false);
+const PROVIDERS = [
+  {
+    id: 'strava',
+    name: 'Strava',
+    description: 'Puente universal de actividades',
+    iconColor: 'text-[#FC4C02]',
+    isReal: true,
+  },
+  {
+    id: 'garmin',
+    name: 'Garmin Connect',
+    description: 'Exporta entrenos estructurados',
+    iconColor: 'text-sky-400',
+    isReal: false,
+  },
+  {
+    id: 'apple_health',
+    name: 'Apple Health',
+    description: 'Datos de salud de iOS',
+    iconColor: 'text-rose-500',
+    isReal: false,
+  },
+  {
+    id: 'wahoo',
+    name: 'Wahoo Fitness',
+    description: 'Sincroniza rodillo y sensores',
+    iconColor: 'text-zinc-200',
+    isReal: false,
+  },
+  {
+    id: 'polar',
+    name: 'Polar Flow',
+    description: 'Métricas de recuperación',
+    iconColor: 'text-red-500',
+    isReal: false,
+  },
+  {
+    id: 'coros',
+    name: 'Coros',
+    description: 'Carga planes de entrenamiento',
+    iconColor: 'text-teal-400',
+    isReal: false,
+  },
+  {
+    id: 'suunto',
+    name: 'Suunto',
+    description: 'Importa rutas y entrenamientos',
+    iconColor: 'text-blue-400',
+    isReal: false,
+  },
+];
+
+export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: TelemetryConnectCardProps) {
+  const [isDisconnecting, setIsDisconnecting] = React.useState<string | null>(null);
   const [isSyncing, setIsSyncing] = React.useState(false);
   const [isPushingWorkouts, setIsPushingWorkouts] = React.useState(false);
 
-  const handleDisconnect = async () => {
-    if (!confirm('¿Estás seguro de que quieres desconectar tu cuenta de Strava?')) return;
-    setIsDisconnecting(true);
+  const handleDisconnect = async (provider: string) => {
+    if (!confirm(`¿Estás seguro de que quieres desconectar tu cuenta de ${provider}?`)) return;
+    setIsDisconnecting(provider);
     try {
-      await disconnectTelemetry('strava');
+      await disconnectTelemetry(provider);
     } catch (e) {
       console.error(e);
     } finally {
-      setIsDisconnecting(false);
+      setIsDisconnecting(null);
     }
   };
 
@@ -61,107 +112,114 @@ export function TelemetryConnectCard({ isConnected, provider, lastSyncTime }: Te
     }
   };
 
-  if (isConnected) {
-    return (
-      <div className="p-6 rounded-2xl bg-orange-500/10 border border-orange-500/30 shadow-xl relative h-full flex flex-col group overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/20 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="flex items-center gap-3 mb-6 relative z-10">
-          <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white shadow-lg shadow-orange-500/30">
-            <Watch className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">Reloj Conectado</h3>
-            <p className="text-xs text-orange-200">Telemetría en tiempo real activa vía {provider || 'Strava'}</p>
-          </div>
-        </div>
-
-        <div className="flex-1 flex flex-col justify-between gap-4 relative z-10">
-          <div className="bg-black/20 rounded-xl p-4 border border-orange-500/20">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs text-zinc-400 font-medium">Estado del Sincronizador</span>
-              <span className="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-[10px] font-bold border border-green-500/30 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> Activo
-              </span>
-            </div>
-            <p className="text-[11px] text-zinc-400">
-              La IA está leyendo automáticamente tus entrenamientos. Última sincronización: <strong className="text-white">{lastSyncTime || 'Hoy'}</strong>
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <button
-              onClick={handlePushWorkouts}
-              disabled={isPushingWorkouts || isSyncing || isDisconnecting}
-              className="w-full py-2.5 text-xs font-bold rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-cyan-500/20"
-            >
-              <UploadCloud className={`w-3.5 h-3.5 ${isPushingWorkouts ? 'animate-bounce' : ''}`} />
-              {isPushingWorkouts ? 'Enviando a Garmin...' : 'Enviar Entrenos de la Semana a Garmin'}
-            </button>
-
-            <button
-              onClick={handleSyncPaces}
-              disabled={isSyncing || isDisconnecting || isPushingWorkouts}
-              className="w-full py-2.5 text-xs font-bold rounded-xl bg-orange-500 hover:bg-orange-400 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-              {isSyncing ? 'Recalculando Ritmos...' : 'Recalcular Ritmos desde Strava'}
-            </button>
-
-            <button
-              onClick={handleDisconnect}
-              disabled={isDisconnecting || isSyncing || isPushingWorkouts}
-              className="w-full py-2 text-xs font-semibold rounded-xl bg-zinc-950/60 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-zinc-850 hover:border-red-500/20 transition-all disabled:opacity-50 cursor-pointer"
-            >
-              {isDisconnecting ? 'Desconectando...' : 'Desconectar cuenta'}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const isStravaConnected = connectedProviders.includes('strava');
+  const isGarminConnected = connectedProviders.includes('garmin');
 
   return (
-    <div className="p-6 rounded-2xl bg-gradient-to-br from-zinc-900 to-[#18181b] border border-zinc-800 shadow-xl relative h-full flex flex-col group">
+    <div className="p-5 rounded-2xl bg-gradient-to-br from-zinc-900 to-[#18181b] border border-zinc-800 shadow-xl relative h-full flex flex-col group overflow-hidden">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
       
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-orange-500">
-          <Watch className="w-5 h-5" />
+      <div className="flex items-center gap-3 mb-4 shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-orange-500 shadow-inner">
+          <Watch className="w-4 h-4" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white leading-tight">Sincroniza tu Reloj</h3>
-          <p className="text-xs text-zinc-400">Paso vital para la Inteligencia Artificial</p>
+          <h3 className="text-sm sm:text-base font-bold text-white leading-tight">Dispositivos y Telemetría</h3>
+          <p className="text-[10px] sm:text-xs text-zinc-400">Sincroniza tus relojes deportivos y sensores</p>
         </div>
       </div>
 
-      <div className="flex-1 space-y-4 mb-6">
-        <p className="text-sm text-zinc-300 leading-relaxed">
-          Para que la IA pueda adaptar tu entrenamiento y evitar lesiones, necesita leer tu pulso y fatiga real.
-        </p>
-        
-        <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/20 flex gap-3 items-start">
-          <Info className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-          <p className="text-[11px] text-orange-200/80 leading-relaxed">
-            Utilizamos <strong>Strava</strong> como puente universal. Da igual si usas Garmin, Coros, Suunto o Apple Watch: conéctalo a través de Strava para que podamos leer los datos de forma segura.
-          </p>
+      {/* Scrollable list of providers */}
+      <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[320px] custom-scrollbar mb-4">
+        {PROVIDERS.map((prov) => {
+          const isConnected = connectedProviders.includes(prov.id);
+          const isPendingDisconnect = isDisconnecting === prov.id;
+
+          return (
+            <div 
+              key={prov.id} 
+              className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
+                isConnected 
+                  ? 'bg-zinc-900/80 border-green-500/20' 
+                  : 'bg-zinc-950/40 border-zinc-800/80 hover:border-zinc-750'
+              }`}
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className={`w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center ${prov.iconColor} shrink-0`}>
+                  {prov.id === 'apple_health' ? (
+                    <Heart className="w-4 h-4" />
+                  ) : prov.id === 'apple_health' ? (
+                    <Smartphone className="w-4 h-4" />
+                  ) : (
+                    <Watch className="w-4 h-4" />
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-white truncate">{prov.name}</span>
+                    {isConnected && (
+                      <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 text-[8px] font-bold border border-green-500/20 flex items-center gap-0.5 uppercase tracking-wider">
+                        <Check className="w-2 h-2" /> Sí
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[9px] text-zinc-400 truncate max-w-[130px] sm:max-w-[160px]">{prov.description}</p>
+                </div>
+              </div>
+
+              <div>
+                {isConnected ? (
+                  <button
+                    onClick={() => handleDisconnect(prov.id)}
+                    disabled={!!isDisconnecting}
+                    className="p-1.5 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-zinc-800 hover:border-red-500/20 transition-all cursor-pointer disabled:opacity-50"
+                    title="Desconectar"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <a href={`/api/auth/telemetry/connect?provider=${prov.id}`}>
+                    <button
+                      className="p-1.5 rounded-lg bg-zinc-800 hover:bg-orange-500/10 text-zinc-300 hover:text-orange-500 border border-zinc-700 hover:border-orange-500/20 transition-all cursor-pointer"
+                      title="Conectar"
+                    >
+                      <LinkIcon className="w-3.5 h-3.5" />
+                    </button>
+                  </a>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Conditionally rendered global actions */}
+      {(isStravaConnected || isGarminConnected) && (
+        <div className="pt-3 border-t border-zinc-800 space-y-2 mt-auto shrink-0">
+          {isGarminConnected && (
+            <button
+              onClick={handlePushWorkouts}
+              disabled={isPushingWorkouts || isSyncing || !!isDisconnecting}
+              className="w-full py-2 text-[10px] sm:text-xs font-bold rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-md shadow-cyan-500/10"
+            >
+              <UploadCloud className={`w-3.5 h-3.5 ${isPushingWorkouts ? 'animate-bounce' : ''}`} />
+              {isPushingWorkouts ? 'Enviando...' : 'Enviar Entrenos de la Semana a Garmin'}
+            </button>
+          )}
+
+          {isStravaConnected && (
+            <button
+              onClick={handleSyncPaces}
+              disabled={isSyncing || isPushingWorkouts || !!isDisconnecting}
+              className="w-full py-2 text-[10px] sm:text-xs font-bold rounded-xl bg-orange-500 hover:bg-orange-400 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              {isSyncing ? 'Recalculando...' : 'Recalcular Ritmos desde Strava'}
+            </button>
+          )}
         </div>
-      </div>
-
-      <div className="flex flex-col gap-2 mt-auto">
-        <a href="/api/auth/telemetry/connect?provider=strava" className="block w-full">
-          <AnimatedButton variant="primary" className="w-full py-2.5 text-xs !bg-[#FC4C02] hover:!bg-[#E34402] !text-white flex justify-center shadow-lg shadow-[#FC4C02]/10 font-bold border border-[#FC4C02]/30">
-            <LinkIcon className="w-3.5 h-3.5 mr-1.5" />
-            Conectar Garmin (vía Strava)
-          </AnimatedButton>
-        </a>
-
-        <a href="/api/auth/telemetry/connect?provider=strava" className="block w-full">
-          <AnimatedButton variant="primary" className="w-full py-2.5 text-xs !bg-orange-650 hover:!bg-orange-600 !text-white flex justify-center shadow-lg shadow-orange-600/10 font-bold border border-orange-600/30">
-            <LinkIcon className="w-3.5 h-3.5 mr-1.5" />
-            Conectar Coros/Suunto (vía Strava)
-          </AnimatedButton>
-        </a>
-      </div>
+      )}
     </div>
   );
 }
+
