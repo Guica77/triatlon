@@ -1,0 +1,3282 @@
+{
+  "meta": {
+    "title": "Guía Completa de Triatlón",
+    "version": "1.0",
+    "fecha": "2026-05-16",
+    "descripcion": "Datos estructurados completos para app de entrenamiento de triatlón: distancias, planes, zonas, nutrición, suplementos, material y recursos verificados.",
+    "idiomas": [
+      "es",
+      "en"
+    ]
+  },
+  "distancias": [
+    {
+      "id": "sprint",
+      "nombre": "Triatlón Sprint",
+      "nivel": "Principiante / Intermedio",
+      "segmentos": {
+        "natacion_m": 750,
+        "ciclismo_km": 20,
+        "carrera_km": 5
+      },
+      "tiempos_estimados": {
+        "principiante": "1:30h",
+        "intermedio": "1:10h",
+        "avanzado": "0:55h"
+      },
+      "calorias_estimadas": "800-1200 kcal",
+      "semanas_preparacion_minimas": 8,
+      "descripcion": "Ideal para el primer triatlón. Alta intensidad, poco tiempo de carrera. Exige buena capacidad anaeróbica.",
+      "notas": [
+        "Se puede completar con 8-12 semanas de entrenamiento específico",
+        "Transiciones rápidas son clave en esta distancia",
+        "La intensidad es muy alta: zonas 3-5 durante gran parte de la prueba"
+      ]
+    },
+    {
+      "id": "olimpico",
+      "nombre": "Triatlón Olímpico (Distancia Estándar)",
+      "nivel": "Intermedio",
+      "segmentos": {
+        "natacion_m": 1500,
+        "ciclismo_km": 40,
+        "carrera_km": 10
+      },
+      "tiempos_estimados": {
+        "principiante": "2:45h",
+        "intermedio": "2:10h",
+        "avanzado": "1:50h"
+      },
+      "calorias_estimadas": "1500-2200 kcal",
+      "semanas_preparacion_minimas": 12,
+      "descripcion": "Distancia oficial de los Juegos Olímpicos. Exige buena base aeróbica y gestión de la fatiga entre disciplinas.",
+      "notas": [
+        "Distancia de referencia mundial desde Seúl 1988",
+        "Requiere equilibrio entre potencia y resistencia",
+        "La carrera se hace a intensidad alta (zona 3-4)"
+      ]
+    },
+    {
+      "id": "70.3",
+      "nombre": "Ironman 70.3 (Half Ironman)",
+      "nivel": "Intermedio / Avanzado",
+      "segmentos": {
+        "natacion_m": 1900,
+        "ciclismo_km": 90,
+        "carrera_km": 21.1
+      },
+      "tiempos_estimados": {
+        "principiante": "6:00h",
+        "intermedio": "5:00h",
+        "avanzado": "3:45h"
+      },
+      "limite_tiempo_h": 8.5,
+      "calorias_estimadas": "3000-5000 kcal",
+      "semanas_preparacion_minimas": 20,
+      "descripcion": "El Half Ironman requiere planificación nutricional en carrera. La nutrición en el bike es clave para llegar bien al run.",
+      "notas": [
+        "Sin base previa: 6-9 meses de preparación",
+        "Con buena base aeróbica: 12-20 semanas",
+        "El 70.3 organizado por WTC/Ironman tiene cupos para el mundial"
+      ]
+    },
+    {
+      "id": "ironman",
+      "nombre": "Ironman (Distancia Completa)",
+      "nivel": "Avanzado",
+      "segmentos": {
+        "natacion_m": 3800,
+        "ciclismo_km": 180,
+        "carrera_km": 42.2
+      },
+      "tiempos_estimados": {
+        "finisher": "9:30h - 16:59h",
+        "intermedio": "11:00h",
+        "avanzado": "8:30h"
+      },
+      "limite_tiempo_h": 17,
+      "calorias_estimadas": "5000-10000 kcal",
+      "semanas_preparacion_minimas": 24,
+      "horas_semanales_pico": "18-22h",
+      "descripcion": "La prueba más icónica del triatlón. La nutrición es la cuarta disciplina. El 70-80% del esfuerzo debe ser en zona 2.",
+      "notas": [
+        "Principiante con base: 20-30 semanas mínimo",
+        "Sin base: 12-18 meses de preparación",
+        "El maratón se completa con las reservas del segmento de ciclismo",
+        "No superar 30km en el long run más largo del entrenamiento"
+      ]
+    }
+  ],
+  "zonas_entrenamiento": {
+    "frecuencia_cardiaca": {
+      "descripcion": "Basado en FCmáx. Calcular con test de campo o 220 - edad (aproximado).",
+      "zonas": [
+        {
+          "zona": 1,
+          "nombre": "Recuperación",
+          "porcentaje_fcmax": "<60%",
+          "descripcion": "Paseos, recuperación activa"
+        },
+        {
+          "zona": 2,
+          "nombre": "Aeróbico base",
+          "porcentaje_fcmax": "60-70%",
+          "descripcion": "El 80% del entrenamiento de fondo. Conversación posible."
+        },
+        {
+          "zona": 3,
+          "nombre": "Tempo",
+          "porcentaje_fcmax": "70-80%",
+          "descripcion": "Esfuerzo moderado. Respiración elevada pero controlada."
+        },
+        {
+          "zona": 4,
+          "nombre": "Umbral láctico",
+          "porcentaje_fcmax": "80-90%",
+          "descripcion": "Series largas, intervalos. Difícil mantener conversación."
+        },
+        {
+          "zona": 5,
+          "nombre": "VO2max / Anaeróbico",
+          "porcentaje_fcmax": "90-100%",
+          "descripcion": "Intervalos cortos e intensos. Insostenible más de 3-8 min."
+        }
+      ],
+      "distribucion_ironman": {
+        "ciclismo": "Zona 2-3 (65-75% FTP)",
+        "carrera": "Zona 2-3 (maratón aeróbico)",
+        "consejo": "No salir en zona 4-5 al inicio o el run será un desastre"
+      }
+    },
+    "potencia_ciclismo": {
+      "descripcion": "Basado en FTP (Functional Threshold Power). Test: 20 min máximo × 0.95 = FTP.",
+      "zonas": [
+        {
+          "zona": 1,
+          "nombre": "Recuperación activa",
+          "porcentaje_ftp": "<55%",
+          "uso": "Rodajes de recuperación"
+        },
+        {
+          "zona": 2,
+          "nombre": "Resistencia aeróbica",
+          "porcentaje_ftp": "56-75%",
+          "uso": "Tiradas largas, base de fondo"
+        },
+        {
+          "zona": 3,
+          "nombre": "Tempo",
+          "porcentaje_ftp": "76-90%",
+          "uso": "Esfuerzos sostenidos 20-60 min"
+        },
+        {
+          "zona": 4,
+          "nombre": "Umbral",
+          "porcentaje_ftp": "91-105%",
+          "uso": "Intervalos 10-30 min, mejora FTP"
+        },
+        {
+          "zona": 5,
+          "nombre": "VO2max",
+          "porcentaje_ftp": "106-120%",
+          "uso": "Intervalos 3-8 min"
+        },
+        {
+          "zona": 6,
+          "nombre": "Capacidad anaeróbica",
+          "porcentaje_ftp": ">120%",
+          "uso": "Sprints, <2 min"
+        }
+      ],
+      "objetivo_carrera": {
+        "ironman": "65-75% FTP",
+        "703": "75-85% FTP",
+        "olimpico": "85-95% FTP",
+        "sprint": "95-105% FTP"
+      }
+    },
+    "ritmo_carrera": {
+      "descripcion": "Referencia basada en ritmo actual de 10km",
+      "zonas": [
+        {
+          "zona": "Easy / Regenerativo",
+          "referencia": "+2:00 min/km sobre ritmo 10km"
+        },
+        {
+          "zona": "Aeróbico largo",
+          "referencia": "+1:30 min/km sobre ritmo 10km"
+        },
+        {
+          "zona": "Tempo / Marathon pace",
+          "referencia": "+0:30-1:00 min/km sobre 10km"
+        },
+        {
+          "zona": "Umbral (Threshold)",
+          "referencia": "Ritmo actual de 10km"
+        },
+        {
+          "zona": "VO2max (intervalos)",
+          "referencia": "Ritmo actual de 5km"
+        }
+      ],
+      "objetivo_carrera_ironman": "+1:30-2:00 min/km sobre tu ritmo de maratón. No acelerar en los primeros 10km."
+    },
+    "natacion_pace": {
+      "descripcion": "Pace por 100m. T-pace = tiempo de 1000m dividido por 10.",
+      "zonas": [
+        {
+          "zona": 1,
+          "nombre": "Recuperación",
+          "referencia": "T-pace + 25-35s/100m"
+        },
+        {
+          "zona": 2,
+          "nombre": "Aeróbico",
+          "referencia": "T-pace + 15-25s/100m"
+        },
+        {
+          "zona": 3,
+          "nombre": "Tempo",
+          "referencia": "T-pace + 5-15s/100m"
+        },
+        {
+          "zona": 4,
+          "nombre": "Umbral (CSS)",
+          "referencia": "T-pace"
+        },
+        {
+          "zona": 5,
+          "nombre": "VO2max",
+          "referencia": "T-pace - 5s/100m"
+        }
+      ],
+      "consejo_competicion": "En triatlón nada al 85-90% de tu ritmo de piscina. El wetsuit suma 5-10s/100m."
+    }
+  },
+  "planes_entrenamiento": [
+    {
+      "id": "sprint_8sem",
+      "nombre": "Plan Sprint — 8 semanas",
+      "distancia": "sprint",
+      "duracion_semanas": 8,
+      "nivel": "principiante",
+      "horas_semanales": {
+        "base": "5-7h",
+        "pico": "8-10h"
+      },
+      "sesiones_semana": "5-6",
+      "fases": [
+        {
+          "nombre": "Base",
+          "semanas": "1-3",
+          "descripcion": "Volumen bajo, técnica de los 3 deportes, adaptación"
+        },
+        {
+          "nombre": "Construcción",
+          "semanas": "4-6",
+          "descripcion": "Aumento de volumen e intensidad. Series de umbral y VO2max."
+        },
+        {
+          "nombre": "Pico",
+          "semanas": "7",
+          "descripcion": "Mayor volumen. Simulación de race pace."
+        },
+        {
+          "nombre": "Taper",
+          "semanas": "8",
+          "descripcion": "Reducción 40-50% de volumen. Mantener intensidad."
+        }
+      ],
+      "semana_tipo": [
+        {
+          "dia": "Lunes",
+          "sesion": "Natación — 2km técnica y series cortas"
+        },
+        {
+          "dia": "Martes",
+          "sesion": "Bike — 45min Z2 + 10min Z4"
+        },
+        {
+          "dia": "Miércoles",
+          "sesion": "Run — 30min Z2 fácil"
+        },
+        {
+          "dia": "Jueves",
+          "sesion": "Natación — 2km series (50-100m)"
+        },
+        {
+          "dia": "Viernes",
+          "sesion": "BRICK: 40min bike + 15min run"
+        },
+        {
+          "dia": "Sábado",
+          "sesion": "Run — 40min Z2"
+        },
+        {
+          "dia": "Domingo",
+          "sesion": "Bike — 75min Z2 largo"
+        }
+      ]
+    },
+    {
+      "id": "703_20sem",
+      "nombre": "Plan 70.3 — 20 semanas",
+      "distancia": "70.3",
+      "duracion_semanas": 20,
+      "nivel": "intermedio",
+      "horas_semanales": {
+        "base": "8-10h",
+        "pico": "14-18h"
+      },
+      "sesiones_semana": "8-10",
+      "fases": [
+        {
+          "nombre": "Base aeróbica",
+          "semanas": "1-6",
+          "descripcion": "Zona 2 puro. Construir capacidad aeróbica. Técnica de natación."
+        },
+        {
+          "nombre": "Construcción",
+          "semanas": "7-14",
+          "descripcion": "Aumento progresivo. Introducción de race pace. Bricks semanales."
+        },
+        {
+          "nombre": "Pico",
+          "semanas": "15-18",
+          "descripcion": "Semanas de carga máxima. Long ride 4h+, long run 2h. Race pace training."
+        },
+        {
+          "nombre": "Taper",
+          "semanas": "19-20",
+          "descripcion": "Reducción 50-60% de volumen. Mantener intensidad puntual."
+        }
+      ],
+      "volumenes_pico": {
+        "natacion_km_semana": "7-8km",
+        "ciclismo_km_semana": "200-250km",
+        "carrera_km_semana": "40-50km",
+        "long_ride_max": "4.5h (100-110km)",
+        "long_run_max": "2h (20-22km)"
+      },
+      "semana_tipo_media": [
+        {
+          "dia": "Lunes",
+          "sesion": "Natación — 3km técnica"
+        },
+        {
+          "dia": "Martes",
+          "sesion": "Bike — 60min Z2+Z4 (umbral intervals)"
+        },
+        {
+          "dia": "Miércoles",
+          "sesion": "Run — 45min Z2"
+        },
+        {
+          "dia": "Jueves",
+          "sesion": "Natación — 3.5km series largas (200-400m)"
+        },
+        {
+          "dia": "Viernes",
+          "sesion": "BRICK — 2h bike + 30min run"
+        },
+        {
+          "dia": "Sábado",
+          "sesion": "Long run — 80-90min Z2"
+        },
+        {
+          "dia": "Domingo",
+          "sesion": "Long bike — 3h Z2"
+        }
+      ],
+      "notas_clave": [
+        "Semana de recuperación cada 3-4 semanas (reducir volumen 60-70%)",
+        "Race pace training obligatorio a partir de semana 10",
+        "Brick sessions al menos 1 vez por semana desde semana 4"
+      ]
+    },
+    {
+      "id": "ironman_24sem",
+      "nombre": "Plan Ironman Completo — 24 semanas",
+      "distancia": "ironman",
+      "duracion_semanas": 24,
+      "nivel": "avanzado",
+      "horas_semanales": {
+        "base": "10-12h",
+        "pico": "18-22h"
+      },
+      "sesiones_semana": "10-12",
+      "fases": [
+        {
+          "nombre": "Base aeróbica",
+          "semanas": "1-8",
+          "descripcion": "80% Z2. Fundamentos de los 3 deportes. Fuerza (gimnasio). Sin intensidad."
+        },
+        {
+          "nombre": "Construcción",
+          "semanas": "9-18",
+          "descripcion": "Aumento progresivo. Bricks regulares. Race pace al 70%. Volumen máximo."
+        },
+        {
+          "nombre": "Pico",
+          "semanas": "19-21",
+          "descripcion": "Semanas más duras. Simulaciones de segmentos de carrera."
+        },
+        {
+          "nombre": "Taper",
+          "semanas": "22-24",
+          "descripcion": "Reducción progresiva. Sem 22: -30%, Sem 23: -50%, Sem 24 (carrera): -80%."
+        }
+      ],
+      "volumenes_pico": {
+        "natacion_km_semana": "12-15km",
+        "ciclismo_km_semana": "400-500km",
+        "carrera_km_semana": "60-80km",
+        "long_ride_max": "5-6h (120-140km, no más)",
+        "long_run_max": "2:30-3h (máximo 30km, no más)",
+        "total_horas_semana": "18-22h"
+      },
+      "semana_tipo_pico": [
+        {
+          "dia": "Lunes",
+          "sesion": "Natación — 4km + Gym core/fuerza"
+        },
+        {
+          "dia": "Martes",
+          "sesion": "Bike — 90min Z3+Z4 (threshold intervals)"
+        },
+        {
+          "dia": "Miércoles",
+          "sesion": "Run — 60min Z2 + Natación 3km"
+        },
+        {
+          "dia": "Jueves",
+          "sesion": "BRICK — Bike 2h Z2 + Run 30min"
+        },
+        {
+          "dia": "Viernes",
+          "sesion": "BRICK LARGO — 4h bike + 60min run Z2"
+        },
+        {
+          "dia": "Sábado",
+          "sesion": "Natación — 5km + Run 30min"
+        },
+        {
+          "dia": "Domingo",
+          "sesion": "Long run — 2:30h Z2"
+        }
+      ],
+      "reglas_criticas": [
+        "El 80% del entrenamiento SIEMPRE en zona 2",
+        "No superar 30km en el long run más largo",
+        "No superar 6h en el long ride más largo",
+        "Semana de recuperación cada 3 semanas",
+        "Al menos 2-3 semanas completas de taper"
+      ]
+    },
+    {
+      "id": "sprint_cero",
+      "nombre": "Plan Sprint — De Cero a Triatlón (12 semanas)",
+      "distancia": "sprint",
+      "duracion_semanas": 12,
+      "nivel": "principiante_absoluto",
+      "descripcion": "Para alguien que nunca ha hecho triatlón y tiene poca o ninguna base deportiva. Semanas 1-4 de adaptación muy suave.",
+      "prerequisitos": "Poder caminar 30 min sin problemas. Saber nadar aunque sea básico. Tener bicicleta.",
+      "horas_semanales": {
+        "base": "3-5h",
+        "pico": "6-8h"
+      },
+      "sesiones_semana": "4-5",
+      "fases": [
+        {
+          "nombre": "Adaptación",
+          "semanas": "1-4",
+          "descripcion": "Volumen muy bajo. Aprender a nadar correctamente, rodar en bicicleta cómodo, correr sin lesionarse. Sin intensidad."
+        },
+        {
+          "nombre": "Base",
+          "semanas": "5-8",
+          "descripcion": "Aumentar volumen progresivamente. Primeras sesiones de natación en open water (si es posible). Primeros bricks cortos."
+        },
+        {
+          "nombre": "Construcción",
+          "semanas": "9-10",
+          "descripcion": "Aumentar duración. Brick session semanal. Simular transiciones."
+        },
+        {
+          "nombre": "Taper",
+          "semanas": "11-12",
+          "descripcion": "Reducir volumen 50%. Carrera de prueba o simulacro. Descanso pre-competición."
+        }
+      ],
+      "plan_semana_a_semana": [
+        {
+          "semana": 1,
+          "fase": "Adaptación",
+          "objetivo": "Primer contacto con los 3 deportes. Sin agobios.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 30,
+              "descripcion": "Piscina — nadar cómodo, técnica libre. Si no sabes nadar bien, enfócate en crol básico. 800-1000m total."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "carrera",
+              "duracion_min": 25,
+              "descripcion": "Caminar + trotar alternando. 1 min trotando / 2 min caminando × 8. Sin mirar el ritmo."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "ciclismo",
+              "duracion_min": 40,
+              "descripcion": "Rodaje fácil en llano o rodillo. Zona 1-2. Aprender a pedalear con cadencia suave (80-90 rpm)."
+            },
+            {
+              "dia": "Sábado",
+              "deporte": "natacion",
+              "duracion_min": 30,
+              "descripcion": "Piscina — igual que el lunes. Foco en técnica de brazada y respiración."
+            }
+          ],
+          "total_horas": "~2h",
+          "nota": "Si algo duele, para. Esta semana es solo para conocer tu cuerpo en los 3 deportes."
+        },
+        {
+          "semana": 2,
+          "fase": "Adaptación",
+          "objetivo": "Añadir una sesión más. Empezar a sentirse cómodo en los 3 deportes.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 35,
+              "descripcion": "Piscina — 1000-1200m. Incluye 4×50m con descanso. Trabajo de patada con tabla 100m."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 45,
+              "descripcion": "Rodaje Z2 fácil. Si tienes rodillo, usa Zwift o vídeo para entretenerte."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 30,
+              "descripcion": "Trote continuo muy suave. Si no puedes 30 min, alterna 2 min trotando / 1 min caminando."
+            },
+            {
+              "dia": "Viernes",
+              "deporte": "natacion",
+              "duracion_min": 35,
+              "descripcion": "Piscina — igual que el lunes. Foco en respirar de lado correctamente."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "ciclismo",
+              "duracion_min": 60,
+              "descripcion": "Salida larga en bicicleta — completamente en Z2. Disfruta del paisaje."
+            }
+          ],
+          "total_horas": "~3.5h",
+          "nota": "Descansa bien miércoles noche. La recuperación es parte del entrenamiento."
+        },
+        {
+          "semana": 3,
+          "fase": "Adaptación",
+          "objetivo": "Consolidar los 3 deportes. Primer brick muy corto.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 40,
+              "descripcion": "Piscina — 1200-1400m. 4×100m con 30s descanso + técnica."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 50,
+              "descripcion": "Rodaje Z2. Trabaja cadencia: 2 min a 90rpm / 2 min a 80rpm alternando."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 30,
+              "descripcion": "Trote continuo Z2. Intenta que sea todo corriendo sin pausas."
+            },
+            {
+              "dia": "Sábado",
+              "deporte": "brick",
+              "duracion_min": 50,
+              "descripcion": "PRIMER BRICK: 35 min bici Z2 + 15 min carrera muy suave. Notarás las piernas pesadas al bajar — es normal."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "natacion",
+              "duracion_min": 40,
+              "descripcion": "Piscina — recuperación. Nada suave 1200m. Foco en deslizamiento."
+            }
+          ],
+          "total_horas": "~3.5h",
+          "nota": "El brick del sábado es el entrenamiento más importante de la semana."
+        },
+        {
+          "semana": 4,
+          "fase": "Adaptación",
+          "objetivo": "SEMANA DE RECUPERACIÓN. Reducir volumen 40%.",
+          "sesiones": [
+            {
+              "dia": "Martes",
+              "deporte": "natacion",
+              "duracion_min": 30,
+              "descripcion": "Natación suave, 900m técnica."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "ciclismo",
+              "duracion_min": 40,
+              "descripcion": "Rodillo o bici fácil Z1-Z2."
+            },
+            {
+              "dia": "Sábado",
+              "deporte": "carrera",
+              "duracion_min": 25,
+              "descripcion": "Trote muy suave Z1. 3-4 km."
+            }
+          ],
+          "total_horas": "~1.5h",
+          "nota": "Semana de descarga. El cuerpo asimila lo aprendido. No te saltes el descanso."
+        },
+        {
+          "semana": 5,
+          "fase": "Base",
+          "objetivo": "Aumentar volumen. Añadir series cortas en natación.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 45,
+              "descripcion": "1500m — calentamiento 300m + 6×100m con 20s descanso + vuelta a la calma 200m."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 60,
+              "descripcion": "Rodaje Z2. Practica beber mientras pedaleas (importante para competición)."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 35,
+              "descripcion": "Trote Z2 continuo. Empieza a controlar el ritmo con el reloj."
+            },
+            {
+              "dia": "Viernes",
+              "deporte": "natacion",
+              "duracion_min": 40,
+              "descripcion": "Piscina — técnica. Pull buoy + paletas si tienes. 1200m."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "brick",
+              "duracion_min": 75,
+              "descripcion": "Brick: 50 min bici Z2 + 25 min run Z2. Practica transición rápida entre los dos."
+            }
+          ],
+          "total_horas": "~4h",
+          "nota": "Empieza a practicar las transiciones (T2): cómo quitarte el casco, ponerte las zapatillas de correr rápido."
+        },
+        {
+          "semana": 6,
+          "fase": "Base",
+          "objetivo": "Distancias más cercanas a la carrera. Open water si es posible.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 50,
+              "descripcion": "1600-1800m. Incluye 4×200m con 30s descanso. Si puedes, prueba en lago o playa con wetsuit."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 60,
+              "descripcion": "Rodaje Z2. Prueba a comer o beber en un gel durante la sesión."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "carrera",
+              "duracion_min": 40,
+              "descripcion": "Run Z2. Ya deberías poder correr 40 min sin parar."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "natacion",
+              "duracion_min": 45,
+              "descripcion": "Piscina — 1500m. Simula los 750m de carrera: nada seguido sin parar en la mitad."
+            },
+            {
+              "dia": "Sábado",
+              "deporte": "brick",
+              "duracion_min": 90,
+              "descripcion": "Brick: 60 min bici + 30 min run. Practica poner los pies en las zapatillas ya puestas en los pedales (técnica de T1 avanzada — opcional)."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "carrera",
+              "duracion_min": 35,
+              "descripcion": "Run suave Z1-Z2. Recuperación activa."
+            }
+          ],
+          "total_horas": "~5.5h",
+          "nota": "Si puedes nadar en open water esta semana, hazlo. La sensación es muy diferente a la piscina."
+        },
+        {
+          "semana": 7,
+          "fase": "Base",
+          "objetivo": "SEMANA DE RECUPERACIÓN.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 35,
+              "descripcion": "1000m suave."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "ciclismo",
+              "duracion_min": 45,
+              "descripcion": "Rodaje Z1-Z2 fácil."
+            },
+            {
+              "dia": "Viernes",
+              "deporte": "carrera",
+              "duracion_min": 30,
+              "descripcion": "Trote suave."
+            }
+          ],
+          "total_horas": "~2h",
+          "nota": "Descarga. Aprovecha para revisar el material para la carrera."
+        },
+        {
+          "semana": 8,
+          "fase": "Construcción",
+          "objetivo": "Simular distancias de carrera. Primera vez que nadas 750m sin parar.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 50,
+              "descripcion": "1800m — incluye un bloque de 750m seguido sin parar. Esto es la distancia de carrera."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 70,
+              "descripcion": "22-25km a ritmo Z2-Z3. Simula la distancia de carrera en terreno llano."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 35,
+              "descripcion": "5-6km Z2. Ya estás preparado para la distancia de carrera."
+            },
+            {
+              "dia": "Viernes",
+              "deporte": "natacion",
+              "duracion_min": 40,
+              "descripcion": "Técnica y open water si puedes. 1400m."
+            },
+            {
+              "dia": "Sábado",
+              "deporte": "brick",
+              "duracion_min": 90,
+              "descripcion": "BRICK LARGO: 60 min bici + 30 min run. Lleva gel y practica la nutrición."
+            }
+          ],
+          "total_horas": "~5.5h",
+          "nota": "Ya has nadado 750m, ya has pedaleado 20km, ya has corrido 5km. Estás listo."
+        },
+        {
+          "semana": 9,
+          "fase": "Construcción",
+          "objetivo": "Consolidar confianza. Primer triatlón de práctica (simulacro en entrenamiento).",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 45,
+              "descripcion": "1600m técnica. Trabaja la salida en open water (nadar en grupo)."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 60,
+              "descripcion": "30 min Z2 + 2×8 min Z3. Primera vez con algo de intensidad en bici."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 35,
+              "descripcion": "30 min Z2 + 5 min Z3. Empieza a correr algo más rápido."
+            },
+            {
+              "dia": "Sábado",
+              "deporte": "simulacro",
+              "duracion_min": 120,
+              "descripcion": "SIMULACRO COMPLETO: Nada 750m (piscina u open water) + T1 + Bici 20km + T2 + Run 5km. Tómatelo con calma, no es una carrera. Aprende las sensaciones."
+            }
+          ],
+          "total_horas": "~5h",
+          "nota": "El simulacro del sábado te dará una idea real de tus tiempos y lo que necesitas mejorar."
+        },
+        {
+          "semana": 10,
+          "fase": "Construcción",
+          "objetivo": "Últimas semanas de carga. Refinar transiciones.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 45,
+              "descripcion": "1800m. Foco en la salida: simula las primeras 100m a ritmo de carrera."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 60,
+              "descripcion": "Rodaje Z2. Practica montar/desmontar la bici rápido (transición T1 y T2)."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 35,
+              "descripcion": "Run Z2. Practica correr con zapatillas de triatlón (sin calcetines si lo haces así en carrera)."
+            },
+            {
+              "dia": "Viernes",
+              "deporte": "natacion",
+              "duracion_min": 35,
+              "descripcion": "1200m fácil. Nada con el wetsuit si lo tienes."
+            },
+            {
+              "dia": "Sábado",
+              "deporte": "brick",
+              "duracion_min": 75,
+              "descripcion": "Brick: 50 min bici + 25 min run. Cronométrate."
+            }
+          ],
+          "total_horas": "~5h"
+        },
+        {
+          "semana": 11,
+          "fase": "Taper",
+          "objetivo": "TAPER — Reducir volumen 50%, mantener algo de intensidad.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 35,
+              "descripcion": "1000m suave. Un bloque de 4×50m algo más rápido para mantener el toque."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "ciclismo",
+              "duracion_min": 40,
+              "descripcion": "30 min Z2 + 2×5 min Z3. Mantener sensaciones."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 25,
+              "descripcion": "20 min Z2 + 5 min a ritmo de carrera."
+            },
+            {
+              "dia": "Sábado",
+              "deporte": "brick",
+              "duracion_min": 50,
+              "descripcion": "Brick ligero: 30 min bici + 20 min run. Repasa la transición."
+            }
+          ],
+          "total_horas": "~2.5h",
+          "nota": "Sientes que entrenan menos y te preocupas — es normal. El descanso es parte del plan."
+        },
+        {
+          "semana": 12,
+          "fase": "Carrera",
+          "objetivo": "SEMANA DE CARRERA. Descanso y preparación mental.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 20,
+              "descripcion": "800m muy suave. Nada tranquilo."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "ciclismo",
+              "duracion_min": 20,
+              "descripcion": "20 min Z1 en rodillo o calle. Solo mover las piernas."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 15,
+              "descripcion": "15 min de trote muy suave + 3×30s a ritmo de carrera."
+            },
+            {
+              "dia": "Sabado_o_pre_carrera",
+              "deporte": "descanso",
+              "duracion_min": 0,
+              "descripcion": "Descansa. Prepara la bolsa de transición. Repasa el mapa del recorrido."
+            },
+            {
+              "dia": "Dia_carrera",
+              "deporte": "competicion",
+              "duracion_min": 90,
+              "descripcion": "¡TU PRIMER TRIATLÓN! Sale suave en la natación. Contrólate en la bici. Corre con alegría."
+            }
+          ],
+          "total_horas": "~1h + carrera",
+          "nota": "Checklist pre-carrera: wetsuit, gafas, gorro (lo dan), bici revisada, zapatillas bici y carrera, geles, cinturón dorsal, casco, gafas sol. ¡Disfrútalo!"
+        }
+      ],
+      "checklist_material_minimo": [
+        "Bañador o trisuit",
+        "Gafas de natación",
+        "Wetsuit (si agua <24.5°C)",
+        "Bicicleta en buen estado",
+        "Casco (obligatorio)",
+        "Zapatillas de ciclismo o deportivas para la bici",
+        "Zapatillas de running",
+        "Gafas de sol",
+        "Cinturón de dorsales",
+        "Gel energético (1-2)",
+        "Bidón de agua"
+      ],
+      "errores_tipicos_principiante": [
+        "Salir demasiado rápido en la natación — empieza al 70% de tu capacidad",
+        "Ir demasiado fuerte en la bici — llegarás destruido al run",
+        "No practicar las transiciones antes de la carrera",
+        "Estrenar material el día de la carrera (zapatillas, gel, wetsuit)",
+        "No desayunar o desayunar demasiado cerca del inicio",
+        "No beber nada en la bici porque 'es corta'"
+      ]
+    },
+    {
+      "id": "sprint_intermedio",
+      "nombre": "Plan Sprint — Mejorar tiempo (8 semanas)",
+      "distancia": "sprint",
+      "duracion_semanas": 8,
+      "nivel": "intermedio",
+      "descripcion": "Para alguien que ya ha hecho algún Sprint y quiere mejorar su tiempo. Más intensidad, más volumen, trabajo de calidad.",
+      "prerequisitos": "Haber terminado al menos 1 triatlón Sprint. Base aeróbica de al menos 6 meses.",
+      "horas_semanales": {
+        "base": "6-8h",
+        "pico": "9-11h"
+      },
+      "sesiones_semana": "6-7",
+      "fases": [
+        {
+          "nombre": "Base de velocidad",
+          "semanas": "1-2",
+          "descripcion": "Retomar el tono. Series cortas y rápidas en los 3 deportes."
+        },
+        {
+          "nombre": "Construcción intensidad",
+          "semanas": "3-6",
+          "descripcion": "Trabajo de umbral y VO2max. Bricks con cambio de ritmo."
+        },
+        {
+          "nombre": "Pico + Taper",
+          "semanas": "7-8",
+          "descripcion": "Simular ritmo de carrera. Taper final."
+        }
+      ],
+      "plan_semana_a_semana": [
+        {
+          "semana": 1,
+          "objetivo": "Retomar ritmo con calidad.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 50,
+              "descripcion": "2000m — 400m calentamiento + 8×100m con 15s descanso a ritmo sostenido + 200m vuelta calma."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 60,
+              "descripcion": "45 min Z2 + 3×5 min Z4 (umbral) con 3 min recuperación."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "carrera",
+              "duracion_min": 40,
+              "descripcion": "30 min Z2 + 4×1 min Z4 con 2 min recuperación."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "natacion",
+              "duracion_min": 45,
+              "descripcion": "1800m técnica y series de 50m."
+            },
+            {
+              "dia": "Sabado",
+              "deporte": "brick",
+              "duracion_min": 75,
+              "descripcion": "50 min bici (20 min Z2 + 15 min Z3 + 15 min Z2) + 25 min run Z3."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "carrera",
+              "duracion_min": 45,
+              "descripcion": "45 min Z2 largo continuo."
+            }
+          ],
+          "total_horas": "~5.5h"
+        },
+        {
+          "semana": 2,
+          "objetivo": "Añadir volumen de natación. Primer trabajo de velocidad en run.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 55,
+              "descripcion": "2200m — 4×200m + 8×50m sprint con 20s descanso."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 70,
+              "descripcion": "60 min con 20 min en Z3 (tempo). Trabaja posición aero en los clips-ons."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "carrera",
+              "duracion_min": 40,
+              "descripcion": "6×400m a ritmo de 5km con 90s recuperación. Esto es trabajo de velocidad."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "natacion",
+              "duracion_min": 45,
+              "descripcion": "1800m — foco en la salida: 10×25m sprint desde pared."
+            },
+            {
+              "dia": "Viernes",
+              "deporte": "descanso_o_movilidad",
+              "duracion_min": 20,
+              "descripcion": "Estiramientos, foam roller, movilidad de caderas y hombros."
+            },
+            {
+              "dia": "Sabado",
+              "deporte": "brick",
+              "duracion_min": 90,
+              "descripcion": "60 min bici (incluye 3×8 min Z4) + 30 min run empezando en Z3."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "carrera",
+              "duracion_min": 50,
+              "descripcion": "50 min Z2 largo."
+            }
+          ],
+          "total_horas": "~6.5h"
+        },
+        {
+          "semana": 3,
+          "objetivo": "SEMANA DE RECUPERACIÓN.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 40,
+              "descripcion": "1500m suave."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "ciclismo",
+              "duracion_min": 50,
+              "descripcion": "Z2 fácil."
+            },
+            {
+              "dia": "Viernes",
+              "deporte": "carrera",
+              "duracion_min": 35,
+              "descripcion": "Trote Z2."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "brick",
+              "duracion_min": 60,
+              "descripcion": "40 min bici + 20 min run suave."
+            }
+          ],
+          "total_horas": "~3h"
+        },
+        {
+          "semana": 4,
+          "objetivo": "Semana de construcción principal. Mayor carga de intensidad.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 55,
+              "descripcion": "2500m — 5×200m al 90% pace con 20s descanso."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 70,
+              "descripcion": "Incluye 4×8 min Z4 (umbral). Descansa 3 min entre bloques."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "carrera",
+              "duracion_min": 45,
+              "descripcion": "8×400m a pace de 5km. 90s recuperación. Duro pero efectivo."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "natacion",
+              "duracion_min": 45,
+              "descripcion": "1800m — open water o técnica. Simula la salida en grupo."
+            },
+            {
+              "dia": "Sabado",
+              "deporte": "brick",
+              "duracion_min": 80,
+              "descripcion": "BRICK RACE PACE: 50 min bici al ritmo objetivo de carrera + 25 min run al ritmo objetivo de carrera."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "carrera",
+              "duracion_min": 50,
+              "descripcion": "55 min Z2."
+            }
+          ],
+          "total_horas": "~6.5h"
+        },
+        {
+          "semana": 5,
+          "objetivo": "Semana exigente — volumen máximo.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 60,
+              "descripcion": "2800m — 3×(4×100m) con 15s descanso dentro del bloque y 1 min entre bloques."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 75,
+              "descripcion": "60 min con 25 min en Z3-Z4."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "carrera",
+              "duracion_min": 45,
+              "descripcion": "5×600m a ritmo 5km con 2 min descanso."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "natacion",
+              "duracion_min": 50,
+              "descripcion": "2000m. Foco en la técnica de viraje y la salida."
+            },
+            {
+              "dia": "Viernes",
+              "deporte": "ciclismo",
+              "duracion_min": 40,
+              "descripcion": "Rodaje recuperación Z1."
+            },
+            {
+              "dia": "Sabado",
+              "deporte": "brick",
+              "duracion_min": 90,
+              "descripcion": "Brick pico: 60 min bici (race effort) + 30 min run (race effort). Lleva gel."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "carrera",
+              "duracion_min": 55,
+              "descripcion": "55 min Z2 continuo."
+            }
+          ],
+          "total_horas": "~8h"
+        },
+        {
+          "semana": 6,
+          "objetivo": "SEMANA DE RECUPERACIÓN pre-pico.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 40,
+              "descripcion": "1500m suave."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "brick",
+              "duracion_min": 60,
+              "descripcion": "35 min bici + 25 min run. Fácil."
+            },
+            {
+              "dia": "Viernes",
+              "deporte": "natacion",
+              "duracion_min": 35,
+              "descripcion": "1200m + 4×50m sprint."
+            },
+            {
+              "dia": "Domingo",
+              "deporte": "carrera",
+              "duracion_min": 40,
+              "descripcion": "40 min Z2."
+            }
+          ],
+          "total_horas": "~3h"
+        },
+        {
+          "semana": 7,
+          "objetivo": "SEMANA DE PICO. Simular la carrera.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 50,
+              "descripcion": "2000m — incluye 750m seguido sin parar al ritmo objetivo de carrera."
+            },
+            {
+              "dia": "Martes",
+              "deporte": "ciclismo",
+              "duracion_min": 60,
+              "descripcion": "20km al ritmo objetivo de carrera. Simula la sección de bike."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 30,
+              "descripcion": "5km al ritmo objetivo de carrera. Confirma tu tiempo."
+            },
+            {
+              "dia": "Sabado",
+              "deporte": "simulacro_completo",
+              "duracion_min": 100,
+              "descripcion": "SIMULACRO: 750m nado + T1 + 20km bici + T2 + 5km run. Cronométrate. Esto ES tu carrera de prueba."
+            }
+          ],
+          "total_horas": "~5h"
+        },
+        {
+          "semana": 8,
+          "objetivo": "TAPER Y CARRERA.",
+          "sesiones": [
+            {
+              "dia": "Lunes",
+              "deporte": "natacion",
+              "duracion_min": 30,
+              "descripcion": "1000m suave + 4×50m a ritmo de carrera."
+            },
+            {
+              "dia": "Miércoles",
+              "deporte": "ciclismo",
+              "duracion_min": 30,
+              "descripcion": "20 min Z2 + 2×5 min Z3."
+            },
+            {
+              "dia": "Jueves",
+              "deporte": "carrera",
+              "duracion_min": 20,
+              "descripcion": "15 min suave + 4×30s a ritmo de carrera."
+            },
+            {
+              "dia": "Dia_carrera",
+              "deporte": "competicion",
+              "duracion_min": 75,
+              "descripcion": "¡SPRINT TRIATLÓN! Disfruta — has trabajado duro para esto."
+            }
+          ],
+          "total_horas": "~2h + carrera"
+        }
+      ]
+    },
+    {
+      "id": "olimpico_principiante",
+      "nombre": "Plan Olímpico — Primer Olímpico (16 semanas)",
+      "distancia": "olimpico",
+      "duracion_semanas": 16,
+      "nivel": "principiante",
+      "descripcion": "Para alguien que ya ha hecho algún Sprint y quiere dar el salto al Olímpico. Aumenta volumen gradualmente.",
+      "prerequisitos": "Haber terminado al menos 1 triatlón Sprint. Poder nadar 1500m, pedalear 40km y correr 10km por separado (aunque sea lento).",
+      "horas_semanales": {
+        "base": "6-8h",
+        "pico": "10-12h"
+      },
+      "sesiones_semana": "6-8",
+      "fases": [
+        {
+          "nombre": "Base",
+          "semanas": "1-5",
+          "descripcion": "Construir volumen aeróbico. Todo en Z2."
+        },
+        {
+          "nombre": "Construcción",
+          "semanas": "6-12",
+          "descripcion": "Añadir intensidad. Bricks más largos. Long run hasta 1h."
+        },
+        {
+          "nombre": "Pico",
+          "semanas": "13-14",
+          "descripcion": "Máximo volumen. Simulacro de carrera."
+        },
+        {
+          "nombre": "Taper",
+          "semanas": "15-16",
+          "descripcion": "Reducir volumen, mantener intensidad puntual."
+        }
+      ],
+      "volumenes_clave": {
+        "natacion_km_semana_base": "5-6km",
+        "natacion_km_semana_pico": "8-10km",
+        "ciclismo_km_semana_pico": "120-150km",
+        "carrera_km_semana_pico": "35-45km",
+        "long_ride_max": "2.5h (60-70km)",
+        "long_run_max": "65-75 min"
+      },
+      "semana_tipo_fase_construccion": [
+        {
+          "dia": "Lunes",
+          "deporte": "natacion",
+          "descripcion": "2500-3000m — series de 200-400m"
+        },
+        {
+          "dia": "Martes",
+          "deporte": "ciclismo",
+          "descripcion": "70-80 min — Z2 + 2×10 min Z3"
+        },
+        {
+          "dia": "Miércoles",
+          "deporte": "carrera",
+          "descripcion": "45-50 min Z2"
+        },
+        {
+          "dia": "Jueves",
+          "deporte": "natacion",
+          "descripcion": "2000m técnica + open water"
+        },
+        {
+          "dia": "Viernes",
+          "deporte": "ciclismo",
+          "descripcion": "45 min recuperación Z1-Z2"
+        },
+        {
+          "dia": "Sabado",
+          "deporte": "brick",
+          "descripcion": "90 min bici + 35 min run"
+        },
+        {
+          "dia": "Domingo",
+          "deporte": "carrera",
+          "descripcion": "Long run 55-65 min Z2"
+        }
+      ]
+    },
+    {
+      "id": "703_principiante",
+      "nombre": "Plan 70.3 — Primer Half Ironman (24 semanas)",
+      "distancia": "70.3",
+      "duracion_semanas": 24,
+      "nivel": "principiante",
+      "descripcion": "Para alguien que ya ha hecho triatlones olímpicos o Sprint y quiere completar su primer 70.3. El objetivo es TERMINAR con buenas sensaciones, no un tiempo concreto.",
+      "prerequisitos": "Haber terminado al menos 1 triatlón olímpico (o 3+ Sprints). Poder nadar 1500m cómodo, pedalear 60km y correr 12-15km por separado.",
+      "horas_semanales": {
+        "base": "7-9h",
+        "pico": "12-15h"
+      },
+      "sesiones_semana": "7-9",
+      "fases": [
+        {
+          "nombre": "Base aeróbica",
+          "semanas": "1-8",
+          "descripcion": "80-90% Z2. Construir los cimientos. Nunca saltarse las semanas de recuperación."
+        },
+        {
+          "nombre": "Construcción volumen",
+          "semanas": "9-16",
+          "descripcion": "Aumentar long ride y long run. Bricks semanales obligatorios."
+        },
+        {
+          "nombre": "Pico específico",
+          "semanas": "17-20",
+          "descripcion": "Entrenamientos más largos. Race pace training. Simular condiciones de carrera."
+        },
+        {
+          "nombre": "Taper",
+          "semanas": "21-24",
+          "descripcion": "Semanas 21-22: -30% vol. Semanas 23-24: -50% vol. Mantener intensidad puntual."
+        }
+      ],
+      "volumenes_clave": {
+        "natacion_km_semana_pico": "8-10km",
+        "ciclismo_km_semana_pico": "180-220km",
+        "carrera_km_semana_pico": "45-55km",
+        "long_ride_max": "4h (90-100km)",
+        "long_run_max": "2h (18-20km max)"
+      },
+      "semana_tipo_semana_10": [
+        {
+          "dia": "Lunes",
+          "deporte": "natacion",
+          "duracion_min": 55,
+          "descripcion": "2800m — 4×400m con 30s descanso."
+        },
+        {
+          "dia": "Martes",
+          "deporte": "ciclismo",
+          "duracion_min": 75,
+          "descripcion": "75 min — 20 min Z2 + 3×12 min Z3 + 20 min Z2."
+        },
+        {
+          "dia": "Miércoles",
+          "deporte": "carrera",
+          "duracion_min": 50,
+          "descripcion": "50 min Z2 continuo."
+        },
+        {
+          "dia": "Jueves",
+          "deporte": "natacion",
+          "duracion_min": 55,
+          "descripcion": "2500m series largas."
+        },
+        {
+          "dia": "Viernes",
+          "deporte": "descanso",
+          "descripcion": "Descanso o 20 min movilidad/yoga."
+        },
+        {
+          "dia": "Sabado",
+          "deporte": "brick",
+          "duracion_min": 165,
+          "descripcion": "BRICK LARGO: 2.5h bici (pace 70.3) + 45 min run (pace 70.3). Practica nutrición con geles."
+        },
+        {
+          "dia": "Domingo",
+          "deporte": "carrera_larga",
+          "duracion_min": 75,
+          "descripcion": "75 min run Z2 continuo."
+        }
+      ],
+      "reglas_criticas_principiante": [
+        "NUNCA saltarse una semana de recuperación (cada 3-4 semanas)",
+        "El long bike del sábado es sagrado — es tu entrenamiento más importante",
+        "Practicar la nutrición en CADA long bike y long run",
+        "No aumentar el volumen total más de un 10% por semana",
+        "Si sientes dolor (no incomodidad, sino dolor): para y consulta"
+      ],
+      "nutricion_race_day_703_principiante": {
+        "antes": "Desayuno 2.5h antes: 80g HC + proteína ligera + café",
+        "nado": "Nada",
+        "bike_cada_20_min": "1 gel (25g CH) o media barrita + agua",
+        "bike_por_hora": "60-75g CH + 500-600ml líquido + 500mg sodio",
+        "run_cada_2km": "Agua en avituallamiento. Gel cada 30-35 min.",
+        "consejo": "Prueba todo esto en los entrenamientos largos ANTES de la carrera. Nunca experimentes el día de carrera."
+      }
+    },
+    {
+      "id": "ironman_principiante",
+      "nombre": "Plan Ironman — Primer Ironman Completo (30 semanas)",
+      "distancia": "ironman",
+      "duracion_semanas": 30,
+      "nivel": "principiante",
+      "descripcion": "Para quien quiere completar su primer Ironman. El objetivo es cruzar la línea de meta. La preparación es un proyecto de vida de 7 meses.",
+      "prerequisitos": "Haber terminado al menos 1 triatlón 70.3 (Half Ironman). Si no, prepararse durante 6 meses antes de empezar este plan.",
+      "advertencia_importante": "El Ironman completo sin haber hecho antes un 70.3 es peligroso. Haz el 70.3 primero.",
+      "horas_semanales": {
+        "base": "9-11h",
+        "pico": "16-20h"
+      },
+      "sesiones_semana": "9-11",
+      "fases": [
+        {
+          "nombre": "Base larga",
+          "semanas": "1-10",
+          "descripcion": "Construir la base aeróbica más grande posible. Sin intensidad. 90% Z2."
+        },
+        {
+          "nombre": "Construcción volumen",
+          "semanas": "11-20",
+          "descripcion": "Aumentar long ride (hasta 5h) y long run (hasta 2:30h). Bricks de 3h+."
+        },
+        {
+          "nombre": "Pico",
+          "semanas": "21-24",
+          "descripcion": "Máximo volumen. Simulación de condiciones de carrera. Race pace training."
+        },
+        {
+          "nombre": "Taper",
+          "semanas": "25-30",
+          "descripcion": "Reducción gradual. Sem 25-26: -20%. Sem 27-28: -40%. Sem 29: -60%. Sem 30 (carrera): -80%."
+        }
+      ],
+      "volumenes_clave": {
+        "natacion_km_semana_pico": "12-14km",
+        "ciclismo_km_semana_pico": "350-420km",
+        "carrera_km_semana_pico": "55-65km",
+        "long_ride_max": "5-5.5h (110-130km — NO más)",
+        "long_run_max": "2:30h (26-28km MAX — NO más)",
+        "total_horas_semana_pico": "17-20h"
+      },
+      "semana_tipo_pico_semana_22": [
+        {
+          "dia": "Lunes",
+          "deporte": "natacion",
+          "duracion_min": 60,
+          "descripcion": "3500m — 2×1000m a ritmo de carrera + técnica."
+        },
+        {
+          "dia": "Martes",
+          "deporte": "ciclismo",
+          "duracion_min": 90,
+          "descripcion": "90 min — 60 min Z3 + 2×10 min Z4. Incluye trabajo en posición aero."
+        },
+        {
+          "dia": "Miércoles",
+          "deporte": "carrera",
+          "duracion_min": 60,
+          "descripcion": "60 min Z2. Bien hidratado."
+        },
+        {
+          "dia": "Jueves",
+          "deporte": "natacion_y_carrera",
+          "descripcion": "Mañana: 3000m natación. Tarde: 40 min run Z2."
+        },
+        {
+          "dia": "Viernes",
+          "deporte": "descanso_activo",
+          "duracion_min": 30,
+          "descripcion": "Yoga, foam roller, o movilidad. Importantísimo en semanas de pico."
+        },
+        {
+          "dia": "Sabado",
+          "deporte": "brick_largo",
+          "duracion_min": 420,
+          "descripcion": "BRICK PICO: 5h bici (80% ritmo Ironman) + 60 min run (ritmo Ironman). Come y bebe igual que en carrera."
+        },
+        {
+          "dia": "Domingo",
+          "deporte": "carrera_larga",
+          "duracion_min": 150,
+          "descripcion": "Long run 2:30h Z2. Llevas geles cada 30 min. Termina aunque vayas despacio."
+        }
+      ],
+      "filosofia_del_primer_ironman": [
+        "El objetivo del primer Ironman es TERMINAR, no un tiempo",
+        "Controla el ego en la bici — ve más despacio de lo que crees necesario",
+        "Empieza el run a un ritmo que puedas mantener 42km, no a sprint",
+        "Cada avituallamiento del run: camina mientras comes (ahorra energía)",
+        "El km 30 del maratón es el muro — es normal, hay que empujarlo",
+        "Sonríe en la llegada — has hecho algo que el 0.1% de la población hace"
+      ],
+      "checklist_semana_carrera": [
+        "Confirmar registro y bolsa de dorsal",
+        "Revisar bicicleta en taller 2 semanas antes",
+        "Preparar bolsa T1 (wetsuit, gafas, gorro → zapatillas bici, casco, gafas sol)",
+        "Preparar bolsa T2 (zapatillas carrera, gorra, cinturón dorsal, geles)",
+        "Practicar desayuno de carrera al menos 2 veces en entrenos largos",
+        "Cargar GPS, luces bici, pulsómetro",
+        "Bombas de aire + herramientas en bici",
+        "Reservar masaje para el día después de la carrera"
+      ]
+    }
+  ],
+  "nutricion": {
+    "pre_competicion": {
+      "noche_anterior": {
+        "recomendacion": "Pasta, arroz o patata. Bajo en fibra. Evitar comidas nuevas o picantes.",
+        "hidratacion": "2-3 litros de agua durante el día"
+      },
+      "desayuno_race_day": {
+        "tiempo_antes": "2-3h antes del inicio",
+        "calorias": "500-800 kcal",
+        "carbohidratos_g": "80-120g",
+        "ejemplo_ironman": "3 tostadas con miel + 2 huevos revueltos + café + 500ml agua",
+        "ejemplo_sprint": "2 tostadas con miel + plátano + café",
+        "prohibido": "Fibra alta, comidas grasas, alimentos no probados previamente"
+      },
+      "1h_antes": {
+        "opcion": "Gel de carbohidratos o plátano maduro + 250ml agua"
+      },
+      "30min_antes": {
+        "cafeina": "3mg/kg peso corporal (ej: 70kg = 210mg ≈ 2 cafés)",
+        "nota": "Solo si estás habituado. Nunca por primera vez en carrera."
+      }
+    },
+    "durante_competicion": {
+      "natacion": {
+        "carbohidratos": "No necesario (duración corta)",
+        "hidratacion": "Ninguna durante el segmento"
+      },
+      "ciclismo": {
+        "carbohidratos_g_hora": {
+          "minimo": 60,
+          "optimo": 75,
+          "maximo": 90
+        },
+        "hidratacion_ml_hora": {
+          "frio": 500,
+          "calor": 800,
+          "extremo": 1000
+        },
+        "sodio_mg_hora": "500-1000mg",
+        "fuentes": [
+          "Geles (25-40g CH)",
+          "Plátano",
+          "Dátiles (28g CH/100g)",
+          "Barritas de cereales",
+          "Bebida isotónica",
+          "Arroz con sal (bolitas japonesas)"
+        ],
+        "truco": "Mezcla maltodextrina + fructosa (ratio 2:1) permite absorber hasta 90g CH/hora"
+      },
+      "carrera": {
+        "carbohidratos_g_hora": {
+          "minimo": 30,
+          "optimo": 45,
+          "maximo": 60
+        },
+        "hidratacion": "Avituallamientos oficiales (cada km en Ironman). Beber en cada uno.",
+        "fuentes": [
+          "Geles (tomar en avituallamientos con agua)",
+          "Coca-Cola (útil en últimos 20km)",
+          "Plátano en avituallamientos"
+        ],
+        "truco_final": "Coca-Cola en los últimos 20km: azúcar + cafeína + sodio + gas para el estómago"
+      }
+    },
+    "recuperacion": {
+      "ventana_0_30min": {
+        "proteina_g": "20-30g (whey o equivalente vegetal)",
+        "carbohidratos": "HC de absorción rápida (plátano, arroz blanco, mermelada)",
+        "descripcion": "Ventana anabólica crítica para recuperación muscular"
+      },
+      "comida_1_2h": {
+        "descripcion": "Comida completa: proteína + HC complejos + verduras + grasa saludable"
+      },
+      "rehidratacion": {
+        "regla": "Beber 150% del peso perdido en agua",
+        "electrolitos": "Sal, caldo, bebida isotónica o suero oral"
+      },
+      "post_ironman": "No realizar ejercicio intenso en 2-4 semanas. El sistema inmune está comprometido."
+    },
+    "dieta_base_triatleta": {
+      "macros_por_kg": {
+        "carbohidratos": "5-8g/kg/día (más en semanas de alto volumen)",
+        "proteina": "1.6-2.0g/kg/día",
+        "grasa": "1.0-1.5g/kg/día"
+      },
+      "calorias_ejemplo": {
+        "descripcion": "Hombre 70kg, 12h/semana entrenamiento",
+        "total": "3200-3800 kcal/día"
+      },
+      "fuentes_recomendadas": {
+        "carbohidratos": [
+          "Arroz",
+          "Pasta",
+          "Avena",
+          "Patata",
+          "Boniato",
+          "Pan integral",
+          "Fruta"
+        ],
+        "proteinas": [
+          "Pechuga de pollo",
+          "Pescado azul",
+          "Huevos",
+          "Legumbres",
+          "Tofu",
+          "Yogur griego"
+        ],
+        "grasas": [
+          "Aceite de oliva virgen extra",
+          "Aguacate",
+          "Frutos secos",
+          "Salmón"
+        ]
+      }
+    }
+  },
+  "suplementos": [
+    {
+      "nombre": "Cafeína",
+      "evidencia": "Muy alta (Grado A)",
+      "dosis": "3-6mg/kg peso corporal",
+      "momento": "45-60 min antes de la carrera o esfuerzo largo. También últimos km del run.",
+      "beneficios": [
+        "Mejora resistencia aeróbica",
+        "Reduce percepción de esfuerzo",
+        "Retrasa fatiga muscular",
+        "Mejora concentración"
+      ],
+      "precauciones": "No usar si hay dependencia severa o arritmias. Nunca por primera vez en competición.",
+      "ejemplo_dosis": "70kg × 4mg = 280mg ≈ 2-3 cafés"
+    },
+    {
+      "nombre": "Creatina monohidrato",
+      "evidencia": "Alta (Grado A)",
+      "dosis": "3-5g/día (mantenimiento, sin carga)",
+      "momento": "En cualquier momento del día",
+      "beneficios": [
+        "Mantiene masa muscular en alto volumen",
+        "Mejora recuperación",
+        "Útil en fase de fuerza invernal"
+      ],
+      "precauciones": "Puede aumentar ligeramente el peso por retención de agua. Menos impacto en rendimiento puramente aeróbico.",
+      "marca_recomendada": "Cualquier creatina monohidrato de calidad (Creapure certificado)"
+    },
+    {
+      "nombre": "Beta-Alanina",
+      "evidencia": "Moderada-Alta (Grado B)",
+      "dosis": "3.2-6.4g/día dividido en tomas",
+      "momento": "Con comidas para reducir parestesia (hormigueo)",
+      "beneficios": [
+        "Aumenta carnosina muscular",
+        "Mejora rendimiento en esfuerzos de 1-10 min",
+        "Útil en series de natación o subidas en bike"
+      ],
+      "precauciones": "El hormigueo (parestesia) es normal e inofensivo. Requiere 4-6 semanas para saturar el músculo.",
+      "saturacion": "4-6 semanas de uso continuado"
+    },
+    {
+      "nombre": "Nitrato (Zumo de remolacha)",
+      "evidencia": "Moderada (Grado B)",
+      "dosis": "500mg de nitrato = ~500ml zumo de remolacha concentrado",
+      "momento": "2-3h antes del esfuerzo",
+      "beneficios": [
+        "Mejora eficiencia del oxígeno",
+        "Reduce VO2 a misma intensidad",
+        "Especialmente útil en altitud"
+      ],
+      "precauciones": "Puede colorear orina y heces de rojo/rosa. Normal y no peligroso.",
+      "marcas": [
+        "Beet It",
+        "Biotta",
+        "Concentrado artesanal"
+      ]
+    },
+    {
+      "nombre": "Proteína Whey / Vegetal",
+      "evidencia": "Alta (Grado A)",
+      "dosis": "20-40g post-entrenamiento si no alcanzas necesidades por comida",
+      "momento": "Post-entrenamiento. También antes de dormir (caseína).",
+      "beneficios": [
+        "Síntesis proteica muscular",
+        "Recuperación tisular",
+        "Mantenimiento masa muscular"
+      ],
+      "precauciones": "La cantidad total diaria de proteína es más importante que el timing exacto.",
+      "alternativas_veganas": [
+        "Proteína de guisante",
+        "Proteína de arroz + guisante (mezcla)"
+      ]
+    },
+    {
+      "nombre": "Vitamina D3",
+      "evidencia": "Moderada (Grado B)",
+      "dosis": "2000-4000 UI/día (ajustar según analítica de sangre)",
+      "momento": "Con comida grasa (para mejor absorción)",
+      "beneficios": [
+        "Sistema inmune",
+        "Función muscular",
+        "Salud ósea",
+        "Función hormonal"
+      ],
+      "precauciones": "Hacer analítica antes de empezar. Combinar con K2 (100-200mcg) para mejor uso del calcio.",
+      "poblacion_riesgo": "Muy frecuente el déficit en España en otoño-invierno"
+    },
+    {
+      "nombre": "Magnesio",
+      "evidencia": "Moderada (Grado B)",
+      "dosis": "300-400mg/día",
+      "momento": "Antes de dormir (mejora el sueño)",
+      "beneficios": [
+        "Calidad del sueño",
+        "Recuperación muscular",
+        "Prevención de calambres",
+        "Función nerviosa"
+      ],
+      "formas_recomendadas": [
+        "Bisglicinato (mejor absorción y tolerancia)",
+        "Citrato",
+        "Malato"
+      ],
+      "formas_evitar": [
+        "Óxido de magnesio (muy baja absorción)"
+      ],
+      "nota": "Los triatletas sudan mucho y pierden magnesio significativo"
+    },
+    {
+      "nombre": "Omega-3 (EPA+DHA)",
+      "evidencia": "Moderada (Grado B)",
+      "dosis": "2-3g EPA+DHA/día",
+      "momento": "Con comida",
+      "beneficios": [
+        "Antiinflamatorio natural",
+        "Recuperación muscular",
+        "Salud cardiovascular",
+        "Función cognitiva"
+      ],
+      "fuentes": [
+        "Aceite de pescado (triglyceride form)",
+        "Aceite de algas (opción vegana)"
+      ],
+      "marcas_calidad": [
+        "Nordic Naturals",
+        "Omega3Zone",
+        "Zinzino"
+      ]
+    },
+    {
+      "nombre": "Electrolitos / Sales de rehidratación",
+      "evidencia": "Alta (Grado A) para uso en carrera",
+      "dosis": "500-1000mg sodio/hora en competición",
+      "momento": "Durante entrenamientos y carreras largas",
+      "beneficios": [
+        "Prevención de hiponatremia",
+        "Rendimiento en calor",
+        "Reducción de calambres"
+      ],
+      "fuentes": [
+        "SaltStick",
+        "Nuun",
+        "High5 Zero",
+        "Tabletas de sal",
+        "Bebida isotónica casera"
+      ],
+      "receta_casera": "1L agua + 1g sal + 40g azúcar + zumo de medio limón"
+    }
+  ],
+  "material": {
+    "natacion": {
+      "imprescindible": [
+        "Gafas de piscina (goggle)",
+        "Gorro de silicona",
+        "Bañador/traje de baño técnico",
+        "Wetsuit (para open water y aguas <24.5°C)"
+      ],
+      "entrenamiento": [
+        "Pull buoy",
+        "Paletas (pequeñas para empezar)",
+        "Tabla de natación",
+        "Aletas cortas (DeFin o similar)",
+        "Tubo frontal de respiración",
+        "Resistance parachute"
+      ],
+      "wetsuit": {
+        "obligatorio_en": "Aguas <24.5°C en pruebas WTC/Ironman",
+        "ventaja": "Flotabilidad + hidrodinámica = 2-5 min menos en 1500m",
+        "inversion": "200-800€",
+        "marcas": [
+          "Blueseventy (Helix, Reaction)",
+          "Xterra (Vortex)",
+          "Zone3 (Aspire)",
+          "Roka (Maverick)",
+          "Sailfish"
+        ]
+      }
+    },
+    "ciclismo": {
+      "bicicleta": {
+        "sprint_olimpico": "Bicicleta de carretera (aero no obligatoria pero ayuda)",
+        "703_ironman": "Bicicleta de triatlón/TT o road con clip-ons (extensiones de manillar aero)",
+        "inversion_minima": {
+          "road_competitiva": "1500-3000€",
+          "tt_entry": "3000-5000€",
+          "tt_carbono": "5000-12000€"
+        }
+      },
+      "accesorios_imprescindibles": [
+        "Casco certificado (aero si es posible)",
+        "Zapatillas de ciclismo con calas",
+        "Pedales (SPD-SL o LOOK KEO)",
+        "Portabidones (2 como mínimo)",
+        "Gafas de ciclismo",
+        "Guantes (opcional)",
+        "Herramienta multiusos + parches + CO2"
+      ],
+      "tecnologia": {
+        "potenciometro": {
+          "importancia": "Muy alta — la mejor inversión para el rendimiento",
+          "marcas": [
+            "Favero Assioma (mejor calidad/precio)",
+            "4iiii",
+            "Stages",
+            "Garmin Rally",
+            "PowerTap"
+          ]
+        },
+        "ciclocomputador": [
+          "Garmin Edge 540/840/1040",
+          "Wahoo Elemnt Roam/Bolt",
+          "Bryton Rider 750"
+        ],
+        "rodillo_smart": [
+          "Wahoo Kickr Core/Kickr",
+          "Tacx Neo 2T",
+          "Elite Direto XR"
+        ]
+      }
+    },
+    "carrera": {
+      "zapatillas": {
+        "entrenamiento_facil_largo": [
+          "Hoka Clifton 9/Bondi 8",
+          "ASICS Gel-Nimbus",
+          "Brooks Ghost",
+          "Saucony Triumph"
+        ],
+        "series_tempo": [
+          "Nike Pegasus",
+          "Adidas Solar Glide",
+          "ASICS Kayano"
+        ],
+        "competicion_carbono": [
+          "Nike Vaporfly 3",
+          "Adidas Adizero Adios Pro 3",
+          "Asics Metaspeed Sky",
+          "Saucony Endorphin Pro 3",
+          "Hoka Rocket X 2"
+        ]
+      },
+      "accesorios": [
+        "Calcetines técnicos (Balega, DryMax, Compressport)",
+        "Mallas o shorts técnicos",
+        "Camiseta técnica o trisuit",
+        "Cinturón de dorsales",
+        "Cordones elásticos (Lock Laces, Caterpy)",
+        "Gorra o visera",
+        "Crema anti-rozaduras (Vaseline, BodyGlide)"
+      ],
+      "trisuit": "Recomendable desde el segundo triatlón. Evita cambios de ropa en T1 y T2."
+    },
+    "tecnologia_general": {
+      "reloj_multisport": {
+        "gama_entrada": [
+          "Garmin Forerunner 255",
+          "Polar Pacer Pro",
+          "Coros Pace 3"
+        ],
+        "gama_media": [
+          "Garmin Forerunner 965",
+          "Polar Vantage V3",
+          "Suunto Race"
+        ],
+        "gama_alta": [
+          "Garmin Fenix 8",
+          "Garmin Enduro 3",
+          "Coros Apex 2 Pro"
+        ]
+      },
+      "monitor_fc": {
+        "pecho_mas_preciso": [
+          "Garmin HRM-Pro Plus",
+          "Polar H10",
+          "Wahoo Tickr X"
+        ],
+        "muneca": "Integrado en el reloj multisport (menos preciso en ciclismo)"
+      },
+      "apps_plataformas": [
+        {
+          "nombre": "TrainingPeaks",
+          "url": "https://www.trainingpeaks.com",
+          "uso": "Planificación y análisis de entrenamiento. Estándar en triatlón.",
+          "precio": "Gratis (básico) / ~16€/mes (premium)"
+        },
+        {
+          "nombre": "Garmin Connect",
+          "url": "https://connect.garmin.com",
+          "uso": "Sincronización dispositivos Garmin",
+          "precio": "Gratis"
+        },
+        {
+          "nombre": "Strava",
+          "url": "https://www.strava.com",
+          "uso": "Comunidad y registro de actividades",
+          "precio": "Gratis / ~7€/mes premium"
+        },
+        {
+          "nombre": "Zwift",
+          "url": "https://www.zwift.com",
+          "uso": "Ciclismo y carrera indoor gamificado",
+          "precio": "~15€/mes"
+        },
+        {
+          "nombre": "Rouvy",
+          "url": "https://www.rouvy.com",
+          "uso": "Ciclismo indoor con vídeo AR. Único con cursos oficiales Ironman.",
+          "precio": "~12€/mes"
+        },
+        {
+          "nombre": "MOTTIV (Triathlon Taren)",
+          "url": "https://www.mymottiv.com",
+          "uso": "Planes de entrenamiento personalizados para triatlón",
+          "precio": "Gratis (básico) / Premium"
+        },
+        {
+          "nombre": "Today's Plan",
+          "url": "https://www.todaysplan.com.au",
+          "uso": "Análisis avanzado y planificación de temporada",
+          "precio": "~10€/mes"
+        },
+        {
+          "nombre": "Intervals.icu",
+          "url": "https://intervals.icu",
+          "uso": "Análisis gratuito tipo TrainingPeaks",
+          "precio": "Gratis"
+        }
+      ]
+    }
+  },
+  "recursos": {
+    "canales_youtube": [
+      {
+        "nombre": "Global Triathlon Network (GTN)",
+        "url": "https://www.youtube.com/@gtn",
+        "idioma": "Inglés",
+        "suscriptores": "~1M",
+        "descripcion": "El canal de triatlón más completo del mundo. Técnica, entrenamientos, material, nutrición, retos y noticias. Presentado por ex-profesionales.",
+        "temas_principales": [
+          "Técnica de natación, bike y run",
+          "Reviews de material",
+          "Planes de entrenamiento",
+          "Nutrición en carrera",
+          "Retos y challenges"
+        ],
+        "recomendado_para": "Todos los niveles"
+      },
+      {
+        "nombre": "Triathlon Taren / MOTTIV Method",
+        "url": "https://www.youtube.com/@triathlontaren",
+        "url_alternativa": "https://www.youtube.com/channel/UC1AKDrz2GvLxD29W9tow66g",
+        "idioma": "Inglés",
+        "suscriptores": "~191K",
+        "descripcion": "Taren Gesell, fundador de MOTTIV. Planes de entrenamiento, gear reviews, entrevistas con élites. Muy didáctico para triatletas amateur.",
+        "temas_principales": [
+          "Planes de entrenamiento Ironman y 70.3",
+          "Gear reviews",
+          "Nutrición",
+          "Entrevistas con pros"
+        ],
+        "recomendado_para": "Principiantes e intermedios"
+      },
+      {
+        "nombre": "Lionel Sanders",
+        "url": "https://www.youtube.com/@Lionel.Sanders",
+        "idioma": "Inglés",
+        "suscriptores": "~200K+",
+        "descripcion": "4x Campeón Ironman y 30x Campeón 70.3. Canal muy honesto sobre entrenamiento, mentalidad, nutrición y vida de un triatleta profesional.",
+        "temas_principales": [
+          "Entrenamientos en detalle",
+          "Mentalidad competitiva",
+          "Nutrición de élite",
+          "Preparación de carreras"
+        ],
+        "recomendado_para": "Intermedios y avanzados"
+      },
+      {
+        "nombre": "Sam Long (Going Long)",
+        "url": "https://www.youtube.com/@SamYoYoYoLong",
+        "idioma": "Inglés",
+        "descripcion": "Triatleta profesional americano. Canal muy entretenido y motivador. Muestra entrenamientos de alto nivel con humor y personalidad.",
+        "temas_principales": [
+          "Entrenamientos de élite",
+          "Competición profesional",
+          "Mentalidad",
+          "Humor y lifestyle"
+        ],
+        "recomendado_para": "Todos los niveles (entretenimiento + aprendizaje)"
+      },
+      {
+        "nombre": "Effortless Swimming",
+        "url": "https://www.youtube.com/@EffortlessSwimming",
+        "idioma": "Inglés",
+        "suscriptores": "~350K",
+        "descripcion": "Canal del coach Brenton Ford. El mejor recurso de YouTube para mejorar la técnica de natación para triatletas. Análisis de vídeo, drills y workouts.",
+        "temas_principales": [
+          "Técnica de crol para triatlón",
+          "Análisis de vídeo de nadadores",
+          "Ejercicios de técnica",
+          "Natación en open water"
+        ],
+        "recomendado_para": "Nadadores principiantes e intermedios que quieren mejorar técnica"
+      },
+      {
+        "nombre": "TrainingPeaks",
+        "url": "https://www.youtube.com/@TrainingPeaks",
+        "idioma": "Inglés",
+        "descripcion": "Canal oficial de TrainingPeaks. Vídeos sobre análisis de entrenamiento, planificación de temporada, CTL/ATL/TSB, y uso de la plataforma.",
+        "temas_principales": [
+          "Uso de TrainingPeaks",
+          "Análisis de TSS/CTL/ATL",
+          "Planificación de temporada",
+          "Nutrición de entrenamiento"
+        ],
+        "recomendado_para": "Triatletas que usan TrainingPeaks"
+      },
+      {
+        "nombre": "IRONMAN Triathlon (Oficial)",
+        "url": "https://www.youtube.com/@IRONMAN",
+        "idioma": "Inglés",
+        "descripcion": "Canal oficial de IRONMAN. Documentales, highlights de carreras, perfiles de atletas, y el famoso The Crawl de Kona.",
+        "temas_principales": [
+          "Documentales de carrera",
+          "Race highlights",
+          "Kona World Championship",
+          "Perfiles de atletas"
+        ],
+        "recomendado_para": "Todos los triatletas. Especialmente para inspiración."
+      },
+      {
+        "nombre": "World Triathlon (Oficial)",
+        "url": "https://www.youtube.com/@worldtriathlon",
+        "idioma": "Inglés",
+        "descripcion": "Canal oficial del organismo rector mundial. Retransmisiones en vivo de WTCS, Series Mundiales y Juegos Olímpicos.",
+        "temas_principales": [
+          "Retransmisiones en vivo",
+          "Distancia olímpica",
+          "Para/triatlón",
+          "Noticias oficiales"
+        ],
+        "recomendado_para": "Fans de la distancia olímpica"
+      },
+      {
+        "nombre": "Talbot Cox Media",
+        "url": "https://www.youtube.com/@TalbotCox",
+        "idioma": "Inglés",
+        "descripcion": "El videógrafo de las estrellas del triatlón. Documentales de alta calidad sobre atletas pro (Lionel Sanders, Jan Frodeno, Alistair Brownlee).",
+        "temas_principales": [
+          "Documentales de atletas pro",
+          "Cobertura de Kona",
+          "Contenido cinematográfico de triatlón"
+        ],
+        "recomendado_para": "Fans del triatlón de élite"
+      },
+      {
+        "nombre": "Zwift",
+        "url": "https://www.youtube.com/@Zwift",
+        "idioma": "Inglés",
+        "descripcion": "Canal oficial de Zwift. Indoor cycling y running gamificado. Útil para sesiones de rodillo en invierno.",
+        "temas_principales": [
+          "Entrenamientos indoor",
+          "Carreras virtuales",
+          "Rutas y mundos de Zwift"
+        ],
+        "recomendado_para": "Triatletas que entrenan en rodillo"
+      }
+    ],
+    "libros": [
+      {
+        "titulo": "The Triathlete's Training Bible (4ª edición)",
+        "autor": "Joe Friel",
+        "descripcion": "El libro de referencia absoluto del triatlón. Planificación de temporada, periodización, zonas de entrenamiento, nutrición. Imprescindible.",
+        "isbn": "978-1937715441",
+        "amazon_url": "https://www.amazon.es/Triathletes-Training-Bible-Joe-Friel/dp/1937715442"
+      },
+      {
+        "titulo": "Going Long: Training for Triathlon's Ultimate Challenge",
+        "autor": "Joe Friel & Gordo Byrn",
+        "descripcion": "Específico para Ironman y medio Ironman. Fisiología del esfuerzo largo, periodización y nutrición de competición.",
+        "amazon_url": "https://www.amazon.es/Going-Long-Training-Triathlon-Challenge/dp/1934030198"
+      },
+      {
+        "titulo": "Swim Speed Secrets",
+        "autor": "Sheila Taormina",
+        "descripcion": "Técnica de natación para triatletas y nadadores. La campeona olímpica explica la mecánica del crol de alto rendimiento.",
+        "amazon_url": "https://www.amazon.es/Swim-Speed-Secrets-Sheila-Taormina/dp/1934030821"
+      },
+      {
+        "titulo": "80/20 Triathlon",
+        "autor": "Matt Fitzgerald & David Warden",
+        "descripcion": "El libro del método polarizado: 80% zona baja, 20% zona alta. Respaldado por ciencia y adaptado al triatlón.",
+        "amazon_url": "https://www.amazon.es/80-20-Triathlon-Discover-Faster/dp/0738234850"
+      },
+      {
+        "titulo": "Fast-Track Triathlete",
+        "autor": "Matt Dixon",
+        "descripcion": "Para triatletas con poco tiempo. Cómo maximizar el rendimiento entrenando 8-12h/semana.",
+        "amazon_url": "https://www.amazon.es/Fast-Track-Triathlete-Performance-Ironman-Distance-ebook/dp/B01N5J2B2J"
+      }
+    ],
+    "webs_recursos": [
+      {
+        "nombre": "220triathlon.com",
+        "url": "https://www.220triathlon.com",
+        "descripcion": "Planes de entrenamiento gratuitos, reviews, noticias",
+        "idioma": "Inglés"
+      },
+      {
+        "nombre": "TriathlonTaren / MOTTIV (planes gratuitos)",
+        "url": "https://www.mymottiv.com",
+        "descripcion": "Planes de entrenamiento gratuitos para todas las distancias",
+        "idioma": "Inglés"
+      },
+      {
+        "nombre": "TrainingPeaks (planes gratuitos)",
+        "url": "https://www.trainingpeaks.com/training-plans/triathlon/",
+        "descripcion": "Biblioteca de planes de entrenamiento (algunos gratuitos)",
+        "idioma": "Inglés"
+      },
+      {
+        "nombre": "Tri247",
+        "url": "https://www.tri247.com",
+        "descripcion": "Noticias de triatlón, consejos de entrenamiento, reviews",
+        "idioma": "Inglés"
+      },
+      {
+        "nombre": "Triatlón Noticias",
+        "url": "https://www.triatlonnoticias.com",
+        "descripcion": "El portal de noticias de triatlón en español más completo",
+        "idioma": "Español"
+      },
+      {
+        "nombre": "Planeta Triatlón",
+        "url": "https://www.planetatriatlon.com",
+        "descripcion": "Noticias, entrenamiento y comunidad en español",
+        "idioma": "Español"
+      },
+      {
+        "nombre": "Ironman.com (calendario y registro)",
+        "url": "https://www.ironman.com",
+        "descripcion": "Calendario oficial de pruebas Ironman y 70.3 en todo el mundo",
+        "idioma": "Inglés"
+      },
+      {
+        "nombre": "Intervals.icu (análisis gratuito)",
+        "url": "https://intervals.icu",
+        "descripcion": "Alternativa gratuita a TrainingPeaks Premium para análisis de entrenamientos",
+        "idioma": "Inglés"
+      }
+    ],
+    "podcasts": [
+      {
+        "nombre": "Taren's MOTTIV Method Podcast",
+        "url_spotify": "https://open.spotify.com/show/3sMCpd6tHOlHPyPhgVfKKy",
+        "descripcion": "Ciencia del entrenamiento, entrevistas con pros, Q&A semanal",
+        "idioma": "Inglés"
+      },
+      {
+        "nombre": "The Triathlon Hour",
+        "descripcion": "Cobertura de noticias y análisis de triatlón profesional",
+        "idioma": "Inglés"
+      },
+      {
+        "nombre": "We Talk Tri",
+        "descripcion": "Entrevistas con triatletas amateur y profesionales",
+        "idioma": "Inglés"
+      }
+    ]
+  },
+  "segunda_mano": {
+    "descripcion_general": "Comprar material de triatlón de segunda mano puede ahorrar entre un 40-70% del precio nuevo. Especialmente recomendado para bicicletas, wetsuits, rodillos y electrónica. Estrategia: empieza con material de segunda mano y actualiza cuando tengas más experiencia.",
+    "ventajas": [
+      "Ahorro del 40-70% respecto al precio nuevo",
+      "El material de triatlón suele estar bien cuidado (atletas cuidan su equipo)",
+      "Puedes acceder a gama alta por precio de gama media",
+      "Sostenibilidad — dale una segunda vida al material"
+    ],
+    "consejos_generales": [
+      "Siempre pide fotos detalladas de posibles golpes, rasguños o daños",
+      "En bicicletas: pide el número de serie y verifica que no esté en bases de datos de robadas (Stolen Bikes Spain, BikeIndex)",
+      "Revisa la fecha de fabricación del cuadro de carbono (vida útil ~10 años en uso normal)",
+      "Los wetsuits duran 3-5 años con buen cuidado — pide año de compra",
+      "En electrónica (GPS, potenciómetros): pide capturas de pantalla del historial de actividades para verificar uso real",
+      "Negocia siempre — en triatlón el margen suele ser del 10-20%",
+      "Si puedes, queda en persona para probar la bici antes de comprar",
+      "Para envíos de bicicleta: asegúrate de que el vendedor embale bien o usa un servicio especializado (Bikeflights)"
+    ],
+    "plataformas": {
+      "espana": [
+        {
+          "nombre": "Wallapop",
+          "url_general": "https://es.wallapop.com",
+          "urls_especificas": {
+            "bicicletas_triatlon": "https://es.wallapop.com/bicicletas/bicicleta-triatlon",
+            "bicicletas_triatlon_madrid": "https://es.wallapop.com/bicicletas/bicicleta-triatlon/madrid",
+            "bicicletas_triatlon_barcelona": "https://es.wallapop.com/bicicletas/bicicleta-triatlon/barcelona",
+            "bicicletas_triatlon_valencia": "https://es.wallapop.com/bicicletas/bicicleta-triatlon/valencia",
+            "bicicletas_triatlon_sevilla": "https://es.wallapop.com/bicicletas/bicicleta-triatlon/sevilla",
+            "bicicletas_canyon": "https://es.wallapop.com/bicicletas/bicicleta-triatlon-canyon",
+            "bicicletas_specialized": "https://es.wallapop.com/bicicletas/bicicleta-triatlon-specialized",
+            "bicicletas_bh": "https://es.wallapop.com/bicicletas/bicicleta-triatlon-bh"
+          },
+          "terminos_busqueda_utiles": [
+            "bicicleta triatlón",
+            "cabra triatlón",
+            "bici crono",
+            "bici TT",
+            "bici contrarreloj",
+            "wetsuit triatlón",
+            "neopreno triatlón",
+            "traje triatlón",
+            "rodillo inteligente smart trainer",
+            "potenciómetro ciclismo",
+            "reloj triatlón Garmin Forerunner",
+            "reloj Polar Garmin Suunto triatlón",
+            "zapatillas triatlón",
+            "trisuit",
+            "cinturón dorsal triatlón",
+            "casco aero triatlón",
+            "ruedas carbono triatlón"
+          ],
+          "descripcion": "El marketplace más popular de España. Mayor volumen de anuncios particulares. Sin comisión para comprador. Sistema de pago seguro integrado.",
+          "consejo": "Activa las alertas de búsqueda para que te notifiquen cuando alguien publique lo que buscas. Los mejores chollos duran horas.",
+          "precios_referencia_vistos": {
+            "bici_triatlon_carbono_gama_media": "600-2000€",
+            "bici_triatlon_carbono_gama_alta": "2000-6000€",
+            "wetsuit_triatlon_segunda_mano": "60-200€",
+            "rodillo_smart_trainer": "300-700€",
+            "potenciometro": "150-500€",
+            "reloj_garmin_forerunner": "100-350€"
+          }
+        },
+        {
+          "nombre": "Milanuncios",
+          "url_general": "https://www.milanuncios.com",
+          "urls_especificas": {
+            "bicicletas_triatlon": "https://www.milanuncios.com/bicicletas/bicicleta-triatlon.htm",
+            "bicicletas_triatlon_segunda_mano": "https://www.milanuncios.com/bicicletas-triatlon-de-segunda-mano/",
+            "neopreno_triatlon": "https://www.milanuncios.com/deportes/neopreno-triatlon.htm"
+          },
+          "descripcion": "Segunda plataforma de clasificados en España tras Wallapop. Buen volumen de anuncios, especialmente de particulares. Sin sistema de pago integrado (cuidado con fraudes).",
+          "consejo": "Cuidado con anuncios sin fotos reales o precios muy por debajo del mercado. Prefiere siempre transacciones en persona.",
+          "terminos_busqueda_utiles": [
+            "bicicleta triatlón",
+            "bici cabra",
+            "neopreno triatlón",
+            "traje triatlón"
+          ]
+        },
+        {
+          "nombre": "Facebook Marketplace",
+          "url_general": "https://www.facebook.com/marketplace",
+          "url_busqueda_triathlon": "https://www.facebook.com/marketplace/search/?query=bicicleta%20triatl%C3%B3n",
+          "descripcion": "Muy útil para comprar a gente cercana. Puedes ver el perfil del vendedor, lo que añade algo de confianza.",
+          "grupos_facebook_recomendados": [
+            "Compra Venta Triatlón España",
+            "Triatlón España — Compra Venta Material",
+            "Material Triatlón Segunda Mano"
+          ],
+          "consejo": "Busca también en grupos locales de triatlón — muchas ventas entre miembros del mismo club."
+        },
+        {
+          "nombre": "eBay España",
+          "url_general": "https://www.ebay.es",
+          "url_busqueda_triatlon": "https://www.ebay.es/sch/i.html?_nkw=bicicleta+triatlon",
+          "descripcion": "Útil para accesorios, electrónica y piezas. Protección del comprador integrada. Vendedores profesionales y particulares.",
+          "mejor_para": [
+            "Potenciómetros",
+            "Relojes GPS",
+            "Ruedas de perfil",
+            "Wetsuits importados"
+          ]
+        }
+      ],
+      "europa_internacional": [
+        {
+          "nombre": "buycycle",
+          "url_general": "https://buycycle.com/es-es",
+          "url_triatlon": "https://buycycle.com/es-es/shop/main-types/bikes/bike-types/road-gravel/categories/triathlon",
+          "descripcion": "El marketplace especializado en bicicletas de segunda mano más grande de Europa. Vendedores verificados, pago seguro y protección del comprador. Envío internacional.",
+          "ventajas": [
+            "Vendedores verificados",
+            "Protección comprador",
+            "Fotos profesionales",
+            "Hasta -70% sobre precio nuevo",
+            "Envío a toda España"
+          ],
+          "marcas_disponibles": [
+            "Canyon Speedmax",
+            "Specialized Shiv",
+            "Trek Speed Concept",
+            "Cervelo P-Series",
+            "Orbea Ordu",
+            "Felt IA",
+            "Quintana Roo"
+          ],
+          "precios_referencia": {
+            "bici_triatlon_carbono_gama_entrada": "800-2000€",
+            "bici_triatlon_carbono_gama_media": "2000-4000€",
+            "bici_triatlon_top_gama": "4000-8000€"
+          }
+        },
+        {
+          "nombre": "eBay Internacional",
+          "url_triatlon_bikes": "https://www.ebay.com/b/Triathlon-Bikes/98083/bn_2397267",
+          "descripcion": "Gran volumen de anuncios internacionales. Protección del comprador. Útil para marcas americanas o material difícil de encontrar en España.",
+          "consejo": "Ten en cuenta costes de envío internacional + posible aduana si viene de fuera de la UE."
+        },
+        {
+          "nombre": "Wiggle / Chain Reaction Cycles (outlet)",
+          "url_wiggle": "https://www.wiggle.es",
+          "url_crc": "https://www.chainreactioncycles.com",
+          "descripcion": "No son segunda mano, pero tienen secciones de outlet con material de temporadas anteriores a precios muy reducidos (30-60% descuento). Ideal para ropa, zapatillas y accesorios.",
+          "consejo": "Vigila sus ventas flash y el outlet. Envío rápido a España."
+        },
+        {
+          "nombre": "Probikeshop (outlet)",
+          "url": "https://www.probikeshop.es",
+          "descripcion": "Gran tienda online con sección de outlet y liquidación. Precios muy competitivos en material de ciclismo y triatlón.",
+          "consejo": "Sección 'Promociones' tiene descuentos de hasta el 50% en material de temporadas anteriores."
+        }
+      ]
+    },
+    "guia_por_producto": {
+      "bicicleta_triatlon": {
+        "ahorro_potencial": "40-70%",
+        "donde_buscar": [
+          "Wallapop",
+          "buycycle",
+          "Milanuncios",
+          "Grupos Facebook triatlón"
+        ],
+        "que_revisar_antes_de_comprar": [
+          "Inspección visual del cuadro de carbono buscando grietas, golpes o reparaciones (usar linterna)",
+          "Estado del grupo (cambios, frenos, cassette, cadena)",
+          "Estado de ruedas (llantas sin grietas, rayos en tensión)",
+          "Historial de caídas (preguntar directamente)",
+          "Número de serie no reportado como robado (verificar en BikeIndex.org)",
+          "Año del cuadro (carbono tiene vida útil ~10 años)",
+          "Talla correcta para tu morfología (crucial en bici TT)"
+        ],
+        "palabras_clave_wallapop": [
+          "bicicleta triatlón",
+          "cabra triatlón",
+          "bici TT",
+          "bici crono",
+          "contrarreloj carbono",
+          "Speedmax",
+          "Shiv",
+          "Ordu",
+          "Speed Concept",
+          "P5",
+          "E119"
+        ],
+        "precio_referencia": {
+          "aluminio_decente": "300-700€",
+          "carbono_entrada": "700-1500€",
+          "carbono_gama_media": "1500-3500€",
+          "carbono_gama_alta": "3500-7000€"
+        },
+        "marcas_mas_frecuentes_wallapop": [
+          "Specialized Shiv",
+          "Trek Speed Concept",
+          "Orbea Ordu",
+          "Canyon Speedmax",
+          "BH Aero",
+          "Argon 18 E-Series",
+          "Giant Trinity",
+          "Scott Plasma",
+          "Cervelo P-Series"
+        ]
+      },
+      "wetsuit_neopreno": {
+        "ahorro_potencial": "50-70%",
+        "donde_buscar": [
+          "Wallapop (buscar: neopreno triatlón, wetsuit triatlón)",
+          "Milanuncios",
+          "Grupos Facebook triatlón",
+          "eBay"
+        ],
+        "que_revisar": [
+          "Año de fabricación (neopreno dura 3-5 años con buen cuidado)",
+          "Estado del neopreno: sin cortes, sin zonas desgastadas",
+          "Talla correcta (crítico para el rendimiento)",
+          "Cierre de cremallera en buen estado",
+          "Que no haya reparaciones con pegamento visibles"
+        ],
+        "precios_referencia_segunda_mano": {
+          "gama_entrada": "50-100€ (nuevo 150-250€)",
+          "gama_media": "100-200€ (nuevo 250-450€)",
+          "gama_alta": "200-400€ (nuevo 450-800€)"
+        },
+        "marcas_buscar": [
+          "Blueseventy Reaction/Helix",
+          "Xterra Vortex",
+          "Zone3 Aspire/Vision",
+          "Roka Maverick",
+          "Sailfish"
+        ]
+      },
+      "rodillo_smart_trainer": {
+        "ahorro_potencial": "30-50%",
+        "donde_buscar": [
+          "Wallapop",
+          "Facebook Marketplace",
+          "eBay"
+        ],
+        "palabras_clave": [
+          "rodillo inteligente",
+          "smart trainer",
+          "rodillo Wahoo",
+          "Kickr",
+          "Tacx",
+          "Elite Direto",
+          "rodillo triatlón"
+        ],
+        "que_revisar": [
+          "Que incluya cable de alimentación y accesorios originales",
+          "Estado de la rueda de inercia (sin ruidos extraños)",
+          "Compatibilidad con tu bicicleta (thru-axle vs QR)",
+          "Que conecte bien por Bluetooth y ANT+"
+        ],
+        "precios_referencia_segunda_mano": {
+          "rodillo_basico_sin_potencia": "100-200€",
+          "smart_trainer_gama_media": "250-450€ (Wahoo Kickr Core, Elite Direto)",
+          "smart_trainer_gama_alta": "500-800€ (Wahoo Kickr, Tacx Neo)"
+        }
+      },
+      "reloj_gps_multisport": {
+        "ahorro_potencial": "30-50%",
+        "donde_buscar": [
+          "Wallapop",
+          "eBay",
+          "Back Market",
+          "Amazon Renewed"
+        ],
+        "palabras_clave": [
+          "Garmin Forerunner triatlón",
+          "Garmin Fenix",
+          "Polar Vantage",
+          "Suunto multisport",
+          "reloj triatlón"
+        ],
+        "que_revisar": [
+          "Estado de la pantalla (sin arañazos profundos)",
+          "Estado de la correa",
+          "Que la batería aguante bien (pedir info de duración actual)",
+          "Que incluya cargador original"
+        ],
+        "url_back_market": "https://www.backmarket.es/es-es/search?q=garmin+forerunner",
+        "precios_referencia_segunda_mano": {
+          "garmin_forerunner_255": "180-250€ (nuevo 350€)",
+          "garmin_forerunner_965": "300-420€ (nuevo 600€)",
+          "garmin_fenix_7": "350-500€ (nuevo 700€+)"
+        }
+      },
+      "potenciometro": {
+        "ahorro_potencial": "30-50%",
+        "donde_buscar": [
+          "Wallapop",
+          "eBay",
+          "Grupos Facebook ciclismo/triatlón"
+        ],
+        "que_revisar": [
+          "Compatibilidad con tu bicicleta (tipo de biela, eje de pedalier)",
+          "Que incluya las pilas o cargador",
+          "Calibración correcta (pide que te muestre una captura de pantalla de calibración)",
+          "Estado de los brazos de biela (sin golpes)"
+        ],
+        "palabras_clave": [
+          "potenciómetro biela",
+          "Favero Assioma",
+          "4iiii",
+          "Stages",
+          "Garmin Rally",
+          "potenciómetro ciclismo"
+        ],
+        "precios_referencia_segunda_mano": {
+          "4iiii_stages_basico": "150-250€ (nuevo 300-400€)",
+          "favero_assioma": "250-380€ (nuevo 500-650€)",
+          "garmin_rally": "300-450€ (nuevo 600-800€)"
+        }
+      },
+      "zapatillas_triatlon": {
+        "consejo_importante": "Las zapatillas de carrera de segunda mano pueden ser un riesgo si tienen muchos km. Calcular: una persona entrena ~800-1000km/año. Preferible comprar nuevas en outlet.",
+        "donde_buscar_outlet": [
+          "https://www.wiggle.es — sección Outlet",
+          "https://www.probikeshop.es — sección Promociones",
+          "https://www.decathlon.es — rebajas temporales",
+          "https://www.amazon.es — modelos anteriores con descuento"
+        ],
+        "segunda_mano_ok_para": "Zapatillas de ciclismo (menos desgaste). Zapatillas de competición con muy pocos km.",
+        "palabras_clave_wallapop": [
+          "zapatillas triatlón",
+          "zapatillas carbono carrera",
+          "Vaporfly",
+          "Adizero Pro",
+          "Metaspeed"
+        ]
+      },
+      "ropa_accesorios": {
+        "donde_buscar": [
+          "Wallapop",
+          "Vinted (https://www.vinted.es)",
+          "Facebook Marketplace"
+        ],
+        "que_buscar": [
+          "Trisuit",
+          "Culote ciclismo",
+          "Maillot ciclismo",
+          "Gorra triatlón",
+          "Gafas ciclismo"
+        ],
+        "consejo": "Vinted es especialmente bueno para ropa técnica de marca (Castelli, Assos, Bioracer, Compressport) a muy buen precio.",
+        "url_vinted_triatlon": "https://www.vinted.es/catalog?search_text=triatlon"
+      }
+    },
+    "grupos_comunidades_espana": [
+      {
+        "nombre": "Triatlón España — Compra Venta Material",
+        "plataforma": "Facebook",
+        "tipo": "Grupo de compra-venta",
+        "descripcion": "Grupo activo de triatletas españoles que compran y venden material. Muy buenas ofertas de triatletas que cambian de material."
+      },
+      {
+        "nombre": "Clubs locales de triatlón",
+        "descripcion": "Cada club tiene su propio grupo de WhatsApp o Telegram donde los miembros venden material. Pregunta en tu club local — es la forma más fiable de comprar porque conoces al vendedor.",
+        "como_encontrar": "Busca en Google 'club triatlón [tu ciudad]' y contacta para apuntarte"
+      }
+    ],
+    "alertas_y_herramientas": [
+      {
+        "nombre": "Wallapop — Alertas de búsqueda",
+        "descripcion": "Configura alertas en la app para recibir notificación cuando alguien publique exactamente lo que buscas. Los mejores chollos duran 1-2h.",
+        "como": "En Wallapop: busca el término → pulsa la campana 🔔 → recibirás notificaciones"
+      },
+      {
+        "nombre": "BikeIndex.org",
+        "url": "https://bikeindex.org",
+        "descripcion": "Base de datos internacional de bicicletas robadas. Introduce el número de serie antes de comprar para verificar que no sea robada.",
+        "uso": "Gratis y rápido — introduce el número de serie del cuadro"
+      },
+      {
+        "nombre": "Stolen Bikes Spain (Facebook)",
+        "descripcion": "Grupo de Facebook español donde se reportan bicicletas robadas. Busca la marca y modelo antes de comprar."
+      }
+    ]
+  },
+  "consejo_medico": {
+    "revision_previa": [
+      "Electrocardiograma en reposo y esfuerzo (ergometría)",
+      "Analítica completa (hemograma, bioquímica, hierro, ferritina, vitamina D, B12)",
+      "Ecocardiograma (recomendable para Ironman)",
+      "Revisión del aparato locomotor (fisioterapeuta deportivo)",
+      "Test de VO2max (opcional pero muy útil para establecer zonas)"
+    ],
+    "señales_de_alerta": [
+      "Dolor en el pecho durante el esfuerzo",
+      "Palpitaciones irregulares",
+      "Mareos o lipotimias",
+      "Fatiga desproporcionada al esfuerzo",
+      "Dolor articular persistente"
+    ],
+    "sobreentrenamiento": {
+      "señales": [
+        "FC basal elevada >5ppm sobre la media",
+        "Rendimiento estancado o en caída",
+        "Alteraciones del sueño",
+        "Irritabilidad",
+        "Infecciones recurrentes",
+        "Pérdida de motivación"
+      ],
+      "accion": "Semana de recuperación total. Consultar con médico deportivo si persiste."
+    }
+  },
+  "planes_entrenamiento_externos": {
+    "descripcion": "Directorio completo de planes de entrenamiento gratuitos y de pago disponibles online, organizados por fuente, distancia y nivel. Todos los URLs verificados.",
+    "como_elegir_tu_plan": {
+      "paso_1": "Define tu distancia objetivo (Sprint, Olímpico, 70.3, Ironman)",
+      "paso_2": "Define tu nivel: ¿Es tu primer triatlón? ¿Cuántas horas/semana puedes entrenar?",
+      "paso_3": "Define tu tiempo disponible: ¿Cuántas semanas hasta la carrera?",
+      "paso_4": "Elige fuente: ¿Quieres PDF descargable, app interactiva o plan en web?",
+      "consejo": "Para principiantes absolutos: empieza con 8-12 semanas de Sprint. No empieces directamente con 70.3 o Ironman sin base previa."
+    },
+    "fuentes": [
+      {
+        "fuente": "MOTTIV (Triathlon Taren)",
+        "url_base": "https://www.mymottiv.com",
+        "descripcion": "La fuente más completa de planes gratuitos. Ex-YouTuber Taren Gesell. App gratuita con planes personalizados. También tiene blog con planes descargables.",
+        "coste": "Gratis (blog) / App gratuita con prueba / Premium ~15€/mes",
+        "idioma": "Inglés",
+        "formato": "Web, App iOS/Android, PDF descargable",
+        "planes_disponibles": [
+          {
+            "nombre": "Couch to Sprint Triathlon",
+            "nivel": "principiante_absoluto",
+            "distancia": "sprint",
+            "semanas": "variable (4-20 según nivel)",
+            "url": "https://www.mymottiv.com/sprint-triathlon-training-plan",
+            "descripcion": "Para alguien que empieza de cero. Incluye versiones de 4, 5, 6, 8, 9, 10, 12, 16 y 20 semanas en niveles principiante, intermedio y avanzado.",
+            "horas_semana": "3-6h"
+          },
+          {
+            "nombre": "Beginner Sprint Triathlon Training Plan",
+            "nivel": "principiante",
+            "distancia": "sprint",
+            "semanas": "8-12",
+            "url": "https://www.mymottiv.com/sprint-triathlon-training-plan/beginner-sprint-triathlon-training-plan",
+            "descripcion": "Plan específico para principiantes en Sprint. Muy bien estructurado.",
+            "horas_semana": "4-7h"
+          },
+          {
+            "nombre": "20 Week Sprint Triathlon Training Plan",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "sprint",
+            "semanas": 20,
+            "url": "https://www.mymottiv.com/sprint-triathlon-training-plan/20-week-sprint-triathlon-training-plan",
+            "descripcion": "Plan de 20 semanas en 3 niveles. Muy completo y progresivo.",
+            "horas_semana": "5-12h según nivel"
+          },
+          {
+            "nombre": "Beginner Olympic Triathlon Training Plan",
+            "nivel": "principiante",
+            "distancia": "olimpico",
+            "semanas": "12-16",
+            "url": "https://www.mymottiv.com/olympic-triathlon-training-plan/beginner-olympic-triathlon-training-plan",
+            "descripcion": "Para el primer olímpico. Incluye fuerza y movilidad.",
+            "horas_semana": "5-8h"
+          },
+          {
+            "nombre": "80/20 Olympic Triathlon Training Plan",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "olimpico",
+            "semanas": "12-20",
+            "url": "https://www.mymottiv.com/olympic-triathlon-training-plan/80-20-olympic-triathlon-training-plan",
+            "descripcion": "Basado en el método 80/20: 80% intensidad baja, 20% alta. Muy efectivo y respaldado por ciencia.",
+            "horas_semana": "5-13h"
+          },
+          {
+            "nombre": "20 Week Olympic Triathlon Training Plan",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "olimpico",
+            "semanas": 20,
+            "url": "https://www.mymottiv.com/olympic-triathlon-training-plan/20-week-olympic-triathlon-training-plan",
+            "descripcion": "Plan largo de 20 semanas con buena progresión.",
+            "horas_semana": "5-13h"
+          },
+          {
+            "nombre": "Olympic Triathlon Training Plan with Strength Training",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "olimpico",
+            "semanas": 16,
+            "url": "https://www.mymottiv.com/olympic-triathlon-training-plan/olympic-triathlon-training-plan-with-strength-training",
+            "descripcion": "Plan olímpico que incluye trabajo de fuerza integrado. Ideal para quien quiere prevenir lesiones.",
+            "horas_semana": "6-10h"
+          },
+          {
+            "nombre": "Half IRONMAN Training Plan (todos los niveles)",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "70.3",
+            "semanas": "variable (12, 16, 20, 24 semanas)",
+            "url": "https://www.mymottiv.com/half-ironman-training-plan",
+            "descripcion": "Hub con TODOS los planes de 70.3 disponibles. Incluye versiones para cada nivel y duración.",
+            "horas_semana": "7-18h"
+          },
+          {
+            "nombre": "IRONMAN Training Plan (todos los niveles)",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "ironman",
+            "semanas": "variable (20, 24, 30 semanas)",
+            "url": "https://www.mymottiv.com/ironman-training-plan",
+            "descripcion": "Hub con todos los planes de Ironman completo. Incluye Couch to Ironman.",
+            "horas_semana": "10-22h"
+          }
+        ]
+      },
+      {
+        "fuente": "220 Triathlon",
+        "url_base": "https://www.220triathlon.com/training/training-plans",
+        "descripcion": "La revista de triatlón más importante en inglés. 28+ planes gratuitos escritos por coaches expertos como Dermott Hayes. Todos descargables.",
+        "coste": "Gratis (registro requerido para descarga)",
+        "idioma": "Inglés",
+        "formato": "PDF descargable, artículos web",
+        "planes_disponibles": [
+          {
+            "nombre": "8-week Supersprint Triathlon Training Plan (Beginners)",
+            "nivel": "principiante_absoluto",
+            "distancia": "supersprint",
+            "semanas": 8,
+            "url": "https://www.220triathlon.com/training/training-plans/training-plan-for-triathlon-beginners",
+            "descripcion": "Para el primer triatlón de la vida. Supersprint (300m nado / 10km bici / 2.5km run). El punto de entrada más suave posible.",
+            "horas_semana": "3-5h"
+          },
+          {
+            "nombre": "8-week Sprint Triathlon Training Plan",
+            "nivel": "principiante / intermedio",
+            "distancia": "sprint",
+            "semanas": 8,
+            "url": "https://www.220triathlon.com/training/training-plans",
+            "descripcion": "Plan clásico de 8 semanas para Sprint. Muy bien valorado por la comunidad.",
+            "horas_semana": "5-8h"
+          },
+          {
+            "nombre": "Free 3-month Olympic Triathlon Training Plan (Beginners)",
+            "nivel": "principiante",
+            "distancia": "olimpico",
+            "semanas": 12,
+            "url": "https://www.220triathlon.com/training/training-plans/training-plan-for-triathlon-beginners",
+            "descripcion": "3 meses para el primer olímpico. Intensidad controlada, ideal para quien viene de Sprint.",
+            "horas_semana": "6-8h"
+          },
+          {
+            "nombre": "Free 6-month Olympic Triathlon Training Plan (Beginners)",
+            "nivel": "principiante",
+            "distancia": "olimpico",
+            "semanas": 26,
+            "url": "https://www.220triathlon.com/training/training-plans/free-six-month-olympic-distance-triathlon-training-plan-for-beginners",
+            "descripcion": "6 meses muy progresivos para el primer olímpico. Recomendado para quien empieza desde cero.",
+            "horas_semana": "4-8h"
+          },
+          {
+            "nombre": "Free 6-month Olympic Triathlon Training Plan (Intermediate)",
+            "nivel": "intermedio",
+            "distancia": "olimpico",
+            "semanas": 26,
+            "url": "https://www.220triathlon.com/training/training-plans/free-6-month-olympic-distance-triathlon-training-plan",
+            "descripcion": "6 meses para mejorar tiempo en olímpico. Más volumen e intensidad que el plan de principiantes.",
+            "horas_semana": "7-12h"
+          },
+          {
+            "nombre": "Free Olympic Distance Triathlon Training Plans (3 niveles)",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "olimpico",
+            "semanas": "8-12",
+            "url": "https://www.220triathlon.com/training/training-plans/free-olympic-distance-triathlon-training-plans",
+            "descripcion": "Hub con 3 planes olímpicos de diferentes niveles. Elige el tuyo según experiencia.",
+            "horas_semana": "5-12h"
+          },
+          {
+            "nombre": "Free 8-week 70.3 Training Plan",
+            "nivel": "intermedio",
+            "distancia": "70.3",
+            "semanas": 8,
+            "url": "https://www.220triathlon.com/training/training-plans/free-ironman-70-3-training-plans",
+            "descripcion": "Para quien tiene base y quiere preparar un 70.3 en 2 meses. Plan de construcción/pico.",
+            "horas_semana": "8-12h"
+          },
+          {
+            "nombre": "Free 12-week Half-Ironman Training Plan",
+            "nivel": "intermedio",
+            "distancia": "70.3",
+            "semanas": 12,
+            "url": "https://www.220triathlon.com/training/training-plans/12-week-70-3-triathlon-training-plan",
+            "descripcion": "3 meses bien estructurados para el 70.3. Incluye días dobles y open water.",
+            "horas_semana": "8-14h"
+          },
+          {
+            "nombre": "Free 6-month Ironman 70.3 Training Plan",
+            "nivel": "principiante / intermedio",
+            "distancia": "70.3",
+            "semanas": 26,
+            "url": "https://www.220triathlon.com/training/training-plans/free-6-month-ironman-70-3-training-plan",
+            "descripcion": "El más completo para preparar un primer 70.3 con tiempo suficiente. Muy recomendado.",
+            "horas_semana": "6-14h"
+          },
+          {
+            "nombre": "Free 6-month Ironman Training Plan",
+            "nivel": "principiante / intermedio",
+            "distancia": "ironman",
+            "semanas": 26,
+            "url": "https://www.220triathlon.com/training/training-plans/free-6-month-ironman-training-plan-that-s-simple-to-use",
+            "descripcion": "6 meses para el primer Ironman. Simple y efectivo. Incluye open water y bricks.",
+            "horas_semana": "8-20h"
+          }
+        ]
+      },
+      {
+        "fuente": "MyProCoach (Phil Mosley)",
+        "url_base": "https://www.myprocoach.net/training-plans/free-pdf-training-plans/",
+        "descripcion": "Coach profesional Phil Mosley. 48 planes en PDF, de 8 o 12 semanas, en 3 niveles. Alta calidad y muy bien estructurados. Los mejores PDFs gratuitos del mercado.",
+        "coste": "Gratis (PDF descargable directo)",
+        "idioma": "Inglés",
+        "formato": "PDF descargable sin registro",
+        "planes_disponibles": [
+          {
+            "nombre": "Sprint Triathlon Training Plans (PDF)",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "sprint",
+            "semanas": "8 o 12",
+            "url": "https://www.myprocoach.net/free-training-plans/sprint-triathlon/",
+            "descripcion": "6 planes en PDF: 8 semanas principiante/intermedio/avanzado + 12 semanas principiante/intermedio/avanzado. Descarga directa, sin registro.",
+            "horas_semana": "4-11h"
+          },
+          {
+            "nombre": "Olympic Triathlon Training Plans (PDF)",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "olimpico",
+            "semanas": "8 o 12",
+            "url": "https://www.myprocoach.net/free-training-plans/olympic-triathlon/",
+            "descripcion": "6 planes PDF para el olímpico. Los más fáciles de imprimir y seguir.",
+            "horas_semana": "5-13h"
+          },
+          {
+            "nombre": "70.3 / Half-Ironman Training Plans (PDF)",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "70.3",
+            "semanas": "8 o 12",
+            "url": "https://www.myprocoach.net/free-training-plans/70-3-triathlon/",
+            "descripcion": "6 planes PDF para 70.3. Muy bien valorados por la comunidad global.",
+            "horas_semana": "7-16h"
+          },
+          {
+            "nombre": "Ironman Training Plans (PDF)",
+            "nivel": "principiante / intermedio / avanzado",
+            "distancia": "ironman",
+            "semanas": "8 o 12",
+            "url": "https://www.myprocoach.net/free-training-plans/ironman/",
+            "descripcion": "6 planes PDF para Ironman completo. Nota: son planes de 8-12 semanas, se usan como bloque final de preparación (necesitas base previa).",
+            "horas_semana": "10-20h"
+          }
+        ]
+      },
+      {
+        "fuente": "80/20 Endurance (Matt Fitzgerald)",
+        "url_base": "https://www.8020endurance.com/free-plans/",
+        "descripcion": "Autor del libro 80/20 Triathlon. El método polarizado: 80% baja intensidad, 20% alta. Planes gratuitos de muestra + planes de pago muy completos.",
+        "coste": "Algunos gratis / Planes completos 30-80€",
+        "idioma": "Inglés",
+        "formato": "PDF, TrainingPeaks",
+        "planes_disponibles": [
+          {
+            "nombre": "Free 80/20 Triathlon Sample Plans",
+            "nivel": "todos",
+            "distancia": "sprint / olimpico / 70.3 / ironman",
+            "semanas": "variable",
+            "url": "https://www.8020endurance.com/free-plans/",
+            "descripcion": "Planes de muestra gratuitos de todas las distancias. Para acceder al plan completo hay que comprarlo.",
+            "horas_semana": "variable"
+          }
+        ]
+      },
+      {
+        "fuente": "Triathlete.com",
+        "url_base": "https://www.triathlete.com/training/",
+        "descripcion": "La web de triatlón más grande de USA. Planes gratuitos de coaches reconocidos. También artículos de nutrición, entrenamiento y equipamiento.",
+        "coste": "Gratis",
+        "idioma": "Inglés",
+        "formato": "Artículo web con plan detallado semana a semana",
+        "planes_disponibles": [
+          {
+            "nombre": "20-Week Training Plan for Your First 70.3",
+            "nivel": "principiante",
+            "distancia": "70.3",
+            "semanas": 20,
+            "url": "https://www.triathlete.com/training/20-week-training-plan-first-70-3-triathlon/",
+            "descripcion": "Plan muy detallado con sesiones específicas por día. Incluye yardas de natación, minutos de bike y run, y pautas de intensidad.",
+            "horas_semana": "6-12h"
+          }
+        ]
+      },
+      {
+        "fuente": "Scientific Triathlon (Mikael Eriksson)",
+        "url_base": "https://scientifictriathlon.com/plans/",
+        "descripcion": "Coach y podcaster especializado en ciencia del entrenamiento. Planes de pago de alta calidad. El podcast 'That Triathlon Show' es el mejor del mundo en contenido técnico.",
+        "coste": "De pago (40-150€)",
+        "idioma": "Inglés",
+        "formato": "TrainingPeaks con vídeos explicativos",
+        "planes_disponibles": [
+          {
+            "nombre": "Beginner Sprint Triathlon Plan",
+            "nivel": "principiante",
+            "distancia": "sprint",
+            "semanas": 12,
+            "url": "https://scientifictriathlon.com/plans/",
+            "descripcion": "Plan principiante muy bien fundamentado en ciencia. Garantía devolución 100%.",
+            "horas_semana": "4-8h"
+          },
+          {
+            "nombre": "Beginner Olympic Triathlon Plan",
+            "nivel": "principiante",
+            "distancia": "olimpico",
+            "semanas": 16,
+            "url": "https://scientifictriathlon.com/plans/",
+            "descripcion": "Plan olímpico principiante con excelentes reviews.",
+            "horas_semana": "6-10h"
+          },
+          {
+            "nombre": "Beginner Half-Distance (70.3) Plan",
+            "nivel": "principiante",
+            "distancia": "70.3",
+            "semanas": 20,
+            "url": "https://scientifictriathlon.com/plans/",
+            "descripcion": "El plan de principiantes para 70.3 mejor valorado. Vídeos semanales explicativos.",
+            "horas_semana": "8-14h"
+          },
+          {
+            "nombre": "Beginner Full Distance (Ironman) Plan",
+            "nivel": "principiante",
+            "distancia": "ironman",
+            "semanas": 24,
+            "url": "https://scientifictriathlon.com/plans/",
+            "descripcion": "Usuario logró 11:33 en su primer Ironman en curso difícil. Alta calidad.",
+            "horas_semana": "10-18h"
+          }
+        ]
+      },
+      {
+        "fuente": "TrainingPeaks (marketplace de planes)",
+        "url_base": "https://www.trainingpeaks.com/training-plans/triathlon/",
+        "descripcion": "El mayor marketplace de planes de entrenamiento del mundo. Miles de planes de coaches certificados. Algunos gratuitos, la mayoría de pago. Se integran directamente con tu reloj GPS.",
+        "coste": "Gratis (algunos) / 20-150€ (la mayoría)",
+        "idioma": "Inglés",
+        "formato": "TrainingPeaks (sincronización automática con Garmin, Wahoo, etc.)",
+        "urls_filtradas": {
+          "todos_triatlon": "https://www.trainingpeaks.com/training-plans/triathlon/",
+          "sprint_principiante": "https://www.trainingpeaks.com/training-plans/triathlon/sprint/",
+          "olimpico_principiante": "https://www.trainingpeaks.com/training-plans/triathlon/olympic/",
+          "703_principiante": "https://www.trainingpeaks.com/training-plans/triathlon/half-ironman/",
+          "ironman_principiante": "https://www.trainingpeaks.com/training-plans/triathlon/ironman/",
+          "planes_gratuitos": "https://www.trainingpeaks.com/training-plans/triathlon/?price=free"
+        },
+        "planes_gratuitos_destacados": [
+          {
+            "nombre": "Intermediate Half-Distance Training Plan — Zwift",
+            "nivel": "intermedio",
+            "distancia": "70.3",
+            "url": "https://www.trainingpeaks.com/training-plans/triathlon/half-ironman/tp-448113/intermediate-half-distance-training-plan-zwift",
+            "descripcion": "Plan integrado con Zwift para el rodillo. Power zones. Gratuito."
+          }
+        ]
+      },
+      {
+        "fuente": "British Triathlon Federation",
+        "url_base": "https://www.britishtriathlon.org/training-plans",
+        "descripcion": "Federación Británica de Triatlón. Planes gratuitos y recursos para principiantes. Muy orientados a completar la carrera, no a competir.",
+        "coste": "Gratis",
+        "idioma": "Inglés",
+        "planes_disponibles": [
+          {
+            "nombre": "Go Tri Training Plans (Super Sprint / Sprint)",
+            "nivel": "principiante_absoluto",
+            "distancia": "supersprint / sprint",
+            "url": "https://www.britishtriathlon.org/training-plans",
+            "descripcion": "Planes del programa Go Tri para quienes nunca han hecho triatlón. Muy accesibles."
+          }
+        ]
+      },
+      {
+        "fuente": "Ironman Official (myResults / Coach)",
+        "url_base": "https://www.ironman.com/training-plans",
+        "descripcion": "Ironman ofrece planes de entrenamiento oficiales para sus distancias. Algunos gratuitos, otros de pago.",
+        "coste": "Algunos gratis / De pago con coach",
+        "idioma": "Inglés",
+        "planes_disponibles": [
+          {
+            "nombre": "IRONMAN Official Beginner 70.3 Plan",
+            "nivel": "principiante",
+            "distancia": "70.3",
+            "url": "https://www.ironman.com/training-plans",
+            "descripcion": "Plan oficial de Ironman para primer 70.3."
+          },
+          {
+            "nombre": "IRONMAN Official Beginner Full Distance Plan",
+            "nivel": "principiante",
+            "distancia": "ironman",
+            "url": "https://www.ironman.com/training-plans",
+            "descripcion": "Plan oficial de Ironman para primer Ironman completo."
+          }
+        ]
+      }
+    ],
+    "resumen_por_nivel": {
+      "principiante_absoluto_nunca_ha_hecho_triatlon": {
+        "descripcion": "Empieza aquí si nunca has hecho un triatlón o tienes poca base deportiva",
+        "recomendacion_1": {
+          "plan": "220 Triathlon — 8-week Supersprint Beginners Plan",
+          "url": "https://www.220triathlon.com/training/training-plans/training-plan-for-triathlon-beginners",
+          "por_que": "El punto de entrada más suave. Distancia supersprint (300m/10km/2.5km). 8 semanas."
+        },
+        "recomendacion_2": {
+          "plan": "MOTTIV — Couch to Sprint Triathlon Training Plan",
+          "url": "https://www.mymottiv.com/sprint-triathlon-training-plan",
+          "por_que": "App gratuita muy intuitiva. Personaliza el plan a tu nivel y horario. Muy motivadora."
+        },
+        "recomendacion_3": {
+          "plan": "MyProCoach — 12-week Sprint Beginner PDF",
+          "url": "https://www.myprocoach.net/free-training-plans/sprint-triathlon/",
+          "por_que": "PDF descargable sin registro. Imprimible. Muy bien estructurado."
+        }
+      },
+      "principiante_con_base_deportiva": {
+        "descripcion": "Ya corres, nadas o vas en bici regularmente pero nunca has hecho un triatlón",
+        "recomendacion_1": {
+          "plan": "MOTTIV — Beginner Sprint Triathlon Training Plan",
+          "url": "https://www.mymottiv.com/sprint-triathlon-training-plan/beginner-sprint-triathlon-training-plan",
+          "por_que": "Bien estructurado, con app de seguimiento gratuita."
+        },
+        "recomendacion_2": {
+          "plan": "MyProCoach — 8-week Sprint Beginner PDF",
+          "url": "https://www.myprocoach.net/free-training-plans/sprint-triathlon/",
+          "por_que": "Descarga inmediata. Solo 8 semanas para el primer Sprint."
+        }
+      },
+      "ya_he_hecho_sprint_quiero_olimpico": {
+        "descripcion": "Ya tienes al menos 1 triatlón Sprint en las piernas",
+        "recomendacion_1": {
+          "plan": "220 Triathlon — Free 3-month Olympic Beginner Plan",
+          "url": "https://www.220triathlon.com/training/training-plans/training-plan-for-triathlon-beginners",
+          "por_que": "12 semanas bien progresivas. Ideal si vienes de Sprint hace poco."
+        },
+        "recomendacion_2": {
+          "plan": "MOTTIV — 80/20 Olympic Triathlon Training Plan",
+          "url": "https://www.mymottiv.com/olympic-triathlon-training-plan/80-20-olympic-triathlon-training-plan",
+          "por_que": "Método 80/20 respaldado por ciencia. App gratuita con seguimiento."
+        }
+      },
+      "ya_he_hecho_olimpico_quiero_703": {
+        "descripcion": "Tienes base sólida y quieres dar el gran salto",
+        "recomendacion_1": {
+          "plan": "220 Triathlon — Free 6-month 70.3 Training Plan",
+          "url": "https://www.220triathlon.com/training/training-plans/free-6-month-ironman-70-3-training-plan",
+          "por_que": "6 meses con tiempo suficiente. El más recomendado para primer 70.3."
+        },
+        "recomendacion_2": {
+          "plan": "Triathlete.com — 20-week First 70.3 Plan",
+          "url": "https://www.triathlete.com/training/20-week-training-plan-first-70-3-triathlon/",
+          "por_que": "Muy detallado, con sesiones específicas. 20 semanas bien progresivas."
+        },
+        "recomendacion_3": {
+          "plan": "Scientific Triathlon — Beginner Half-Distance Plan",
+          "url": "https://scientifictriathlon.com/plans/",
+          "por_que": "De pago pero el mejor del mercado. Incluye vídeos explicativos semanales."
+        }
+      },
+      "quiero_hacer_mi_primer_ironman": {
+        "descripcion": "El gran objetivo. Asegúrate de haber hecho al menos un 70.3 antes.",
+        "advertencia": "No hagas un Ironman completo sin haber terminado primero un 70.3. Es peligroso y el entrenamiento sería insuficiente.",
+        "recomendacion_1": {
+          "plan": "220 Triathlon — Free 6-month Ironman Plan",
+          "url": "https://www.220triathlon.com/training/training-plans/free-6-month-ironman-training-plan-that-s-simple-to-use",
+          "por_que": "El gratuito más completo para Ironman. 6 meses bien estructurados."
+        },
+        "recomendacion_2": {
+          "plan": "MOTTIV — Ironman Training Plan",
+          "url": "https://www.mymottiv.com/ironman-training-plan",
+          "por_que": "App gratuita con personalización. Comunidad de soporte."
+        },
+        "recomendacion_3": {
+          "plan": "Scientific Triathlon — Beginner Full Distance Plan",
+          "url": "https://scientifictriathlon.com/plans/",
+          "por_que": "El mejor plan de pago para primer Ironman. Usuario logró sub-12h."
+        }
+      }
+    },
+    "tabla_resumen_rapida": [
+      {
+        "nivel": "Nunca he hecho deporte",
+        "distancia": "Supersprint",
+        "semanas": 8,
+        "fuente": "220 Triathlon",
+        "url": "https://www.220triathlon.com/training/training-plans/training-plan-for-triathlon-beginners",
+        "coste": "Gratis"
+      },
+      {
+        "nivel": "Principiante absoluto",
+        "distancia": "Sprint",
+        "semanas": 12,
+        "fuente": "MOTTIV",
+        "url": "https://www.mymottiv.com/sprint-triathlon-training-plan/beginner-sprint-triathlon-training-plan",
+        "coste": "Gratis"
+      },
+      {
+        "nivel": "Principiante absoluto",
+        "distancia": "Sprint",
+        "semanas": "8 o 12",
+        "fuente": "MyProCoach PDF",
+        "url": "https://www.myprocoach.net/free-training-plans/sprint-triathlon/",
+        "coste": "Gratis PDF"
+      },
+      {
+        "nivel": "Principiante absoluto",
+        "distancia": "Sprint",
+        "semanas": 20,
+        "fuente": "MOTTIV 20 semanas",
+        "url": "https://www.mymottiv.com/sprint-triathlon-training-plan/20-week-sprint-triathlon-training-plan",
+        "coste": "Gratis"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "Olímpico",
+        "semanas": 12,
+        "fuente": "220 Triathlon",
+        "url": "https://www.220triathlon.com/training/training-plans/training-plan-for-triathlon-beginners",
+        "coste": "Gratis"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "Olímpico",
+        "semanas": 26,
+        "fuente": "220 Triathlon 6 meses",
+        "url": "https://www.220triathlon.com/training/training-plans/free-six-month-olympic-distance-triathlon-training-plan-for-beginners",
+        "coste": "Gratis"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "Olímpico",
+        "semanas": "8 o 12",
+        "fuente": "MyProCoach PDF",
+        "url": "https://www.myprocoach.net/free-training-plans/olympic-triathlon/",
+        "coste": "Gratis PDF"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "70.3",
+        "semanas": 20,
+        "fuente": "Triathlete.com",
+        "url": "https://www.triathlete.com/training/20-week-training-plan-first-70-3-triathlon/",
+        "coste": "Gratis"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "70.3",
+        "semanas": 26,
+        "fuente": "220 Triathlon 6 meses",
+        "url": "https://www.220triathlon.com/training/training-plans/free-6-month-ironman-70-3-training-plan",
+        "coste": "Gratis"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "70.3",
+        "semanas": 20,
+        "fuente": "MOTTIV",
+        "url": "https://www.mymottiv.com/half-ironman-training-plan",
+        "coste": "Gratis"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "70.3",
+        "semanas": 20,
+        "fuente": "Scientific Triathlon (MEJOR)",
+        "url": "https://scientifictriathlon.com/plans/",
+        "coste": "~50€"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "Ironman",
+        "semanas": 26,
+        "fuente": "220 Triathlon 6 meses",
+        "url": "https://www.220triathlon.com/training/training-plans/free-6-month-ironman-training-plan-that-s-simple-to-use",
+        "coste": "Gratis"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "Ironman",
+        "semanas": "20-30",
+        "fuente": "MOTTIV",
+        "url": "https://www.mymottiv.com/ironman-training-plan",
+        "coste": "Gratis/App"
+      },
+      {
+        "nivel": "Principiante",
+        "distancia": "Ironman",
+        "semanas": 24,
+        "fuente": "Scientific Triathlon (MEJOR)",
+        "url": "https://scientifictriathlon.com/plans/",
+        "coste": "~80€"
+      }
+    ]
+  }
+}

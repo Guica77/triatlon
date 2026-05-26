@@ -23,7 +23,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 async function main() {
   console.log("Iniciando seedeo de datos de entrenamiento...");
 
-  const dataPath = path.join(__dirname, '../../triathlon_data_completo.json');
+  const dataPath = path.join(__dirname, '../triathlon_data_completo.json');
   const rawData = fs.readFileSync(dataPath, 'utf-8');
   const jsonData = JSON.parse(rawData);
 
