@@ -155,15 +155,22 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
                   )}
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-xs font-semibold text-white truncate">{prov.name}</span>
                     {isConnected && (
                       <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 text-[8px] font-bold border border-green-500/20 flex items-center gap-0.5 uppercase tracking-wider">
                         <Check className="w-2 h-2" /> Sí
                       </span>
                     )}
+                    <span className={`px-1 py-0.5 rounded text-[7px] font-bold border uppercase tracking-wider ${
+                      prov.isReal 
+                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' 
+                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                    }`}>
+                      {prov.isReal ? 'OAuth BETA' : 'Simulado'}
+                    </span>
                   </div>
-                  <p className="text-[9px] text-zinc-400 truncate max-w-[130px] sm:max-w-[160px]">{prov.description}</p>
+                  <p className="text-[9px] text-zinc-400 truncate max-w-[110px] sm:max-w-[130px]">{prov.description}</p>
                 </div>
               </div>
 

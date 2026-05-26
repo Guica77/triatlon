@@ -1,17 +1,67 @@
 'use client';
 
 import * as React from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { login, signup, signInWithOAuth, sendResetPasswordEmail } from './actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { Apple } from 'lucide-react'; // Usamos iconos limpios o SVG custom
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
   const [isSignUp, setIsSignUp] = React.useState(false);
   const [isForgotPassword, setIsForgotPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = React.useState<string | null>(null);
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+
+  async function handleDemoLogin() {
+    setLoading(true);
+    setError(null);
+    setInfoMessage('Cargando demostración... Conectando sesión de prueba.');
+    
+    try {
+      const formData = new FormData();
+      formData.append('email', 'demo@triatlonpro.com');
+      formData.append('password', 'demo123456');
+      
+      const result: any = await login(formData);
+      if (result && result.error) {
+        setInfoMessage('Configurando cuenta de demostración por primera vez...');
+        const signupData = new FormData();
+        signupData.append('email', 'demo@triatlonpro.com');
+        signupData.append('password', 'demo123456');
+        signupData.append('firstName', 'Demo');
+        signupData.append('lastName', 'Atleta');
+        
+        const signupResult: any = await signup(signupData);
+        // Si hay error en el registro o si requiere confirmación de email (lo cual no debería para cuenta demo mockeada, pero por si acaso)
+        const secondLoginResult: any = await login(formData);
+        if (secondLoginResult && secondLoginResult.error) {
+          setError('El modo demo no está disponible en este momento. Por favor, crea una cuenta de atleta gratis.');
+          setLoading(false);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Error al iniciar el modo demostración.');
+      setLoading(false);
+    }
+  }
+
+  React.useEffect(() => {
+    const mode = searchParams.get('mode');
+    const message = searchParams.get('message');
+    if (mode === 'signup') {
+      setIsSignUp(true);
+    } else if (mode === 'demo') {
+      handleDemoLogin();
+    }
+    if (message === 'auth_required') {
+      setInfoMessage('Es necesario iniciar sesión o crear una cuenta para poder configurar tu plan.');
+    }
+  }, [searchParams]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -77,6 +127,15 @@ export default function LoginPage() {
             <>
               <div className="space-y-3">
                 <AnimatedButton 
+                  variant="primary" 
+                  className="w-full font-bold bg-gradient-to-r from-cyan-500 to-emerald-500 text-black border-none hover:from-cyan-400 hover:to-emerald-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                  onClick={handleDemoLogin}
+                  type="button"
+                  disabled={loading}
+                >
+                  ⚡ Entrar en Modo Demo / Vista Rápida
+                </AnimatedButton>
+                <AnimatedButton 
                   variant="secondary" 
                   className="w-full font-normal"
                   onClick={() => signInWithOAuth('apple')}
@@ -123,6 +182,12 @@ export default function LoginPage() {
             {successMessage && (
               <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs text-center leading-relaxed">
                 {successMessage}
+              </div>
+            )}
+
+            {infoMessage && !error && !successMessage && (
+              <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs text-center leading-relaxed">
+                {infoMessage}
               </div>
             )}
 
@@ -214,5 +279,17 @@ export default function LoginPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-6">
+        <div className="text-zinc-400 text-sm">Cargando...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

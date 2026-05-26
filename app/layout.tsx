@@ -22,8 +22,34 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Triatlon Pro",
-  description: "Plataforma de entrenamiento de triatlón de alto rendimiento y telemetría universal",
+  metadataBase: new URL('https://triatlonpro.com'),
+  title: "Triatlon Pro - Plataforma de Entrenamiento de Alto Rendimiento",
+  description: "Plataforma de entrenamiento de triatlón de alto rendimiento y telemetría universal. Periodización avanzada basada en FTP, ritmos y fatiga real.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "Triatlon Pro - Dashboard de Alto Rendimiento",
+    description: "Plataforma de entrenamiento de triatlón de alto rendimiento y telemetría universal. Conecta Garmin y Strava.",
+    url: "https://triatlonpro.com",
+    siteName: "Triatlon Pro",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Triatlon Pro Dashboard de Alto Rendimiento",
+      },
+    ],
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Triatlon Pro - Entrenamiento Inteligente",
+    description: "Plataforma de entrenamiento de triatlón de alto rendimiento y telemetría universal",
+    images: ["/og-image.png"],
+  },
   appleWebApp: {
     capable: true,
     title: "Triatlon Pro",

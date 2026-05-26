@@ -319,11 +319,16 @@ export function MarketplaceAggregatorGrid({ initialItems, initialCategory = 'tod
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         {portalStyle.label}
                       </span>
-                      {discountPercent > 0 && (
-                        <span className="bg-emerald-500 text-black font-black text-xs px-2.5 py-1 rounded-lg shadow-lg border border-emerald-400">
-                          -{discountPercent}%
+                      <div className="flex flex-col gap-1 items-end">
+                        {discountPercent > 0 && (
+                          <span className="bg-emerald-500 text-black font-black text-xs px-2.5 py-1 rounded-lg shadow-lg border border-emerald-400">
+                            -{discountPercent}%
+                          </span>
+                        )}
+                        <span className="bg-amber-500/20 border border-amber-500/30 text-amber-300 font-extrabold text-[9px] px-2 py-0.5 rounded-md shadow-lg backdrop-blur-sm uppercase tracking-wider">
+                          Simulado
                         </span>
-                      )}
+                      </div>
                     </div>
 
                     {/* Controles del Carrusel */}

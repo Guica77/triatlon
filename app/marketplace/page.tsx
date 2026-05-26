@@ -122,11 +122,14 @@ export default async function MarketplacePage({
         
         {/* Encabezado de Sección */}
         <div className="space-y-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 flex-wrap">
             <Sparkles className="w-3.5 h-3.5" /> Agregador Inteligente de Chollos (AI Scraper Hub)
+            <span className="bg-amber-500/10 text-amber-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-500/20 uppercase tracking-wider">
+              BETA / Simulación
+            </span>
           </h2>
-          <p className="text-sm text-zinc-400 max-w-3xl">
-            Rastreamos continuamente Wallapop, Tuvalum, TuTriatlon y BuyCycle para encontrarte el mejor material certificado de triatlón. Compra directamente al vendedor sin comisiones.
+          <p className="text-sm text-zinc-400 max-w-3xl leading-relaxed">
+            Rastreamos continuamente Wallapop, Tuvalum, TuTriatlon y BuyCycle para encontrarte el mejor material certificado de triatlón. Compra directamente al vendedor sin comisiones. <span className="text-amber-400/80 font-medium">(Los datos de esta sección son simulaciones con fines demostrativos en esta fase Beta).</span>
           </p>
         </div>
 

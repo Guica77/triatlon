@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Activity, Shield, Zap, TrendingUp, Download, Compass, Cpu, Sparkles, Check, ChevronRight, Play } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
@@ -71,7 +72,7 @@ export function LandingClient() {
             </button>
             <AnimatedButton 
               variant="primary"
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/login?mode=signup')}
               className="px-4 py-2 text-xs"
             >
               Comenzar Gratis
@@ -102,13 +103,13 @@ export function LandingClient() {
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
             <AnimatedButton 
               variant="primary"
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/login?mode=signup')}
               className="w-full sm:w-auto px-8 py-4 text-sm font-bold shadow-[0_0_30px_rgba(34,211,238,0.2)]"
             >
               Empezar mi Plan Gratis <ChevronRight className="w-4 h-4 ml-1.5" />
             </AnimatedButton>
             <button 
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/login?mode=demo')}
               className="w-full sm:w-auto px-8 py-4 rounded-xl border border-zinc-800 bg-zinc-900/20 hover:bg-zinc-900/50 hover:border-zinc-700 text-sm font-semibold transition-all flex items-center justify-center gap-2"
             >
               <Play className="w-4 h-4 text-emerald-400 fill-emerald-400" />
@@ -400,7 +401,7 @@ export function LandingClient() {
 
             <AnimatedButton 
               variant="ghost" 
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/login?mode=signup')}
               className="w-full py-3 text-xs"
             >
               Comenzar Plan Free
@@ -449,7 +450,7 @@ export function LandingClient() {
 
               <AnimatedButton 
                 variant="primary"
-                onClick={() => router.push('/login')}
+                onClick={() => router.push('/login?mode=signup&plan=pro')}
                 className="w-full py-3 text-xs"
               >
                 Suscribirme a Pro Now
@@ -470,9 +471,9 @@ export function LandingClient() {
           </div>
           <p>© {new Date().getFullYear()} Triatlon Pro Inc. Todos los derechos reservados.</p>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-zinc-300">Términos</a>
-            <a href="#" className="hover:text-zinc-300">Privacidad</a>
-            <a href="#" className="hover:text-zinc-300">Soporte</a>
+            <Link href="/terminos" className="hover:text-zinc-300">Términos</Link>
+            <Link href="/privacidad" className="hover:text-zinc-300">Privacidad</Link>
+            <Link href="/soporte" className="hover:text-zinc-300">Soporte</Link>
           </div>
         </div>
       </footer>
