@@ -63,6 +63,11 @@ export function BillingCard({ status }: BillingCardProps) {
               <span className="text-3xl font-black text-white">{isPro ? '9,99€' : '0,00€'}</span>
               <span className="text-xs text-zinc-500 font-medium">/ mes</span>
             </div>
+            {isPro && (
+              <p className="text-[9px] text-emerald-400 font-extrabold tracking-wider uppercase bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md inline-block">
+                Próxima renovación: 26 de Junio de 2026
+              </p>
+            )}
             <p className="text-xs text-zinc-400 leading-relaxed pt-1">
               {isPro 
                 ? 'Tienes activadas todas las funciones de periodización avanzada, análisis de fatiga PMC y exportación estructurada de TCX ilimitada.'

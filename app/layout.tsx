@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
+import { CookieBanner } from "@/components/ui/cookie-banner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,6 +74,7 @@ export default function RootLayout({
           <main className="flex-1 overflow-x-hidden">{children}</main>
           <MobileBottomNav />
         </div>
+        <CookieBanner />
         <script
           dangerouslySetInnerHTML={{
             __html: `

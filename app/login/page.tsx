@@ -55,8 +55,12 @@ function LoginForm() {
     const message = searchParams.get('message');
     if (mode === 'signup') {
       setIsSignUp(true);
+      setIsForgotPassword(false);
     } else if (mode === 'demo') {
       handleDemoLogin();
+    } else if (mode === 'forgot') {
+      setIsForgotPassword(true);
+      setIsSignUp(false);
     }
     if (message === 'auth_required') {
       setInfoMessage('Es necesario iniciar sesión o crear una cuenta para poder configurar tu plan.');
