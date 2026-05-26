@@ -170,6 +170,7 @@ export type Database = {
           target_swim_time: string | null
           target_bike_time: string | null
           target_run_time: string | null
+          subscription_status: string | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -205,6 +206,7 @@ export type Database = {
           target_swim_time?: string | null
           target_bike_time?: string | null
           target_run_time?: string | null
+          subscription_status?: string | null
         }
         Update: {
           active_plan_id?: string | null
@@ -240,6 +242,7 @@ export type Database = {
           target_swim_time?: string | null
           target_bike_time?: string | null
           target_run_time?: string | null
+          subscription_status?: string | null
         }
         Relationships: [
           {

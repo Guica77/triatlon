@@ -1,7 +1,7 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function getOrRefreshStravaToken(userId: string): Promise<string | null> {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   // 1. Obtener tokens de user_connected_devices
   const { data: device } = await supabase
@@ -81,7 +81,7 @@ export async function getOrRefreshStravaToken(userId: string): Promise<string | 
 }
 
 export async function syncPhysiologyFromStrava(userId: string, accessToken: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   try {
     // 1. Fetch detailed athlete profile to read FTP if set

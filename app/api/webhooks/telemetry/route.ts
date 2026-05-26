@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Strava Webhooks verification handler (GET)
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Check if it's a new activity creation
     if (object_type === 'activity' && aspect_type === 'create') {
       const externalAthleteId = `strava_user_${owner_id}`;
-      const supabase = await createClient();
+      const supabase = createAdminClient();
 
       // Find profile by external athlete ID
       const { data: profile } = await supabase

@@ -199,3 +199,30 @@ export async function pushWeekWorkoutsToGarminAction() {
 
   return { success: true, count: workoutCount };
 }
+
+export async function updateSubscriptionStatus(status: 'free' | 'pro') {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'No autorizado' };
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      subscription_status: status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', user.id);
+
+  if (error) {
+    console.error('Error updating subscription status:', error);
+    return { error: 'Error al actualizar el estado de suscripción' };
+  }
+
+  revalidatePath('/settings');
+  revalidatePath('/dashboard');
+  
+  return { success: true };
+}

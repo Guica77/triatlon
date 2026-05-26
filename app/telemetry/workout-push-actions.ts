@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { parsePaceToSeconds } from '@/lib/zones-utility';
 
 export interface WorkoutStep {
   type: 'Warmup' | 'Interval' | 'Rest' | 'Repeat' | 'Cooldown';
@@ -35,6 +36,7 @@ export async function generateStructuredWorkout(workoutId: string): Promise<Stru
   const { data: workout } = await supabase.from('user_workouts')
     .select(`
       id, 
+      user_id,
       scheduled_date,
       training_sessions (
         sport_type,
@@ -59,6 +61,16 @@ export async function generateStructuredWorkout(workoutId: string): Promise<Stru
   const sport = sportMap[session.sport_type] || 'GENERIC';
   const desc = session.description || '';
 
+  // Obtener métricas fisiológicas del perfil para adaptar los objetivos
+  const { data: profile } = await supabase.from('profiles')
+    .select('current_ftp, current_swim_pace, current_run_pace')
+    .eq('id', workout.user_id)
+    .single();
+
+  const ftp = profile?.current_ftp || 180;
+  const runPaceSec = parsePaceToSeconds(profile?.current_run_pace, 330); // 5:30 min/km
+  const swimPaceSec = parsePaceToSeconds(profile?.current_swim_pace, 120); // 2:00 min/100m
+
   // Parsear heurísticamente la descripción para construir series realistas
   const steps: WorkoutStep[] = [];
 
@@ -67,9 +79,9 @@ export async function generateStructuredWorkout(workoutId: string): Promise<Stru
     type: 'Warmup',
     stepOrder: 1,
     endCondition: 'LAP_BUTTON',
-    targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'HEART_RATE' : 'OPEN',
-    targetValueOne: sport === 'CYCLED' ? 120 : sport === 'RUNNING' ? 110 : undefined,
-    targetValueTwo: sport === 'CYCLED' ? 150 : sport === 'RUNNING' ? 130 : undefined,
+    targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'PACE' : 'OPEN',
+    targetValueOne: sport === 'CYCLED' ? Math.round(ftp * 0.50) : sport === 'RUNNING' ? Math.round(runPaceSec * 1.25) : undefined,
+    targetValueTwo: sport === 'CYCLED' ? Math.round(ftp * 0.65) : sport === 'RUNNING' ? Math.round(runPaceSec * 1.35) : undefined,
   });
 
   // Paso 2: Bloque Principal (Series / Intervalos según detección en texto)
@@ -90,17 +102,17 @@ export async function generateStructuredWorkout(workoutId: string): Promise<Stru
           endCondition: 'TIME',
           endConditionValue: 180, // 3 min
           targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'PACE' : 'OPEN',
-          targetValueOne: sport === 'CYCLED' ? 220 : sport === 'RUNNING' ? 240 : undefined, // 240s = 4:00 min/km
-          targetValueTwo: sport === 'CYCLED' ? 250 : sport === 'RUNNING' ? 270 : undefined, // 270s = 4:30 min/km
+          targetValueOne: sport === 'CYCLED' ? Math.round(ftp * 0.91) : sport === 'RUNNING' ? Math.round(runPaceSec * 0.95) : undefined,
+          targetValueTwo: sport === 'CYCLED' ? Math.round(ftp * 1.05) : sport === 'RUNNING' ? Math.round(runPaceSec * 1.00) : undefined,
         },
         {
           type: 'Rest',
           stepOrder: 2,
           endCondition: 'TIME',
           endConditionValue: 90, // 1.5 min
-          targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'HEART_RATE' : 'OPEN',
-          targetValueOne: sport === 'CYCLED' ? 100 : sport === 'RUNNING' ? 110 : undefined,
-          targetValueTwo: sport === 'CYCLED' ? 130 : sport === 'RUNNING' ? 125 : undefined,
+          targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'PACE' : 'OPEN',
+          targetValueOne: sport === 'CYCLED' ? Math.round(ftp * 0.50) : sport === 'RUNNING' ? Math.round(runPaceSec * 1.20) : undefined,
+          targetValueTwo: sport === 'CYCLED' ? Math.round(ftp * 0.55) : sport === 'RUNNING' ? Math.round(runPaceSec * 1.25) : undefined,
         }
       ]
     });
@@ -112,9 +124,9 @@ export async function generateStructuredWorkout(workoutId: string): Promise<Stru
       stepOrder: 2,
       endCondition: 'TIME',
       endConditionValue: mainDuration,
-      targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'HEART_RATE' : 'OPEN',
-      targetValueOne: sport === 'CYCLED' ? 170 : sport === 'RUNNING' ? 130 : undefined,
-      targetValueTwo: sport === 'CYCLED' ? 195 : sport === 'RUNNING' ? 145 : undefined,
+      targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'PACE' : 'OPEN',
+      targetValueOne: sport === 'CYCLED' ? Math.round(ftp * 0.56) : sport === 'RUNNING' ? Math.round(runPaceSec * 1.12) : undefined,
+      targetValueTwo: sport === 'CYCLED' ? Math.round(ftp * 0.75) : sport === 'RUNNING' ? Math.round(runPaceSec * 1.24) : undefined,
     });
   }
 

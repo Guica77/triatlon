@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
+import { adaptWorkoutDescription } from '@/lib/zones-utility';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
 import { 
@@ -306,7 +307,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
             Notas del Entrenador
           </h3>
           <p className="text-sm text-zinc-300 leading-relaxed font-normal whitespace-pre-line">
-            {session.description || 'Sin notas descriptivas para este entrenamiento.'}
+            {adaptWorkoutDescription(session.description, session.sport_type, profile) || 'Sin notas descriptivas para este entrenamiento.'}
           </p>
         </ProCard>
 

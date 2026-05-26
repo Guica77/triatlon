@@ -8,6 +8,7 @@ import { RaceGoalCard } from '@/components/settings/race-goal-card';
 import { PhysiologicalCard } from '@/components/settings/physiological-card';
 import { VirtualGarageCard } from '@/components/settings/virtual-garage-card';
 import { TelemetryConnectCard } from '@/components/settings/telemetry-connect-card';
+import { BillingCard } from '@/components/settings/billing-card';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -92,7 +93,7 @@ export default async function SettingsPage() {
               />
             </div>
             
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="h-full">
                 <VirtualGarageCard 
                   initialGarage={profile.virtual_garage || []}
@@ -102,6 +103,11 @@ export default async function SettingsPage() {
                 <TelemetryConnectCard 
                   connectedProviders={connectedProviders}
                   lastSyncTime={null}
+                />
+              </div>
+              <div className="h-full">
+                <BillingCard 
+                  status={profile.subscription_status}
                 />
               </div>
             </div>

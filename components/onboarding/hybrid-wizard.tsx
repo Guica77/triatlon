@@ -121,7 +121,7 @@ export function HybridWizard() {
     }
   };
 
-  const handleSaveAndConnect = async () => {
+  const handleSaveAndConnect = async (provider: 'strava' | 'garmin' = 'strava') => {
     setLoading(true);
     try {
       const result = await saveRaceGoalAndPlan({
@@ -147,8 +147,8 @@ export function HybridWizard() {
         console.error('Error:', result.error);
         setLoading(false);
       } else {
-        // Redirect to real Strava connection
-        window.location.href = '/api/auth/telemetry/connect?provider=strava';
+        // Redirect to real provider connection
+        window.location.href = `/api/auth/telemetry/connect?provider=${provider}`;
       }
     } catch (error) {
       console.error('Error:', error);
@@ -523,18 +523,18 @@ export function HybridWizard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Garmin Connect button */}
                   <button
-                    onClick={handleSaveAndConnect}
+                    onClick={() => handleSaveAndConnect('garmin')}
                     disabled={loading}
                     className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden"
                   >
                     <span className="text-3xl mb-3 block">🛰️</span>
                     <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">Conectar Garmin</span>
-                    <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Vía Strava Bridge</span>
+                    <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Vía Garmin Connect</span>
                   </button>
 
                   {/* Coros/Suunto/Otros button */}
                   <button
-                    onClick={handleSaveAndConnect}
+                    onClick={() => handleSaveAndConnect('strava')}
                     disabled={loading}
                     className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden"
                   >

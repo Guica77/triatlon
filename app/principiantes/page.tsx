@@ -617,7 +617,7 @@ export default function BeginnersHubPage() {
 
                     <div className="pt-4 border-t border-zinc-800/80">
                       <AnimatedButton
-                        onClick={() => handleActivatePlan('3')}
+                        onClick={() => handleActivatePlan('sprint_cero')}
                         disabled={isPending}
                         className="w-full !bg-emerald-500 hover:!bg-emerald-400 !text-black py-2.5 text-xs font-bold rounded-xl shadow-md shadow-emerald-950/20 flex items-center justify-center gap-1.5"
                       >
@@ -665,7 +665,7 @@ export default function BeginnersHubPage() {
 
                     <div className="pt-4 border-t border-zinc-800/80">
                       <AnimatedButton
-                        onClick={() => handleActivatePlan('5')}
+                        onClick={() => handleActivatePlan('olimpico_principiante')}
                         disabled={isPending}
                         className="w-full !bg-zinc-800 hover:!bg-zinc-700 !text-white py-2.5 text-xs font-bold rounded-xl border border-zinc-700/80 flex items-center justify-center gap-1.5"
                       >
