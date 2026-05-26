@@ -5,7 +5,7 @@ import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/dashboard/action
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
@@ -66,6 +66,121 @@ function parseWorkoutDescription(desc: string, sportType: string) {
 
   return { main, warmup, cooldown, gear };
 }
+
+interface LocalWorkoutStep {
+  type: 'Warmup' | 'Interval' | 'Rest' | 'Repeat' | 'Cooldown';
+  stepOrder: number;
+  repeatCount?: number;
+  endCondition: 'LAP_BUTTON' | 'TIME' | 'DISTANCE';
+  endConditionValue?: number;
+  targetType: 'POWER' | 'HEART_RATE' | 'PACE' | 'OPEN';
+  targetValueOne?: number;
+  targetValueTwo?: number;
+  workoutSteps?: LocalWorkoutStep[];
+}
+
+function getLocalStructuredSteps(sportType: string, description: string, durationMin: number): LocalWorkoutStep[] {
+  const sportMap: Record<string, 'CYCLED' | 'RUNNING' | 'SWIMMING' | 'GENERIC'> = {
+    ciclismo: 'CYCLED',
+    carrera: 'RUNNING',
+    natacion: 'SWIMMING',
+    brick: 'GENERIC'
+  };
+
+  const sport = sportMap[sportType] || 'GENERIC';
+  const desc = description || '';
+  const steps: LocalWorkoutStep[] = [];
+
+  // 1. Calentamiento
+  steps.push({
+    type: 'Warmup',
+    stepOrder: 1,
+    endCondition: 'LAP_BUTTON',
+    targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'HEART_RATE' : 'OPEN',
+    targetValueOne: sport === 'CYCLED' ? 120 : sport === 'RUNNING' ? 110 : undefined,
+    targetValueTwo: sport === 'CYCLED' ? 150 : sport === 'RUNNING' ? 130 : undefined,
+  });
+
+  // 2. Bloque Principal
+  const isInterval = desc.includes('series') || desc.includes('x') || desc.includes('Z4') || desc.includes('fuerte');
+  
+  if (isInterval) {
+    steps.push({
+      type: 'Repeat',
+      stepOrder: 2,
+      repeatCount: 5,
+      endCondition: 'TIME',
+      targetType: 'OPEN',
+      workoutSteps: [
+        {
+          type: 'Interval',
+          stepOrder: 1,
+          endCondition: 'TIME',
+          endConditionValue: 180, // 3 min
+          targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'PACE' : 'OPEN',
+          targetValueOne: sport === 'CYCLED' ? 220 : sport === 'RUNNING' ? 240 : undefined,
+          targetValueTwo: sport === 'CYCLED' ? 250 : sport === 'RUNNING' ? 270 : undefined,
+        },
+        {
+          type: 'Rest',
+          stepOrder: 2,
+          endCondition: 'TIME',
+          endConditionValue: 90, // 1.5 min
+          targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'HEART_RATE' : 'OPEN',
+          targetValueOne: sport === 'CYCLED' ? 100 : sport === 'RUNNING' ? 110 : undefined,
+          targetValueTwo: sport === 'CYCLED' ? 130 : sport === 'RUNNING' ? 125 : undefined,
+        }
+      ]
+    });
+  } else {
+    const mainDuration = Math.max((durationMin - 20) * 60, 1200);
+    steps.push({
+      type: 'Interval',
+      stepOrder: 2,
+      endCondition: 'TIME',
+      endConditionValue: mainDuration,
+      targetType: sport === 'CYCLED' ? 'POWER' : sport === 'RUNNING' ? 'HEART_RATE' : 'OPEN',
+      targetValueOne: sport === 'CYCLED' ? 170 : sport === 'RUNNING' ? 130 : undefined,
+      targetValueTwo: sport === 'CYCLED' ? 195 : sport === 'RUNNING' ? 145 : undefined,
+    });
+  }
+
+  // 3. Enfriamiento
+  steps.push({
+    type: 'Cooldown',
+    stepOrder: 3,
+    endCondition: 'TIME',
+    endConditionValue: 600, // 10 min
+    targetType: 'OPEN'
+  });
+
+  return steps;
+}
+
+const localFormatTarget = (targetType: string, val1?: number, val2?: number) => {
+  if (!val1 && !val2) return 'Libre';
+  if (targetType === 'POWER') return `${val1}W-${val2}W`;
+  if (targetType === 'HEART_RATE') return `${val1}-${val2} ppm`;
+  if (targetType === 'PACE') {
+    const formatPace = (sec: number) => {
+      const m = Math.floor(sec / 60);
+      const s = Math.round(sec % 60);
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+    return `${formatPace(val1!)}-${formatPace(val2!)}/km`;
+  }
+  return 'Libre';
+};
+
+const localFormatCondition = (condition: string, value?: number) => {
+  if (condition === 'LAP_BUTTON') return 'Hasta Lap';
+  if (condition === 'TIME') {
+    const mins = Math.floor(value! / 60);
+    return `${mins} min`;
+  }
+  if (condition === 'DISTANCE') return `${value}m`;
+  return '';
+};
 
 export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio' }: WorkoutCardProps) {
   const [status, setStatus] = React.useState(workout.status);
@@ -172,6 +287,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
       parsed.gear = '🏃‍♂️ Zapatillas de running normales y ropa cómoda.';
     }
   }
+
+  const localSteps = getLocalStructuredSteps(session.sport_type, desc, durationMin);
 
   const hasZ1 = desc.includes('Zona 1') || desc.includes('Z1');
   const hasZ2 = desc.includes('Zona 2') || desc.includes('Z2') || desc.includes('suave') || desc.includes('fácil');
@@ -302,9 +419,82 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                 className="text-sm text-zinc-300 leading-relaxed font-normal w-full"
               >
                 {activeTab === 'main' && (
-                  <div>
-                    <p className="font-semibold text-cyan-400 mb-2">🎯 Objetivo Principal de la Sesión:</p>
-                    <p>{parsed.main}</p>
+                  <div className="space-y-4 w-full">
+                    <div className="p-3.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80">
+                      <p className="font-semibold text-cyan-400 mb-1.5 flex items-center gap-1.5 text-xs tracking-wide uppercase">
+                        <Target className="w-4 h-4 text-cyan-400" /> Objetivo Principal de la Sesión:
+                      </p>
+                      <p className="text-zinc-300 text-sm leading-relaxed">{parsed.main}</p>
+                    </div>
+
+                    {localSteps.length > 0 && (
+                      <div className="pt-2 border-t border-zinc-800/80">
+                        <p className="text-[10px] uppercase font-bold text-zinc-500 mb-2.5 tracking-wider flex items-center gap-1">
+                          <Activity className="w-3.5 h-3.5 text-zinc-500" />
+                          Bloques Estructurados de Entrenamiento
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {localSteps.map((step, index) => {
+                            if (step.type === 'Repeat') {
+                              const sub1 = step.workoutSteps?.[0];
+                              const sub2 = step.workoutSteps?.[1];
+                              return (
+                                <div key={index} className="p-3 rounded-xl bg-purple-950/15 border border-purple-500/25 hover:border-purple-500/40 transition-colors flex flex-col justify-between group shadow-sm shadow-purple-950/5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
+                                      <RefreshCw className="w-3.5 h-3.5 text-purple-400 group-hover:rotate-180 transition-transform duration-500" /> 
+                                      Repetir {step.repeatCount}x
+                                    </span>
+                                  </div>
+                                  <div className="mt-2.5 space-y-1.5">
+                                    {sub1 && (
+                                      <div className="text-xs font-semibold text-zinc-200 flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                                        {localFormatCondition(sub1.endCondition, sub1.endConditionValue)} a {localFormatTarget(sub1.targetType, sub1.targetValueOne, sub1.targetValueTwo)}
+                                      </div>
+                                    )}
+                                    {sub2 && (
+                                      <div className="text-[10px] font-medium text-purple-300/70 border-t border-purple-500/10 pt-1.5 flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                                        Recuperación: {localFormatCondition(sub2.endCondition, sub2.endConditionValue)}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            const isWarmup = step.type === 'Warmup';
+                            const isCooldown = step.type === 'Cooldown';
+                            const stepColorClass = isWarmup 
+                              ? 'text-amber-400 bg-amber-950/15 border-amber-500/25 hover:border-amber-500/40 shadow-amber-950/5' 
+                              : isCooldown 
+                              ? 'text-blue-400 bg-blue-950/15 border-blue-500/25 hover:border-blue-500/40 shadow-blue-950/5' 
+                              : 'text-cyan-400 bg-cyan-950/15 border-cyan-500/25 hover:border-cyan-500/40 shadow-cyan-950/5';
+
+                            const StepIcon = isWarmup 
+                              ? Flame 
+                              : isCooldown 
+                              ? Wind 
+                              : Target;
+
+                            return (
+                              <div key={index} className={`p-3 rounded-xl border transition-colors flex flex-col justify-between ${stepColorClass} shadow-sm`}>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                    <StepIcon className="w-3.5 h-3.5" />
+                                    {isWarmup ? 'Calentamiento' : isCooldown ? 'Enfriamiento' : 'Intervalo'}
+                                  </span>
+                                </div>
+                                <div className="text-xs font-semibold text-zinc-200 mt-2.5">
+                                  {localFormatCondition(step.endCondition, step.endConditionValue)} • {localFormatTarget(step.targetType, step.targetValueOne, step.targetValueTwo)}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 {activeTab === 'warmup' && (
