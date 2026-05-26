@@ -12,6 +12,10 @@ interface FormStatusWidgetProps {
 
 export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: FormStatusWidgetProps) {
   const isBeginner = athleteLevel === 'principiante';
+
+  // Robust protection against NaN, null, or undefined values
+  const safeTsb = typeof tsb === 'number' && !isNaN(tsb) ? tsb : 0;
+  const safeProgressPercent = typeof progressPercent === 'number' && !isNaN(progressPercent) ? progressPercent : 0;
   
   let label = '';
   let description = '';
@@ -21,14 +25,14 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
   let bgClass = '';
   
   if (isBeginner) {
-    if (progressPercent < 30) {
+    if (safeProgressPercent < 30) {
       label = '¡Buen comienzo!';
       description = 'Sigue sumando, cada sesión cuenta para crear el hábito.';
       color = 'text-blue-400';
       strokeColor = '#60a5fa';
       glowColor = 'rgba(96, 165, 250, 0.15)';
       bgClass = 'bg-zinc-950/40 border-blue-500/20 hover:border-blue-500/40';
-    } else if (progressPercent < 70) {
+    } else if (safeProgressPercent < 70) {
       label = 'Buen camino';
       description = 'Constancia sólida esta semana. ¡Mantén el ritmo!';
       color = 'text-emerald-400';
@@ -44,28 +48,28 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
       bgClass = 'bg-zinc-950/40 border-amber-500/20 hover:border-amber-500/40';
     }
   } else {
-    if (tsb > 25) {
+    if (safeTsb > 25) {
       label = 'Pérdida de Forma';
       description = 'Demasiado descanso, perdiendo condición.';
       color = 'text-zinc-400';
       strokeColor = '#a1a1aa';
       glowColor = 'rgba(161, 161, 170, 0.15)';
       bgClass = 'bg-zinc-950/40 border-zinc-800/80 hover:border-zinc-700/80';
-    } else if (tsb >= 5) {
+    } else if (safeTsb >= 5) {
       label = 'Pico de Forma';
       description = 'Frescura alta. Listo para competir.';
       color = 'text-emerald-400';
       strokeColor = '#34d399';
       glowColor = 'rgba(52, 211, 153, 0.15)';
       bgClass = 'bg-zinc-950/40 border-emerald-500/20 hover:border-emerald-500/40';
-    } else if (tsb >= -10) {
+    } else if (safeTsb >= -10) {
       label = 'Entrenamiento Óptimo';
       description = 'Asimilando cargas correctamente.';
       color = 'text-blue-400';
       strokeColor = '#60a5fa';
       glowColor = 'rgba(96, 165, 250, 0.15)';
       bgClass = 'bg-zinc-950/40 border-blue-500/20 hover:border-blue-500/40';
-    } else if (tsb >= -25) {
+    } else if (safeTsb >= -25) {
       label = 'Sobrecarga Controlada';
       description = 'Semana de impacto. La fatiga es alta.';
       color = 'text-yellow-400';
@@ -83,9 +87,9 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
   }
 
   // Calcular porcentaje del dial
-  const clampedTsb = Math.min(Math.max(tsb, -50), 50);
+  const clampedTsb = Math.min(Math.max(safeTsb, -50), 50);
   const percentage = isBeginner
-    ? Math.min(Math.max(progressPercent, 0), 100) / 100
+    ? Math.min(Math.max(safeProgressPercent, 0), 100) / 100
     : (clampedTsb + 50) / 100;
   
   // Parámetros de la circunferencia del círculo (r = 38)
@@ -95,7 +99,7 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
 
   return (
     <Link href={isBeginner ? "/principiantes" : "/analytics"} className="block group w-full h-full">
-      <div className={`p-5 sm:p-6 rounded-2xl border ${bgClass} shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full relative overflow-hidden backdrop-blur-md`}>
+      <div className={`p-5 sm:p-6 rounded-2xl border ${bgClass} shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full min-h-[320px] relative overflow-hidden backdrop-blur-md`}>
         {/* Glow de fondo dinámico en base al color del estado */}
         <div 
           className="absolute inset-0 pointer-events-none transition-all duration-300 opacity-30 group-hover:opacity-40"
@@ -105,7 +109,7 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
         />
 
         {/* Encabezado */}
-        <div className="flex items-start justify-between mb-4 relative z-10">
+        <div className="flex items-start justify-between mb-2 relative z-10 shrink-0">
           <div className="flex items-center gap-2">
             {isBeginner ? (
               <Calendar className={`w-4 h-4 ${color}`} />
@@ -125,7 +129,7 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
         </div>
         
         {/* Visualización Central - Dial SVG */}
-        <div className="flex-1 flex flex-col items-center justify-center py-4 relative z-10">
+        <div className="flex-1 flex flex-col items-center justify-center py-2 relative z-10 shrink-0">
           <div className="relative w-28 h-28 flex items-center justify-center">
             {/* SVG del Dial */}
             <svg className="w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 100 100">
@@ -159,9 +163,9 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
             {/* Texto interior del dial */}
             <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
               <span className="text-2xl font-black text-white leading-none tracking-tight">
-                {isBeginner ? `${progressPercent}%` : (tsb > 0 ? `+${tsb}` : tsb)}
+                {isBeginner ? `${safeProgressPercent}%` : (safeTsb > 0 ? `+${safeTsb}` : safeTsb)}
               </span>
-              <span className="text-[9px] text-zinc-500 uppercase tracking-widest font-semibold mt-0.5">
+              <span className="text-[9px] text-zinc-550 uppercase tracking-widest font-semibold mt-0.5">
                 {isBeginner ? 'constancia' : 'balance'}
               </span>
             </div>
@@ -169,7 +173,7 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
         </div>
 
         {/* Textos inferiores del estado */}
-        <div className="relative z-10 mt-2">
+        <div className="relative z-10 mt-2 shrink-0">
           <div className="flex items-baseline gap-2">
             <span className={`text-base font-black tracking-tight ${color}`}>
               {label}
