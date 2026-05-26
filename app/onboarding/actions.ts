@@ -20,15 +20,34 @@ export async function selectPlan(planId: string) {
 
   const level = planData?.level || 'intermedio'
 
-  // 1.5 Upsert perfil
-  const { error: profileError } = await supabase
+  // 1.5 Comprobar si el perfil ya existe para evitar fallos de RLS con upsert en Supabase
+  const { data: existingProfile } = await supabase
     .from('profiles')
-    .upsert({ 
-      id: user.id,
-      first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Triatleta',
-      level: level,
-      active_plan_id: planId 
-    })
+    .select('id')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const profilePayload = {
+    id: user.id,
+    first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Triatleta',
+    level: level,
+    active_plan_id: planId 
+  };
+
+  let profileError = null;
+
+  if (existingProfile) {
+    const { error } = await supabase
+      .from('profiles')
+      .update(profilePayload)
+      .eq('id', user.id);
+    profileError = error;
+  } else {
+    const { error } = await supabase
+      .from('profiles')
+      .insert(profilePayload);
+    profileError = error;
+  }
 
   if (profileError) {
     console.error("Error actualizando plan en perfil:", profileError)
@@ -208,32 +227,51 @@ export async function saveRaceGoalAndPlan(formData: {
   const selectedPlan = plans?.find((p: any) => p.id === selectedPlanId);
   const level = athlete_level || selectedPlan?.level || 'intermedio';
 
-  // 2. Upsert perfil con los objetivos de carrera, modalidad, plan activo, métricas fisiológicas, garaje virtual, horas semanales y marcas de segmento
-  const { error: profileError } = await supabase
+  // 2. Comprobar si el perfil ya existe para evitar fallos de RLS con upsert en Supabase
+  const { data: existingProfile } = await supabase
     .from('profiles')
-    .upsert({
-      id: user.id,
-      first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Triatleta',
-      last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.last_name || '',
-      level: level,
-      target_race_name,
-      target_race_date,
-      target_race_distance,
-      target_race_modality,
-      target_finish_time,
-      baseline_training_hours,
-      current_ftp,
-      current_swim_pace,
-      current_run_pace,
-      virtual_garage,
-      swim_weekly_hours,
-      bike_weekly_hours,
-      run_weekly_hours,
-      target_swim_time,
-      target_bike_time,
-      target_run_time,
-      active_plan_id: selectedPlanId
-    });
+    .select('id')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  const profilePayload = {
+    id: user.id,
+    first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Triatleta',
+    last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.last_name || '',
+    level: level,
+    target_race_name,
+    target_race_date,
+    target_race_distance,
+    target_race_modality,
+    target_finish_time,
+    baseline_training_hours,
+    current_ftp,
+    current_swim_pace,
+    current_run_pace,
+    virtual_garage,
+    swim_weekly_hours,
+    bike_weekly_hours,
+    run_weekly_hours,
+    target_swim_time,
+    target_bike_time,
+    target_run_time,
+    active_plan_id: selectedPlanId
+  };
+
+  let profileError = null;
+
+  if (existingProfile) {
+    const { error } = await supabase
+      .from('profiles')
+      .update(profilePayload)
+      .eq('id', user.id);
+    profileError = error;
+  } else {
+    const { error } = await supabase
+      .from('profiles')
+      .insert(profilePayload);
+    profileError = error;
+  }
 
   if (profileError) {
     console.error("Error actualizando objetivos de carrera en perfil:", profileError);
