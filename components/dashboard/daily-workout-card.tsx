@@ -324,14 +324,14 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
           </div>
           {session.sport_type !== 'descanso' ? (
             <Link href={`/dashboard/workout/${workout.id}`} className="hover:text-cyan-400 hover:underline transition-colors decoration-cyan-400">
-              <h3 className="text-xl font-semibold text-zinc-50 capitalize inline-flex items-center gap-1.5 group">
+              <h3 className="text-xl font-semibold text-zinc-50 inline-flex items-center gap-1.5 group">
                 {session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
                 <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-transform group-hover:translate-x-0.5" />
               </h3>
             </Link>
           ) : (
-            <h3 className="text-xl font-semibold text-zinc-50 capitalize">
-              Día de Descanso Activo
+            <h3 className="text-xl font-semibold text-zinc-50">
+              Día de descanso activo
             </h3>
           )}
         </div>
@@ -371,38 +371,63 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
             </motion.div>
           )}
 
-          {/* Navegación de Pestañas */}
-          <div className="flex flex-wrap gap-2 border-b border-zinc-800 pb-2">
-            <button
-              onClick={() => setActiveTab('warmup')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'warmup' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'}`}
-            >
-              <Sparkles className="w-3.5 h-3.5" /> Calentamiento (15')
-            </button>
+          {/* Navegación de Pestañas (Segmented Control Estilo Premium) */}
+          <div className="bg-zinc-950/60 p-1 rounded-xl border border-zinc-800/60 flex items-center gap-1 overflow-x-auto scrollbar-none">
             <button
               onClick={() => setActiveTab('main')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'main' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-300 border border-zinc-700/50 hover:text-zinc-100 hover:bg-zinc-800/50'}`}
+              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                activeTab === 'main' 
+                  ? 'bg-zinc-900 text-cyan-400 border border-zinc-800 shadow-sm font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+              }`}
             >
-              <Target className="w-3.5 h-3.5" /> Bloque Principal
+              <Target className="w-3.5 h-3.5" />
+              <span>Bloque Principal</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('warmup')}
+              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                activeTab === 'warmup' 
+                  ? 'bg-zinc-900 text-amber-400 border border-zinc-800 shadow-sm font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+              }`}
+            >
+              <Flame className="w-3.5 h-3.5" />
+              <span>Calentamiento</span>
             </button>
             <button
               onClick={() => setActiveTab('cooldown')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'cooldown' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'}`}
+              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                activeTab === 'cooldown' 
+                  ? 'bg-zinc-900 text-blue-400 border border-zinc-800 shadow-sm font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+              }`}
             >
-              <ShieldCheck className="w-3.5 h-3.5" /> Enfriamiento (10')
+              <Wind className="w-3.5 h-3.5" />
+              <span>Enfriamiento</span>
             </button>
             <button
               onClick={() => setActiveTab('gear')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'gear' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'}`}
+              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                activeTab === 'gear' 
+                  ? 'bg-zinc-900 text-purple-400 border border-zinc-800 shadow-sm font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+              }`}
             >
-              <Dumbbell className="w-3.5 h-3.5" /> Material
+              <Dumbbell className="w-3.5 h-3.5" />
+              <span>Material</span>
             </button>
             {telemetry && (
               <button
                 onClick={() => setActiveTab('telemetry')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${activeTab === 'telemetry' ? 'bg-green-500/10 text-green-400 border border-green-500/30 shadow-sm' : 'text-green-500/70 hover:text-green-400 hover:bg-green-500/5 animate-pulse'}`}
+                className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                  activeTab === 'telemetry' 
+                    ? 'bg-green-500/10 text-green-400 border border-green-500/20 shadow-sm font-bold' 
+                    : 'text-green-550 hover:text-green-400 hover:bg-green-500/5'
+                }`}
               >
-                <Watch className="w-3.5 h-3.5" /> Telemetría del Reloj
+                <Watch className="w-3.5 h-3.5" />
+                <span>Telemetría</span>
               </button>
             )}
           </div>
@@ -439,24 +464,31 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                               const sub1 = step.workoutSteps?.[0];
                               const sub2 = step.workoutSteps?.[1];
                               return (
-                                <div key={index} className="p-3 rounded-xl bg-purple-950/15 border border-purple-500/25 hover:border-purple-500/40 transition-colors flex flex-col justify-between group shadow-sm shadow-purple-950/5">
+                                <div key={index} className="p-3.5 rounded-xl bg-purple-500/[0.02] border border-purple-500/15 hover:border-purple-500/30 transition-all duration-200 flex flex-col justify-between group hover:shadow-lg">
                                   <div className="flex items-center justify-between">
                                     <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-                                      <RefreshCw className="w-3.5 h-3.5 text-purple-400 group-hover:rotate-180 transition-transform duration-500" /> 
+                                      <RefreshCw className="w-3.5 h-3.5 text-purple-400 group-hover:rotate-180 transition-transform duration-700" /> 
                                       Repetir {step.repeatCount}x
                                     </span>
                                   </div>
-                                  <div className="mt-2.5 space-y-1.5">
+                                  <div className="mt-2.5 space-y-2">
                                     {sub1 && (
-                                      <div className="text-xs font-semibold text-zinc-200 flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                                        {localFormatCondition(sub1.endCondition, sub1.endConditionValue)} a {localFormatTarget(sub1.targetType, sub1.targetValueOne, sub1.targetValueTwo)}
+                                      <div>
+                                        <div className="text-xs font-bold text-zinc-100 flex items-center gap-1.5">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
+                                          {localFormatCondition(sub1.endCondition, sub1.endConditionValue)}
+                                        </div>
+                                        <div className="text-[10px] text-zinc-400 ml-3 font-medium">
+                                          a {localFormatTarget(sub1.targetType, sub1.targetValueOne, sub1.targetValueTwo)}
+                                        </div>
                                       </div>
                                     )}
                                     {sub2 && (
-                                      <div className="text-[10px] font-medium text-purple-300/70 border-t border-purple-500/10 pt-1.5 flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                                        Recuperación: {localFormatCondition(sub2.endCondition, sub2.endConditionValue)}
+                                      <div className="border-t border-purple-500/10 pt-1.5">
+                                        <div className="text-[10px] font-bold text-purple-300 flex items-center gap-1.5">
+                                          <span className="w-1 h-1 rounded-full bg-purple-500" />
+                                          Recup: {localFormatCondition(sub2.endCondition, sub2.endConditionValue)}
+                                        </div>
                                       </div>
                                     )}
                                   </div>
@@ -467,10 +499,10 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                             const isWarmup = step.type === 'Warmup';
                             const isCooldown = step.type === 'Cooldown';
                             const stepColorClass = isWarmup 
-                              ? 'text-amber-400 bg-amber-950/15 border-amber-500/25 hover:border-amber-500/40 shadow-amber-950/5' 
+                              ? 'text-amber-400 bg-amber-500/[0.02] border-amber-500/15 hover:border-amber-500/30' 
                               : isCooldown 
-                              ? 'text-blue-400 bg-blue-950/15 border-blue-500/25 hover:border-blue-500/40 shadow-blue-950/5' 
-                              : 'text-cyan-400 bg-cyan-950/15 border-cyan-500/25 hover:border-cyan-500/40 shadow-cyan-950/5';
+                              ? 'text-blue-400 bg-blue-500/[0.02] border-blue-500/15 hover:border-blue-500/30' 
+                              : 'text-cyan-400 bg-cyan-500/[0.02] border-cyan-500/15 hover:border-cyan-500/30';
 
                             const StepIcon = isWarmup 
                               ? Flame 
@@ -479,15 +511,20 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                               : Target;
 
                             return (
-                              <div key={index} className={`p-3 rounded-xl border transition-colors flex flex-col justify-between ${stepColorClass} shadow-sm`}>
+                              <div key={index} className={`p-3.5 rounded-xl border transition-all duration-200 flex flex-col justify-between ${stepColorClass} hover:shadow-lg`}>
                                 <div className="flex items-center justify-between">
                                   <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5">
                                     <StepIcon className="w-3.5 h-3.5" />
                                     {isWarmup ? 'Calentamiento' : isCooldown ? 'Enfriamiento' : 'Intervalo'}
                                   </span>
                                 </div>
-                                <div className="text-xs font-semibold text-zinc-200 mt-2.5">
-                                  {localFormatCondition(step.endCondition, step.endConditionValue)} • {localFormatTarget(step.targetType, step.targetValueOne, step.targetValueTwo)}
+                                <div className="mt-2.5">
+                                  <div className="text-sm font-bold text-zinc-100">
+                                    {localFormatCondition(step.endCondition, step.endConditionValue)}
+                                  </div>
+                                  <div className="text-[11px] text-zinc-400 mt-0.5 font-medium">
+                                    Objetivo: {localFormatTarget(step.targetType, step.targetValueOne, step.targetValueTwo)}
+                                  </div>
                                 </div>
                               </div>
                             );
@@ -498,32 +535,42 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                   </div>
                 )}
                 {activeTab === 'warmup' && (
-                  <div>
-                    <p className="font-semibold text-amber-400 mb-2">🔥 Activación y Calentamiento:</p>
-                    <p>{parsed.warmup}</p>
+                  <div className="w-full">
+                    <p className="font-semibold text-amber-400 mb-1.5 flex items-center gap-1.5 text-xs tracking-wide uppercase">
+                      <Flame className="w-4 h-4 text-amber-400" /> Activación y Calentamiento:
+                    </p>
+                    <p className="text-zinc-300 text-sm leading-relaxed bg-amber-500/[0.02] border border-amber-500/15 p-3.5 rounded-xl">{parsed.warmup}</p>
                   </div>
                 )}
                 {activeTab === 'cooldown' && (
-                  <div>
-                    <p className="font-semibold text-green-400 mb-2">🛡️ Vuelta a la Calma y Recuperación:</p>
-                    <p>{parsed.cooldown}</p>
+                  <div className="w-full">
+                    <p className="font-semibold text-blue-400 mb-1.5 flex items-center gap-1.5 text-xs tracking-wide uppercase">
+                      <Wind className="w-4 h-4 text-blue-400" /> Vuelta a la Calma y Recuperación:
+                    </p>
+                    <p className="text-zinc-300 text-sm leading-relaxed bg-blue-500/[0.02] border border-blue-500/15 p-3.5 rounded-xl">{parsed.cooldown}</p>
                   </div>
                 )}
                 {activeTab === 'gear' && (
-                  <div className="space-y-3">
-                    <p className="font-semibold text-purple-400 mb-1">🎒 Equipamiento Recomendado:</p>
-                    <p>{parsed.gear}</p>
-                    <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between flex-wrap gap-2">
-                      <span className="text-xs text-zinc-400 flex items-center gap-1.5">
-                        <ShoppingBag className="w-3.5 h-3.5 text-cyan-400" />
-                        ¿Te falta material para esta sesión?
-                      </span>
-                      <Link href="/marketplace">
-                        <span className="px-3 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-xs font-bold transition flex items-center gap-1 cursor-pointer shadow-sm">
-                          💡 Buscar chollos locales en Marketplace ➔
-                        </span>
-                      </Link>
+                  <div className="space-y-4 w-full">
+                    <div>
+                      <p className="font-semibold text-purple-400 mb-1.5 flex items-center gap-1.5 text-xs tracking-wide uppercase">
+                        <Dumbbell className="w-4 h-4 text-purple-400" /> Equipamiento Recomendado:
+                      </p>
+                      <p className="text-zinc-300 text-sm leading-relaxed bg-purple-500/[0.02] border border-purple-500/15 p-3.5 rounded-xl">{parsed.gear}</p>
                     </div>
+                    {missingGear.length > 0 && (
+                      <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between flex-wrap gap-3">
+                        <span className="text-xs text-zinc-400 flex items-center gap-1.5">
+                          <ShoppingBag className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                          ¿Te falta material para esta sesión?
+                        </span>
+                        <Link href={`/marketplace?category=accesorios&search=${encodeURIComponent(missingGear[0])}`}>
+                          <span className="px-3.5 py-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm">
+                            <Sparkles className="w-3.5 h-3.5" /> Buscar Chollos IA ➔
+                          </span>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 )}
                 {activeTab === 'telemetry' && telemetry && (
@@ -642,49 +689,102 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
       </AnimatePresence>
 
       {/* Botones de acción principales limpios */}
-      <div className="pt-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center relative z-10">
+      <div className="pt-4 flex flex-col gap-3 relative z-10">
         {session.sport_type !== 'descanso' ? (
-          <div className="flex-1 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center w-full">
+          <div className="w-full space-y-3">
+            {/* PENDING STATE */}
             {!isCompleted && !isMissed && (
-              <>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <div className="flex gap-2 flex-1 sm:flex-[2]">
+                  <AnimatedButton 
+                    variant="primary" 
+                    className="flex-1 justify-center py-6 text-sm font-semibold shadow-lg shadow-cyan-500/10"
+                    onClick={handleToggle}
+                    disabled={loading}
+                  >
+                    <Circle className="w-5 h-5 text-zinc-400" />
+                    <span>Completar</span>
+                  </AnimatedButton>
+
+                  <AnimatedButton
+                    variant="ghost"
+                    className="w-12 h-12 shrink-0 justify-center p-0 border border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 flex items-center"
+                    onClick={handleToggleMissed}
+                    disabled={loading}
+                    title="Saltar sesión"
+                  >
+                    <XCircle className="w-5 h-5 text-zinc-500" />
+                  </AnimatedButton>
+                </div>
+
+                <AnimatedButton
+                  variant="ghost"
+                  className="flex-1 justify-center py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-semibold shadow-lg shadow-orange-500/10 whitespace-nowrap"
+                  onClick={() => {
+                    setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
+                    window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
+                    setTimeout(() => setToastMsg(null), 6000);
+                  }}
+                >
+                  <Download className="w-4 h-4 text-orange-400 animate-bounce" />
+                  <span>Enviar al Reloj</span>
+                </AnimatedButton>
+
+                {session.sport_type === 'fuerza' && (
+                  <AnimatedButton
+                    variant="ghost"
+                    className="flex-1 justify-center py-6 border border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 flex items-center justify-center gap-2 font-semibold shadow-[0_0_15px_rgba(168,85,247,0.15)] whitespace-nowrap"
+                    onClick={() => setIsGymModeOpen(true)}
+                  >
+                    <Dumbbell className="w-4 h-4 text-purple-400" />
+                    <span>Iniciar Modo Gym</span>
+                  </AnimatedButton>
+                )}
+              </div>
+            )}
+
+            {/* COMPLETED STATE */}
+            {isCompleted && (
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <AnimatedButton 
-                  variant="primary" 
-                  className="flex-[3] justify-center py-6 text-sm font-semibold shadow-lg shadow-cyan-500/10"
+                  variant="secondary" 
+                  className="flex-1 justify-center py-6 text-sm font-semibold border-green-500/20 bg-green-950/5 hover:bg-green-950/10"
                   onClick={handleToggle}
                   disabled={loading}
                 >
-                  <Circle className="w-5 h-5 text-zinc-400" />
-                  <span>Marcar como Completado</span>
+                  <CheckCircle2 className="w-5 h-5 text-green-400" />
+                  <span className="text-zinc-200">✓ Completado</span>
                 </AnimatedButton>
 
                 <AnimatedButton
                   variant="ghost"
-                  className="flex-[1] justify-center py-6 border border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 flex items-center gap-2"
-                  onClick={handleToggleMissed}
-                  disabled={loading}
+                  className="flex-1 justify-center py-6 border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50 flex items-center justify-center gap-2"
+                  onClick={() => setIsFeedbackOpen(true)}
                 >
-                  <XCircle className="w-5 h-5 text-zinc-500" />
-                  <span>Saltar</span>
+                  <MessageSquarePlus className="w-5 h-5" />
+                  <span>Evaluar Sesión</span>
                 </AnimatedButton>
-              </>
+
+                <AnimatedButton
+                  variant="ghost"
+                  className="flex-1 justify-center py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-semibold shadow-lg shadow-orange-500/10 whitespace-nowrap"
+                  onClick={() => {
+                    setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
+                    window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
+                    setTimeout(() => setToastMsg(null), 6000);
+                  }}
+                >
+                  <Download className="w-4 h-4 text-orange-400 animate-bounce" />
+                  <span>Enviar al Reloj</span>
+                </AnimatedButton>
+              </div>
             )}
 
-            {isCompleted && (
-              <AnimatedButton 
-                variant="secondary" 
-                className="flex-1 justify-center py-6 text-sm font-semibold"
-                onClick={handleToggle}
-                disabled={loading}
-              >
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                <span className="text-zinc-200">✓ Entrenamiento Completado (Sincronizado)</span>
-              </AnimatedButton>
-            )}
-
+            {/* MISSED STATE */}
             {isMissed && (
               <AnimatedButton 
                 variant="secondary" 
-                className="flex-1 justify-center py-6 text-sm font-semibold border-red-500/20 bg-red-950/10 hover:bg-red-950/20"
+                className="w-full justify-center py-6 text-sm font-semibold border-red-500/20 bg-red-950/10 hover:bg-red-950/20"
                 onClick={handleToggleMissed}
                 disabled={loading}
               >
@@ -692,46 +792,9 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                 <span className="text-red-400">✓ Entrenamiento Saltado (Clic para Restaurar)</span>
               </AnimatedButton>
             )}
-
-            {!isMissed && (
-              <AnimatedButton
-                variant="ghost"
-                className="py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-bold shadow-lg shadow-orange-500/10"
-                onClick={() => {
-                  setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
-                  window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
-                  setTimeout(() => setToastMsg(null), 6000);
-                }}
-              >
-                <Download className="w-5 h-5 text-orange-400 animate-bounce" />
-                <span>Enviar al Reloj (.TCX)</span>
-              </AnimatedButton>
-            )}
-
-            {!isCompleted && !isMissed && session.sport_type === 'fuerza' && (
-              <AnimatedButton
-                variant="ghost"
-                className="flex-1 justify-center py-6 border border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 flex items-center gap-2 font-bold shadow-[0_0_15px_rgba(168,85,247,0.15)]"
-                onClick={() => setIsGymModeOpen(true)}
-              >
-                <Dumbbell className="w-5 h-5 text-purple-400 animate-pulse" />
-                <span>Iniciar Modo Gym</span>
-              </AnimatedButton>
-            )}
-
-            {isCompleted && (
-              <AnimatedButton
-                variant="ghost"
-                className="py-6 border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50 flex items-center justify-center gap-2"
-                onClick={() => setIsFeedbackOpen(true)}
-              >
-                <MessageSquarePlus className="w-5 h-5" />
-                <span>Evaluar Sesión</span>
-              </AnimatedButton>
-            )}
           </div>
         ) : (
-          <div className="flex-1 p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-center text-xs text-zinc-500 uppercase tracking-widest font-semibold">
+          <div className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-center text-xs text-zinc-500 uppercase tracking-widest font-semibold">
             ✓ Descanso Programado
           </div>
         )}

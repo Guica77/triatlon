@@ -235,12 +235,14 @@ export default async function DashboardPage() {
               athleteLevel={profile.level}
               progressPercent={progressPercent}
             />
-             <DashboardViewTabs 
+          </div>
+        </section>
+
+        <DashboardViewTabs 
           initialWorkouts={workouts || []} 
           isConnected={isConnected} 
           profile={profile} 
-        />         </div>
-        </section>
+        />
 
         {/* Historial de Actividades Recientes de Strava (Sólo si está conectado) */}
         {isConnected && (
