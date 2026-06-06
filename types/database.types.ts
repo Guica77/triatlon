@@ -39,6 +39,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_athletes: {
+        Row: {
+          athlete_id: string
+          coach_id: string
+          created_at: string
+          id: string
+          status: string | null
+        }
+        Insert: {
+          athlete_id: string
+          coach_id: string
+          created_at?: string
+          id?: string
+          status?: string | null
+        }
+        Update: {
+          athlete_id?: string
+          coach_id?: string
+          created_at?: string
+          id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_athletes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_athletes_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_feedback: {
         Row: {
           athlete_id: string | null
@@ -171,6 +249,8 @@ export type Database = {
           target_bike_time: string | null
           target_run_time: string | null
           subscription_status: string | null
+          role: string | null
+          email: string | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -207,6 +287,8 @@ export type Database = {
           target_bike_time?: string | null
           target_run_time?: string | null
           subscription_status?: string | null
+          role?: string | null
+          email?: string | null
         }
         Update: {
           active_plan_id?: string | null
@@ -243,6 +325,8 @@ export type Database = {
           target_bike_time?: string | null
           target_run_time?: string | null
           subscription_status?: string | null
+          role?: string | null
+          email?: string | null
         }
         Relationships: [
           {

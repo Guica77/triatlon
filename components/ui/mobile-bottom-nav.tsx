@@ -8,13 +8,41 @@ import { motion } from 'framer-motion';
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const [role, setRole] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    async function fetchRole() {
+      try {
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+          if (profile && profile.role) {
+            setRole(profile.role);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching role in bottom nav:', err);
+      }
+    }
+    fetchRole();
+  }, []);
 
   // Ocultar en login y callback
   if (pathname.includes('/login') || pathname.includes('/auth')) {
     return null;
   }
 
-  const navItems = [
+  const navItems = role === 'coach' ? [
+    { href: '/coach/dashboard', label: 'Roster', icon: Home },
+    { href: '/coach/chat', label: 'Mensajes', icon: MessageSquare },
+    { href: '/settings', label: 'Ajustes', icon: Settings },
+  ] : [
     { href: '/dashboard', label: 'Inicio', icon: Home },
     { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
     { href: '/feedback', label: 'Feedback', icon: MessageSquare },

@@ -14,6 +14,7 @@ interface DashboardViewTabsProps {
   initialWorkouts: any[];
   isConnected: boolean;
   profile: any;
+  readOnly?: boolean;
 }
 
 const sportColors: Record<string, string> = {
@@ -25,7 +26,7 @@ const sportColors: Record<string, string> = {
   descanso: 'bg-zinc-650',
 };
 
-export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile }: DashboardViewTabsProps) {
+export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, readOnly = false }: DashboardViewTabsProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<'semana' | 'mes'>('semana');
   const [isManualModalOpen, setIsManualModalOpen] = React.useState(false);
@@ -205,14 +206,16 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile }
             </a>
           )}
           
-          <AnimatedButton
-            variant="primary"
-            onClick={() => openModalForDate(todayStr)}
-            className="!bg-cyan-500 hover:!bg-cyan-400 !text-black text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-cyan-500/10 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Añadir Sesión Manual</span>
-          </AnimatedButton>
+          {!readOnly && (
+            <AnimatedButton
+              variant="primary"
+              onClick={() => openModalForDate(todayStr)}
+              className="!bg-cyan-500 hover:!bg-cyan-400 !text-black text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-cyan-500/10 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Añadir Sesión Manual</span>
+            </AnimatedButton>
+          )}
         </div>
       </div>
 
@@ -257,6 +260,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile }
                         initialIsConnected={isConnected}
                         virtualGarage={profile?.virtual_garage || []}
                         athleteLevel={profile?.level}
+                        readOnly={readOnly}
                       />
                     </div>
                   );
@@ -318,16 +322,36 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile }
                   // Find sessions for this day
                   const daySessions = initialWorkouts.filter(w => w.scheduled_date === dateStr);
 
+                  // Calculate compliance color like TrainingPeaks
+                  let complianceClass = '';
+                  if (daySessions.length > 0) {
+                    const hasCompleted = daySessions.some(w => w.status === 'completed');
+                    const hasMissed = daySessions.some(w => w.status === 'missed');
+                    const hasPending = daySessions.some(w => w.status === 'pending');
+                    
+                    if (daySessions.every(w => w.status === 'completed')) {
+                      complianceClass = 'bg-emerald-500/5 border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/10';
+                    } else if (hasMissed) {
+                      complianceClass = 'bg-red-500/5 border-red-500/25 text-red-400 hover:bg-red-500/10';
+                    } else if (hasPending && daySessions.some(w => w.scheduled_date <= todayStr)) {
+                      complianceClass = 'bg-amber-500/5 border-amber-500/25 text-amber-400 hover:bg-amber-500/10';
+                    } else {
+                      complianceClass = 'bg-zinc-950/25 border-zinc-850 text-zinc-350 hover:bg-zinc-900/20';
+                    }
+                  } else {
+                    complianceClass = 'bg-zinc-950/10 border-zinc-900/60 text-zinc-500 hover:bg-zinc-900/10';
+                  }
+
                   return (
                     <button
                       key={idx}
                       onClick={() => setSelectedDateStr(dateStr)}
                       className={`relative min-h-[56px] sm:min-h-[72px] p-1.5 rounded-xl border flex flex-col justify-between items-start transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-zinc-900 border-cyan-500/50 shadow-md shadow-cyan-500/5 ring-1 ring-cyan-500/30'
+                          ? 'bg-zinc-900 border-cyan-500/55 shadow-md shadow-cyan-500/5 ring-1 ring-cyan-500/30'
                           : isToday
-                          ? 'bg-zinc-950/60 border-zinc-700 shadow-sm'
-                          : 'bg-zinc-950/20 border-zinc-900 hover:border-zinc-800 hover:bg-zinc-900/10'
+                          ? 'bg-zinc-950/60 border-zinc-705 shadow-sm'
+                          : complianceClass
                       } ${!isCurrentMonth ? 'opacity-35' : ''}`}
                     >
                       {/* Day Number */}
@@ -363,7 +387,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile }
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
                   Sesiones del {new Date(selectedDateStr + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
-                {selectedDayWorkouts.length === 0 && (
+                {selectedDayWorkouts.length === 0 && !readOnly && (
                   <button
                     onClick={() => openModalForDate(selectedDateStr)}
                     className="text-[11px] font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
@@ -382,6 +406,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile }
                     initialIsConnected={isConnected}
                     virtualGarage={profile?.virtual_garage || []}
                     athleteLevel={profile?.level}
+                    readOnly={readOnly}
                   />
                 ))
               ) : (
@@ -397,7 +422,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile }
 
       {/* Manual Workout Logger Modal */}
       <AnimatePresence>
-        {isManualModalOpen && (
+        {isManualModalOpen && !readOnly && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             
             {/* Overlay */}

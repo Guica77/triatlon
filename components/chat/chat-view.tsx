@@ -1,0 +1,358 @@
+'use client'
+
+import * as React from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  Send, 
+  Search, 
+  MessageSquare, 
+  User, 
+  ChevronRight, 
+  Clock, 
+  ArrowLeft,
+  Sparkles
+} from 'lucide-react'
+import Link from 'next/link'
+import { AnimatedButton } from '@/components/ui/animated-button'
+import { ChatParticipant, ChatMessageItem, sendMessage, getMessages } from '@/app/chat/actions'
+
+interface ChatViewProps {
+  initialParticipants: ChatParticipant[]
+  currentUserRole: 'coach' | 'athlete'
+  currentUserId: string
+  preselectedParticipantId?: string | null
+}
+
+export function ChatView({ 
+  initialParticipants, 
+  currentUserRole, 
+  currentUserId,
+  preselectedParticipantId 
+}: ChatViewProps) {
+  const [participants, setParticipants] = React.useState<ChatParticipant[]>(initialParticipants)
+  const [selectedPart, setSelectedPart] = React.useState<ChatParticipant | null>(null)
+  const [messages, setMessages] = React.useState<ChatMessageItem[]>([])
+  const [newMessageText, setNewMessageText] = React.useState('')
+  const [loadingMessages, setLoadingMessages] = React.useState(false)
+  const [searchQuery, setSearchQuery] = React.useState('')
+  const [isTyping, setIsTyping] = React.useState(false)
+
+  const messagesEndRef = React.useRef<HTMLDivElement>(null)
+
+  // Filtered sidebar items
+  const filteredParticipants = participants.filter(p => {
+    const name = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase()
+    return name.includes(searchQuery.toLowerCase())
+  })
+
+  // Select participant and fetch history
+  const handleSelectParticipant = async (part: ChatParticipant) => {
+    setSelectedPart(part)
+    setLoadingMessages(true)
+    setMessages([])
+    
+    try {
+      const res = await getMessages(part.id)
+      if (res.data) {
+        setMessages(res.data)
+      }
+    } catch (err) {
+      console.error('Error fetching chat messages:', err)
+    } finally {
+      setLoadingMessages(false)
+    }
+  }
+
+  // Pre-select participant if passed in props (e.g. from Roster Grid quick action)
+  React.useEffect(() => {
+    if (preselectedParticipantId && initialParticipants.length > 0) {
+      const found = initialParticipants.find(p => p.id === preselectedParticipantId)
+      if (found) {
+        handleSelectParticipant(found)
+      }
+    } else if (initialParticipants.length > 0 && currentUserRole === 'athlete') {
+      // For athletes, preselect their only coach automatically
+      handleSelectParticipant(initialParticipants[0])
+    }
+  }, [preselectedParticipantId, initialParticipants]);
+
+  // Scroll to bottom helper
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  React.useEffect(() => {
+    scrollToBottom()
+  }, [messages, isTyping])
+
+  // Submit message handler
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newMessageText.trim() || !selectedPart) return
+
+    const messageText = newMessageText.trim()
+    setNewMessageText('')
+
+    // 1. Optimistic update
+    const tempId = `temp-${Date.now()}`
+    const optimisticMsg: ChatMessageItem = {
+      id: tempId,
+      sender_id: currentUserId,
+      receiver_id: selectedPart.id,
+      message: messageText,
+      created_at: new Date().toISOString()
+    }
+
+    setMessages(prev => [...prev, optimisticMsg])
+
+    try {
+      const res = await sendMessage(selectedPart.id, messageText)
+      if (res.error) {
+        // Remove optimistic message on error
+        setMessages(prev => prev.filter(m => m.id !== tempId))
+        alert(res.error)
+      } else if (res.data) {
+        // Swap temp id for real DB row
+        setMessages(prev => prev.map(m => m.id === tempId ? res.data! : m))
+
+        // Trigger simulated reply for premium feeling in demo mode
+        simulateCoachOrAthleteReply(messageText)
+      }
+    } catch (err) {
+      console.error(err)
+      setMessages(prev => prev.filter(m => m.id !== tempId))
+    }
+  }
+
+  // Simulated AI/Demonstration reply
+  const simulateCoachOrAthleteReply = (athleteText: string) => {
+    setIsTyping(true)
+
+    setTimeout(() => {
+      setIsTyping(false)
+
+      let reply = ''
+      if (currentUserRole === 'coach') {
+        // Athlete replying to coach
+        const lower = athleteText.toLowerCase()
+        if (lower.includes('hola') || lower.includes('buenos')) {
+          reply = '¡Hola Entrenador! He completado la sesión de natación de esta mañana. Me he sentido fuerte en las series de Z3.'
+        } else if (lower.includes('hrv') || lower.includes('fatiga') || lower.includes('cansado')) {
+          reply = 'Sí, hoy me he levantado un poco cansado y con el HRV algo bajo. Intentaré hacer la sesión de rodillo muy suave como me indicas.'
+        } else if (lower.includes('plan') || lower.includes('entrenamiento')) {
+          reply = '¡Plan recibido! Muchas gracias por adaptarlo esta semana. Me viene de perlas para compaginarlo con el trabajo.'
+        } else {
+          reply = 'Entendido Coach. Seguiré las indicaciones al pie de la letra y te registro el RPE en cuanto acabe.'
+        }
+      } else {
+        // Coach replying to athlete
+        const lower = athleteText.toLowerCase()
+        if (lower.includes('hola') || lower.includes('duda')) {
+          reply = '¡Hola! He revisado tu sesión de ayer. Muy buena constancia. ¿Qué tal te sentiste en las series finales? Ajustemos si hace falta.'
+        } else if (lower.includes('cansado') || lower.includes('dolor') || lower.includes('fatiga')) {
+          reply = 'He visto tus biometrias de hoy y la fatiga está alta. Vamos a recortar la sesión de carrera a la mitad o haz rodaje regenerativo en Z1.'
+        } else {
+          reply = 'Excelente entrenamiento. Sigue controlando la hidratación y recuerda registrar el feedback de RPE para ajustar la carga de la semana.'
+        }
+      }
+
+      const replyMsg: ChatMessageItem = {
+        id: `sim-${Date.now()}`,
+        sender_id: selectedPart!.id,
+        receiver_id: currentUserId,
+        message: reply,
+        created_at: new Date().toISOString()
+      }
+
+      setMessages(prev => [...prev, replyMsg])
+    }, 2000)
+  }
+
+  return (
+    <div className="flex bg-[#121214] border border-zinc-850 rounded-2xl overflow-hidden h-[calc(100vh-180px)] min-h-[500px] shadow-2xl">
+      
+      {/* Left Sidebar (Only visible/relevant for coaches with multiple athletes) */}
+      {(currentUserRole === 'coach' || participants.length > 1) ? (
+        <div className="w-80 border-r border-zinc-850 flex flex-col shrink-0 bg-zinc-950/20">
+          
+          {/* Search bar */}
+          <div className="p-4 border-b border-zinc-850 flex items-center gap-2 bg-zinc-950/40">
+            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-xl w-full">
+              <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar conversación..."
+                className="bg-transparent border-none text-xs text-zinc-200 outline-none w-full"
+              />
+            </div>
+          </div>
+
+          {/* List */}
+          <div className="flex-1 overflow-y-auto divide-y divide-zinc-900/60 scrollbar-none">
+            {filteredParticipants.length === 0 ? (
+              <div className="p-6 text-center text-xs text-zinc-650 font-medium">
+                No hay contactos disponibles
+              </div>
+            ) : (
+              filteredParticipants.map(p => {
+                const isSelected = selectedPart?.id === p.id
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => handleSelectParticipant(p)}
+                    className={`w-full p-4 flex items-center justify-between text-left transition-all ${
+                      isSelected 
+                        ? 'bg-zinc-900/90 border-l-2 border-cyan-500' 
+                        : 'hover:bg-zinc-900/20'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-750 flex items-center justify-center font-bold text-xs text-zinc-300">
+                        {(p.first_name || 'T')[0].toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs font-bold text-white block truncate">
+                          {p.first_name || 'Triatleta'} {p.last_name || ''}
+                        </span>
+                        <span className="text-[10px] text-zinc-500 block truncate">
+                          {p.role === 'coach' ? 'Entrenador Personal' : 'Atleta de Roster'}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                  </button>
+                )
+              })
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {/* Main Chat Conversation Viewport */}
+      <div className="flex-1 flex flex-col justify-between bg-zinc-900/10">
+        {selectedPart ? (
+          <>
+            {/* Active chat header */}
+            <div className="px-6 py-4 border-b border-zinc-850 bg-zinc-950/30 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-600 to-indigo-600 border border-zinc-700 flex items-center justify-center font-bold text-xs text-white">
+                  {(selectedPart.first_name || 'T')[0].toUpperCase()}
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-white">
+                    {selectedPart.first_name || 'Triatleta'} {selectedPart.last_name || ''}
+                  </h3>
+                  <p className="text-[9px] text-zinc-500 flex items-center gap-1 mt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                    Chat Activo
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/5 border border-orange-500/15 text-[9px] text-orange-400 font-bold uppercase tracking-wider">
+                <Sparkles className="w-3 h-3 text-orange-400 animate-pulse" />
+                Modo Simulación Activo
+              </div>
+            </div>
+
+            {/* Messages body list */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-none">
+              {loadingMessages ? (
+                <div className="h-full flex items-center justify-center text-xs text-zinc-500">
+                  Cargando conversación...
+                </div>
+              ) : messages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-zinc-500 space-y-2">
+                  <MessageSquare className="w-8 h-8 text-zinc-650" />
+                  <p className="text-xs">No hay mensajes previos en esta conversación.</p>
+                  <p className="text-[10px] text-zinc-600">¡Escribe tu primer mensaje a continuación!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {messages.map(m => {
+                    const isOwn = m.sender_id === currentUserId
+                    return (
+                      <div 
+                        key={m.id}
+                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className={`max-w-[70%] p-3.5 rounded-2xl text-xs leading-relaxed shadow-md ${
+                            isOwn 
+                              ? 'bg-cyan-500 text-black font-semibold rounded-tr-none' 
+                              : 'bg-zinc-800 text-zinc-200 rounded-tl-none'
+                          }`}
+                        >
+                          <p>{m.message}</p>
+                          <span className={`text-[8px] mt-1.5 block text-right font-medium ${
+                            isOwn ? 'text-black/60' : 'text-zinc-500'
+                          }`}>
+                            {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </motion.div>
+                      </div>
+                    )
+                  })}
+
+                  {/* Typing Indicator */}
+                  {isTyping && (
+                    <div className="flex justify-start">
+                      <div className="bg-zinc-800 text-zinc-400 p-3.5 rounded-2xl rounded-tl-none flex items-center gap-1.5 shadow-md">
+                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                    </div>
+                  )}
+
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
+
+            {/* Input form */}
+            <form 
+              onSubmit={handleSendMessage}
+              className="p-4 border-t border-zinc-850 bg-zinc-950/30 flex items-center gap-2 shrink-0"
+            >
+              <input
+                type="text"
+                value={newMessageText}
+                onChange={(e) => setNewMessageText(e.target.value)}
+                placeholder="Escribe tu mensaje aquí..."
+                className="bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-200 outline-none w-full transition-colors"
+              />
+              <AnimatedButton
+                type="submit"
+                variant="primary"
+                size="icon"
+                className="w-10 h-10 shrink-0 !bg-cyan-500 hover:!bg-cyan-400 !text-black rounded-xl shadow-lg shadow-cyan-500/10 flex items-center justify-center"
+              >
+                <Send className="w-4 h-4 text-black" />
+              </AnimatedButton>
+            </form>
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-zinc-500 space-y-3 p-6 text-center">
+            <div className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500">
+              <MessageSquare className="w-6 h-6 text-zinc-400" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-zinc-300 font-bold text-sm">Mensajería Entrenador ↔ Atleta</h3>
+              <p className="text-xs text-zinc-500 max-w-sm">
+                {currentUserRole === 'coach' 
+                  ? 'Selecciona un atleta del roster de la izquierda para ver su historial y comenzar una conversación.' 
+                  : 'Aún no dispones de un entrenador asignado. Pide a tu entrenador que te añada introduciendo tu correo en su roster.'}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+    </div>
+  )
+}

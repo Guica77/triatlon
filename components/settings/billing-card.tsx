@@ -20,78 +20,143 @@ export function BillingCard({ status }: BillingCardProps) {
   const [paymentSuccess, setPaymentSuccess] = React.useState(false);
 
   const isPro = status === 'pro';
+  const isCoach = status === 'coach';
+
+  const [activeTab, setActiveTab] = React.useState<'pro' | 'coach'>(isCoach ? 'coach' : 'pro');
+
+  React.useEffect(() => {
+    if (isCoach) {
+      setActiveTab('coach');
+    } else if (isPro) {
+      setActiveTab('pro');
+    }
+  }, [isPro, isCoach]);
+
+  const currentPlanActive = (activeTab === 'pro' && isPro) || (activeTab === 'coach' && isCoach);
 
   const handleButtonClick = () => {
-    if (isPro) {
+    if (currentPlanActive) {
       setShowCancelModal(true);
     } else {
       setShowPayModal(true);
     }
   };
 
+  const planPrice = activeTab === 'pro' ? '2,99€' : '19,00€';
+  const planName = activeTab === 'pro' ? 'Plan Atleta Pro' : 'Plan Entrenador Pro';
+  const planDescription = activeTab === 'pro'
+    ? 'Tienes activadas todas las funciones de periodización avanzada, análisis de fatiga PMC y exportación estructurada de TCX ilimitada.'
+    : 'Roster de atletas ilimitado, tarifa plana sin cobros por atleta, panel de control con alertas avanzadas (HRV/TSS), asignación de planes y chat.';
+
+  const benefitsList = activeTab === 'pro' ? [
+    'Semanas ilimitadas de entrenamiento',
+    'Zonas fisiológicas dinámicas auto-adaptadas',
+    'Métricas de carga, fatiga y estrés (PMC)',
+    'Conexión total con Garmin y Strava Webhooks',
+    'Exportación estructurada en TCX para el reloj'
+  ] : [
+    'Roster y gestión de atletas sin límites (B2B)',
+    'Tarifa plana de 19€/mes (sin coste extra por atleta)',
+    'Panel de control con semáforo de alertas (HRV/TSS)',
+    'Asignación remota e instantánea de planes de entrenamiento',
+    'Soporte prioritario y mensajería en español/multilingüe'
+  ];
+
   return (
     <>
       <div className="p-6 rounded-2xl bg-[#18181b] border border-zinc-800 shadow-xl relative h-full flex flex-col justify-between group overflow-hidden">
         {/* Decorative ambient background */}
-        {isPro && (
+        {status && status !== 'free' && (
           <div className="absolute -top-12 -right-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
         )}
 
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                isPro ? 'bg-emerald-500/10' : 'bg-zinc-900 border border-zinc-800'
-              }`}>
-                <CreditCard className={`w-4 h-4 ${isPro ? 'text-emerald-400' : 'text-zinc-400'}`} />
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  status && status !== 'free' ? 'bg-emerald-500/10' : 'bg-zinc-900 border border-zinc-800'
+                }`}>
+                  <CreditCard className={`w-4 h-4 ${status && status !== 'free' ? 'text-emerald-400' : 'text-zinc-400'}`} />
+                </div>
+                <h3 className="text-base font-bold text-zinc-100 font-sans">Planes y Facturación</h3>
               </div>
-              <h3 className="text-base font-bold text-zinc-100 font-sans">Suscripción y Pagos</h3>
+              
+              <span className={`text-[10px] uppercase tracking-widest font-black px-2.5 py-1 rounded-full ${
+                status && status !== 'free'
+                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-emerald-500/5 shadow-md' 
+                  : 'bg-zinc-900 text-zinc-500 border border-zinc-800/80'
+              }`}>
+                {isCoach ? 'Entrenador' : isPro ? 'Atleta Pro' : 'Plan Free'}
+              </span>
             </div>
-            
-            <span className={`text-[10px] uppercase tracking-widest font-black px-2.5 py-1 rounded-full ${
-              isPro 
-                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-emerald-500/5 shadow-md' 
-                : 'bg-zinc-900 text-zinc-500 border border-zinc-800/80'
-            }`}>
-              {isPro ? 'Plan Pro' : 'Plan Free'}
-            </span>
+
+            {/* Plan Tabs Selection (only allow toggling if not fully subscribed to both) */}
+            {(!isPro && !isCoach) && (
+              <div className="grid grid-cols-2 gap-1 p-1 bg-zinc-950 rounded-xl border border-zinc-800">
+                <button
+                  onClick={() => setActiveTab('pro')}
+                  className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    activeTab === 'pro' 
+                      ? 'bg-zinc-800 text-white shadow-sm' 
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  Atleta
+                </button>
+                <button
+                  onClick={() => setActiveTab('coach')}
+                  className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    activeTab === 'coach' 
+                      ? 'bg-zinc-800 text-white shadow-sm' 
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                >
+                  Entrenador
+                </button>
+              </div>
+            )}
+
+            {isPro && (
+              <div className="flex justify-between items-center bg-zinc-900/50 border border-zinc-800/60 p-2.5 rounded-xl">
+                <span className="text-[11px] text-zinc-400 font-medium">¿Eres entrenador?</span>
+                <button
+                  onClick={() => setActiveTab('coach')}
+                  className="px-2.5 py-1 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 rounded-lg text-[10px] font-bold border border-cyan-500/20 transition-colors"
+                >
+                  Subir a Entrenador
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Plan price / details */}
           <div className="space-y-1">
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-white">{isPro ? '9,99€' : '0,00€'}</span>
+              <span className="text-3xl font-black text-white">{planPrice}</span>
               <span className="text-xs text-zinc-500 font-medium">/ mes</span>
             </div>
-            {isPro && (
+            {currentPlanActive && (
               <p className="text-[9px] text-emerald-400 font-extrabold tracking-wider uppercase bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md inline-block">
                 Próxima renovación: 26 de Junio de 2026
               </p>
             )}
             <p className="text-xs text-zinc-400 leading-relaxed pt-1">
-              {isPro 
-                ? 'Tienes activadas todas las funciones de periodización avanzada, análisis de fatiga PMC y exportación estructurada de TCX ilimitada.'
-                : 'Estás en la cuenta básica. Actualiza a Pro para desbloquear analíticas avanzadas, planes adaptados de forma ilimitada y sincronización en tiempo real.'}
+              {planDescription}
             </p>
           </div>
 
           {/* Benefits list */}
           <div className="border-t border-zinc-800/80 pt-4 space-y-2.5">
             <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold block mb-1">
-              {isPro ? 'Beneficios Activos' : 'Ventajas del Plan Pro'}
+              {currentPlanActive ? 'Beneficios Activos' : `Ventajas del ${planName}`}
             </span>
             
             <div className="space-y-2">
-              {[
-                { text: 'Semanas ilimitadas de entrenamiento', pro: true },
-                { text: 'Zonas fisiológicas dinámicas auto-adaptadas', pro: true },
-                { text: 'Métricas de carga, fatiga y estrés (PMC)', pro: true },
-                { text: 'Conexión total con Garmin y Strava Webhooks', pro: true },
-                { text: 'Exportación estructurada en TCX para el reloj', pro: true }
-              ].map((benefit, idx) => (
+              {benefitsList.map((benefit, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-xs">
-                  <Check className={`w-3.5 h-3.5 shrink-0 ${isPro ? 'text-emerald-400' : 'text-zinc-500'}`} />
-                  <span className={isPro ? 'text-zinc-300' : 'text-zinc-400'}>{benefit.text}</span>
+                  <Check className={`w-3.5 h-3.5 shrink-0 ${currentPlanActive ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                  <span className={currentPlanActive ? 'text-zinc-300' : 'text-zinc-400'}>{benefit}</span>
                 </div>
               ))}
             </div>
@@ -100,21 +165,21 @@ export function BillingCard({ status }: BillingCardProps) {
 
         <div className="pt-6 border-t border-zinc-800/80 mt-6">
           <AnimatedButton
-            variant={isPro ? 'ghost' : 'primary'}
+            variant={currentPlanActive ? 'ghost' : 'primary'}
             onClick={handleButtonClick}
             disabled={loading}
             className={`w-full py-3 text-xs font-bold flex items-center justify-center gap-1.5 ${
-              isPro 
+              currentPlanActive 
                 ? 'border-zinc-800 hover:border-rose-500/30 hover:bg-rose-500/5 hover:text-rose-400 transition-all'
                 : '!bg-emerald-500 hover:!bg-emerald-400 !text-black shadow-emerald-500/10 shadow-lg'
             }`}
           >
-            {isPro ? (
+            {currentPlanActive ? (
               'Cancelar Suscripción'
             ) : (
               <>
                 <Sparkles className="w-3.5 h-3.5 text-black" />
-                Suscribirse a Pro
+                {status && status !== 'free' ? 'Cambiar a este Plan' : `Activar ${planName}`}
               </>
             )}
           </AnimatedButton>
@@ -164,7 +229,7 @@ export function BillingCard({ status }: BillingCardProps) {
                 // Simular procesamiento del banco
                 await new Promise((resolve) => setTimeout(resolve, 1500));
                 try {
-                  const res = await updateSubscriptionStatus('pro');
+                  const res = await updateSubscriptionStatus(activeTab);
                   if (res && res.error) {
                     alert(res.error);
                   } else {

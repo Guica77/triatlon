@@ -12,6 +12,13 @@ export function LandingClient() {
   const router = useRouter();
   const [selectedSport, setSelectedSport] = React.useState<'ciclismo' | 'carrera' | 'natacion'>('ciclismo');
   const [mockFtp, setMockFtp] = React.useState(180);
+  const [numAthletes, setNumAthletes] = React.useState(30);
+
+  // TrainingPeaks charges $99/mo coach subscription + $9/mo per premium athlete
+  const tpMonthlyCost = 99 + (numAthletes * 9);
+  const triProMonthlyCost = 19; // flat €19
+  const monthlySavings = tpMonthlyCost - triProMonthlyCost;
+  const annualSavings = monthlySavings * 12;
 
   // Dynamic preview helper
   const getZoneRange = (sport: typeof selectedSport, ftp: number) => {
@@ -90,14 +97,14 @@ export function LandingClient() {
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] text-zinc-100">
-            Entrenamiento Inteligente.{' '}
+            Plataforma Europea para Coaches de{' '}
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-emerald-400 to-sky-400">
-              Telemetría Universal.
+              Triatlón, Ciclismo y Running.
             </span>
           </h1>
 
           <p className="text-zinc-400 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto lg:mx-0">
-            Planifica tus entrenamientos de triatlón con periodización adaptativa basada en tu FTP, ritmos y fatiga real. Sincroniza Garmin o Strava y exporta series estructuradas en TCX directamente a tu reloj.
+            La alternativa en euros y español a TrainingPeaks. Gestiona de 20 a 100+ atletas con alertas biométricas avanzadas (HRV/TSS), asignación de planes instantánea y chat directo desde una tarifa plana de 19€/mes.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
@@ -213,9 +220,9 @@ export function LandingClient() {
       <section className="bg-zinc-950 py-20 px-4 sm:px-8 border-y border-zinc-900/50">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center max-w-xl mx-auto space-y-4">
-            <h2 className="text-2xl sm:text-4xl font-extrabold">Todo lo que necesitas para tu triatlón</h2>
+            <h2 className="text-2xl sm:text-4xl font-extrabold">Todo lo que necesitas para entrenar a tu grupo</h2>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              Herramientas de nivel profesional que adaptan cada detalle de tu preparación atlética.
+              Herramientas profesionales en español para gestionar la preparación de triatlón, ciclismo y running sin pagar de más.
             </p>
           </div>
 
@@ -362,8 +369,86 @@ export function LandingClient() {
         </div>
       </section>
 
+      {/* Competitor Savings Calculator */}
+      <section className="py-20 px-4 sm:px-8 max-w-4xl mx-auto space-y-12 border-t border-zinc-900/50">
+        <div className="text-center max-w-xl mx-auto space-y-4">
+          <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full font-black uppercase tracking-wider">
+            La ventaja del Euro y la tarifa plana
+          </span>
+          <h2 className="text-2xl sm:text-4xl font-extrabold">¿Cuánto ahorras frente a TrainingPeaks?</h2>
+          <p className="text-sm text-zinc-400 leading-relaxed">
+            TrainingPeaks está diseñado en dólares (USD), cobra por atleta premium y encarece la gestión de tu club. Calcula tu cuota plana con nosotros.
+          </p>
+        </div>
+
+        <div className="bg-zinc-900/20 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 space-y-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <label className="text-sm font-bold text-zinc-300 font-sans">Número de atletas en tu roster:</label>
+              <span className="text-lg font-black text-cyan-400 bg-cyan-400/10 px-3 py-1 rounded-lg">
+                {numAthletes} atletas
+              </span>
+            </div>
+            <input
+              type="range"
+              min="5"
+              max="100"
+              value={numAthletes}
+              onChange={(e) => setNumAthletes(parseInt(e.target.value))}
+              className="w-full h-2 bg-zinc-800 rounded-lg appearance-none accent-emerald-400 cursor-pointer"
+            />
+            <div className="flex justify-between text-xs text-zinc-500">
+              <span>5 atletas</span>
+              <span>50 atletas</span>
+              <span>100 atletas</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-zinc-900">
+            <div className="bg-zinc-950/50 p-5 rounded-2xl border border-zinc-900 text-center space-y-1">
+              <span className="text-xs text-zinc-500 block font-semibold uppercase">TrainingPeaks (USD)</span>
+              <span className="text-2xl font-black text-zinc-400">
+                ${tpMonthlyCost} <span className="text-xs text-zinc-500">/ mes</span>
+              </span>
+              <span className="text-[10px] text-zinc-600 block">
+                $99 base + $9/atleta premium
+              </span>
+            </div>
+            
+            <div className="bg-emerald-500/5 p-5 rounded-2xl border border-emerald-500/20 text-center space-y-1 relative">
+              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-black bg-emerald-400 text-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                Tarifa Plana
+              </div>
+              <span className="text-xs text-emerald-400 block font-semibold uppercase">Triatlon Pro</span>
+              <span className="text-2xl font-black text-white">
+                19€ <span className="text-xs text-zinc-400">/ mes</span>
+              </span>
+              <span className="text-[10px] text-emerald-500 block font-bold">
+                Atletas ilimitados • Soporte en Euro
+              </span>
+            </div>
+
+            <div className="bg-gradient-to-br from-cyan-500/10 to-emerald-500/10 p-5 rounded-2xl border border-cyan-500/20 text-center space-y-1">
+              <span className="text-xs text-cyan-400 block font-semibold uppercase">Tu Ahorro Anual</span>
+              <span className="text-2xl font-black text-emerald-400">
+                ~{Math.round(annualSavings)}€ <span className="text-xs text-emerald-400/70">/ año</span>
+              </span>
+              <span className="text-[10px] text-zinc-400 block font-medium">
+                Cambio de divisa + sin límite
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-900/60 text-xs text-zinc-400 leading-relaxed text-center">
+            🚀 <strong>Ventaja Europea:</strong> Además del ahorro económico de la tarifa plana, disfrutas de soporte y facturación en euros y plataforma completamente traducida al español para ti y tus atletas.
+          </div>
+        </div>
+      </section>
+
       {/* Pricing / Plan options */}
-      <section className="py-20 px-4 sm:px-8 max-w-5xl mx-auto space-y-12">
+      <section className="py-20 px-4 sm:px-8 max-w-6xl mx-auto space-y-12">
         <div className="text-center max-w-xl mx-auto space-y-4">
           <h2 className="text-2xl sm:text-4xl font-extrabold">Planes sencillos, sin sorpresas</h2>
           <p className="text-sm text-zinc-400 leading-relaxed">
@@ -371,7 +456,7 @@ export function LandingClient() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
           {/* Free Plan */}
           <ProCard className="bg-zinc-950/40 border-zinc-800/80 p-8 flex flex-col justify-between space-y-8">
             <div className="space-y-4">
@@ -418,7 +503,7 @@ export function LandingClient() {
                   <span className="text-[10px] bg-gradient-to-r from-cyan-400 to-emerald-400 text-black px-2 py-0.5 rounded font-black">PRO</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white">9.99€</span>
+                  <span className="text-4xl font-black text-white">2.99€</span>
                   <span className="text-xs text-zinc-500">/ mes</span>
                 </div>
                 <p className="text-xs text-zinc-400 leading-relaxed">
@@ -454,6 +539,56 @@ export function LandingClient() {
                 className="w-full py-3 text-xs"
               >
                 Suscribirme a Pro Now
+              </AnimatedButton>
+            </ProCard>
+          </div>
+
+          {/* Coach Plan */}
+          <div className="relative">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl blur opacity-30" />
+            <ProCard className="relative bg-zinc-950 p-8 border-zinc-800/80 h-full flex flex-col justify-between space-y-8">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-cyan-400 uppercase tracking-widest font-extrabold block">B2B Coach</span>
+                  <span className="text-[10px] bg-gradient-to-r from-emerald-400 to-cyan-400 text-black px-2 py-0.5 rounded font-black">COACH</span>
+                </div>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-black text-white">19€</span>
+                  <span className="text-xs text-zinc-500">/ mes</span>
+                </div>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Para entrenadores y clubes de triatlón, ciclismo o running que gestionan múltiples atletas con dashboard y chat centralizado.
+                </p>
+                <ul className="space-y-2.5 text-xs text-zinc-300 pt-4">
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="font-semibold text-white">Atletas ilimitados (sin coste por atleta)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>Panel de roster para 20-30+ atletas</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>Alertas automáticas de biometría (HRV, fatiga, TSS)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>Mensajería chat directo Coach-Atleta</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span>Soporte prioritario y analíticas avanzadas</span>
+                  </li>
+                </ul>
+              </div>
+
+              <AnimatedButton 
+                variant="primary"
+                onClick={() => router.push('/login?mode=signup&plan=coach')}
+                className="w-full py-3 text-xs !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-cyan-500/10 shadow-lg"
+              >
+                Suscribirme a Plan Entrenador
               </AnimatedButton>
             </ProCard>
           </div>

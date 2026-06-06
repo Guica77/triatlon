@@ -200,7 +200,7 @@ export async function pushWeekWorkoutsToGarminAction() {
   return { success: true, count: workoutCount };
 }
 
-export async function updateSubscriptionStatus(status: 'free' | 'pro') {
+export async function updateSubscriptionStatus(status: 'free' | 'pro' | 'coach') {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -208,10 +208,13 @@ export async function updateSubscriptionStatus(status: 'free' | 'pro') {
     return { error: 'No autorizado' };
   }
 
+  const role = status === 'coach' ? 'coach' : 'athlete';
+
   const { error } = await supabase
     .from('profiles')
     .update({
       subscription_status: status,
+      role: role,
       updated_at: new Date().toISOString(),
     })
     .eq('id', user.id);

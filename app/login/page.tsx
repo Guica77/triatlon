@@ -15,31 +15,37 @@ function LoginForm() {
   const [infoMessage, setInfoMessage] = React.useState<string | null>(null);
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [roleSelection, setRoleSelection] = React.useState<'athlete' | 'coach'>('athlete');
 
-  async function handleDemoLogin() {
+  async function handleDemoLogin(role: 'athlete' | 'coach') {
     setLoading(true);
     setError(null);
-    setInfoMessage('Cargando demostración... Conectando sesión de prueba.');
+    setInfoMessage(`Cargando demostración de ${role === 'coach' ? 'Entrenador' : 'Atleta'}... Conectando sesión de prueba.`);
     
+    const email = role === 'coach' ? 'coach-demo@triatlonpro.com' : 'demo@triatlonpro.com';
+    const password = 'demo123456';
+    const firstName = 'Demo';
+    const lastName = role === 'coach' ? 'Entrenador' : 'Atleta';
+
     try {
       const formData = new FormData();
-      formData.append('email', 'demo@triatlonpro.com');
-      formData.append('password', 'demo123456');
+      formData.append('email', email);
+      formData.append('password', password);
       
       const result: any = await login(formData);
       if (result && result.error) {
         setInfoMessage('Configurando cuenta de demostración por primera vez...');
         const signupData = new FormData();
-        signupData.append('email', 'demo@triatlonpro.com');
-        signupData.append('password', 'demo123456');
-        signupData.append('firstName', 'Demo');
-        signupData.append('lastName', 'Atleta');
+        signupData.append('email', email);
+        signupData.append('password', password);
+        signupData.append('firstName', firstName);
+        signupData.append('lastName', lastName);
+        signupData.append('role', role);
         
         const signupResult: any = await signup(signupData);
-        // Si hay error en el registro o si requiere confirmación de email (lo cual no debería para cuenta demo mockeada, pero por si acaso)
         const secondLoginResult: any = await login(formData);
         if (secondLoginResult && secondLoginResult.error) {
-          setError('El modo demo no está disponible en este momento. Por favor, crea una cuenta de atleta gratis.');
+          setError(`El modo demo no está disponible en este momento. Por favor, crea una cuenta de ${role === 'coach' ? 'entrenador' : 'atleta'} gratis.`);
           setLoading(false);
         }
       }
@@ -53,11 +59,21 @@ function LoginForm() {
   React.useEffect(() => {
     const mode = searchParams.get('mode');
     const message = searchParams.get('message');
+    const plan = searchParams.get('plan');
     if (mode === 'signup') {
       setIsSignUp(true);
       setIsForgotPassword(false);
+      if (plan === 'coach') {
+        setRoleSelection('coach');
+      } else {
+        setRoleSelection('athlete');
+      }
     } else if (mode === 'demo') {
-      handleDemoLogin();
+      if (plan === 'coach') {
+        handleDemoLogin('coach');
+      } else {
+        handleDemoLogin('athlete');
+      }
     } else if (mode === 'forgot') {
       setIsForgotPassword(true);
       setIsSignUp(false);
@@ -130,15 +146,28 @@ function LoginForm() {
           {!isForgotPassword && (
             <>
               <div className="space-y-3">
-                <AnimatedButton 
-                  variant="primary" 
-                  className="w-full font-bold bg-gradient-to-r from-cyan-500 to-emerald-500 text-black border-none hover:from-cyan-400 hover:to-emerald-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                  onClick={handleDemoLogin}
-                  type="button"
-                  disabled={loading}
-                >
-                  ⚡ Entrar en Modo Demo / Vista Rápida
-                </AnimatedButton>
+                <div className="grid grid-cols-2 gap-2">
+                  <AnimatedButton 
+                    variant="primary" 
+                    className="w-full text-xs font-black bg-gradient-to-r from-cyan-500 to-indigo-500 text-white border-none hover:from-cyan-400 hover:to-indigo-400 shadow-[0_0_12px_rgba(34,211,238,0.15)] flex flex-col items-center justify-center py-2.5 h-auto leading-normal"
+                    onClick={() => handleDemoLogin('athlete')}
+                    type="button"
+                    disabled={loading}
+                  >
+                    <span className="text-sm">🏃‍♂️ Atleta Demo</span>
+                    <span className="text-[9px] font-normal opacity-80">Vista Atleta</span>
+                  </AnimatedButton>
+                  <AnimatedButton 
+                    variant="primary" 
+                    className="w-full text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-500 text-black border-none hover:from-emerald-400 hover:to-teal-400 shadow-[0_0_12px_rgba(16,185,129,0.15)] flex flex-col items-center justify-center py-2.5 h-auto leading-normal"
+                    onClick={() => handleDemoLogin('coach')}
+                    type="button"
+                    disabled={loading}
+                  >
+                    <span className="text-sm">📋 Coach Demo</span>
+                    <span className="text-[9px] font-bold opacity-80">Vista Entrenador</span>
+                  </AnimatedButton>
+                </div>
                 <AnimatedButton 
                   variant="secondary" 
                   className="w-full font-normal"
@@ -196,26 +225,57 @@ function LoginForm() {
             )}
 
             {isSignUp && !isForgotPassword && (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs text-zinc-400">Nombre</label>
-                  <input 
-                    name="firstName" 
-                    type="text" 
-                    required 
-                    className="w-full bg-[#121214] border border-[var(--color-border)] rounded-xl p-3 text-sm text-zinc-100 outline-none focus:border-zinc-400 transition-colors"
-                  />
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs text-zinc-400">Nombre</label>
+                    <input 
+                      name="firstName" 
+                      type="text" 
+                      required 
+                      className="w-full bg-[#121214] border border-[var(--color-border)] rounded-xl p-3 text-sm text-zinc-100 outline-none focus:border-zinc-400 transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-zinc-400">Apellidos</label>
+                    <input 
+                      name="lastName" 
+                      type="text" 
+                      required 
+                      className="w-full bg-[#121214] border border-[var(--color-border)] rounded-xl p-3 text-sm text-zinc-100 outline-none focus:border-zinc-400 transition-colors"
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs text-zinc-400">Apellidos</label>
-                  <input 
-                    name="lastName" 
-                    type="text" 
-                    required 
-                    className="w-full bg-[#121214] border border-[var(--color-border)] rounded-xl p-3 text-sm text-zinc-100 outline-none focus:border-zinc-400 transition-colors"
-                  />
+
+                <div className="space-y-1.5">
+                  <label className="text-xs text-zinc-400">Tipo de Cuenta</label>
+                  <div className="grid grid-cols-2 gap-1 p-1 bg-zinc-950 rounded-xl border border-zinc-800">
+                    <button
+                      type="button"
+                      onClick={() => setRoleSelection('athlete')}
+                      className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                        roleSelection === 'athlete' 
+                          ? 'bg-zinc-800 text-white shadow-sm' 
+                          : 'text-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      <span>🏃‍♂️ Atleta</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRoleSelection('coach')}
+                      className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                        roleSelection === 'coach' 
+                          ? 'bg-zinc-800 text-white shadow-sm' 
+                          : 'text-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      <span>📋 Entrenador</span>
+                    </button>
+                  </div>
+                  <input type="hidden" name="role" value={roleSelection} />
                 </div>
-              </div>
+              </>
             )}
 
             <div className="space-y-1">

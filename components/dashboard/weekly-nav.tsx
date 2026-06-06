@@ -58,43 +58,69 @@ export function WeeklyNav({ workouts }: WeeklyNavProps) {
   return (
     <ProCard className="p-4 py-6">
       <div className="flex justify-between items-center gap-2 max-w-2xl mx-auto">
-        {days.map((d, i) => (
-          <div 
-            key={i} 
-            className={cn(
-              "flex flex-col items-center justify-center p-3 rounded-2xl w-16 transition-all",
-              d.isToday ? "bg-zinc-800 border border-zinc-700 shadow-lg" : "hover:bg-zinc-900/50"
-            )}
-          >
-            <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
-              {d.dayName}
-            </span>
-            <span className={cn(
-              "text-lg font-semibold mb-2", 
-              d.isToday ? "text-zinc-50" : "text-zinc-400"
-            )}>
-              {d.dayNum}
-            </span>
+        {days.map((d, i) => {
+          let complianceClass = '';
+          const todayStr = new Date().toISOString().split('T')[0];
 
-            {/* Dots o Check */}
-            <div className="h-3 flex items-center justify-center gap-1">
-              {d.isCompleted ? (
-                <div className="w-4 h-4 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
-                  <Check className="w-3 h-3 text-green-400" />
-                </div>
-              ) : d.workouts.length > 0 ? (
-                d.workouts.map((w, wIdx) => (
-                  <span 
-                    key={wIdx} 
-                    className={cn("w-1.5 h-1.5 rounded-full", sportDotColors[w.training_sessions?.sport_type] || 'bg-zinc-600')} 
-                  />
-                ))
-              ) : (
-                <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+          if (d.workouts.length > 0) {
+            const hasCompleted = d.workouts.some(w => w.status === 'completed');
+            const hasMissed = d.workouts.some(w => w.status === 'missed');
+            const hasPending = d.workouts.some(w => w.status === 'pending');
+
+            if (d.workouts.every(w => w.status === 'completed')) {
+              complianceClass = 'bg-emerald-500/5 border border-emerald-500/20 text-emerald-400';
+            } else if (hasMissed) {
+              complianceClass = 'bg-red-500/5 border border-red-500/20 text-red-400';
+            } else if (hasPending && d.workouts.some(w => w.scheduled_date <= todayStr)) {
+              complianceClass = 'bg-amber-500/5 border border-amber-500/20 text-amber-400';
+            } else {
+              complianceClass = 'bg-zinc-950/25 border border-zinc-850 text-zinc-350 hover:bg-zinc-900/20';
+            }
+          } else {
+            complianceClass = d.isToday 
+              ? 'bg-zinc-800 border border-zinc-700 shadow-lg text-zinc-50' 
+              : 'border border-transparent hover:bg-zinc-900/50 text-zinc-400';
+          }
+
+          return (
+            <div 
+              key={i} 
+              className={cn(
+                "flex flex-col items-center justify-center p-3 rounded-2xl w-16 transition-all border",
+                complianceClass,
+                d.isToday && "bg-zinc-800 border-zinc-700 shadow-lg"
               )}
+            >
+              <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
+                {d.dayName}
+              </span>
+              <span className={cn(
+                "text-lg font-semibold mb-2", 
+                d.isToday ? "text-zinc-50" : "text-zinc-400"
+              )}>
+                {d.dayNum}
+              </span>
+
+              {/* Dots o Check */}
+              <div className="h-3 flex items-center justify-center gap-1">
+                {d.isCompleted ? (
+                  <div className="w-4 h-4 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                    <Check className="w-3 h-3 text-green-400" />
+                  </div>
+                ) : d.workouts.length > 0 ? (
+                  d.workouts.map((w, wIdx) => (
+                    <span 
+                      key={wIdx} 
+                      className={cn("w-1.5 h-1.5 rounded-full", sportDotColors[w.training_sessions?.sport_type] || 'bg-zinc-600')} 
+                    />
+                  ))
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </ProCard>
   );

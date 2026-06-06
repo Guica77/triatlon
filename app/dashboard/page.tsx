@@ -30,11 +30,19 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .single();
 
-  if (!profileData || !(profileData as any).active_plan_id) {
+  if (!profileData) {
     redirect('/onboarding');
   }
 
   const profile = profileData as any;
+
+  if (profile.role === 'coach') {
+    redirect('/coach/dashboard');
+  }
+
+  if (!profile.active_plan_id) {
+    redirect('/onboarding');
+  }
   const activePlan = profile.training_plans;
 
   // 1.5 Obtener Biometría del Día (con auto-simulación inicial)

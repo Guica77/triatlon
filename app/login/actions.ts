@@ -20,13 +20,26 @@ export async function login(formData: FormData) {
   // Comprobar si tiene perfil y plan activo
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
+    // Seeding on login for demo users
+    if (email === 'coach-demo@triatlonpro.com' || email === 'demo@triatlonpro.com') {
+      const { seedDemoData } = await import('@/lib/demo-seeder')
+      await seedDemoData(email, user.id)
+    }
+
     const { data: profile } = await supabase
       .from('profiles')
-      .select('active_plan_id')
+      .select('active_plan_id, role')
       .eq('id', user.id)
       .single()
 
-    if (!profile || !profile.active_plan_id) {
+    if (profile) {
+      if (profile.role === 'coach') {
+        redirect('/coach/dashboard')
+      }
+      if (!profile.active_plan_id) {
+        redirect('/onboarding')
+      }
+    } else {
       redirect('/onboarding')
     }
   }
@@ -39,6 +52,7 @@ export async function signup(formData: FormData) {
   const password = formData.get('password') as string
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
+  const role = (formData.get('role') as string) || 'athlete'
   const supabase = await createClient()
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -51,24 +65,35 @@ export async function signup(formData: FormData) {
   }
 
   if (authData.user) {
-    // Insertar perfil inicial
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        id: authData.user.id,
-        first_name: firstName || '',
-        last_name: lastName || '',
-        level: 'intermedio',
-      })
+    if (email === 'coach-demo@triatlonpro.com' || email === 'demo@triatlonpro.com') {
+      const { seedDemoData } = await import('@/lib/demo-seeder')
+      await seedDemoData(email, authData.user.id)
+    } else {
+      // Insertar perfil inicial
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          first_name: firstName || '',
+          last_name: lastName || '',
+          level: 'intermedio',
+          email: email || '',
+          role: role as any,
+        })
 
-    if (profileError) {
-      console.error("Error creando perfil:", profileError)
+      if (profileError) {
+        console.error("Error creando perfil:", profileError)
+      }
     }
   }
 
   // Si requiere confirmación de email (la sesión no está activa tras el signup)
   if (!authData.session) {
     return { success: true, emailConfirmRequired: true }
+  }
+
+  if (role === 'coach') {
+    redirect('/coach/dashboard')
   }
 
   redirect('/onboarding')

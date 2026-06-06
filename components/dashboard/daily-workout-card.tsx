@@ -16,6 +16,7 @@ interface WorkoutCardProps {
   initialIsConnected?: boolean;
   virtualGarage?: string[];
   athleteLevel?: string;
+  readOnly?: boolean;
   workout: {
     id: string;
     scheduled_date: string;
@@ -38,7 +39,7 @@ interface WorkoutCardProps {
       avg_cadence?: number;
       training_effect_aerobic?: number;
       training_effect_anaerobic?: number;
-      raw_payload?: any;
+      raw_payload: any;
     }[] | null;
   };
 }
@@ -182,7 +183,7 @@ const localFormatCondition = (condition: string, value?: number) => {
   return '';
 };
 
-export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio' }: WorkoutCardProps) {
+export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio', readOnly = false }: WorkoutCardProps) {
   const [status, setStatus] = React.useState(workout.status);
   const [loading, setLoading] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry'>('main');
@@ -208,7 +209,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
   // Sincronización Automática en Segundo Plano (Garmin / Strava Webhooks)
   React.useEffect(() => {
-    if (initialIsConnected && status === 'pending' && session?.sport_type !== 'descanso') {
+    if (!readOnly && initialIsConnected && status === 'pending' && session?.sport_type !== 'descanso') {
       const timer = setTimeout(async () => {
         const res = await simulateWatchIngestion(workout.id, session?.sport_type || 'ciclismo');
         if (res?.success) {
@@ -218,7 +219,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
       }, 3500);
       return () => clearTimeout(timer);
     }
-  }, [initialIsConnected, status, workout.id, session?.sport_type]);
+  }, [initialIsConnected, status, workout.id, session?.sport_type, readOnly]);
 
   if (!session) return null;
 
@@ -323,12 +324,18 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
             )}
           </div>
           {session.sport_type !== 'descanso' ? (
-            <Link href={`/dashboard/workout/${workout.id}`} className="hover:text-cyan-400 hover:underline transition-colors decoration-cyan-400">
-              <h3 className="text-xl font-semibold text-zinc-50 inline-flex items-center gap-1.5 group">
+            readOnly ? (
+              <h3 className="text-xl font-semibold text-zinc-50 inline-flex items-center gap-1.5">
                 {session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
-                <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-transform group-hover:translate-x-0.5" />
               </h3>
-            </Link>
+            ) : (
+              <Link href={`/dashboard/workout/${workout.id}`} className="hover:text-cyan-400 hover:underline transition-colors decoration-cyan-400">
+                <h3 className="text-xl font-semibold text-zinc-50 inline-flex items-center gap-1.5 group">
+                  {session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
+                  <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-cyan-400 transition-transform group-hover:translate-x-0.5" />
+                </h3>
+              </Link>
+            )
           ) : (
             <h3 className="text-xl font-semibold text-zinc-50">
               Día de descanso activo
@@ -363,11 +370,13 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                   <p className="text-xs text-orange-300/80 mt-0.5">El entreno pide: <strong className="text-orange-300">{missingGear.join(', ')}</strong> y no lo tienes en tu Garaje.</p>
                 </div>
               </div>
-              <Link href={`/marketplace?category=accesorios&search=${encodeURIComponent(missingGear[0])}`} className="shrink-0 w-full sm:w-auto">
-                <button className="w-full sm:w-auto px-4 py-2 bg-orange-500 text-black font-bold text-xs rounded-lg hover:bg-orange-400 transition-colors shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
-                  <Sparkles className="w-3.5 h-3.5" /> Buscar Chollos IA
-                </button>
-              </Link>
+              {!readOnly && (
+                <Link href={`/marketplace?category=accesorios&search=${encodeURIComponent(missingGear[0])}`} className="shrink-0 w-full sm:w-auto">
+                  <button className="w-full sm:w-auto px-4 py-2 bg-orange-500 text-black font-bold text-xs rounded-lg hover:bg-orange-400 transition-colors shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+                    <Sparkles className="w-3.5 h-3.5" /> Buscar Chollos IA
+                  </button>
+                </Link>
+              )}
             </motion.div>
           )}
 
@@ -558,7 +567,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                       </p>
                       <p className="text-zinc-300 text-sm leading-relaxed bg-purple-500/[0.02] border border-purple-500/15 p-3.5 rounded-xl">{parsed.gear}</p>
                     </div>
-                    {missingGear.length > 0 && (
+                    {missingGear.length > 0 && !readOnly && (
                       <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between flex-wrap gap-3">
                         <span className="text-xs text-zinc-400 flex items-center gap-1.5">
                           <ShoppingBag className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
@@ -689,116 +698,126 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
       </AnimatePresence>
 
       {/* Botones de acción principales limpios */}
-      <div className="pt-4 flex flex-col gap-3 relative z-10">
-        {session.sport_type !== 'descanso' ? (
-          <div className="w-full space-y-3">
-            {/* PENDING STATE */}
-            {!isCompleted && !isMissed && (
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
-                <div className="flex gap-2 flex-1 sm:flex-[2]">
+      {!readOnly ? (
+        <div className="pt-4 flex flex-col gap-3 relative z-10">
+          {session.sport_type !== 'descanso' ? (
+            <div className="w-full space-y-3">
+              {/* PENDING STATE */}
+              {!isCompleted && !isMissed && (
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  <div className="flex gap-2 flex-1 sm:flex-[2]">
+                    <AnimatedButton 
+                      variant="primary" 
+                      className="flex-1 justify-center py-6 text-sm font-semibold shadow-lg shadow-cyan-500/10"
+                      onClick={handleToggle}
+                      disabled={loading}
+                    >
+                      <Circle className="w-5 h-5 text-zinc-400" />
+                      <span>Completar</span>
+                    </AnimatedButton>
+
+                    <AnimatedButton
+                      variant="ghost"
+                      className="w-12 h-12 shrink-0 justify-center p-0 border border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 flex items-center"
+                      onClick={handleToggleMissed}
+                      disabled={loading}
+                      title="Saltar sesión"
+                    >
+                      <XCircle className="w-5 h-5 text-zinc-500" />
+                    </AnimatedButton>
+                  </div>
+
+                  <AnimatedButton
+                    variant="ghost"
+                    className="flex-1 justify-center py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-semibold shadow-lg shadow-orange-500/10 whitespace-nowrap"
+                    onClick={() => {
+                      setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
+                      window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
+                      setTimeout(() => setToastMsg(null), 6000);
+                    }}
+                  >
+                    <Download className="w-4 h-4 text-orange-400 animate-bounce" />
+                    <span>Enviar al Reloj</span>
+                  </AnimatedButton>
+
+                  {session.sport_type === 'fuerza' && (
+                    <AnimatedButton
+                      variant="ghost"
+                      className="flex-1 justify-center py-6 border border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 flex items-center justify-center gap-2 font-semibold shadow-[0_0_15px_rgba(168,85,247,0.15)] whitespace-nowrap"
+                      onClick={() => setIsGymModeOpen(true)}
+                    >
+                      <Dumbbell className="w-4 h-4 text-purple-400" />
+                      <span>Iniciar Modo Gym</span>
+                    </AnimatedButton>
+                  )}
+                </div>
+              )}
+
+              {/* COMPLETED STATE */}
+              {isCompleted && (
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
                   <AnimatedButton 
-                    variant="primary" 
-                    className="flex-1 justify-center py-6 text-sm font-semibold shadow-lg shadow-cyan-500/10"
+                    variant="secondary" 
+                    className="flex-1 justify-center py-6 text-sm font-semibold border-green-500/20 bg-green-950/5 hover:bg-green-950/10"
                     onClick={handleToggle}
                     disabled={loading}
                   >
-                    <Circle className="w-5 h-5 text-zinc-400" />
-                    <span>Completar</span>
+                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                    <span className="text-zinc-200">✓ Completado</span>
                   </AnimatedButton>
 
                   <AnimatedButton
                     variant="ghost"
-                    className="w-12 h-12 shrink-0 justify-center p-0 border border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 flex items-center"
-                    onClick={handleToggleMissed}
-                    disabled={loading}
-                    title="Saltar sesión"
+                    className="flex-1 justify-center py-6 border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50 flex items-center justify-center gap-2"
+                    onClick={() => setIsFeedbackOpen(true)}
                   >
-                    <XCircle className="w-5 h-5 text-zinc-500" />
+                    <MessageSquarePlus className="w-5 h-5" />
+                    <span>Evaluar Sesión</span>
+                  </AnimatedButton>
+
+                  <AnimatedButton
+                    variant="ghost"
+                    className="flex-1 justify-center py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-semibold shadow-lg shadow-orange-500/10 whitespace-nowrap"
+                    onClick={() => {
+                      setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
+                      window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
+                      setTimeout(() => setToastMsg(null), 6000);
+                    }}
+                  >
+                    <Download className="w-4 h-4 text-orange-400 animate-bounce" />
+                    <span>Enviar al Reloj</span>
                   </AnimatedButton>
                 </div>
+              )}
 
-                <AnimatedButton
-                  variant="ghost"
-                  className="flex-1 justify-center py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-semibold shadow-lg shadow-orange-500/10 whitespace-nowrap"
-                  onClick={() => {
-                    setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
-                    window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
-                    setTimeout(() => setToastMsg(null), 6000);
-                  }}
-                >
-                  <Download className="w-4 h-4 text-orange-400 animate-bounce" />
-                  <span>Enviar al Reloj</span>
-                </AnimatedButton>
-
-                {session.sport_type === 'fuerza' && (
-                  <AnimatedButton
-                    variant="ghost"
-                    className="flex-1 justify-center py-6 border border-purple-500/30 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 hover:border-purple-500/50 flex items-center justify-center gap-2 font-semibold shadow-[0_0_15px_rgba(168,85,247,0.15)] whitespace-nowrap"
-                    onClick={() => setIsGymModeOpen(true)}
-                  >
-                    <Dumbbell className="w-4 h-4 text-purple-400" />
-                    <span>Iniciar Modo Gym</span>
-                  </AnimatedButton>
-                )}
-              </div>
-            )}
-
-            {/* COMPLETED STATE */}
-            {isCompleted && (
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
+              {/* MISSED STATE */}
+              {isMissed && (
                 <AnimatedButton 
                   variant="secondary" 
-                  className="flex-1 justify-center py-6 text-sm font-semibold border-green-500/20 bg-green-950/5 hover:bg-green-950/10"
-                  onClick={handleToggle}
+                  className="w-full justify-center py-6 text-sm font-semibold border-red-500/20 bg-red-950/10 hover:bg-red-950/20"
+                  onClick={handleToggleMissed}
                   disabled={loading}
                 >
-                  <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  <span className="text-zinc-200">✓ Completado</span>
+                  <XCircle className="w-5 h-5 text-red-500" />
+                  <span className="text-red-400">✓ Entrenamiento Saltado (Clic para Restaurar)</span>
                 </AnimatedButton>
-
-                <AnimatedButton
-                  variant="ghost"
-                  className="flex-1 justify-center py-6 border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-500/50 flex items-center justify-center gap-2"
-                  onClick={() => setIsFeedbackOpen(true)}
-                >
-                  <MessageSquarePlus className="w-5 h-5" />
-                  <span>Evaluar Sesión</span>
-                </AnimatedButton>
-
-                <AnimatedButton
-                  variant="ghost"
-                  className="flex-1 justify-center py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-semibold shadow-lg shadow-orange-500/10 whitespace-nowrap"
-                  onClick={() => {
-                    setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
-                    window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
-                    setTimeout(() => setToastMsg(null), 6000);
-                  }}
-                >
-                  <Download className="w-4 h-4 text-orange-400 animate-bounce" />
-                  <span>Enviar al Reloj</span>
-                </AnimatedButton>
-              </div>
-            )}
-
-            {/* MISSED STATE */}
-            {isMissed && (
-              <AnimatedButton 
-                variant="secondary" 
-                className="w-full justify-center py-6 text-sm font-semibold border-red-500/20 bg-red-950/10 hover:bg-red-950/20"
-                onClick={handleToggleMissed}
-                disabled={loading}
-              >
-                <XCircle className="w-5 h-5 text-red-500" />
-                <span className="text-red-400">✓ Entrenamiento Saltado (Clic para Restaurar)</span>
-              </AnimatedButton>
-            )}
+              )}
+            </div>
+          ) : (
+            <div className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-center text-xs text-zinc-500 uppercase tracking-widest font-semibold">
+              ✓ Descanso Programado
+            </div>
+          )}
+        </div>
+      ) : (
+        session.sport_type === 'descanso' && (
+          <div className="pt-4 relative z-10">
+            <div className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-center text-xs text-zinc-500 uppercase tracking-widest font-semibold">
+              ✓ Descanso Programado
+            </div>
           </div>
-        ) : (
-          <div className="w-full p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-center text-xs text-zinc-500 uppercase tracking-widest font-semibold">
-            ✓ Descanso Programado
-          </div>
-        )}
-      </div>
+        )
+      )}
 
       <WorkoutFeedbackModal
         isOpen={isFeedbackOpen}
