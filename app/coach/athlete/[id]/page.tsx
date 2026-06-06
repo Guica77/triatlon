@@ -8,6 +8,7 @@ import { fetchAndCalculateAnalytics } from '@/app/analytics/analytics-actions';
 import { Trophy, LogOut, Settings, ChevronLeft, Calendar, User, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { AnimatedButton } from '@/components/ui/animated-button';
+import { SessionPlanner } from '@/components/coach/session-planner';
 
 interface AthletePageProps {
   params: Promise<{ id: string }>;
@@ -187,6 +188,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
                 <span>Chat con {athleteProfile.first_name || 'Atleta'}</span>
               </AnimatedButton>
             </Link>
+            <SessionPlanner athleteId={athleteId} />
           </div>
           <span className="px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800/80 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
             Modo Supervisor (Solo Lectura)

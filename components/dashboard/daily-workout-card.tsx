@@ -11,6 +11,7 @@ import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-mod
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
 import { GymTrackerModal } from '@/components/workouts/gym-tracker-modal';
 import Link from 'next/link';
+import { WatchSyncModal } from '@/components/dashboard/watch-sync-modal';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
@@ -189,6 +190,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry'>('main');
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
   const [isGymModeOpen, setIsGymModeOpen] = React.useState(false);
+  const [isSyncingOpen, setIsSyncingOpen] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
 
   const session = workout.training_sessions;
@@ -731,9 +733,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                     variant="ghost"
                     className="flex-1 justify-center py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-semibold shadow-lg shadow-orange-500/10 whitespace-nowrap"
                     onClick={() => {
-                      setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
+                      setIsSyncingOpen(true);
                       window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
-                      setTimeout(() => setToastMsg(null), 6000);
                     }}
                   >
                     <Download className="w-4 h-4 text-orange-400 animate-bounce" />
@@ -779,9 +780,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                     variant="ghost"
                     className="flex-1 justify-center py-6 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 font-semibold shadow-lg shadow-orange-500/10 whitespace-nowrap"
                     onClick={() => {
-                      setToastMsg('📥 Descargando sesión estructurada... El móvil abrirá automáticamente Garmin Connect / Coros.');
+                      setIsSyncingOpen(true);
                       window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
-                      setTimeout(() => setToastMsg(null), 6000);
                     }}
                   >
                     <Download className="w-4 h-4 text-orange-400 animate-bounce" />
@@ -834,6 +834,12 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
           workoutId={workout.id}
         />
       )}
+
+      <WatchSyncModal
+        isOpen={isSyncingOpen}
+        onClose={() => setIsSyncingOpen(false)}
+        workout={workout as any}
+      />
     </ProCard>
   );
 }

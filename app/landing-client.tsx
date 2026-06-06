@@ -4,7 +4,7 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Activity, Shield, Zap, TrendingUp, Download, Compass, Cpu, Sparkles, Check, ChevronRight, Play } from 'lucide-react';
+import { Activity, Shield, Zap, TrendingUp, Download, Compass, Cpu, Sparkles, Check, ChevronRight, Play, Calendar } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
@@ -329,40 +329,51 @@ export function LandingClient() {
               </div>
             </div>
 
-            {/* feature 4: Marketplace */}
-            <div className="md:col-span-2 relative overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-900/10 p-6 flex flex-col justify-between space-y-6">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+            {/* feature 4: Planificador de Roster */}
+            <div className="rounded-2xl border border-zinc-900 bg-zinc-900/10 p-6 flex flex-col justify-between space-y-6">
+              <div className="space-y-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-orange-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Planificador en Tiempo Real</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Planifica sesiones de intervalos y entrenamientos personalizados en segundos directamente en el calendario del atleta. Se actualiza al instante en su móvil.
+                </p>
+              </div>
+
+              <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-900 text-[10px] space-y-1.5">
+                <div className="flex justify-between items-center text-zinc-500">
+                  <span>Martes • Ciclismo</span>
+                  <span className="text-orange-400 font-bold">60 min</span>
+                </div>
+                <div className="text-zinc-200 font-bold truncate">**Intervalos VO2Max**</div>
+                <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+                  <div className="h-full w-2/3 bg-orange-500" />
+                </div>
+              </div>
+            </div>
+
+            {/* feature 5: Marketplace */}
+            <div className="rounded-2xl border border-zinc-900 bg-zinc-900/10 p-6 flex flex-col justify-between space-y-6">
               <div className="space-y-4">
                 <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
                   <Compass className="w-5 h-5 text-amber-400" />
                 </div>
-                <h3 className="text-lg font-bold text-white">Marketplace de Material & Wallapop Crawler</h3>
+                <h3 className="text-lg font-bold text-white">Crawler de Material</h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  ¿Te falta un neopreno de gama alta, ruedas de carbono o una cabra de triatlón para tu gran prueba? Nuestro indexador rastrea Wallapop buscando chollos y ofertas técnicas adaptadas a la distancia de tu carrera.
+                  ¿Te falta material para tu carrera? Nuestro indexador inteligente rastrea chollos técnicos de segunda mano (neoprenos, ruedas de perfil) en segundos.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-900 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🩱</span>
-                    <div>
-                      <span className="text-[11px] font-bold text-white block">Neopreno Orca Athlex</span>
-                      <span className="text-[9px] text-zinc-500">Talla MT • Perfecto estado</span>
-                    </div>
+              <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-900 flex items-center justify-between text-[10px]">
+                <div className="flex items-center gap-1.5 truncate">
+                  <span>🩱</span>
+                  <div className="truncate">
+                    <span className="font-bold text-white block truncate">Orca Athlex</span>
+                    <span className="text-zinc-500 block">Talla MT</span>
                   </div>
-                  <span className="text-xs font-black text-amber-400">140€</span>
                 </div>
-                <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-900 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">⭕</span>
-                    <div>
-                      <span className="text-[11px] font-bold text-white block">Ruedas Carbono 50mm</span>
-                      <span className="text-[9px] text-zinc-500">Perfil Aero • Tubeless ready</span>
-                    </div>
-                  </div>
-                  <span className="text-xs font-black text-amber-400">450€</span>
-                </div>
+                <span className="font-black text-amber-400 shrink-0">140€</span>
               </div>
             </div>
           </div>
