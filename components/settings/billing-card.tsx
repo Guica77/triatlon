@@ -42,7 +42,7 @@ export function BillingCard({ status }: BillingCardProps) {
     }
   };
 
-  const planPrice = activeTab === 'pro' ? '2,99€' : '19,00€';
+  const planPrice = activeTab === 'pro' ? '5,00€' : '19,00€';
   const planName = activeTab === 'pro' ? 'Plan Atleta Pro' : 'Plan Entrenador Pro';
   const planDescription = activeTab === 'pro'
     ? 'Tienes activadas todas las funciones de periodización avanzada, análisis de fatiga PMC y exportación estructurada de TCX ilimitada.'

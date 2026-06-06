@@ -503,7 +503,7 @@ export function LandingClient() {
                   <span className="text-[10px] bg-gradient-to-r from-cyan-400 to-emerald-400 text-black px-2 py-0.5 rounded font-black">PRO</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white">2.99€</span>
+                  <span className="text-4xl font-black text-white">5€</span>
                   <span className="text-xs text-zinc-500">/ mes</span>
                 </div>
                 <p className="text-xs text-zinc-400 leading-relaxed">
