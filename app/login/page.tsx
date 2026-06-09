@@ -146,28 +146,7 @@ function LoginForm() {
           {!isForgotPassword && (
             <>
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <AnimatedButton 
-                    variant="primary" 
-                    className="w-full text-xs font-black bg-gradient-to-r from-cyan-500 to-indigo-500 text-white border-none hover:from-cyan-400 hover:to-indigo-400 shadow-[0_0_12px_rgba(34,211,238,0.15)] flex flex-col items-center justify-center py-2.5 h-auto leading-normal"
-                    onClick={() => handleDemoLogin('athlete')}
-                    type="button"
-                    disabled={loading}
-                  >
-                    <span className="text-sm">🏃‍♂️ Atleta Demo</span>
-                    <span className="text-[9px] font-normal opacity-80">Vista Atleta</span>
-                  </AnimatedButton>
-                  <AnimatedButton 
-                    variant="primary" 
-                    className="w-full text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-500 text-black border-none hover:from-emerald-400 hover:to-teal-400 shadow-[0_0_12px_rgba(16,185,129,0.15)] flex flex-col items-center justify-center py-2.5 h-auto leading-normal"
-                    onClick={() => handleDemoLogin('coach')}
-                    type="button"
-                    disabled={loading}
-                  >
-                    <span className="text-sm">📋 Coach Demo</span>
-                    <span className="text-[9px] font-bold opacity-80">Vista Entrenador</span>
-                  </AnimatedButton>
-                </div>
+
                 <AnimatedButton 
                   variant="secondary" 
                   className="w-full font-normal"
