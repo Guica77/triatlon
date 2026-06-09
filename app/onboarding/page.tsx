@@ -15,9 +15,21 @@ export default async function OnboardingPage() {
     .from('profiles')
     .select('role')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
-  if (profile?.role === 'coach') {
+  // Determine if the user is a coach either from their existing profile or their auth metadata
+  const isCoach = profile?.role === 'coach' || user.user_metadata?.role === 'coach';
+
+  if (isCoach) {
+    // If they are a coach but don't have a profile yet, create it on the fly
+    if (!profile) {
+      await supabase.from('profiles').insert({
+        id: user.id,
+        role: 'coach',
+        first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Entrenador',
+        last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.last_name || '',
+      });
+    }
     redirect('/coach/dashboard');
   }
 
