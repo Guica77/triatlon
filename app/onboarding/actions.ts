@@ -123,9 +123,9 @@ export async function selectPlan(planId: string) {
 }
 
 export async function saveRaceGoalAndPlan(formData: {
-  target_race_name: string;
-  target_race_date: string;
-  target_race_distance: 'sprint' | 'olimpico' | 'half' | 'full';
+  target_race_name?: string;
+  target_race_date?: string;
+  target_race_distance?: 'sprint' | 'olimpico' | 'half' | 'full';
   target_race_modality?: string;
   target_finish_time?: string;
   baseline_training_hours?: string;
@@ -149,10 +149,11 @@ export async function saveRaceGoalAndPlan(formData: {
   }
 
   const { 
-    target_race_name, target_race_date, target_race_distance, target_race_modality = 'triatlon',
-    target_finish_time, baseline_training_hours, virtual_garage = [],
+    target_race_name = 'Objetivo Pendiente', target_race_date = '2026-12-31', 
+    target_race_distance = 'half', target_race_modality = 'triatlon',
+    target_finish_time, baseline_training_hours = '7-10h', virtual_garage = [],
     swim_weekly_hours = 2, bike_weekly_hours = 4, run_weekly_hours = 3,
-    target_swim_time, target_bike_time, target_run_time, athlete_level
+    target_swim_time, target_bike_time, target_run_time, athlete_level = 'intermedio'
   } = formData;
 
   // AI Estimation Fallback Logic for Physiological Metrics

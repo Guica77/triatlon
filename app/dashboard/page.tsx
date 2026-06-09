@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
+import { ObjectiveConfigCard } from '@/components/dashboard/objective-config-card';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -177,6 +178,9 @@ export default async function DashboardPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-6 pt-8 space-y-8">
+        
+        {/* Objective Configuration Card (If pending or to edit) */}
+        <ObjectiveConfigCard targetRaceName={profile.target_race_name} />
         
         {/* Banner de Bienvenida a Principiantes */}
         {profile.level === 'principiante' && (
