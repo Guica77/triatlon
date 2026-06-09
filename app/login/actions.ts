@@ -30,16 +30,18 @@ export async function login(formData: FormData) {
       .from('profiles')
       .select('active_plan_id, role')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (profile) {
-      if (profile.role === 'coach') {
-        redirect('/coach/dashboard')
-      }
-      if (!profile.active_plan_id) {
-        redirect('/onboarding')
-      }
-    } else {
+    // Determine if user is coach from profile or auth metadata
+    const isCoach = profile?.role === 'coach' || user.user_metadata?.role === 'coach';
+
+    if (isCoach) {
+      redirect('/coach/dashboard')
+    }
+
+    if (profile && !profile.active_plan_id) {
+      redirect('/onboarding')
+    } else if (!profile) {
       redirect('/onboarding')
     }
   }
