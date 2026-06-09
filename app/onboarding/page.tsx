@@ -11,6 +11,16 @@ export default async function OnboardingPage() {
     redirect('/login');
   }
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.role === 'coach') {
+    redirect('/coach/dashboard');
+  }
+
   return (
     <div className="min-h-screen bg-[var(--color-background)] p-6 pt-16 flex flex-col items-center pb-24">
       <div className="w-full max-w-5xl space-y-12">
