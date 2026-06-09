@@ -140,16 +140,51 @@ export function BiometricsCard({ initialBiometrics, readOnly = false }: Biometri
         <div className="flex flex-col md:flex-row items-center gap-6 relative z-10 py-2">
           <div 
             onClick={() => !readOnly && !isRegistered && setIsModalOpen(true)}
-            className={`w-24 h-24 rounded-full border-8 flex flex-col items-center justify-center shadow-lg transition-all duration-300 ${
-              !isRegistered 
-                ? `border-dashed border-zinc-850 text-zinc-550 bg-zinc-950/40 ${readOnly ? 'cursor-default' : 'cursor-pointer hover:border-emerald-500/40 hover:bg-emerald-500/5 hover:scale-105'}` 
-                : ringColor
-            }`}
+            className={`relative w-28 h-28 flex items-center justify-center shrink-0 group ${!readOnly && !isRegistered ? 'cursor-pointer' : ''}`}
           >
-            <span className="text-3xl font-light tracking-tight text-zinc-100">
-              {isRegistered ? score : '--'}
-            </span>
-            {!isRegistered && !readOnly && <span className="text-[8px] text-emerald-400/80 font-bold uppercase tracking-wider mt-0.5 animate-pulse text-center leading-none">REGISTRAR</span>}
+            {/* SVG del Dial */}
+            <svg className="absolute inset-0 w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 100 100">
+              {/* Círculo de fondo (pista) */}
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                className={!isRegistered ? "stroke-zinc-800" : "stroke-zinc-800/40"}
+                strokeWidth={!isRegistered ? "4" : "6"}
+                strokeDasharray={!isRegistered ? "8 6" : "none"}
+                fill="transparent"
+              />
+              {/* Círculo activo coloreado */}
+              {isRegistered && (
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  stroke={isOptimal ? '#34d399' : isModerate ? '#fbbf24' : '#f43f5e'}
+                  strokeWidth="6"
+                  fill="transparent"
+                  strokeDasharray="263.89"
+                  strokeDashoffset={263.89 * (1 - (score / 100))}
+                  strokeLinecap="round"
+                  className="transition-all duration-1000 ease-out"
+                  style={{
+                    filter: `drop-shadow(0 0 6px ${isOptimal ? '#34d399' : isModerate ? '#fbbf24' : '#f43f5e'}50)`
+                  }}
+                />
+              )}
+            </svg>
+            
+            {/* Contenido Central */}
+            <div className={`absolute inset-0 flex flex-col items-center justify-center transition-transform duration-300 ${!isRegistered && !readOnly ? 'group-hover:scale-105' : ''}`}>
+              <span className="text-3xl font-light tracking-tight text-zinc-100 relative z-10">
+                {isRegistered ? score : '--'}
+              </span>
+              {!isRegistered && !readOnly && (
+                <span className="text-[8px] text-emerald-400/80 font-bold uppercase tracking-wider mt-0.5 animate-pulse text-center leading-none">
+                  REGISTRAR
+                </span>
+              )}
+            </div>
           </div>
           <div className="text-center md:text-left space-y-1">
             <div className="flex items-center justify-center md:justify-start gap-2">

@@ -116,6 +116,7 @@ export function MarketplaceAggregatorGrid({ initialItems, initialCategory = 'tod
 
   const getPortalBadgeStyle = (portal: string) => {
     const p = portal.toLowerCase();
+    if (p.includes('triatlon pro') || p.includes('triatlón pro')) return { bg: 'bg-emerald-500/20', border: 'border-emerald-500/40', text: 'text-emerald-400', label: 'Comunidad • Directo' };
     if (p.includes('tuvalum')) return { bg: 'bg-[#ff6b00]/20', border: 'border-[#ff6b00]/40', text: 'text-[#ff6b00]', label: 'Tuvalum • Certificado' };
     if (p.includes('wallapop')) return { bg: 'bg-[#13c1ac]/20', border: 'border-[#13c1ac]/40', text: 'text-[#13c1ac]', label: 'Wallapop • Verificado' };
     if (p.includes('buycycle')) return { bg: 'bg-[#3b82f6]/20', border: 'border-[#3b82f6]/40', text: 'text-[#3b82f6]', label: 'BuyCycle • Garantía' };
@@ -325,9 +326,11 @@ export function MarketplaceAggregatorGrid({ initialItems, initialCategory = 'tod
                             -{discountPercent}%
                           </span>
                         )}
-                        <span className="bg-amber-500/20 border border-amber-500/30 text-amber-300 font-extrabold text-[9px] px-2 py-0.5 rounded-md shadow-lg backdrop-blur-sm uppercase tracking-wider">
-                          Simulado
-                        </span>
+                        {!item.source_portal.toLowerCase().includes('triatlon') && (
+                          <span className="bg-amber-500/20 border border-amber-500/30 text-amber-300 font-extrabold text-[9px] px-2 py-0.5 rounded-md shadow-lg backdrop-blur-sm uppercase tracking-wider">
+                            Simulado
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -397,35 +400,46 @@ export function MarketplaceAggregatorGrid({ initialItems, initialCategory = 'tod
 
                     {/* Botones de Acción */}
                     <div className="space-y-2 pt-2">
-                      <button 
-                        onClick={() => {
-                          let url = item.external_url;
-                          if (!url || url === '#' || url.startsWith('http://localhost') || url.includes('placeholder') || url.includes('fake-url')) {
-                            // Limpiar el título de añadidos como "(Oportunidad)" o "- Muy Cuidado"
-                            const cleanTitle = item.title
-                              .replace(/\(oportunidad\)/i, '')
-                              .replace(/- muy cuidado/i, '')
-                              .replace(/\(.*?\)/g, '')
-                              .replace(/-.*$/g, '')
-                              .trim();
-                            const keywords = encodeURIComponent(cleanTitle);
-                            const portal = item.source_portal.toLowerCase();
-                            
-                            if (portal.includes('tuvalum')) {
-                              url = `https://tuvalum.com/buscar?q=${keywords}`;
-                            } else if (portal.includes('buycycle')) {
-                              url = `https://buycycle.com/es-es/bikes?q=${keywords}`;
-                            } else {
-                              url = `https://es.wallapop.com/search?keywords=${keywords}`;
+                      {item.source_portal.toLowerCase().includes('triatlon') ? (
+                        <button 
+                          onClick={() => {
+                            alert(`Abriendo chat seguro con ${item.seller_name || 'el vendedor'}... (En desarrollo)`);
+                          }}
+                          className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 cursor-pointer group/btn"
+                        >
+                          <span>Contactar Vendedor</span>
+                        </button>
+                      ) : (
+                        <button 
+                          onClick={() => {
+                            let url = item.external_url;
+                            if (!url || url === '#' || url.startsWith('http://localhost') || url.includes('placeholder') || url.includes('fake-url')) {
+                              // Limpiar el título de añadidos como "(Oportunidad)" o "- Muy Cuidado"
+                              const cleanTitle = item.title
+                                .replace(/\(oportunidad\)/i, '')
+                                .replace(/- muy cuidado/i, '')
+                                .replace(/\(.*?\)/g, '')
+                                .replace(/-.*$/g, '')
+                                .trim();
+                              const keywords = encodeURIComponent(cleanTitle);
+                              const portal = item.source_portal.toLowerCase();
+                              
+                              if (portal.includes('tuvalum')) {
+                                url = `https://tuvalum.com/buscar?q=${keywords}`;
+                              } else if (portal.includes('buycycle')) {
+                                url = `https://buycycle.com/es-es/bikes?q=${keywords}`;
+                              } else {
+                                url = `https://es.wallapop.com/search?keywords=${keywords}`;
+                              }
                             }
-                          }
-                          window.open(url, '_blank');
-                        }}
-                        className="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-cyan-500/10 hover:shadow-cyan-500/20 cursor-pointer group/btn"
-                      >
-                        <span>Comprar en {item.source_portal}</span>
-                        <ExternalLink className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" />
-                      </button>
+                            window.open(url, '_blank');
+                          }}
+                          className="w-full py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-extrabold text-sm flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-cyan-500/10 hover:shadow-cyan-500/20 cursor-pointer group/btn"
+                        >
+                          <span>Comprar en {item.source_portal}</span>
+                          <ExternalLink className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" />
+                        </button>
+                      )}
 
                       <div className="flex justify-center">
                         <button 

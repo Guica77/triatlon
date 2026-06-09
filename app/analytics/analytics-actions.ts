@@ -12,6 +12,12 @@ export interface PmcPoint {
   swimDistance: number; // en metros
   bikeDistance: number; // en km
   runDistance: number; // en km
+  isFuture?: boolean; // Modelado Predictivo
+  plannedTss?: number; // Para cálculo de Compliance
+  actualTss?: number; // Para cálculo de Compliance
+  rpe?: number; // Rate of Perceived Exertion (1-10)
+  feel?: number; // Sensaciones (1-5)
+  prs?: string[]; // Personal Records / Picos de Rendimiento
 }
 
 export interface PacePowerPoint {
@@ -171,6 +177,33 @@ function generateSimulatedPmcData(): PmcPoint[] {
     });
   }
 
+  // Modelado Predictivo (Simulación +14 días)
+  for (let i = 1; i <= 14; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    
+    // Asumimos un plan estándar para la simulación futura
+    const isWorkoutDay = i % 7 !== 0; 
+    const dailyTss = isWorkoutDay ? 65 : 0; 
+
+    currentCtl = currentCtl + (dailyTss - currentCtl) * (1 / 42);
+    currentAtl = currentAtl + (dailyTss - currentAtl) * (1 / 7);
+    const currentTsb = currentCtl - currentAtl;
+
+    points.push({
+      date: d.toISOString().split('T')[0],
+      ctl: Math.round(currentCtl),
+      atl: Math.round(currentAtl),
+      tsb: Math.round(currentTsb),
+      swimDistance: 0,
+      bikeDistance: 0,
+      runDistance: 0,
+      isFuture: true,
+      plannedTss: dailyTss,
+      actualTss: 0
+    });
+  }
+
   return points;
 }
 
@@ -202,6 +235,9 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
     }
 
     const tssByDate: Record<string, number> = {};
+    const plannedTssByDate: Record<string, number> = {};
+    const rpeByDate: Record<string, number> = {};
+    const feelByDate: Record<string, number> = {};
     const dailyDistance: Record<string, { swim: number; bike: number; run: number }> = {};
     const sportTssCurrentWeek = {
       natacion: 0,
@@ -308,13 +344,18 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
       }
     }
 
-    // 2. Fetch completed workouts from local database to complement
+    // 2. Fetch completed AND scheduled workouts from local database
     const { data: workouts } = await supabase
       .from('user_workouts')
       .select(`
         id,
+        scheduled_date,
         completed_at,
         actual_tss,
+        planned_tss,
+        status,
+        rpe,
+        feel,
         training_sessions (
           id,
           sport_type,
@@ -323,19 +364,38 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
         )
       `)
       .eq('user_id', userId)
-      .eq('status', 'completed')
-      .order('completed_at', { ascending: true });
+      .in('status', ['completed', 'scheduled'])
+      .order('scheduled_date', { ascending: true });
 
     if (workouts && workouts.length > 0) {
       hasRealData = true;
       workouts.forEach((w: any) => {
-        if (!w.completed_at || !w.training_sessions) return;
-        const dateStr = w.completed_at.split('T')[0];
+        if (!w.training_sessions) return;
+        
+        const isScheduled = w.status === 'scheduled';
+        const dateRaw = isScheduled ? w.scheduled_date : (w.completed_at || w.scheduled_date);
+        if (!dateRaw) return;
+        
+        const dateStr = dateRaw.split('T')[0];
         const session = w.training_sessions;
-        const tss = w.actual_tss || estimateTss(session.duration_min, session.description);
+        
+        // Use planned_tss for future workouts, actual_tss for completed
+        let tss = 0;
+        let pTss = w.planned_tss || estimateTss(session.duration_min, session.description);
+
+        if (isScheduled) {
+           tss = pTss;
+        } else {
+           tss = w.actual_tss || pTss;
+        }
 
         // Keep highest if there is overlap on the same date
         tssByDate[dateStr] = Math.max(tssByDate[dateStr] || 0, tss);
+        plannedTssByDate[dateStr] = Math.max(plannedTssByDate[dateStr] || 0, pTss);
+        
+        // Grab RPE and Feel if they exist
+        if (w.rpe) rpeByDate[dateStr] = Math.max(rpeByDate[dateStr] || 0, w.rpe);
+        if (w.feel) feelByDate[dateStr] = Math.max(feelByDate[dateStr] || 0, w.feel);
 
         const sport = (session.sport_type || '').toLowerCase();
         let estimatedDistance = 0;
@@ -379,12 +439,13 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
       return getFallbackAnalyticsData();
     }
 
-    // 3. Generate 90-day time series curves
+    // 3. Generate 90-day historical + 14-day future time series curves
     const pmcData: PmcPoint[] = [];
     let currentCtl = 25; // Base fitness starting point
     let currentAtl = 25;
 
-    for (let i = 89; i >= 0; i--) {
+    // Loop through past 90 days to Today, and +14 days into the future
+    for (let i = 89; i >= -14; i--) {
       const d = new Date(now);
       d.setDate(now.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];
@@ -395,19 +456,39 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
       const currentTsb = currentCtl - currentAtl;
 
       const dist = dailyDistance[dateStr] || { swim: 0, bike: 0, run: 0 };
+      const isFutureDate = i < 0;
+
+      // Simulated PR logic: high TSS usually means hard races or max tests (for the MVP demo)
+      let prs: string[] = [];
+      if (!isFutureDate && dailyTss > 90) {
+        if (dist.run > 15) prs.push('Medio Maratón (Ritmo)');
+        else if (dist.run > 8) prs.push('10K (Mejor Marca)');
+        else if (dist.run > 3) prs.push('5K (Mejor Marca)');
+        else if (dist.bike > 50) prs.push('Potencia 20min (FTP Test)');
+        else if (dist.swim > 1.5) prs.push('1000m Natación (CSS)');
+        else prs.push('Pico de Potencia 5min');
+      }
 
       pmcData.push({
         date: dateStr,
         ctl: Math.round(currentCtl),
         atl: Math.round(currentAtl),
         tsb: Math.round(currentTsb),
-        swimDistance: Math.round(dist.swim),
-        bikeDistance: Number(dist.bike.toFixed(1)),
-        runDistance: Number(dist.run.toFixed(1))
+        swimDistance: isFutureDate ? 0 : Math.round(dist.swim),
+        bikeDistance: isFutureDate ? 0 : Number(dist.bike.toFixed(1)),
+        runDistance: isFutureDate ? 0 : Number(dist.run.toFixed(1)),
+        isFuture: isFutureDate,
+        actualTss: isFutureDate ? 0 : dailyTss,
+        plannedTss: plannedTssByDate[dateStr] || dailyTss,
+        rpe: isFutureDate ? undefined : rpeByDate[dateStr],
+        feel: isFutureDate ? undefined : feelByDate[dateStr],
+        prs: prs.length > 0 ? prs : undefined
       });
     }
 
-    const lastPoint = pmcData[pmcData.length - 1];
+    // El lastPoint para KPIs debe ser "Hoy" (índice donde i == 0)
+    const todayIndex = pmcData.findIndex(p => p.date === now.toISOString().split('T')[0]) || (pmcData.length - 15);
+    const todayPoint = pmcData[todayIndex > -1 ? todayIndex : pmcData.length - 15];
     const weeklyTssActual = sportTssCurrentWeek.natacion + sportTssCurrentWeek.ciclismo + sportTssCurrentWeek.carrera;
     const weeklyTssTarget = 450; 
 
@@ -474,9 +555,9 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
 
     return {
       pmcData,
-      currentCtl: lastPoint.ctl,
-      currentAtl: lastPoint.atl,
-      currentTsb: lastPoint.tsb,
+      currentCtl: todayPoint.ctl,
+      currentAtl: todayPoint.atl,
+      currentTsb: todayPoint.tsb,
       weeklyTssActual,
       weeklyTssTarget,
       sportDistribution: {
@@ -586,7 +667,7 @@ function getFallbackAnalyticsData(level: string = 'intermedio'): AnalyticsDashbo
 
   return {
     pmcData,
-    currentCtl: lastPoint.ctl,
+    currentCtl: lastPoint.ctl, // here fallback doesn't matter much
     currentAtl: lastPoint.atl,
     currentTsb: lastPoint.tsb,
     weeklyTssActual: 385,

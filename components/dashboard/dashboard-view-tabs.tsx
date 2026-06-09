@@ -8,7 +8,8 @@ import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
 import { WeeklyNav } from '@/components/dashboard/weekly-nav';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { Calendar, Plus, X, Flame, Sparkles, ChevronLeft, ChevronRight, Activity } from 'lucide-react';
+import { Calendar, Plus, X, Flame, Sparkles, ChevronLeft, ChevronRight, Activity, Bot } from 'lucide-react';
+import { AIWorkoutGenerator, GeneratedWorkout } from './ai-workout-generator';
 
 interface DashboardViewTabsProps {
   initialWorkouts: any[];
@@ -30,7 +31,26 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
   const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<'semana' | 'mes'>('semana');
   const [isManualModalOpen, setIsManualModalOpen] = React.useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = React.useState(false);
+  const [aiWorkouts, setAiWorkouts] = React.useState<GeneratedWorkout[]>([]);
   
+  // Merge initialWorkouts with AI generated ones
+  const allWorkouts = React.useMemo(() => {
+    const mappedAiWorkouts = aiWorkouts.map((aiw, idx) => ({
+      id: `ai-gen-${Date.now()}-${idx}`,
+      scheduled_date: aiw.date,
+      status: 'pending',
+      training_sessions: {
+        sport_type: aiw.sport_type,
+        title: aiw.title,
+        description: aiw.description,
+        duration_minutes: aiw.duration_minutes,
+        tss_score: aiw.tss
+      }
+    }));
+    return [...initialWorkouts, ...mappedAiWorkouts];
+  }, [initialWorkouts, aiWorkouts]);
+
   // State for monthly view navigation and selection
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const todayStr = new Date().toISOString().split('T')[0];
@@ -156,13 +176,13 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
     const monStr = monday.toISOString().split('T')[0];
     const sunStr = sunday.toISOString().split('T')[0];
 
-    return initialWorkouts.filter(
+    return allWorkouts.filter(
       w => w.scheduled_date >= monStr && w.scheduled_date <= sunStr
-    );
+    ).sort((a, b) => a.scheduled_date.localeCompare(b.scheduled_date));
   };
 
   const weeklyWorkouts = getWeeklyWorkouts();
-  const selectedDayWorkouts = initialWorkouts.filter(w => w.scheduled_date === selectedDateStr);
+  const selectedDayWorkouts = allWorkouts.filter(w => w.scheduled_date === selectedDateStr);
 
   return (
     <div className="space-y-6">
@@ -172,23 +192,33 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
         <div className="flex bg-zinc-950/60 p-1 rounded-xl border border-zinc-800 shadow-inner">
           <button
             onClick={() => setActiveTab('semana')}
-            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === 'semana'
-                ? 'bg-zinc-800 text-white shadow-md'
-                : 'text-zinc-400 hover:text-zinc-200'
+            className={`relative px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${
+              activeTab === 'semana' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            Vista Semanal
+            {activeTab === 'semana' && (
+              <motion.div
+                layoutId="active-dashboard-tab"
+                className="absolute inset-0 bg-zinc-800 rounded-lg shadow-md"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10">Vista Semanal</span>
           </button>
           <button
             onClick={() => setActiveTab('mes')}
-            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
-              activeTab === 'mes'
-                ? 'bg-zinc-800 text-white shadow-md'
-                : 'text-zinc-400 hover:text-zinc-200'
+            className={`relative px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${
+              activeTab === 'mes' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            Vista Mensual
+            {activeTab === 'mes' && (
+              <motion.div
+                layoutId="active-dashboard-tab"
+                className="absolute inset-0 bg-zinc-800 rounded-lg shadow-md"
+                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+              />
+            )}
+            <span className="relative z-10">Vista Mensual</span>
           </button>
         </div>
 
@@ -207,14 +237,24 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
           )}
           
           {!readOnly && (
-            <AnimatedButton
-              variant="primary"
-              onClick={() => openModalForDate(todayStr)}
-              className="!bg-cyan-500 hover:!bg-cyan-400 !text-black text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-cyan-500/10 cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Añadir Sesión Manual</span>
-            </AnimatedButton>
+            <div className="flex items-center gap-2">
+              <AnimatedButton
+                variant="ghost"
+                onClick={() => setIsAiModalOpen(true)}
+                className="bg-cyan-950/30 hover:bg-cyan-900/50 text-cyan-400 border border-cyan-900/50 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Bot className="w-4 h-4" />
+                <span className="hidden sm:inline">Generar Plan AI</span>
+              </AnimatedButton>
+              <AnimatedButton
+                variant="primary"
+                onClick={() => openModalForDate(todayStr)}
+                className="!bg-cyan-500 hover:!bg-cyan-400 !text-black text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-cyan-500/10 cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Añadir Manual</span>
+              </AnimatedButton>
+            </div>
           )}
         </div>
       </div>
@@ -320,7 +360,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                   const isSelected = dateStr === selectedDateStr;
 
                   // Find sessions for this day
-                  const daySessions = initialWorkouts.filter(w => w.scheduled_date === dateStr);
+                  const daySessions = allWorkouts.filter(w => w.scheduled_date === dateStr);
 
                   // Calculate compliance color like TrainingPeaks
                   let complianceClass = '';
@@ -410,10 +450,17 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                   />
                 ))
               ) : (
-                <ProCard className="p-6 text-center bg-zinc-950/20 border-dashed border-zinc-800">
-                  <p className="text-xs sm:text-sm text-zinc-400">No hay entrenamientos planificados para esta fecha.</p>
-                  <p className="text-[10px] text-zinc-550 mt-1">Descansa o añade una sesión manual.</p>
-                </ProCard>
+                <div className="p-6 rounded-2xl bg-zinc-950/40 border border-dashed border-zinc-800 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform duration-500">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-zinc-300">Día de Recuperación Activa</p>
+                    <p className="text-xs text-zinc-500 max-w-[250px] mx-auto leading-relaxed">
+                      No hay entrenamientos de alta intensidad. Aprovecha para estirar 15 min, caminar o simplemente descansar la musculatura.
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -577,6 +624,13 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
           </div>
         )}
       </AnimatePresence>
+
+      <AIWorkoutGenerator 
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        onGenerate={(workouts) => setAiWorkouts(workouts)}
+        currentDate={currentDate.toISOString().split('T')[0]}
+      />
     </div>
   );
 }

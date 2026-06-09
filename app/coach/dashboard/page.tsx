@@ -45,6 +45,7 @@ export default async function CoachDashboardPage() {
       initialRoster={roster} 
       plans={plans} 
       coachName={coachName} 
+      coachId={user.id}
     />
   )
 }

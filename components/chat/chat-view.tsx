@@ -15,6 +15,7 @@ import {
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { ChatParticipant, ChatMessageItem, sendMessage, getMessages } from '@/app/chat/actions'
+import { createClient } from '@/lib/supabase/client'
 
 interface ChatViewProps {
   initialParticipants: ChatParticipant[]
@@ -85,6 +86,42 @@ export function ChatView({
     scrollToBottom()
   }, [messages, isTyping])
 
+  // Supabase Realtime Subscription
+  React.useEffect(() => {
+    if (!currentUserId || !selectedPart) return
+
+    const supabase = createClient()
+    
+    // Create a channel specifically for this conversation (or user)
+    const channel = supabase
+      .channel(`chat_${currentUserId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `receiver_id=eq.${currentUserId}`
+        },
+        (payload) => {
+          const newMsg = payload.new as ChatMessageItem
+          // Only append if the message is from the currently active chat
+          if (newMsg.sender_id === selectedPart.id) {
+            setMessages(prev => {
+              // Avoid duplicates (in case of own optimistic updates)
+              if (prev.some(m => m.id === newMsg.id)) return prev
+              return [...prev, newMsg]
+            })
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [currentUserId, selectedPart])
+
   // Submit message handler
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -114,58 +151,11 @@ export function ChatView({
       } else if (res.data) {
         // Swap temp id for real DB row
         setMessages(prev => prev.map(m => m.id === tempId ? res.data! : m))
-
-        // Trigger simulated reply for premium feeling in demo mode
-        simulateCoachOrAthleteReply(messageText)
       }
     } catch (err) {
       console.error(err)
       setMessages(prev => prev.filter(m => m.id !== tempId))
     }
-  }
-
-  // Simulated AI/Demonstration reply
-  const simulateCoachOrAthleteReply = (athleteText: string) => {
-    setIsTyping(true)
-
-    setTimeout(() => {
-      setIsTyping(false)
-
-      let reply = ''
-      if (currentUserRole === 'coach') {
-        // Athlete replying to coach
-        const lower = athleteText.toLowerCase()
-        if (lower.includes('hola') || lower.includes('buenos')) {
-          reply = '¡Hola Entrenador! He completado la sesión de natación de esta mañana. Me he sentido fuerte en las series de Z3.'
-        } else if (lower.includes('hrv') || lower.includes('fatiga') || lower.includes('cansado')) {
-          reply = 'Sí, hoy me he levantado un poco cansado y con el HRV algo bajo. Intentaré hacer la sesión de rodillo muy suave como me indicas.'
-        } else if (lower.includes('plan') || lower.includes('entrenamiento')) {
-          reply = '¡Plan recibido! Muchas gracias por adaptarlo esta semana. Me viene de perlas para compaginarlo con el trabajo.'
-        } else {
-          reply = 'Entendido Coach. Seguiré las indicaciones al pie de la letra y te registro el RPE en cuanto acabe.'
-        }
-      } else {
-        // Coach replying to athlete
-        const lower = athleteText.toLowerCase()
-        if (lower.includes('hola') || lower.includes('duda')) {
-          reply = '¡Hola! He revisado tu sesión de ayer. Muy buena constancia. ¿Qué tal te sentiste en las series finales? Ajustemos si hace falta.'
-        } else if (lower.includes('cansado') || lower.includes('dolor') || lower.includes('fatiga')) {
-          reply = 'He visto tus biometrias de hoy y la fatiga está alta. Vamos a recortar la sesión de carrera a la mitad o haz rodaje regenerativo en Z1.'
-        } else {
-          reply = 'Excelente entrenamiento. Sigue controlando la hidratación y recuerda registrar el feedback de RPE para ajustar la carga de la semana.'
-        }
-      }
-
-      const replyMsg: ChatMessageItem = {
-        id: `sim-${Date.now()}`,
-        sender_id: selectedPart!.id,
-        receiver_id: currentUserId,
-        message: reply,
-        created_at: new Date().toISOString()
-      }
-
-      setMessages(prev => [...prev, replyMsg])
-    }, 2000)
   }
 
   return (
@@ -251,9 +241,9 @@ export function ChatView({
                 </div>
               </div>
               
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/5 border border-orange-500/15 text-[9px] text-orange-400 font-bold uppercase tracking-wider">
-                <Sparkles className="w-3 h-3 text-orange-400 animate-pulse" />
-                Modo Simulación Activo
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/5 border border-emerald-500/15 text-[9px] text-emerald-400 font-bold uppercase tracking-wider">
+                <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
+                Conectado (Realtime)
               </div>
             </div>
 

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ArrowLeft, ShoppingBag, Sparkles } from 'lucide-react';
 import { MarketplaceAggregatorGrid, MarketplaceItem } from '@/components/marketplace/marketplace-aggregator-grid';
+import { SellItemButton } from '@/components/marketplace/sell-item-button';
 
 export const revalidate = 60; // Refrescar caché de chollos cada 60 segundos
 
@@ -114,6 +115,7 @@ export default async function MarketplacePage({
               <span>Volver al Dashboard</span>
             </AnimatedButton>
           </Link>
+          <SellItemButton virtualGarage={virtualGarage} />
         </div>
       </header>
 
@@ -122,14 +124,14 @@ export default async function MarketplacePage({
         
         {/* Encabezado de Sección */}
         <div className="space-y-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 flex-wrap">
-            <Sparkles className="w-3.5 h-3.5" /> Agregador Inteligente de Chollos (AI Scraper Hub)
-            <span className="bg-amber-500/10 text-amber-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-500/20 uppercase tracking-wider">
-              BETA / Simulación
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5 flex-wrap">
+            <Sparkles className="w-3.5 h-3.5" /> Comunidad Triatlón Pro
+            <span className="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/20 uppercase tracking-wider">
+              100% Sin Comisiones
             </span>
           </h2>
           <p className="text-sm text-zinc-400 max-w-3xl leading-relaxed">
-            Rastreamos continuamente Wallapop, Tuvalum, TuTriatlon y BuyCycle para encontrarte el mejor material certificado de triatlón. Compra directamente al vendedor sin comisiones. <span className="text-amber-400/80 font-medium">(Los datos de esta sección son simulaciones con fines demostrativos en esta fase Beta).</span>
+            Compra y vende material certificado directamente a otros atletas de la plataforma. Sin intermediarios, sin comisiones ocultas y con la seguridad de la comunidad.
           </p>
         </div>
 

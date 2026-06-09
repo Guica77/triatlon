@@ -1,24 +1,21 @@
 {
-  "name": "Triatlon Pro App",
-  "short_name": "Triatlon Pro",
-  "description": "Plataforma de entrenamiento de triatlón de alto rendimiento y telemetría universal",
+  "name": "Triatlón Pro",
+  "short_name": "Tri Pro",
+  "description": "La plataforma definitiva para el triatleta.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#09090b",
   "theme_color": "#09090b",
-  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/globe.svg",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
-      "src": "/globe.svg",
+      "src": "/icon-512x512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }

@@ -174,6 +174,7 @@ export type Database = {
           location: string | null
           original_price: number | null
           price: number
+          seller_id: string | null
           seller_name: string | null
           source_portal: string
           title: string
@@ -190,6 +191,7 @@ export type Database = {
           location?: string | null
           original_price?: number | null
           price: number
+          seller_id?: string | null
           seller_name?: string | null
           source_portal: string
           title: string
@@ -206,6 +208,7 @@ export type Database = {
           location?: string | null
           original_price?: number | null
           price?: number
+          seller_id?: string | null
           seller_name?: string | null
           source_portal?: string
           title?: string
