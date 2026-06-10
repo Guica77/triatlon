@@ -56,11 +56,6 @@ export async function signup(formData: FormData) {
   const lastName = formData.get('lastName') as string
   const role = (formData.get('role') as string) || 'athlete'
 
-  // Si intentan crear la cuenta de pruebas, lo reconducimos a un Login directo para evitar el bloqueo de emails
-  if (email === 'coach-demo@triatlonpro.com' || email === 'demo@triatlonpro.com') {
-    return login(formData);
-  }
-
   const supabase = await createClient()
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
