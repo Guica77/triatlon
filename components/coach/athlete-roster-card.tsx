@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Eye, MessageSquare, Trash2, Clock, Activity, AlertTriangle } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { AthleteRosterItem } from '@/app/coach/dashboard/actions';
+import { AthleteRosterItem } from '@/app/(app)/coach/dashboard/actions';
 
 interface AthleteRosterCardProps {
   athlete: AthleteRosterItem;

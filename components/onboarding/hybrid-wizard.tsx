@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { RACES_CATALOG, RaceCatalogItem, MultisportModality } from '@/lib/races-data';
-import { saveRaceGoalAndPlan } from '@/app/onboarding/actions';
+import { saveRaceGoalAndPlan } from '@/app/(app)/onboarding/actions';
 import { Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence } from 'framer-motion';

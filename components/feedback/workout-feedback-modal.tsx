@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertTriangle, Smile, Frown, ThumbsUp, Moon, Activity } from 'lucide-react';
-import { submitWorkoutFeedback } from '@/app/feedback/feedback-actions';
+import { submitWorkoutFeedback } from '@/app/(app)/feedback/feedback-actions';
 
 interface WorkoutFeedbackModalProps {
   isOpen: boolean;

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { calculateReadiness } from '@/app/dashboard/biometrics-actions'
+import { calculateReadiness } from '@/app/(app)/dashboard/biometrics-actions'
 
 // Mocking Supabase Client & Next Navigation
 vi.mock('@/lib/supabase/server', () => ({

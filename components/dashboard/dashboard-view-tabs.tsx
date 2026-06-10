@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createManualWorkoutAction } from '@/app/dashboard/actions';
+import { createManualWorkoutAction } from '@/app/(app)/dashboard/actions';
 import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
 import { WeeklyNav } from '@/components/dashboard/weekly-nav';
 import { ProCard } from '@/components/ui/pro-card';

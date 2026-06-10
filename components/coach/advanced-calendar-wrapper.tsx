@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { AdvancedCalendar, WorkoutItem } from './advanced-calendar';
-import { updateWorkoutDate } from '@/app/coach/athlete/[id]/actions';
+import { updateWorkoutDate } from '@/app/(app)/coach/athlete/[id]/actions';
 
 interface AdvancedCalendarWrapperProps {
   athleteId: string;

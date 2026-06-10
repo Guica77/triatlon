@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { selectPlan } from '@/app/onboarding/actions';
+import { selectPlan } from '@/app/(app)/onboarding/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { 

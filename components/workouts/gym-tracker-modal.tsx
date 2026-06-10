@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Timer, Minus, Plus, Dumbbell, ShieldAlert, Zap, Activity, Loader2 } from 'lucide-react';
-import { getStrengthExercisesForUser, logStrengthSet } from '@/app/dashboard/strength-actions';
+import { getStrengthExercisesForUser, logStrengthSet } from '@/app/(app)/dashboard/strength-actions';
 
 interface GymTrackerModalProps {
   isOpen: boolean;

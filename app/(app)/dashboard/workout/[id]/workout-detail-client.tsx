@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/dashboard/actions';
+import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/(app)/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { adaptWorkoutDescription } from '@/lib/zones-utility';
 import { AnimatedButton } from '@/components/ui/animated-button';

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Edit2, X, Check, Zap, Waves, Footprints, Clock } from 'lucide-react';
-import { updatePhysiologicalData } from '@/app/settings/actions';
+import { updatePhysiologicalData } from '@/app/(app)/settings/actions';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 interface PhysiologicalCardProps {

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, Bike, Tag, MapPin, Loader2, Sparkles } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { createMarketplaceListing } from '@/app/marketplace/actions';
+import { createMarketplaceListing } from '@/app/(app)/marketplace/actions';
 
 interface SellItemModalProps {
   isOpen: boolean;

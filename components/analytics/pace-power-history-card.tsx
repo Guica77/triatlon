@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { PacePowerPoint } from '@/app/analytics/analytics-actions';
+import { PacePowerPoint } from '@/app/(app)/analytics/analytics-actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { Activity, Flame, TrendingUp } from 'lucide-react';
 

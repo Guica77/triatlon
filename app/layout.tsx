@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
 import { CookieBanner } from "@/components/ui/cookie-banner";
 
 const geistSans = Geist({
@@ -70,10 +69,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full bg-background text-foreground flex flex-col font-sans selection:bg-primary/30">
-        <div className="relative flex min-h-screen flex-col pb-16 sm:pb-0">
-          <main className="flex-1 overflow-x-hidden">{children}</main>
-          <MobileBottomNav />
-        </div>
+        {children}
         <CookieBanner />
         <script
           dangerouslySetInnerHTML={{

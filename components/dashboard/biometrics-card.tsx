@@ -4,7 +4,7 @@ import * as React from 'react'
 import { ProCard } from '@/components/ui/pro-card'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { Activity, Moon, Heart, Settings, Flame, Brain } from 'lucide-react'
-import { DailyBiometrics, updateBiometrics, calculateReadiness } from '@/app/dashboard/biometrics-actions'
+import { DailyBiometrics, updateBiometrics, calculateReadiness } from '@/app/(app)/dashboard/biometrics-actions'
 import { BiometricsModal } from '@/components/dashboard/biometrics-modal'
 
 interface BiometricsCardProps {

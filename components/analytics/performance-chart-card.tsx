@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { PmcPoint } from '@/app/analytics/analytics-actions';
+import { PmcPoint } from '@/app/(app)/analytics/analytics-actions';
 import { HelpCircle, Activity, SlidersHorizontal, Calendar, Zap, TrendingUp, Smile, Meh, Frown, HeartPulse, Trophy } from 'lucide-react';
 import {
   LineChart,

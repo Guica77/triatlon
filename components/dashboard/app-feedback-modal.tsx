@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Send, X, Star } from 'lucide-react';
-import { submitAppFeedback } from '@/app/feedback/feedback-actions';
+import { submitAppFeedback } from '@/app/(app)/feedback/feedback-actions';
 
 interface AppFeedbackModalProps {
   daysUsed: number;

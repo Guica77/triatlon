@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { getCoachDashboardData } from '@/app/feedback/feedback-actions';
+import { getCoachDashboardData } from '@/app/(app)/feedback/feedback-actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { CoachSuggestionForm } from '@/components/feedback/coach-suggestion-form';

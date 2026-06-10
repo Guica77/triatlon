@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { RACES_CATALOG, RaceCatalogItem, MultisportModality } from '@/lib/races-data';
-import { saveRaceGoalAndPlan } from '@/app/onboarding/actions';
+import { saveRaceGoalAndPlan } from '@/app/(app)/onboarding/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Search, Trophy, Calendar, Zap, Flag, Check } from 'lucide-react';

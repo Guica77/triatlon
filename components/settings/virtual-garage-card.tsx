@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wrench, Edit2, X, Check } from 'lucide-react';
-import { updateVirtualGarage } from '@/app/settings/actions';
+import { updateVirtualGarage } from '@/app/(app)/settings/actions';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 const VIRTUAL_GARAGE_ITEMS = [

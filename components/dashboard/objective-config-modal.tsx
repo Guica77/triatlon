@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Target, X, Save, AlertCircle } from 'lucide-react';
 import { StepAmbition } from '@/components/onboarding/steps/step-ambition';
 import { RACES_CATALOG, RaceCatalogItem, MultisportModality } from '@/lib/races-data';
-import { saveRaceGoalAndPlan } from '@/app/onboarding/actions';
+import { saveRaceGoalAndPlan } from '@/app/(app)/onboarding/actions';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { useRouter } from 'next/navigation';
 

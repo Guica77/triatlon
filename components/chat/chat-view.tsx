@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
-import { ChatParticipant, ChatMessageItem, sendMessage, getMessages } from '@/app/chat/actions'
+import { ChatParticipant, ChatMessageItem, sendMessage, getMessages } from '@/app/(app)/chat/actions'
 import { createClient } from '@/lib/supabase/client'
 
 interface ChatViewProps {

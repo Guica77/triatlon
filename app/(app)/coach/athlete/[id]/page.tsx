@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
-import { fetchAndCalculateAnalytics } from '@/app/analytics/analytics-actions';
+import { fetchAndCalculateAnalytics } from '@/app/(app)/analytics/analytics-actions';
 import { Trophy, LogOut, Settings, ChevronLeft, Calendar, User, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { AnimatedButton } from '@/components/ui/animated-button';

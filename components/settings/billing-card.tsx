@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { CreditCard, Check, Zap, Sparkles, RefreshCw, X, Lock } from 'lucide-react';
-import { updateSubscriptionStatus } from '@/app/settings/actions';
+import { updateSubscriptionStatus } from '@/app/(app)/settings/actions';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 interface BillingCardProps {

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getChatParticipants } from '@/app/chat/actions'
+import { getChatParticipants } from '@/app/(app)/chat/actions'
 import { ChatView } from '@/components/chat/chat-view'
 import { Trophy, MessageSquare, Settings, LogOut } from 'lucide-react'
 import Link from 'next/link'

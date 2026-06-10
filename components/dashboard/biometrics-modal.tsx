@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Info, Heart, Moon, Activity, Flame, Brain } from 'lucide-react'
-import { DailyBiometrics } from '@/app/dashboard/biometrics-actions'
+import { DailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions'
 import { AnimatedButton } from '@/components/ui/animated-button'
 
 interface BiometricsModalProps {

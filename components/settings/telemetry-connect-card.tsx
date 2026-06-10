@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { disconnectTelemetry, syncPacesFromStravaAction, pushWeekWorkoutsToGarminAction } from '@/app/settings/actions';
+import { disconnectTelemetry, syncPacesFromStravaAction, pushWeekWorkoutsToGarminAction } from '@/app/(app)/settings/actions';
 import { Watch, Link as LinkIcon, Info, Activity, RefreshCw, UploadCloud, Heart, Check, X, Smartphone } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ZonePoint } from '@/app/analytics/analytics-actions';
+import { ZonePoint } from '@/app/(app)/analytics/analytics-actions';
 import { ShieldAlert, Flame, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
 

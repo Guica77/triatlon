@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/dashboard/actions';
+import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/(app)/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';

@@ -4,7 +4,7 @@ import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, X, Clock, Check, PlusCircle, Activity } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
-import { saveCoachWorkout } from '@/app/coach/athlete/[id]/actions'
+import { saveCoachWorkout } from '@/app/(app)/coach/athlete/[id]/actions'
 import { useRouter } from 'next/navigation'
 
 interface SessionPlannerProps {

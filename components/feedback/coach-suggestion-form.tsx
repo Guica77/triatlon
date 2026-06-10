@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { submitCoachFeedback } from '@/app/feedback/feedback-actions';
+import { submitCoachFeedback } from '@/app/(app)/feedback/feedback-actions';
 import { Send, CheckCircle2, AlertCircle, FileText, Settings, User } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 
