@@ -119,86 +119,127 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md space-y-8">
+    <div className="relative min-h-screen bg-[#09090b] flex flex-col items-center justify-center p-6 overflow-hidden font-sans">
+      
+      {/* Ambient Background Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+      <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-orange-500/10 rounded-full blur-[100px] mix-blend-screen" />
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
+
+      <div className="relative w-full max-w-md space-y-8 z-10">
         
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-light tracking-tight text-zinc-50">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-zinc-900/50 border border-zinc-800/80 shadow-2xl mb-2 backdrop-blur-xl">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="url(#cyan-gradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <defs>
+                <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#22d3ee" />
+                  <stop offset="100%" stopColor="#818cf8" />
+                </linearGradient>
+              </defs>
+              <path d="M12 2L2 7l10 5 10-5-10-5z" />
+              <path d="M2 17l10 5 10-5" />
+              <path d="M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <h1 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white to-zinc-500">
             {isForgotPassword 
-              ? 'Recuperar Contraseña' 
+              ? 'Recuperar Acceso' 
               : isSignUp 
-              ? 'Crear Cuenta' 
-              : 'Iniciar Sesión'}
+              ? 'Crear tu Legado' 
+              : 'Bienvenido de Nuevo'}
           </h1>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-400 font-medium tracking-wide">
             {isForgotPassword
-              ? 'Ingresa tu correo y te enviaremos un enlace de recuperación'
+              ? 'Te enviaremos un enlace cuántico de recuperación'
               : isSignUp 
-              ? 'Únete a la plataforma de triatlón de alto rendimiento' 
-              : 'Accede a tu plan de entrenamiento personalizado'}
+              ? 'La plataforma definitiva de alto rendimiento' 
+              : 'Tu plan de entrenamiento personalizado te espera'}
           </p>
         </div>
 
-        <ProCard className="space-y-6">
-          
+        <div className="p-8 rounded-[2rem] bg-zinc-950/40 border border-zinc-800/60 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+          {/* Subtle card inner glow */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-50 pointer-events-none" />
+
+          {/* Premium Demo Buttons for Presentation */}
+          {!isForgotPassword && !isSignUp && (
+            <div className="mb-8 space-y-3 relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent flex-1" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Modo Presentación</span>
+                <div className="h-px bg-gradient-to-r from-transparent via-zinc-700 to-transparent flex-1" />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => handleDemoLogin('athlete')}
+                  disabled={loading}
+                  className="relative group overflow-hidden rounded-2xl p-[1px]"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative h-full bg-zinc-950 px-4 py-3 rounded-[15px] flex flex-col items-center justify-center gap-1 transition-transform duration-300 group-hover:scale-[0.98]">
+                    <span className="text-sm font-black text-white group-hover:text-cyan-300 transition-colors">🏃‍♂️ Atleta</span>
+                    <span className="text-[9px] text-zinc-400 font-medium uppercase tracking-wider">Demo Interactiva</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleDemoLogin('coach')}
+                  disabled={loading}
+                  className="relative group overflow-hidden rounded-2xl p-[1px]"
+                >
+                  <span className="absolute inset-0 bg-gradient-to-br from-orange-500 to-rose-500 opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative h-full bg-zinc-950 px-4 py-3 rounded-[15px] flex flex-col items-center justify-center gap-1 transition-transform duration-300 group-hover:scale-[0.98]">
+                    <span className="text-sm font-black text-white group-hover:text-orange-300 transition-colors">📋 Coach</span>
+                    <span className="text-[9px] text-zinc-400 font-medium uppercase tracking-wider">Panel Avanzado</span>
+                  </div>
+                </button>
+              </div>
+              
+              <div className="flex items-center gap-3 mt-8 mb-2">
+                <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent flex-1" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-600">Acceso Estándar</span>
+                <div className="h-px bg-gradient-to-r from-transparent via-zinc-800 to-transparent flex-1" />
+              </div>
+            </div>
+          )}
+
           {/* Social Logins */}
           {!isForgotPassword && (
-            <>
-              <div className="space-y-3">
-
-                <AnimatedButton 
-                  variant="secondary" 
-                  className="w-full font-normal"
-                  onClick={() => signInWithOAuth('apple')}
-                  type="button"
-                >
-                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 5.26c.61-.75 1.02-1.8 1.02-2.85 0-.09-.01-.19-.03-.28-.96.04-2.07.64-2.71 1.4-.56.66-.99 1.73-.99 2.76 0 .1.02.21.03.22 1.02-.04 2.07-.5 2.68-1.25z"/>
-                  </svg>
-                  Continuar con Apple
-                </AnimatedButton>
-                <AnimatedButton 
-                  variant="secondary" 
-                  className="w-full font-normal"
-                  onClick={() => signInWithOAuth('google')}
-                  type="button"
-                >
-                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-                  </svg>
-                  Continuar con Google
-                </AnimatedButton>
-              </div>
-
-              <div className="relative flex py-2 items-center">
-                <div className="flex-grow border-t border-[var(--color-border)]"></div>
-                <span className="flex-shrink mx-4 text-xs text-zinc-500 uppercase tracking-widest">o con email</span>
-                <div className="flex-grow border-t border-[var(--color-border)]"></div>
-              </div>
-            </>
+            <div className="space-y-3 relative z-10 mb-6">
+              <button 
+                onClick={() => signInWithOAuth('apple')}
+                type="button"
+                className="w-full flex items-center justify-center gap-3 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium py-3.5 rounded-xl border border-zinc-800 transition-all hover:border-zinc-700"
+              >
+                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 5.26c.61-.75 1.02-1.8 1.02-2.85 0-.09-.01-.19-.03-.28-.96.04-2.07.64-2.71 1.4-.56.66-.99 1.73-.99 2.76 0 .1.02.21.03.22 1.02-.04 2.07-.5 2.68-1.25z"/>
+                </svg>
+                Continuar con Apple
+              </button>
+            </div>
           )}
 
           {/* Email / Password Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
             
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center">
+              <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-medium shadow-inner">
                 {error}
               </div>
             )}
 
             {successMessage && (
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs text-center leading-relaxed">
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs text-center leading-relaxed font-medium shadow-inner">
                 {successMessage}
               </div>
             )}
 
             {infoMessage && !error && !successMessage && (
-              <div className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs text-center leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs text-center leading-relaxed font-medium shadow-inner">
                 {infoMessage}
               </div>
             )}
@@ -206,35 +247,35 @@ function LoginForm() {
             {isSignUp && !isForgotPassword && (
               <>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-xs text-zinc-400">Nombre</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Nombre</label>
                     <input 
                       name="firstName" 
                       type="text" 
                       required 
-                      className="w-full bg-[#121214] border border-[var(--color-border)] rounded-xl p-3 text-sm text-zinc-100 outline-none focus:border-zinc-400 transition-colors"
+                      className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:bg-zinc-900 transition-all"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-zinc-400">Apellidos</label>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Apellidos</label>
                     <input 
                       name="lastName" 
                       type="text" 
                       required 
-                      className="w-full bg-[#121214] border border-[var(--color-border)] rounded-xl p-3 text-sm text-zinc-100 outline-none focus:border-zinc-400 transition-colors"
+                      className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:bg-zinc-900 transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs text-zinc-400">Tipo de Cuenta</label>
-                  <div className="grid grid-cols-2 gap-1 p-1 bg-zinc-950 rounded-xl border border-zinc-800">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Tipo de Cuenta</label>
+                  <div className="grid grid-cols-2 gap-1 p-1 bg-zinc-950/80 rounded-xl border border-zinc-800 shadow-inner">
                     <button
                       type="button"
                       onClick={() => setRoleSelection('athlete')}
-                      className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                      className={`py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                         roleSelection === 'athlete' 
-                          ? 'bg-zinc-800 text-white shadow-sm' 
+                          ? 'bg-zinc-800 text-white shadow-md ring-1 ring-zinc-700' 
                           : 'text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
@@ -243,9 +284,9 @@ function LoginForm() {
                     <button
                       type="button"
                       onClick={() => setRoleSelection('coach')}
-                      className={`py-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                      className={`py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                         roleSelection === 'coach' 
-                          ? 'bg-zinc-800 text-white shadow-sm' 
+                          ? 'bg-zinc-800 text-white shadow-md ring-1 ring-zinc-700' 
                           : 'text-zinc-500 hover:text-zinc-300'
                       }`}
                     >
@@ -257,25 +298,25 @@ function LoginForm() {
               </>
             )}
 
-            <div className="space-y-1">
-              <label className="text-xs text-zinc-400">Correo Electrónico</label>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Correo Electrónico</label>
               <input 
                 name="email" 
                 type="email" 
-                placeholder="atleta@triatlon.com" 
+                placeholder="atleta@triatlonpro.com" 
                 required 
-                className="w-full bg-[#121214] border border-[var(--color-border)] rounded-xl p-3 text-sm text-zinc-100 outline-none focus:border-zinc-400 transition-colors"
+                className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:bg-zinc-900 transition-all"
               />
             </div>
 
             {!isForgotPassword && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs text-zinc-400">Contraseña</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Contraseña</label>
                   <button
                     type="button"
                     onClick={() => { setIsForgotPassword(true); setError(null); setSuccessMessage(null); }}
-                    className="text-[11px] text-cyan-400 hover:text-cyan-300 transition-colors font-medium animate-fade-in"
+                    className="text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors font-bold uppercase tracking-wider"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -285,24 +326,33 @@ function LoginForm() {
                   type="password" 
                   placeholder="••••••••" 
                   required 
-                  className="w-full bg-[#121214] border border-[var(--color-border)] rounded-xl p-3 text-sm text-zinc-100 outline-none focus:border-zinc-400 transition-colors"
+                  className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:bg-zinc-900 transition-all font-mono"
                 />
               </div>
             )}
 
-            <AnimatedButton variant="primary" className="w-full mt-2" type="submit" disabled={loading}>
-              {loading ? 'Procesando...' : isForgotPassword ? 'Enviar Enlace de Recuperación' : (isSignUp ? 'Crear Cuenta' : 'Entrar al Plan')}
-            </AnimatedButton>
+            <button 
+              className="w-full mt-4 py-4 rounded-xl text-sm font-black text-black bg-white hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center disabled:opacity-50" 
+              type="submit" 
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 rounded-full border-2 border-black/20 border-t-black animate-spin" />
+                  Procesando...
+                </span>
+              ) : isForgotPassword ? 'Enviar Enlace de Recuperación' : (isSignUp ? 'Crear mi Cuenta' : 'Entrar a la Plataforma')}
+            </button>
 
           </form>
 
           {/* Toggle mode */}
-          <div className="text-center pt-2">
+          <div className="text-center pt-6 relative z-10">
             {isForgotPassword ? (
               <button 
                 type="button" 
                 onClick={() => { setIsForgotPassword(false); setError(null); setSuccessMessage(null); }}
-                className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-semibold"
+                className="text-xs text-zinc-400 hover:text-white transition-colors font-semibold"
               >
                 ← Volver a Iniciar Sesión
               </button>
@@ -310,15 +360,15 @@ function LoginForm() {
               <button 
                 type="button" 
                 onClick={() => { setIsSignUp(!isSignUp); setError(null); setSuccessMessage(null); }}
-                className="text-xs text-zinc-400 hover:text-zinc-100 transition-colors"
+                className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-medium"
               >
                 {isSignUp 
-                  ? '¿Ya tienes cuenta? Inicia sesión aquí' 
-                  : '¿No tienes cuenta? Regístrate ahora'}
+                  ? '¿Ya eres miembro? Inicia sesión aquí' 
+                  : '¿No tienes cuenta? Solicita acceso'}
               </button>
             )}
           </div>
-        </ProCard>
+        </div>
 
       </div>
     </div>
