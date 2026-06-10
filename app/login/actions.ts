@@ -55,6 +55,12 @@ export async function signup(formData: FormData) {
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
   const role = (formData.get('role') as string) || 'athlete'
+
+  // Si intentan crear la cuenta de pruebas, lo reconducimos a un Login directo para evitar el bloqueo de emails
+  if (email === 'coach-demo@triatlonpro.com' || email === 'demo@triatlonpro.com') {
+    return login(formData);
+  }
+
   const supabase = await createClient()
 
   const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -63,7 +69,11 @@ export async function signup(formData: FormData) {
   })
 
   if (authError) {
-    return { error: authError.message }
+    let errorMessage = authError.message;
+    if (errorMessage.includes('Error sending confirmation email') || errorMessage.includes('rate limit')) {
+      errorMessage = 'Límite de registros alcanzado por seguridad (Anti-Spam). Usa "coach-demo@triatlonpro.com" iniciando sesión para probar la demo.';
+    }
+    return { error: errorMessage }
   }
 
   if (authData.user) {
