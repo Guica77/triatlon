@@ -97,3 +97,40 @@ export async function saveCoachWorkout(
     return { error: err.message || 'Error inesperado' }
   }
 }
+
+export async function updateWorkoutDate(
+  athleteId: string,
+  workoutId: string,
+  newDate: string
+) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  // Verify coach
+  const { data: rosterCheck } = await supabase
+    .from('coach_athletes')
+    .select('id')
+    .eq('coach_id', user.id)
+    .eq('athlete_id', athleteId)
+    .maybeSingle()
+
+  if (!rosterCheck) return { error: 'No autorizado' }
+
+  const { error } = await supabase
+    .from('user_workouts')
+    .update({ scheduled_date: newDate } as any)
+    .eq('id', workoutId)
+    .eq('user_id', athleteId)
+
+  if (error) {
+    console.error('Error updating workout date:', error)
+    return { error: 'Error al mover la sesión' }
+  }
+
+  revalidatePath(`/coach/athlete/${athleteId}`)
+  revalidatePath('/dashboard')
+  
+  return { success: true }
+}

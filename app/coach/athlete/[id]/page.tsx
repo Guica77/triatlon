@@ -9,6 +9,7 @@ import { Trophy, LogOut, Settings, ChevronLeft, Calendar, User, Activity } from 
 import Link from 'next/link';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { SessionPlanner } from '@/components/coach/session-planner';
+import { AdvancedCalendarWrapper } from '@/components/coach/advanced-calendar-wrapper';
 
 interface AthletePageProps {
   params: Promise<{ id: string }>;
@@ -229,6 +230,20 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
               progressPercent={progressPercent}
             />
           </div>
+        </section>
+
+        {/* Advanced Builder */}
+        <section className="space-y-4 pt-4 border-t border-zinc-800/60">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-orange-500" /> 
+              Constructor Semanal Inteligente
+            </h2>
+            <span className="text-xs text-zinc-500 font-medium bg-zinc-900 px-2.5 py-1 rounded-md border border-zinc-800">
+              Arrastra y suelta para reprogramar
+            </span>
+          </div>
+          <AdvancedCalendarWrapper athleteId={athleteId} initialWorkouts={workouts || []} />
         </section>
 
         {/* Tabs of Calendar / List View */}
