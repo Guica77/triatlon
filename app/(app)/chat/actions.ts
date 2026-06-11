@@ -7,12 +7,7 @@ import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key')
 
-// Set VAPID Details
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
-  process.env.VAPID_PRIVATE_KEY || ''
-)
+// VAPID Details configuration moved inside functions to prevent Vercel build errors
 
 export interface ChatMessageItem {
   id: string
@@ -79,14 +74,24 @@ export async function sendMessage(receiverId: string, message: string): Promise<
 
         const senderName = senderProfile?.first_name || 'Alguien'
 
-        await webpush.sendNotification(
-          receiverProfile.push_subscriptions as any,
-          JSON.stringify({
-            title: `Nuevo mensaje de ${senderName}`,
-            body: message.trim(),
-            url: '/chat',
-          })
-        )
+        if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+          webpush.setVapidDetails(
+            process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com',
+            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+            process.env.VAPID_PRIVATE_KEY
+          )
+
+          await webpush.sendNotification(
+            receiverProfile.push_subscriptions as any,
+            JSON.stringify({
+              title: `Nuevo mensaje de ${senderName}`,
+              body: message.trim(),
+              url: '/chat',
+            })
+          )
+        } else {
+          console.warn('VAPID keys not configured, skipping push notification.')
+        }
       } else {
         // Trigger Resend email fallback
         console.log(`No push token for ${receiverId}. Triggering Email Fallback...`);
