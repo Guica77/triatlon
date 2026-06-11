@@ -16,11 +16,14 @@ import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { ObjectiveConfigCard } from '@/components/dashboard/objective-config-card';
 
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (!user) {
+    console.error("DashboardPage: No user found! Redirecting to /login", authError);
     redirect('/login');
   }
 

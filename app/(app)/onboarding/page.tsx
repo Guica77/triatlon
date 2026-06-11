@@ -3,11 +3,14 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { HybridWizard } from '@/components/onboarding/hybrid-wizard';
 
+export const dynamic = 'force-dynamic'
+
 export default async function OnboardingPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (!user) {
+    console.error("OnboardingPage: No user found! Redirecting to /login", authError);
     redirect('/login');
   }
 

@@ -4,11 +4,14 @@ import { redirect } from 'next/navigation'
 import { fetchCoachAthletes } from './actions'
 import { CoachDashboardView } from './coach-dashboard-view'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CoachDashboardPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (!user) {
+    console.error("CoachDashboardPage: No user found! Redirecting to /login", authError);
     redirect('/login')
   }
 
