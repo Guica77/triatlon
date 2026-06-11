@@ -109,8 +109,11 @@ export async function signup(formData: FormData) {
       const { seedDemoData } = await import('@/lib/demo-seeder')
       await seedDemoData(email, authData.user.id)
     } else {
-      // Insertar perfil inicial
-      const { error: profileError } = await supabase
+      // Insertar perfil inicial usando admin client para saltar RLS ya que el usuario aún no tiene la cookie activa
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const supabaseAdmin = createAdminClient()
+      
+      const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .insert({
           id: authData.user.id,

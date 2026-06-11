@@ -18,12 +18,15 @@ export async function GET(request: Request) {
       const oauthRole = cookieStore.get('oauth_role')?.value
       
       if (oauthRole) {
+        const { createAdminClient } = await import('@/lib/supabase/admin')
+        const supabaseAdmin = createAdminClient()
+        
         // Check if profile already exists to avoid overwriting existing roles on login
-        const { data: existingProfile } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle()
+        const { data: existingProfile } = await supabaseAdmin.from('profiles').select('id').eq('id', user.id).maybeSingle()
 
         if (!existingProfile) {
           // Only insert profile with the selected role if it's a brand new user
-          const { error: profileError } = await supabase
+          const { error: profileError } = await supabaseAdmin
             .from('profiles')
             .insert({
               id: user.id,
@@ -37,7 +40,7 @@ export async function GET(request: Request) {
           if (profileError) console.error("Error inserting profile for OAuth:", profileError)
         } else {
           // Update the existing profile role to the newly selected one (helps with testing and switching)
-          await supabase.from('profiles').update({ role: oauthRole as any }).eq('id', user.id)
+          await supabaseAdmin.from('profiles').update({ role: oauthRole as any }).eq('id', user.id)
         }
         
         cookieStore.delete('oauth_role')
