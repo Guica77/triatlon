@@ -105,6 +105,10 @@ export async function registerAthlete(formData: FormData) {
       });
   }
 
+  if (authData.session) {
+    return { emailConfirmRequired: false };
+  }
+
   return { emailConfirmRequired: true };
 }
 
@@ -165,6 +169,10 @@ export async function registerCoach(formData: FormData) {
         email: email || '',
         role: 'coach',
       });
+  }
+
+  if (authData.session) {
+    return { emailConfirmRequired: false };
   }
 
   return { emailConfirmRequired: true };

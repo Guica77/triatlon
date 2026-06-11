@@ -27,6 +27,8 @@ export default function CoachRegisterPage() {
         '¡Cuenta de Entrenador creada con éxito! Te hemos enviado un correo de confirmación. Por favor, revisa tu bandeja de entrada (y la carpeta de spam o correo no deseado) para activar tu cuenta antes de iniciar sesión.'
       );
       setLoading(false);
+    } else {
+      router.push('/coach/dashboard');
     }
   }
 
