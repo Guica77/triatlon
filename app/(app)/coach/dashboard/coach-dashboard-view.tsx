@@ -71,6 +71,7 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId }:
     setInviteLoading(true)
     setInviteMessage(null)
 
+    try {
       const inviteUrl = `${window.location.origin}/invite/${coachId}`
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(inviteUrl)
@@ -310,6 +311,8 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId }:
                   <input 
                     type="text" 
                     readOnly 
+                    aria-label="Enlace mágico de invitación"
+                    title="Enlace mágico de invitación"
                     value={`${typeof window !== 'undefined' ? window.location.origin : ''}/invite/${coachId}`}
                     className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-300 outline-none font-mono selection:bg-cyan-500/30"
                     onClick={(e) => (e.target as HTMLInputElement).select()}
