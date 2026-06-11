@@ -88,9 +88,17 @@ export async function GET(request: Request) {
       }
       
       return NextResponse.redirect(`${origin}${finalNext}`)
+    } else {
+      console.error("OAuth Exchange Error:", error);
     }
+  } else {
+    console.error("No code provided in callback:", request.url);
   }
 
-  // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=AuthCallbackError`)
+  // Determine fallback based on cookie
+  const cookieStore = await cookies();
+  const oauthRole = cookieStore.get('oauth_role')?.value;
+  const fallback = oauthRole === 'coach' ? '/coach/login' : '/athlete/login';
+
+  return NextResponse.redirect(`${origin}${fallback}?error=AuthCallbackError`)
 }
