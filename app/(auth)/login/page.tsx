@@ -202,7 +202,7 @@ function LoginForm() {
           )}
 
           {/* Social Logins */}
-          {!isForgotPassword && (
+          {!isForgotPassword && !(isSignUp && roleSelection === 'coach') && (
             <div className="space-y-3 relative z-10 mb-6">
               <button 
                 onClick={async () => {
@@ -225,6 +225,13 @@ function LoginForm() {
                 </svg>
                 Continuar con Google
               </button>
+            </div>
+          )}
+
+          {!isForgotPassword && isSignUp && roleSelection === 'coach' && (
+            <div className="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs text-center leading-relaxed font-medium shadow-inner mb-6">
+              <p className="font-bold text-white mb-1">Registro de Entrenadores</p>
+              Para configurar tu panel profesional de forma segura, utiliza el registro por correo electrónico y contraseña.
             </div>
           )}
 
