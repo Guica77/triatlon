@@ -177,8 +177,15 @@ const getBaseUrl = () => {
   return 'http://localhost:3000';
 };
 
-export async function signInWithOAuth(provider: 'apple' | 'google') {
+export async function getOAuthUrl(provider: 'apple' | 'google', role?: string) {
   const supabase = await createClient()
+
+  if (role) {
+    const { cookies } = await import('next/headers')
+    const cookieStore = await cookies()
+    // Set cookie securely, HTTP 200 response will ensure it's saved by the browser
+    cookieStore.set('oauth_role', role, { path: '/', maxAge: 60 * 5, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' }) 
+  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
@@ -191,9 +198,7 @@ export async function signInWithOAuth(provider: 'apple' | 'google') {
     return { error: error.message }
   }
 
-  if (data.url) {
-    redirect(data.url)
-  }
+  return { url: data.url }
 }
 
 export async function sendResetPasswordEmail(formData: FormData) {

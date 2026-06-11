@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { login, signup, signInWithOAuth, sendResetPasswordEmail } from './actions';
+import { login, signup, sendResetPasswordEmail, getOAuthUrl } from './actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
@@ -205,9 +205,14 @@ function LoginForm() {
           {!isForgotPassword && (
             <div className="space-y-3 relative z-10 mb-6">
               <button 
-                onClick={() => {
-                  document.cookie = `oauth_role=${roleSelection}; path=/; max-age=300; SameSite=Lax`;
-                  signInWithOAuth('google');
+                onClick={async () => {
+                  // Bypass Next.js redirect bugs by fetching the URL from a Server Action and navigating client-side
+                  const res = await getOAuthUrl('google', roleSelection);
+                  if (res?.url) {
+                    window.location.href = res.url;
+                  } else if (res?.error) {
+                    setError(`Error con Google: ${res.error}`);
+                  }
                 }}
                 type="button"
                 className="w-full flex items-center justify-center gap-3 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium py-3.5 rounded-xl border border-zinc-800 transition-all hover:border-zinc-700 shadow-sm"
