@@ -60,8 +60,15 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     redirect('/coach/dashboard');
   }
 
-  const athleteProfile = athleteProfileData as Record<string, unknown>;
-  const activePlan = athleteProfile.training_plans as Record<string, unknown>;
+  const athleteProfile = athleteProfileData as {
+    first_name?: string;
+    last_name?: string;
+    level?: string;
+    garmin_connected?: boolean;
+    strava_connected?: boolean;
+    training_plans?: { name?: string };
+  };
+  const activePlan = athleteProfile.training_plans;
 
   // 4. Fetch daily biometrics for the athlete (simulated or real)
   const today = new Date().toISOString().split('T')[0];

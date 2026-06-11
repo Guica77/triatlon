@@ -81,7 +81,7 @@ export async function sendMessage(receiverId: string, message: string): Promise<
           )
 
           await webpush.sendNotification(
-            receiverProfile.push_subscriptions as Record<string, unknown> | any,
+            receiverProfile.push_subscriptions as unknown as webpush.PushSubscription,
             JSON.stringify({
               title: `Nuevo mensaje de ${senderName}`,
               body: message.trim(),
