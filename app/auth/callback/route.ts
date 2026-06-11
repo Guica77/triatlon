@@ -15,7 +15,8 @@ export async function GET(request: Request) {
       const cookieStore = await cookies()
       
       // -- OAUTH ROLE HANDLING --
-      const oauthRole = cookieStore.get('oauth_role')?.value
+      // Read the role from URL search parameters, which survives the cross-domain OAuth redirect reliably
+      const oauthRole = searchParams.get('role')
       
       if (oauthRole) {
         const { createAdminClient } = await import('@/lib/supabase/admin')
@@ -43,7 +44,6 @@ export async function GET(request: Request) {
           await supabaseAdmin.from('profiles').update({ role: oauthRole as 'coach' | 'athlete' }).eq('id', user.id)
         }
         
-        cookieStore.delete('oauth_role')
       }
 
       // -- MAGIC LINK RESOLUTION --
