@@ -1,7 +1,6 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
 import webpush from 'web-push'
 import { Resend } from 'resend'
 
@@ -82,7 +81,7 @@ export async function sendMessage(receiverId: string, message: string): Promise<
           )
 
           await webpush.sendNotification(
-            receiverProfile.push_subscriptions as any,
+            receiverProfile.push_subscriptions as Record<string, unknown> | any,
             JSON.stringify({
               title: `Nuevo mensaje de ${senderName}`,
               body: message.trim(),
@@ -118,10 +117,10 @@ export async function sendMessage(receiverId: string, message: string): Promise<
       // We don't return error here because the message was successfully saved
     }
 
-    return { data: newMessage as any }
-  } catch (err: any) {
+    return { data: newMessage as unknown as ChatMessageItem }
+  } catch (err: unknown) {
     console.error('Exception in sendMessage:', err)
-    return { error: err.message || 'Error inesperado' }
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
 
@@ -148,10 +147,10 @@ export async function getMessages(otherUserId: string): Promise<{ data?: ChatMes
       return { error: 'Error al obtener el historial de mensajes' }
     }
 
-    return { data: messages as any }
-  } catch (err: any) {
+    return { data: messages as unknown as ChatMessageItem[] }
+  } catch (err: unknown) {
     console.error('Exception in getMessages:', err)
-    return { error: err.message || 'Error inesperado' }
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
 
@@ -209,7 +208,7 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
     } else {
       // Fetch coach details
       // Attempt 1: coach_id from profiles
-      let coachId = (profile as any).coach_id
+      let coachId = (profile as Record<string, unknown>).coach_id as string | null
 
       // Attempt 2: coach from coach_athletes link
       if (!coachId) {
@@ -240,8 +239,8 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
 
       return { data: [coach], role: 'athlete' }
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Exception in getChatParticipants:', err)
-    return { error: err.message || 'Error inesperado' }
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }

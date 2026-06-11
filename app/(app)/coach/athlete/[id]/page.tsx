@@ -5,7 +5,7 @@ import { BiometricsCard } from '@/components/dashboard/biometrics-card';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { fetchAndCalculateAnalytics } from '@/app/(app)/analytics/analytics-actions';
-import { Trophy, LogOut, Settings, ChevronLeft, Calendar, User, Activity } from 'lucide-react';
+import { LogOut, Settings, ChevronLeft, Calendar, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { SessionPlanner } from '@/components/coach/session-planner';
@@ -60,8 +60,8 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     redirect('/coach/dashboard');
   }
 
-  const athleteProfile = athleteProfileData as any;
-  const activePlan = athleteProfile.training_plans;
+  const athleteProfile = athleteProfileData as Record<string, unknown>;
+  const activePlan = athleteProfile.training_plans as Record<string, unknown>;
 
   // 4. Fetch daily biometrics for the athlete (simulated or real)
   const today = new Date().toISOString().split('T')[0];

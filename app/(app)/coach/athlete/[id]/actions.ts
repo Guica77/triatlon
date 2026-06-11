@@ -92,9 +92,9 @@ export async function saveCoachWorkout(
     revalidatePath('/dashboard')
     
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Exception in saveCoachWorkout:', err)
-    return { error: err.message || 'Error inesperado' }
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
 
@@ -120,7 +120,7 @@ export async function updateWorkoutDate(
 
   const { error } = await supabase
     .from('user_workouts')
-    .update({ scheduled_date: newDate } as any)
+    .update({ scheduled_date: newDate })
     .eq('id', workoutId)
     .eq('user_id', athleteId)
 
@@ -187,9 +187,9 @@ export async function updateCoachWorkoutDetails(
     revalidatePath('/dashboard')
     
     return { success: true }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Exception in updateCoachWorkoutDetails:', err)
-    return { error: err.message || 'Error inesperado' }
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
 

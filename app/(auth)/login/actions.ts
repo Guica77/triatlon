@@ -121,7 +121,7 @@ export async function signup(formData: FormData) {
           last_name: lastName || '',
           level: 'intermedio',
           email: email || '',
-          role: role as any,
+          role: role as 'coach' | 'athlete',
         })
 
       if (profileError) {

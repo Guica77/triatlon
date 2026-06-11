@@ -33,14 +33,14 @@ export async function GET(request: Request) {
               email: user.email || '',
               first_name: user.user_metadata?.full_name?.split(' ')[0] || 'Usuario',
               last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || (oauthRole === 'coach' ? 'Entrenador' : 'Atleta'),
-              role: oauthRole as any,
+              role: oauthRole as 'coach' | 'athlete',
               level: 'intermedio'
             })
             
           if (profileError) console.error("Error inserting profile for OAuth:", profileError)
         } else {
           // Update the existing profile role to the newly selected one (helps with testing and switching)
-          await supabaseAdmin.from('profiles').update({ role: oauthRole as any }).eq('id', user.id)
+          await supabaseAdmin.from('profiles').update({ role: oauthRole as 'coach' | 'athlete' }).eq('id', user.id)
         }
         
         cookieStore.delete('oauth_role')
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
             // Also update backwards compatibility
             await supabase
               .from('profiles')
-              .update({ coach_id: inviteCoachId } as any)
+              .update({ coach_id: inviteCoachId })
               .eq('id', user.id)
           }
         } catch (e) {
