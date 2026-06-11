@@ -87,7 +87,7 @@ export async function GET(request: Request) {
         finalNext = '/onboarding';
       }
       
-      return NextResponse.redirect(`${origin}${finalNext}`)
+      return NextResponse.redirect(`${origin}${finalNext}?_t=${Date.now()}`)
     } else {
       console.error("OAuth Exchange Error:", error);
     }
