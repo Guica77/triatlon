@@ -244,3 +244,79 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
     return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
+
+/**
+ * Fetches all available coaches for the directory.
+ */
+export async function getAvailableCoaches(): Promise<{ data?: ChatParticipant[]; error?: string }> {
+  const supabase = await createClient()
+  
+  try {
+    const { data: coaches, error } = await supabase
+      .from('profiles')
+      .select('id, first_name, last_name, email, role, level')
+      .eq('role', 'coach')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching available coaches:', error)
+      return { error: 'Error al obtener la lista de entrenadores' }
+    }
+
+    return { data: coaches as any[] }
+  } catch (err: unknown) {
+    console.error('Exception in getAvailableCoaches:', err)
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
+  }
+}
+
+/**
+ * Links the current athlete to a specific coach.
+ */
+export async function linkCoachByAthlete(coachId: string): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'No autorizado' }
+  }
+
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabaseAdmin = createAdminClient()
+
+    // Insert the link
+    const { error: linkError } = await supabaseAdmin
+      .from('coach_athletes')
+      .insert({
+        coach_id: coachId,
+        athlete_id: user.id,
+        status: 'active'
+      })
+
+    if (linkError && linkError.code !== '23505') {
+      console.error('Error linking to coach:', linkError)
+      return { error: 'Error al vincular con el entrenador' }
+    }
+
+    // Update profile
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .update({ coach_id: coachId })
+      .eq('id', user.id)
+
+    if (profileError) {
+      console.error('Error updating profile with coach:', profileError)
+      return { error: 'Error al actualizar el perfil' }
+    }
+
+    const { revalidatePath } = await import('next/cache')
+    revalidatePath('/chat')
+    revalidatePath('/dashboard')
+
+    return { success: true }
+  } catch (err: unknown) {
+    console.error('Exception in linkCoachByAthlete:', err)
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
+  }
+}

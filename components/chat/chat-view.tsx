@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
-import { ChatParticipant, ChatMessageItem, sendMessage, getMessages } from '@/app/(app)/chat/actions'
+import { ChatParticipant, ChatMessageItem, sendMessage, getMessages, linkCoachByAthlete } from '@/app/(app)/chat/actions'
 import { createClient } from '@/lib/supabase/client'
 
 interface ChatViewProps {
@@ -22,13 +22,15 @@ interface ChatViewProps {
   currentUserRole: 'coach' | 'athlete'
   currentUserId: string
   preselectedParticipantId?: string | null
+  availableCoaches?: ChatParticipant[]
 }
 
 export function ChatView({ 
   initialParticipants, 
   currentUserRole, 
   currentUserId,
-  preselectedParticipantId 
+  preselectedParticipantId,
+  availableCoaches = []
 }: ChatViewProps) {
   const [participants, setParticipants] = React.useState<ChatParticipant[]>(initialParticipants)
   const [selectedPart, setSelectedPart] = React.useState<ChatParticipant | null>(null)
@@ -37,6 +39,7 @@ export function ChatView({
   const [loadingMessages, setLoadingMessages] = React.useState(false)
   const [searchQuery, setSearchQuery] = React.useState('')
   const [isTyping, setIsTyping] = React.useState(false)
+  const [linkingCoachId, setLinkingCoachId] = React.useState<string | null>(null)
 
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
@@ -155,6 +158,17 @@ export function ChatView({
     } catch (err) {
       console.error(err)
       setMessages(prev => prev.filter(m => m.id !== tempId))
+    }
+  }
+
+  const handleLinkCoach = async (coachId: string) => {
+    setLinkingCoachId(coachId)
+    const res = await linkCoachByAthlete(coachId)
+    if (res.success) {
+      window.location.reload()
+    } else {
+      alert(res.error || 'Error al vincular con el entrenador')
+      setLinkingCoachId(null)
     }
   }
 
@@ -327,18 +341,66 @@ export function ChatView({
             </form>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-zinc-500 space-y-3 p-6 text-center">
-            <div className="w-14 h-14 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500">
-              <MessageSquare className="w-6 h-6 text-zinc-400" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-zinc-300 font-bold text-sm">Mensajería Entrenador ↔ Atleta</h3>
-              <p className="text-xs text-zinc-500 max-w-sm">
-                {currentUserRole === 'coach' 
-                  ? 'Selecciona un atleta del roster de la izquierda para ver su historial y comenzar una conversación.' 
-                  : 'Aún no dispones de un entrenador asignado. Pide a tu entrenador que te añada introduciendo tu correo en su roster.'}
-              </p>
-            </div>
+          <div className="flex-1 flex flex-col items-center p-6 bg-zinc-950/50">
+            {currentUserRole === 'coach' ? (
+              <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-500 shadow-inner">
+                  <MessageSquare className="w-8 h-8 text-zinc-400" />
+                </div>
+                <div>
+                  <h3 className="text-zinc-300 font-bold text-lg">Centro de Mensajería</h3>
+                  <p className="text-sm text-zinc-500 max-w-sm mt-2">
+                    Selecciona un atleta de tu roster en el panel izquierdo para ver su historial y comenzar a chatear con él.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="text-center space-y-2 mb-8 mt-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mb-4 shadow-inner">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white">Directorio de Entrenadores</h3>
+                  <p className="text-sm text-zinc-400">
+                    Aún no tienes un entrenador asignado. Explora nuestra lista de entrenadores certificados y elige el que mejor se adapte a ti.
+                  </p>
+                </div>
+                
+                {availableCoaches.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {availableCoaches.map(coach => (
+                      <div key={coach.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between hover:border-cyan-500/40 transition-all group shadow-md">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-950 border border-zinc-700 flex items-center justify-center font-bold text-lg text-white shadow-inner">
+                            {(coach.first_name || 'E')[0].toUpperCase()}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-zinc-100 group-hover:text-cyan-400 transition-colors">
+                              {coach.first_name} {coach.last_name}
+                            </h4>
+                            <span className="text-[10px] uppercase tracking-wider font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md mt-1 inline-block border border-emerald-500/20">
+                              Entrenador Certificado
+                            </span>
+                          </div>
+                        </div>
+                        <AnimatedButton
+                          variant="primary"
+                          className="w-full text-xs font-semibold !bg-zinc-100 hover:!bg-white !text-black shadow-lg"
+                          disabled={linkingCoachId === coach.id}
+                          onClick={() => handleLinkCoach(coach.id)}
+                        >
+                          {linkingCoachId === coach.id ? 'Vinculando...' : 'Elegir como Entrenador'}
+                        </AnimatedButton>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-zinc-900/50 border border-zinc-800 rounded-2xl">
+                    <p className="text-sm text-zinc-500">No hay entrenadores disponibles en este momento.</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getChatParticipants } from '@/app/(app)/chat/actions'
+import { getChatParticipants, getAvailableCoaches } from '@/app/(app)/chat/actions'
 import { ChatView } from '@/components/chat/chat-view'
 import { Trophy, ArrowLeft, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
@@ -29,6 +29,13 @@ export default async function AthleteChatPage() {
   // 2. Fetch athlete's assigned coach
   const participantsRes = await getChatParticipants()
   const participants = participantsRes.data || []
+
+  // 3. If no coach is assigned, fetch available coaches
+  let availableCoaches: any[] = []
+  if (participants.length === 0) {
+    const coachesRes = await getAvailableCoaches()
+    availableCoaches = coachesRes.data || []
+  }
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] text-zinc-100 flex flex-col pb-20 sm:pb-0">
@@ -59,6 +66,7 @@ export default async function AthleteChatPage() {
       <main className="max-w-4xl mx-auto w-full px-6 pt-8 flex-1 flex flex-col justify-start">
         <ChatView
           initialParticipants={participants}
+          availableCoaches={availableCoaches}
           currentUserRole="athlete"
           currentUserId={user.id}
         />
