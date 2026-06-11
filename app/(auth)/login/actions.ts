@@ -146,8 +146,15 @@ const getBaseUrl = () => {
   return 'http://localhost:3000';
 };
 
-export async function signInWithOAuth(provider: 'apple' | 'google') {
+export async function signInWithOAuth(provider: 'apple' | 'google', role?: string) {
   const supabase = await createClient()
+  
+  if (role) {
+    const { cookies } = await import('next/headers')
+    const cookieStore = await cookies()
+    cookieStore.set('oauth_role', role, { path: '/', maxAge: 60 * 5 }) // Expires in 5 mins
+  }
+
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {

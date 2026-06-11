@@ -211,7 +211,7 @@ function LoginForm() {
           {!isForgotPassword && (
             <div className="space-y-3 relative z-10 mb-6">
               <button 
-                onClick={() => signInWithOAuth('google')}
+                onClick={() => signInWithOAuth('google', roleSelection)}
                 type="button"
                 className="w-full flex items-center justify-center gap-3 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium py-3.5 rounded-xl border border-zinc-800 transition-all hover:border-zinc-700 shadow-sm"
               >

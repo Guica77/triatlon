@@ -12,8 +12,30 @@ export async function GET(request: Request) {
     const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error && user) {
-      // -- MAGIC LINK RESOLUTION --
       const cookieStore = await cookies()
+      
+      // -- OAUTH ROLE HANDLING --
+      const oauthRole = cookieStore.get('oauth_role')?.value
+      
+      if (oauthRole) {
+        // Upsert profile with the selected role
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: user.id,
+            email: user.email || '',
+            first_name: user.user_metadata?.full_name?.split(' ')[0] || 'Usuario',
+            last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || (oauthRole === 'coach' ? 'Entrenador' : 'Atleta'),
+            role: oauthRole,
+            level: 'intermedio'
+          }, { onConflict: 'id' })
+          
+        if (profileError) console.error("Error upserting profile for OAuth:", profileError)
+        
+        cookieStore.delete('oauth_role')
+      }
+
+      // -- MAGIC LINK RESOLUTION --
       const inviteCoachId = cookieStore.get('invite_coach_id')?.value
 
       if (inviteCoachId) {
@@ -41,8 +63,19 @@ export async function GET(request: Request) {
         // Clean up cookie
         cookieStore.delete('invite_coach_id')
       }
+
+      // -- REDIRECTION LOGIC --
+      // Fetch profile to decide where to go
+      const { data: profile } = await supabase.from('profiles').select('role, active_plan_id').eq('id', user.id).maybeSingle()
       
-      return NextResponse.redirect(`${origin}${next}`)
+      let finalNext = next;
+      if (profile?.role === 'coach') {
+        finalNext = '/coach/dashboard';
+      } else if (profile?.role === 'athlete' && !profile?.active_plan_id && next === '/dashboard') {
+        finalNext = '/onboarding';
+      }
+      
+      return NextResponse.redirect(`${origin}${finalNext}`)
     }
   }
 
