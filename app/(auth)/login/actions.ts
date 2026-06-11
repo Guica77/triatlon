@@ -177,19 +177,13 @@ const getBaseUrl = () => {
   return 'http://localhost:3000';
 };
 
-export async function signInWithOAuth(provider: 'apple' | 'google', role?: string) {
+export async function signInWithOAuth(provider: 'apple' | 'google') {
   const supabase = await createClient()
-  
-  // Use query parameter instead of cookies to pass the role safely through the OAuth redirect
-  const redirectUrl = new URL(`${getBaseUrl()}/auth/callback`)
-  if (role) {
-    redirectUrl.searchParams.set('role', role)
-  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: redirectUrl.toString(),
+      redirectTo: `${getBaseUrl()}/auth/callback`,
     },
   })
 
