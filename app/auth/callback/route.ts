@@ -35,6 +35,9 @@ export async function GET(request: Request) {
             })
             
           if (profileError) console.error("Error inserting profile for OAuth:", profileError)
+        } else {
+          // Update the existing profile role to the newly selected one (helps with testing and switching)
+          await supabase.from('profiles').update({ role: oauthRole as any }).eq('id', user.id)
         }
         
         cookieStore.delete('oauth_role')
