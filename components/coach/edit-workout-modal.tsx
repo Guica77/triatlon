@@ -4,7 +4,7 @@ import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Clock, Check, Activity, Edit3 } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
-import { updateCoachWorkoutDetails } from '@/app/(app)/coach/athlete/[id]/actions'
+import { updateCoachWorkoutDetails, saveCoachWorkout } from '@/app/(app)/coach/athlete/[id]/actions'
 import { useRouter } from 'next/navigation'
 
 export interface EditWorkoutData {
@@ -16,6 +16,7 @@ export interface EditWorkoutData {
   warmup: string
   main: string
   cooldown: string
+  scheduled_date?: string
 }
 
 interface EditWorkoutModalProps {
@@ -71,7 +72,23 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
     setError(null)
 
     try {
-      const res = await updateCoachWorkoutDetails(athleteId, workout.id, workout.session_id, formData)
+      const isNew = workout.id === 'new'
+      
+      let res;
+      if (isNew) {
+        res = await saveCoachWorkout(athleteId, {
+          scheduledDate: workout.scheduled_date || new Date().toISOString().split('T')[0],
+          sportType: formData.sportType,
+          durationMin: formData.durationMin,
+          title: formData.title,
+          warmup: formData.warmup,
+          main: formData.main,
+          cooldown: formData.cooldown
+        })
+      } else {
+        res = await updateCoachWorkoutDetails(athleteId, workout.id, workout.session_id, formData)
+      }
+
       if (res.error) {
         setError(res.error)
         setLoading(false)
@@ -84,7 +101,7 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
         }, 1500)
       }
     } catch (err) {
-      setError('Ocurrió un error inesperado al actualizar.')
+      setError('Ocurrió un error inesperado al procesar la solicitud.')
       setLoading(false)
     }
   }
@@ -118,8 +135,8 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                   <Edit3 className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-100">Editar Entrenamiento</h3>
-                  <p className="text-[10px] text-zinc-400">Modifica los detalles del bloque seleccionado.</p>
+                  <h3 className="text-sm font-bold text-zinc-100">{workout.id === 'new' ? 'Crear Nuevo Entrenamiento' : 'Editar Entrenamiento'}</h3>
+                  <p className="text-[10px] text-zinc-400">{workout.id === 'new' ? 'Configura el bloque para tu atleta.' : 'Modifica los detalles del bloque seleccionado.'}</p>
                 </div>
               </div>
               <button 

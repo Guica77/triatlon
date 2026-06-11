@@ -22,6 +22,7 @@ import {
 } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDroppable } from '@dnd-kit/core';
 import { Calendar, GripVertical, Activity, Flame, Droplets, Dumbbell } from 'lucide-react';
 import { format, parseISO, addDays, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -163,6 +164,47 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
   );
 }
 
+// --- Droppable Background Component ---
+function DroppableBackground({ id, isEmpty, onAddClick, children }: { id: string, isEmpty: boolean, onAddClick: (dateStr: string) => void, children: React.ReactNode }) {
+  const { setNodeRef } = useDroppable({
+    id,
+    data: {
+      type: 'Column',
+      container: id
+    }
+  });
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      className="flex-1 p-2 min-h-[150px] flex flex-col gap-2 relative group cursor-pointer"
+      onClick={(e) => {
+        // Only trigger creation if clicking on the empty background, not on a card
+        if (e.target === e.currentTarget) {
+          onAddClick(id);
+        }
+      }}
+    >
+      {isEmpty && (
+        <div 
+          onClick={(e) => {
+            e.stopPropagation();
+            onAddClick(id);
+          }}
+          className="absolute inset-2 border-2 border-dashed border-zinc-800/50 rounded-xl bg-zinc-900/20 text-[10px] text-zinc-600 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all font-medium uppercase tracking-wider flex items-center justify-center cursor-pointer z-0"
+        >
+          Crear Aquí ➕
+        </div>
+      )}
+      <div className="z-10 flex flex-col gap-2 relative pointer-events-none">
+        <div className="pointer-events-auto flex flex-col gap-2">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // --- Main Calendar Component ---
 export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date(), athleteId }: AdvancedCalendarProps) {
   // Normalize start date to Monday
@@ -203,6 +245,22 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
       warmup: parsed.warmup,
       main: parsed.main,
       cooldown: parsed.cooldown,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleCreateClick = (dateStr?: string) => {
+    const targetDate = dateStr || format(startDate, 'yyyy-MM-dd');
+    setEditingWorkout({
+      id: 'new',
+      session_id: 'new',
+      sport_type: 'ciclismo',
+      duration_min: 60,
+      title: 'Nuevo Entrenamiento',
+      warmup: '',
+      main: '',
+      cooldown: '',
+      scheduled_date: targetDate
     });
     setIsEditModalOpen(true);
   };
@@ -340,16 +398,11 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
                 items={columns[day.id]?.map(w => w.id) || []} 
                 strategy={verticalListSortingStrategy}
               >
-                <div className="flex-1 p-2 min-h-[150px] flex flex-col gap-2">
+                <DroppableBackground id={day.id} onAddClick={handleCreateClick} isEmpty={(!columns[day.id] || columns[day.id].length === 0)}>
                   {columns[day.id]?.map(workout => (
                     <SortableWorkoutCard key={workout.id} workout={workout} onEdit={handleEditClick} />
                   ))}
-                  {(!columns[day.id] || columns[day.id].length === 0) && (
-                    <div className="flex-1 flex items-center justify-center border-2 border-dashed border-zinc-800/50 rounded-xl bg-zinc-900/20 text-[10px] text-zinc-600 font-medium uppercase tracking-wider">
-                      Soltar Aquí
-                    </div>
-                  )}
-                </div>
+                </DroppableBackground>
               </SortableContext>
             </div>
           ))}
