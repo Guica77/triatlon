@@ -40,6 +40,12 @@ export default async function DashboardPage() {
 
   const profile = profileData as any;
 
+  let coachProfile = null;
+  if (profile.coach_id) {
+    const { data } = await supabase.from('profiles').select('first_name, last_name').eq('id', profile.coach_id).single();
+    coachProfile = data;
+  }
+
   if (profile.role === 'coach') {
     redirect('/coach/dashboard');
   }
@@ -140,6 +146,9 @@ export default async function DashboardPage() {
               <p className="text-xs text-zinc-400 capitalize truncate flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse shrink-0"></span>
                 Atleta: {profile.first_name || 'Triatleta'} • Nivel {profile.level}
+                {coachProfile && (
+                  <span className="text-cyan-400 ml-1 font-medium">• Entrenador: {coachProfile.first_name} {coachProfile.last_name}</span>
+                )}
               </p>
             </div>
           </div>

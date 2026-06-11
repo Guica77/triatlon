@@ -61,6 +61,25 @@ export async function loginAthlete(formData: FormData) {
     return { error: 'Credenciales inválidas o correo no confirmado.' };
   }
 
+  // Magic Link resolution on Login
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user) {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const inviteCoachId = cookieStore.get('invite_coach_id')?.value;
+    if (inviteCoachId) {
+      const { createAdminClient } = await import('@/lib/supabase/admin');
+      const supabaseAdmin = createAdminClient();
+      await supabaseAdmin.from('coach_athletes').insert({
+        coach_id: inviteCoachId,
+        athlete_id: session.user.id,
+        status: 'active'
+      }).catch(() => {}); // Ignore duplicate
+      await supabaseAdmin.from('profiles').update({ coach_id: inviteCoachId }).eq('id', session.user.id);
+      cookieStore.delete('invite_coach_id');
+    }
+  }
+
   // We rely on middleware or callback to handle redirection
   // We can return success to let the client component redirect to dashboard
   return { success: true };
@@ -103,6 +122,21 @@ export async function registerAthlete(formData: FormData) {
         email: email || '',
         role: 'athlete',
       });
+
+    // Magic Link resolution on Registration
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const inviteCoachId = cookieStore.get('invite_coach_id')?.value;
+    
+    if (inviteCoachId) {
+      await supabaseAdmin.from('coach_athletes').insert({
+        coach_id: inviteCoachId,
+        athlete_id: authData.user.id,
+        status: 'active'
+      }).catch(() => {});
+      await supabaseAdmin.from('profiles').update({ coach_id: inviteCoachId }).eq('id', authData.user.id);
+      cookieStore.delete('invite_coach_id');
+    }
   }
 
   if (authData.session) {
