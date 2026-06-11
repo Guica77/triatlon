@@ -3,6 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import webpush from 'web-push'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key')
 
 // Set VAPID Details
 webpush.setVapidDetails(
@@ -62,7 +65,7 @@ export async function sendMessage(receiverId: string, message: string): Promise<
     try {
       const { data: receiverProfile } = await supabase
         .from('profiles')
-        .select('push_subscriptions, first_name')
+        .select('push_subscriptions, first_name, email')
         .eq('id', receiverId)
         .single()
 
@@ -85,8 +88,25 @@ export async function sendMessage(receiverId: string, message: string): Promise<
           })
         )
       } else {
-        // Here you would trigger Resend to send an email.
+        // Trigger Resend email fallback
         console.log(`No push token for ${receiverId}. Triggering Email Fallback...`);
+        if (receiverProfile?.email) {
+          try {
+            await resend.emails.send({
+              from: 'Triatlon Pro Notificaciones <onboarding@resend.dev>',
+              to: receiverProfile.email,
+              subject: `Nuevo mensaje de ${user.email}`,
+              html: `<div style="font-family: sans-serif; padding: 20px;">
+                      <h2>Tienes un nuevo mensaje en Triatlón Pro</h2>
+                      <p><strong>Mensaje:</strong> "${message.trim()}"</p>
+                      <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/chat" style="display: inline-block; padding: 10px 20px; background-color: #22d3ee; color: #000; text-decoration: none; border-radius: 5px; font-weight: bold;">Ver en el Chat</a>
+                    </div>`
+            });
+            console.log(`Email fallback sent successfully to ${receiverProfile.email}`);
+          } catch (emailErr) {
+            console.error('Error sending fallback email:', emailErr);
+          }
+        }
       }
     } catch (pushErr) {
       console.error('Error triggering push notification:', pushErr)
