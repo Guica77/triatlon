@@ -71,10 +71,25 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId }:
     setInviteLoading(true)
     setInviteMessage(null)
 
-    try {
       const inviteUrl = `${window.location.origin}/invite/${coachId}`
-      await navigator.clipboard.writeText(inviteUrl)
-      setInviteMessage({ text: '¡Enlace Mágico copiado! Envíalo a tu atleta.', type: 'success' })
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(inviteUrl)
+        setInviteMessage({ text: '¡Enlace Mágico copiado!', type: 'success' })
+      } else {
+        // Fallback for non-secure contexts (like testing on local IP)
+        const textArea = document.createElement("textarea");
+        textArea.value = inviteUrl;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          setInviteMessage({ text: '¡Enlace Mágico copiado!', type: 'success' })
+        } catch (err) {
+          setInviteMessage({ text: 'No se pudo copiar automáticamente. Por favor, cópialo a mano del recuadro.', type: 'error' })
+        }
+        document.body.removeChild(textArea);
+      }
       
       // Auto hide success message
       setTimeout(() => setInviteMessage(null), 4000)
@@ -291,19 +306,28 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId }:
               </p>
 
               <div className="space-y-4">
-                <AnimatedButton
-                  variant="primary"
-                  onClick={handleCopyLink}
-                  disabled={inviteLoading}
-                  className="w-full py-3 text-xs font-bold !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-cyan-500/10 shadow-lg flex items-center justify-center gap-1.5"
-                >
-                  {inviteLoading ? 'Generando...' : (
-                    <>
-                      <UserCheck className="w-3.5 h-3.5 text-black" />
-                      Copiar Enlace Mágico
-                    </>
-                  )}
-                </AnimatedButton>
+                <div className="flex flex-col gap-2">
+                  <input 
+                    type="text" 
+                    readOnly 
+                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/invite/${coachId}`}
+                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-300 outline-none font-mono selection:bg-cyan-500/30"
+                    onClick={(e) => (e.target as HTMLInputElement).select()}
+                  />
+                  <AnimatedButton
+                    variant="primary"
+                    onClick={handleCopyLink}
+                    disabled={inviteLoading}
+                    className="w-full py-3 text-xs font-bold !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-cyan-500/10 shadow-lg flex items-center justify-center gap-1.5"
+                  >
+                    {inviteLoading ? 'Generando...' : (
+                      <>
+                        <UserCheck className="w-3.5 h-3.5 text-black" />
+                        Copiar Enlace Mágico
+                      </>
+                    )}
+                  </AnimatedButton>
+                </div>
               </div>
 
               <AnimatePresence>
