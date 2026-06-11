@@ -1,27 +1,30 @@
 'use client';
 
 import * as React from 'react';
-import { Share, PlusSquare } from 'lucide-react';
+import { Share, PlusSquare, MoreVertical, Download } from 'lucide-react';
 
 export function IosInstallPrompt() {
-  const [isIos, setIsIos] = React.useState(false);
+  const [osType, setOsType] = React.useState<'ios' | 'android' | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(true); // Default true to prevent flash
 
   React.useEffect(() => {
     // Detect iOS
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
+    const isAndroidDevice = /android/.test(userAgent);
     
     // Detect Standalone (installed PWA)
     const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator as any).standalone;
     const isMatchMediaStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
-    setIsIos(isIosDevice);
+    if (isIosDevice) setOsType('ios');
+    else if (isAndroidDevice) setOsType('android');
+    
     setIsStandalone(isInStandaloneMode || isMatchMediaStandalone);
   }, []);
 
-  if (!isIos || isStandalone) {
-    return null; // Don't show if it's not iOS or it's already installed
+  if (!osType || isStandalone) {
+    return null; // Don't show if it's not a mobile device or it's already installed
   }
 
   // AGGRESSIVE MODE: Block entire screen
@@ -56,23 +59,47 @@ export function IosInstallPrompt() {
         </div>
 
         <div className="space-y-4 pt-4 border-t border-zinc-800">
-          <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
-            <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
-              <Share className="w-5 h-5" />
-            </div>
-            <p className="text-sm text-zinc-300 font-medium">
-              <strong className="text-white">Paso 1:</strong> Toca el botón de compartir abajo en Safari.
-            </p>
-          </div>
+          {osType === 'ios' ? (
+            <>
+              <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
+                <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
+                  <Share className="w-5 h-5" />
+                </div>
+                <p className="text-sm text-zinc-300 font-medium">
+                  <strong className="text-white">Paso 1:</strong> Toca el botón de compartir abajo en Safari.
+                </p>
+              </div>
 
-          <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
-            <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
-              <PlusSquare className="w-5 h-5" />
-            </div>
-            <p className="text-sm text-zinc-300 font-medium">
-              <strong className="text-white">Paso 2:</strong> Selecciona "Añadir a la pantalla de inicio".
-            </p>
-          </div>
+              <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
+                <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
+                  <PlusSquare className="w-5 h-5" />
+                </div>
+                <p className="text-sm text-zinc-300 font-medium">
+                  <strong className="text-white">Paso 2:</strong> Selecciona "Añadir a la pantalla de inicio".
+                </p>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
+                <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
+                  <MoreVertical className="w-5 h-5" />
+                </div>
+                <p className="text-sm text-zinc-300 font-medium">
+                  <strong className="text-white">Paso 1:</strong> Toca los 3 puntitos arriba a la derecha en Chrome.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
+                <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
+                  <Download className="w-5 h-5" />
+                </div>
+                <p className="text-sm text-zinc-300 font-medium">
+                  <strong className="text-white">Paso 2:</strong> Selecciona "Instalar aplicación" o "Añadir a inicio".
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="pt-4 animate-pulse">
@@ -80,10 +107,10 @@ export function IosInstallPrompt() {
         </div>
       </div>
       
-      {/* Visual arrow pointing down towards Safari share button */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce flex flex-col items-center gap-2 opacity-50">
+      {/* Visual arrow pointing towards the install action area */}
+      <div className={`absolute ${osType === 'ios' ? 'bottom-10 left-1/2 -translate-x-1/2' : 'top-24 right-6'} animate-bounce flex flex-col items-center gap-2 opacity-50`}>
         <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">Instalar Aquí</span>
-        <svg className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ transform: osType === 'android' ? 'rotate(180deg)' : 'none' }}>
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>
