@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
     // 3. Send Web Push Notification (100% Free)
     await webpush.sendNotification(
-      pushSubscription,
+      pushSubscription as any,
       JSON.stringify({
         title: `Nuevo mensaje de ${sender_name || 'tu Coach'}`,
         body: message_body || 'Tienes un nuevo mensaje esperándote.',
