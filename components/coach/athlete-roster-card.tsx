@@ -98,6 +98,8 @@ export function AthleteRosterCard({
             </div>
           ) : (
             <select
+              aria-label="Plan de Entrenamiento"
+              title="Plan de Entrenamiento"
               value={athlete.active_plan_id || ''}
               onChange={(e) => onPlanSelect(athlete.id, e.target.value)}
               className="bg-transparent text-xs text-zinc-300 outline-none w-full cursor-pointer"

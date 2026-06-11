@@ -140,6 +140,8 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                 </div>
               </div>
               <button 
+                title="Cerrar Modal"
+                aria-label="Cerrar Modal"
                 onClick={onClose}
                 disabled={loading}
                 className="w-8 h-8 rounded-lg border border-zinc-900 flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-colors"
@@ -175,6 +177,8 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                     <div className="space-y-1.5 col-span-2">
                       <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Tipo de Deporte</label>
                       <select 
+                        title="Tipo de Deporte"
+                        aria-label="Tipo de Deporte"
                         name="sportType"
                         value={formData.sportType}
                         onChange={handleInputChange}
@@ -191,6 +195,9 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                       <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Duración (min)</label>
                       <div className="relative flex items-center">
                         <input 
+                          title="Duración"
+                          aria-label="Duración"
+                          placeholder="60"
                           type="number"
                           name="durationMin"
                           required
@@ -208,6 +215,8 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                   <div className="space-y-1.5">
                     <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Título del Bloque</label>
                     <input 
+                      title="Título"
+                      aria-label="Título"
                       type="text"
                       name="title"
                       placeholder="Ej: Intervals VO2Max"
@@ -225,6 +234,9 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                       <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">1. Calentamiento (Warmup)</label>
                     </div>
                     <textarea 
+                      title="Calentamiento"
+                      aria-label="Calentamiento"
+                      placeholder="Detalles del calentamiento"
                       name="warmup"
                       rows={2}
                       value={formData.warmup}
@@ -239,6 +251,9 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                       <label className="text-[10px] text-cyan-400 uppercase tracking-wider font-semibold">2. Parte Principal</label>
                     </div>
                     <textarea 
+                      title="Parte Principal"
+                      aria-label="Parte Principal"
+                      placeholder="Detalles de la parte principal"
                       name="main"
                       rows={3}
                       required
@@ -254,6 +269,9 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                       <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">3. Enfriamiento (Cooldown)</label>
                     </div>
                     <textarea 
+                      title="Enfriamiento"
+                      aria-label="Enfriamiento"
+                      placeholder="Detalles del enfriamiento"
                       name="cooldown"
                       rows={2}
                       value={formData.cooldown}

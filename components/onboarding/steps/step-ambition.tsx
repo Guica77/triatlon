@@ -67,7 +67,7 @@ export function StepAmbition(props: StepAmbitionProps) {
                   <Search className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
                   <input type="text" placeholder="Buscar carrera..." value={props.searchQuery} onChange={e => props.setSearchQuery(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all" />
                 </div>
-                <select onChange={e => props.setSelectedRace(RACES_CATALOG.find(r => r.id === e.target.value) || null)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none appearance-none cursor-pointer transition-all">
+                <select title="Seleccionar Carrera" aria-label="Seleccionar Carrera" onChange={e => props.setSelectedRace(RACES_CATALOG.find(r => r.id === e.target.value) || null)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none appearance-none cursor-pointer transition-all">
                   {props.filteredCatalog.map(r => <option key={r.id} value={r.id}>{r.name} - {r.estimatedDate}</option>)}
                 </select>
               </div>
@@ -76,14 +76,14 @@ export function StepAmbition(props: StepAmbitionProps) {
             {props.activeTab === 'custom' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input type="text" placeholder="Nombre de la prueba" value={props.customName} onChange={e => props.setCustomName(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all" />
-                <input type="date" value={props.customDate} onChange={e => props.setCustomDate(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all" />
-                <select value={props.customDistance} onChange={e => props.setCustomDistance(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all">
+                <input title="Fecha" aria-label="Fecha" type="date" value={props.customDate} onChange={e => props.setCustomDate(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all" />
+                <select title="Distancia" aria-label="Distancia" value={props.customDistance} onChange={e => props.setCustomDistance(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all">
                   <option value="sprint">Sprint</option>
                   <option value="olimpico">Olímpico</option>
                   <option value="half">Half / 70.3</option>
                   <option value="full">Full / Ironman</option>
                 </select>
-                <select value={props.customModality} onChange={e => props.setCustomModality(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all">
+                <select title="Modalidad" aria-label="Modalidad" value={props.customModality} onChange={e => props.setCustomModality(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all">
                   <option value="triatlon">Triatlón</option>
                   <option value="duatlon">Duatlón</option>
                   <option value="acuatlon">Acuatlón</option>
@@ -167,6 +167,8 @@ export function StepAmbition(props: StepAmbitionProps) {
                   <strong className="text-sm font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{props.swimHours}h</strong>
                 </div>
                 <input 
+                  title="Horas de Natación"
+                  aria-label="Horas de Natación"
                   type="range" 
                   min="0" 
                   max="10" 
@@ -185,6 +187,8 @@ export function StepAmbition(props: StepAmbitionProps) {
                   <strong className="text-sm font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{props.bikeHours}h</strong>
                 </div>
                 <input 
+                  title="Horas de Ciclismo"
+                  aria-label="Horas de Ciclismo"
                   type="range" 
                   min="0" 
                   max="20" 
@@ -203,6 +207,8 @@ export function StepAmbition(props: StepAmbitionProps) {
                   <strong className="text-sm font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{props.runHours}h</strong>
                 </div>
                 <input 
+                  title="Horas de Carrera"
+                  aria-label="Horas de Carrera"
                   type="range" 
                   min="0" 
                   max="15" 

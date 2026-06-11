@@ -101,6 +101,8 @@ export function SellItemModal({ isOpen, onClose, virtualGarage }: SellItemModalP
                 <h3 className="text-base font-bold text-white">Vender Material</h3>
               </div>
               <button 
+                title="Cerrar Modal"
+                aria-label="Cerrar Modal"
                 onClick={onClose}
                 className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
               >
@@ -158,6 +160,8 @@ export function SellItemModal({ isOpen, onClose, virtualGarage }: SellItemModalP
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Categoría</label>
                     <select
+                      title="Categoría"
+                      aria-label="Categoría"
                       value={category}
                       onChange={e => setCategory(e.target.value)}
                       className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl text-sm text-white outline-none"
@@ -174,6 +178,8 @@ export function SellItemModal({ isOpen, onClose, virtualGarage }: SellItemModalP
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Estado</label>
                     <select
+                      title="Estado"
+                      aria-label="Estado"
                       value={condition}
                       onChange={e => setCondition(e.target.value)}
                       className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl text-sm text-white outline-none"

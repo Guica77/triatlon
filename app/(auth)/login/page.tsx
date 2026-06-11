@@ -253,18 +253,24 @@ function LoginForm() {
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Nombre</label>
                     <input 
+                      id="firstName"
                       name="firstName" 
                       type="text" 
                       required 
+                      placeholder="Nombre"
+                      title="Nombre"
                       className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:bg-zinc-900 transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Apellidos</label>
                     <input 
+                      id="lastName"
                       name="lastName" 
                       type="text" 
                       required 
+                      placeholder="Apellidos"
+                      title="Apellidos"
                       className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:bg-zinc-900 transition-all"
                     />
                   </div>

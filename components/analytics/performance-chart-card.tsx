@@ -203,7 +203,7 @@ export function PerformanceChartCard({
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLOR_CTL }}></span>
                 Fitness (CTL)
               </span>
-              <button onClick={() => setActiveHelp(activeHelp === 'ctl' ? null : 'ctl')} className="text-slate-600 hover:text-blue-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
+              <button title="Ayuda sobre CTL" aria-label="Ayuda sobre CTL" onClick={() => setActiveHelp(activeHelp === 'ctl' ? null : 'ctl')} className="text-slate-600 hover:text-blue-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-2xl font-bold text-white tabular-nums tracking-tight">{currentCtl}</span>
@@ -219,7 +219,7 @@ export function PerformanceChartCard({
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLOR_ATL }}></span>
                 Fatiga (ATL)
               </span>
-              <button onClick={() => setActiveHelp(activeHelp === 'atl' ? null : 'atl')} className="text-slate-600 hover:text-red-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
+              <button title="Ayuda sobre ATL" aria-label="Ayuda sobre ATL" onClick={() => setActiveHelp(activeHelp === 'atl' ? null : 'atl')} className="text-slate-600 hover:text-red-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-2xl font-bold text-white tabular-nums tracking-tight">{currentAtl}</span>
@@ -235,7 +235,7 @@ export function PerformanceChartCard({
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLOR_TSB }}></span>
                 Forma (TSB)
               </span>
-              <button onClick={() => setActiveHelp(activeHelp === 'tsb' ? null : 'tsb')} className="text-slate-600 hover:text-amber-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
+              <button title="Ayuda sobre TSB" aria-label="Ayuda sobre TSB" onClick={() => setActiveHelp(activeHelp === 'tsb' ? null : 'tsb')} className="text-slate-600 hover:text-amber-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className={`text-2xl font-bold tabular-nums tracking-tight`} style={{ color: currentTsb >= 0 ? COLOR_TSB : '#fcd34d' }}>

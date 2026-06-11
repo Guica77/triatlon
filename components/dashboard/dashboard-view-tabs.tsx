@@ -326,12 +326,16 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                 </h3>
                 <div className="flex items-center gap-1.5">
                   <button
+                    title="Mes Anterior"
+                    aria-label="Mes Anterior"
                     onClick={handlePrevMonth}
                     className="p-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 text-zinc-400 hover:text-white transition cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
                   <button
+                    title="Mes Siguiente"
+                    aria-label="Mes Siguiente"
                     onClick={handleNextMonth}
                     className="p-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 text-zinc-400 hover:text-white transition cursor-pointer"
                   >
@@ -497,6 +501,8 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                   Registrar Sesión Manual
                 </h3>
                 <button
+                  title="Cerrar"
+                  aria-label="Cerrar"
                   onClick={() => setIsManualModalOpen(false)}
                   className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
                 >
@@ -533,6 +539,8 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                       Disciplina *
                     </label>
                     <select
+                      title="Disciplina"
+                      aria-label="Disciplina"
                       value={formSport}
                       onChange={(e) => setFormSport(e.target.value)}
                       className="w-full bg-zinc-950 border border-zinc-850 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-colors cursor-pointer"
@@ -549,6 +557,9 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                       Duración (min) *
                     </label>
                     <input
+                      title="Duración en minutos"
+                      aria-label="Duración en minutos"
+                      placeholder="45"
                       type="number"
                       value={formDuration}
                       onChange={(e) => setFormDuration(e.target.value)}
@@ -565,6 +576,9 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                       Fecha Programada *
                     </label>
                     <input
+                      title="Fecha Programada"
+                      aria-label="Fecha Programada"
+                      placeholder="YYYY-MM-DD"
                       type="date"
                       value={formDate}
                       onChange={(e) => setFormDate(e.target.value)}
@@ -578,6 +592,8 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                       Estado de Realización *
                     </label>
                     <select
+                      title="Estado"
+                      aria-label="Estado"
                       value={formStatus}
                       onChange={(e) => setFormStatus(e.target.value as any)}
                       className="w-full bg-zinc-950 border border-zinc-850 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-colors cursor-pointer"

@@ -101,7 +101,7 @@ export function PushNotificationManager() {
             </AnimatedButton>
           </div>
         </div>
-        <button onClick={() => setDismissed(true)} className="text-zinc-500 hover:text-zinc-300 shrink-0">
+        <button title="Cerrar" aria-label="Cerrar" onClick={() => setDismissed(true)} className="text-zinc-500 hover:text-zinc-300 shrink-0">
           <X className="w-4 h-4" />
         </button>
       </div>
