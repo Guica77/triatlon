@@ -18,19 +18,24 @@ export async function GET(request: Request) {
       const oauthRole = cookieStore.get('oauth_role')?.value
       
       if (oauthRole) {
-        // Upsert profile with the selected role
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            email: user.email || '',
-            first_name: user.user_metadata?.full_name?.split(' ')[0] || 'Usuario',
-            last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || (oauthRole === 'coach' ? 'Entrenador' : 'Atleta'),
-            role: oauthRole,
-            level: 'intermedio'
-          }, { onConflict: 'id' })
-          
-        if (profileError) console.error("Error upserting profile for OAuth:", profileError)
+        // Check if profile already exists to avoid overwriting existing roles on login
+        const { data: existingProfile } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle()
+
+        if (!existingProfile) {
+          // Only insert profile with the selected role if it's a brand new user
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              id: user.id,
+              email: user.email || '',
+              first_name: user.user_metadata?.full_name?.split(' ')[0] || 'Usuario',
+              last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || (oauthRole === 'coach' ? 'Entrenador' : 'Atleta'),
+              role: oauthRole as any,
+              level: 'intermedio'
+            })
+            
+          if (profileError) console.error("Error inserting profile for OAuth:", profileError)
+        }
         
         cookieStore.delete('oauth_role')
       }
