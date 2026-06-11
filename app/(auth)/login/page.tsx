@@ -202,12 +202,19 @@ function LoginForm() {
           )}
 
           {/* Social Logins */}
-          {!isForgotPassword && !(isSignUp && roleSelection === 'coach') && (
+          {!isForgotPassword && (
             <div className="space-y-3 relative z-10 mb-6">
               <button 
                 onClick={async () => {
-                  // Bypass Next.js redirect bugs by fetching the URL from a Server Action and navigating client-side
-                  const res = await getOAuthUrl('google', roleSelection);
+                  // Only pass the role selection if we are signing up. Otherwise, just login.
+                  if (isSignUp) {
+                    document.cookie = `oauth_role=${roleSelection}; path=/; max-age=300; SameSite=Lax`;
+                  } else {
+                    // Clear the cookie for standard logins so we don't accidentally overwrite existing roles
+                    document.cookie = `oauth_role=; path=/; max-age=0; SameSite=Lax`;
+                  }
+                  
+                  const res = await getOAuthUrl('google');
                   if (res?.url) {
                     window.location.href = res.url;
                   } else if (res?.error) {
@@ -225,13 +232,6 @@ function LoginForm() {
                 </svg>
                 Continuar con Google
               </button>
-            </div>
-          )}
-
-          {!isForgotPassword && isSignUp && roleSelection === 'coach' && (
-            <div className="p-3.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs text-center leading-relaxed font-medium shadow-inner mb-6">
-              <p className="font-bold text-white mb-1">Registro de Entrenadores</p>
-              Para configurar tu panel profesional de forma segura, utiliza el registro por correo electrónico y contraseña.
             </div>
           )}
 

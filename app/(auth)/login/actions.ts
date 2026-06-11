@@ -177,15 +177,8 @@ const getBaseUrl = () => {
   return 'http://localhost:3000';
 };
 
-export async function getOAuthUrl(provider: 'apple' | 'google', role?: string) {
+export async function getOAuthUrl(provider: 'apple' | 'google') {
   const supabase = await createClient()
-
-  if (role) {
-    const { cookies } = await import('next/headers')
-    const cookieStore = await cookies()
-    // Set cookie securely, HTTP 200 response will ensure it's saved by the browser
-    cookieStore.set('oauth_role', role, { path: '/', maxAge: 60 * 5, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' }) 
-  }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
