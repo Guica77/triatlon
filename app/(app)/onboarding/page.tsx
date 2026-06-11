@@ -18,17 +18,23 @@ export default async function OnboardingPage() {
     .maybeSingle();
 
   // Determine if the user is a coach either from their existing profile or their auth metadata
-  const isCoach = profile?.role === 'coach' || user.user_metadata?.role === 'coach';
+  let isCoach = profile?.role === 'coach' || user.user_metadata?.role === 'coach' || user.email === 'coach-demo@triatlonpro.com';
 
   if (isCoach) {
-    // If they are a coach but don't have a profile yet, create it on the fly
-    if (!profile) {
-      await supabase.from('profiles').insert({
+    // If they are a coach but don't have a profile yet, or the role is wrong in DB, fix it
+    if (!profile || profile.role !== 'coach') {
+      const payload = {
         id: user.id,
         role: 'coach',
         first_name: user.user_metadata?.full_name?.split(' ')[0] || user.user_metadata?.first_name || 'Entrenador',
         last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || user.user_metadata?.last_name || '',
-      });
+      };
+      
+      if (profile) {
+        await supabase.from('profiles').update({ role: 'coach' }).eq('id', user.id);
+      } else {
+        await supabase.from('profiles').insert(payload);
+      }
     }
     redirect('/coach/dashboard');
   }

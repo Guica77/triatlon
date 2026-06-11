@@ -16,7 +16,8 @@ export function HybridWizard() {
   const [step, setStep] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
 
-  // Step 1: Physiological
+  // Step 1: Physiological & Planning Preference
+  const [wantsCoach, setWantsCoach] = React.useState<boolean>(false);
   const [currentFtp, setCurrentFtp] = React.useState('');
   const [currentSwimPace, setCurrentSwimPace] = React.useState('');
   const [currentRunPace, setCurrentRunPace] = React.useState('');
@@ -38,6 +39,7 @@ export function HybridWizard() {
         current_swim_pace: currentSwimPace || undefined,
         current_run_pace: currentRunPace || undefined,
         virtual_garage: virtualGarage,
+        wants_coach: wantsCoach,
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -59,6 +61,7 @@ export function HybridWizard() {
         current_swim_pace: currentSwimPace || undefined,
         current_run_pace: currentRunPace || undefined,
         virtual_garage: virtualGarage,
+        wants_coach: wantsCoach,
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -103,6 +106,8 @@ export function HybridWizard() {
       <AnimatePresence mode="wait">
         {step === 1 && (
           <StepPhysiology
+            wantsCoach={wantsCoach}
+            setWantsCoach={setWantsCoach}
             currentFtp={currentFtp}
             setCurrentFtp={setCurrentFtp}
             currentSwimPace={currentSwimPace}

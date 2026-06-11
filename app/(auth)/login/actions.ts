@@ -26,22 +26,48 @@ export async function login(formData: FormData) {
       await seedDemoData(email, user.id)
     }
 
-    const { data: profile } = await supabase
+    let { data: profile } = await supabase
       .from('profiles')
       .select('active_plan_id, role')
       .eq('id', user.id)
       .maybeSingle()
 
-    // Determine if user is coach from profile or auth metadata
-    const isCoach = profile?.role === 'coach' || user.user_metadata?.role === 'coach';
+    let isCoach = profile?.role === 'coach' || user.user_metadata?.role === 'coach' || email === 'coach-demo@triatlonpro.com';
+
+    if (email === 'coach-demo@triatlonpro.com') {
+      // Force update the profile role in DB just in case it was created as athlete
+      if (profile && profile.role !== 'coach') {
+        await supabase.from('profiles').update({ role: 'coach' }).eq('id', user.id);
+        profile.role = 'coach';
+      }
+    }
+
+    // Si no tiene perfil (por ejemplo si falló por RLS al registrarse), lo creamos ahora que sí tiene sesión activa
+    if (!profile) {
+      const role = email === 'coach-demo@triatlonpro.com' ? 'coach' 
+                 : email === 'demo@triatlonpro.com' ? 'athlete' 
+                 : (user.user_metadata?.role || 'athlete');
+                 
+      const { error: insertError } = await supabase.from('profiles').insert({
+        id: user.id,
+        first_name: user.user_metadata?.first_name || 'Usuario',
+        last_name: user.user_metadata?.last_name || (role === 'coach' ? 'Entrenador' : 'Atleta'),
+        email: email,
+        role: role,
+        level: 'avanzado'
+      });
+      
+      if (!insertError) {
+        isCoach = role === 'coach';
+        profile = { active_plan_id: null, role: role };
+      }
+    }
 
     if (isCoach) {
       redirect('/coach/dashboard')
     }
 
-    if (profile && !profile.active_plan_id) {
-      redirect('/onboarding')
-    } else if (!profile) {
+    if (!profile?.active_plan_id) {
       redirect('/onboarding')
     }
   }
@@ -61,6 +87,13 @@ export async function signup(formData: FormData) {
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        role: role,
+        first_name: firstName,
+        last_name: lastName
+      }
+    }
   })
 
   if (authError) {

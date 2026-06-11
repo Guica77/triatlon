@@ -140,6 +140,7 @@ export async function saveRaceGoalAndPlan(formData: {
   target_bike_time?: string;
   target_run_time?: string;
   athlete_level?: string;
+  wants_coach?: boolean;
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
