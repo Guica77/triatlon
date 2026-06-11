@@ -166,10 +166,7 @@ export function BiometricsCard({ initialBiometrics, readOnly = false }: Biometri
                   strokeDasharray="263.89"
                   strokeDashoffset={263.89 * (1 - (score / 100))}
                   strokeLinecap="round"
-                  className="transition-all duration-1000 ease-out"
-                  style={{
-                    filter: `drop-shadow(0 0 6px ${isOptimal ? '#34d399' : isModerate ? '#fbbf24' : '#f43f5e'}50)`
-                  }}
+                  className={`transition-all duration-1000 ease-out ${isOptimal ? 'drop-shadow-[0_0_6px_#34d39950]' : isModerate ? 'drop-shadow-[0_0_6px_#fbbf2450]' : 'drop-shadow-[0_0_6px_#f43f5e50]'}`}
                 />
               )}
             </svg>

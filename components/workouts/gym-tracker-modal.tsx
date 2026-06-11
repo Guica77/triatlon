@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Timer, Minus, Plus, Dumbbell, ShieldAlert, Zap, Activity, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import { getStrengthExercisesForUser, logStrengthSet } from '@/app/(app)/dashboard/strength-actions';
 
 interface GymTrackerModalProps {
@@ -11,6 +12,11 @@ interface GymTrackerModalProps {
   workoutTitle: string;
   workoutId?: string;
 }
+
+const StyledDiv = React.forwardRef<HTMLDivElement, any>(({ styleProps, ...props }, ref) => 
+  React.createElement('div', { ref, style: styleProps, ...props })
+);
+StyledDiv.displayName = 'StyledDiv';
 
 export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: GymTrackerModalProps) {
   const [exercises, setExercises] = React.useState<any[]>([]);
@@ -44,11 +50,11 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
   const exercise = exercises[currentExercise];
 
   React.useEffect(() => {
-    let interval: any;
+    let interval: ReturnType<typeof setInterval>;
     if (isResting && restTime > 0) {
       interval = setInterval(() => setRestTime(prev => prev - 1), 1000);
     } else if (restTime === 0 && isResting) {
-      setIsResting(false);
+      setTimeout(() => setIsResting(false), 0);
     }
     return () => clearInterval(interval);
   }, [isResting, restTime]);
@@ -104,7 +110,7 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
               </p>
               <h3 className="text-base font-bold text-zinc-100 truncate max-w-[250px]">{workoutTitle}</h3>
             </div>
-            <button onClick={onClose} className="p-2 bg-zinc-800/80 rounded-full text-zinc-400 hover:text-white transition-colors">
+            <button title="Cerrar" aria-label="Cerrar" onClick={onClose} className="p-2 bg-zinc-800/80 rounded-full text-zinc-400 hover:text-white transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -124,9 +130,9 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
             <>
               {/* Progress Bar */}
               <div className="w-full bg-zinc-900 h-1">
-                <div 
+                <StyledDiv 
                   className="bg-purple-500 h-1 transition-all duration-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]" 
-                  style={{ width: `${((currentExercise + (currentSet - 1) / exercise.targetSets) / exercises.length) * 100}%` }} 
+                  styleProps={{ width: `${((currentExercise + (currentSet - 1) / exercise.targetSets) / exercises.length) * 100}%` }} 
                 />
               </div>
 
@@ -136,7 +142,7 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
                 {/* Exercise Image Banner */}
                 <div className="relative w-full h-48 sm:h-56 shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-t from-[#121214] via-[#121214]/60 to-transparent z-10" />
-                  <img src={exercise.img} alt={exercise.name} className="w-full h-full object-cover" />
+                  <Image src={exercise.img} alt={exercise.name} fill className="object-cover" />
                   
                   <div className="absolute bottom-4 left-6 z-20">
                     <div className="flex items-center gap-2 mb-2">
@@ -163,11 +169,11 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
                         <Dumbbell className="w-3 h-3" /> Peso (kg)
                       </p>
                       <div className="flex items-center justify-between w-full">
-                        <button onClick={() => setWeight(w => Math.max(0, w - 2.5))} className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-full hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0">
+                        <button title="Reducir peso" aria-label="Reducir peso" onClick={() => setWeight(w => Math.max(0, w - 2.5))} className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-full hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0">
                           <Minus className="w-5 h-5" />
                         </button>
                         <span className="text-3xl font-black text-white tabular-nums tracking-tighter">{weight}</span>
-                        <button onClick={() => setWeight(w => w + 2.5)} className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-full hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0">
+                        <button title="Aumentar peso" aria-label="Aumentar peso" onClick={() => setWeight(w => w + 2.5)} className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-full hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0">
                           <Plus className="w-5 h-5" />
                         </button>
                       </div>
@@ -184,11 +190,11 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
                         <Activity className="w-3 h-3" /> Repeticiones
                       </p>
                       <div className="flex items-center justify-between w-full">
-                        <button onClick={() => setReps(r => Math.max(1, r - 1))} className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-full hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0">
+                        <button title="Reducir repeticiones" aria-label="Reducir repeticiones" onClick={() => setReps(r => Math.max(1, r - 1))} className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-full hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0">
                           <Minus className="w-5 h-5" />
                         </button>
                         <span className="text-3xl font-black text-white tabular-nums tracking-tighter">{reps}</span>
-                        <button onClick={() => setReps(r => r + 1)} className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-full hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0">
+                        <button title="Aumentar repeticiones" aria-label="Aumentar repeticiones" onClick={() => setReps(r => r + 1)} className="w-10 h-10 flex items-center justify-center bg-zinc-800 rounded-full hover:bg-zinc-700 text-zinc-300 transition-colors shrink-0">
                           <Plus className="w-5 h-5" />
                         </button>
                       </div>

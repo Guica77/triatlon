@@ -36,7 +36,7 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
   }, [data]);
 
   if (!chartData || chartData.length === 0) {
-    return <div className="w-full flex items-center justify-center text-zinc-500" style={{ height }}>No hay datos suficientes para el PMC</div>;
+    return <div className="w-full h-[400px] flex items-center justify-center text-zinc-500">No hay datos suficientes para el PMC</div>;
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -46,14 +46,14 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
           <p className="text-zinc-300 text-sm font-medium mb-2">{label}</p>
           {payload.map((entry: any, index: number) => {
             let name = entry.name;
-            let color = entry.color;
+            const color = entry.color;
             if (entry.dataKey === 'ctl') name = 'CTL (Fitness)';
             if (entry.dataKey === 'atl') name = 'ATL (Fatiga)';
             if (entry.dataKey === 'tsb') name = 'TSB (Forma)';
 
             return (
               <div key={index} className="flex items-center gap-2 text-xs mb-1">
-                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
+                <div className={`w-2 h-2 rounded-full ${entry.dataKey === 'ctl' ? 'bg-[#3b82f6]' : entry.dataKey === 'atl' ? 'bg-[#ef4444]' : 'bg-[#10b981]'}`} />
                 <span className="text-zinc-400 w-24">{name}:</span>
                 <span className="text-white font-bold">{entry.value}</span>
               </div>
@@ -97,7 +97,7 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
         </div>
       </div>
 
-      <div style={{ height, width: '100%' }}>
+      <div className="w-full h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}

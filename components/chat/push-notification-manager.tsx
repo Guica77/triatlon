@@ -21,14 +21,7 @@ export function PushNotificationManager() {
   const [loading, setLoading] = React.useState(false);
   const [dismissed, setDismissed] = React.useState(false);
 
-  React.useEffect(() => {
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      setIsSupported(true);
-      checkSubscription();
-    }
-  }, []);
-
-  const checkSubscription = async () => {
+  const checkSubscription = React.useCallback(async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
       const sub = await registration.pushManager.getSubscription();
@@ -36,7 +29,17 @@ export function PushNotificationManager() {
     } catch (err) {
       console.error('Error checking subscription', err);
     }
-  };
+  }, []);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        setIsSupported(true);
+        checkSubscription();
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [checkSubscription]);
 
   const subscribeToPush = async () => {
     setLoading(true);

@@ -110,7 +110,7 @@ export function IosInstallPrompt() {
       {/* Visual arrow pointing towards the install action area */}
       <div className={`absolute ${osType === 'ios' ? 'bottom-10 left-1/2 -translate-x-1/2' : 'top-24 right-6'} animate-bounce flex flex-col items-center gap-2 opacity-50`}>
         <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">Instalar Aquí</span>
-        <svg className="w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ transform: osType === 'android' ? 'rotate(180deg)' : 'none' }}>
+        <svg className={`w-6 h-6 text-cyan-400 ${osType === 'android' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>

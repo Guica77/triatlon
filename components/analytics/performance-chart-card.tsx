@@ -91,7 +91,7 @@ export function PerformanceChartCard({
     });
   }, [pmcData, timeRange]);
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const renderTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -103,23 +103,23 @@ export function PerformanceChartCard({
           <div className="grid grid-cols-[auto_1fr_auto] gap-x-3 gap-y-1.5 items-center">
             {visibleLines.ctl && (
               <>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLOR_CTL }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />
                 <span className="text-slate-300">Fitness (CTL)</span>
                 <span className="text-white font-black">{data.raw_ctl}</span>
               </>
             )}
             {visibleLines.atl && (
               <>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLOR_ATL }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#fb7185]" />
                 <span className="text-slate-300">Fatiga (ATL)</span>
                 <span className="text-white font-black">{data.raw_atl}</span>
               </>
             )}
             {visibleLines.tsb && (
               <>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLOR_TSB }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#a3e635]" />
                 <span className="text-slate-300">Forma (TSB)</span>
-                <span className={`font-black`} style={{ color: data.raw_tsb >= 0 ? COLOR_TSB : '#fcd34d' }}>
+                <span className={`font-black ${data.raw_tsb >= 0 ? 'text-[#a3e635]' : 'text-[#fcd34d]'}`}>
                   {data.raw_tsb > 0 ? `+${data.raw_tsb}` : data.raw_tsb}
                 </span>
               </>
@@ -199,8 +199,8 @@ export function PerformanceChartCard({
         <div className="grid grid-cols-3 divide-x divide-slate-800/60 bg-[#020817] border-b border-slate-800/60">
           <div className="px-5 py-3 relative group">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5" style={{ color: COLOR_CTL }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLOR_CTL }}></span>
+              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-[#38bdf8]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]"></span>
                 Fitness (CTL)
               </span>
               <button title="Ayuda sobre CTL" aria-label="Ayuda sobre CTL" onClick={() => setActiveHelp(activeHelp === 'ctl' ? null : 'ctl')} className="text-slate-600 hover:text-blue-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
@@ -215,8 +215,8 @@ export function PerformanceChartCard({
           
           <div className="px-5 py-3 relative group">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5" style={{ color: COLOR_ATL }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLOR_ATL }}></span>
+              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-[#fb7185]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#fb7185]"></span>
                 Fatiga (ATL)
               </span>
               <button title="Ayuda sobre ATL" aria-label="Ayuda sobre ATL" onClick={() => setActiveHelp(activeHelp === 'atl' ? null : 'atl')} className="text-slate-600 hover:text-red-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
@@ -231,14 +231,14 @@ export function PerformanceChartCard({
 
           <div className="px-5 py-3 relative group">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5" style={{ color: COLOR_TSB }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLOR_TSB }}></span>
+              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-[#a3e635]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#a3e635]"></span>
                 Forma (TSB)
               </span>
               <button title="Ayuda sobre TSB" aria-label="Ayuda sobre TSB" onClick={() => setActiveHelp(activeHelp === 'tsb' ? null : 'tsb')} className="text-slate-600 hover:text-amber-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className={`text-2xl font-bold tabular-nums tracking-tight`} style={{ color: currentTsb >= 0 ? COLOR_TSB : '#fcd34d' }}>
+              <span className={`text-2xl font-bold tabular-nums tracking-tight ${currentTsb >= 0 ? 'text-[#a3e635]' : 'text-[#fcd34d]'}`}>
                 {currentTsb > 0 ? `+${currentTsb}` : currentTsb}
               </span>
             </div>
@@ -256,13 +256,13 @@ export function PerformanceChartCard({
         <div className="flex flex-wrap items-center justify-end gap-x-4 mb-2 px-4 relative z-10">
           <div className="flex items-center gap-3 text-[10px] font-medium text-slate-400">
             <button onClick={() => toggleLine('ctl')} className={`flex items-center gap-1.5 transition-all ${visibleLines.ctl ? 'opacity-100 text-slate-300' : 'opacity-40 line-through'}`}>
-              <span className="w-3 h-0.5" style={{ backgroundColor: COLOR_CTL }} /> CTL
+              <span className="w-3 h-0.5 bg-[#38bdf8]" /> CTL
             </button>
             <button onClick={() => toggleLine('atl')} className={`flex items-center gap-1.5 transition-all ${visibleLines.atl ? 'opacity-100 text-slate-300' : 'opacity-40 line-through'}`}>
-              <span className="w-3 h-0.5 border border-dashed" style={{ borderColor: COLOR_ATL }} /> ATL
+              <span className="w-3 h-0.5 border border-dashed border-[#fb7185]" /> ATL
             </button>
             <button onClick={() => toggleLine('tsb')} className={`flex items-center gap-1.5 transition-all ${visibleLines.tsb ? 'opacity-100 text-slate-300' : 'opacity-40 line-through'}`}>
-              <span className="w-2.5 h-2.5 bg-opacity-20 border" style={{ backgroundColor: `${COLOR_TSB}33`, borderColor: `${COLOR_TSB}80` }} /> TSB
+              <span className="w-2.5 h-2.5 border bg-[#a3e635]/20 border-[#a3e635]/50" /> TSB
             </button>
             <div className="w-px h-3 bg-slate-800 mx-1"></div>
             <span className="flex items-center gap-1.5 text-slate-500">
@@ -328,7 +328,8 @@ export function PerformanceChartCard({
               />
               
               <Tooltip 
-                content={<CustomTooltip />} 
+                // @ts-expect-error recharts TooltipProps typing is too strict
+                content={renderTooltip} 
                 cursor={{ stroke: '#475569', strokeWidth: 1.5, strokeDasharray: '4 4' }} 
                 isAnimationActive={false}
               />

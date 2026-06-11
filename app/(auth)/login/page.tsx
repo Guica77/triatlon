@@ -32,24 +32,15 @@ function LoginForm() {
       formData.append('email', email);
       formData.append('password', password);
       
-      const result: any = await login(formData);
+      const result = await login(formData) as { error?: string; emailConfirmRequired?: boolean };
       if (result && result.error) {
-        setInfoMessage('Configurando cuenta de demostración por primera vez...');
-        const signupData = new FormData();
-        signupData.append('email', email);
-        signupData.append('password', password);
-        signupData.append('firstName', firstName);
-        signupData.append('lastName', lastName);
-        signupData.append('role', role);
-        
-        const signupResult: any = await signup(signupData);
-        const secondLoginResult: any = await login(formData);
-        if (secondLoginResult && secondLoginResult.error) {
-          setError(`El modo demo no está disponible en este momento. Por favor, crea una cuenta de ${role === 'coach' ? 'entrenador' : 'atleta'} gratis.`);
-          setLoading(false);
-        }
+        setError(`El modo demo no está disponible en este momento: ${result.error}`);
+        setLoading(false);
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err?.message === 'NEXT_REDIRECT') {
+        throw err;
+      }
       console.error(err);
       setError('Error al iniciar el modo demostración.');
       setLoading(false);
@@ -57,11 +48,12 @@ function LoginForm() {
   }
 
   React.useEffect(() => {
-    const mode = searchParams.get('mode');
-    const message = searchParams.get('message');
-    const plan = searchParams.get('plan');
-    if (mode === 'signup') {
-      setIsSignUp(true);
+    const timer = setTimeout(() => {
+      const mode = searchParams.get('mode');
+      const message = searchParams.get('message');
+      const plan = searchParams.get('plan');
+      if (mode === 'signup') {
+        setIsSignUp(true);
       setIsForgotPassword(false);
       if (plan === 'coach') {
         setRoleSelection('coach');
@@ -78,9 +70,11 @@ function LoginForm() {
       setIsForgotPassword(true);
       setIsSignUp(false);
     }
-    if (message === 'auth_required') {
-      setInfoMessage('Es necesario iniciar sesión o crear una cuenta para poder configurar tu plan.');
-    }
+      if (message === 'auth_required') {
+        setInfoMessage('Es necesario iniciar sesión o crear una cuenta para poder configurar tu plan.');
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [searchParams]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -91,7 +85,7 @@ function LoginForm() {
     const formData = new FormData(event.currentTarget);
 
     if (isForgotPassword) {
-      const result: any = await sendResetPasswordEmail(formData);
+      const result = await sendResetPasswordEmail(formData) as { error?: string };
       if (result && result.error) {
         setError(result.error);
       } else {
@@ -103,7 +97,7 @@ function LoginForm() {
       return;
     }
 
-    const result: any = isSignUp ? await signup(formData) : await login(formData);
+    const result = (isSignUp ? await signup(formData) : await login(formData)) as { error?: string; emailConfirmRequired?: boolean };
     if (result) {
       if (result.error) {
         setError(result.error);
@@ -122,8 +116,8 @@ function LoginForm() {
     <div className="relative min-h-screen bg-[#09090b] flex flex-col items-center justify-center p-6 overflow-hidden font-sans">
       
       {/* Ambient Background Orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyan-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse [animation-duration:8s]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/20 rounded-full blur-[120px] mix-blend-screen animate-pulse [animation-duration:10s] [animation-delay:2s]" />
       <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-orange-500/10 rounded-full blur-[100px] mix-blend-screen" />
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay pointer-events-none" />
 

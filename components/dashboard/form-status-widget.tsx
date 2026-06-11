@@ -21,8 +21,9 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
   let description = '';
   let color = '';
   let strokeColor = '';
-  let glowColor = '';
   let bgClass = '';
+  let glowClass = '';
+  let dropShadowClass = '';
   
   if (isBeginner) {
     if (safeProgressPercent < 30) {
@@ -30,21 +31,24 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
       description = 'Sigue sumando, cada sesión cuenta para crear el hábito.';
       color = 'text-blue-400';
       strokeColor = '#60a5fa';
-      glowColor = 'rgba(96, 165, 250, 0.15)';
+      glowClass = 'bg-[radial-gradient(circle_80px_at_50%_50%,rgba(96,165,250,0.15),transparent)]';
+      dropShadowClass = 'drop-shadow-[0_0_4px_#60a5fa40]';
       bgClass = 'bg-zinc-950/40 border-blue-500/20 hover:border-blue-500/40';
     } else if (safeProgressPercent < 70) {
       label = 'Buen camino';
       description = 'Constancia sólida esta semana. ¡Mantén el ritmo!';
       color = 'text-emerald-400';
       strokeColor = '#34d399';
-      glowColor = 'rgba(52, 211, 153, 0.15)';
+      glowClass = 'bg-[radial-gradient(circle_80px_at_50%_50%,rgba(52,211,153,0.15),transparent)]';
+      dropShadowClass = 'drop-shadow-[0_0_4px_#34d39940]';
       bgClass = 'bg-zinc-950/40 border-emerald-500/20 hover:border-emerald-500/40';
     } else {
       label = '¡Constancia Impecable!';
       description = 'Excelente adherencia al plan. Estás construyendo una gran base.';
       color = 'text-amber-400';
       strokeColor = '#f59e0b';
-      glowColor = 'rgba(245, 158, 11, 0.15)';
+      glowClass = 'bg-[radial-gradient(circle_80px_at_50%_50%,rgba(245,158,11,0.15),transparent)]';
+      dropShadowClass = 'drop-shadow-[0_0_4px_#f59e0b40]';
       bgClass = 'bg-zinc-950/40 border-amber-500/20 hover:border-amber-500/40';
     }
   } else {
@@ -53,35 +57,40 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
       description = 'Demasiado descanso, perdiendo condición.';
       color = 'text-zinc-400';
       strokeColor = '#a1a1aa';
-      glowColor = 'rgba(161, 161, 170, 0.15)';
+      glowClass = 'bg-[radial-gradient(circle_80px_at_50%_50%,rgba(161,161,170,0.15),transparent)]';
+      dropShadowClass = 'drop-shadow-[0_0_4px_#a1a1aa40]';
       bgClass = 'bg-zinc-950/40 border-zinc-800/80 hover:border-zinc-700/80';
     } else if (safeTsb >= 5) {
       label = 'Pico de Forma';
       description = 'Frescura alta. Listo para competir.';
       color = 'text-emerald-400';
       strokeColor = '#34d399';
-      glowColor = 'rgba(52, 211, 153, 0.15)';
+      glowClass = 'bg-[radial-gradient(circle_80px_at_50%_50%,rgba(52,211,153,0.15),transparent)]';
+      dropShadowClass = 'drop-shadow-[0_0_4px_#34d39940]';
       bgClass = 'bg-zinc-950/40 border-emerald-500/20 hover:border-emerald-500/40';
     } else if (safeTsb >= -10) {
       label = 'Entrenamiento Óptimo';
       description = 'Asimilando cargas correctamente.';
       color = 'text-blue-400';
       strokeColor = '#60a5fa';
-      glowColor = 'rgba(96, 165, 250, 0.15)';
+      glowClass = 'bg-[radial-gradient(circle_80px_at_50%_50%,rgba(96,165,250,0.15),transparent)]';
+      dropShadowClass = 'drop-shadow-[0_0_4px_#60a5fa40]';
       bgClass = 'bg-zinc-950/40 border-blue-500/20 hover:border-blue-500/40';
     } else if (safeTsb >= -25) {
       label = 'Sobrecarga Controlada';
       description = 'Semana de impacto. La fatiga es alta.';
       color = 'text-yellow-400';
       strokeColor = '#facc15';
-      glowColor = 'rgba(250, 204, 21, 0.15)';
+      glowClass = 'bg-[radial-gradient(circle_80px_at_50%_50%,rgba(250,204,21,0.15),transparent)]';
+      dropShadowClass = 'drop-shadow-[0_0_4px_#facc1540]';
       bgClass = 'bg-zinc-950/40 border-yellow-500/20 hover:border-yellow-500/40';
     } else {
       label = 'Alerta de Fatiga';
       description = 'Riesgo de lesión. Considera descansar.';
       color = 'text-red-400';
       strokeColor = '#f87171';
-      glowColor = 'rgba(248, 113, 113, 0.15)';
+      glowClass = 'bg-[radial-gradient(circle_80px_at_50%_50%,rgba(248,113,113,0.15),transparent)]';
+      dropShadowClass = 'drop-shadow-[0_0_4px_#f8717140]';
       bgClass = 'bg-zinc-950/40 border-red-500/20 hover:border-red-500/40';
     }
   }
@@ -101,12 +110,7 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
     <Link href="/analytics" className="block group w-full h-full">
       <div className={`p-5 sm:p-6 rounded-2xl border ${bgClass} shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full min-h-[320px] relative overflow-hidden backdrop-blur-md`}>
         {/* Glow de fondo dinámico en base al color del estado */}
-        <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-300 opacity-30 group-hover:opacity-40"
-          style={{
-            background: `radial-gradient(circle 80px at 50% 50%, ${glowColor}, transparent)`
-          }}
-        />
+        <div className={`absolute inset-0 pointer-events-none transition-all duration-300 opacity-30 group-hover:opacity-40 ${glowClass}`} />
 
         {/* Encabezado */}
         <div className="flex items-start justify-between mb-2 relative z-10 shrink-0">
@@ -153,10 +157,7 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
                 strokeDasharray={circumference}
                 strokeDashoffset={strokeDashoffset}
                 strokeLinecap="round"
-                className="transition-all duration-1000 ease-out"
-                style={{
-                  filter: `drop-shadow(0 0 4px ${strokeColor}40)`
-                }}
+                className={`transition-all duration-1000 ease-out ${dropShadowClass}`}
               />
             </svg>
 

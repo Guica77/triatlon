@@ -61,7 +61,7 @@ function parseDescription(desc: string | null) {
     if (line.startsWith('Calentamiento: ')) {
       warmup = line.replace('Calentamiento: ', '');
     } else if (line.startsWith('Parte principal: ')) {
-      let mainPart = line.replace('Parte principal: ', '');
+      const mainPart = line.replace('Parte principal: ', '');
       if (mainPart.startsWith('**') && mainPart.includes('** - ')) {
         const parts = mainPart.split('** - ');
         title = parts[0].replace('**', '');
@@ -98,6 +98,12 @@ const getSportAccent = (type: string) => {
   }
 };
 
+const StyledDiv = React.forwardRef<HTMLDivElement, any>(({ styleProps, ...props }, ref) => 
+  React.createElement('div', { ref, style: styleProps, ...props })
+);
+StyledDiv.displayName = 'StyledDiv';
+
+
 // --- Sortable Item Component ---
 function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit: (w: WorkoutItem) => void }) {
   const {
@@ -119,12 +125,12 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
 
   if (isRest) {
     return (
-      <div 
-        ref={setNodeRef} style={style} {...attributes} {...listeners}
+      <StyledDiv 
+        ref={setNodeRef} styleProps={style} {...attributes} {...listeners}
         className={`p-2.5 rounded-xl border border-dashed border-zinc-700/50 bg-zinc-900/30 flex items-center justify-center gap-2 cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-30' : 'opacity-100'}`}
       >
         <span className="text-xs text-zinc-600 font-medium tracking-wide">DESCANSO</span>
-      </div>
+      </StyledDiv>
     );
   }
 
@@ -132,9 +138,9 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
   const displayTitle = parsed.title || session?.sport_type || 'Sesión';
 
   return (
-    <div
+    <StyledDiv
       ref={setNodeRef}
-      style={style}
+      styleProps={style}
       {...attributes}
       {...listeners}
       onClick={() => onEdit(workout)}
@@ -160,7 +166,7 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
           {parsed.main || parsed.warmup || session?.description}
         </p>
       </div>
-    </div>
+    </StyledDiv>
   );
 }
 

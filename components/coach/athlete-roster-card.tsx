@@ -16,6 +16,11 @@ interface AthleteRosterCardProps {
   onRemove: (athleteId: string) => void;
 }
 
+const StyledDiv = React.forwardRef<HTMLDivElement, any>(({ styleProps, ...props }, ref) => 
+  React.createElement('div', { ref, style: styleProps, ...props })
+);
+StyledDiv.displayName = 'StyledDiv';
+
 export function AthleteRosterCard({
   athlete,
   plans,
@@ -167,11 +172,11 @@ export function AthleteRosterCard({
           </span>
         </div>
         <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-          <div 
+          <StyledDiv 
             className={`h-full rounded-full transition-all duration-1000 ${
               alerts.high_tss ? 'bg-red-500' : 'bg-gradient-to-r from-cyan-500 to-blue-500'
             }`}
-            style={{ width: `${tssPercentage}%` }}
+            styleProps={{ width: `${tssPercentage}%` }}
           />
         </div>
       </div>

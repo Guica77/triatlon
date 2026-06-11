@@ -37,7 +37,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
   // Merge initialWorkouts with AI generated ones
   const allWorkouts = React.useMemo(() => {
     const mappedAiWorkouts = aiWorkouts.map((aiw, idx) => ({
-      id: `ai-gen-${Date.now()}-${idx}`,
+      id: `ai-gen-${aiw.date}-${idx}`,
       scheduled_date: aiw.date,
       status: 'pending',
       training_sessions: {
@@ -109,9 +109,9 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
         resetForm();
         router.refresh();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMessage(err.message || 'Error al crear la sesión manual.');
+      setErrorMessage(err instanceof Error ? err.message : 'Error al crear la sesión manual.');
     } finally {
       setIsSubmitting(false);
     }
@@ -137,7 +137,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
     calendarEnd.setDate(calendarEnd.getDate() + (7 - lastDayIdx));
     
     const days: Date[] = [];
-    let curr = new Date(calendarStart);
+    const curr = new Date(calendarStart);
     while (curr <= calendarEnd) {
       days.push(new Date(curr));
       curr.setDate(curr.getDate() + 1);
@@ -595,7 +595,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                       title="Estado"
                       aria-label="Estado"
                       value={formStatus}
-                      onChange={(e) => setFormStatus(e.target.value as any)}
+                      onChange={(e) => setFormStatus(e.target.value as 'pending' | 'completed')}
                       className="w-full bg-zinc-950 border border-zinc-850 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-colors cursor-pointer"
                     >
                       <option value="completed">✓ Completado</option>

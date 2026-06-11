@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
     .maybeSingle();
 
   // Determine if the user is a coach either from their existing profile or their auth metadata
-  let isCoach = profile?.role === 'coach' || user.user_metadata?.role === 'coach' || user.email === 'coach-demo@triatlonpro.com';
+  const isCoach = profile?.role === 'coach' || user.user_metadata?.role === 'coach' || user.email === 'coach-demo@triatlonpro.com';
 
   if (isCoach) {
     // If they are a coach but don't have a profile yet, or the role is wrong in DB, fix it

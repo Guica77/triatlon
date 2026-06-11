@@ -8,10 +8,38 @@ export async function login(formData: FormData) {
   const password = formData.get('password') as string
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
+  let { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
+
+  // Auto-crear y auto-confirmar cuentas demo si no existen
+  if (error && (error.message.includes('Invalid login credentials') || error.message.includes('Credenciales')) && (email === 'coach-demo@triatlonpro.com' || email === 'demo@triatlonpro.com')) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+    
+    // Crear el usuario con email confirmado para evitar el bloqueo
+    const { data: newUser, error: createError } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: {
+        role: email === 'coach-demo@triatlonpro.com' ? 'coach' : 'athlete',
+        first_name: 'Demo',
+        last_name: email === 'coach-demo@triatlonpro.com' ? 'Entrenador' : 'Atleta'
+      }
+    })
+
+    if (!createError && newUser?.user) {
+      // Plantar datos
+      const { seedDemoData } = await import('@/lib/demo-seeder')
+      await seedDemoData(email, newUser.user.id)
+      
+      // Reintentar login ahora que existe y está confirmado
+      const retryAuth = await supabase.auth.signInWithPassword({ email, password })
+      error = retryAuth.error
+    }
+  }
 
   if (error) {
     return { error: error.message }

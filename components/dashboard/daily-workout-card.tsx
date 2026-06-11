@@ -49,7 +49,7 @@ function parseWorkoutDescription(desc: string, sportType: string) {
   let main = desc || 'Sesión de entrenamiento aeróbico de construcción base.';
   let warmup = '15 mins de calentamiento progresivo de Z1 a Z2 con movilidad articular.';
   let cooldown = '10 mins de vuelta a la calma en Z1 y estiramientos suaves descontracturantes.';
-  let gear = sportType === 'natacion' 
+  const gear = sportType === 'natacion' 
     ? '🩱 Palas, aletas cortas y pullbuoy.' 
     : sportType === 'ciclismo' 
     ? '🚴‍♂️ Potenciómetro calibrado, bidones de sales y geles de carbohidratos.' 

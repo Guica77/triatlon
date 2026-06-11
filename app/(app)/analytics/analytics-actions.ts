@@ -381,7 +381,7 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
         
         // Use planned_tss for future workouts, actual_tss for completed
         let tss = 0;
-        let pTss = w.planned_tss || estimateTss(session.duration_min, session.description);
+        const pTss = w.planned_tss || estimateTss(session.duration_min, session.description);
 
         if (isScheduled) {
            tss = pTss;
@@ -459,7 +459,7 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
       const isFutureDate = i < 0;
 
       // Simulated PR logic: high TSS usually means hard races or max tests (for the MVP demo)
-      let prs: string[] = [];
+      const prs: string[] = [];
       if (!isFutureDate && dailyTss > 90) {
         if (dist.run > 15) prs.push('Medio Maratón (Ritmo)');
         else if (dist.run > 8) prs.push('10K (Mejor Marca)');

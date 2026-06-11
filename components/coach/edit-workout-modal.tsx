@@ -42,18 +42,21 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
   })
 
   React.useEffect(() => {
-    if (workout && isOpen) {
-      setFormData({
-        sportType: workout.sport_type || 'ciclismo',
-        durationMin: workout.duration_min || 60,
-        title: workout.title || '',
-        warmup: workout.warmup || '',
-        main: workout.main || '',
-        cooldown: workout.cooldown || ''
-      })
-      setError(null)
-      setSuccess(false)
-    }
+    const timer = setTimeout(() => {
+      if (workout && isOpen) {
+        setFormData({
+          sportType: workout.sport_type || 'ciclismo',
+          durationMin: workout.duration_min || 60,
+          title: workout.title || '',
+          warmup: workout.warmup || '',
+          main: workout.main || '',
+          cooldown: workout.cooldown || ''
+        })
+        setError(null)
+        setSuccess(false)
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [workout, isOpen])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

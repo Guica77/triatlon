@@ -106,8 +106,8 @@ export async function syncPhysiologyFromStrava(userId: string, accessToken: stri
       }
     });
 
-    let runPaces: number[] = []; // seconds per km
-    let swimPaces: number[] = []; // seconds per 100m
+    const runPaces: number[] = []; // seconds per km
+    const swimPaces: number[] = []; // seconds per 100m
     let maxRidePower = 0;
 
     if (activitiesResponse.ok) {
