@@ -254,6 +254,7 @@ export type Database = {
           subscription_status: string | null
           role: string | null
           email: string | null
+          push_subscriptions: Json | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -292,6 +293,7 @@ export type Database = {
           subscription_status?: string | null
           role?: string | null
           email?: string | null
+          push_subscriptions?: Json | null
         }
         Update: {
           active_plan_id?: string | null
@@ -330,6 +332,7 @@ export type Database = {
           subscription_status?: string | null
           role?: string | null
           email?: string | null
+          push_subscriptions?: Json | null
         }
         Relationships: [
           {
