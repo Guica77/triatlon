@@ -2,6 +2,14 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import webpush from 'web-push'
+
+// Set VAPID Details
+webpush.setVapidDetails(
+  process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com',
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
+  process.env.VAPID_PRIVATE_KEY || ''
+)
 
 export interface ChatMessageItem {
   id: string
@@ -48,6 +56,41 @@ export async function sendMessage(receiverId: string, message: string): Promise<
     if (error) {
       console.error('Error inserting chat message:', error)
       return { error: 'Error al enviar el mensaje' }
+    }
+
+    // --- PUSH NOTIFICATION TRIGGER ---
+    try {
+      const { data: receiverProfile } = await supabase
+        .from('profiles')
+        .select('push_subscriptions, first_name')
+        .eq('id', receiverId)
+        .single()
+
+      if (receiverProfile && receiverProfile.push_subscriptions) {
+        // Fetch sender name for the notification
+        const { data: senderProfile } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('id', user.id)
+          .single()
+
+        const senderName = senderProfile?.first_name || 'Alguien'
+
+        await webpush.sendNotification(
+          receiverProfile.push_subscriptions,
+          JSON.stringify({
+            title: `Nuevo mensaje de ${senderName}`,
+            body: message.trim(),
+            url: '/chat',
+          })
+        )
+      } else {
+        // Here you would trigger Resend to send an email.
+        console.log(`No push token for ${receiverId}. Triggering Email Fallback...`);
+      }
+    } catch (pushErr) {
+      console.error('Error triggering push notification:', pushErr)
+      // We don't return error here because the message was successfully saved
     }
 
     return { data: newMessage as any }

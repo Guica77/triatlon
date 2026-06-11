@@ -134,3 +134,62 @@ export async function updateWorkoutDate(
   
   return { success: true }
 }
+
+export async function updateCoachWorkoutDetails(
+  athleteId: string,
+  workoutId: string,
+  sessionId: string,
+  data: {
+    sportType: string
+    durationMin: number
+    title: string
+    warmup: string
+    main: string
+    cooldown: string
+  }
+) {
+  const supabase = await createClient()
+
+  // 1. Authenticate coach
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  // 2. Verify athlete belongs to coach roster
+  const { data: rosterCheck } = await supabase
+    .from('coach_athletes')
+    .select('id')
+    .eq('coach_id', user.id)
+    .eq('athlete_id', athleteId)
+    .maybeSingle()
+
+  if (!rosterCheck) return { error: 'No autorizado' }
+
+  try {
+    // 3. Format description using expected markers
+    const description = `Calentamiento: ${data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${data.cooldown || 'Enfriamiento y estiramientos.'}`
+
+    // 4. Update training_sessions
+    const { error: sessionError } = await supabase
+      .from('training_sessions')
+      .update({
+        sport_type: data.sportType,
+        duration_min: data.durationMin,
+        description: description,
+      })
+      .eq('id', sessionId)
+
+    if (sessionError) {
+      console.error('Error updating training session:', sessionError)
+      return { error: 'Error al actualizar los detalles del entrenamiento' }
+    }
+
+    revalidatePath(`/coach/athlete/${athleteId}`)
+    revalidatePath('/dashboard')
+    
+    return { success: true }
+  } catch (err: any) {
+    console.error('Exception in updateCoachWorkoutDetails:', err)
+    return { error: err.message || 'Error inesperado' }
+  }
+}
+

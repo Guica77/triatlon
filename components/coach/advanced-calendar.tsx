@@ -25,6 +25,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Calendar, GripVertical, Activity, Flame, Droplets, Dumbbell } from 'lucide-react';
 import { format, parseISO, addDays, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { EditWorkoutModal, EditWorkoutData } from './edit-workout-modal';
 
 // --- Types ---
 export interface WorkoutItem {
@@ -42,6 +43,37 @@ interface AdvancedCalendarProps {
   workouts: WorkoutItem[];
   onWorkoutMove: (workoutId: string, newDate: string) => Promise<void>;
   startDate?: Date; // Usually the Monday of the current week
+  athleteId?: string; // Needed for EditWorkoutModal
+}
+
+// --- Helper for parsing description ---
+function parseDescription(desc: string | null) {
+  if (!desc) return { warmup: '', main: '', cooldown: '', title: '' };
+  
+  let warmup = '';
+  let main = '';
+  let cooldown = '';
+  let title = '';
+
+  const lines = desc.split('\n');
+  lines.forEach(line => {
+    if (line.startsWith('Calentamiento: ')) {
+      warmup = line.replace('Calentamiento: ', '');
+    } else if (line.startsWith('Parte principal: ')) {
+      let mainPart = line.replace('Parte principal: ', '');
+      if (mainPart.startsWith('**') && mainPart.includes('** - ')) {
+        const parts = mainPart.split('** - ');
+        title = parts[0].replace('**', '');
+        main = parts.slice(1).join('** - ');
+      } else {
+        main = mainPart;
+      }
+    } else if (line.startsWith('Enfriamiento: ')) {
+      cooldown = line.replace('Enfriamiento: ', '');
+    }
+  });
+
+  return { warmup, main, cooldown, title };
 }
 
 // --- Icons ---
@@ -55,18 +87,18 @@ const SportIcon = ({ type, className }: { type: string, className?: string }) =>
   }
 };
 
-const getSportColor = (type: string) => {
+const getSportAccent = (type: string) => {
   switch (type?.toLowerCase()) {
-    case 'natacion': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-    case 'ciclismo': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-    case 'carrera': return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-    case 'fuerza': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-    default: return 'bg-zinc-800 text-zinc-400 border-zinc-700';
+    case 'natacion': return 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]';
+    case 'ciclismo': return 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]';
+    case 'carrera': return 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]';
+    case 'fuerza': return 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]';
+    default: return 'bg-zinc-500';
   }
 };
 
 // --- Sortable Item Component ---
-function SortableWorkoutCard({ workout }: { workout: WorkoutItem }) {
+function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit: (w: WorkoutItem) => void }) {
   const {
     attributes,
     listeners,
@@ -95,39 +127,44 @@ function SortableWorkoutCard({ workout }: { workout: WorkoutItem }) {
     );
   }
 
+  const parsed = parseDescription(session?.description || '');
+  const displayTitle = parsed.title || session?.sport_type || 'Sesión';
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className={`p-3 rounded-xl border bg-[#18181b] shadow-sm cursor-grab active:cursor-grabbing group transition-colors ${
-        isDragging ? 'opacity-50 scale-105 shadow-xl z-50 border-cyan-500/50' : 'border-zinc-800 hover:border-zinc-700'
+      onClick={() => onEdit(workout)}
+      className={`relative p-3 pl-3.5 rounded-xl border bg-zinc-900/40 backdrop-blur-md shadow-sm cursor-grab active:cursor-grabbing group transition-all overflow-hidden ${
+        isDragging ? 'opacity-50 scale-105 shadow-2xl z-50 border-cyan-500/50' : 'border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/60'
       }`}
     >
-      <div className="flex items-start gap-2">
-        <div className="mt-0.5 text-zinc-600 group-hover:text-zinc-400 transition-colors cursor-grab">
-          <GripVertical className="w-3.5 h-3.5" />
+      {/* Accent Line */}
+      <div className={`absolute left-0 top-0 bottom-0 w-1 ${getSportAccent(session?.sport_type || '')}`} />
+      
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="text-[11px] font-black text-zinc-100 uppercase tracking-tight truncate flex-1 flex items-center gap-1.5">
+            <SportIcon type={session?.sport_type || ''} className="w-3 h-3 opacity-70" />
+            <span className="truncate">{displayTitle}</span>
+          </h4>
+          <span className="text-[10px] font-black text-zinc-500 flex items-center gap-1 shrink-0 bg-zinc-950 px-1.5 py-0.5 rounded-md border border-zinc-800/50">
+            {session?.duration_min}'
+          </span>
         </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border flex items-center gap-1 ${getSportColor(session?.sport_type || '')}`}>
-              <SportIcon type={session?.sport_type || ''} className="w-2.5 h-2.5" />
-              {session?.sport_type}
-            </span>
-            <span className="text-[10px] font-medium text-zinc-500">{session?.duration_min} min</span>
-          </div>
-          <p className="text-xs text-zinc-300 leading-snug line-clamp-2">
-            {session?.description}
-          </p>
-        </div>
+        
+        <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-2 pr-1">
+          {parsed.main || parsed.warmup || session?.description}
+        </p>
       </div>
     </div>
   );
 }
 
 // --- Main Calendar Component ---
-export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date() }: AdvancedCalendarProps) {
+export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date(), athleteId }: AdvancedCalendarProps) {
   // Normalize start date to Monday
   const weekStart = startOfWeek(startDate, { weekStartsOn: 1 });
   
@@ -146,6 +183,29 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
   const [columns, setColumns] = React.useState<Record<string, WorkoutItem[]>>({});
   const [activeWorkout, setActiveWorkout] = React.useState<WorkoutItem | null>(null);
   const [isUpdating, setIsUpdating] = React.useState(false);
+  
+  // Edit Modal State
+  const [editingWorkout, setEditingWorkout] = React.useState<EditWorkoutData | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+
+  const handleEditClick = (workout: WorkoutItem) => {
+    if (!workout.training_sessions) return;
+    const session = workout.training_sessions as any;
+    
+    const parsed = parseDescription(session.description);
+    
+    setEditingWorkout({
+      id: workout.id,
+      session_id: session.id,
+      sport_type: session.sport_type || 'ciclismo',
+      duration_min: session.duration_min || 60,
+      title: parsed.title,
+      warmup: parsed.warmup,
+      main: parsed.main,
+      cooldown: parsed.cooldown,
+    });
+    setIsEditModalOpen(true);
+  };
 
   // Initialize columns from props
   React.useEffect(() => {
@@ -282,7 +342,7 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
               >
                 <div className="flex-1 p-2 min-h-[150px] flex flex-col gap-2">
                   {columns[day.id]?.map(workout => (
-                    <SortableWorkoutCard key={workout.id} workout={workout} />
+                    <SortableWorkoutCard key={workout.id} workout={workout} onEdit={handleEditClick} />
                   ))}
                   {(!columns[day.id] || columns[day.id].length === 0) && (
                     <div className="flex-1 flex items-center justify-center border-2 border-dashed border-zinc-800/50 rounded-xl bg-zinc-900/20 text-[10px] text-zinc-600 font-medium uppercase tracking-wider">
@@ -296,9 +356,18 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
         </div>
 
         <DragOverlay dropAnimation={dropAnimation}>
-          {activeWorkout ? <SortableWorkoutCard workout={activeWorkout} /> : null}
+          {activeWorkout ? <SortableWorkoutCard workout={activeWorkout} onEdit={() => {}} /> : null}
         </DragOverlay>
       </DndContext>
+
+      {athleteId && (
+        <EditWorkoutModal 
+          athleteId={athleteId}
+          workout={editingWorkout}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

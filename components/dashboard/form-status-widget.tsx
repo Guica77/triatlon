@@ -98,7 +98,7 @@ export function FormStatusWidget({ tsb, athleteLevel, progressPercent = 0 }: For
   const strokeDashoffset = circumference * (1 - percentage);
 
   return (
-    <Link href={isBeginner ? "/principiantes" : "/analytics"} className="block group w-full h-full">
+    <Link href="/analytics" className="block group w-full h-full">
       <div className={`p-5 sm:p-6 rounded-2xl border ${bgClass} shadow-xl transition-all duration-300 hover:scale-[1.02] flex flex-col justify-between h-full min-h-[320px] relative overflow-hidden backdrop-blur-md`}>
         {/* Glow de fondo dinámico en base al color del estado */}
         <div 

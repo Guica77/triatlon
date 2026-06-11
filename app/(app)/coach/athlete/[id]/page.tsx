@@ -198,7 +198,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-4xl mx-auto px-6 pt-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-6 pt-8 space-y-8">
         
         {/* Connection status header */}
         {isConnected && (

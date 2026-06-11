@@ -39,6 +39,7 @@ export function AdvancedCalendarWrapper({ athleteId, initialWorkouts }: Advanced
     <AdvancedCalendar 
       workouts={workouts} 
       onWorkoutMove={handleWorkoutMove} 
+      athleteId={athleteId}
     />
   );
 }
