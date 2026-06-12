@@ -9,6 +9,8 @@ import { AnimatedButton } from '@/components/ui/animated-button';
 interface StepPhysiologyProps {
   wantsCoach: boolean;
   setWantsCoach: (v: boolean) => void;
+  inviteCode?: string;
+  setInviteCode?: (v: string) => void;
   currentFtp: string;
   setCurrentFtp: (v: string) => void;
   currentSwimPace: string;
@@ -89,10 +91,23 @@ export function StepPhysiology(props: StepPhysiologyProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="pt-4 border-t border-zinc-800/50 text-center space-y-2"
+              className="pt-4 border-t border-zinc-800/50 space-y-4"
             >
-              <p className="text-sm text-zinc-300">Has elegido entrenar con un profesional.</p>
-              <p className="text-xs text-zinc-500">Saltaremos la calibración automática. Podrás elegir a tu entrenador o introducir su código de invitación en el siguiente paso.</p>
+              <div className="text-center space-y-2">
+                <p className="text-sm text-zinc-300">Has elegido entrenar con un profesional.</p>
+                <p className="text-xs text-zinc-500">Saltaremos la calibración automática. Si ya tienes un entrenador, introduce su código a continuación.</p>
+              </div>
+
+              <div className="max-w-xs mx-auto">
+                <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider text-center">Código de Entrenador (Opcional)</label>
+                <input 
+                  type="text" 
+                  value={props.inviteCode || ''} 
+                  onChange={e => props.setInviteCode && props.setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))} 
+                  placeholder="Ej: GUILLEPRO" 
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-cyan-400 focus:border-cyan-500 outline-none transition-all text-center font-bold tracking-widest uppercase" 
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

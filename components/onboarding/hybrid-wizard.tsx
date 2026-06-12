@@ -18,6 +18,7 @@ export function HybridWizard() {
 
   // Step 1: Physiological & Planning Preference
   const [wantsCoach, setWantsCoach] = React.useState<boolean>(false);
+  const [inviteCode, setInviteCode] = React.useState('');
   const [currentFtp, setCurrentFtp] = React.useState('');
   const [currentSwimPace, setCurrentSwimPace] = React.useState('');
   const [currentRunPace, setCurrentRunPace] = React.useState('');
@@ -34,6 +35,17 @@ export function HybridWizard() {
   const handleSave = async () => {
     setLoading(true);
     try {
+      // Si quiere coach y ha puesto un código, intentamos vincularlo primero
+      if (wantsCoach && inviteCode.trim()) {
+        const { linkCoachByCode } = await import('@/app/(app)/chat/actions');
+        const linkRes = await linkCoachByCode(inviteCode);
+        if (linkRes.error) {
+          alert(linkRes.error || 'Código de entrenador inválido');
+          setLoading(false);
+          return;
+        }
+      }
+
       const result = await saveRaceGoalAndPlan({
         current_ftp: currentFtp ? parseInt(currentFtp) : undefined,
         current_swim_pace: currentSwimPace || undefined,
@@ -108,6 +120,8 @@ export function HybridWizard() {
           <StepPhysiology
             wantsCoach={wantsCoach}
             setWantsCoach={setWantsCoach}
+            inviteCode={inviteCode}
+            setInviteCode={setInviteCode}
             currentFtp={currentFtp}
             setCurrentFtp={setCurrentFtp}
             currentSwimPace={currentSwimPace}
