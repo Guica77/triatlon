@@ -322,6 +322,58 @@ export async function linkCoachByAthlete(coachId: string): Promise<{ success?: b
 }
 
 /**
+ * Looks up a coach by invite code.
+ */
+export async function lookupCoachByCode(code: string): Promise<{ success?: boolean; error?: string; coach?: any }> {
+  if (!code || !code.trim()) {
+    return { error: 'El código no puede estar vacío' }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'No autorizado' }
+  }
+
+  try {
+    const formattedCode = code.trim().toUpperCase()
+
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabaseAdmin = createAdminClient()
+
+    // Find the coach with this code
+    const { data: coachProfile, error: searchError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, role, first_name, last_name, avatar_url')
+      .eq('invite_code' as any, formattedCode)
+      .maybeSingle()
+
+    if (searchError) {
+      console.error('Error looking up coach by code:', searchError)
+      return { error: 'Error al buscar el código' }
+    }
+
+    if (!coachProfile || coachProfile.role !== 'coach') {
+      return { error: 'Código de entrenador inválido' }
+    }
+
+    return { 
+      success: true, 
+      coach: {
+        id: coachProfile.id,
+        first_name: coachProfile.first_name,
+        last_name: coachProfile.last_name,
+        avatar_url: coachProfile.avatar_url
+      }
+    }
+  } catch (err: unknown) {
+    console.error('Exception in lookupCoachByCode:', err)
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
+  }
+}
+
+/**
  * Links the current athlete to a coach using an invite code.
  */
 export async function linkCoachByCode(code: string): Promise<{ success?: boolean; error?: string }> {
