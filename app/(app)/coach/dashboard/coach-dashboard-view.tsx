@@ -44,7 +44,6 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
   const [inviteCode, setInviteCode] = React.useState(initialInviteCode || '')
   const [inviteLoading, setInviteLoading] = React.useState(false)
   const [inviteMessage, setInviteMessage] = React.useState<{ text: string; type: 'success' | 'error' } | null>(null)
-  const [isEditingCode, setIsEditingCode] = React.useState(false)
   
   const [assigningId, setAssigningId] = React.useState<string | null>(null)
   const [removingId, setRemovingId] = React.useState<string | null>(null)
@@ -104,17 +103,21 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
     }
   }
 
-  const handleSaveCode = async () => {
+  const handleGenerateCode = async () => {
     setInviteLoading(true)
     setInviteMessage(null)
     try {
+      // Generar código aleatorio tipo: TR-8A2F9B
+      const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase()
+      const newCode = `TR-${randomPart}`
+
       const { updateInviteCode } = await import('./actions')
-      const res = await updateInviteCode(inviteCode)
+      const res = await updateInviteCode(newCode)
       if (res.error) {
         setInviteMessage({ text: res.error, type: 'error' })
       } else {
-        setIsEditingCode(false)
-        setInviteMessage({ text: 'Código actualizado correctamente', type: 'success' })
+        setInviteCode(newCode)
+        setInviteMessage({ text: 'Código generado y actualizado con éxito', type: 'success' })
       }
     } catch (err) {
       setInviteMessage({ text: 'Error de conexión', type: 'error' })
@@ -326,7 +329,7 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
               </div>
 
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Genera un enlace mágico único y envíaselo por WhatsApp o Email a tu atleta. Al registrarse, se conectará a ti automáticamente.
+                Pide a tus atletas que introduzcan este código cuando se registren, o envíales el enlace mágico para que se vinculen automáticamente.
               </p>
 
               <div className="space-y-4">
@@ -335,70 +338,33 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/5 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                     <p className="text-[10px] text-zinc-500 mb-2 uppercase tracking-widest font-bold">Tu Código de Entrenador</p>
                     
-                    {isEditingCode ? (
-                      <input 
-                        type="text" 
-                        value={inviteCode}
-                        onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
-                        placeholder="Escribe tu código..."
-                        className="w-full bg-zinc-900 border-b-2 border-cyan-500 p-2 text-xl text-center text-cyan-400 outline-none font-black uppercase tracking-widest transition-all"
-                        autoFocus
-                      />
-                    ) : (
-                      <div className="text-2xl text-white font-black tracking-widest drop-shadow-md">
-                        {inviteCode || (
-                          <span className="text-zinc-600 text-lg">No configurado</span>
-                        )}
-                      </div>
-                    )}
+                    <div className="text-2xl text-white font-black tracking-widest drop-shadow-md">
+                      {inviteCode ? (
+                        <span className="text-cyan-400">{inviteCode}</span>
+                      ) : (
+                        <span className="text-zinc-600 text-lg">No configurado</span>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="flex gap-2">
-                    {isEditingCode ? (
-                      <>
-                        <AnimatedButton
-                          variant="ghost"
-                          onClick={() => {
-                            setIsEditingCode(false)
-                            setInviteCode(initialInviteCode || '')
-                          }}
-                          className="flex-1 py-3 text-xs font-bold text-zinc-400 hover:text-white border border-zinc-800 rounded-xl"
-                        >
-                          Cancelar
-                        </AnimatedButton>
-                        <AnimatedButton
-                          variant="primary"
-                          onClick={handleSaveCode}
-                          disabled={inviteLoading || !inviteCode.trim()}
-                          className="flex-1 py-3 text-xs font-bold !bg-emerald-500 hover:!bg-emerald-400 !text-black shadow-emerald-500/10 shadow-lg"
-                        >
-                          {inviteLoading ? 'Guardando...' : 'Guardar'}
-                        </AnimatedButton>
-                      </>
-                    ) : (
-                      <>
-                        <AnimatedButton
-                          variant="ghost"
-                          onClick={() => setIsEditingCode(true)}
-                          className="px-4 py-3 text-xs font-bold text-zinc-400 hover:text-cyan-400 border border-zinc-800 rounded-xl"
-                        >
-                          {inviteCode ? 'Cambiar' : 'Crear Código'}
-                        </AnimatedButton>
-                        <AnimatedButton
-                          variant="primary"
-                          onClick={handleCopyLink}
-                          disabled={inviteLoading}
-                          className="flex-1 py-3 text-xs font-bold !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-cyan-500/10 shadow-lg flex items-center justify-center gap-1.5"
-                        >
-                          {inviteLoading ? 'Generando...' : (
-                            <>
-                              <UserCheck className="w-3.5 h-3.5 text-black" />
-                              Copiar Link Mágico
-                            </>
-                          )}
-                        </AnimatedButton>
-                      </>
-                    )}
+                    <AnimatedButton
+                      variant="ghost"
+                      onClick={handleGenerateCode}
+                      disabled={inviteLoading}
+                      className="px-4 py-3 text-xs font-bold text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 rounded-xl transition-all"
+                    >
+                      {inviteCode ? 'Generar Nuevo' : 'Generar Código'}
+                    </AnimatedButton>
+                    <AnimatedButton
+                      variant="primary"
+                      onClick={handleCopyLink}
+                      disabled={inviteLoading || !inviteCode}
+                      className="flex-1 py-3 text-xs font-bold !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-cyan-500/10 shadow-lg flex items-center justify-center gap-1.5"
+                    >
+                      <UserCheck className="w-3.5 h-3.5 text-black" />
+                      Copiar Enlace
+                    </AnimatedButton>
                   </div>
                 </div>
               </div>
