@@ -436,7 +436,7 @@ export async function updateInviteCode(code: string): Promise<{ success?: boolea
     if (!formattedCode) {
       const { error } = await supabase
         .from('profiles')
-        .update({ invite_code: null })
+        .update({ invite_code: null } as any)
         .eq('id', user.id)
       
       if (error) throw error
@@ -448,7 +448,7 @@ export async function updateInviteCode(code: string): Promise<{ success?: boolea
     const { data: existing } = await supabase
       .from('profiles')
       .select('id')
-      .eq('invite_code', formattedCode)
+      .eq('invite_code' as any, formattedCode)
       .neq('id', user.id)
       .maybeSingle()
 
@@ -458,7 +458,7 @@ export async function updateInviteCode(code: string): Promise<{ success?: boolea
 
     const { error: updateError } = await supabase
       .from('profiles')
-      .update({ invite_code: formattedCode })
+      .update({ invite_code: formattedCode } as any)
       .eq('id', user.id)
 
     if (updateError) {
