@@ -358,30 +358,6 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
       {session.sport_type !== 'descanso' ? (
         <div className="space-y-4 relative z-10">
           
-          {/* Alerta de Material Faltante (IA Gear Match Loop) */}
-          {missingGear.length > 0 && !isCompleted && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg shadow-orange-500/5 mb-4"
-            >
-              <div className="flex items-start gap-3">
-                <ShoppingBag className="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-bold text-orange-400">⚠️ Material Faltante</p>
-                  <p className="text-xs text-orange-300/80 mt-0.5">El entreno pide: <strong className="text-orange-300">{missingGear.join(', ')}</strong> y no lo tienes en tu Garaje.</p>
-                </div>
-              </div>
-              {!readOnly && (
-                <Link href={`/marketplace?category=accesorios&search=${encodeURIComponent(missingGear[0])}`} className="shrink-0 w-full sm:w-auto">
-                  <button className="w-full sm:w-auto px-4 py-2 bg-orange-500 text-black font-bold text-xs rounded-lg hover:bg-orange-400 transition-colors shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
-                    <Sparkles className="w-3.5 h-3.5" /> Buscar Chollos IA
-                  </button>
-                </Link>
-              )}
-            </motion.div>
-          )}
-
           {/* Navegación de Pestañas (Segmented Control Estilo Premium) */}
           <div className="bg-zinc-950/60 p-1 rounded-xl border border-zinc-800/60 flex items-center gap-1 overflow-x-auto scrollbar-none">
             <button
@@ -572,14 +548,9 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                     {missingGear.length > 0 && !readOnly && (
                       <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between flex-wrap gap-3">
                         <span className="text-xs text-zinc-400 flex items-center gap-1.5">
-                          <ShoppingBag className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-                          ¿Te falta material para esta sesión?
+                          <ShoppingBag className="w-3.5 h-3.5 text-orange-400" />
+                          No tienes este material en tu Garaje Virtual.
                         </span>
-                        <Link href={`/marketplace?category=accesorios&search=${encodeURIComponent(missingGear[0])}`}>
-                          <span className="px-3.5 py-2 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm">
-                            <Sparkles className="w-3.5 h-3.5" /> Buscar Chollos IA ➔
-                          </span>
-                        </Link>
                       </div>
                     )}
                   </div>

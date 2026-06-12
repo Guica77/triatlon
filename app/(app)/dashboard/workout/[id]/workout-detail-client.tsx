@@ -424,12 +424,9 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
 
               {missingGear.length > 0 && (
                 <div className="pt-3 border-t border-zinc-800">
-                  <Link href={`/marketplace?search=${encodeURIComponent(missingGear[0])}`}>
-                    <span className="w-full py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/30 text-[11px] font-bold rounded-lg transition flex items-center justify-center gap-1 cursor-pointer">
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      Buscar Chollo local para {missingGear[0]}
-                    </span>
-                  </Link>
+                  <span className="w-full py-2 text-zinc-400 text-[11px] font-bold rounded-lg flex items-center justify-center gap-1">
+                    Recuerda conseguir este material antes de la sesión.
+                  </span>
                 </div>
               )}
             </div>

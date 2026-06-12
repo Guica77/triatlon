@@ -168,12 +168,7 @@ export default async function DashboardPage() {
               <span className="font-medium">Zona Principiantes</span>
             </AnimatedButton>
           </Link>
-          <Link href="/marketplace" className="shrink-0">
-            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-cyan-500/30 bg-cyan-500/10 flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/20 shadow-sm transition-all duration-200">
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span className="font-medium">Material 2ª Mano</span>
-            </AnimatedButton>
-          </Link>
+
           <Link href="/analytics" className="shrink-0">
             <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-800 bg-zinc-900/60 flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 hover:bg-zinc-800/60 transition-all duration-200">
               <BarChart2 className="w-3.5 h-3.5" />
