@@ -415,3 +415,29 @@ export async function linkCoachByCode(code: string): Promise<{ success?: boolean
     return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
+
+/**
+ * Fetches the public directory of available coaches.
+ */
+export async function getCoachDirectory(): Promise<{ success?: boolean; error?: string; coaches?: any[] }> {
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabaseAdmin = createAdminClient()
+
+    const { data: coaches, error } = await supabaseAdmin
+      .from('profiles')
+      .select('id, first_name, last_name, role, level, goal_distance, bio, achievements, invite_code')
+      .eq('role', 'coach')
+      .not('invite_code' as any, 'is', null)
+
+    if (error) {
+      console.error('Error fetching coach directory:', error)
+      return { error: 'Error al cargar el directorio de entrenadores' }
+    }
+
+    return { success: true, coaches: coaches || [] }
+  } catch (err: unknown) {
+    console.error('Exception in getCoachDirectory:', err)
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
+  }
+}
