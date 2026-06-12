@@ -148,7 +148,7 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
               {loadingDirectory && <Loader2 className="w-3 h-3 text-cyan-500 animate-spin" />}
             </h3>
             
-            <div className="flex overflow-x-auto pb-4 gap-4 px-2 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <div className="flex overflow-x-auto pb-4 gap-4 px-2 snap-x snap-mandatory scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none]">
               {!loadingDirectory && coaches.length === 0 && (
                 <div className="w-full p-6 text-center border border-zinc-800/50 rounded-2xl bg-zinc-900/20">
                   <p className="text-xs text-zinc-500">No hay entrenadores públicos en este momento.</p>
