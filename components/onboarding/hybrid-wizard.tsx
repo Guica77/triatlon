@@ -115,7 +115,13 @@ export function HybridWizard() {
             currentRunPace={currentRunPace}
             setCurrentRunPace={setCurrentRunPace}
             onPrev={() => setStep(1)} // Prev isn't actually used on step 1, but we pass it
-            onNext={() => setStep(2)}
+            onNext={() => {
+              if (wantsCoach) {
+                handleSave();
+              } else {
+                setStep(2);
+              }
+            }}
           />
         )}
 
