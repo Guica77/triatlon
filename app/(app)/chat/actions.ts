@@ -345,7 +345,7 @@ export async function lookupCoachByCode(code: string): Promise<{ success?: boole
     // Find the coach with this code
     const { data: coachProfile, error: searchError } = await supabaseAdmin
       .from('profiles')
-      .select('id, role, first_name, last_name, avatar_url')
+      .select('id, role, first_name, last_name')
       .eq('invite_code' as any, formattedCode)
       .maybeSingle()
 
@@ -363,8 +363,7 @@ export async function lookupCoachByCode(code: string): Promise<{ success?: boole
       coach: {
         id: coachProfile.id,
         first_name: coachProfile.first_name,
-        last_name: coachProfile.last_name,
-        avatar_url: coachProfile.avatar_url
+        last_name: coachProfile.last_name
       }
     }
   } catch (err: unknown) {
