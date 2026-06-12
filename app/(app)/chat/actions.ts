@@ -257,6 +257,7 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
 export async function getAvailableCoaches(): Promise<{ data?: ChatParticipant[]; error?: string }> {
   const supabase = await createClient()
   
+  try {
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const supabaseAdmin = createAdminClient()
 
