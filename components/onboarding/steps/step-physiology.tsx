@@ -91,23 +91,10 @@ export function StepPhysiology(props: StepPhysiologyProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="pt-4 border-t border-zinc-800/50 space-y-4"
+              className="pt-4 border-t border-zinc-800/50 text-center space-y-2"
             >
-              <div className="text-center space-y-2">
-                <p className="text-sm text-zinc-300">Has elegido entrenar con un profesional.</p>
-                <p className="text-xs text-zinc-500">Saltaremos la calibración automática. Si ya tienes un entrenador, introduce su código a continuación.</p>
-              </div>
-
-              <div className="max-w-xs mx-auto">
-                <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider text-center">Código de Entrenador (Opcional)</label>
-                <input 
-                  type="text" 
-                  value={props.inviteCode || ''} 
-                  onChange={e => props.setInviteCode && props.setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))} 
-                  placeholder="Ej: GUILLEPRO" 
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-cyan-400 focus:border-cyan-500 outline-none transition-all text-center font-bold tracking-widest uppercase" 
-                />
-              </div>
+              <p className="text-sm text-zinc-300">Has elegido entrenar con un profesional.</p>
+              <p className="text-xs text-zinc-500">Saltaremos la calibración automática y el garaje. En el siguiente paso podrás usar tu código o buscar uno.</p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -115,7 +102,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
         <div className="flex justify-between pt-4 border-t border-zinc-800/80">
           <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-400 hover:text-white transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
           <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm !bg-emerald-500 hover:!bg-emerald-400 !text-black shadow-emerald-500/20">
-            {props.wantsCoach ? 'Buscar Entrenador' : 'Continuar'} <ChevronRight className="w-4 h-4 ml-1" />
+            {props.wantsCoach ? 'Siguiente' : 'Continuar'} <ChevronRight className="w-4 h-4 ml-1" />
           </AnimatedButton>
         </div>
       </ProCard>
