@@ -49,13 +49,11 @@ export function PushNotificationManager() {
       const registration = await navigator.serviceWorker.ready;
       if (!registration) throw new Error('No se encontró el Service Worker.');
       
-      if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
-        throw new Error('Falta la clave VAPID en las variables de entorno.');
-      }
+      const publicVapidKey = 'BAi2rxfRgcD4X9qjv1wPdfwwCNfUv0tUz047zi4evcA47w6fra9ujTMNXSB6CedfJgoaHbWaxcncxN-o0G3M2cQ';
 
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY)
+        applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
       });
 
       setSubscription(sub);
