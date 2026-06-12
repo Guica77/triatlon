@@ -470,7 +470,7 @@ export async function markMessagesAsRead(senderId: string) {
       .update({ is_read: true } as any)
       .eq('receiver_id', user.id)
       .eq('sender_id', senderId)
-      .eq('is_read', false as any)
+      .eq('is_read' as any, false)
 
     if (error) throw error
 
@@ -495,7 +495,7 @@ export async function getUnreadCount() {
       .from('chat_messages')
       .select('*', { count: 'exact', head: true })
       .eq('receiver_id', user.id)
-      .eq('is_read', false as any)
+      .eq('is_read' as any, false)
 
     if (error) throw error
 
