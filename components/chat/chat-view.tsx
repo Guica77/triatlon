@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
-import { ChatParticipant, ChatMessageItem, sendMessage, getMessages, linkCoachByAthlete } from '@/app/(app)/chat/actions'
+import { ChatParticipant, ChatMessageItem, sendMessage, getMessages, linkCoachByAthlete, linkCoachByCode } from '@/app/(app)/chat/actions'
 import { createClient } from '@/lib/supabase/client'
 
 interface ChatViewProps {
@@ -40,6 +40,8 @@ export function ChatView({
   const [searchQuery, setSearchQuery] = React.useState('')
   const [isTyping, setIsTyping] = React.useState(false)
   const [linkingCoachId, setLinkingCoachId] = React.useState<string | null>(null)
+  const [inviteCode, setInviteCode] = React.useState('')
+  const [linkingCoachCode, setLinkingCoachCode] = React.useState(false)
 
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
@@ -169,6 +171,20 @@ export function ChatView({
     } else {
       alert(res.error || 'Error al vincular con el entrenador')
       setLinkingCoachId(null)
+    }
+  }
+
+  const handleLinkByCode = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!inviteCode.trim()) return
+
+    setLinkingCoachCode(true)
+    const res = await linkCoachByCode(inviteCode)
+    if (res.success) {
+      window.location.reload()
+    } else {
+      alert(res.error || 'Código inválido o error al vincular')
+      setLinkingCoachCode(false)
     }
   }
 
@@ -355,19 +371,50 @@ export function ChatView({
                 </div>
               </div>
             ) : (
-              <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-[100%] pr-2">
                 <div className="text-center space-y-2 mb-8 mt-4">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mb-4 shadow-inner">
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <h3 className="text-xl font-bold text-white">Directorio de Entrenadores</h3>
                   <p className="text-sm text-zinc-400">
-                    Aún no tienes un entrenador asignado. Explora nuestra lista de entrenadores certificados y elige el que mejor se adapte a ti.
+                    Aún no tienes un entrenador asignado. Explora nuestra lista de entrenadores certificados o introduce un código de invitación.
                   </p>
                 </div>
                 
+                {/* Código de invitación */}
+                <form onSubmit={handleLinkByCode} className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 shadow-lg flex flex-col gap-3 max-w-sm mx-auto">
+                  <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider text-center">¿Tienes un código de entrenador?</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={inviteCode}
+                      onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
+                      placeholder="Ej: GUILLEPRO"
+                      className="flex-1 bg-zinc-950 border border-zinc-800 focus:border-cyan-500 rounded-xl px-4 py-3 text-sm text-cyan-400 font-bold uppercase tracking-wider outline-none transition-all"
+                    />
+                    <AnimatedButton
+                      type="submit"
+                      variant="primary"
+                      disabled={linkingCoachCode || !inviteCode.trim()}
+                      className="px-6 py-3 text-sm font-bold !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-cyan-500/20 shadow-lg"
+                    >
+                      {linkingCoachCode ? '...' : 'Vincular'}
+                    </AnimatedButton>
+                  </div>
+                </form>
+
+                <div className="relative py-4 max-w-sm mx-auto">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-zinc-800"></div>
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-zinc-950/50 px-4 text-xs font-medium text-zinc-500">o elige uno disponible</span>
+                  </div>
+                </div>
+
                 {availableCoaches.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12">
                     {availableCoaches.map(coach => (
                       <div key={coach.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between hover:border-cyan-500/40 transition-all group shadow-md">
                         <div className="flex items-center gap-3 mb-4">
@@ -395,7 +442,7 @@ export function ChatView({
                     ))}
                   </div>
                 ) : (
-                  <div className="p-8 text-center bg-zinc-900/50 border border-zinc-800 rounded-2xl">
+                  <div className="p-8 text-center bg-zinc-900/50 border border-zinc-800 rounded-2xl pb-12">
                     <p className="text-sm text-zinc-500">No hay entrenadores disponibles en este momento.</p>
                   </div>
                 )}

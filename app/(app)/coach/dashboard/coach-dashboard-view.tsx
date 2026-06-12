@@ -35,14 +35,16 @@ interface CoachDashboardViewProps {
   plans: { id: string; name: string }[]
   coachName: string
   coachId: string
+  initialInviteCode?: string | null
 }
 
-export function CoachDashboardView({ initialRoster, plans, coachName, coachId }: CoachDashboardViewProps) {
+export function CoachDashboardView({ initialRoster, plans, coachName, coachId, initialInviteCode }: CoachDashboardViewProps) {
   const [roster, setRoster] = React.useState<AthleteRosterItem[]>(initialRoster)
   const [searchQuery, setSearchQuery] = React.useState('')
-  const [inviteEmail, setInviteEmail] = React.useState('')
+  const [inviteCode, setInviteCode] = React.useState(initialInviteCode || '')
   const [inviteLoading, setInviteLoading] = React.useState(false)
   const [inviteMessage, setInviteMessage] = React.useState<{ text: string; type: 'success' | 'error' } | null>(null)
+  const [isEditingCode, setIsEditingCode] = React.useState(false)
   
   const [assigningId, setAssigningId] = React.useState<string | null>(null)
   const [removingId, setRemovingId] = React.useState<string | null>(null)
@@ -72,7 +74,8 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId }:
     setInviteMessage(null)
 
     try {
-      const inviteUrl = `${window.location.origin}/invite/${coachId}`
+      const codeToUse = inviteCode || coachId
+      const inviteUrl = `${window.location.origin}/invite/${codeToUse}`
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(inviteUrl)
         setInviteMessage({ text: '¡Enlace Mágico copiado!', type: 'success' })
@@ -98,6 +101,26 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId }:
       setInviteMessage({ text: 'Error al copiar el enlace', type: 'error' })
     } finally {
       setInviteLoading(false)
+    }
+  }
+
+  const handleSaveCode = async () => {
+    setInviteLoading(true)
+    setInviteMessage(null)
+    try {
+      const { updateInviteCode } = await import('./actions')
+      const res = await updateInviteCode(inviteCode)
+      if (res.error) {
+        setInviteMessage({ text: res.error, type: 'error' })
+      } else {
+        setIsEditingCode(false)
+        setInviteMessage({ text: 'Código actualizado correctamente', type: 'success' })
+      }
+    } catch (err) {
+      setInviteMessage({ text: 'Error de conexión', type: 'error' })
+    } finally {
+      setInviteLoading(false)
+      setTimeout(() => setInviteMessage(null), 4000)
     }
   }
 
@@ -308,28 +331,76 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId }:
 
               <div className="space-y-4">
                 <div className="flex flex-col gap-2">
-                  <input 
-                    type="text" 
-                    readOnly 
-                    aria-label="Enlace mágico de invitación"
-                    title="Enlace mágico de invitación"
-                    value={`${typeof window !== 'undefined' ? window.location.origin : ''}/invite/${coachId}`}
-                    className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-300 outline-none font-mono selection:bg-cyan-500/30"
-                    onClick={(e) => (e.target as HTMLInputElement).select()}
-                  />
-                  <AnimatedButton
-                    variant="primary"
-                    onClick={handleCopyLink}
-                    disabled={inviteLoading}
-                    className="w-full py-3 text-xs font-bold !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-cyan-500/10 shadow-lg flex items-center justify-center gap-1.5"
-                  >
-                    {inviteLoading ? 'Generando...' : (
+                  <div className="flex items-center gap-2">
+                    {isEditingCode ? (
+                      <input 
+                        type="text" 
+                        value={inviteCode}
+                        onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
+                        placeholder="Ej: GUILLEPRO"
+                        className="w-full bg-zinc-950 border border-cyan-500/50 rounded-xl p-3 text-sm text-cyan-400 outline-none font-bold uppercase tracking-wider transition-all"
+                        autoFocus
+                      />
+                    ) : (
+                      <input 
+                        type="text" 
+                        readOnly 
+                        aria-label="Enlace mágico de invitación"
+                        title="Enlace mágico de invitación"
+                        value={`${typeof window !== 'undefined' ? window.location.origin : ''}/invite/${inviteCode || coachId}`}
+                        className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-300 outline-none font-mono selection:bg-cyan-500/30"
+                        onClick={(e) => (e.target as HTMLInputElement).select()}
+                      />
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {isEditingCode ? (
                       <>
-                        <UserCheck className="w-3.5 h-3.5 text-black" />
-                        Copiar Enlace Mágico
+                        <AnimatedButton
+                          variant="ghost"
+                          onClick={() => {
+                            setIsEditingCode(false)
+                            setInviteCode(initialInviteCode || '')
+                          }}
+                          className="flex-1 py-3 text-xs font-bold text-zinc-400 hover:text-white border border-zinc-800 rounded-xl"
+                        >
+                          Cancelar
+                        </AnimatedButton>
+                        <AnimatedButton
+                          variant="primary"
+                          onClick={handleSaveCode}
+                          disabled={inviteLoading}
+                          className="flex-1 py-3 text-xs font-bold !bg-emerald-500 hover:!bg-emerald-400 !text-black shadow-emerald-500/10 shadow-lg"
+                        >
+                          {inviteLoading ? 'Guardando...' : 'Guardar Código'}
+                        </AnimatedButton>
+                      </>
+                    ) : (
+                      <>
+                        <AnimatedButton
+                          variant="ghost"
+                          onClick={() => setIsEditingCode(true)}
+                          className="px-4 py-3 text-xs font-bold text-zinc-400 hover:text-cyan-400 border border-zinc-800 rounded-xl"
+                        >
+                          Personalizar
+                        </AnimatedButton>
+                        <AnimatedButton
+                          variant="primary"
+                          onClick={handleCopyLink}
+                          disabled={inviteLoading}
+                          className="flex-1 py-3 text-xs font-bold !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-cyan-500/10 shadow-lg flex items-center justify-center gap-1.5"
+                        >
+                          {inviteLoading ? 'Generando...' : (
+                            <>
+                              <UserCheck className="w-3.5 h-3.5 text-black" />
+                              Copiar Link
+                            </>
+                          )}
+                        </AnimatedButton>
                       </>
                     )}
-                  </AnimatedButton>
+                  </div>
                 </div>
               </div>
 

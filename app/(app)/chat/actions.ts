@@ -320,3 +320,44 @@ export async function linkCoachByAthlete(coachId: string): Promise<{ success?: b
     return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
+
+/**
+ * Links the current athlete to a coach using an invite code.
+ */
+export async function linkCoachByCode(code: string): Promise<{ success?: boolean; error?: string }> {
+  if (!code || !code.trim()) {
+    return { error: 'El código no puede estar vacío' }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'No autorizado' }
+  }
+
+  try {
+    const formattedCode = code.trim().toUpperCase()
+
+    // Find the coach with this code
+    const { data: coachProfile, error: searchError } = await supabase
+      .from('profiles')
+      .select('id, role')
+      .eq('invite_code', formattedCode)
+      .maybeSingle()
+
+    if (searchError) {
+      console.error('Error looking up coach by code:', searchError)
+      return { error: 'Error al buscar el código' }
+    }
+
+    if (!coachProfile || coachProfile.role !== 'coach') {
+      return { error: 'Código de entrenador inválido' }
+    }
+
+    return await linkCoachByAthlete(coachProfile.id)
+  } catch (err: unknown) {
+    console.error('Exception in linkCoachByCode:', err)
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
+  }
+}

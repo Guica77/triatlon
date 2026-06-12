@@ -17,8 +17,8 @@ export default async function InviteLandingPage({
   // 1. Fetch coach details
   const { data: coach, error } = await supabase
     .from('profiles')
-    .select('first_name, last_name, role')
-    .eq('id', coachId)
+    .select('id, first_name, last_name, role')
+    .or(`id.eq.${coachId},invite_code.eq.${coachId.toUpperCase()}`)
     .single()
 
   if (error || !coach || coach.role !== 'coach') {
@@ -30,7 +30,7 @@ export default async function InviteLandingPage({
   const cookieStore = await cookies()
   cookieStore.set({
     name: 'invite_coach_id',
-    value: coachId,
+    value: coach.id,
     httpOnly: true,
     path: '/',
     maxAge: 60 * 60 * 24 * 7, // 1 semana

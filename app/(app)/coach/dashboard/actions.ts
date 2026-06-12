@@ -417,3 +417,59 @@ export async function removeAthlete(athleteId: string): Promise<{ success?: bool
     return { error: err.message || 'Error inesperado' }
   }
 }
+
+/**
+ * Updates the coach's custom invite code.
+ */
+export async function updateInviteCode(code: string): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'No autorizado' }
+  }
+
+  try {
+    const formattedCode = code.trim().toUpperCase()
+    
+    // Si lo deja vacío, lo guardamos como null
+    if (!formattedCode) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ invite_code: null })
+        .eq('id', user.id)
+      
+      if (error) throw error
+      revalidatePath('/coach/dashboard')
+      return { success: true }
+    }
+
+    // Check if the code is already taken by someone else
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('invite_code', formattedCode)
+      .neq('id', user.id)
+      .maybeSingle()
+
+    if (existing) {
+      return { error: 'Este código ya está en uso por otro entrenador' }
+    }
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ invite_code: formattedCode })
+      .eq('id', user.id)
+
+    if (updateError) {
+      console.error('Error updating invite code:', updateError)
+      return { error: 'Error al actualizar el código' }
+    }
+
+    revalidatePath('/coach/dashboard')
+    return { success: true }
+  } catch (err: any) {
+    console.error('Exception in updateInviteCode:', err)
+    return { error: err.message || 'Error inesperado' }
+  }
+}

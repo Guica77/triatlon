@@ -18,7 +18,7 @@ export default async function CoachDashboardPage() {
   // 1. Verify user profile and coach role
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role, first_name')
+    .select('role, first_name, invite_code')
     .eq('id', user.id)
     .single()
 
@@ -49,6 +49,7 @@ export default async function CoachDashboardPage() {
       plans={plans} 
       coachName={coachName} 
       coachId={user.id}
+      initialInviteCode={profile.invite_code}
     />
   )
 }
