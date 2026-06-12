@@ -40,7 +40,7 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
   const coachName = profile.first_name || 'Entrenador'
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] text-zinc-100 flex flex-col">
+    <div className="h-[100dvh] bg-[var(--color-background)] text-zinc-100 flex flex-col overflow-hidden pb-[env(safe-area-inset-bottom)] sm:pb-0">
       {/* Upper Deck Header */}
       <header className="sticky top-0 z-50 bg-[var(--color-background)]/90 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm shrink-0">
         <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-900/50">
@@ -90,7 +90,7 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
       </header>
 
       {/* Reusable Chat Interface */}
-      <main className="max-w-6xl mx-auto w-full px-6 pt-8 flex-1 flex flex-col justify-start">
+      <main className="max-w-6xl mx-auto w-full px-0 sm:px-6 pt-0 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-[4.5rem] sm:pb-0">
         <ChatView
           initialParticipants={participants}
           currentUserRole="coach"

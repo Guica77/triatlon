@@ -344,7 +344,7 @@ export function ChatView({
             {/* Input form */}
             <form 
               onSubmit={handleSendMessage}
-              className="p-4 border-t border-zinc-850 bg-zinc-950/30 flex items-center gap-2 shrink-0"
+              className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-zinc-850 bg-zinc-950/30 flex items-center gap-2 shrink-0"
             >
               <input
                 type="text"

@@ -38,7 +38,7 @@ export default async function AthleteChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] text-zinc-100 flex flex-col pb-20 sm:pb-0">
+    <div className="h-[100dvh] bg-[var(--color-background)] text-zinc-100 flex flex-col pb-[env(safe-area-inset-bottom)] sm:pb-0 overflow-hidden">
       
       {/* Top Navbar */}
       <header className="border-b border-[var(--color-border)] bg-[var(--color-background)]/80 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 shrink-0">
@@ -63,7 +63,7 @@ export default async function AthleteChatPage() {
       </header>
 
       {/* Main chat viewport */}
-      <main className="max-w-4xl mx-auto w-full px-6 pt-8 flex-1 flex flex-col justify-start">
+      <main className="max-w-4xl mx-auto w-full px-0 sm:px-6 pt-2 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-[4.5rem] sm:pb-0">
         <ChatView
           initialParticipants={participants}
           availableCoaches={availableCoaches}
