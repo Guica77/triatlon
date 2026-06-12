@@ -330,27 +330,26 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
               </p>
 
               <div className="space-y-4">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-3">
+                  <div className="bg-zinc-950/50 border border-zinc-800/80 rounded-xl p-4 text-center relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/5 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                    <p className="text-[10px] text-zinc-500 mb-2 uppercase tracking-widest font-bold">Tu Código de Entrenador</p>
+                    
                     {isEditingCode ? (
                       <input 
                         type="text" 
                         value={inviteCode}
                         onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
-                        placeholder="Ej: GUILLEPRO"
-                        className="w-full bg-zinc-950 border border-cyan-500/50 rounded-xl p-3 text-sm text-cyan-400 outline-none font-bold uppercase tracking-wider transition-all"
+                        placeholder="Escribe tu código..."
+                        className="w-full bg-zinc-900 border-b-2 border-cyan-500 p-2 text-xl text-center text-cyan-400 outline-none font-black uppercase tracking-widest transition-all"
                         autoFocus
                       />
                     ) : (
-                      <input 
-                        type="text" 
-                        readOnly 
-                        aria-label="Enlace mágico de invitación"
-                        title="Enlace mágico de invitación"
-                        value={`${typeof window !== 'undefined' ? window.location.origin : ''}/invite/${inviteCode || coachId}`}
-                        className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-300 outline-none font-mono selection:bg-cyan-500/30"
-                        onClick={(e) => (e.target as HTMLInputElement).select()}
-                      />
+                      <div className="text-2xl text-white font-black tracking-widest drop-shadow-md">
+                        {inviteCode || (
+                          <span className="text-zinc-600 text-lg">No configurado</span>
+                        )}
+                      </div>
                     )}
                   </div>
                   
@@ -370,10 +369,10 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
                         <AnimatedButton
                           variant="primary"
                           onClick={handleSaveCode}
-                          disabled={inviteLoading}
+                          disabled={inviteLoading || !inviteCode.trim()}
                           className="flex-1 py-3 text-xs font-bold !bg-emerald-500 hover:!bg-emerald-400 !text-black shadow-emerald-500/10 shadow-lg"
                         >
-                          {inviteLoading ? 'Guardando...' : 'Guardar Código'}
+                          {inviteLoading ? 'Guardando...' : 'Guardar'}
                         </AnimatedButton>
                       </>
                     ) : (
@@ -383,7 +382,7 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
                           onClick={() => setIsEditingCode(true)}
                           className="px-4 py-3 text-xs font-bold text-zinc-400 hover:text-cyan-400 border border-zinc-800 rounded-xl"
                         >
-                          Personalizar
+                          {inviteCode ? 'Cambiar' : 'Crear Código'}
                         </AnimatedButton>
                         <AnimatedButton
                           variant="primary"
@@ -394,7 +393,7 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
                           {inviteLoading ? 'Generando...' : (
                             <>
                               <UserCheck className="w-3.5 h-3.5 text-black" />
-                              Copiar Link
+                              Copiar Link Mágico
                             </>
                           )}
                         </AnimatedButton>
