@@ -14,8 +14,9 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
-import { ChatParticipant, ChatMessageItem, sendMessage, getMessages, linkCoachByAthlete, linkCoachByCode } from '@/app/(app)/chat/actions'
+import { ChatParticipant, ChatMessageItem, sendMessage, getMessages, linkCoachByAthlete, linkCoachByCode, markMessagesAsRead } from '@/app/(app)/chat/actions'
 import { createClient } from '@/lib/supabase/client'
+import { useNotifications } from '@/components/providers/notification-provider'
 
 interface ChatViewProps {
   initialParticipants: ChatParticipant[]
@@ -45,6 +46,8 @@ export function ChatView({
 
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
+  const { refreshUnreadCount } = useNotifications()
+
   // Filtered sidebar items
   const filteredParticipants = participants.filter(p => {
     const name = `${p.first_name || ''} ${p.last_name || ''}`.toLowerCase()
@@ -62,6 +65,10 @@ export function ChatView({
       if (res.data) {
         setMessages(res.data)
       }
+      
+      // Mark messages from this participant as read
+      await markMessagesAsRead(part.id)
+      await refreshUnreadCount()
     } catch (err) {
       console.error('Error fetching chat messages:', err)
     } finally {

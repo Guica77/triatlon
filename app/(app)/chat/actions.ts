@@ -441,3 +441,58 @@ export async function getCoachDirectory(): Promise<{ success?: boolean; error?: 
     return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
+
+/**
+ * Marks all messages from a specific sender to the current user as read.
+ */
+export async function markMessagesAsRead(senderId: string) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'No autorizado' }
+
+    // Use admin client if RLS prevents update
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabaseAdmin = createAdminClient()
+
+    const { error } = await supabaseAdmin
+      .from('chat_messages')
+      .update({ is_read: true } as any)
+      .eq('receiver_id', user.id)
+      .eq('sender_id', senderId)
+      .eq('is_read', false as any)
+
+    if (error) throw error
+
+    return { success: true }
+  } catch (err: unknown) {
+    console.error('Exception in markMessagesAsRead:', err)
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
+  }
+}
+
+/**
+ * Fetches the total count of unread messages for the current user.
+ */
+export async function getUnreadCount() {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { count: 0 }
+
+    const { count, error } = await supabase
+      .from('chat_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('receiver_id', user.id)
+      .eq('is_read', false as any)
+
+    if (error) throw error
+
+    return { count: count || 0 }
+  } catch (err: unknown) {
+    console.error('Exception in getUnreadCount:', err)
+    return { count: 0 }
+  }
+}

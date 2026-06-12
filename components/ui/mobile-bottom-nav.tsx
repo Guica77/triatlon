@@ -4,11 +4,13 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, BarChart2, MessageSquare, Settings } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNotifications } from '@/components/providers/notification-provider';
 
 export function MobileBottomNav() {
   const pathname = usePathname();
   const [role, setRole] = React.useState<string | null>(null);
+  const { unreadCount } = useNotifications();
 
   React.useEffect(() => {
     async function fetchRole() {
@@ -40,12 +42,12 @@ export function MobileBottomNav() {
 
   const navItems = role === 'coach' ? [
     { href: '/coach/dashboard', label: 'Roster', icon: Home },
-    { href: '/coach/chat', label: 'Mensajes', icon: MessageSquare },
+    { href: '/coach/chat', label: 'Mensajes', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ] : [
     { href: '/dashboard', label: 'Inicio', icon: Home },
     { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
-    { href: '/chat', label: 'Chat', icon: MessageSquare },
+    { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
     { href: '/onboarding', label: 'Ajustes', icon: Settings },
   ];
 
@@ -70,7 +72,25 @@ export function MobileBottomNav() {
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              <Icon className={`w-5 h-5 transition-colors duration-200 ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-400'}`} />
+              
+              <div className="relative">
+                <Icon className={`w-5 h-5 transition-colors duration-200 ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-400'}`} />
+                <AnimatePresence>
+                  {item.showBadge && unreadCount > 0 && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0 }}
+                      className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-zinc-950 shadow-sm"
+                    >
+                      <span className="text-[9px] font-bold text-white leading-none">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <span className={`text-[10px] font-medium tracking-wide transition-colors duration-200 ${isActive ? 'text-white font-semibold' : 'text-zinc-500 group-hover:text-zinc-400'}`}>
                 {item.label}
               </span>
