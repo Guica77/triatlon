@@ -44,28 +44,36 @@ export function PushNotificationManager() {
   const subscribeToPush = async () => {
     setLoading(true);
     try {
-      const registration = await navigator.serviceWorker.ready;
+      if (!('serviceWorker' in navigator)) throw new Error('Service Worker no soportado.');
       
+      const registration = await navigator.serviceWorker.ready;
+      if (!registration) throw new Error('No se encontró el Service Worker.');
+      
+      if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
+        throw new Error('Falta la clave VAPID en las variables de entorno.');
+      }
+
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!)
+        applicationServerKey: urlBase64ToUint8Array(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY)
       });
 
       setSubscription(sub);
 
       // Save to Supabase
-      await fetch('/api/notifications/subscribe', {
+      const res = await fetch('/api/notifications/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sub)
       });
+      
+      if (!res.ok) {
+        throw new Error('Error al guardar la suscripción en la base de datos.');
+      }
 
     } catch (err) {
       console.error('Error subscribing to push', err);
-      // Fallback for iOS PWA: Alert if they haven't added to home screen
-      if (String(err).includes('NotAllowedError')) {
-        alert('Debes dar permisos de notificación en los ajustes de tu navegador o añadir esta web a la Pantalla de Inicio en iOS.');
-      }
+      alert('Error activando notificaciones: ' + String(err));
     } finally {
       setLoading(false);
     }
