@@ -194,7 +194,10 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
 
       const athleteIds = links.map(l => l.athlete_id)
 
-      const { data: athletes, error: athletesError } = await supabase
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const supabaseAdmin = createAdminClient()
+
+      const { data: athletes, error: athletesError } = await supabaseAdmin
         .from('profiles')
         .select('id, first_name, last_name, email, role')
         .in('id', athleteIds)
@@ -226,7 +229,10 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
         return { data: [], role: 'athlete' }
       }
 
-      const { data: coach, error: coachError } = await supabase
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const supabaseAdmin = createAdminClient()
+
+      const { data: coach, error: coachError } = await supabaseAdmin
         .from('profiles')
         .select('id, first_name, last_name, email, role')
         .eq('id', coachId)
@@ -251,8 +257,10 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
 export async function getAvailableCoaches(): Promise<{ data?: ChatParticipant[]; error?: string }> {
   const supabase = await createClient()
   
-  try {
-    const { data: coaches, error } = await supabase
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabaseAdmin = createAdminClient()
+
+    const { data: coaches, error } = await supabaseAdmin
       .from('profiles')
       .select('id, first_name, last_name, email, role, level')
       .eq('role', 'coach')
