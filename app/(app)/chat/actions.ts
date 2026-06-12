@@ -343,7 +343,7 @@ export async function linkCoachByCode(code: string): Promise<{ success?: boolean
     const { data: coachProfile, error: searchError } = await supabase
       .from('profiles')
       .select('id, role')
-      .eq('invite_code', formattedCode)
+      .eq('invite_code' as any, formattedCode)
       .maybeSingle()
 
     if (searchError) {
