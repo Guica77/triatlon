@@ -339,8 +339,11 @@ export async function linkCoachByCode(code: string): Promise<{ success?: boolean
   try {
     const formattedCode = code.trim().toUpperCase()
 
-    // Find the coach with this code
-    const { data: coachProfile, error: searchError } = await supabase
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const supabaseAdmin = createAdminClient()
+
+    // Find the coach with this code (use admin client to bypass RLS since users can't read coach profiles by default)
+    const { data: coachProfile, error: searchError } = await supabaseAdmin
       .from('profiles')
       .select('id, role')
       .eq('invite_code' as any, formattedCode)
