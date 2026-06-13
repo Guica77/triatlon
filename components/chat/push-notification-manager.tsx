@@ -49,7 +49,10 @@ export function PushNotificationManager() {
       const registration = await navigator.serviceWorker.ready;
       if (!registration) throw new Error('No se encontró el Service Worker.');
       
-      const publicVapidKey = 'BAi2rxfRgcD4X9qjv1wPdfwwCNfUv0tUz047zi4evcA47w6fra9ujTMNXSB6CedfJgoaHbWaxcncxN-o0G3M2cQ';
+      const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      if (!publicVapidKey) {
+        throw new Error("La clave pública VAPID no está configurada en el servidor (NEXT_PUBLIC_VAPID_PUBLIC_KEY).");
+      }
 
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
