@@ -350,8 +350,13 @@ export function ChatView({
                 type="text"
                 value={newMessageText}
                 onChange={(e) => setNewMessageText(e.target.value)}
+                onFocus={(e) => {
+                  setTimeout(() => {
+                    e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 150);
+                }}
                 placeholder="Escribe tu mensaje aquí..."
-                className="bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-200 outline-none w-full transition-colors"
+                className="bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl p-3 text-base text-zinc-200 outline-none w-full transition-colors"
               />
               <AnimatedButton
                 type="submit"

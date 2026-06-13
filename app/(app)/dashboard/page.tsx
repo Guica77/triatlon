@@ -50,7 +50,7 @@ export default async function DashboardPage() {
     redirect('/coach/dashboard');
   }
 
-  if (!profile.active_plan_id) {
+  if (!profile.active_plan_id && !profile.coach_id) {
     redirect('/onboarding');
   }
   const activePlan = profile.training_plans;

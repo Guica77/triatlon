@@ -141,3 +141,43 @@ export async function toggleWorkoutStatus(workoutId: string, currentStatus: stri
   return updateWorkoutStatus(workoutId, newStatus);
 }
 
+export async function completeWorkoutWithFeedback(workoutId: string, rpe: number, notes: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error("No autenticado")
+  }
+
+  // Obtener coach_id del perfil del atleta
+  const { data: profile } = await supabase.from('profiles').select('coach_id').eq('id', user.id).single();
+
+  // Guardar feedback en BD
+  const { error } = await supabase
+    .from('user_workouts')
+    .update({ 
+      rpe,
+      coach_notes: notes || null
+    })
+    .eq('id', workoutId)
+    .eq('user_id', user.id)
+
+  if (error) {
+    console.error("Error guardando feedback:", error)
+    throw new Error("No se pudo guardar el feedback")
+  }
+
+  // Si tiene entrenador, enviarle un mensaje automático al chat
+  if (profile?.coach_id) {
+    const adminSupabase = createAdminClient();
+    await adminSupabase.from('chat_messages').insert({
+      sender_id: user.id,
+      receiver_id: profile.coach_id,
+      message: `¡Entrenamiento completado! 🎯\nEsfuerzo percibido (RPE): ${rpe}/10\n${notes ? `\nNotas: ${notes}` : ''}`,
+      is_read: false
+    });
+  }
+
+  // Marcar como completado
+  return updateWorkoutStatus(workoutId, 'completed');
+}

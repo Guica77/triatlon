@@ -242,11 +242,17 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
   async function handleToggle() {
     if (loading) return;
+    
+    // Si vamos a completarlo, abrimos el modal de feedback y detenemos aquí
+    if (!isCompleted) {
+      setIsFeedbackOpen(true);
+      return;
+    }
+
+    // Si vamos a des-completarlo, lo hacemos directo
     setLoading(true);
     const prevStatus = status;
-    const nextStatus = isCompleted ? 'pending' : 'completed';
-    setStatus(nextStatus); // Optimistic
-
+    setStatus('pending'); // Optimistic
     try {
       await toggleWorkoutStatus(workout.id, prevStatus);
     } catch (error) {

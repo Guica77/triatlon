@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertTriangle, Smile, Frown, ThumbsUp, Moon, Activity } from 'lucide-react';
-import { submitWorkoutFeedback } from '@/app/(app)/feedback/feedback-actions';
+import { completeWorkoutWithFeedback } from '@/app/(app)/dashboard/actions';
 
 interface WorkoutFeedbackModalProps {
   isOpen: boolean;
@@ -48,25 +48,19 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const compiledNotes = `Descanso: ${sleep} | Molestias: ${pain} ${notes ? `| Notas: ${notes}` : ''}`;
+    const compiledNotes = `Sensación: ${feeling} | Descanso: ${sleep} | Molestias: ${pain} ${notes ? `| Notas: ${notes}` : ''}`;
 
-    const res = await submitWorkoutFeedback({
-      workout_id: workoutId,
-      rpe_score: rpe,
-      feeling,
-      notes: compiledNotes
-    });
-
-    setIsSubmitting(false);
-
-    if (res.error) {
-      setErrorMessage(res.error);
-    } else {
-      setSuccessMessage('¡Feedback registrado con éxito! Tu py-entrenador ha sido notificado.');
+    try {
+      await completeWorkoutWithFeedback(workoutId, rpe, compiledNotes);
+      setSuccessMessage('¡Feedback registrado y entrenamiento completado!');
       setTimeout(() => {
         setSuccessMessage(null);
         onClose();
       }, 2000);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Error guardando feedback');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
