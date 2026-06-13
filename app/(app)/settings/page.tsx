@@ -6,7 +6,6 @@ import { AnimatedButton } from '@/components/ui/animated-button';
 import { ArrowLeft, Settings } from 'lucide-react';
 import { RaceGoalCard } from '@/components/settings/race-goal-card';
 import { PhysiologicalCard } from '@/components/settings/physiological-card';
-import { VirtualGarageCard } from '@/components/settings/virtual-garage-card';
 import { TelemetryConnectCard } from '@/components/settings/telemetry-connect-card';
 import { BillingCard } from '@/components/settings/billing-card';
 import { NotificationTestCard } from '@/components/settings/notification-test-card';
@@ -94,12 +93,7 @@ export default async function SettingsPage() {
               />
             </div>
             
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="h-full">
-                <VirtualGarageCard 
-                  initialGarage={profile.virtual_garage || []}
-                />
-              </div>
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="h-full">
                 <TelemetryConnectCard 
                   connectedProviders={connectedProviders}
