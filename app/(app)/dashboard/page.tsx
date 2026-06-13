@@ -15,6 +15,7 @@ import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { ObjectiveConfigCard } from '@/components/dashboard/objective-config-card';
+import { PushNotificationManager } from '@/components/chat/push-notification-manager';
 
 export const dynamic = 'force-dynamic'
 
@@ -270,6 +271,7 @@ export default async function DashboardPage() {
           </section>
         )}
 
+        <PushNotificationManager />
       </main>
     </div>
   );
