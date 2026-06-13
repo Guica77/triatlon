@@ -56,7 +56,21 @@ export function NotificationTestCard() {
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Error desconocido');
+      
+      // Si el servidor de push (Google/Apple) rechaza la firma, significa que las claves VAPID 
+      // con las que se creó la suscripción ya no coinciden con las del servidor actual.
+      if (err.message?.includes('unexpected response code') || err.message?.includes('410') || err.message?.includes('403')) {
+        setError("Suscripción caducada o inválida. Se ha reseteado. Por favor, refresca la página y vuelve a darle a 'Permitir Avisos'.");
+        try {
+          const registration = await navigator.serviceWorker.ready;
+          const sub = await registration.pushManager.getSubscription();
+          if (sub) await sub.unsubscribe();
+        } catch (e) {
+          console.error("Error unsubscribing", e);
+        }
+      } else {
+        setError(err.message || 'Error desconocido');
+      }
     } finally {
       setLoading(false);
     }
