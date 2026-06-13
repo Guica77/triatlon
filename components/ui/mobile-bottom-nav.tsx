@@ -48,7 +48,7 @@ export function MobileBottomNav() {
     { href: '/dashboard', label: 'Inicio', icon: Home },
     { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
     { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
-    { href: '/onboarding', label: 'Ajustes', icon: Settings },
+    { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
   return (
