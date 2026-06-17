@@ -46,7 +46,7 @@ export default function AthleteLoginPage() {
         <button 
           onClick={handleGoogleLogin}
           type="button"
-          className="w-full flex items-center justify-center gap-3 bg-zinc-900 hover:bg-zinc-800 text-white text-sm font-medium py-3.5 rounded-xl border border-zinc-800 transition-all hover:border-zinc-700 shadow-sm"
+          className="w-full flex items-center justify-center gap-3 bg-white hover:bg-zinc-50 text-zinc-700 text-sm font-medium py-3.5 rounded-xl border border-zinc-200 transition-all shadow-sm cursor-pointer"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -59,29 +59,29 @@ export default function AthleteLoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-medium shadow-inner">
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-750 text-xs text-center font-medium shadow-xs">
               {error}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Correo Electrónico</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Correo Electrónico</label>
             <input 
               name="email" 
               type="email" 
               placeholder="atleta@triatlonpro.com" 
               required 
-              className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:bg-zinc-900 transition-all"
+              className="w-full bg-white border border-zinc-200 rounded-xl p-3.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-cyan-500 focus:bg-white transition-all"
             />
           </div>
 
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Contraseña</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Contraseña</label>
               <button
                 type="button"
                 onClick={() => router.push('/forgot-password')}
-                className="text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors font-bold uppercase tracking-wider"
+                className="text-[10px] text-cyan-600 hover:text-cyan-700 transition-colors font-bold uppercase tracking-wider"
               >
                 ¿Olvidaste tu contraseña?
               </button>
@@ -91,12 +91,12 @@ export default function AthleteLoginPage() {
               type="password" 
               placeholder="••••••••" 
               required 
-              className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:bg-zinc-900 transition-all font-mono"
+              className="w-full bg-white border border-zinc-200 rounded-xl p-3.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-cyan-500 focus:bg-white transition-all font-mono"
             />
           </div>
 
           <button 
-            className="w-full mt-4 py-4 rounded-xl text-sm font-black text-black bg-white hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center disabled:opacity-50" 
+            className="w-full mt-4 py-4 rounded-xl text-sm font-bold text-white bg-cyan-600 hover:bg-cyan-700 transition-colors shadow-xs flex items-center justify-center disabled:opacity-50 cursor-pointer" 
             type="submit" 
             disabled={loading}
           >
@@ -108,7 +108,7 @@ export default function AthleteLoginPage() {
           <button 
             type="button" 
             onClick={() => router.push('/athlete/register')}
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-medium"
+            className="text-xs text-zinc-500 hover:text-cyan-600 transition-colors font-bold"
           >
             ¿No tienes cuenta? Solicita acceso
           </button>

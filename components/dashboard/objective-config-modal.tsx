@@ -97,7 +97,6 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
   };
 
   if (!isOpen) return null;
-
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -105,33 +104,33 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"
           onClick={onClose}
         />
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl p-6 scrollbar-none"
+          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white border border-zinc-200 rounded-2xl shadow-2xl p-6 scrollbar-none"
         >
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-zinc-550 hover:text-zinc-800 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
 
           <div className="mb-6 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
-              <Target className="w-5 h-5 text-cyan-400" />
+              <Target className="w-5 h-5 text-cyan-500" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">Define tu Objetivo</h2>
-              <p className="text-sm text-zinc-400">Selecciona tu carrera y disponibilidad para que la IA recalibre tu plan.</p>
+              <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Define tu Objetivo</h2>
+              <p className="text-sm text-zinc-500">Selecciona tu carrera y disponibilidad para que la IA recalibre tu plan.</p>
             </div>
           </div>
 
-          <div className="bg-[#09090b] p-4 sm:p-6 rounded-xl border border-zinc-800/80">
+          <div className="bg-zinc-50 p-4 sm:p-6 rounded-xl border border-zinc-200">
             <StepAmbition
               activeTab={activeTab}
               setActiveTab={setActiveTab}
@@ -171,17 +170,17 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
           </div>
 
           {error && (
-            <div className="mt-4 p-4 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-400">
+            <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-650">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <p className="text-sm font-medium">{error}</p>
             </div>
           )}
 
-          <div className="mt-6 flex justify-end gap-3 border-t border-zinc-800 pt-6">
+          <div className="mt-6 flex justify-end gap-3 border-t border-zinc-150 pt-6">
             <AnimatedButton
               variant="ghost"
               onClick={onClose}
-              className="text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800"
+              className="text-zinc-600 hover:text-zinc-800 bg-zinc-50 border border-zinc-200"
             >
               Cancelar
             </AnimatedButton>
@@ -189,7 +188,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
               variant="primary"
               onClick={handleSave}
               disabled={loading}
-              className="!bg-cyan-500 hover:!bg-cyan-400 !text-black flex items-center gap-2"
+              className="!bg-cyan-500 hover:!bg-cyan-400 !text-white flex items-center gap-2 font-bold"
             >
               <Save className="w-4 h-4" />
               <span>{loading ? 'Calculando Plan...' : 'Guardar y Recalibrar'}</span>

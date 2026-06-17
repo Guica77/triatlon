@@ -132,21 +132,21 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={!isGenerating ? onClose : undefined}
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="relative w-full max-w-lg bg-[#121214] border border-cyan-900/50 rounded-3xl shadow-2xl shadow-cyan-900/20 overflow-hidden z-10"
+            className="relative w-full max-w-lg bg-white border border-zinc-200 rounded-3xl shadow-2xl overflow-hidden z-10"
           >
             {/* Header */}
-            <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-800/80 bg-gradient-to-r from-zinc-950/50 to-cyan-950/20">
+            <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-150 bg-zinc-50">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
                   <Bot className="w-4 h-4" />
                 </div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-zinc-900 flex items-center gap-2">
                   Generador AI
                   <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">Beta</span>
                 </h3>
@@ -154,7 +154,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
               {!isGenerating && (
                 <button 
                   onClick={onClose}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -166,7 +166,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
                 <div className="py-8 flex flex-col items-center justify-center space-y-6">
                   <div className="relative">
                     <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-xl animate-pulse" />
-                    <div className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center relative z-10">
+                    <div className="w-16 h-16 bg-zinc-50 border border-zinc-200 rounded-full flex items-center justify-center relative z-10">
                       <BrainCircuit className="w-8 h-8 text-cyan-400 animate-pulse" />
                     </div>
                     {/* Orbiting dots */}
@@ -175,14 +175,14 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
                   </div>
                   
                   <div className="text-center space-y-2">
-                    <h4 className="text-lg font-bold text-white">Construyendo tu semana</h4>
+                    <h4 className="text-lg font-bold text-zinc-900">Construyendo tu semana</h4>
                     <AnimatePresence mode="wait">
                       <motion.p
                         key={generationStep}
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -5 }}
-                        className="text-sm text-cyan-400 font-medium"
+                        className="text-sm text-cyan-400 font-semibold"
                       >
                         {steps[generationStep]}
                       </motion.p>
@@ -191,7 +191,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
                 </div>
               ) : (
                 <form onSubmit={handleGenerate} className="space-y-6">
-                  <p className="text-sm text-zinc-400 leading-relaxed">
+                  <p className="text-sm text-zinc-650 leading-relaxed">
                     Describe tu objetivo para esta semana. Nuestro motor analizará tu fatiga actual (CTL/ATL) y generará una planificación óptima.
                   </p>
 
@@ -200,15 +200,15 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
                       value={prompt}
                       onChange={e => setPrompt(e.target.value)}
                       placeholder="Ej: Quiero una semana enfocada en el sector de ciclismo con unos 1000m de desnivel acumulado, y un rodaje largo de carrera a pie el domingo. El viernes necesito descansar."
-                      className="w-full h-32 px-4 py-3 bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl text-sm text-white placeholder-zinc-600 outline-none resize-none custom-scrollbar"
+                      className="w-full h-32 px-4 py-3 bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl text-sm text-zinc-800 placeholder-zinc-400 outline-none resize-none custom-scrollbar shadow-inner"
                       autoFocus
                     />
                     
                     {/* Quick prompts */}
                     <div className="flex gap-2 flex-wrap">
-                      <button type="button" onClick={() => setPrompt("Semana de recuperación activa (Z1/Z2) bajando volumen al 50%.")} className="text-[10px] px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition">Recuperación</button>
-                      <button type="button" onClick={() => setPrompt("Bloque de carga fuerte: Priorizar series anaeróbicas en carrera y V02Max en bici.")} className="text-[10px] px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition">Carga Máxima</button>
-                      <button type="button" onClick={() => setPrompt("Semana Tapering pre-competición. Bajada de volumen, activación neuromuscular.")} className="text-[10px] px-2.5 py-1 rounded-full bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition">Tapering (Pre-Carrera)</button>
+                      <button type="button" onClick={() => setPrompt("Semana de recuperación activa (Z1/Z2) bajando volumen al 50%.")} className="text-[10px] px-2.5 py-1.5 rounded-full bg-zinc-100 text-zinc-600 hover:text-zinc-800 hover:bg-zinc-200 transition cursor-pointer font-medium">Recuperación</button>
+                      <button type="button" onClick={() => setPrompt("Bloque de carga fuerte: Priorizar series anaeróbicas en carrera y V02Max en bici.")} className="text-[10px] px-2.5 py-1.5 rounded-full bg-zinc-100 text-zinc-600 hover:text-zinc-800 hover:bg-zinc-200 transition cursor-pointer font-medium">Carga Máxima</button>
+                      <button type="button" onClick={() => setPrompt("Semana Tapering pre-competición. Bajada de volumen, activación neuromuscular.")} className="text-[10px] px-2.5 py-1.5 rounded-full bg-zinc-100 text-zinc-600 hover:text-zinc-800 hover:bg-zinc-200 transition cursor-pointer font-medium">Tapering (Pre-Carrera)</button>
                     </div>
                   </div>
 
@@ -216,7 +216,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
                     type="submit"
                     variant="primary"
                     disabled={!prompt.trim()}
-                    className="w-full py-3.5 !bg-cyan-500 hover:!bg-cyan-400 !text-black font-extrabold rounded-xl shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2"
+                    className="w-full py-3.5 !bg-cyan-500 hover:!bg-cyan-400 !text-white font-extrabold rounded-xl shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2"
                   >
                     <Sparkles className="w-4 h-4" />
                     Generar Calendario AI

@@ -1,36 +1,50 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #09090b; /* zinc-950 */
-  --color-foreground: #fafafa; /* zinc-50 */
+  --color-background: #f3f4f6; /* TrainingPeaks gray-100 background */
+  --color-foreground: #09090b; /* zinc-950 dark text */
   
-  --color-surface: #18181b; /* zinc-900 */
-  --color-surface-hover: #27272a; /* zinc-800 */
+  --color-surface: #ffffff; /* White cards */
+  --color-surface-hover: #f4f4f5; /* Hover state light zinc */
   
-  --color-border: #27272a; /* zinc-800 */
+  --color-border: #e4e4e7; /* Clean zinc-200 border */
   
-  --color-primary: #fafafa; /* solid white */
-  --color-primary-foreground: #09090b; /* solid black */
+  --color-primary: #18181b; /* zinc-900 for dark buttons */
+  --color-primary-foreground: #ffffff; /* white text */
 
   /* Triathlon Zones - Pure, no glows */
-  --color-zone-1: #60a5fa; /* Blue */
-  --color-zone-2: #4ade80; /* Green */
-  --color-zone-3: #facc15; /* Yellow */
-  --color-zone-4: #fb923c; /* Orange */
-  --color-zone-5: #f87171; /* Red */
+  --color-zone-1: #3b82f6; /* Blue */
+  --color-zone-2: #22c55e; /* Green */
+  --color-zone-3: #eab308; /* Yellow */
+  --color-zone-4: #f97316; /* Orange */
+  --color-zone-5: #ef4444; /* Red */
 
-  /* Disciplines */
-  --color-swim: #38bdf8;
-  --color-bike: #a3e635;
-  --color-run: #fb7185;
+  /* Disciplines (TrainingPeaks Convencion) */
+  --color-swim: #00a2e8; /* Sky Blue */
+  --color-bike: #2ecc71; /* Emerald Green */
+  --color-run: #e74c3c;  /* Crimson Red */
+
+  /* Map Cyan tailwind utilities globally to TrainingPeaks Orange */
+  --color-cyan-50: #fff7ed;
+  --color-cyan-100: #ffedd5;
+  --color-cyan-200: #fed7aa;
+  --color-cyan-300: #fdbb74;
+  --color-cyan-400: #ff7e00; /* TP Orange */
+  --color-cyan-500: #e56a00; /* Active/hover TP Orange */
+  --color-cyan-600: #d95d00;
+  --color-cyan-700: #b34b00;
+  --color-cyan-800: #8c3a00;
+  --color-cyan-900: #592500;
+  --color-cyan-950: #fff7ed; /* Light background orange tint in light mode */
 }
 
 @layer base {
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    color-scheme: dark;
+    color-scheme: light;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 }
+

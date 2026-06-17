@@ -33,36 +33,36 @@ export default function ForgotPasswordPage() {
   return (
     <AuthLayout 
       title="Recuperar Acceso" 
-      subtitle="Te enviaremos un enlace cuántico de recuperación"
+      subtitle="Te enviaremos un enlace de recuperación"
       isAthlete={true}
     >
       <div className="space-y-6 relative z-10">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-medium shadow-inner">
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-750 text-xs text-center font-medium shadow-xs">
               {error}
             </div>
           )}
 
           {successMessage && (
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs text-center leading-relaxed font-medium shadow-inner">
+            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-750 text-xs text-center leading-relaxed font-medium shadow-xs">
               {successMessage}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Correo Electrónico</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Correo Electrónico</label>
             <input 
               name="email" 
               type="email" 
               placeholder="tu@correo.com" 
               required 
-              className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 focus:bg-zinc-900 transition-all"
+              className="w-full bg-white border border-zinc-200 rounded-xl p-3.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-cyan-500 focus:bg-white transition-all"
             />
           </div>
 
           <button 
-            className="w-full mt-4 py-4 rounded-xl text-sm font-black text-black bg-white hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)] flex items-center justify-center disabled:opacity-50" 
+            className="w-full mt-4 py-4 rounded-xl text-sm font-bold text-white bg-cyan-600 hover:bg-cyan-700 transition-colors shadow-xs flex items-center justify-center disabled:opacity-50 cursor-pointer" 
             type="submit" 
             disabled={loading}
           >
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
           <button 
             type="button" 
             onClick={() => router.push('/login')}
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-medium"
+            className="text-xs text-zinc-500 hover:text-cyan-600 transition-colors font-bold"
           >
             ← Volver a Iniciar Sesión
           </button>

@@ -83,7 +83,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={syncState === 'success' ? onClose : undefined}
-          className="absolute inset-0 bg-black/85 backdrop-blur-md"
+          className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"
         />
 
         {/* Modal container */}
@@ -92,13 +92,13 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
           transition={{ type: 'spring', duration: 0.4 }}
-          className="relative w-full max-w-sm bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col p-6 items-center text-center space-y-6"
+          className="relative w-full max-w-sm bg-white border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col p-6 items-center text-center space-y-6"
         >
           {/* Close button */}
           {syncState === 'success' && (
             <button 
               onClick={onClose}
-              className="absolute top-4 right-4 w-7 h-7 rounded-lg border border-zinc-900 flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-colors"
+              className="absolute top-4 right-4 w-7 h-7 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-650 hover:bg-zinc-100 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -112,10 +112,10 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
             }`} />
 
             {/* Smartwatch Outer Case Mockup */}
-            <div className="absolute inset-0 rounded-full border-4 border-zinc-800 bg-zinc-900 shadow-inner flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border-4 border-zinc-250 bg-zinc-50 shadow-inner flex items-center justify-center">
               
               {/* Screen Rim */}
-              <div className="w-[144px] h-[144px] rounded-full border border-zinc-950 bg-black overflow-hidden flex flex-col items-center justify-center p-4 relative">
+              <div className="w-[144px] h-[144px] rounded-full border border-zinc-200 bg-white overflow-hidden flex flex-col items-center justify-center p-4 relative">
                 
                 {/* Watch Content: Success State vs Syncing State */}
                 <AnimatePresence mode="wait">
@@ -126,10 +126,10 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                       animate={{ scale: 1, opacity: 1 }}
                       className="flex flex-col items-center justify-center space-y-1"
                     >
-                      <div className="w-11 h-11 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                      <div className="w-11 h-11 rounded-full bg-emerald-50 border border-emerald-250 flex items-center justify-center text-emerald-600">
                         <Check className="w-6 h-6 stroke-[3]" />
                       </div>
-                      <span className="text-[10px] font-black text-emerald-400 tracking-wider uppercase">¡LISTO!</span>
+                      <span className="text-[10px] font-black text-emerald-600 tracking-wider uppercase">¡LISTO!</span>
                       <span className="text-[8px] text-zinc-500 font-semibold truncate max-w-[110px]">Ver en tu reloj</span>
                     </motion.div>
                   ) : (
@@ -140,7 +140,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                       className="flex flex-col items-center justify-center space-y-1.5"
                     >
                       <div className="relative">
-                        <Watch className="w-10 h-10 text-orange-400" />
+                        <Watch className="w-10 h-10 text-orange-500" />
                         <motion.div 
                           animate={{ rotate: 360 }}
                           transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
@@ -149,8 +149,8 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                           <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
                         </motion.div>
                       </div>
-                      <span className="text-[11px] font-black text-white">{progress}%</span>
-                      <div className="w-16 h-1 bg-zinc-850 rounded-full overflow-hidden">
+                      <span className="text-[11px] font-black text-zinc-800">{progress}%</span>
+                      <div className="w-16 h-1 bg-zinc-200 rounded-full overflow-hidden">
                         <div 
                           className="h-full bg-orange-500 transition-all duration-100"
                           style={{ width: `${progress}%` }}
@@ -189,9 +189,9 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
 
           {/* Sync status labels */}
           <div className="space-y-1.5 w-full">
-            <h4 className="text-sm font-bold text-zinc-100 flex items-center justify-center gap-1.5">
+            <h4 className="text-sm font-bold text-zinc-850 flex items-center justify-center gap-1.5">
               {syncState === 'success' ? (
-                <span className="text-emerald-400">Sincronización Completada</span>
+                <span className="text-emerald-600">Sincronización Completada</span>
               ) : (
                 <>
                   <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
@@ -199,30 +199,30 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                 </>
               )}
             </h4>
-            <p className="text-[11px] text-zinc-400 min-h-[16px] max-w-[240px] mx-auto leading-relaxed">
+            <p className="text-[11px] text-zinc-500 min-h-[16px] max-w-[240px] mx-auto leading-relaxed">
               {getStateText()}
             </p>
           </div>
 
           {/* Structured block visualization preview */}
-          <div className="w-full bg-zinc-900/40 border border-zinc-850 rounded-xl p-3 text-left space-y-2">
+          <div className="w-full bg-zinc-50 border border-zinc-200 rounded-xl p-3 text-left space-y-2">
             <div className="flex justify-between items-center text-[10px] text-zinc-500">
               <span className="font-bold uppercase tracking-wider">Bloques Estructurados</span>
               <span className="font-semibold">{sportEmoji} {session.sport_type.toUpperCase()}</span>
             </div>
             
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] border-b border-zinc-850/50 pb-1">
-                <span className="text-zinc-400">1. Calentamiento:</span>
-                <span className="text-zinc-300 font-medium">Hasta Lap (abierto)</span>
+              <div className="flex items-center justify-between text-[11px] border-b border-zinc-150 pb-1">
+                <span className="text-zinc-500">1. Calentamiento:</span>
+                <span className="text-zinc-750 font-medium">Hasta Lap (abierto)</span>
               </div>
-              <div className="flex items-center justify-between text-[11px] border-b border-zinc-850/50 pb-1">
-                <span className="text-zinc-400">2. Intervalo Principal:</span>
-                <span className="text-orange-400 font-bold">5x Repeticiones</span>
+              <div className="flex items-center justify-between text-[11px] border-b border-zinc-150 pb-1">
+                <span className="text-zinc-500">2. Intervalo Principal:</span>
+                <span className="text-orange-600 font-bold">5x Repeticiones</span>
               </div>
               <div className="flex items-center justify-between text-[11px] pb-0.5">
-                <span className="text-zinc-400">3. Enfriamiento:</span>
-                <span className="text-zinc-300 font-medium">10 min Z1</span>
+                <span className="text-zinc-500">3. Enfriamiento:</span>
+                <span className="text-zinc-750 font-medium">10 min Z1</span>
               </div>
             </div>
           </div>

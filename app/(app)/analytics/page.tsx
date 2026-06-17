@@ -35,16 +35,16 @@ export default async function AnalyticsPage() {
     <div className="min-h-screen bg-[var(--color-background)] pb-24">
       
       {/* Top Navbar */}
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-background)]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+      <header className="border-b border-[var(--color-border)] bg-[var(--color-background)]/85 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center shadow-inner">
-            <BarChart2 className="w-4 h-4 text-cyan-400" />
+          <div className="w-9 h-9 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center shadow-xs">
+            <BarChart2 className="w-4 h-4 text-cyan-600" />
           </div>
           <div>
-            <h1 className="text-base font-medium text-zinc-50">
+            <h1 className="text-base font-medium text-zinc-900">
               {profile?.level === 'principiante' ? 'Mi Progreso y Constancia' : 'Analíticas Avanzadas'}
             </h1>
-            <p className="text-xs text-zinc-400 capitalize">
+            <p className="text-xs text-zinc-500 capitalize font-medium">
               {activePlan?.name || 'Plan de Entrenamiento'} • Atleta: {profile?.first_name || 'Triatleta'}
             </p>
           </div>
@@ -52,7 +52,7 @@ export default async function AnalyticsPage() {
 
         <div className="flex items-center gap-3">
           <Link href="/dashboard">
-            <AnimatedButton variant="ghost" size="sm" className="border border-zinc-800 flex items-center gap-2">
+            <AnimatedButton variant="ghost" size="sm" className="border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 flex items-center gap-2">
               <ArrowLeft className="w-4 h-4" />
               <span>Volver al Dashboard</span>
             </AnimatedButton>
@@ -65,10 +65,10 @@ export default async function AnalyticsPage() {
         
         {/* Encabezado de Sección */}
         <div className="space-y-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-600">
             {profile?.level === 'principiante' ? 'Progreso Semanal' : 'Panel de Rendimiento Unificado'}
           </h2>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-650">
             {profile?.level === 'principiante'
               ? 'Sigue tu tiempo de entrenamiento acumulado, tu constancia semanal y la distribución de tus deportes.'
               : 'Monitoriza tu carga acumulada (TSS), evita el sobreentrenamiento y planifica tus picos de forma con precisión milimétrica.'}

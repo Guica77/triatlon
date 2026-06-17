@@ -105,25 +105,25 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-2xl rounded-2xl bg-zinc-900 border border-zinc-800 p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto my-8"
+          className="relative w-full max-w-2xl rounded-2xl bg-white border border-zinc-200 p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto my-8"
         >
           {/* Botón Cerrar */}
           <button
             onClick={onClose}
-            className="absolute top-6 right-6 p-2 rounded-full bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 transition-colors"
+            className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
  
           <div className="mb-6">
-            <h2 className="text-2xl font-light tracking-tight text-zinc-50">Diario Biométrico del Atleta</h2>
-            <p className="text-sm text-zinc-400 mt-1">
+            <h2 className="text-2xl font-light tracking-tight text-zinc-900">Diario Biométrico del Atleta</h2>
+            <p className="text-sm text-zinc-500 mt-1">
               Ajusta tus métricas matutinas para recalcular tu Readiness Score al instante.
             </p>
           </div>
@@ -133,22 +133,22 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
             {/* 1. Métricas Objetivas */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Activity className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">1. Métricas Objetivas (Reloj / Sensor)</h3>
+                <Activity className="w-4 h-4 text-emerald-600" />
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">1. Métricas Objetivas (Reloj / Sensor)</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 
                 {/* Sueño */}
-                <div className="p-4 rounded-xl bg-zinc-950/50 border border-zinc-800/80 space-y-2">
+                <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
-                      <Moon className="w-3.5 h-3.5 text-zinc-500" />
+                    <label className="text-xs font-medium text-zinc-500 flex items-center gap-1.5">
+                      <Moon className="w-3.5 h-3.5 text-zinc-450" />
                       SUEÑO (h)
                     </label>
                     <div className="group relative">
-                      <Info className="w-3.5 h-3.5 text-sky-400 cursor-help" />
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block w-48 p-2 rounded bg-zinc-800 text-[10px] text-zinc-200 text-center shadow-xl z-20 pointer-events-none border border-zinc-700">
+                      <Info className="w-3.5 h-3.5 text-sky-500 cursor-help" />
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block w-48 p-2 rounded bg-zinc-800 text-[10px] text-white text-center shadow-xl z-20 pointer-events-none border border-zinc-700">
                         Meta recomendada: 8.0h para asimilación óptima de carga en triatlón.
                       </div>
                     </div>
@@ -161,20 +161,20 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                     value={sleepHours}
                     onChange={(e) => setSleepHours(e.target.value)}
                     placeholder="7.5"
-                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-lg font-medium text-zinc-100 text-center focus:outline-none focus:border-emerald-500 transition-colors"
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-lg font-medium text-zinc-800 text-center focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 transition-colors"
                   />
                 </div>
 
                 {/* HRV */}
-                <div className="p-4 rounded-xl bg-zinc-950/50 border border-zinc-800/80 space-y-2">
+                <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
-                      <Heart className="w-3.5 h-3.5 text-zinc-500" />
+                    <label className="text-xs font-medium text-zinc-500 flex items-center gap-1.5">
+                      <Heart className="w-3.5 h-3.5 text-zinc-450" />
                       HRV (ms)
                     </label>
                     <div className="group relative">
-                      <Info className="w-3.5 h-3.5 text-sky-400 cursor-help" />
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block w-52 p-2 rounded bg-zinc-800 text-[10px] text-zinc-200 text-center shadow-xl z-20 pointer-events-none border border-zinc-700">
+                      <Info className="w-3.5 h-3.5 text-sky-500 cursor-help" />
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block w-52 p-2 rounded bg-zinc-800 text-[10px] text-white text-center shadow-xl z-20 pointer-events-none border border-zinc-700">
                         Variabilidad de Frecuencia Cardíaca. Mayor valor indica mejor recuperación del sistema nervioso central.
                       </div>
                     </div>
@@ -186,20 +186,20 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                     value={hrv}
                     onChange={(e) => setHrv(e.target.value)}
                     placeholder="65"
-                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-lg font-medium text-zinc-100 text-center focus:outline-none focus:border-emerald-500 transition-colors"
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-lg font-medium text-zinc-800 text-center focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 transition-colors"
                   />
                 </div>
 
                 {/* RHR */}
-                <div className="p-4 rounded-xl bg-zinc-950/50 border border-zinc-800/80 space-y-2">
+                <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 space-y-2">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-medium text-zinc-400 flex items-center gap-1.5">
-                      <Activity className="w-3.5 h-3.5 text-zinc-500" />
+                    <label className="text-xs font-medium text-zinc-500 flex items-center gap-1.5">
+                      <Activity className="w-3.5 h-3.5 text-zinc-450" />
                       RHR (bpm)
                     </label>
                     <div className="group relative">
-                      <Info className="w-3.5 h-3.5 text-sky-400 cursor-help" />
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block w-48 p-2 rounded bg-zinc-800 text-[10px] text-zinc-200 text-center shadow-xl z-20 pointer-events-none border border-zinc-700">
+                      <Info className="w-3.5 h-3.5 text-sky-500 cursor-help" />
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block w-48 p-2 rounded bg-zinc-800 text-[10px] text-white text-center shadow-xl z-20 pointer-events-none border border-zinc-700">
                         Frecuencia Cardíaca en Reposo. Menor valor indica menor fatiga cardiovascular acumulada.
                       </div>
                     </div>
@@ -211,15 +211,15 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                     value={rhr}
                     onChange={(e) => setRhr(e.target.value)}
                     placeholder="52"
-                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-lg font-medium text-zinc-100 text-center focus:outline-none focus:border-emerald-500 transition-colors"
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-3 py-2 text-lg font-medium text-zinc-800 text-center focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-200 transition-colors"
                   />
                 </div>
 
               </div>
 
               {/* Peso corporal */}
-              <div className="mt-4 p-4 rounded-xl bg-zinc-950/50 border border-zinc-800/80 flex justify-between items-center">
-                <label className="text-xs font-medium text-zinc-400">Peso Corporal (kg)</label>
+              <div className="mt-4 p-4 rounded-xl bg-zinc-50 border border-zinc-200 flex justify-between items-center">
+                <label className="text-xs font-medium text-zinc-500">Peso Corporal (kg)</label>
                 <input
                   type="number"
                   step="0.1"
@@ -228,26 +228,26 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
                   placeholder="72.0"
-                  className="w-28 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-100 text-right focus:outline-none focus:border-emerald-500 transition-colors"
+                  className="w-28 bg-white border border-zinc-200 rounded-lg px-3 py-1.5 text-sm font-medium text-zinc-900 text-right focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
             </div>
 
             {/* 2. Métricas Subjetivas (Fatiga y Estrés) */}
-            <div className="space-y-6 border-t border-zinc-800/80 pt-6">
+            <div className="space-y-6 border-t border-zinc-150 pt-6">
               <div className="flex items-center gap-2 mb-2">
                 <Flame className="w-4 h-4 text-amber-500" />
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-400">2. Sensaciones del Atleta (Métricas Subjetivas)</h3>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-zinc-500">2. Sensaciones del Atleta (Métricas Subjetivas)</h3>
               </div>
 
               {/* Fatiga Muscular */}
-              <div className="p-5 rounded-xl bg-zinc-950/40 border border-zinc-800/80 space-y-4">
+              <div className="p-5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-zinc-200 flex items-center gap-2">
+                  <span className="text-sm font-semibold text-zinc-850 flex items-center gap-2">
                     <Flame className="w-4 h-4 text-amber-500" />
                     Fatiga y Dolor Muscular (RPE)
                   </span>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20">
                     Nivel {fatigueRating !== null && fatigueRating > 0 ? fatigueRating : 'Pendiente'} / 5
                   </span>
                 </div>
@@ -258,10 +258,10 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                       key={num}
                       type="button"
                       onClick={() => setFatigueRating(num)}
-                      className={`py-2.5 rounded-lg font-medium text-sm transition-all ${
+                      className={`py-2.5 rounded-lg font-medium text-sm transition-all cursor-pointer ${
                         fatigueRating === num
                           ? 'bg-amber-500 text-zinc-950 font-bold shadow-lg shadow-amber-500/20 scale-105'
-                          : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                          : 'bg-white border border-zinc-200 text-zinc-500 hover:border-zinc-350 hover:text-zinc-850'
                       }`}
                     >
                       {num}
@@ -270,20 +270,20 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                 </div>
 
                 {/* Ayuda Dinámica */}
-                <div className="p-3.5 rounded-lg bg-amber-500/5 border-l-2 border-amber-500 space-y-1">
-                  <p className="text-xs font-semibold text-amber-400">{currentFatigue.title}</p>
-                  <p className="text-xs text-zinc-400 leading-relaxed">{currentFatigue.desc}</p>
+                <div className="p-3.5 rounded-lg bg-amber-50 border-l-2 border-amber-500 space-y-1">
+                  <p className="text-xs font-semibold text-amber-600">{currentFatigue.title}</p>
+                  <p className="text-xs text-zinc-500 leading-relaxed">{currentFatigue.desc}</p>
                 </div>
               </div>
 
               {/* Nivel de Estrés Mental */}
-              <div className="p-5 rounded-xl bg-zinc-950/40 border border-zinc-800/80 space-y-4">
+              <div className="p-5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-zinc-200 flex items-center gap-2">
-                    <Brain className="w-4 h-4 text-emerald-400" />
+                  <span className="text-sm font-semibold text-zinc-850 flex items-center gap-2">
+                    <Brain className="w-4 h-4 text-emerald-600" />
                     Nivel de Estrés Mental / Laboral
                   </span>
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                     Nivel {stressLevel !== null && stressLevel > 0 ? stressLevel : 'Pendiente'} / 5
                   </span>
                 </div>
@@ -294,10 +294,10 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                       key={num}
                       type="button"
                       onClick={() => setStressLevel(num)}
-                      className={`py-2.5 rounded-lg font-medium text-sm transition-all ${
+                      className={`py-2.5 rounded-lg font-medium text-sm transition-all cursor-pointer ${
                         stressLevel === num
                           ? 'bg-emerald-500 text-zinc-950 font-bold shadow-lg shadow-emerald-500/20 scale-105'
-                          : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                          : 'bg-white border border-zinc-200 text-zinc-500 hover:border-zinc-350 hover:text-zinc-850'
                       }`}
                     >
                       {num}
@@ -306,16 +306,16 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                 </div>
 
                 {/* Ayuda Dinámica */}
-                <div className="p-3.5 rounded-lg bg-emerald-500/5 border-l-2 border-emerald-500 space-y-1">
-                  <p className="text-xs font-semibold text-emerald-400">{currentStress.title}</p>
-                  <p className="text-xs text-zinc-400 leading-relaxed">{currentStress.desc}</p>
+                <div className="p-3.5 rounded-lg bg-emerald-50 border-l-2 border-emerald-500 space-y-1">
+                  <p className="text-xs font-semibold text-emerald-600">{currentStress.title}</p>
+                  <p className="text-xs text-zinc-500 leading-relaxed">{currentStress.desc}</p>
                 </div>
               </div>
 
             </div>
 
             {errorMessage && (
-              <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-450 text-xs font-medium text-center">
+              <div className="p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 text-xs font-medium text-center">
                 {errorMessage}
               </div>
             )}

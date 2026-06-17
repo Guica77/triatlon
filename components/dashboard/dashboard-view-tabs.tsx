@@ -325,18 +325,18 @@ export function DashboardViewTabs({
       </section>
 
       {/* Tabs and Quick Actions */}
-      <div className="flex justify-between items-center flex-wrap gap-3 pb-2 border-b border-zinc-800/80">
-        <div className="flex bg-zinc-950/60 p-1 rounded-xl border border-zinc-800 shadow-inner">
+      <div className="flex justify-between items-center flex-wrap gap-3 pb-2 border-b border-zinc-205">
+        <div className="flex bg-zinc-100 p-1 rounded-xl border border-zinc-200/80 shadow-sm">
           <button
             onClick={() => setActiveTab('semana')}
-            className={`relative px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${
-              activeTab === 'semana' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+            className={`relative px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+              activeTab === 'semana' ? 'text-cyan-400 font-bold' : 'text-zinc-500 hover:text-zinc-800'
             }`}
           >
             {activeTab === 'semana' && (
               <motion.div
                 layoutId="active-dashboard-tab"
-                className="absolute inset-0 bg-zinc-800 rounded-lg shadow-md"
+                className="absolute inset-0 bg-white border border-zinc-200 shadow-sm rounded-lg"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
             )}
@@ -344,14 +344,14 @@ export function DashboardViewTabs({
           </button>
           <button
             onClick={() => setActiveTab('mes')}
-            className={`relative px-4 py-2 text-xs font-semibold rounded-lg transition-colors ${
-              activeTab === 'mes' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+            className={`relative px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
+              activeTab === 'mes' ? 'text-cyan-400 font-bold' : 'text-zinc-500 hover:text-zinc-800'
             }`}
           >
             {activeTab === 'mes' && (
               <motion.div
                 layoutId="active-dashboard-tab"
-                className="absolute inset-0 bg-zinc-800 rounded-lg shadow-md"
+                className="absolute inset-0 bg-white border border-zinc-200 shadow-sm rounded-lg"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
               />
             )}
@@ -386,7 +386,7 @@ export function DashboardViewTabs({
               <AnimatedButton
                 variant="primary"
                 onClick={() => openModalForDate(todayStr)}
-                className="!bg-cyan-500 hover:!bg-cyan-400 !text-black text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 shadow-lg shadow-cyan-500/10 cursor-pointer"
+                className="!bg-cyan-500 hover:!bg-cyan-400 !text-black text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Añadir Manual</span>
@@ -416,12 +416,12 @@ export function DashboardViewTabs({
                 </h2>
                 
                 {/* Selector de modo de vista */}
-                <div className="flex bg-zinc-950/40 p-1 rounded-lg border border-zinc-900 text-[10px] font-bold shrink-0">
+                <div className="flex bg-zinc-100 p-1 rounded-lg border border-zinc-200/80 text-[10px] font-bold shrink-0">
                   <button
                     onClick={() => setViewMode('focus')}
                     className={cn(
                       "px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-1",
-                      viewMode === 'focus' ? "bg-zinc-800 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"
+                      viewMode === 'focus' ? "bg-white text-cyan-400 shadow-sm border border-zinc-200" : "text-zinc-550 hover:text-zinc-800"
                     )}
                   >
                     <Eye className="w-3 h-3" />
@@ -431,7 +431,7 @@ export function DashboardViewTabs({
                     onClick={() => setViewMode('all')}
                     className={cn(
                       "px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-1",
-                      viewMode === 'all' ? "bg-zinc-800 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"
+                      viewMode === 'all' ? "bg-white text-cyan-400 shadow-sm border border-zinc-200" : "text-zinc-550 hover:text-zinc-800"
                     )}
                   >
                     <ListFilter className="w-3 h-3" />
@@ -519,7 +519,7 @@ export function DashboardViewTabs({
               
               {/* Calendar Header */}
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm sm:text-base font-bold text-zinc-200 flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-zinc-800 flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-cyan-400" />
                   <span>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</span>
                 </h3>
@@ -528,7 +528,7 @@ export function DashboardViewTabs({
                     title="Mes Anterior"
                     aria-label="Mes Anterior"
                     onClick={handlePrevMonth}
-                    className="p-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 text-zinc-400 hover:text-white transition cursor-pointer"
+                    className="p-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 bg-white text-zinc-500 hover:text-zinc-800 transition cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -536,7 +536,7 @@ export function DashboardViewTabs({
                     title="Mes Siguiente"
                     aria-label="Mes Siguiente"
                     onClick={handleNextMonth}
-                    className="p-1.5 rounded-lg border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 text-zinc-400 hover:text-white transition cursor-pointer"
+                    className="p-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 bg-white text-zinc-500 hover:text-zinc-800 transition cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -573,16 +573,16 @@ export function DashboardViewTabs({
                     const hasPending = daySessions.some(w => w.status === 'pending');
                     
                     if (daySessions.every(w => w.status === 'completed')) {
-                      complianceClass = 'bg-emerald-500/5 border-emerald-500/25 text-emerald-400 hover:bg-emerald-500/10';
+                      complianceClass = 'bg-[#e2f9eb] border-[#b2f0c9] text-emerald-800 hover:bg-[#d0f5dc]';
                     } else if (hasMissed) {
-                      complianceClass = 'bg-red-500/5 border-red-500/25 text-red-400 hover:bg-red-500/10';
+                      complianceClass = 'bg-[#feeef0] border-[#fccad3] text-red-800 hover:bg-[#fddde2]';
                     } else if (hasPending && daySessions.some(w => w.scheduled_date <= todayStr)) {
-                      complianceClass = 'bg-amber-500/5 border-amber-500/25 text-amber-400 hover:bg-amber-500/10';
+                      complianceClass = 'bg-[#fff8e6] border-[#ffe8b3] text-amber-800 hover:bg-[#fff0cc]';
                     } else {
-                      complianceClass = 'bg-zinc-950/25 border-zinc-850 text-zinc-350 hover:bg-zinc-900/20';
+                      complianceClass = 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50';
                     }
                   } else {
-                    complianceClass = 'bg-zinc-950/10 border-zinc-900/60 text-zinc-500 hover:bg-zinc-900/10';
+                    complianceClass = 'bg-[#fcfcfd] border-zinc-200/80 text-zinc-400 hover:bg-zinc-50';
                   }
 
                   return (
@@ -591,15 +591,15 @@ export function DashboardViewTabs({
                       onClick={() => setSelectedDateStr(dateStr)}
                       className={`relative min-h-[56px] sm:min-h-[72px] p-1.5 rounded-xl border flex flex-col justify-between items-start transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-zinc-900 border-cyan-500/55 shadow-md shadow-cyan-500/5 ring-1 ring-cyan-500/30'
+                          ? 'bg-cyan-50 border-cyan-400 ring-2 ring-cyan-400/20 shadow-xs'
                           : isToday
-                          ? 'bg-zinc-950/60 border-zinc-705 shadow-sm'
+                          ? 'bg-cyan-50/20 border-cyan-300 ring-1 ring-cyan-200'
                           : complianceClass
                       } ${!isCurrentMonth ? 'opacity-35' : ''}`}
                     >
                       {/* Day Number */}
                       <span className={`text-[10px] sm:text-xs font-bold leading-none ${
-                        isToday ? 'text-cyan-400' : isSelected ? 'text-white' : 'text-zinc-450'
+                        isToday ? 'text-cyan-600' : isSelected ? 'text-cyan-800' : 'text-zinc-650'
                       }`}>
                         {d.getDate()}
                       </span>
@@ -656,12 +656,12 @@ export function DashboardViewTabs({
                   />
                 ))
               ) : (
-                <div className="p-6 rounded-2xl bg-zinc-950/40 border border-dashed border-zinc-800 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform duration-500">
+                <div className="p-6 rounded-2xl bg-zinc-50 border border-dashed border-zinc-200 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group shadow-inner">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform duration-500">
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-zinc-300">Día de Recuperación Activa</p>
+                    <p className="text-sm font-bold text-zinc-850">Día de Recuperación Activa</p>
                     <p className="text-xs text-zinc-500 max-w-[250px] mx-auto leading-relaxed">
                       No hay entrenamientos de alta intensidad. Aprovecha para estirar 15 min, caminar o simplemente descansar la musculatura.
                     </p>
@@ -692,13 +692,13 @@ export function DashboardViewTabs({
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-lg rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl p-6 overflow-hidden z-10"
+              className="relative w-full max-w-lg rounded-2xl bg-white border border-zinc-200 shadow-2xl p-6 overflow-hidden z-10"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
 
               {/* Modal Header */}
-              <div className="flex justify-between items-center border-b border-zinc-800 pb-4 mb-4">
-                <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <div className="flex justify-between items-center border-b border-zinc-150 pb-4 mb-4">
+                <h3 className="text-base sm:text-lg font-bold text-zinc-900 flex items-center gap-2">
                   <Activity className="w-5 h-5 text-cyan-400 animate-pulse" />
                   Registrar Sesión Manual
                 </h3>
@@ -706,7 +706,7 @@ export function DashboardViewTabs({
                   title="Cerrar"
                   aria-label="Cerrar"
                   onClick={() => setIsManualModalOpen(false)}
-                  className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -722,7 +722,7 @@ export function DashboardViewTabs({
                 )}
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
                     Título de la Sesión *
                   </label>
                   <input
@@ -731,13 +731,13 @@ export function DashboardViewTabs({
                     onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="Ej. Rodaje continuo, Natación técnica, HIIT"
                     required
-                    className="w-full bg-zinc-950 border border-zinc-850 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-colors"
+                    className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
                       Disciplina *
                     </label>
                     <select
@@ -745,7 +745,7 @@ export function DashboardViewTabs({
                       aria-label="Disciplina"
                       value={formSport}
                       onChange={(e) => setFormSport(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-850 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-colors cursor-pointer"
+                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition-colors cursor-pointer"
                     >
                       <option value="carrera">🏃‍♂️ Carrera</option>
                       <option value="ciclismo">🚴‍♂️ Ciclismo</option>
@@ -755,7 +755,7 @@ export function DashboardViewTabs({
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
                       Duración (min) *
                     </label>
                     <input
@@ -767,14 +767,14 @@ export function DashboardViewTabs({
                       onChange={(e) => setFormDuration(e.target.value)}
                       min="1"
                       required
-                      className="w-full bg-zinc-950 border border-zinc-850 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-colors"
+                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
                       Fecha Programada *
                     </label>
                     <input
@@ -785,12 +785,12 @@ export function DashboardViewTabs({
                       value={formDate}
                       onChange={(e) => setFormDate(e.target.value)}
                       required
-                      className="w-full bg-zinc-950 border border-zinc-850 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-colors cursor-pointer"
+                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition-colors cursor-pointer"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
                       Estado de Realización *
                     </label>
                     <select
@@ -798,7 +798,7 @@ export function DashboardViewTabs({
                       aria-label="Estado"
                       value={formStatus}
                       onChange={(e) => setFormStatus(e.target.value as 'pending' | 'completed')}
-                      className="w-full bg-zinc-950 border border-zinc-850 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-white outline-none transition-colors cursor-pointer"
+                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition-colors cursor-pointer"
                     >
                       <option value="completed">✓ Completado</option>
                       <option value="pending">⏳ Pendiente</option>
@@ -807,7 +807,7 @@ export function DashboardViewTabs({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
                     Descripción / Notas (Opcional)
                   </label>
                   <textarea
@@ -815,16 +815,16 @@ export function DashboardViewTabs({
                     onChange={(e) => setFormDescription(e.target.value)}
                     placeholder="Detalles sobre las sensaciones, ritmos o series realizadas..."
                     rows={3}
-                    className="w-full bg-zinc-950 border border-zinc-850 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-600 outline-none transition-colors resize-none"
+                    className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors resize-none"
                   />
                 </div>
 
-                <div className="pt-2 flex justify-end gap-3 border-t border-zinc-800">
+                <div className="pt-2 flex justify-end gap-3 border-t border-zinc-205">
                   <AnimatedButton
                     type="button"
                     variant="ghost"
                     onClick={() => setIsManualModalOpen(false)}
-                    className="px-4 py-2 border border-zinc-800 bg-zinc-900/30 text-zinc-400 hover:text-zinc-200 text-xs rounded-xl"
+                    className="px-4 py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 hover:text-zinc-800 hover:bg-zinc-100 text-xs rounded-xl"
                   >
                     Cancelar
                   </AnimatedButton>
@@ -832,7 +832,7 @@ export function DashboardViewTabs({
                     type="submit"
                     variant="primary"
                     disabled={isSubmitting}
-                    className="!bg-cyan-500 hover:!bg-cyan-400 !text-black px-5 py-2 text-xs font-bold rounded-xl shadow-md disabled:opacity-50"
+                    className="bg-cyan-500 hover:bg-cyan-600 text-white px-5 py-2 text-xs font-bold rounded-xl disabled:opacity-50"
                   >
                     {isSubmitting ? 'Guardando...' : 'Registrar Sesión'}
                   </AnimatedButton>

@@ -95,8 +95,8 @@ export function PerformanceChartCard({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-[#0f172a]/95 border border-slate-700/80 rounded-lg shadow-2xl p-3 backdrop-blur-xl tabular-nums text-xs min-w-[160px]">
-          <div className="font-bold text-zinc-300 border-b border-slate-700/60 pb-1.5 mb-2 uppercase tracking-wider text-[10px]">
+        <div className="bg-white/95 border border-zinc-205 rounded-lg shadow-xl p-3 backdrop-blur-md tabular-nums text-xs min-w-[160px]">
+          <div className="font-bold text-zinc-500 border-b border-zinc-200 pb-1.5 mb-2 uppercase tracking-wider text-[10px]">
             {data.formattedDate}
           </div>
           
@@ -104,29 +104,29 @@ export function PerformanceChartCard({
             {visibleLines.ctl && (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />
-                <span className="text-slate-300">Fitness (CTL)</span>
-                <span className="text-white font-black">{data.raw_ctl}</span>
+                <span className="text-zinc-700">Fitness (CTL)</span>
+                <span className="text-zinc-900 font-extrabold">{data.raw_ctl}</span>
               </>
             )}
             {visibleLines.atl && (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#fb7185]" />
-                <span className="text-slate-300">Fatiga (ATL)</span>
-                <span className="text-white font-black">{data.raw_atl}</span>
+                <span className="text-zinc-700">Fatiga (ATL)</span>
+                <span className="text-zinc-900 font-extrabold">{data.raw_atl}</span>
               </>
             )}
             {visibleLines.tsb && (
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#a3e635]" />
-                <span className="text-slate-300">Forma (TSB)</span>
-                <span className={`font-black ${data.raw_tsb >= 0 ? 'text-[#a3e635]' : 'text-[#fcd34d]'}`}>
+                <span className="text-zinc-700">Forma (TSB)</span>
+                <span className={`font-extrabold ${data.raw_tsb >= 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
                   {data.raw_tsb > 0 ? `+${data.raw_tsb}` : data.raw_tsb}
                 </span>
               </>
             )}
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-700/60 text-[9px] text-slate-400 italic text-center">
+          <div className="mt-2.5 pt-2 border-t border-zinc-200 text-[9px] text-zinc-400 italic text-center">
             Click para ver detalle del día
           </div>
         </div>
@@ -142,25 +142,25 @@ export function PerformanceChartCard({
   };
 
   return (
-    <div className="col-span-1 md:col-span-2 bg-[#020617] rounded-xl border border-slate-800/60 overflow-hidden flex flex-col font-sans shadow-xl">
+    <div className="col-span-1 md:col-span-2 bg-white rounded-xl border border-zinc-200 overflow-hidden flex flex-col font-sans shadow-sm">
       
       {/* HEADER TÉCNICO */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-5 py-4 border-b border-slate-800/60 bg-slate-950">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-5 py-4 border-b border-zinc-200 bg-zinc-50">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-            <Activity className="w-4 h-4 text-blue-400" />
+          <div className="w-8 h-8 rounded bg-sky-50 border border-sky-100 flex items-center justify-center">
+            <Activity className="w-4 h-4 text-sky-600" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-slate-200 tracking-tight flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-zinc-850 tracking-tight flex items-center gap-2">
               Performance Management Chart
-              <span className="px-1.5 py-0.5 rounded-sm bg-slate-800 text-[9px] text-slate-400 font-medium uppercase tracking-widest border border-slate-700">Pro</span>
+              <span className="px-1.5 py-0.5 rounded-sm bg-zinc-100 text-[9px] text-zinc-650 font-medium uppercase tracking-widest border border-zinc-200">Pro</span>
             </h2>
-            <p className="text-[11px] text-slate-500 font-medium">Click en la gráfica para explorar días específicos</p>
+            <p className="text-[11px] text-zinc-500 font-medium">Click en la gráfica para explorar días específicos</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 mt-4 sm:mt-0">
-          <div className="flex bg-slate-900 rounded p-0.5 border border-slate-800">
+          <div className="flex bg-zinc-100 rounded p-0.5 border border-zinc-200">
             {[
               { label: '4W', value: 30 },
               { label: '8W', value: 60 },
@@ -172,10 +172,10 @@ export function PerformanceChartCard({
                   setTimeRange(tab.value);
                   setSelectedDateData(null); // reset selection on zoom change
                 }}
-                className={`px-3 py-1 text-[11px] font-bold rounded-sm transition-all ${
+                className={`px-3 py-1 text-[11px] font-bold rounded-sm transition-all cursor-pointer ${
                   timeRange === tab.value
-                    ? 'bg-slate-700 text-white shadow-sm'
-                    : 'text-slate-500 hover:text-slate-300'
+                    ? 'bg-white text-zinc-900 border border-zinc-200/80 shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-800'
                 }`}
               >
                 {tab.label}
@@ -184,8 +184,8 @@ export function PerformanceChartCard({
           </div>
           <button 
             onClick={() => setShowVolume(!showVolume)}
-            className={`flex items-center justify-center w-7 h-7 rounded border transition-colors ${
-              showVolume ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'
+            className={`flex items-center justify-center w-7 h-7 rounded border transition-colors cursor-pointer ${
+              showVolume ? 'bg-sky-50 border-sky-200 text-sky-600' : 'bg-zinc-100 border-zinc-200 text-zinc-500 hover:text-zinc-850'
             }`}
             title="Toggle Volumen"
           >
@@ -196,88 +196,88 @@ export function PerformanceChartCard({
 
       {/* MÉTRICAS SUPERIORES (KPIs) */}
       {!isBeginner && (
-        <div className="grid grid-cols-3 divide-x divide-slate-800/60 bg-[#020817] border-b border-slate-800/60">
+        <div className="grid grid-cols-3 divide-x divide-zinc-250 bg-white border-b border-zinc-200">
           <div className="px-5 py-3 relative group">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-[#38bdf8]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]"></span>
+              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-sky-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
                 Fitness (CTL)
               </span>
-              <button title="Ayuda sobre CTL" aria-label="Ayuda sobre CTL" onClick={() => setActiveHelp(activeHelp === 'ctl' ? null : 'ctl')} className="text-slate-600 hover:text-blue-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
+              <button title="Ayuda sobre CTL" aria-label="Ayuda sobre CTL" onClick={() => setActiveHelp(activeHelp === 'ctl' ? null : 'ctl')} className="text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"><HelpCircle className="w-3 h-3"/></button>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-bold text-white tabular-nums tracking-tight">{currentCtl}</span>
+              <span className="text-2xl font-bold text-zinc-900 tabular-nums tracking-tight">{currentCtl}</span>
             </div>
             {activeHelp === 'ctl' && (
-              <div onClick={() => setActiveHelp(null)} className="absolute top-12 left-2 z-20 w-48 bg-slate-800 p-2 text-[10px] rounded border border-slate-700 text-slate-300 shadow-xl cursor-pointer">Mide tu condición física a largo plazo. Sube de forma constante con constancia.</div>
+              <div onClick={() => setActiveHelp(null)} className="absolute top-12 left-2 z-20 w-48 bg-zinc-800 p-2 text-[10px] rounded border border-zinc-700 text-zinc-100 shadow-xl cursor-pointer">Mide tu condición física a largo plazo. Sube de forma constante con constancia.</div>
             )}
           </div>
           
           <div className="px-5 py-3 relative group">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-[#fb7185]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#fb7185]"></span>
+              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-rose-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
                 Fatiga (ATL)
               </span>
-              <button title="Ayuda sobre ATL" aria-label="Ayuda sobre ATL" onClick={() => setActiveHelp(activeHelp === 'atl' ? null : 'atl')} className="text-slate-600 hover:text-red-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
+              <button title="Ayuda sobre ATL" aria-label="Ayuda sobre ATL" onClick={() => setActiveHelp(activeHelp === 'atl' ? null : 'atl')} className="text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"><HelpCircle className="w-3 h-3"/></button>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-bold text-white tabular-nums tracking-tight">{currentAtl}</span>
+              <span className="text-2xl font-bold text-zinc-900 tabular-nums tracking-tight">{currentAtl}</span>
             </div>
             {activeHelp === 'atl' && (
-              <div onClick={() => setActiveHelp(null)} className="absolute top-12 left-2 z-20 w-48 bg-slate-800 p-2 text-[10px] rounded border border-slate-700 text-slate-300 shadow-xl cursor-pointer">Mide tu cansancio a corto plazo. Reacciona fuertemente a sesiones duras.</div>
+              <div onClick={() => setActiveHelp(null)} className="absolute top-12 left-2 z-20 w-48 bg-zinc-800 p-2 text-[10px] rounded border border-zinc-700 text-zinc-100 shadow-xl cursor-pointer">Mide tu cansancio a corto plazo. Reacciona fuertemente a sesiones duras.</div>
             )}
           </div>
 
           <div className="px-5 py-3 relative group">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-[#a3e635]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#a3e635]"></span>
+              <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-emerald-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 Forma (TSB)
               </span>
-              <button title="Ayuda sobre TSB" aria-label="Ayuda sobre TSB" onClick={() => setActiveHelp(activeHelp === 'tsb' ? null : 'tsb')} className="text-slate-600 hover:text-amber-400 transition-colors"><HelpCircle className="w-3 h-3"/></button>
+              <button title="Ayuda sobre TSB" aria-label="Ayuda sobre TSB" onClick={() => setActiveHelp(activeHelp === 'tsb' ? null : 'tsb')} className="text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"><HelpCircle className="w-3 h-3"/></button>
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className={`text-2xl font-bold tabular-nums tracking-tight ${currentTsb >= 0 ? 'text-[#a3e635]' : 'text-[#fcd34d]'}`}>
+              <span className={`text-2xl font-bold tabular-nums tracking-tight ${currentTsb >= 0 ? 'text-emerald-600' : 'text-amber-600'}`}>
                 {currentTsb > 0 ? `+${currentTsb}` : currentTsb}
               </span>
             </div>
             {activeHelp === 'tsb' && (
-              <div onClick={() => setActiveHelp(null)} className="absolute top-12 left-2 z-20 w-48 bg-slate-800 p-2 text-[10px] rounded border border-slate-700 text-slate-300 shadow-xl cursor-pointer">CTL - ATL. Valores positivos indican frescura para competir.</div>
+              <div onClick={() => setActiveHelp(null)} className="absolute top-12 left-2 z-20 w-48 bg-zinc-800 p-2 text-[10px] rounded border border-zinc-700 text-zinc-100 shadow-xl cursor-pointer">CTL - ATL. Valores positivos indican frescura para competir.</div>
             )}
           </div>
         </div>
       )}
 
       {/* GRÁFICO RECHARTS DENSE */}
-      <div className="relative w-full pt-4 pb-1 px-2 bg-[#020817] cursor-pointer">
+      <div className="relative w-full pt-4 pb-1 px-2 bg-white cursor-pointer">
         
         {/* LEYENDA COMPACTA */}
         <div className="flex flex-wrap items-center justify-end gap-x-4 mb-2 px-4 relative z-10">
-          <div className="flex items-center gap-3 text-[10px] font-medium text-slate-400">
-            <button onClick={() => toggleLine('ctl')} className={`flex items-center gap-1.5 transition-all ${visibleLines.ctl ? 'opacity-100 text-slate-300' : 'opacity-40 line-through'}`}>
+          <div className="flex items-center gap-3 text-[10px] font-medium text-zinc-550">
+            <button onClick={() => toggleLine('ctl')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.ctl ? 'opacity-100 text-zinc-800 font-bold' : 'opacity-40 line-through text-zinc-400'}`}>
               <span className="w-3 h-0.5 bg-[#38bdf8]" /> CTL
             </button>
-            <button onClick={() => toggleLine('atl')} className={`flex items-center gap-1.5 transition-all ${visibleLines.atl ? 'opacity-100 text-slate-300' : 'opacity-40 line-through'}`}>
+            <button onClick={() => toggleLine('atl')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.atl ? 'opacity-100 text-zinc-800 font-bold' : 'opacity-40 line-through text-zinc-400'}`}>
               <span className="w-3 h-0.5 border border-dashed border-[#fb7185]" /> ATL
             </button>
-            <button onClick={() => toggleLine('tsb')} className={`flex items-center gap-1.5 transition-all ${visibleLines.tsb ? 'opacity-100 text-slate-300' : 'opacity-40 line-through'}`}>
+            <button onClick={() => toggleLine('tsb')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.tsb ? 'opacity-100 text-zinc-800 font-bold' : 'opacity-40 line-through text-zinc-400'}`}>
               <span className="w-2.5 h-2.5 border bg-[#a3e635]/20 border-[#a3e635]/50" /> TSB
             </button>
-            <div className="w-px h-3 bg-slate-800 mx-1"></div>
-            <span className="flex items-center gap-1.5 text-slate-500">
-              <span className="w-3 h-0.5 border border-dashed border-slate-500" /> Predicción
+            <div className="w-px h-3 bg-zinc-200 mx-1"></div>
+            <span className="flex items-center gap-1.5 text-zinc-400">
+              <span className="w-3 h-0.5 border border-dashed border-zinc-400" /> Predicción
             </span>
             {showVolume && (
               <>
-                <div className="w-px h-3 bg-slate-800 mx-1"></div>
-                <button onClick={() => toggleLine('swim')} className={`flex items-center gap-1.5 transition-all ${visibleLines.swim ? 'opacity-100 text-[#38bdf8]' : 'opacity-40 line-through'}`}>
+                <div className="w-px h-3 bg-zinc-200 mx-1"></div>
+                <button onClick={() => toggleLine('swim')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.swim ? 'opacity-100 text-sky-600 font-bold' : 'opacity-40 line-through text-zinc-400'}`}>
                   Vol S
                 </button>
-                <button onClick={() => toggleLine('bike')} className={`flex items-center gap-1.5 transition-all ${visibleLines.bike ? 'opacity-100 text-[#a3e635]' : 'opacity-40 line-through'}`}>
+                <button onClick={() => toggleLine('bike')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.bike ? 'opacity-100 text-emerald-600 font-bold' : 'opacity-40 line-through text-zinc-400'}`}>
                   Vol B
                 </button>
-                <button onClick={() => toggleLine('run')} className={`flex items-center gap-1.5 transition-all ${visibleLines.run ? 'opacity-100 text-[#fb7185]' : 'opacity-40 line-through'}`}>
+                <button onClick={() => toggleLine('run')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.run ? 'opacity-100 text-rose-600 font-bold' : 'opacity-40 line-through text-zinc-400'}`}>
                   Vol R
                 </button>
               </>
@@ -298,43 +298,43 @@ export function PerformanceChartCard({
                   <stop offset="100%" stopColor={COLOR_TSB} stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" vertical={false} />
               
               <XAxis 
                 dataKey="formattedDate" 
-                stroke="#475569" 
+                stroke="#71717a" 
                 fontSize={10} 
                 tickLine={false} 
                 axisLine={false}
                 minTickGap={30}
-                tick={{ fill: '#475569' }}
+                tick={{ fill: '#71717a' }}
               />
               
               <YAxis 
                 yAxisId="left" 
-                stroke="#475569" 
+                stroke="#71717a" 
                 fontSize={10} 
                 tickLine={false} 
                 axisLine={false} 
-                tick={{ fill: '#475569' }}
+                tick={{ fill: '#71717a' }}
                 domain={[0, 'auto']} 
               />
               
               <YAxis 
                 yAxisId="right" 
                 orientation="right" 
-                stroke="#475569" 
+                stroke="#71717a" 
                 hide 
               />
               
               <Tooltip 
                 // @ts-expect-error recharts TooltipProps typing is too strict
                 content={renderTooltip} 
-                cursor={{ stroke: '#475569', strokeWidth: 1.5, strokeDasharray: '4 4' }} 
+                cursor={{ stroke: '#a1a1aa', strokeWidth: 1.5, strokeDasharray: '4 4' }} 
                 isAnimationActive={false}
               />
               
-              <ReferenceLine yAxisId="right" y={0} stroke="#334155" strokeDasharray="3 3" />
+              <ReferenceLine yAxisId="right" y={0} stroke="#d4d4d8" strokeDasharray="3 3" />
 
               {/* TSB - TrainingPeaks Style Area Chart */}
               {visibleLines.tsb && (
