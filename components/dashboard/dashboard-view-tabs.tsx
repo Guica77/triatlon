@@ -13,7 +13,11 @@ import { AIWorkoutGenerator, GeneratedWorkout } from './ai-workout-generator';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
 import { DailyFuelCard } from '@/components/dashboard/daily-fuel-card';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
-import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
+import { 
+  calculateDailyMacros, 
+  calculateSessionPacing, 
+  calculateWorkoutCalories 
+} from '@/lib/nutrition-utility';
 import { cn } from '@/lib/utils';
 
 interface DashboardViewTabsProps {
@@ -73,31 +77,77 @@ export function DashboardViewTabs({
   const [selectedDateStr, setSelectedDateStr] = React.useState(todayStr);
 
   // Dynamic States for unified dashboard
-  const [nutritionData, setNutritionData] = React.useState(initialNutrition);
-  const [loadingNutrition, setLoadingNutrition] = React.useState(false);
   const [viewMode, setViewMode] = React.useState<'focus' | 'all'>('focus');
 
-  // Reactively update nutrition when selected date changes
-  React.useEffect(() => {
-    let active = true;
-    async function updateNutrition() {
-      setLoadingNutrition(true);
-      try {
-        const res = await getDailyNutrition(selectedDateStr);
-        if (active && res && res.data) {
-          setNutritionData(res.data);
-        }
-      } catch (err) {
-        console.error("Error updating nutrition for date:", selectedDateStr, err);
-      } finally {
-        if (active) setLoadingNutrition(false);
-      }
-    }
-    updateNutrition();
-    return () => {
-      active = false;
+  // Compute selected day nutrition dynamically client-side in 0ms to avoid network round-trip delay on mobile
+  const nutritionData = React.useMemo(() => {
+    const sweatRate = profile?.sweat_rate || 0.8;
+    const customCarbsPerHour = profile?.custom_carbs_per_hour;
+    const weight = initialNutrition?.weight || 72.0;
+
+    let activeExpenditure = 0;
+    let totalWorkoutHours = 0;
+    let hasStrengthSession = false;
+    let hasBrickSession = false;
+    const sessionsPacing: any[] = [];
+
+    const dayWorkouts = allWorkouts.filter(w => w.scheduled_date === selectedDateStr);
+
+    dayWorkouts.forEach((w: any) => {
+      const session = w.training_sessions;
+      if (!session || session.sport_type === 'descanso') return;
+
+      const durationMin = session.duration_min || 0;
+      const durationHours = durationMin / 60;
+      totalWorkoutHours += durationHours;
+
+      const sport = session.sport_type;
+      if (sport === 'fuerza') hasStrengthSession = true;
+      if (sport === 'brick') hasBrickSession = true;
+
+      // Calcular calorías quemadas
+      const kcalBurned = calculateWorkoutCalories(sport, weight, durationMin);
+      activeExpenditure += kcalBurned;
+
+      // Calcular pacing
+      const pacing = calculateSessionPacing(sport, durationMin, sweatRate, customCarbsPerHour);
+
+      sessionsPacing.push({
+        workoutId: w.id,
+        sportType: sport,
+        durationMin,
+        hourlyFluidMl: pacing.hourlyFluidMl,
+        totalFluidMl: pacing.totalFluidMl,
+        hourlySodiumMg: pacing.hourlySodiumMg,
+        totalSodiumMg: pacing.totalSodiumMg,
+        hourlyCarbsG: pacing.hourlyCarbsG,
+        totalCarbsG: pacing.totalCarbsG,
+        practicalGuide: pacing.practicalGuide
+      });
+    });
+
+    const macrosCalc = calculateDailyMacros(
+      weight,
+      totalWorkoutHours,
+      hasStrengthSession,
+      hasBrickSession,
+      activeExpenditure
+    );
+
+    return {
+      bmr: macrosCalc.bmr,
+      baseExpenditure: macrosCalc.baseExpenditure,
+      activeExpenditure: macrosCalc.activeExpenditure,
+      totalCalories: macrosCalc.totalCalories,
+      weight,
+      macros: {
+        carbs: macrosCalc.carbs,
+        protein: macrosCalc.protein,
+        fat: macrosCalc.fat
+      },
+      sessionsPacing
     };
-  }, [selectedDateStr]);
+  }, [selectedDateStr, allWorkouts, profile, initialNutrition]);
 
   // Form states for manual workout logger
   const [formTitle, setFormTitle] = React.useState('');
@@ -262,7 +312,7 @@ export function DashboardViewTabs({
           <DailyFuelCard 
             nutritionData={nutritionData} 
             error={null} 
-            loading={loadingNutrition}
+            loading={false}
           />
         </div>
         <div className="h-full">
