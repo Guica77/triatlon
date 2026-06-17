@@ -287,3 +287,58 @@ export function calculateRecoveryMeal(
   };
 }
 
+/**
+ * Genera una sugerencia de comida pre-entrenamiento en base a las preferencias y la sesión
+ */
+export function calculatePreWorkoutMeal(
+  sportType: string,
+  durationMin: number,
+  preferredIngredients: string[] | null
+): { mealName: string; macronutrientFocus: string; recipeDescription: string } {
+  if (sportType === 'descanso') {
+    return {
+      mealName: 'Desayuno/Comida equilibrada base',
+      macronutrientFocus: 'Macronutrientes equilibrados',
+      recipeDescription: 'Día de descanso. Mantén tu pauta habitual rica en fibra y grasas saludables sin necesidad de cargas rápidas de energía.'
+    };
+  }
+
+  // Ingredientes seleccionados (con fallbacks si no hay ninguno)
+  const ingredients = preferredIngredients && preferredIngredients.length > 0
+    ? preferredIngredients
+    : ['avena', 'platano']; // fallbacks estándar de pre-entreno
+
+  // Buscar carbohidratos de asimilación rápida/media
+  const quickCarb = ingredients.find(i => ['platano', 'avena', 'arroz', 'pasta', 'patata'].includes(i)) || 'platano';
+
+  const ingredientLabels: Record<string, string> = {
+    pasta: 'Pasta blanca con un toque de aceite',
+    arroz: 'Arroz blanco ligero',
+    patata: 'Patata cocida blanda',
+    avena: 'Porridge de avena templada',
+    platano: 'Plátano maduro con miel'
+  };
+
+  const carbLabel = ingredientLabels[quickCarb] || 'Plátano maduro con miel';
+
+  let mealName = '';
+  let recipeDescription = '';
+  let macronutrientFocus = '';
+
+  if (sportType === 'carrera' || sportType === 'brick') {
+    macronutrientFocus = 'Carbohidratos de asimilación rápida (Cero molestias gástricas / Flato)';
+    mealName = `Carga Pre-Carrera: ${carbLabel}`;
+    recipeDescription = `Para salir a correr y evitar flato o pesadez estomacal: Consumir 60-90 minutos antes del entrenamiento. Toma 1 porción de ${carbLabel}. Evita totalmente lácteos, grasas, proteínas pesadas y exceso de fibra en esta ventana previa.`;
+  } else {
+    macronutrientFocus = 'Energía sostenida (Carbohidratos de fácil digestión)';
+    mealName = `Combustible Pre-Entreno: ${carbLabel}`;
+    recipeDescription = `Consumir 90-120 minutos antes de comenzar la sesión de ${sportType === 'ciclismo' ? 'bici' : sportType}. Prepara una porción de ${carbLabel} para saturar tus depósitos de glucógeno y evitar pájaras durante tu sesión de ${durationMin} min.`;
+  }
+
+  return {
+    mealName,
+    macronutrientFocus,
+    recipeDescription
+  };
+}
+

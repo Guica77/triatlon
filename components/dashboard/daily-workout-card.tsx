@@ -12,7 +12,7 @@ import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
 import { GymTrackerModal } from '@/components/workouts/gym-tracker-modal';
 import Link from 'next/link';
 import { WatchSyncModal } from '@/components/dashboard/watch-sync-modal';
-import { calculateSessionPacing, calculateRecoveryMeal } from '@/lib/nutrition-utility';
+import { calculateSessionPacing, calculateRecoveryMeal, calculatePreWorkoutMeal } from '@/lib/nutrition-utility';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
@@ -298,6 +298,12 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   }
 
   const recoveryMeal = calculateRecoveryMeal(
+    session?.sport_type || 'descanso',
+    durationMin,
+    preferredIngredients
+  );
+
+  const preWorkoutMeal = calculatePreWorkoutMeal(
     session?.sport_type || 'descanso',
     durationMin,
     preferredIngredients
@@ -667,6 +673,28 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                         </div>
                       ) : (
                         <div className="space-y-4">
+                          {/* Nutrición Pre-Entrenamiento */}
+                          <div className="p-4 rounded-xl bg-[#0e0e10] border border-zinc-800 space-y-3">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                <Flame className="w-3.5 h-3.5 text-cyan-400" />
+                                Carga Pre-Entrenamiento
+                              </span>
+                              <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[9px] font-bold tracking-wider uppercase">
+                                60-120 Min Antes
+                              </span>
+                            </div>
+
+                            <div className="space-y-1">
+                              <h4 className="text-base font-bold text-zinc-50">{preWorkoutMeal.mealName}</h4>
+                              <p className="text-xs text-zinc-450 font-medium">{preWorkoutMeal.macronutrientFocus}</p>
+                            </div>
+
+                            <p className="text-xs text-zinc-300 leading-relaxed pt-1.5 border-t border-zinc-900">
+                              {preWorkoutMeal.recipeDescription}
+                            </p>
+                          </div>
+
                           {/* Grid de 3 Pilares */}
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             {/* Hidratación */}
