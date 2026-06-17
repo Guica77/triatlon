@@ -1,0 +1,2 @@
+ALTER TABLE profiles
+ADD COLUMN IF NOT EXISTS preferred_ingredients TEXT[] DEFAULT NULL;

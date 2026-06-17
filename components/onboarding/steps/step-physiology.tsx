@@ -19,7 +19,22 @@ interface StepPhysiologyProps {
   setCurrentRunPace: (v: string) => void;
   onNext: () => void;
   onPrev: () => void;
+  preferredIngredients: string[];
+  setPreferredIngredients: (v: string[]) => void;
 }
+
+const INGREDIENTS_OPTIONS = [
+  { id: 'pasta', label: 'Pasta', category: 'Carbohidratos' },
+  { id: 'arroz', label: 'Arroz', category: 'Carbohidratos' },
+  { id: 'patata', label: 'Patatas', category: 'Carbohidratos' },
+  { id: 'avena', label: 'Avena', category: 'Carbohidratos' },
+  { id: 'platano', label: 'Plátanos', category: 'Carbohidratos' },
+  { id: 'pollo', label: 'Pollo', category: 'Proteínas' },
+  { id: 'salmon', label: 'Salmón', category: 'Proteínas' },
+  { id: 'tofu', label: 'Tofu/Legumbres', category: 'Proteínas' },
+  { id: 'huevo', label: 'Huevos', category: 'Proteínas' },
+  { id: 'aguacate', label: 'Aguacate', category: 'Grasas' },
+];
 
 export function StepPhysiology(props: StepPhysiologyProps) {
   return (
@@ -98,6 +113,45 @@ export function StepPhysiology(props: StepPhysiologyProps) {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Sección de Preferencias de Alimentos para Nutrición */}
+        <div className="pt-6 border-t border-zinc-800/80 space-y-4">
+          <div>
+            <label className="text-xs font-semibold text-zinc-400 block uppercase tracking-wider">
+              Ingredientes Preferidos para Recuperación Post-Entrenamiento
+            </label>
+            <p className="text-xs text-zinc-500 mt-1">
+              Selecciona tus alimentos favoritos. La IA los utilizará para generar sugerencias de platos post-entrenamiento personalizados.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+            {INGREDIENTS_OPTIONS.map((ing) => {
+              const isSelected = props.preferredIngredients.includes(ing.id);
+              return (
+                <button
+                  key={ing.id}
+                  type="button"
+                  onClick={() => {
+                    if (isSelected) {
+                      props.setPreferredIngredients(props.preferredIngredients.filter(x => x !== ing.id));
+                    } else {
+                      props.setPreferredIngredients([...props.preferredIngredients, ing.id]);
+                    }
+                  }}
+                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
+                    isSelected
+                      ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400 ring-1 ring-emerald-500 shadow-sm shadow-emerald-500/10'
+                      : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:border-zinc-700'
+                  }`}
+                >
+                  <span className="text-xs font-bold">{ing.label}</span>
+                  <span className="text-[9px] text-zinc-500 uppercase font-semibold mt-1 tracking-wider">{ing.category}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
         
         <div className="flex justify-between pt-4 border-t border-zinc-800/80">
           <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-400 hover:text-white transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>

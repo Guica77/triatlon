@@ -218,3 +218,72 @@ export function calculateSessionPacing(
     practicalGuide
   }
 }
+
+/**
+ * Genera una sugerencia de plato de recuperación post-entrenamiento en base a las preferencias y la duración de la sesión
+ */
+export function calculateRecoveryMeal(
+  sportType: string,
+  durationMin: number,
+  preferredIngredients: string[] | null
+): { mealName: string; macronutrientFocus: string; recipeDescription: string } {
+  if (sportType === 'descanso') {
+    return {
+      mealName: 'Comida ligera base',
+      macronutrientFocus: 'Proteína moderada & Grasas saludables',
+      recipeDescription: 'Día de descanso. Mantén una ingesta moderada de carbohidratos. Elige verduras frescas con proteínas limpias.'
+    }
+  }
+
+  // Ingredientes seleccionados (con fallbacks si no hay ninguno)
+  const ingredients = preferredIngredients && preferredIngredients.length > 0
+    ? preferredIngredients
+    : ['arroz', 'pollo', 'aguacate']; // fallbacks estándar
+
+  // Determinar foco según deporte y duración
+  const isHighCarbs = durationMin >= 60;
+  
+  // Buscar qué ingredientes preferidos encajan
+  const carbSelection = ingredients.find(i => ['pasta', 'arroz', 'patata', 'avena', 'platano'].includes(i)) || 'arroz';
+  const proteinSelection = ingredients.find(i => ['pollo', 'salmon', 'tofu', 'huevo'].includes(i)) || 'pollo';
+  const fatSelection = ingredients.find(i => ['aguacate'].includes(i)) || 'aguacate';
+
+  // Mapear ID de ingredientes a etiquetas legibles en español
+  const ingredientLabels: Record<string, string> = {
+    pasta: 'Pasta integral',
+    arroz: 'Arroz basmati',
+    patata: 'Patatas asadas',
+    avena: 'Porridge de avena',
+    platano: 'Plátano',
+    pollo: 'Pechuga de pollo',
+    salmon: 'Filete de salmón',
+    tofu: 'Tofu salteado',
+    huevo: 'Huevos revueltos',
+    aguacate: 'Aguacate'
+  };
+
+  const carbLabel = ingredientLabels[carbSelection];
+  const proteinLabel = ingredientLabels[proteinSelection];
+  const fatLabel = ingredientLabels[fatSelection];
+
+  let mealName = '';
+  let recipeDescription = '';
+  let macronutrientFocus = '';
+
+  if (isHighCarbs) {
+    macronutrientFocus = 'Alta carga de Carbohidratos (Glucógeno) + Proteína de rápida asimilación';
+    mealName = `Bowl de Recuperación: ${carbLabel} con ${proteinLabel}`;
+    recipeDescription = `Ideal para reponer reservas después de ${durationMin} min de ${sportType}. Prepara un plato con 120g de ${carbLabel}, 150g de ${proteinLabel} y añade rodajas de ${fatLabel} para un aporte graso antiinflamatorio.`;
+  } else {
+    macronutrientFocus = 'Proteína limpia para reparación de fibras + Grasas saludables';
+    mealName = `Plato de Regeneración: ${proteinLabel} y ${fatLabel}`;
+    recipeDescription = `Enfoque en recuperación muscular estructural. Prepara 180g de ${proteinLabel} acompañado de medio ${fatLabel} con ensalada verde, reduciendo los carbohidratos al ser una sesión más corta.`;
+  }
+
+  return {
+    mealName,
+    macronutrientFocus,
+    recipeDescription
+  };
+}
+

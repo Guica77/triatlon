@@ -262,6 +262,7 @@ export type Database = {
           sweat_test_duration_min: number | null
           custom_carbs_per_hour: number | null
           invite_code: string | null
+          preferred_ingredients: string[] | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -308,6 +309,7 @@ export type Database = {
           sweat_test_duration_min?: number | null
           custom_carbs_per_hour?: number | null
           invite_code?: string | null
+          preferred_ingredients?: string[] | null
         }
         Update: {
           active_plan_id?: string | null
@@ -354,6 +356,7 @@ export type Database = {
           sweat_test_duration_min?: number | null
           custom_carbs_per_hour?: number | null
           invite_code?: string | null
+          preferred_ingredients?: string[] | null
         }
         Relationships: [
           {

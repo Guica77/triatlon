@@ -303,6 +303,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                         readOnly={readOnly}
                         sweatRate={profile?.sweat_rate}
                         customCarbsPerHour={profile?.custom_carbs_per_hour}
+                        preferredIngredients={profile?.preferred_ingredients || []}
                       />
                     </div>
                   );
@@ -456,6 +457,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                     readOnly={readOnly}
                     sweatRate={profile?.sweat_rate}
                     customCarbsPerHour={profile?.custom_carbs_per_hour}
+                    preferredIngredients={profile?.preferred_ingredients || []}
                   />
                 ))
               ) : (

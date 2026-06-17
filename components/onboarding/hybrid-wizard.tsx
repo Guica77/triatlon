@@ -24,6 +24,7 @@ export function HybridWizard() {
   const [currentFtp, setCurrentFtp] = React.useState('');
   const [currentSwimPace, setCurrentSwimPace] = React.useState('');
   const [currentRunPace, setCurrentRunPace] = React.useState('');
+  const [preferredIngredients, setPreferredIngredients] = React.useState<string[]>([]);
 
   // Step 2: Virtual Garage
   const [virtualGarage, setVirtualGarage] = React.useState<string[]>([]);
@@ -54,6 +55,7 @@ export function HybridWizard() {
         current_run_pace: currentRunPace || undefined,
         virtual_garage: virtualGarage,
         wants_coach: wantsCoach,
+        preferred_ingredients: preferredIngredients,
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -76,6 +78,7 @@ export function HybridWizard() {
         current_run_pace: currentRunPace || undefined,
         virtual_garage: virtualGarage,
         wants_coach: wantsCoach,
+        preferred_ingredients: preferredIngredients,
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -138,6 +141,8 @@ export function HybridWizard() {
             setCurrentRunPace={setCurrentRunPace}
             onPrev={() => setStep(1)}
             onNext={() => setStep(2)}
+            preferredIngredients={preferredIngredients}
+            setPreferredIngredients={setPreferredIngredients}
           />
         )}
 

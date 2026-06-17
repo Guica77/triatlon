@@ -12,7 +12,7 @@ import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
 import { GymTrackerModal } from '@/components/workouts/gym-tracker-modal';
 import Link from 'next/link';
 import { WatchSyncModal } from '@/components/dashboard/watch-sync-modal';
-import { calculateSessionPacing } from '@/lib/nutrition-utility';
+import { calculateSessionPacing, calculateRecoveryMeal } from '@/lib/nutrition-utility';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
@@ -21,6 +21,7 @@ interface WorkoutCardProps {
   readOnly?: boolean;
   sweatRate?: number | null;
   customCarbsPerHour?: number | null;
+  preferredIngredients?: string[] | null;
   workout: {
     id: string;
     scheduled_date: string;
@@ -187,7 +188,7 @@ const localFormatCondition = (condition: string, value?: number) => {
   return '';
 };
 
-export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio', readOnly = false, sweatRate = 0.8, customCarbsPerHour }: WorkoutCardProps) {
+export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio', readOnly = false, sweatRate = 0.8, customCarbsPerHour, preferredIngredients = [] }: WorkoutCardProps) {
   const [status, setStatus] = React.useState(workout.status);
   const [loading, setLoading] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry' | 'nutrition'>('main');
@@ -295,6 +296,12 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     durationMin = Math.round(durationMin * 0.75);
     parsed.main = `[SESIÓN ADAPTADA POR FATIGA] Duración principal reducida un 25%. Mantén un esfuerzo moderado y cómodo en Zona 1-2. Objetivo original: ${parsed.main}`;
   }
+
+  const recoveryMeal = calculateRecoveryMeal(
+    session?.sport_type || 'descanso',
+    durationMin,
+    preferredIngredients
+  );
 
   if (athleteLevel === 'principiante') {
     if (session.sport_type === 'natacion') {
@@ -583,15 +590,39 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                 )}
                 {activeTab === 'nutrition' && (
                   <div className="space-y-4 w-full">
-                    <div>
+                    <div className="space-y-4">
                       <p className="font-semibold text-emerald-400 mb-2 flex items-center gap-1.5 text-xs tracking-wide uppercase">
                         <Sparkles className="w-4 h-4 text-emerald-400" /> Estrategia de Nutrición y Pacing:
                       </p>
                       
                       {session?.sport_type === 'descanso' ? (
-                        <p className="text-zinc-350 text-sm leading-relaxed bg-zinc-900/40 border border-zinc-805 p-3.5 rounded-xl">
-                          Hoy es día de descanso y asimilación. Concéntrate en mantenerte hidratado con agua y seguir tu plan de macros base. No requieres suplementación específica de pacing.
-                        </p>
+                        <div className="space-y-4">
+                          <p className="text-zinc-350 text-sm leading-relaxed bg-zinc-900/40 border border-zinc-800 p-3.5 rounded-xl">
+                            Hoy es día de descanso y asimilación. Concéntrate en mantenerte hidratado con agua y seguir tu plan de macros base. No requieres suplementación específica de pacing.
+                          </p>
+
+                          {/* Nutrición de Recuperación Post-Entrenamiento (Día de descanso) */}
+                          <div className="p-4 rounded-xl bg-[#0e0e10] border border-zinc-800 space-y-4">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                                Nutrición Recomendada
+                              </span>
+                              <span className="px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 text-[9px] font-bold tracking-wider uppercase">
+                                Descanso Activo
+                              </span>
+                            </div>
+
+                            <div className="space-y-2">
+                              <h4 className="text-base font-bold text-zinc-50">{recoveryMeal.mealName}</h4>
+                              <p className="text-xs text-zinc-400 font-medium">{recoveryMeal.macronutrientFocus}</p>
+                            </div>
+
+                            <p className="text-xs text-zinc-300 leading-relaxed pt-1">
+                              {recoveryMeal.recipeDescription}
+                            </p>
+                          </div>
+                        </div>
                       ) : (
                         <div className="space-y-4">
                           {/* Grid de 3 Pilares */}
@@ -642,8 +673,83 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                               {pacing.practicalGuide}
                             </p>
                           </div>
+
+                          {/* Nutrición de Recuperación Post-Entrenamiento */}
+                          <div className="p-4 rounded-xl bg-[#0e0e10] border border-zinc-800 space-y-4">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                                Recuperación Post-Entrenamiento
+                              </span>
+                              {isCompleted ? (
+                                <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/35 text-emerald-400 text-[9px] font-bold tracking-wider uppercase flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+                                  ✓ Ingerir ahora (Ventana metabólica)
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 text-[9px] font-bold tracking-wider uppercase">
+                                  ⏱ Planificado Post-Entreno
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="space-y-1">
+                              <h4 className="text-base font-bold text-zinc-50">{recoveryMeal.mealName}</h4>
+                              <p className="text-xs text-zinc-450 font-medium">{recoveryMeal.macronutrientFocus}</p>
+                            </div>
+
+                            {/* Gráfico de Distribución Macro Minimalista */}
+                            <div className="space-y-2 pt-1">
+                              <div className="flex justify-between text-[10px] text-zinc-500 font-bold tracking-wider uppercase">
+                                <span>Distribución Nutricional Recomendada</span>
+                                <span>
+                                  HC: {durationMin >= 60 ? '55' : '15'}% | PRO: {durationMin >= 60 ? '30' : '60'}% | FAT: {durationMin >= 60 ? '15' : '25'}%
+                                </span>
+                              </div>
+                              <div className="h-2 w-full rounded-full bg-zinc-900 overflow-hidden flex">
+                                <div style={{ width: `${durationMin >= 60 ? 55 : 15}%` }} className="bg-cyan-500 h-full transition-all" />
+                                <div style={{ width: `${durationMin >= 60 ? 30 : 60}%` }} className="bg-purple-500 h-full transition-all" />
+                                <div style={{ width: `${durationMin >= 60 ? 15 : 25}%` }} className="bg-amber-500 h-full transition-all" />
+                              </div>
+                              <div className="flex gap-4 text-[9px] text-zinc-450 font-medium">
+                                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> Carbohidratos</span>
+                                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-500" /> Proteínas</span>
+                                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Grasas</span>
+                              </div>
+                            </div>
+
+                            <p className="text-xs text-zinc-300 leading-relaxed pt-1.5 border-t border-zinc-900">
+                              {recoveryMeal.recipeDescription}
+                            </p>
+
+                            {/* Nota de ingredientes preferidos (Onboarding integration) */}
+                            {preferredIngredients && preferredIngredients.length > 0 && (
+                              <div className="flex items-center gap-1.5 flex-wrap pt-1.5 border-t border-zinc-900/60">
+                                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Tus preferencias del onboarding:</span>
+                                {preferredIngredients.map((ing) => (
+                                  <span key={ing} className="px-1.5 py-0.5 rounded bg-zinc-900/80 border border-zinc-800 text-zinc-300 text-[9px] capitalize font-medium">
+                                    {ing}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
+
+                      {/* Guía Explicativa del Funcionamiento Metodológico */}
+                      <div className="p-3.5 rounded-xl bg-zinc-950/40 border border-zinc-900 flex gap-2.5 items-start">
+                        <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+                        <div className="space-y-1">
+                          <span className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider">
+                            ¿Cómo se calculan estas métricas?
+                          </span>
+                          <p className="text-[11px] text-zinc-500 leading-relaxed">
+                            Esta estrategia es completamente dinámica. La hidratación se deriva de tu tasa de sudoración ({sweatRate} L/h), y el sodio previene la fatiga y calambres. Los carbohidratos intra-entreno se ajustan según la duración y exigencia de la sesión ({durationMin} min). Por último, la comida de recuperación post-entrenamiento se optimiza utilizando los ingredientes preferidos seleccionados en tu onboarding, acelerando la síntesis proteica y reposición de glucógeno.
+                          </p>
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 )}
