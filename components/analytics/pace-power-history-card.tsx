@@ -244,7 +244,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
           <path
             d={linePoints}
             fill="none"
-            stroke={activeTab === 'ftp' ? '#38bdf8' : activeTab === 'run' ? '#34d399' : '#c084fc'}
+            stroke={activeTab === 'ftp' ? '#2ecc71' : activeTab === 'run' ? '#e74c3c' : '#00a2e8'}
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -254,8 +254,8 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
           {/* Degradados */}
           <defs>
             <linearGradient id="gradFtp" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#38bdf8" />
-              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+              <stop offset="0%" stopColor="#2ecc71" />
+              <stop offset="100%" stopColor="#2ecc71" stopOpacity="0" />
             </linearGradient>
           </defs>
 
@@ -276,7 +276,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
                 cx={hoverX} 
                 cy={hoverY} 
                 r="6" 
-                fill={activeTab === 'ftp' ? '#38bdf8' : activeTab === 'run' ? '#34d399' : '#c084fc'} 
+                fill={activeTab === 'ftp' ? '#2ecc71' : activeTab === 'run' ? '#e74c3c' : '#00a2e8'} 
                 stroke="#ffffff" 
                 strokeWidth="2.5" 
                 pointerEvents="none" 

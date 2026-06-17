@@ -46,11 +46,11 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
             <p className="text-[11px] text-zinc-650 leading-relaxed">
               Muestra el porcentaje del esfuerzo físico total (**TSS**) y el volumen real (**distancia**) que has dedicado a cada deporte durante esta semana:
               <br /><br />
-              • <strong className="text-purple-750">Natación 🟣</strong> (en metros)
+              • <strong className="text-[#00a2e8]">Natación 🔵</strong> (en metros)
               <br />
-              • <strong className="text-sky-650">Ciclismo 🔵</strong> (en kilómetros)
+              • <strong className="text-[#2ecc71]">Ciclismo 🟢</strong> (en kilómetros)
               <br />
-              • <strong className="text-emerald-750">Carrera a Pie 🟢</strong> (en kilómetros)
+              • <strong className="text-[#e74c3c]">Carrera a Pie 🔴</strong> (en kilómetros)
               <br /><br />
               Te sirve para verificar visualmente que tu volumen e intensidad por deporte coincidan con el balance planificado para tus objetivos de triatlón.
             </p>
@@ -103,13 +103,13 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
               strokeWidth="12"
             />
 
-            {/* Segmento Natación (Morado) */}
+            {/* Segmento Natación (Azul) */}
             <circle
               cx="50"
               cy="50"
               r={radius}
               fill="transparent"
-              stroke="#c084fc"
+              stroke="#00a2e8"
               strokeWidth="12"
               strokeDasharray={circumference}
               strokeDashoffset={swimOffset}
@@ -117,13 +117,13 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
               className="transition-all duration-1000"
             />
 
-            {/* Segmento Ciclismo (Azul) */}
+            {/* Segmento Ciclismo (Verde) */}
             <circle
               cx="50"
               cy="50"
               r={radius}
               fill="transparent"
-              stroke="#38bdf8"
+              stroke="#2ecc71"
               strokeWidth="12"
               strokeDasharray={circumference}
               strokeDashoffset={bikeOffset}
@@ -131,13 +131,13 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
               className="transition-all duration-1000"
             />
 
-            {/* Segmento Carrera (Verde) */}
+            {/* Segmento Carrera (Rojo) */}
             <circle
               cx="50"
               cy="50"
               r={radius}
               fill="transparent"
-              stroke="#34d399"
+              stroke="#e74c3c"
               strokeWidth="12"
               strokeDasharray={circumference}
               strokeDashoffset={runOffset}
@@ -162,7 +162,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
           {/* Ciclismo */}
           <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200 min-w-[170px]">
             <div className="flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-sky-400" />
+              <span className="w-3 h-3 rounded-full bg-[#2ecc71]" />
               <span className="text-sm font-medium text-zinc-700">Ciclismo</span>
             </div>
             <div className="text-right">
@@ -170,7 +170,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
                 {ciclismo.percentage}%
               </span>
               <span className="text-xs text-zinc-500 block">
-                {ciclismo.tss} TSS • <strong className="text-sky-600">{weeklyDistance.ciclismo} km</strong>
+                {ciclismo.tss} TSS • <strong className="text-[#2ecc71]">{weeklyDistance.ciclismo} km</strong>
               </span>
             </div>
           </div>
@@ -178,7 +178,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
           {/* Carrera */}
           <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200 min-w-[170px]">
             <div className="flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-emerald-400" />
+              <span className="w-3 h-3 rounded-full bg-[#e74c3c]" />
               <span className="text-sm font-medium text-zinc-700">Carrera</span>
             </div>
             <div className="text-right">
@@ -186,7 +186,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
                 {carrera.percentage}%
               </span>
               <span className="text-xs text-zinc-500 block">
-                {carrera.tss} TSS • <strong className="text-emerald-700">{weeklyDistance.carrera} km</strong>
+                {carrera.tss} TSS • <strong className="text-[#e74c3c]">{weeklyDistance.carrera} km</strong>
               </span>
             </div>
           </div>
@@ -194,7 +194,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
           {/* Natación */}
           <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200 min-w-[170px]">
             <div className="flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full bg-purple-400" />
+              <span className="w-3 h-3 rounded-full bg-[#00a2e8]" />
               <span className="text-sm font-medium text-zinc-700">Natación</span>
             </div>
             <div className="text-right">
@@ -202,7 +202,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
                 {natacion.percentage}%
               </span>
               <span className="text-xs text-zinc-500 block">
-                {natacion.tss} TSS • <strong className="text-purple-700">{weeklyDistance.natacion} m</strong>
+                {natacion.tss} TSS • <strong className="text-[#00a2e8]">{weeklyDistance.natacion} m</strong>
               </span>
             </div>
           </div>

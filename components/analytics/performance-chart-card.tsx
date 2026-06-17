@@ -50,9 +50,9 @@ export function PerformanceChartCard({
   });
 
   // BRAND COLORS
-  const COLOR_CTL = "#38bdf8"; // Swim Blue
-  const COLOR_ATL = "#fb7185"; // Run Red
-  const COLOR_TSB = "#a3e635"; // Bike Green
+  const COLOR_CTL = "#00a2e8"; // Fitness (CTL) - Olympian Blue
+  const COLOR_ATL = "#fb7185"; // Fatigue (ATL) - Pink/Rose
+  const COLOR_TSB = "#ff7e00"; // Form (TSB) - Brand Yellow/Orange
 
   const toggleLine = (lineKey: keyof typeof visibleLines) => {
     setVisibleLines((prev) => ({
