@@ -4,6 +4,7 @@ import * as React from 'react';
 import { ProCard } from '@/components/ui/pro-card';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface WeeklyNavProps {
   workouts: Array<{
@@ -15,9 +16,11 @@ interface WeeklyNavProps {
       day_name: string;
     };
   }>;
+  selectedDateStr: string;
+  onSelectDate: (dateStr: string) => void;
 }
 
-export function WeeklyNav({ workouts }: WeeklyNavProps) {
+export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNavProps) {
   // Generar los 7 días de la semana actual
   const now = new Date();
   const currentDay = now.getDay() || 7; // 1 Lunes ... 7 Domingo
@@ -56,11 +59,12 @@ export function WeeklyNav({ workouts }: WeeklyNavProps) {
   };
 
   return (
-    <ProCard className="p-4 py-6">
+    <ProCard className="p-4 py-6 relative z-10 border-zinc-800 bg-zinc-900/40 backdrop-blur-xl">
       <div className="flex justify-between items-center gap-2 max-w-2xl mx-auto">
         {days.map((d, i) => {
           let complianceClass = '';
           const todayStr = new Date().toISOString().split('T')[0];
+          const isSelected = d.dateStr === selectedDateStr;
 
           if (d.workouts.length > 0) {
             const hasCompleted = d.workouts.some(w => w.status === 'completed');
@@ -78,31 +82,43 @@ export function WeeklyNav({ workouts }: WeeklyNavProps) {
             }
           } else {
             complianceClass = d.isToday 
-              ? 'bg-zinc-800 border border-zinc-700 shadow-lg text-zinc-50' 
-              : 'border border-transparent hover:bg-zinc-900/50 text-zinc-400';
+              ? 'bg-zinc-800/40 border border-zinc-700/80 text-zinc-100 shadow-sm' 
+              : 'border border-transparent hover:bg-zinc-900/30 text-zinc-400';
           }
 
+          const activeClass = isSelected
+            ? 'bg-zinc-900 border-cyan-500/55 shadow-md shadow-cyan-500/5 ring-1 ring-cyan-500/30 text-white'
+            : complianceClass;
+
           return (
-            <div 
+            <button 
               key={i} 
+              onClick={() => onSelectDate(d.dateStr)}
               className={cn(
-                "flex flex-col items-center justify-center p-3 rounded-2xl w-16 transition-all border",
-                complianceClass,
-                d.isToday && "bg-zinc-800 border-zinc-700 shadow-lg"
+                "relative flex flex-col items-center justify-center p-3 rounded-2xl w-16 transition-all border cursor-pointer select-none",
+                activeClass,
+                d.isToday && !isSelected && "bg-zinc-800/40 border-zinc-750 shadow-sm"
               )}
             >
-              <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">
+              {isSelected && (
+                <motion.div
+                  layoutId="activeWeeklyDay"
+                  className="absolute inset-0 bg-zinc-900 border border-cyan-500/40 rounded-2xl -z-10 shadow-sm"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+              <span className="text-[10px] sm:text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1 z-10">
                 {d.dayName}
               </span>
               <span className={cn(
-                "text-lg font-semibold mb-2", 
-                d.isToday ? "text-zinc-50" : "text-zinc-400"
+                "text-lg font-bold mb-2 z-10", 
+                isSelected ? "text-cyan-400" : d.isToday ? "text-zinc-50" : "text-zinc-400"
               )}>
                 {d.dayNum}
               </span>
 
               {/* Dots o Check */}
-              <div className="h-3 flex items-center justify-center gap-1">
+              <div className="h-3 flex items-center justify-center gap-1 z-10">
                 {d.isCompleted ? (
                   <div className="w-4 h-4 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
                     <Check className="w-3 h-3 text-green-400" />
@@ -110,15 +126,15 @@ export function WeeklyNav({ workouts }: WeeklyNavProps) {
                 ) : d.workouts.length > 0 ? (
                   d.workouts.map((w, wIdx) => (
                     <span 
-                      key={wIdx} 
-                      className={cn("w-1.5 h-1.5 rounded-full", sportDotColors[w.training_sessions?.sport_type] || 'bg-zinc-600')} 
+                       key={wIdx} 
+                       className={cn("w-1.5 h-1.5 rounded-full", sportDotColors[w.training_sessions?.sport_type] || 'bg-zinc-650')} 
                     />
                   ))
                 ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-800/50" />
                 )}
               </div>
-            </div>
+            </button>
           );
         })}
       </div>

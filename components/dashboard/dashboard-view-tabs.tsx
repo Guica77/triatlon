@@ -8,14 +8,22 @@ import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
 import { WeeklyNav } from '@/components/dashboard/weekly-nav';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { Calendar, Plus, X, Flame, Sparkles, ChevronLeft, ChevronRight, Activity, Bot } from 'lucide-react';
+import { Calendar, Plus, X, Flame, Sparkles, ChevronLeft, ChevronRight, Activity, Bot, Eye, ListFilter } from 'lucide-react';
 import { AIWorkoutGenerator, GeneratedWorkout } from './ai-workout-generator';
+import { BiometricsCard } from '@/components/dashboard/biometrics-card';
+import { DailyFuelCard } from '@/components/dashboard/daily-fuel-card';
+import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
+import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
+import { cn } from '@/lib/utils';
 
 interface DashboardViewTabsProps {
   initialWorkouts: any[];
   isConnected: boolean;
   profile: any;
   readOnly?: boolean;
+  initialBiometrics?: any;
+  initialNutrition?: any;
+  initialAnalytics?: any;
 }
 
 const sportColors: Record<string, string> = {
@@ -27,7 +35,15 @@ const sportColors: Record<string, string> = {
   descanso: 'bg-zinc-650',
 };
 
-export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, readOnly = false }: DashboardViewTabsProps) {
+export function DashboardViewTabs({ 
+  initialWorkouts = [], 
+  isConnected, 
+  profile, 
+  readOnly = false,
+  initialBiometrics,
+  initialNutrition,
+  initialAnalytics
+}: DashboardViewTabsProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<'semana' | 'mes'>('semana');
   const [isManualModalOpen, setIsManualModalOpen] = React.useState(false);
@@ -55,6 +71,33 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
   const [currentDate, setCurrentDate] = React.useState(new Date());
   const todayStr = new Date().toISOString().split('T')[0];
   const [selectedDateStr, setSelectedDateStr] = React.useState(todayStr);
+
+  // Dynamic States for unified dashboard
+  const [nutritionData, setNutritionData] = React.useState(initialNutrition);
+  const [loadingNutrition, setLoadingNutrition] = React.useState(false);
+  const [viewMode, setViewMode] = React.useState<'focus' | 'all'>('focus');
+
+  // Reactively update nutrition when selected date changes
+  React.useEffect(() => {
+    let active = true;
+    async function updateNutrition() {
+      setLoadingNutrition(true);
+      try {
+        const res = await getDailyNutrition(selectedDateStr);
+        if (active && res && res.data) {
+          setNutritionData(res.data);
+        }
+      } catch (err) {
+        console.error("Error updating nutrition for date:", selectedDateStr, err);
+      } finally {
+        if (active) setLoadingNutrition(false);
+      }
+    }
+    updateNutrition();
+    return () => {
+      active = false;
+    };
+  }, [selectedDateStr]);
 
   // Form states for manual workout logger
   const [formTitle, setFormTitle] = React.useState('');
@@ -181,12 +224,56 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
     ).sort((a, b) => a.scheduled_date.localeCompare(b.scheduled_date));
   };
 
-  const weeklyWorkouts = getWeeklyWorkouts();
-  const selectedDayWorkouts = allWorkouts.filter(w => w.scheduled_date === selectedDateStr);
+  const weeklyWorkouts = getWeeklyWorkouts();  const selectedDayWorkouts = allWorkouts.filter(w => w.scheduled_date === selectedDateStr);
+
+  const progressPercent = React.useMemo(() => {
+    const weeklyWorkouts = allWorkouts.filter(w => {
+      const now = new Date();
+      const currentDay = now.getDay() || 7;
+      const monday = new Date(now);
+      monday.setDate(monday.getDate() - currentDay + 1);
+      monday.setHours(0, 0, 0, 0);
+
+      const sunday = new Date(monday);
+      sunday.setDate(sunday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+
+      const monStr = monday.toISOString().split('T')[0];
+      const sunStr = sunday.toISOString().split('T')[0];
+      return w.scheduled_date >= monStr && w.scheduled_date <= sunStr;
+    });
+
+    const completed = weeklyWorkouts.filter(w => w.status === 'completed').length;
+    const total = weeklyWorkouts.filter(w => w.training_sessions?.sport_type !== 'descanso').length;
+    return total > 0 ? Math.round((completed / total) * 100) : 0;
+  }, [allWorkouts]);
 
   return (
     <div className="space-y-6">
       
+      {/* Sección Biometría, Nutrición y Readiness Dinámica (Actualización Dinámica al cambiar de Día) */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {initialBiometrics && (
+          <div className="h-full">
+            <BiometricsCard initialBiometrics={initialBiometrics} />
+          </div>
+        )}
+        <div className="h-full">
+          <DailyFuelCard 
+            nutritionData={nutritionData} 
+            error={null} 
+            loading={loadingNutrition}
+          />
+        </div>
+        <div className="h-full">
+          <FormStatusWidget 
+            tsb={initialAnalytics?.currentTsb || 0} 
+            athleteLevel={profile?.level}
+            progressPercent={progressPercent}
+          />
+        </div>
+      </section>
+
       {/* Tabs and Quick Actions */}
       <div className="flex justify-between items-center flex-wrap gap-3 pb-2 border-b border-zinc-800/80">
         <div className="flex bg-zinc-950/60 p-1 rounded-xl border border-zinc-800 shadow-inner">
@@ -230,7 +317,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
               className="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-750 text-zinc-300 hover:text-zinc-100 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
               title="Descargar toda la semana en tu Apple Calendar, Google Calendar o Garmin Calendar"
             >
-              <Calendar className="w-3.5 h-3.5 text-orange-450" />
+              <Calendar className="w-3.5 h-3.5 text-orange-455" />
               <span className="hidden sm:inline">Exportar Semana (.ICS)</span>
               <span className="inline sm:hidden">.ICS</span>
             </a>
@@ -264,55 +351,113 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
         <div className={activeTab === 'semana' ? 'block' : 'hidden'}>
           <div className="space-y-6 animate-fade-in">
             {/* Weekly navigation component */}
-            <WeeklyNav workouts={weeklyWorkouts} />
+            <WeeklyNav 
+              workouts={weeklyWorkouts}
+              selectedDateStr={selectedDateStr}
+              onSelectDate={setSelectedDateStr}
+            />
 
             {/* Weekly Workout list */}
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
-                  <Flame className="w-4 h-4 text-amber-500" /> Entrenamientos Planificados
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-550 flex items-center gap-1.5">
+                  <Flame className="w-4 h-4 text-amber-500" />
+                  {viewMode === 'focus' ? 'Sesión del Día Seleccionado' : 'Entrenamientos Planificados de la Semana'}
                 </h2>
-                <span className="text-xs text-zinc-400">Esta Semana</span>
+                
+                {/* Selector de modo de vista */}
+                <div className="flex bg-zinc-950/40 p-1 rounded-lg border border-zinc-900 text-[10px] font-bold shrink-0">
+                  <button
+                    onClick={() => setViewMode('focus')}
+                    className={cn(
+                      "px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-1",
+                      viewMode === 'focus' ? "bg-zinc-800 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"
+                    )}
+                  >
+                    <Eye className="w-3 h-3" />
+                    Día Seleccionado
+                  </button>
+                  <button
+                    onClick={() => setViewMode('all')}
+                    className={cn(
+                      "px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-1",
+                      viewMode === 'all' ? "bg-zinc-800 text-cyan-400" : "text-zinc-500 hover:text-zinc-300"
+                    )}
+                  >
+                    <ListFilter className="w-3 h-3" />
+                    Toda la Semana
+                  </button>
+                </div>
               </div>
 
-              {weeklyWorkouts.length > 0 ? (
-                weeklyWorkouts.map(w => {
-                  const isToday = w.scheduled_date === todayStr;
-                  const tomorrow = new Date();
-                  tomorrow.setDate(tomorrow.getDate() + 1);
-                  const tomorrowStr = tomorrow.toISOString().split('T')[0];
-                  const isTomorrow = w.scheduled_date === tomorrowStr;
-
-                  return (
-                    <div key={w.id} className={isToday ? "ring-2 ring-cyan-500/30 rounded-2xl p-0.5" : ""}>
-                      {isToday && (
-                        <div className="px-4 py-1.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-cyan-500/20">
-                          Hoy
-                        </div>
-                      )}
-                      {isTomorrow && (
-                        <div className="px-4 py-1.5 bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-zinc-700/30">
-                          Mañana
-                        </div>
-                      )}
-                      <DailyWorkoutCard
-                        workout={w}
-                        initialIsConnected={isConnected}
-                        virtualGarage={profile?.virtual_garage || []}
-                        athleteLevel={profile?.level}
-                        readOnly={readOnly}
-                        sweatRate={profile?.sweat_rate}
-                        customCarbsPerHour={profile?.custom_carbs_per_hour}
-                        preferredIngredients={profile?.preferred_ingredients || []}
-                      />
+              {viewMode === 'focus' ? (
+                selectedDayWorkouts.length > 0 ? (
+                  selectedDayWorkouts.map(w => (
+                    <DailyWorkoutCard
+                      key={w.id}
+                      workout={w}
+                      initialIsConnected={isConnected}
+                      virtualGarage={profile?.virtual_garage || []}
+                      athleteLevel={profile?.level}
+                      readOnly={readOnly}
+                      sweatRate={profile?.sweat_rate}
+                      customCarbsPerHour={profile?.custom_carbs_per_hour}
+                      preferredIngredients={profile?.preferred_ingredients || []}
+                    />
+                  ))
+                ) : (
+                  <div className="p-8 rounded-2xl bg-zinc-900/10 border border-dashed border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group">
+                    <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform duration-500">
+                      <Sparkles className="w-5 h-5" />
                     </div>
-                  );
-                })
+                    <div className="space-y-1">
+                      <p className="text-sm font-bold text-zinc-300">Día de Recuperación Activa</p>
+                      <p className="text-xs text-zinc-500 max-w-[250px] mx-auto leading-relaxed">
+                        No hay entrenamientos de alta intensidad. Aprovecha para descansar o estirar 15 minutos.
+                      </p>
+                    </div>
+                  </div>
+                )
               ) : (
-                <ProCard className="text-center py-12 bg-zinc-900/30">
-                  <Activity className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
-                  <p className="text-sm font-medium text-zinc-300">No hay sesiones planificadas para esta semana</p>
-                </ProCard>
+                weeklyWorkouts.length > 0 ? (
+                  weeklyWorkouts.map(w => {
+                    const isToday = w.scheduled_date === todayStr;
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+                    const isTomorrow = w.scheduled_date === tomorrowStr;
+
+                    return (
+                      <div key={w.id} className={isToday ? "ring-2 ring-cyan-500/30 rounded-2xl p-0.5" : ""}>
+                        {isToday && (
+                          <div className="px-4 py-1.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-cyan-500/20">
+                            Hoy
+                          </div>
+                        )}
+                        {isTomorrow && (
+                          <div className="px-4 py-1.5 bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-zinc-700/30">
+                            Mañana
+                          </div>
+                        )}
+                        <DailyWorkoutCard
+                          workout={w}
+                          initialIsConnected={isConnected}
+                          virtualGarage={profile?.virtual_garage || []}
+                          athleteLevel={profile?.level}
+                          readOnly={readOnly}
+                          sweatRate={profile?.sweat_rate}
+                          customCarbsPerHour={profile?.custom_carbs_per_hour}
+                          preferredIngredients={profile?.preferred_ingredients || []}
+                        />
+                      </div>
+                    );
+                  })
+                ) : (
+                  <ProCard className="text-center py-12 bg-zinc-900/30">
+                    <Activity className="w-8 h-8 text-zinc-650 mx-auto mb-2" />
+                    <p className="text-sm font-medium text-zinc-350">No hay sesiones planificadas para esta semana</p>
+                  </ProCard>
+                )
               )}
             </div>
           </div>

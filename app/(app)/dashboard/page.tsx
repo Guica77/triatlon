@@ -248,32 +248,13 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Sección Biometría, Nutrición y Readiness (Estilo Oura/Whoop/INDYA) */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {biometrics && (
-            <div className="h-full">
-              <BiometricsCard initialBiometrics={biometrics} />
-            </div>
-          )}
-          <div className="h-full">
-            <DailyFuelCard 
-              nutritionData={nutritionData} 
-              error={nutritionError} 
-            />
-          </div>
-          <div className="h-full">
-            <FormStatusWidget 
-              tsb={analyticsData.currentTsb} 
-              athleteLevel={profile.level}
-              progressPercent={progressPercent}
-            />
-          </div>
-        </section>
-
         <DashboardViewTabs 
           initialWorkouts={workouts || []} 
           isConnected={isConnected} 
-          profile={profile} 
+          profile={profile}
+          initialBiometrics={biometrics}
+          initialNutrition={nutritionData}
+          initialAnalytics={analyticsData}
         />
 
         {/* Historial de Actividades Recientes de Strava (Sólo si está conectado) */}
