@@ -5,19 +5,22 @@ import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/(app)/dashboard/
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info, Droplet, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
 import { GymTrackerModal } from '@/components/workouts/gym-tracker-modal';
 import Link from 'next/link';
 import { WatchSyncModal } from '@/components/dashboard/watch-sync-modal';
+import { calculateSessionPacing } from '@/lib/nutrition-utility';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
   virtualGarage?: string[];
   athleteLevel?: string;
   readOnly?: boolean;
+  sweatRate?: number | null;
+  customCarbsPerHour?: number | null;
   workout: {
     id: string;
     scheduled_date: string;
@@ -184,16 +187,22 @@ const localFormatCondition = (condition: string, value?: number) => {
   return '';
 };
 
-export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio', readOnly = false }: WorkoutCardProps) {
+export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio', readOnly = false, sweatRate = 0.8, customCarbsPerHour }: WorkoutCardProps) {
   const [status, setStatus] = React.useState(workout.status);
   const [loading, setLoading] = React.useState(false);
-  const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry'>('main');
+  const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry' | 'nutrition'>('main');
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
   const [isGymModeOpen, setIsGymModeOpen] = React.useState(false);
   const [isSyncingOpen, setIsSyncingOpen] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
 
   const session = workout.training_sessions;
+  const pacing = calculateSessionPacing(
+    session?.sport_type || 'descanso',
+    session?.duration_min || 0,
+    sweatRate || 0.8,
+    customCarbsPerHour
+  );
   const isCompleted = status === 'completed';
   const isMissed = status === 'missed';
 
@@ -410,6 +419,17 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               <Dumbbell className="w-3.5 h-3.5" />
               <span>Material</span>
             </button>
+            <button
+              onClick={() => setActiveTab('nutrition')}
+              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                activeTab === 'nutrition' 
+                  ? 'bg-zinc-900 text-emerald-400 border border-zinc-800 shadow-sm font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Nutrición ⚡</span>
+            </button>
             {telemetry && (
               <button
                 onClick={() => setActiveTab('telemetry')}
@@ -430,10 +450,10 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, y: 4 }}
+                initial={{ opacity: 0, y: 2 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.15 }}
+                exit={{ opacity: 0, y: -2 }}
+                transition={{ duration: 0.08, ease: 'easeOut' }}
                 className="text-sm text-zinc-300 leading-relaxed font-normal w-full"
               >
                 {activeTab === 'main' && (
@@ -559,6 +579,72 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                         </span>
                       </div>
                     )}
+                  </div>
+                )}
+                {activeTab === 'nutrition' && (
+                  <div className="space-y-4 w-full">
+                    <div>
+                      <p className="font-semibold text-emerald-400 mb-2 flex items-center gap-1.5 text-xs tracking-wide uppercase">
+                        <Sparkles className="w-4 h-4 text-emerald-400" /> Estrategia de Nutrición y Pacing:
+                      </p>
+                      
+                      {session?.sport_type === 'descanso' ? (
+                        <p className="text-zinc-350 text-sm leading-relaxed bg-zinc-900/40 border border-zinc-805 p-3.5 rounded-xl">
+                          Hoy es día de descanso y asimilación. Concéntrate en mantenerte hidratado con agua y seguir tu plan de macros base. No requieres suplementación específica de pacing.
+                        </p>
+                      ) : (
+                        <div className="space-y-4">
+                          {/* Grid de 3 Pilares */}
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {/* Hidratación */}
+                            <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800/80 flex flex-col justify-between">
+                              <span className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider flex items-center gap-1">
+                                <Droplet className="w-3.5 h-3.5 text-cyan-400" /> Hidratación
+                              </span>
+                              <div className="mt-2">
+                                <span className="text-lg font-extrabold text-zinc-50">{pacing.hourlyFluidMl}</span>
+                                <span className="text-xs text-zinc-400 font-medium"> ml/h</span>
+                              </div>
+                              <span className="text-[10px] text-zinc-550 mt-1.5 block">Total: {pacing.totalFluidMl} ml</span>
+                            </div>
+
+                            {/* Electrolitos (Sodio) */}
+                            <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800/80 flex flex-col justify-between">
+                              <span className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider flex items-center gap-1">
+                                <Activity className="w-3.5 h-3.5 text-amber-400" /> Sodio
+                              </span>
+                              <div className="mt-2">
+                                <span className="text-lg font-extrabold text-zinc-50">{pacing.hourlySodiumMg}</span>
+                                <span className="text-xs text-zinc-400 font-medium"> mg/h</span>
+                              </div>
+                              <span className="text-[10px] text-zinc-550 mt-1.5 block">Total: {pacing.totalSodiumMg} mg</span>
+                            </div>
+
+                            {/* Carbohidratos */}
+                            <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800/80 flex flex-col justify-between">
+                              <span className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider flex items-center gap-1">
+                                <Zap className="w-3.5 h-3.5 text-rose-400" /> Carbohidratos
+                              </span>
+                              <div className="mt-2">
+                                <span className="text-lg font-extrabold text-zinc-50">{pacing.hourlyCarbsG}</span>
+                                <span className="text-xs text-zinc-400 font-medium"> g/h</span>
+                              </div>
+                              <span className="text-[10px] text-zinc-550 mt-1.5 block">Total: {pacing.totalCarbsG} g</span>
+                            </div>
+                          </div>
+
+                          {/* Guía Práctica de Suplementación */}
+                          <div className="p-3.5 rounded-xl bg-emerald-950/10 border border-emerald-500/15">
+                            <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                              💼 Pack del Entrenamiento
+                            </span>
+                            <p className="text-xs text-zinc-300 leading-relaxed mt-1.5">
+                              {pacing.practicalGuide}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
                 {activeTab === 'telemetry' && telemetry && (

@@ -229,3 +229,32 @@ export async function updateSubscriptionStatus(status: 'free' | 'pro' | 'coach')
   
   return { success: true };
 }
+
+export async function updateNutritionSettings(data: {
+  custom_carbs_per_hour: number | null;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'No autorizado' };
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      custom_carbs_per_hour: data.custom_carbs_per_hour,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', user.id);
+
+  if (error) {
+    console.error('Error updating nutrition settings:', error);
+    return { error: 'Error al actualizar la configuración de nutrición' };
+  }
+
+  revalidatePath('/settings');
+  revalidatePath('/dashboard');
+  
+  return { success: true };
+}

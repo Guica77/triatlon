@@ -261,7 +261,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
 
       {/* Main View Area */}
       <div>
-        {activeTab === 'semana' ? (
+        <div className={activeTab === 'semana' ? 'block' : 'hidden'}>
           <div className="space-y-6 animate-fade-in">
             {/* Weekly navigation component */}
             <WeeklyNav workouts={weeklyWorkouts} />
@@ -301,6 +301,8 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                         virtualGarage={profile?.virtual_garage || []}
                         athleteLevel={profile?.level}
                         readOnly={readOnly}
+                        sweatRate={profile?.sweat_rate}
+                        customCarbsPerHour={profile?.custom_carbs_per_hour}
                       />
                     </div>
                   );
@@ -313,7 +315,8 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
               )}
             </div>
           </div>
-        ) : (
+        </div>
+        <div className={activeTab === 'mes' ? 'block' : 'hidden'}>
           <div className="space-y-6 animate-fade-in">
             {/* Monthly Calendar View */}
             <ProCard className="p-5">
@@ -451,6 +454,8 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
                     virtualGarage={profile?.virtual_garage || []}
                     athleteLevel={profile?.level}
                     readOnly={readOnly}
+                    sweatRate={profile?.sweat_rate}
+                    customCarbsPerHour={profile?.custom_carbs_per_hour}
                   />
                 ))
               ) : (
@@ -468,7 +473,7 @@ export function DashboardViewTabs({ initialWorkouts = [], isConnected, profile, 
               )}
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Manual Workout Logger Modal */}

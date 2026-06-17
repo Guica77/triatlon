@@ -4,7 +4,9 @@ import { redirect } from 'next/navigation';
 import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
 import { WeeklyNav } from '@/components/dashboard/weekly-nav';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
+import { DailyFuelCard } from '@/components/dashboard/daily-fuel-card';
 import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
+import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
 import { ProCard } from '@/components/ui/pro-card';
@@ -20,6 +22,7 @@ import { PushNotificationManager } from '@/components/chat/push-notification-man
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
+  const now = new Date();
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -59,6 +62,10 @@ export default async function DashboardPage() {
   // 1.5 Obtener Biometría del Día (con auto-simulación inicial)
   const { data: biometrics } = await getDailyBiometrics();
 
+  // 1.5.5 Obtener Nutrición Deportiva Dinámica (Estilo INDYA)
+  const todayStr = now.toISOString().split('T')[0];
+  const { data: nutritionData, error: nutritionError } = await getDailyNutrition(todayStr);
+
   // 1.6 Obtener Datos PMC para el FormStatusWidget
   const analyticsData = await getAnalyticsDashboardData();
 
@@ -70,7 +77,6 @@ export default async function DashboardPage() {
   const isConnected = Boolean(profile.garmin_connected || profile.strava_connected || (devices && devices.length > 0));
 
   // 2. Obtener entrenamientos del mes en curso (rango completo de calendario)
-  const now = new Date();
   
   // Calcular primer día del mes actual, y luego retroceder al Lunes de esa semana
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -242,13 +248,19 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Sección Biometría y Readiness (Estilo Oura/Whoop) */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Sección Biometría, Nutrición y Readiness (Estilo Oura/Whoop/INDYA) */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {biometrics && (
             <div className="h-full">
               <BiometricsCard initialBiometrics={biometrics} />
             </div>
           )}
+          <div className="h-full">
+            <DailyFuelCard 
+              nutritionData={nutritionData} 
+              error={nutritionError} 
+            />
+          </div>
           <div className="h-full">
             <FormStatusWidget 
               tsb={analyticsData.currentTsb} 

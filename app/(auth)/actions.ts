@@ -74,7 +74,7 @@ export async function loginAthlete(formData: FormData) {
         coach_id: inviteCoachId,
         athlete_id: session.user.id,
         status: 'active'
-      }).catch(() => {}); // Ignore duplicate
+      }); // Ignore duplicate
       await supabaseAdmin.from('profiles').update({ coach_id: inviteCoachId }).eq('id', session.user.id);
       cookieStore.delete('invite_coach_id');
     }
@@ -133,7 +133,7 @@ export async function registerAthlete(formData: FormData) {
         coach_id: inviteCoachId,
         athlete_id: authData.user.id,
         status: 'active'
-      }).catch(() => {});
+      });
       await supabaseAdmin.from('profiles').update({ coach_id: inviteCoachId }).eq('id', authData.user.id);
       cookieStore.delete('invite_coach_id');
     }

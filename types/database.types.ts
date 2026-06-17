@@ -255,6 +255,13 @@ export type Database = {
           role: string | null
           email: string | null
           push_subscriptions: Json | null
+          sweat_rate: number | null
+          sweat_test_weight_before: number | null
+          sweat_test_weight_after: number | null
+          sweat_test_fluid_intake: number | null
+          sweat_test_duration_min: number | null
+          custom_carbs_per_hour: number | null
+          invite_code: string | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -294,6 +301,13 @@ export type Database = {
           role?: string | null
           email?: string | null
           push_subscriptions?: Json | null
+          sweat_rate?: number | null
+          sweat_test_weight_before?: number | null
+          sweat_test_weight_after?: number | null
+          sweat_test_fluid_intake?: number | null
+          sweat_test_duration_min?: number | null
+          custom_carbs_per_hour?: number | null
+          invite_code?: string | null
         }
         Update: {
           active_plan_id?: string | null
@@ -333,6 +347,13 @@ export type Database = {
           role?: string | null
           email?: string | null
           push_subscriptions?: Json | null
+          sweat_rate?: number | null
+          sweat_test_weight_before?: number | null
+          sweat_test_weight_after?: number | null
+          sweat_test_fluid_intake?: number | null
+          sweat_test_duration_min?: number | null
+          custom_carbs_per_hour?: number | null
+          invite_code?: string | null
         }
         Relationships: [
           {

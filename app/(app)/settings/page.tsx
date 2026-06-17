@@ -9,6 +9,7 @@ import { PhysiologicalCard } from '@/components/settings/physiological-card';
 import { TelemetryConnectCard } from '@/components/settings/telemetry-connect-card';
 import { BillingCard } from '@/components/settings/billing-card';
 import { NotificationTestCard } from '@/components/settings/notification-test-card';
+import { SweatTestCard } from '@/components/settings/sweat-test-card';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -82,15 +83,27 @@ export default async function SettingsPage() {
             />
           </div>
 
-          {/* Right Column: Physiological and Virtual Garage Grid */}
+          {/* Right Column: Physiological, Sweat Test and Tech Integrations */}
           <div className="lg:col-span-2 flex flex-col gap-6">
-            <div className="flex-1">
-              <PhysiologicalCard 
-                ftp={profile.current_ftp}
-                swimPace={profile.current_swim_pace}
-                runPace={profile.current_run_pace}
-                baselineHours={profile.baseline_training_hours}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="h-full">
+                <PhysiologicalCard 
+                  ftp={profile.current_ftp}
+                  swimPace={profile.current_swim_pace}
+                  runPace={profile.current_run_pace}
+                  baselineHours={profile.baseline_training_hours}
+                />
+              </div>
+              <div className="h-full">
+                <SweatTestCard 
+                  sweatRate={profile.sweat_rate}
+                  weightBefore={profile.sweat_test_weight_before}
+                  weightAfter={profile.sweat_test_weight_after}
+                  fluidIntake={profile.sweat_test_fluid_intake}
+                  durationMin={profile.sweat_test_duration_min}
+                  customCarbsPerHour={profile.custom_carbs_per_hour}
+                />
+              </div>
             </div>
             
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-6">

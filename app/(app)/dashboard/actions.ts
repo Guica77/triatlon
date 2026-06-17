@@ -154,13 +154,14 @@ export async function completeWorkoutWithFeedback(workoutId: string, rpe: number
 
   // Guardar feedback en BD
   const { error } = await supabase
-    .from('user_workouts')
-    .update({ 
-      rpe,
-      coach_notes: notes || null
+    .from('workout_feedback')
+    .insert({ 
+      workout_id: workoutId,
+      user_id: user.id,
+      rpe_score: rpe,
+      notes: notes || null,
+      feeling: 'neutral'
     })
-    .eq('id', workoutId)
-    .eq('user_id', user.id)
 
   if (error) {
     console.error("Error guardando feedback:", error)
@@ -173,8 +174,7 @@ export async function completeWorkoutWithFeedback(workoutId: string, rpe: number
     await adminSupabase.from('chat_messages').insert({
       sender_id: user.id,
       receiver_id: profile.coach_id,
-      message: `¡Entrenamiento completado! 🎯\nEsfuerzo percibido (RPE): ${rpe}/10\n${notes ? `\nNotas: ${notes}` : ''}`,
-      is_read: false
+      message: `¡Entrenamiento completado! 🎯\nEsfuerzo percibido (RPE): ${rpe}/10\n${notes ? `\nNotas: ${notes}` : ''}`
     });
   }
 
