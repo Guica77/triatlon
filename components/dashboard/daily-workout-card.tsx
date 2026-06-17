@@ -777,9 +777,9 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                 </span>
                               </div>
                               <div className="h-2 w-full rounded-full bg-zinc-900 overflow-hidden flex">
-                                <div style={{ width: `${durationMin >= 60 ? 55 : 15}%` }} className="bg-cyan-500 h-full transition-all" />
-                                <div style={{ width: `${durationMin >= 60 ? 30 : 60}%` }} className="bg-purple-500 h-full transition-all" />
-                                <div style={{ width: `${durationMin >= 60 ? 15 : 25}%` }} className="bg-amber-500 h-full transition-all" />
+                                <div className={`bg-cyan-500 h-full transition-all ${durationMin >= 60 ? 'w-[55%]' : 'w-[15%]'}`} />
+                                <div className={`bg-purple-500 h-full transition-all ${durationMin >= 60 ? 'w-[30%]' : 'w-[60%]'}`} />
+                                <div className={`bg-amber-500 h-full transition-all ${durationMin >= 60 ? 'w-[15%]' : 'w-[25%]'}`} />
                               </div>
                               <div className="flex gap-4 text-[9px] text-zinc-450 font-medium">
                                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> Carbohidratos</span>
