@@ -381,71 +381,113 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
         <div className="space-y-4 relative z-10">
           
           {/* Navegación de Pestañas (Segmented Control Estilo Premium) */}
-          <div className="bg-zinc-950/60 p-1 rounded-xl border border-zinc-800/60 flex items-center gap-1 overflow-x-auto scrollbar-none">
+          <div className="bg-zinc-950/60 p-1 rounded-xl border border-zinc-800/60 flex items-center gap-1 overflow-x-auto scrollbar-none relative">
             <button
               onClick={() => setActiveTab('main')}
-              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              className={`relative flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer z-10 ${
                 activeTab === 'main' 
-                  ? 'bg-zinc-900 text-cyan-400 border border-zinc-800 shadow-sm font-bold' 
-                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+                  ? 'text-cyan-400 font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
+              {activeTab === 'main' && (
+                <motion.div
+                  layoutId={`activeTabPill-${workout.id}`}
+                  className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-lg -z-10 shadow-sm"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
               <Target className="w-3.5 h-3.5" />
               <span>Bloque Principal</span>
             </button>
             <button
               onClick={() => setActiveTab('warmup')}
-              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              className={`relative flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer z-10 ${
                 activeTab === 'warmup' 
-                  ? 'bg-zinc-900 text-amber-400 border border-zinc-800 shadow-sm font-bold' 
-                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+                  ? 'text-amber-400 font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
+              {activeTab === 'warmup' && (
+                <motion.div
+                  layoutId={`activeTabPill-${workout.id}`}
+                  className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-lg -z-10 shadow-sm"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
               <Flame className="w-3.5 h-3.5" />
               <span>Calentamiento</span>
             </button>
             <button
               onClick={() => setActiveTab('cooldown')}
-              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              className={`relative flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer z-10 ${
                 activeTab === 'cooldown' 
-                  ? 'bg-zinc-900 text-blue-400 border border-zinc-800 shadow-sm font-bold' 
-                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+                  ? 'text-blue-400 font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
+              {activeTab === 'cooldown' && (
+                <motion.div
+                  layoutId={`activeTabPill-${workout.id}`}
+                  className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-lg -z-10 shadow-sm"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
               <Wind className="w-3.5 h-3.5" />
               <span>Enfriamiento</span>
             </button>
             <button
               onClick={() => setActiveTab('gear')}
-              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              className={`relative flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer z-10 ${
                 activeTab === 'gear' 
-                  ? 'bg-zinc-900 text-purple-400 border border-zinc-800 shadow-sm font-bold' 
-                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+                  ? 'text-purple-400 font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
+              {activeTab === 'gear' && (
+                <motion.div
+                  layoutId={`activeTabPill-${workout.id}`}
+                  className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-lg -z-10 shadow-sm"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
               <Dumbbell className="w-3.5 h-3.5" />
               <span>Material</span>
             </button>
             <button
               onClick={() => setActiveTab('nutrition')}
-              className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              className={`relative flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer z-10 ${
                 activeTab === 'nutrition' 
-                  ? 'bg-zinc-900 text-emerald-400 border border-zinc-800 shadow-sm font-bold' 
-                  : 'text-zinc-400 hover:text-zinc-250 hover:bg-zinc-900/30 border border-transparent'
+                  ? 'text-emerald-400 font-bold' 
+                  : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
+              {activeTab === 'nutrition' && (
+                <motion.div
+                  layoutId={`activeTabPill-${workout.id}`}
+                  className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-lg -z-10 shadow-sm"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
               <span>Nutrición ⚡</span>
             </button>
             {telemetry && (
               <button
                 onClick={() => setActiveTab('telemetry')}
-                className={`flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                className={`relative flex-1 min-w-[100px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer z-10 ${
                   activeTab === 'telemetry' 
-                    ? 'bg-green-500/10 text-green-400 border border-green-500/20 shadow-sm font-bold' 
-                    : 'text-green-550 hover:text-green-400 hover:bg-green-500/5'
+                    ? 'text-green-400 font-bold' 
+                    : 'text-zinc-400 hover:text-zinc-200'
                 }`}
               >
+                {activeTab === 'telemetry' && (
+                  <motion.div
+                    layoutId={`activeTabPill-${workout.id}`}
+                    className="absolute inset-0 bg-zinc-900 border border-zinc-800 rounded-lg -z-10 shadow-sm"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
                 <Watch className="w-3.5 h-3.5" />
                 <span>Telemetría</span>
               </button>
