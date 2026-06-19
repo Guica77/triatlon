@@ -154,6 +154,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
               {!isGenerating && (
                 <button 
                   onClick={onClose}
+                  title="Cerrar"
                   className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition"
                 >
                   <X className="w-4 h-4" />

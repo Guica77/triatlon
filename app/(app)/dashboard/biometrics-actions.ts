@@ -56,7 +56,7 @@ export async function calculateReadiness(
   }
 }
 
-export async function getDailyBiometrics(): Promise<{ data?: DailyBiometrics; error?: string }> {
+export async function getDailyBiometrics(): Promise<{ data?: DailyBiometrics; history?: any[]; error?: string }> {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -67,16 +67,21 @@ export async function getDailyBiometrics(): Promise<{ data?: DailyBiometrics; er
   const today = new Date().toISOString().split('T')[0]
 
   try {
-    const { data: existing, error: fetchError } = await supabase
+    const { data: existing } = await supabase
       .from('user_biometrics')
       .select('*')
       .eq('user_id', user.id)
       .eq('date', today)
       .single()
 
-    if (existing) {
-      return { data: existing }
-    }
+    const { data: history } = await supabase
+      .from('user_biometrics')
+      .select('date, hrv, rhr, sleep_hours, readiness_score')
+      .eq('user_id', user.id)
+      .order('date', { ascending: false })
+      .limit(7)
+
+    const cronHistory = history ? [...history].reverse() : []
 
     // Retornar objeto vacío puesto a cero para el día de hoy (sin guardar en base de datos)
     const defaultBiometrics: DailyBiometrics = {
@@ -92,7 +97,7 @@ export async function getDailyBiometrics(): Promise<{ data?: DailyBiometrics; er
       readiness_score: null,
     }
 
-    return { data: defaultBiometrics }
+    return { data: existing || defaultBiometrics, history: cronHistory }
   } catch (err: any) {
     console.error("Excepción en getDailyBiometrics:", err)
     return { error: err.message || "Error al obtener biometría" }

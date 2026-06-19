@@ -60,7 +60,9 @@ export default async function DashboardPage() {
   const activePlan = profile.training_plans;
 
   // 1.5 Obtener Biometría del Día (con auto-simulación inicial)
-  const { data: biometrics } = await getDailyBiometrics();
+  const biometricsRes = await getDailyBiometrics();
+  const biometrics = biometricsRes.data || null;
+  const biometricsHistory = biometricsRes.history || [];
 
   // 1.5.5 Obtener Nutrición Deportiva Dinámica (Estilo INDYA)
   const todayStr = now.toISOString().split('T')[0];
@@ -141,51 +143,51 @@ export default async function DashboardPage() {
       )}
       
       {/* Upper Deck (Bento Header / Doble Nivel) */}
-      <header className="sticky top-0 z-50 bg-[var(--color-background)]/90 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm transition-all duration-300">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-sm transition-all duration-300">
         {/* Nivel 1: Fila Superior (Identidad del Atleta y Salida) */}
-        <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-900/50">
+        <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-100">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-inner shrink-0 group hover:border-cyan-500/40 transition-colors">
-              <Trophy className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform duration-300" />
+            <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-sm shrink-0 group hover:border-cyan-500/40 transition-colors">
+              <Trophy className="w-4 h-4 text-cyan-500 group-hover:scale-110 transition-transform duration-300" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base font-semibold text-zinc-50 truncate tracking-tight">{activePlan?.name || 'Plan de Entrenamiento'}</h1>
-              <p className="text-xs text-zinc-400 capitalize truncate flex items-center gap-1.5 mt-0.5">
+              <h1 className="text-base font-bold text-zinc-850 truncate tracking-tight">{activePlan?.name || 'Plan de Entrenamiento'}</h1>
+              <p className="text-xs text-zinc-500 font-semibold truncate flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse shrink-0"></span>
                 Atleta: {profile.first_name || 'Triatleta'} • Nivel {profile.level}
                 {coachProfile && (
-                  <span className="text-cyan-400 ml-1 font-medium">• Entrenador: {coachProfile.first_name} {coachProfile.last_name}</span>
+                  <span className="text-cyan-500 ml-1 font-bold">• Entrenador: {coachProfile.first_name} {coachProfile.last_name}</span>
                 )}
               </p>
             </div>
           </div>
 
           <form action="/auth/signout" method="post" className="shrink-0 ml-3">
-            <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all duration-200 border border-transparent hover:border-red-500/20">
+            <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-450 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200 border border-transparent hover:border-red-100">
               <LogOut className="w-4 h-4" />
             </AnimatedButton>
           </form>
         </div>
 
         {/* Nivel 2: Fila Inferior (Barra de Píldoras de Acción / Quick Actions) */}
-        <div className="px-6 py-2.5 bg-zinc-950/60 flex items-center gap-2 overflow-x-auto scrollbar-none border-t border-zinc-900/30">
+        <div className="px-6 py-2.5 bg-zinc-50/50 flex items-center gap-2 overflow-x-auto scrollbar-none border-t border-zinc-100">
           <Link href="/principiantes" className="shrink-0">
-            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-emerald-500/30 bg-emerald-500/10 flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/20 shadow-sm transition-all duration-200">
+            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-emerald-500/20 bg-emerald-500/10 flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/20 shadow-sm transition-all duration-200">
               <BookOpen className="w-3.5 h-3.5" />
-              <span className="font-medium">Zona Principiantes</span>
+              <span className="font-semibold">Zona Principiantes</span>
             </AnimatedButton>
           </Link>
 
           <Link href="/analytics" className="shrink-0">
-            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-800 bg-zinc-900/60 flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 hover:bg-zinc-800/60 transition-all duration-200">
+            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-cyan-500/20 bg-cyan-500/10 flex items-center gap-1.5 text-cyan-600 hover:text-cyan-700 hover:bg-cyan-500/20 transition-all duration-200">
               <BarChart2 className="w-3.5 h-3.5" />
-              <span className="font-medium">Analíticas</span>
+              <span className="font-semibold">Analíticas</span>
             </AnimatedButton>
           </Link>
           <Link href="/settings" className="shrink-0">
-            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800/60 transition-all duration-200 flex items-center gap-1.5">
+            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-650 hover:text-zinc-800 hover:bg-zinc-50 transition-all duration-200 flex items-center gap-1.5">
               <Settings className="w-3.5 h-3.5" />
-              <span className="font-medium">Ajustes y Perfil</span>
+              <span className="font-semibold">Ajustes y Perfil</span>
             </AnimatedButton>
           </Link>
         </div>
@@ -228,21 +230,21 @@ export default async function DashboardPage() {
 
         {/* Barra de Telemetría Activa (Sólo si está conectado, sin botón manual de forzado) */}
         {isConnected && (
-          <div className="p-4 rounded-2xl bg-orange-500/5 border border-orange-500/15 flex items-center justify-between gap-4">
+          <div className="p-4 rounded-2xl bg-cyan-50/50 border border-cyan-100 flex items-center justify-between gap-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600 shrink-0">
                 <Activity className="w-4 h-4 animate-pulse" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-zinc-100">Telemetría Activa (Auto 24/7)</span>
-                  <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 text-[9px] font-bold border border-green-500/20">Sincronización Pasiva</span>
+                  <span className="text-xs font-bold text-zinc-850">Telemetría Activa (Auto 24/7)</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-bold border border-emerald-150">Sincronización Pasiva</span>
                 </div>
-                <p className="text-[10px] text-zinc-400 mt-0.5">Tus actividades se marcan como hechas y se sincronizan al instante en cuanto se detectan en Strava.</p>
+                <p className="text-[10px] text-zinc-500 mt-0.5">Tus actividades se marcan como hechas y se sincronizan al instante en cuanto se detectan en Strava.</p>
               </div>
             </div>
-            <div className="flex items-center gap-1 shrink-0 bg-black/30 px-3 py-1.5 rounded-lg border border-zinc-800 text-[10px] text-zinc-300 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            <div className="flex items-center gap-1 shrink-0 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-150 text-[10px] text-emerald-700 font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Conexión Activa
             </div>
           </div>
@@ -253,6 +255,7 @@ export default async function DashboardPage() {
           isConnected={isConnected} 
           profile={profile}
           initialBiometrics={biometrics}
+          initialBiometricsHistory={biometricsHistory}
           initialNutrition={nutritionData}
           initialAnalytics={analyticsData}
         />

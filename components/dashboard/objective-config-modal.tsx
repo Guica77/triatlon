@@ -115,6 +115,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
         >
           <button 
             onClick={onClose}
+            title="Cerrar"
             className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-zinc-550 hover:text-zinc-800 transition-colors"
           >
             <X className="w-4 h-4" />

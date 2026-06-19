@@ -116,6 +116,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
           {/* Botón Cerrar */}
           <button
             onClick={onClose}
+            title="Cerrar"
             className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800 transition-colors"
           >
             <X className="w-5 h-5" />

@@ -223,6 +223,7 @@ export function ActivitiesFeed() {
                       href={`https://www.strava.com/activities/${act.id}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      title="Ver actividad en Strava"
                       className="w-7 h-7 rounded-md bg-zinc-50 hover:bg-zinc-100 flex items-center justify-center text-zinc-500 hover:text-zinc-800 border border-zinc-200 transition-colors"
                     >
                       <ExternalLink className="w-3 h-3" />

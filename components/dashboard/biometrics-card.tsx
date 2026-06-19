@@ -6,13 +6,15 @@ import { AnimatedButton } from '@/components/ui/animated-button'
 import { Activity, Moon, Heart, Settings, Flame, Brain } from 'lucide-react'
 import { DailyBiometrics, updateBiometrics, calculateReadiness } from '@/app/(app)/dashboard/biometrics-actions'
 import { BiometricsModal } from '@/components/dashboard/biometrics-modal'
+import { motion } from 'framer-motion'
  
 interface BiometricsCardProps {
   initialBiometrics: DailyBiometrics
+  initialBiometricsHistory?: any[]
   readOnly?: boolean
 }
  
-export function BiometricsCard({ initialBiometrics, readOnly = false }: BiometricsCardProps) {
+export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [], readOnly = false }: BiometricsCardProps) {
   const [biometrics, setBiometrics] = React.useState<DailyBiometrics>(initialBiometrics)
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [statusLabels, setStatusLabels] = React.useState({
@@ -23,7 +25,6 @@ export function BiometricsCard({ initialBiometrics, readOnly = false }: Biometri
  
   const isRegistered = biometrics.readiness_score !== null
  
-  // Calcular etiquetas de estado cuando las métricas son reales
   React.useEffect(() => {
     async function loadStatus() {
       if (biometrics && biometrics.readiness_score !== null && biometrics.hrv !== null) {
@@ -82,7 +83,6 @@ export function BiometricsCard({ initialBiometrics, readOnly = false }: Biometri
     }
     setBiometrics(updated)
  
-    // Llamar a Server Action
     await updateBiometrics(formData)
   }
  
@@ -97,144 +97,244 @@ export function BiometricsCard({ initialBiometrics, readOnly = false }: Biometri
     : isModerate
     ? 'Recuperación moderada. Prioriza rodajes aeróbicos'
     : 'Fatiga acumulada. Se recomienda descanso o recuperación activa'
+
+  // Generador de sparkline para tendencias de 7 días
+  const getSparklinePath = (field: 'sleep_hours' | 'hrv' | 'rhr', width = 120, height = 30) => {
+    if (!initialBiometricsHistory || initialBiometricsHistory.length < 2) return null;
+
+    const data = initialBiometricsHistory
+      .map(d => ({ date: d.date, val: d[field] !== null && d[field] !== undefined ? Number(d[field]) : null }))
+      .filter((d): d is { date: string; val: number } => d.val !== null && !isNaN(d.val));
+
+    if (data.length < 2) return null;
+
+    const values = data.map(d => d.val);
+    const minVal = Math.min(...values);
+    const maxVal = Math.max(...values);
+    const range = maxVal - minVal || 1;
+
+    const points = data.map((d, idx) => {
+      const x = (idx / (data.length - 1)) * width;
+      const y = height - 3 - ((d.val - minVal) / range) * (height - 6);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+
+    return {
+      linePath: `M ${points.join(' L ')}`,
+      areaPath: `M 0,${height} L ${points.join(' L ')} L ${width},${height} Z`,
+    };
+  };
  
   return (
     <>
-      <ProCard className="p-4 sm:p-6 space-y-6 relative overflow-hidden border-zinc-200 bg-white shadow-sm">
+      <ProCard className="p-4 sm:p-6 space-y-6 relative overflow-hidden border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col justify-between">
+        
         {/* Cabecera */}
         <div className="flex justify-between items-center border-b border-zinc-100 pb-4 relative z-10">
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-emerald-600" />
-            <span className="text-xs font-semibold tracking-widest text-zinc-400 uppercase">Biometría y Preparación</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm">
+              <Activity className="w-4 h-4 text-emerald-600 animate-pulse" />
+            </div>
+            <span className="text-xs font-bold tracking-widest text-zinc-450 uppercase">Biometría y Preparación</span>
           </div>
           {!readOnly && (
             <AnimatedButton
               variant={isRegistered ? 'secondary' : 'primary'}
               size="sm"
               onClick={() => setIsModalOpen(true)}
-              className={`flex items-center gap-1.5 text-xs py-1.5 px-3 transition-all duration-300 ${
+              className={`flex items-center gap-1.5 text-xs py-1.5 px-3 transition-all duration-300 cursor-pointer shadow-sm ${
                 !isRegistered
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white font-bold border-transparent'
-                  : 'border-zinc-300 hover:border-zinc-400 text-zinc-700'
+                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white font-black border-transparent'
+                  : 'border-zinc-200 hover:border-zinc-300 text-zinc-700 bg-white hover:bg-zinc-50'
               }`}
             >
               <Settings className={`w-3.5 h-3.5 ${!isRegistered ? 'text-white' : 'text-zinc-500'}`} />
-              <span>{isRegistered ? 'Ajustar Diario' : 'Registrar Hoy'}</span>
+              <span>{isRegistered ? 'Ajustar' : 'Registrar Hoy'}</span>
             </AnimatedButton>
           )}
         </div>
  
         {/* Sección Principal: Anillo y Estado */}
-        <div className="flex flex-col md:flex-row items-center gap-6 relative z-10 py-2">
+        <div className="flex flex-col sm:flex-row items-center gap-6 relative z-10 py-2">
           <div 
             onClick={() => !readOnly && !isRegistered && setIsModalOpen(true)}
             className={`relative w-28 h-28 flex items-center justify-center shrink-0 group ${!readOnly && !isRegistered ? 'cursor-pointer' : ''}`}
           >
-            {/* SVG del Dial */}
+            {/* SVG del Dial con Gradientes */}
             <svg className="absolute inset-0 w-full h-full transform -rotate-90 overflow-visible" viewBox="0 0 100 100">
-              {/* Círculo de fondo (pista) */}
+              <defs>
+                <linearGradient id="readinessOptimal" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+                <linearGradient id="readinessModerate" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f59e0b" />
+                  <stop offset="100%" stopColor="#eab308" />
+                </linearGradient>
+                <linearGradient id="readinessAlert" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f43f5e" />
+                  <stop offset="100%" stopColor="#e11d48" />
+                </linearGradient>
+              </defs>
+              
+              {/* Círculo de fondo (pista de tacómetro) */}
               <circle
                 cx="50"
                 cy="50"
                 r="42"
-                className={!isRegistered ? "stroke-zinc-200" : "stroke-zinc-100"}
+                className={!isRegistered ? "stroke-zinc-200/80" : "stroke-zinc-100"}
                 strokeWidth={!isRegistered ? "4" : "6"}
-                strokeDasharray={!isRegistered ? "8 6" : "none"}
+                strokeDasharray={!isRegistered ? "5 4" : "none"}
                 fill="transparent"
               />
+              
               {/* Círculo activo coloreado */}
               {isRegistered && (
-                <circle
+                <motion.circle
                   cx="50"
                   cy="50"
                   r="42"
-                  stroke={isOptimal ? '#10b981' : isModerate ? '#f59e0b' : '#ef4444'}
+                  stroke={isOptimal ? 'url(#readinessOptimal)' : isModerate ? 'url(#readinessModerate)' : 'url(#readinessAlert)'}
                   strokeWidth="6"
                   fill="transparent"
                   strokeDasharray="263.89"
-                  strokeDashoffset={263.89 * (1 - (score / 100))}
+                  initial={{ strokeDashoffset: 263.89 }}
+                  animate={{ strokeDashoffset: 263.89 * (1 - (score / 100)) }}
+                  transition={{ duration: 1.2, ease: 'easeOut' }}
                   strokeLinecap="round"
-                  className="transition-all duration-1000 ease-out"
                 />
               )}
             </svg>
             
             {/* Contenido Central */}
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-transform duration-300 ${!isRegistered && !readOnly ? 'group-hover:scale-105' : ''}`}>
-              <span className="text-3xl font-bold tracking-tight text-zinc-900 relative z-10">
+              <span className="text-3xl font-black tracking-tight text-zinc-900 relative z-10 leading-none">
                 {isRegistered ? score : '--'}
               </span>
               {!isRegistered && !readOnly && (
-                <span className="text-[8px] text-emerald-600 font-bold uppercase tracking-wider mt-0.5 animate-pulse text-center leading-none">
+                <span className="text-[8px] text-emerald-600 font-extrabold uppercase tracking-widest mt-1.5 animate-pulse text-center leading-none">
                   REGISTRAR
                 </span>
               )}
             </div>
           </div>
-          <div className="text-center md:text-left space-y-1">
-            <div className="flex items-center justify-center md:justify-start gap-2">
-              <h3 className="text-xl font-bold text-zinc-800">
+          <div className="text-center sm:text-left space-y-1">
+            <div className="flex items-center justify-center sm:justify-start gap-2">
+              <h3 className="text-base font-bold text-zinc-800 tracking-tight leading-tight">
                 {!isRegistered ? 'Métricas Pendientes' : isOptimal ? 'Readiness Óptimo' : isModerate ? 'Readiness Moderado' : 'Descanso Recomendado'}
               </h3>
-              <span className={`w-2 h-2 rounded-full ${!isRegistered ? 'bg-zinc-350 animate-pulse' : isOptimal ? 'bg-emerald-500' : isModerate ? 'bg-amber-500' : 'bg-rose-500'}`} />
+              <span className={`w-2 h-2 rounded-full ${!isRegistered ? 'bg-zinc-300 animate-pulse' : isOptimal ? 'bg-emerald-500 animate-ping' : isModerate ? 'bg-amber-500' : 'bg-rose-500'}`} />
             </div>
-            <p className="text-sm text-zinc-500 max-w-sm leading-relaxed">
+            <p className="text-xs text-zinc-500 leading-relaxed font-semibold">
               {statusText}
             </p>
           </div>
         </div>
  
         {/* Grid de Desglose de Factores Objetivos */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 relative z-10">
-          
+        <div className="grid grid-cols-3 gap-2.5 relative z-10">
           {/* Sueño */}
-          <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col justify-between space-y-1">
+          <motion.div 
+            whileHover={{ y: -2 }}
+            className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 hover:border-violet-300 flex flex-col justify-between space-y-1.5 transition-all duration-300 shadow-sm"
+          >
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">SUEÑO</span>
-              <Moon className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-500">SUEÑO</span>
+              <Moon className="w-3.5 h-3.5 text-violet-500" />
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-bold text-zinc-900">{isRegistered ? biometrics.sleep_hours : '--'}</span>
-              {isRegistered && <span className="text-xs text-zinc-400">h</span>}
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-lg font-black text-zinc-900 leading-none">{isRegistered ? biometrics.sleep_hours : '--'}</span>
+              {isRegistered && <span className="text-[10px] text-zinc-450 font-bold">h</span>}
             </div>
-            <span className={`text-[11px] font-bold ${isRegistered ? 'text-emerald-600' : 'text-zinc-400'}`}>{statusLabels.sleepStatus}</span>
-          </div>
- 
+            {/* Sparkline de Sueño */}
+            {isRegistered && getSparklinePath('sleep_hours') && (
+              <div className="h-6 w-full my-0.5">
+                <svg className="w-full h-full overflow-visible" viewBox="0 0 120 30" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="sleepSparkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <path d={getSparklinePath('sleep_hours')?.areaPath} fill="url(#sleepSparkGrad)" />
+                  <path d={getSparklinePath('sleep_hours')?.linePath} fill="none" stroke="#8b5cf6" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            )}
+            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-violet-600' : 'text-zinc-400'}`}>{statusLabels.sleepStatus}</span>
+          </motion.div>
+  
           {/* HRV */}
-          <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col justify-between space-y-1">
+          <motion.div 
+            whileHover={{ y: -2 }}
+            className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 hover:border-rose-300 flex flex-col justify-between space-y-1.5 transition-all duration-300 shadow-sm"
+          >
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 cursor-help" title="Variabilidad del Ritmo Cardíaco (HRV): Mide el tiempo entre latidos. Un valor alto indica que tu sistema nervioso está recuperado y listo para entrenar.">HRV</span>
-              <Heart className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-500 cursor-help" title="Variabilidad del Ritmo Cardíaco (HRV). Un valor alto indica recuperación.">HRV</span>
+              <Heart className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-bold text-zinc-900">{isRegistered ? biometrics.hrv : '--'}</span>
-              {isRegistered && <span className="text-xs text-zinc-400">ms</span>}
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-lg font-black text-zinc-900 leading-none">{isRegistered ? biometrics.hrv : '--'}</span>
+              {isRegistered && <span className="text-[10px] text-zinc-455 font-bold">ms</span>}
             </div>
-            <span className={`text-[11px] font-bold ${isRegistered ? 'text-emerald-600' : 'text-zinc-400'}`}>{statusLabels.hrvStatus}</span>
-          </div>
- 
+            {/* Sparkline de HRV */}
+            {isRegistered && getSparklinePath('hrv') && (
+              <div className="h-6 w-full my-0.5">
+                <svg className="w-full h-full overflow-visible" viewBox="0 0 120 30" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="hrvSparkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <path d={getSparklinePath('hrv')?.areaPath} fill="url(#hrvSparkGrad)" />
+                  <path d={getSparklinePath('hrv')?.linePath} fill="none" stroke="#f43f5e" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            )}
+            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-rose-600' : 'text-zinc-400'}`}>{statusLabels.hrvStatus}</span>
+          </motion.div>
+  
           {/* RHR */}
-          <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col justify-between space-y-1">
+          <motion.div 
+            whileHover={{ y: -2 }}
+            className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 hover:border-emerald-300 flex flex-col justify-between space-y-1.5 transition-all duration-300 shadow-sm"
+          >
             <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 cursor-help" title="Pulsaciones en Reposo (RHR): Mide tus latidos mínimos por minuto. Un valor más bajo suele indicar que tu corazón está bien descansado.">RHR</span>
-              <Activity className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-500 cursor-help" title="Pulsaciones en Reposo (RHR). Un valor más bajo indica descanso.">RHR</span>
+              <Activity className="w-3.5 h-3.5 text-emerald-500" />
             </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-bold text-zinc-900">{isRegistered ? biometrics.rhr : '--'}</span>
-              {isRegistered && <span className="text-xs text-zinc-400">bpm</span>}
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-lg font-black text-zinc-900 leading-none">{isRegistered ? biometrics.rhr : '--'}</span>
+              {isRegistered && <span className="text-[10px] text-zinc-450 font-bold">bpm</span>}
             </div>
-            <span className={`text-[11px] font-bold ${isRegistered ? 'text-emerald-600' : 'text-zinc-400'}`}>{statusLabels.rhrStatus}</span>
-          </div>
+            {/* Sparkline de RHR */}
+            {isRegistered && getSparklinePath('rhr') && (
+              <div className="h-6 w-full my-0.5">
+                <svg className="w-full h-full overflow-visible" viewBox="0 0 120 30" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="rhrSparkGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <path d={getSparklinePath('rhr')?.areaPath} fill="url(#rhrSparkGrad)" />
+                  <path d={getSparklinePath('rhr')?.linePath} fill="none" stroke="#10b981" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            )}
+            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-emerald-600' : 'text-zinc-400'}`}>{statusLabels.rhrStatus}</span>
+          </motion.div>
  
         </div>
  
         {/* Factores Subjetivos (Atleta) */}
-        <div className="flex flex-wrap gap-3 pt-2 relative z-10 border-t border-zinc-100 mt-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs text-zinc-650">
+        <div className="flex flex-wrap gap-2.5 pt-3 relative z-10 border-t border-zinc-100">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
             <Flame className="w-3.5 h-3.5 text-amber-500" />
             <span>Fatiga Muscular: <strong className="text-amber-600">{isRegistered ? `Nivel ${biometrics.fatigue_rating}/5` : 'Pendiente'}</strong></span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-xs text-zinc-650">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
             <Brain className="w-3.5 h-3.5 text-emerald-500" />
             <span>Carga Mental: <strong className="text-emerald-650">{isRegistered ? `Nivel ${biometrics.stress_level}/5` : 'Pendiente'}</strong></span>
           </div>

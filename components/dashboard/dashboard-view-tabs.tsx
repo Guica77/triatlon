@@ -26,6 +26,7 @@ interface DashboardViewTabsProps {
   profile: any;
   readOnly?: boolean;
   initialBiometrics?: any;
+  initialBiometricsHistory?: any[];
   initialNutrition?: any;
   initialAnalytics?: any;
 }
@@ -45,6 +46,7 @@ export function DashboardViewTabs({
   profile, 
   readOnly = false,
   initialBiometrics,
+  initialBiometricsHistory,
   initialNutrition,
   initialAnalytics
 }: DashboardViewTabsProps) {
@@ -301,11 +303,25 @@ export function DashboardViewTabs({
   return (
     <div className="space-y-6">
       
-      {/* Sección Biometría, Nutrición y Readiness Dinámica (Actualización Dinámica al cambiar de Día) */}
+      {/* Sección Estado de Forma, Biometría y Nutrición Dinámica */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="h-full">
+          <FormStatusWidget 
+            tsb={initialAnalytics?.currentTsb || 0} 
+            ctl={initialAnalytics?.currentCtl || 0}
+            atl={initialAnalytics?.currentAtl || 0}
+            athleteLevel={profile?.level}
+            progressPercent={progressPercent}
+            pmcHistory={initialAnalytics?.pmcData}
+          />
+        </div>
         {initialBiometrics && (
           <div className="h-full">
-            <BiometricsCard initialBiometrics={initialBiometrics} />
+            <BiometricsCard 
+              initialBiometrics={initialBiometrics} 
+              initialBiometricsHistory={initialBiometricsHistory}
+              readOnly={readOnly}
+            />
           </div>
         )}
         <div className="h-full">
@@ -313,13 +329,9 @@ export function DashboardViewTabs({
             nutritionData={nutritionData} 
             error={null} 
             loading={false}
-          />
-        </div>
-        <div className="h-full">
-          <FormStatusWidget 
-            tsb={initialAnalytics?.currentTsb || 0} 
-            athleteLevel={profile?.level}
-            progressPercent={progressPercent}
+            preferredIngredients={profile?.preferred_ingredients || []}
+            workouts={selectedDayWorkouts}
+            dateString={selectedDateStr}
           />
         </div>
       </section>
@@ -364,10 +376,10 @@ export function DashboardViewTabs({
             <a 
               href="/api/workouts/export-calendar" 
               download="calendario_semanal.ics"
-              className="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-750 text-zinc-300 hover:text-zinc-100 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="px-3.5 py-2 rounded-xl bg-white border border-zinc-200 hover:border-zinc-350 text-zinc-700 hover:text-zinc-900 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
               title="Descargar toda la semana en tu Apple Calendar, Google Calendar o Garmin Calendar"
             >
-              <Calendar className="w-3.5 h-3.5 text-orange-455" />
+              <Calendar className="w-3.5 h-3.5 text-cyan-600" />
               <span className="hidden sm:inline">Exportar Semana (.ICS)</span>
               <span className="inline sm:hidden">.ICS</span>
             </a>
@@ -378,7 +390,7 @@ export function DashboardViewTabs({
               <AnimatedButton
                 variant="ghost"
                 onClick={() => setIsAiModalOpen(true)}
-                className="bg-cyan-950/30 hover:bg-cyan-900/50 text-cyan-400 border border-cyan-900/50 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="bg-cyan-50 hover:bg-cyan-100/80 text-cyan-700 border border-cyan-200 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
               >
                 <Bot className="w-4 h-4" />
                 <span className="hidden sm:inline">Generar Plan AI</span>
@@ -386,7 +398,7 @@ export function DashboardViewTabs({
               <AnimatedButton
                 variant="primary"
                 onClick={() => openModalForDate(todayStr)}
-                className="!bg-cyan-500 hover:!bg-cyan-400 !text-black text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
+                className="!bg-cyan-650 hover:!bg-cyan-550 !text-white text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>Añadir Manual</span>
@@ -456,14 +468,14 @@ export function DashboardViewTabs({
                     />
                   ))
                 ) : (
-                  <div className="p-8 rounded-2xl bg-zinc-900/10 border border-dashed border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group">
-                    <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform duration-500">
-                      <Sparkles className="w-5 h-5" />
+                  <div className="p-8 rounded-2xl bg-white border border-dashed border-zinc-200 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group shadow-sm">
+                    <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                      <Sparkles className="w-5 h-5 animate-pulse" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-bold text-zinc-300">Día de Recuperación Activa</p>
-                      <p className="text-xs text-zinc-500 max-w-[250px] mx-auto leading-relaxed">
-                        No hay entrenamientos de alta intensidad. Aprovecha para descansar o estirar 15 minutos.
+                      <p className="text-sm font-black text-zinc-900">Día de Recuperación Activa</p>
+                      <p className="text-xs text-zinc-500 font-semibold max-w-[250px] mx-auto leading-relaxed">
+                        No hay entrenamientos programados. Aprovecha para descansar o realizar estiramientos.
                       </p>
                     </div>
                   </div>

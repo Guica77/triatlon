@@ -92,6 +92,7 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
             {!isSubmitted && (
               <button
                 onClick={handleDismiss}
+                title="Cerrar"
                 className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-700 p-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
@@ -139,6 +140,7 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
                         onClick={() => setRating(star)}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
+                        title={`Calificar con ${star} estrellas`}
                         className="text-zinc-300 hover:scale-115 transition duration-150 cursor-pointer"
                       >
                         <Star

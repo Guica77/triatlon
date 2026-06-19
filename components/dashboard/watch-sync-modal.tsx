@@ -18,6 +18,30 @@ interface WatchSyncModalProps {
   }
 }
 
+function getProgressWidthClass(progress: number): string {
+  if (progress >= 100) return 'w-[100%]';
+  if (progress >= 95) return 'w-[95%]';
+  if (progress >= 90) return 'w-[90%]';
+  if (progress >= 85) return 'w-[85%]';
+  if (progress >= 80) return 'w-[80%]';
+  if (progress >= 75) return 'w-[75%]';
+  if (progress >= 70) return 'w-[70%]';
+  if (progress >= 65) return 'w-[65%]';
+  if (progress >= 60) return 'w-[60%]';
+  if (progress >= 55) return 'w-[55%]';
+  if (progress >= 50) return 'w-[50%]';
+  if (progress >= 45) return 'w-[45%]';
+  if (progress >= 40) return 'w-[40%]';
+  if (progress >= 35) return 'w-[35%]';
+  if (progress >= 30) return 'w-[30%]';
+  if (progress >= 25) return 'w-[25%]';
+  if (progress >= 20) return 'w-[20%]';
+  if (progress >= 15) return 'w-[15%]';
+  if (progress >= 10) return 'w-[10%]';
+  if (progress >= 5) return 'w-[5%]';
+  return 'w-[0%]';
+}
+
 export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps) {
   const [progress, setProgress] = React.useState(0)
   const [syncState, setSyncState] = React.useState<'connecting' | 'syncing' | 'verifying' | 'success'>('connecting')
@@ -98,6 +122,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
           {syncState === 'success' && (
             <button 
               onClick={onClose}
+              title="Cerrar"
               className="absolute top-4 right-4 w-7 h-7 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-650 hover:bg-zinc-100 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
@@ -152,8 +177,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                       <span className="text-[11px] font-black text-zinc-800">{progress}%</span>
                       <div className="w-16 h-1 bg-zinc-200 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-orange-500 transition-all duration-100"
-                          style={{ width: `${progress}%` }}
+                          className={`h-full bg-orange-500 transition-all duration-100 ${getProgressWidthClass(progress)}`}
                         />
                       </div>
                     </motion.div>

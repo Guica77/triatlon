@@ -181,3 +181,122 @@ export async function getDailyNutrition(dateString: string): Promise<{ data?: Dy
     return { error: err.message || 'Error interno al calcular la nutrición.' }
   }
 }
+
+/**
+ * Server Action que simula respuestas de alta fidelidad para el Asistente de IA de Nutrición Deportiva.
+ * Integra de forma precisa el peso del usuario, macros recomendadas para el día, entrenamientos y sus ingredientes preferidos.
+ */
+export async function askNutritionAI(
+  question: string,
+  dateString: string,
+  preferredIngredients: string[] = []
+): Promise<{ response: string; success: boolean }> {
+  try {
+    const nutritionRes = await getDailyNutrition(dateString)
+    const nutrition = nutritionRes.data
+
+    if (!nutrition) {
+      return {
+        success: false,
+        response: "Lo siento, no he podido recuperar tus datos nutricionales y de peso para hoy. Por favor, asegúrate de tener tu perfil biométrico al día en los Ajustes."
+      }
+    }
+
+    const q = question.toLowerCase().trim()
+    let response = ""
+
+    // Identificar el deporte principal del día
+    let workoutSport = "descanso"
+    let workoutDuration = 0
+    if (nutrition.sessionsPacing && nutrition.sessionsPacing.length > 0) {
+      workoutSport = nutrition.sessionsPacing[0].sportType
+      workoutDuration = nutrition.sessionsPacing[0].durationMin
+    }
+
+    const hasWorkout = workoutSport !== "descanso" && workoutDuration > 0
+    const carbGrams = nutrition.macros.carbs.grams
+    const proteinGrams = nutrition.macros.protein.grams
+    const totalKcal = nutrition.totalCalories
+
+    // Caso 1: Pregunta sobre sustitución de ingredientes (pollo, arroz, etc.)
+    if (q.includes("sustitu") || q.includes("cambiar") || q.includes("pollo") || q.includes("salmon") || q.includes("tofu") || q.includes("ingrediente")) {
+      const proteins = preferredIngredients.filter(i => ["pollo", "salmon", "tofu", "huevo"].includes(i))
+      const carbs = preferredIngredients.filter(i => ["pasta", "arroz", "patata", "avena", "platano"].includes(i))
+      
+      const pAlternatives = proteins.length > 0 
+        ? proteins.map(p => `- **${p.toUpperCase()}**: Una de tus fuentes favoritas del onboarding. Aporta aproximadamente la misma densidad proteica de alta biodisponibilidad.`).join("\n")
+        : "- **Huevo o Tofu**: Fuentes excelentes de proteína para reparar tus fibras musculares.\n- **Salmón**: Excelente alternativa antiinflamatoria rica en grasas saludables Omega-3."
+
+      const cAlternatives = carbs.length > 0
+        ? carbs.map(c => `- **${c.toUpperCase()}**: Tu carbohidrato de confianza. Ideal para recargar glucógeno hoy.`).join("\n")
+        : "- **Patata cocida o Boniato**: Carbohidratos complejos de fácil digestión.\n- **Quinoa o Arroz integral**: Aportan energía sostenida y fibra."
+
+      response = `### 🍳 Sustituciones Inteligentes para Hoy
+
+Considerando que hoy tienes planificado un entrenamiento de **${workoutSport}** de **${workoutDuration} min** y un objetivo proteico de **${proteinGrams}g**, aquí tienes las mejores alternativas para adaptar tu plato:
+
+#### Para la proteína (reemplazo de pollo/salmón/tofu):
+${pAlternatives}
+
+#### Para el carbohidrato (reemplazo de arroz/pasta/patata):
+${cAlternatives}
+
+*💡 Consejo del Coach Nutricional: Intenta mantener las proporciones. Si cambias 150g de pechuga de pollo, sustitúyelo por 150g de salmón o 180g de tofu firme para no desbalancear tus **${proteinGrams}g** de proteína diaria.*`
+
+    // Caso 2: Intolerancia al Gluten / Celíaco
+    } else if (q.includes("gluten") || q.includes("celiac") || q.includes("intoleran") || q.includes("alergia")) {
+      response = `### 🌾 Adaptación para Intolerancias y Celíacos
+
+Para cumplir con tu objetivo de **${carbGrams}g de carbohidratos** hoy de forma 100% libre de gluten o alérgenos molestos para el estómago del triatleta:
+
+1. **Sustituye la pasta o trigo**: Utiliza **Arroz basmati** (que es uno de tus favoritos), **Quinoa** o **Patata asada**. Son naturalmente libres de gluten y muy fáciles de digerir antes de tu sesión de **${workoutSport}**.
+2. **Post-entreno limpio**: Para tu comida de recuperación, utiliza arroz blanco o patata cocida como base de carbohidrato, acompañado de tu proteína favorita (pechuga de pollo a la plancha o huevo).
+3. **Cuidado con los suplementos**: Si tomas geles o isotónicos intra-entreno hoy, asegúrate de que lleven el sello *Gluten-Free* para evitar irritación intestinal y flato durante la sesión.
+
+¿Quieres que te sugiera una receta específica para hoy con arroz o patata en base a tu entrenamiento?`
+
+    // Caso 3: Entrenamiento tardío y cenas
+    } else if (q.includes("cena") || q.includes("tarde") || q.includes("noche") || q.includes("tardio")) {
+      response = `### 🌙 Estrategia para Entrenamientos Tardíos
+
+Entrenar tarde influye directamente en tu cena y en la calidad del sueño. Con tu objetivo de hoy de **${totalKcal} Kcal**:
+
+- **Si entrenaste duro por la tarde/noche**: Necesitas recuperar glucógeno pero sin saturar la digestión. Cena una porción moderada de **Arroz basmati o puré de patatas** (hidratos rápidos y suaves) junto con una fuente de proteína limpia como **Tofu salteado** o **Huevo cocido**.
+- **Evita grasas pesadas**: Reduce el aguacate o los frutos secos en la cena si vas a dormir en menos de 2 horas. Las grasas ralentizan el vaciado gástrico y pueden interrumpir el sueño profundo.
+- **Hidratación**: Asegúrate de reponer el líquido perdido estimado según tu tasa de sudoración sin beber grandes volúmenes de golpe justo antes de acostarte para evitar despertarte por la noche.`
+
+    // Fallback: Respuesta general personalizada
+    } else {
+      const workoutText = hasWorkout
+        ? `tienes programada una sesión de **${workoutSport}** de **${workoutDuration} minutos**`
+        : `es tu día de descanso activo`
+
+      response = `### 🤖 Asistente de IA Nutricional Triatlón Pro
+
+Hola. Analizando tu perfil para la fecha seleccionada:
+- Tu peso registrado es de **${nutrition.weight} kg**.
+- Hoy **${workoutText}**.
+- Tus necesidades calóricas totales son de **${totalKcal} kcal** (metabolismo basal de ${nutrition.bmr} kcal + gasto activo).
+- Tus macros objetivos son: **${carbGrams}g CHO** | **${proteinGrams}g PRO** | **${nutrition.macros.fat.grams}g FAT**.
+
+Tus ingredientes preferidos son: *${preferredIngredients.join(", ")}*.
+
+¿En qué puedo ayudarte hoy? Puedes preguntarme sobre:
+1. *¿Cómo sustituir un ingrediente de mi plato de hoy?*
+2. *¿Qué debería comer/cenar si mi entrenamiento se retrasa?*
+3. *¿Cómo adaptar el plan si tengo molestias estomacales o acidez?*`
+    }
+
+    return {
+      success: true,
+      response
+    }
+  } catch (err: any) {
+    console.error("Excepción en askNutritionAI server action:", err)
+    return {
+      success: false,
+      response: "Ha ocurrido un error inesperado al procesar la consulta con el asistente de IA."
+    }
+  }
+}
+
