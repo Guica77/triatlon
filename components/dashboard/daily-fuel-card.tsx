@@ -134,15 +134,14 @@ export function DailyFuelCard({
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
           </div>
-          <span className="text-xs font-bold tracking-widest text-zinc-450 uppercase hidden sm:inline">Combustible del Día</span>
-          <span className="text-xs font-bold tracking-widest text-zinc-450 uppercase inline sm:hidden">Nutrición</span>
+          <span className="text-xs font-bold tracking-widest text-zinc-455 uppercase whitespace-nowrap">Combustible</span>
         </div>
 
         {/* Selector de Pestañas */}
-        <div className="flex bg-zinc-100 p-0.5 rounded-lg border border-zinc-200/80 text-[10px] font-bold">
+        <div className="flex bg-zinc-100 p-0.5 rounded-lg border border-zinc-200/80 text-[10px] font-bold shrink-0">
           <button
             onClick={() => setActiveTab('macros')}
-            className={`px-2.5 py-1 rounded cursor-pointer transition-colors ${
+            className={`px-2 py-1 rounded cursor-pointer transition-colors ${
               activeTab === 'macros' ? 'bg-white text-emerald-600 shadow-xs border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'
             }`}
           >
@@ -150,7 +149,7 @@ export function DailyFuelCard({
           </button>
           <button
             onClick={() => setActiveTab('platos')}
-            className={`px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-1 ${
+            className={`px-2 py-1 rounded cursor-pointer transition-colors flex items-center gap-1 ${
               activeTab === 'platos' ? 'bg-white text-emerald-600 shadow-xs border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'
             }`}
           >
