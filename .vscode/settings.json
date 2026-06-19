@@ -19,7 +19,7 @@
   },
   "sonarlint.analysisExcludesStandalone": "**/.superpowers/**",
   "files.associations": {
-    "**/supabase/migrations/*.sql": "plaintext",
+    "**/*.sql": "plaintext",
     "**/.superpowers/**/*.html": "plaintext"
   },
   "mssql.intelliSense.enableErrorChecking": false,
