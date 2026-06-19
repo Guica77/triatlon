@@ -61,43 +61,43 @@ const DISLIKED_OPTIONS = [
 export function StepPhysiology(props: StepPhysiologyProps) {
   return (
     <motion.div key="step2" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
-      <ProCard className="space-y-6">
-        <div className="border-b border-zinc-800/80 pb-4">
-          <h2 className="text-xl font-medium text-zinc-100 flex items-center gap-2"><Activity className="w-5 h-5 text-emerald-400" /> Calibración Fisiológica</h2>
-          <p className="text-sm text-zinc-400 mt-1">Introduce tus zonas actuales. Si no las sabes, las estimaremos automáticamente por IA.</p>
+      <ProCard className="space-y-6 bg-white border border-zinc-200">
+        <div className="border-b border-zinc-200 pb-4">
+          <h2 className="text-xl font-bold text-zinc-900 flex items-center gap-2"><Activity className="w-5 h-5 text-cyan-400" /> Calibración Fisiológica</h2>
+          <p className="text-sm text-zinc-500 mt-1">Introduce tus zonas actuales. Si no las sabes, las estimaremos automáticamente por IA.</p>
         </div>
 
         <div className="space-y-4">
-          <label className="text-xs font-medium text-zinc-400 block uppercase tracking-wider">Modalidad de Entrenamiento</label>
+          <label className="text-xs font-bold text-zinc-400 block uppercase tracking-wider">Modalidad de Entrenamiento</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={() => props.setWantsCoach(false)}
-              className={`p-4 rounded-xl border text-left transition-all flex flex-col gap-1.5 ${
+              className={`p-4 rounded-xl border text-left transition-all flex flex-col gap-1.5 cursor-pointer ${
                 !props.wantsCoach 
-                  ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.15)] ring-1 ring-cyan-500' 
-                  : 'bg-zinc-950/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  ? 'bg-cyan-50/50 border-cyan-500 text-cyan-600 ring-1 ring-cyan-500 shadow-xs' 
+                  : 'bg-zinc-50/30 border-zinc-200 text-zinc-500 hover:border-zinc-300'
               }`}
             >
               <div className="flex justify-between items-center w-full">
                 <span className="font-bold text-sm">IA Autónoma</span>
-                {!props.wantsCoach && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />}
+                {!props.wantsCoach && <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />}
               </div>
-              <span className="text-[10px] opacity-80 font-medium">Planificación 100% generada por IA</span>
+              <span className="text-[10px] opacity-80 font-semibold">Planificación 100% generada por IA</span>
             </button>
             
             <button
               onClick={() => props.setWantsCoach(true)}
-              className={`p-4 rounded-xl border text-left transition-all flex flex-col gap-1.5 ${
+              className={`p-4 rounded-xl border text-left transition-all flex flex-col gap-1.5 cursor-pointer ${
                 props.wantsCoach 
-                  ? 'bg-orange-500/10 border-orange-500 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.15)] ring-1 ring-orange-500' 
-                  : 'bg-zinc-950/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                  ? 'bg-orange-50/50 border-orange-500 text-orange-600 ring-1 ring-orange-500 shadow-xs' 
+                  : 'bg-zinc-50/30 border-zinc-200 text-zinc-500 hover:border-zinc-300'
               }`}
             >
               <div className="flex justify-between items-center w-full">
                 <span className="font-bold text-sm">Entrenador Humano</span>
-                {props.wantsCoach && <div className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />}
+                {props.wantsCoach && <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />}
               </div>
-              <span className="text-[10px] opacity-80 font-medium">Solicitar conexión con un Coach (Recomendado)</span>
+              <span className="text-[10px] opacity-80 font-semibold">Solicitar conexión con un Coach (Recomendado)</span>
             </button>
           </div>
         </div>
@@ -108,19 +108,19 @@ export function StepPhysiology(props: StepPhysiologyProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-zinc-800/50"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-zinc-200"
             >
               <div>
-                <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">FTP Ciclismo (W)</label>
-                <input type="number" placeholder="Ej. 250" value={props.currentFtp} onChange={e => props.setCurrentFtp(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-emerald-500 outline-none transition-all" />
+                <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider">FTP Ciclismo (W)</label>
+                <input type="number" placeholder="Ej. 250" value={props.currentFtp} onChange={e => props.setCurrentFtp(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Natación (/100m)</label>
-                <input type="text" placeholder="Ej. 01:45" value={props.currentSwimPace} onChange={e => props.setCurrentSwimPace(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-emerald-500 outline-none transition-all" />
+                <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Natación (/100m)</label>
+                <input type="text" placeholder="Ej. 01:45" value={props.currentSwimPace} onChange={e => props.setCurrentSwimPace(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
               </div>
               <div>
-                <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Carrera (/km)</label>
-                <input type="text" placeholder="Ej. 04:30" value={props.currentRunPace} onChange={e => props.setCurrentRunPace(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-emerald-500 outline-none transition-all" />
+                <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Carrera (/km)</label>
+                <input type="text" placeholder="Ej. 04:30" value={props.currentRunPace} onChange={e => props.setCurrentRunPace(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
               </div>
             </motion.div>
           ) : (
@@ -128,20 +128,20 @@ export function StepPhysiology(props: StepPhysiologyProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="pt-4 border-t border-zinc-800/50 text-center space-y-2"
+              className="pt-4 border-t border-zinc-200 text-center space-y-2"
             >
-              <p className="text-sm text-zinc-300">Has elegido entrenar con un profesional.</p>
+              <p className="text-sm text-zinc-750 font-medium">Has elegido entrenar con un profesional.</p>
               <p className="text-xs text-zinc-500">Saltaremos la calibración automática y el garaje. En el siguiente paso podrás usar tu código o buscar uno.</p>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Sección de Preferencias de Alimentos para Nutrición */}
-        <div className="pt-6 border-t border-zinc-800/80 space-y-6">
+        <div className="pt-6 border-t border-zinc-200 space-y-6">
           {/* 1. Ingredientes Preferidos */}
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-zinc-400 block uppercase tracking-wider">
+              <label className="text-xs font-bold text-zinc-650 block uppercase tracking-wider">
                 Ingredientes Preferidos para Recuperación
               </label>
               <p className="text-xs text-zinc-500 mt-1">
@@ -165,12 +165,12 @@ export function StepPhysiology(props: StepPhysiologyProps) {
                     }}
                     className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
                       isSelected
-                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400 ring-1 ring-emerald-500 shadow-sm shadow-emerald-500/10'
-                        : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:border-zinc-700'
+                        ? 'bg-emerald-50 border-emerald-500 text-emerald-700 ring-1 ring-emerald-500 shadow-xs font-semibold'
+                        : 'bg-zinc-50/50 border-zinc-200 text-zinc-650 hover:bg-zinc-50 hover:border-zinc-300'
                     }`}
                   >
                     <span className="text-xs font-bold">{ing.label}</span>
-                    <span className="text-[9px] text-zinc-500 uppercase font-semibold mt-1 tracking-wider">{ing.category}</span>
+                    <span className="text-[9px] text-zinc-400 uppercase font-bold mt-1 tracking-wider">{ing.category}</span>
                   </button>
                 );
               })}
@@ -178,9 +178,9 @@ export function StepPhysiology(props: StepPhysiologyProps) {
           </div>
 
           {/* 2. Alergias Alimentarias */}
-          <div className="space-y-4 pt-4 border-t border-zinc-850/50">
+          <div className="space-y-4 pt-4 border-t border-zinc-200">
             <div>
-              <label className="text-xs font-bold text-red-400/90 block uppercase tracking-wider">
+              <label className="text-xs font-bold text-red-500/90 block uppercase tracking-wider">
                 Alergias o Intolerancias Alimentarias
               </label>
               <p className="text-xs text-zinc-500 mt-1">
@@ -204,12 +204,12 @@ export function StepPhysiology(props: StepPhysiologyProps) {
                     }}
                     className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
                       isSelected
-                        ? 'bg-red-500/10 border-red-500/40 text-red-400 ring-1 ring-red-500/40 shadow-sm shadow-red-500/10'
-                        : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:border-zinc-700'
+                        ? 'bg-red-50 border-red-500/40 text-red-700 ring-1 ring-red-500/40 shadow-xs font-semibold'
+                        : 'bg-zinc-50/50 border-zinc-200 text-zinc-650 hover:bg-zinc-50 hover:border-zinc-300'
                     }`}
                   >
                     <span className="text-xs font-bold">{alg.label}</span>
-                    <span className="text-[9px] text-red-550/60 uppercase font-semibold mt-1 tracking-wider">{alg.category}</span>
+                    <span className="text-[9px] text-red-500/50 uppercase font-bold mt-1 tracking-wider">{alg.category}</span>
                   </button>
                 );
               })}
@@ -217,9 +217,9 @@ export function StepPhysiology(props: StepPhysiologyProps) {
           </div>
 
           {/* 3. Ingredientes a Evitar */}
-          <div className="space-y-4 pt-4 border-t border-zinc-850/50">
+          <div className="space-y-4 pt-4 border-t border-zinc-200">
             <div>
-              <label className="text-xs font-bold text-amber-500/90 block uppercase tracking-wider">
+              <label className="text-xs font-bold text-amber-600/90 block uppercase tracking-wider">
                 Ingredientes que prefieres evitar
               </label>
               <p className="text-xs text-zinc-500 mt-1">
@@ -243,12 +243,12 @@ export function StepPhysiology(props: StepPhysiologyProps) {
                     }}
                     className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
                       isSelected
-                        ? 'bg-amber-500/10 border-amber-500/40 text-amber-400 ring-1 ring-amber-500/40 shadow-sm shadow-amber-500/10'
-                        : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:border-zinc-700'
+                        ? 'bg-amber-50 border-amber-500/40 text-amber-700 ring-1 ring-amber-500/40 shadow-xs font-semibold'
+                        : 'bg-zinc-50/50 border-zinc-200 text-zinc-650 hover:bg-zinc-50 hover:border-zinc-300'
                     }`}
                   >
                     <span className="text-xs font-bold">{dis.label}</span>
-                    <span className="text-[9px] text-amber-550/60 uppercase font-semibold mt-1 tracking-wider">{dis.category}</span>
+                    <span className="text-[9px] text-amber-600/50 uppercase font-bold mt-1 tracking-wider">{dis.category}</span>
                   </button>
                 );
               })}
@@ -256,9 +256,9 @@ export function StepPhysiology(props: StepPhysiologyProps) {
           </div>
         </div>
         
-        <div className="flex justify-between pt-4 border-t border-zinc-800/80">
-          <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-400 hover:text-white transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
-          <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm !bg-emerald-500 hover:!bg-emerald-400 !text-black shadow-emerald-500/20">
+        <div className="flex justify-between pt-4 border-t border-zinc-200">
+          <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-500 hover:text-zinc-800 transition flex items-center cursor-pointer"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+          <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm !bg-cyan-400 hover:!bg-cyan-500 !text-white shadow-cyan-500/10">
             {props.wantsCoach ? 'Siguiente' : 'Continuar'} <ChevronRight className="w-4 h-4 ml-1" />
           </AnimatedButton>
         </div>
