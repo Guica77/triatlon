@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { sendWorkoutCompletionEmail } from '@/lib/email'
+import { evaluateFeedbackAndAdjustPlan } from '@/app/telemetry/telemetry-actions'
 
 function safeWaitUntil(promise: Promise<any>) {
   if (typeof (globalThis as any).waitUntil === 'function') {
@@ -141,7 +142,14 @@ export async function toggleWorkoutStatus(workoutId: string, currentStatus: stri
   return updateWorkoutStatus(workoutId, newStatus);
 }
 
-export async function completeWorkoutWithFeedback(workoutId: string, rpe: number, notes: string) {
+export async function completeWorkoutWithFeedback(
+  workoutId: string,
+  rpe: number,
+  feeling: string,
+  intensityAdherence: string,
+  painLocalized: boolean,
+  notes: string
+) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -159,8 +167,10 @@ export async function completeWorkoutWithFeedback(workoutId: string, rpe: number
       workout_id: workoutId,
       user_id: user.id,
       rpe_score: rpe,
-      notes: notes || null,
-      feeling: 'neutral'
+      feeling: feeling,
+      intensity_adherence: intensityAdherence,
+      pain_localized: painLocalized,
+      notes: notes || null
     })
 
   if (error) {
@@ -168,14 +178,29 @@ export async function completeWorkoutWithFeedback(workoutId: string, rpe: number
     throw new Error("No se pudo guardar el feedback")
   }
 
-  // Si tiene entrenador, enviarle un mensaje automático al chat
-  if (profile?.coach_id) {
+  const hasFatigueAlert = rpe >= 8 || feeling === 'fatigado' || feeling === 'lesionado' || painLocalized;
+
+  // Si tiene entrenador y NO es una alerta de fatiga extrema/lesión, enviarle un mensaje automático de éxito al chat
+  if (profile?.coach_id && !hasFatigueAlert) {
     const adminSupabase = createAdminClient();
+    const feelingEmoji: Record<string, string> = {
+      excelente: '😃 Excelente',
+      buena: '🙂 Bueno',
+      fatigado: '🥱 Fatigado',
+      lesionado: '🤕 Lesionado'
+    };
     await adminSupabase.from('chat_messages').insert({
       sender_id: user.id,
       receiver_id: profile.coach_id,
-      message: `¡Entrenamiento completado! 🎯\nEsfuerzo percibido (RPE): ${rpe}/10\n${notes ? `\nNotas: ${notes}` : ''}`
+      message: `¡Entrenamiento completado! 🎯\n- Esfuerzo percibido (RPE): **${rpe}/10**\n- Sensaciones: **${feelingEmoji[feeling] || feeling}**\n- Adherencia: **${intensityAdherence}**\n${notes ? `\nNotas: ${notes}` : ''}`
     });
+  }
+
+  // Si tiene alertas, disparar el motor adaptativo (que ya gestiona su mensaje de alerta al coach si procede)
+  try {
+    await evaluateFeedbackAndAdjustPlan(user.id, workoutId, rpe, feeling, painLocalized);
+  } catch (adjustError) {
+    console.error('Error al ejecutar evaluación adaptativa de feedback:', adjustError);
   }
 
   // Marcar como completado

@@ -36,6 +36,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
   const [feeling, setFeeling] = useState<string>('buena');
   const [sleep, setSleep] = useState<string>('buena');
   const [pain, setPain] = useState<string>('ninguno');
+  const [intensityAdherence, setIntensityAdherence] = useState<string>('clavado');
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -48,10 +49,15 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
     setIsSubmitting(true);
     setErrorMessage(null);
 
-    const compiledNotes = `Sensación: ${feeling} | Descanso: ${sleep} | Molestias: ${pain} ${notes ? `| Notas: ${notes}` : ''}`;
-
     try {
-      await completeWorkoutWithFeedback(workoutId, rpe, compiledNotes);
+      await completeWorkoutWithFeedback(
+        workoutId,
+        rpe,
+        feeling,
+        intensityAdherence,
+        pain !== 'ninguno',
+        notes
+      );
       setSuccessMessage('¡Feedback registrado y entrenamiento completado!');
       setTimeout(() => {
         setSuccessMessage(null);
@@ -221,6 +227,35 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                         </button>
                       ))}
                     </div>
+                  </div>
+                </div>
+
+                {/* Intensity Adherence Selector */}
+                <div>
+                  <label className="block text-sm font-semibold text-zinc-300 mb-3">¿Cumpliste las zonas de intensidad?</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'suave', label: 'Más suave', emoji: '📉' },
+                      { id: 'clavado', label: 'Clavado', emoji: '🎯' },
+                      { id: 'fuerte', label: 'Más fuerte', emoji: '📈' }
+                    ].map((item) => {
+                      const isSelected = intensityAdherence === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => setIntensityAdherence(item.id)}
+                          className={`py-2.5 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
+                            isSelected 
+                              ? 'border-cyan-500 text-cyan-400 bg-cyan-500/10 font-bold scale-102 ring-2 ring-cyan-400' 
+                              : 'bg-zinc-800/40 border-zinc-700/50 text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300'
+                          }`}
+                        >
+                          <span>{item.emoji}</span>
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

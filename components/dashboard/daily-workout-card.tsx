@@ -46,6 +46,7 @@ interface WorkoutCardProps {
       training_effect_anaerobic?: number;
       raw_payload: any;
     }[] | null;
+    workout_feedback?: any[] | null;
   };
 }
 
@@ -224,6 +225,10 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const isCompleted = status === 'completed';
   const isMissed = status === 'missed';
 
+  const hasFeedback = React.useMemo(() => {
+    return !!(workout.workout_feedback && workout.workout_feedback.length > 0);
+  }, [workout.workout_feedback]);
+
   const plannedTss = React.useMemo(() => {
     if (!session) return 0;
     return Math.round(session.duration_min * (session.sport_type === 'carrera' ? 0.8 : session.sport_type === 'ciclismo' ? 0.75 : session.sport_type === 'natacion' ? 0.6 : 0.5));
@@ -273,6 +278,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
         if (res?.success) {
           setStatus('completed');
           setToastMsg('¡Actividad detectada y sincronizada automáticamente desde tu reloj! TSS Real: 85');
+          // Abrir modal de feedback inmediatamente al sincronizarse en vivo
+          setIsFeedbackOpen(true);
         }
       }, 3500);
       return () => clearTimeout(timer);
@@ -1147,37 +1154,54 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
               {/* COMPLETED STATE */}
               {isCompleted && (
-                <div className="flex flex-col sm:flex-row gap-3 w-full">
-                  <AnimatedButton 
-                    variant="secondary" 
-                    className="flex-1 justify-center py-6 text-sm font-semibold border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
-                    onClick={handleToggle}
-                    disabled={loading}
-                  >
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <span className="text-emerald-700">✓ Completado</span>
-                  </AnimatedButton>
+                <div className="w-full space-y-3">
+                  {!hasFeedback && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-3 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-semibold flex items-center gap-2"
+                    >
+                      <Sparkles className="w-4 h-4 text-orange-400 animate-pulse shrink-0" />
+                      <span>¡Actividad importada de Strava! Valora tus sensaciones para que la IA adapte tu plan.</span>
+                    </motion.div>
+                  )}
 
-                  <AnimatedButton
-                    variant="ghost"
-                    className="flex-1 justify-center py-6 border border-cyan-200 bg-cyan-50/50 text-cyan-400 hover:bg-cyan-50/80 flex items-center justify-center gap-2 font-semibold"
-                    onClick={() => setIsFeedbackOpen(true)}
-                  >
-                    <MessageSquarePlus className="w-5 h-5 text-cyan-400" />
-                    <span>Evaluar Sesión</span>
-                  </AnimatedButton>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+                    <AnimatedButton 
+                      variant="secondary" 
+                      className="flex-1 justify-center py-6 text-sm font-semibold border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
+                      onClick={handleToggle}
+                      disabled={loading}
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                      <span className="text-emerald-700">✓ Completado</span>
+                    </AnimatedButton>
 
-                  <AnimatedButton
-                    variant="ghost"
-                    className="flex-1 justify-center py-6 border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 flex items-center justify-center gap-2 font-semibold whitespace-nowrap"
-                    onClick={() => {
-                      setIsSyncingOpen(true);
-                      window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
-                    }}
-                  >
-                    <Download className="w-4 h-4 text-orange-500 animate-bounce" />
-                    <span>Enviar al Reloj</span>
-                  </AnimatedButton>
+                    <AnimatedButton
+                      variant="ghost"
+                      className={`flex-1 justify-center py-6 border flex items-center justify-center gap-2 font-semibold transition-all ${
+                        !hasFeedback 
+                          ? 'border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 shadow-md shadow-orange-500/5'
+                          : 'border-cyan-200 bg-cyan-50/50 text-cyan-400 hover:bg-cyan-50/80'
+                      }`}
+                      onClick={() => setIsFeedbackOpen(true)}
+                    >
+                      <MessageSquarePlus className={`w-5 h-5 ${!hasFeedback ? 'text-orange-400 animate-bounce' : 'text-cyan-400'}`} />
+                      <span>{hasFeedback ? 'Editar Valoración' : 'Evaluar Sesión'}</span>
+                    </AnimatedButton>
+
+                    <AnimatedButton
+                      variant="ghost"
+                      className="flex-1 justify-center py-6 border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 flex items-center justify-center gap-2 font-semibold whitespace-nowrap"
+                      onClick={() => {
+                        setIsSyncingOpen(true);
+                        window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
+                      }}
+                    >
+                      <Download className="w-4 h-4 text-orange-500 animate-bounce" />
+                      <span>Enviar al Reloj</span>
+                    </AnimatedButton>
+                  </div>
                 </div>
               )}
 

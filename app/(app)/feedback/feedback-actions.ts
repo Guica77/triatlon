@@ -2,12 +2,15 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { evaluateFeedbackAndAdjustPlan } from '@/app/telemetry/telemetry-actions';
 
 export interface WorkoutFeedbackData {
   workout_id: string;
   rpe_score: number;
   feeling: string;
   notes?: string;
+  pain_localized?: boolean;
+  intensity_adherence?: string;
 }
 
 export interface CoachFeedbackData {
@@ -42,10 +45,25 @@ export async function submitWorkoutFeedback(formData: WorkoutFeedbackData) {
       user_id: authData.user.id,
       rpe_score: formData.rpe_score,
       feeling: formData.feeling,
-      notes: formData.notes || null
+      notes: formData.notes || null,
+      pain_localized: formData.pain_localized || false,
+      intensity_adherence: formData.intensity_adherence || null
     });
 
     if (error) return { error: error.message };
+
+    // Evaluar adaptaciones de IA y alertas de fatiga/lesión
+    try {
+      await evaluateFeedbackAndAdjustPlan(
+        authData.user.id,
+        formData.workout_id,
+        formData.rpe_score,
+        formData.feeling,
+        formData.pain_localized || false
+      );
+    } catch (adjustError) {
+      console.error('Error al ejecutar evaluación adaptativa de feedback:', adjustError);
+    }
 
     revalidatePath('/dashboard');
     revalidatePath('/analytics');

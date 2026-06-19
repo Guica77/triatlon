@@ -24,7 +24,7 @@ export default async function WorkoutDetailPage({ params }: WorkoutPageProps) {
   // 1. Fetch workout details
   const { data: workout } = await supabase
     .from('user_workouts')
-    .select('*, training_sessions(*), universal_telemetry(*)')
+    .select('*, training_sessions(*), universal_telemetry(*), workout_feedback(*)')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();

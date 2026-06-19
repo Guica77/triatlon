@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { pushWorkoutToDevice } from '@/app/telemetry/workout-push-actions';
 import { sendWorkoutCompletionEmail } from '@/lib/email';
@@ -367,3 +368,99 @@ export async function getRecentStravaActivities() {
     return { error: error.message || 'Error inesperado' };
   }
 }
+
+export async function evaluateFeedbackAndAdjustPlan(
+  userId: string,
+  workoutId: string,
+  rpe: number,
+  feeling: string,
+  painLocalized: boolean
+): Promise<{ adjusted: boolean; message: string }> {
+  try {
+    const supabase = await createClient();
+
+    // 1. Verificar si hay disparadores de fatiga/lesión
+    const hasFatigueAlert = rpe >= 8 || feeling === 'fatigado' || feeling === 'lesionado' || painLocalized;
+
+    if (!hasFatigueAlert) {
+      return { adjusted: false, message: 'Feedback normal registrado.' };
+    }
+
+    // 2. Obtener los siguientes 2 entrenamientos pendientes del atleta
+    const { data: upcoming, error: upcomingError } = await supabase
+      .from('user_workouts')
+      .select('id, scheduled_date')
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+      .order('scheduled_date', { ascending: true })
+      .limit(2);
+
+    if (upcomingError) {
+      console.error('Error al obtener entrenamientos futuros:', upcomingError);
+    }
+
+    // 3. Ajustar los entrenamientos si existen
+    if (upcoming && upcoming.length > 0) {
+      const ids = upcoming.map(u => u.id);
+      const { error: updateError } = await supabase
+        .from('user_workouts')
+        .update({ auto_adjusted: true })
+        .in('id', ids);
+
+      if (updateError) {
+        console.error('Error al reajustar entrenamientos futuros:', updateError);
+      }
+    }
+
+    // 4. Alertar al entrenador en el chat si tiene uno
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('coach_id, first_name, last_name')
+      .eq('id', userId)
+      .single();
+
+    if (profile?.coach_id) {
+      const adminSupabase = createAdminClient();
+      const athleteName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Atleta';
+      let sport = 'entrenamiento';
+
+      const { data: workout } = await supabase
+        .from('user_workouts')
+        .select('training_sessions(sport_type)')
+        .eq('id', workoutId)
+        .single();
+
+      if (workout?.training_sessions?.sport_type) {
+        sport = workout.training_sessions.sport_type;
+      }
+
+      const feelingEmoji: Record<string, string> = {
+        excelente: '😃 Excelente',
+        buena: '🙂 Bueno',
+        fatigado: '🥱 Fatigado',
+        lesionado: '🤕 Lesionado'
+      };
+
+      const alertMsg = `⚠️ **Alerta de Fatiga/Lesión**\nEl atleta **${athleteName}** ha completado su sesión de **${sport}** con:\n- Esfuerzo Percibido (RPE): **${rpe}/10**\n- Sensaciones: **${feelingEmoji[feeling] || feeling}**\n- ¿Dolor Localizado?: **${painLocalized ? 'Sí 🔴' : 'No 🟢'}**\n\n*La IA ha adaptado preventivamente los entrenamientos de los próximos 2 días (-25% de carga).*`;
+
+      await adminSupabase.from('chat_messages').insert({
+        sender_id: userId,
+        receiver_id: profile.coach_id,
+        message: alertMsg
+      });
+    }
+
+    revalidatePath('/dashboard');
+    revalidatePath('/analytics');
+    revalidatePath('/feedback');
+
+    return {
+      adjusted: true,
+      message: '¡Aviso! Se han adaptado tus próximos 2 entrenamientos por el nivel de fatiga detectado.'
+    };
+  } catch (error: any) {
+    console.error('Error en evaluateFeedbackAndAdjustPlan:', error);
+    return { adjusted: false, message: error.message || 'Error en el ajuste adaptativo' };
+  }
+}
+

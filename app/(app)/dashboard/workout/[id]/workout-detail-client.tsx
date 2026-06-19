@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/(app)/dashboard/actions';
+import { toggleWorkoutStatus, updateWorkoutStatus, completeWorkoutWithFeedback } from '@/app/(app)/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { adaptWorkoutDescription } from '@/lib/zones-utility';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -24,7 +24,9 @@ import {
   Heart, 
   Timer, 
   Smartphone,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -53,6 +55,7 @@ interface WorkoutDetailClientProps {
       day_name: string;
       gear_needed?: string[] | null;
     };
+    workout_feedback?: any[] | null;
   };
   structured: {
     workoutName: string;
@@ -98,19 +101,77 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
   const isCompleted = status === 'completed';
   const isMissed = status === 'missed';
 
+  // Estados de feedback subjetivo
+  const initialFeedback = workout.workout_feedback && Array.isArray(workout.workout_feedback)
+    ? workout.workout_feedback[0]
+    : (workout.workout_feedback || null);
+
+  const [hasFeedback, setHasFeedback] = React.useState(!!initialFeedback);
+  const [showFeedbackForm, setShowFeedbackForm] = React.useState(workout.status === 'completed' && !initialFeedback);
+  const [submittingFeedback, setSubmittingFeedback] = React.useState(false);
+
+  // Campos del cuestionario
+  const [rpe, setRpe] = React.useState(initialFeedback?.rpe_score || 5);
+  const [feeling, setFeeling] = React.useState(initialFeedback?.feeling || 'buena');
+  const [intensityAdherence, setIntensityAdherence] = React.useState(initialFeedback?.intensity_adherence || 'clavado');
+  const [painLocalized, setPainLocalized] = React.useState(!!initialFeedback?.pain_localized);
+  const [notes, setNotes] = React.useState(initialFeedback?.notes || '');
+
   const handleToggle = async () => {
     if (loading) return;
+    
+    // Si queremos marcar como completado, en lugar de completarlo directamente, abrimos el formulario de feedback
+    if (!isCompleted) {
+      setShowFeedbackForm(true);
+      return;
+    }
+
+    // Si ya está completado y queremos desmarcarlo
     setLoading(true);
     const prevStatus = status;
-    const nextStatus = isCompleted ? 'pending' : 'completed';
+    const nextStatus = 'pending';
     setStatus(nextStatus);
+    setHasFeedback(false);
+    setShowFeedbackForm(false);
 
     try {
       await toggleWorkoutStatus(workout.id, prevStatus);
       router.refresh();
     } catch (e) {
       setStatus(prevStatus);
+      setHasFeedback(!!initialFeedback);
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFeedbackSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (submittingFeedback) return;
+    setSubmittingFeedback(true);
+    setLoading(true);
+
+    try {
+      await completeWorkoutWithFeedback(
+        workout.id,
+        rpe,
+        feeling,
+        intensityAdherence,
+        painLocalized,
+        notes
+      );
+      setHasFeedback(true);
+      setShowFeedbackForm(false);
+      setStatus('completed');
+      setToastMsg('¡Entrenamiento valorado y completado con éxito! 🚀');
+      setTimeout(() => setToastMsg(null), 5000);
+      router.refresh();
+    } catch (err: any) {
+      console.error('Error al guardar feedback:', err);
+      setToastMsg('⚠️ Error al registrar feedback.');
+      setTimeout(() => setToastMsg(null), 5000);
+    } finally {
+      setSubmittingFeedback(false);
       setLoading(false);
     }
   };
@@ -299,6 +360,258 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
             </div>
           </div>
         </div>
+
+        {/* Cuestionario de Feedback Adaptativo */}
+        <AnimatePresence mode="wait">
+          {showFeedbackForm && (
+            <motion.div
+              key="feedback-form"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+            >
+              <ProCard className="p-6 border-cyan-500/30 bg-zinc-900/90 shadow-xl space-y-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none bg-cyan-500/5" />
+                <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-cyan-400" />
+                    Valoración del Entrenamiento
+                  </h3>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setShowFeedbackForm(false);
+                    }}
+                    className="text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+
+                <form onSubmit={handleFeedbackSubmit} className="space-y-6">
+                  {/* 1. RPE Slider / Buttons */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                      Esfuerzo Percibido (RPE): <span className="text-white text-sm font-bold ml-1">{rpe}/10</span>
+                    </label>
+                    
+                    {/* RPE Buttons Grid */}
+                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5 pt-1">
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map((val) => {
+                        let btnClass = "bg-zinc-950 border-zinc-800 text-zinc-400 hover:bg-zinc-850";
+                        if (rpe === val) {
+                          if (val <= 3) btnClass = "bg-green-500/25 border-green-400 text-green-300 scale-105 font-bold shadow-lg shadow-green-950/20";
+                          else if (val <= 7) btnClass = "bg-yellow-500/25 border-yellow-400 text-yellow-300 scale-105 font-bold shadow-lg shadow-yellow-950/20";
+                          else btnClass = "bg-red-500/25 border-red-400 text-red-300 scale-105 font-bold shadow-lg shadow-red-950/20";
+                        }
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setRpe(val)}
+                            className={`py-2 px-1 text-xs border rounded-lg text-center transition-all cursor-pointer duration-150 ${btnClass}`}
+                          >
+                            {val}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    
+                    <p className="text-[10px] text-zinc-500 italic mt-1.5">
+                      {rpe <= 2 && "Suave: Conversación fluida y muy cómodo."}
+                      {rpe >= 3 && rpe <= 4 && "Moderado: Nivel de esfuerzo bajo, respiración controlada."}
+                      {rpe >= 5 && rpe <= 6 && "Algo Duro: Comienza la fatiga, requiere concentración."}
+                      {rpe >= 7 && rpe <= 8 && "Duro: Esfuerzo alto, respiración muy agitada."}
+                      {rpe >= 9 && "Extenuante: Esfuerzo límite, casi imposible de mantener."}
+                    </p>
+                  </div>
+
+                  {/* 2. Sensaciones (Feeling) */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                      ¿Cómo te has sentido en general?
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                      {[
+                        { id: 'excelente', label: 'Excelente', emoji: '😃', color: 'border-green-500 text-green-300 bg-green-500/5' },
+                        { id: 'buena', label: 'Bueno', emoji: '🙂', color: 'border-cyan-500 text-cyan-300 bg-cyan-500/5' },
+                        { id: 'fatigado', label: 'Fatigado', emoji: '🥱', color: 'border-yellow-500 text-yellow-300 bg-yellow-500/5' },
+                        { id: 'lesionado', label: 'Lesión / Dolor', emoji: '🤕', color: 'border-red-500 text-red-300 bg-red-500/5' }
+                      ].map((item) => {
+                        const isSelected = feeling === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setFeeling(item.id)}
+                            className={`py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
+                              isSelected 
+                                ? `${item.color} font-bold scale-102` 
+                                : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300"
+                            }`}
+                          >
+                            <span className="text-base">{item.emoji}</span>
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 3. Adherencia a la Intensidad */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                      ¿Cumpliste las zonas de intensidad indicadas?
+                    </label>
+                    <div className="grid grid-cols-3 gap-2 pt-1">
+                      {[
+                        { id: 'suave', label: 'Más suave', emoji: '📉' },
+                        { id: 'clavado', label: 'Clavado', emoji: '🎯' },
+                        { id: 'fuerte', label: 'Más fuerte', emoji: '📈' }
+                      ].map((item) => {
+                        const isSelected = intensityAdherence === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => setIntensityAdherence(item.id)}
+                            className={`py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
+                              isSelected 
+                                ? "border-cyan-500 text-cyan-300 bg-cyan-500/5 font-bold scale-102" 
+                                : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300"
+                            }`}
+                          >
+                            <span>{item.emoji}</span>
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 4. Dolor Localizado */}
+                  <div className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-950 flex flex-col space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className={`w-4 h-4 ${painLocalized ? 'text-red-400' : 'text-zinc-500'}`} />
+                        <div>
+                          <p className="text-xs font-bold text-white">¿Dolor o molestia localizada inusual?</p>
+                          <p className="text-[10px] text-zinc-500">Excluye la fatiga muscular común.</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPainLocalized(!painLocalized)}
+                        className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 cursor-pointer ${
+                          painLocalized ? 'bg-red-500/80' : 'bg-zinc-800'
+                        }`}
+                      >
+                        <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                          painLocalized ? 'translate-x-6' : 'translate-x-0'
+                        }`} />
+                      </button>
+                    </div>
+
+                    {painLocalized && (
+                      <div className="pt-2 border-t border-red-500/10 text-[10px] text-red-300 leading-relaxed">
+                        ⚠️ **Alerta activa:** Esto avisará a tu entrenador y activará la reducción preventora de carga de la IA.
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 5. Comentarios */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 flex justify-between">
+                      <span>Comentarios y notas (opcional)</span>
+                      <span className="text-[10px] text-zinc-550 font-normal">{notes.length}/1000</span>
+                    </label>
+                    <textarea
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value.slice(0, 1000))}
+                      placeholder="¿Cómo fue el viento, la temperatura? ¿Tuviste problemas mecánicos o de nutrición? Cuéntaselo al entrenador..."
+                      rows={3}
+                      className="w-full rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 p-3 text-xs focus:outline-none focus:border-cyan-500/50 resize-none font-normal"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <AnimatedButton
+                    variant="primary"
+                    type="submit"
+                    disabled={loading}
+                    className="w-full justify-center py-5 text-xs font-bold shadow-lg shadow-cyan-500/10"
+                  >
+                    <span>Guardar Valoración y Completar</span>
+                  </AnimatedButton>
+                </form>
+              </ProCard>
+            </motion.div>
+          )}
+
+          {hasFeedback && !showFeedbackForm && (
+            <motion.div
+              key="feedback-summary"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+            >
+              <ProCard className="p-5 border-zinc-850 bg-zinc-900/40 space-y-4">
+                <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-green-400" />
+                    Valoración de la Sesión
+                  </h3>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowFeedbackForm(true)}
+                    className="text-[10px] font-bold text-cyan-400 hover:text-cyan-300 cursor-pointer"
+                  >
+                    Editar Valoración
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider">Esfuerzo (RPE)</p>
+                    <p className="text-sm font-bold text-white mt-0.5">{rpe}/10</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider">Sensación</p>
+                    <p className="text-sm font-bold text-white mt-0.5 capitalize flex items-center gap-1">
+                      {feeling === 'excelente' && '😃 Excelente'}
+                      {feeling === 'buena' && '🙂 Bueno'}
+                      {feeling === 'fatigado' && '🥱 Fatigado'}
+                      {feeling === 'lesionado' && '🤕 Lesionado'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider">Adherencia</p>
+                    <p className="text-sm font-bold text-white mt-0.5 capitalize">
+                      {intensityAdherence === 'suave' && '📉 Más suave'}
+                      {intensityAdherence === 'clavado' && '🎯 Clavado'}
+                      {intensityAdherence === 'fuerte' && '📈 Más fuerte'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider">Dolor muscular</p>
+                    <p className={`text-sm font-bold mt-0.5 ${painLocalized ? 'text-red-400' : 'text-green-400'}`}>
+                      {painLocalized ? 'Sí 🔴' : 'No 🟢'}
+                    </p>
+                  </div>
+                </div>
+
+                {notes && (
+                  <div className="pt-2 border-t border-zinc-850">
+                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider mb-1">Notas registradas</p>
+                    <p className="text-xs text-zinc-300 italic bg-zinc-950/20 p-2.5 rounded-lg border border-zinc-850/50 leading-relaxed font-normal">
+                      {notes}
+                    </p>
+                  </div>
+                )}
+              </ProCard>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Coaching Notes / Description */}
         <ProCard className="p-5 space-y-3">

@@ -681,7 +681,9 @@ export type Database = {
           created_at: string | null
           feeling: string
           id: string
+          intensity_adherence: string | null
           notes: string | null
+          pain_localized: boolean | null
           rpe_score: number
           user_id: string
           workout_id: string
@@ -690,7 +692,9 @@ export type Database = {
           created_at?: string | null
           feeling: string
           id?: string
+          intensity_adherence?: string | null
           notes?: string | null
+          pain_localized?: boolean | null
           rpe_score: number
           user_id: string
           workout_id: string
@@ -699,7 +703,9 @@ export type Database = {
           created_at?: string | null
           feeling?: string
           id?: string
+          intensity_adherence?: string | null
           notes?: string | null
+          pain_localized?: boolean | null
           rpe_score?: number
           user_id?: string
           workout_id?: string

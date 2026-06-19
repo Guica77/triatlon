@@ -96,7 +96,7 @@ export default async function DashboardPage() {
 
   const { data: workouts } = await supabase
     .from('user_workouts')
-    .select('*, training_sessions(*), universal_telemetry(*)')
+    .select('*, training_sessions(*), universal_telemetry(*), workout_feedback(*)')
     .eq('user_id', user.id)
     .gte('scheduled_date', calendarStart.toISOString().split('T')[0])
     .lte('scheduled_date', calendarEnd.toISOString().split('T')[0])
