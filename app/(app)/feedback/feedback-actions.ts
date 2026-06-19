@@ -59,7 +59,8 @@ export async function submitWorkoutFeedback(formData: WorkoutFeedbackData) {
         formData.workout_id,
         formData.rpe_score,
         formData.feeling,
-        formData.pain_localized || false
+        formData.pain_localized || false,
+        formData.intensity_adherence
       );
     } catch (adjustError) {
       console.error('Error al ejecutar evaluación adaptativa de feedback:', adjustError);

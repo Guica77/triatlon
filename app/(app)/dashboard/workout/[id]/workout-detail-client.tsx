@@ -26,7 +26,8 @@ import {
   Smartphone,
   ChevronRight,
   Sparkles,
-  AlertTriangle
+  AlertTriangle,
+  ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -48,6 +49,7 @@ interface WorkoutDetailClientProps {
     scheduled_date: string;
     status: string;
     auto_adjusted?: boolean | null;
+    adjustment_reason?: string | null;
     training_sessions: {
       sport_type: string;
       duration_min: number;
@@ -98,6 +100,34 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
 
   const session = workout.training_sessions;
+
+  const durationMin = React.useMemo(() => {
+    let dur = session.duration_min || 0;
+    if (workout.auto_adjusted) {
+      if (workout.adjustment_reason === 'lesion') {
+        dur = Math.round(dur * 0.5);
+      } else if (workout.adjustment_reason === 'adherencia') {
+        dur = Math.round(dur * 0.85);
+      } else {
+        dur = Math.round(dur * 0.75);
+      }
+    }
+    return dur;
+  }, [session.duration_min, workout.auto_adjusted, workout.adjustment_reason]);
+
+  const adaptedDescription = React.useMemo(() => {
+    let desc = session.description || '';
+    if (workout.auto_adjusted) {
+      if (workout.adjustment_reason === 'lesion') {
+        desc = `[AJUSTE DE IA: PREVENCIÓN DE LESIONES] Sesión reducida al 50%. Entrena estrictamente en Zona 1 (recuperación activa) y detén la sesión inmediatamente si sientes cualquier molestia o pinchazo. Objetivo original:\n${desc}`;
+      } else if (workout.adjustment_reason === 'adherencia') {
+        desc = `[AJUSTE DE IA: ADHERENCIA] Carga reducida un 15% para consolidar ritmos. Prioriza terminar la sesión cómodamente en lugar de forzar zonas altas. Objetivo original:\n${desc}`;
+      } else {
+        desc = `[AJUSTE DE IA: AJUSTE POR FATIGA] Duración principal reducida un 25%. Mantén un esfuerzo moderado y cómodo en Zona 1-2. Objetivo original:\n${desc}`;
+      }
+    }
+    return desc;
+  }, [session.description, workout.auto_adjusted, workout.adjustment_reason]);
   const isCompleted = status === 'completed';
   const isMissed = status === 'missed';
 
@@ -328,13 +358,31 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
         <div className={`p-6 rounded-2xl bg-gradient-to-br border shadow-xl relative overflow-hidden ${sportBgColors[session.sport_type] || 'from-zinc-900 to-zinc-950 border-zinc-800'}`}>
           <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none ${sportGlows[session.sport_type] || 'bg-transparent'}`} />
           
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className="px-2 py-0.5 rounded bg-black/40 text-[9px] font-bold uppercase tracking-widest text-zinc-300 border border-zinc-800">
               {session.day_name}
             </span>
             <span className={`text-[10px] font-extrabold uppercase tracking-widest ${sportTextColors[session.sport_type] || 'text-white'}`}>
               • {session.sport_type}
             </span>
+            {workout.auto_adjusted && (
+              workout.adjustment_reason === 'lesion' ? (
+                <span className="px-2 py-0.5 rounded bg-red-950/40 border border-red-550/30 text-red-400 text-[9px] font-bold flex items-center gap-1">
+                  <AlertTriangle className="w-2.5 h-2.5 text-red-400" />
+                  <span>IA: Prevención de Lesión</span>
+                </span>
+              ) : workout.adjustment_reason === 'adherencia' ? (
+                <span className="px-2 py-0.5 rounded bg-blue-950/40 border border-blue-550/30 text-blue-400 text-[9px] font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-2.5 h-2.5 text-blue-400" />
+                  <span>IA: Ajuste de Carga</span>
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded bg-amber-950/40 border border-amber-550/30 text-amber-400 text-[9px] font-bold flex items-center gap-1">
+                  <Flame className="w-2.5 h-2.5 text-amber-400" />
+                  <span>IA: Ajuste por Fatiga</span>
+                </span>
+              )
+            )}
           </div>
 
           <h2 className="text-2xl font-bold text-white capitalize leading-tight mb-4">
@@ -344,7 +392,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/5">
             <div>
               <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Duración</p>
-              <p className="text-base font-bold text-white mt-0.5">{session.duration_min} min</p>
+              <p className="text-base font-bold text-white mt-0.5">{durationMin} min</p>
             </div>
             <div>
               <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Tipo</p>
@@ -501,6 +549,8 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                       </div>
                       <button
                         type="button"
+                        aria-label="Alternar dolor localizado"
+                        title="Alternar dolor localizado"
                         onClick={() => setPainLocalized(!painLocalized)}
                         className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 cursor-pointer ${
                           painLocalized ? 'bg-red-500/80' : 'bg-zinc-800'
@@ -620,7 +670,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
             Notas del Entrenador
           </h3>
           <p className="text-sm text-zinc-300 leading-relaxed font-normal whitespace-pre-line">
-            {adaptWorkoutDescription(session.description, session.sport_type, profile) || 'Sin notas descriptivas para este entrenamiento.'}
+            {adaptWorkoutDescription(adaptedDescription, session.sport_type, profile) || 'Sin notas descriptivas para este entrenamiento.'}
           </p>
         </ProCard>
 

@@ -237,7 +237,7 @@ export function FormStatusWidget({
           {/* Gráfico de tendencia PMC de 7 días (Solo para atletas intermedios/avanzados) */}
           {showChart && (
             <div className="w-full mt-3 border-t border-zinc-100 pt-2">
-              <div style={{ height: `${chartHeight}px`, width: '100%' }}>
+              <div className="w-full h-[55px]">
                 <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
                   {/* Línea de referencia Cero */}
                   <line x1="0" y1={getY_T(0)} x2={chartWidth} y2={getY_T(0)} stroke="#e4e4e7" strokeWidth="1" strokeDasharray="3 2" />

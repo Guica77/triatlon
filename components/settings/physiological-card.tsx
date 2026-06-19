@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Edit2, X, Check, Zap, Waves, Footprints, Clock } from 'lucide-react';
+import { Activity, Edit2, X, Zap, Waves, Footprints, Clock } from 'lucide-react';
 import { updatePhysiologicalData } from '@/app/(app)/settings/actions';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
@@ -37,53 +37,55 @@ export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours }: Phy
   };
 
   return (
-    <div className="p-6 rounded-2xl bg-[#18181b] border border-zinc-800 shadow-xl relative h-full flex flex-col group">
+    <div className="p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm relative h-full flex flex-col group">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-            <Activity className="w-4 h-4 text-emerald-400" />
+          <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm">
+            <Activity className="w-4 h-4 text-emerald-600" />
           </div>
-          <h3 className="text-base font-bold text-zinc-100">Fisiología y Zonas</h3>
+          <h3 className="text-sm sm:text-base font-bold text-zinc-900 tracking-tight leading-tight">Fisiología y Zonas</h3>
         </div>
         <button 
           onClick={() => setIsEditing(true)}
-          className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors"
+          title="Editar métricas"
+          aria-label="Editar métricas"
+          className="w-8 h-8 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-cyan-600 hover:border-cyan-550 hover:bg-cyan-50/50 transition-colors cursor-pointer"
         >
           <Edit2 className="w-3.5 h-3.5" />
         </button>
       </div>
 
       <div className="grid grid-cols-2 gap-4 flex-1">
-        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50 flex flex-col justify-center">
-          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
-            <Zap className="w-3.5 h-3.5 text-yellow-500" />
-            <span className="text-[10px] uppercase tracking-widest font-bold">FTP Bici</span>
+        <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/80 flex flex-col justify-center shadow-sm">
+          <div className="flex items-center gap-1.5 text-zinc-450 mb-1">
+            <Zap className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-[10px] uppercase tracking-widest font-black">FTP Bici</span>
           </div>
-          <p className="text-xl font-black text-white">{ftp ? `${ftp} W` : '---'}</p>
+          <p className="text-xl font-black text-zinc-900">{ftp ? `${ftp} W` : '---'}</p>
         </div>
-        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50 flex flex-col justify-center">
-          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
-            <Waves className="w-3.5 h-3.5 text-blue-400" />
-            <span className="text-[10px] uppercase tracking-widest font-bold">Ritmo Nado</span>
+        <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/80 flex flex-col justify-center shadow-sm">
+          <div className="flex items-center gap-1.5 text-zinc-450 mb-1">
+            <Waves className="w-3.5 h-3.5 text-cyan-500" />
+            <span className="text-[10px] uppercase tracking-widest font-black">Ritmo Nado</span>
           </div>
-          <p className="text-xl font-black text-white">{swimPace ? `${swimPace}` : '---'}</p>
-          <p className="text-[9px] text-zinc-600 mt-0.5">/ 100m</p>
+          <p className="text-xl font-black text-zinc-900">{swimPace ? `${swimPace}` : '---'}</p>
+          <p className="text-[9px] text-zinc-500 mt-0.5">/ 100m</p>
         </div>
-        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50 flex flex-col justify-center">
-          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
-            <Footprints className="w-3.5 h-3.5 text-orange-400" />
-            <span className="text-[10px] uppercase tracking-widest font-bold">Ritmo Carrera</span>
+        <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/80 flex flex-col justify-center shadow-sm">
+          <div className="flex items-center gap-1.5 text-zinc-450 mb-1">
+            <Footprints className="w-3.5 h-3.5 text-rose-500" />
+            <span className="text-[10px] uppercase tracking-widest font-black">Ritmo Carrera</span>
           </div>
-          <p className="text-xl font-black text-white">{runPace ? `${runPace}` : '---'}</p>
-          <p className="text-[9px] text-zinc-600 mt-0.5">/ km</p>
+          <p className="text-xl font-black text-zinc-900">{runPace ? `${runPace}` : '---'}</p>
+          <p className="text-[9px] text-zinc-500 mt-0.5">/ km</p>
         </div>
-        <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800/50 flex flex-col justify-center">
-          <div className="flex items-center gap-1.5 text-zinc-500 mb-1">
-            <Clock className="w-3.5 h-3.5 text-purple-400" />
-            <span className="text-[10px] uppercase tracking-widest font-bold">Horas Base</span>
+        <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/80 flex flex-col justify-center shadow-sm">
+          <div className="flex items-center gap-1.5 text-zinc-450 mb-1">
+            <Clock className="w-3.5 h-3.5 text-purple-500" />
+            <span className="text-[10px] uppercase tracking-widest font-black">Horas Base</span>
           </div>
-          <p className="text-xl font-black text-white">{baselineHours || '---'}</p>
-          <p className="text-[9px] text-zinc-600 mt-0.5">/ semana</p>
+          <p className="text-xl font-black text-zinc-900">{baselineHours || '---'}</p>
+          <p className="text-[9px] text-zinc-500 mt-0.5">/ semana</p>
         </div>
       </div>
 
@@ -93,37 +95,71 @@ export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours }: Phy
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm rounded-2xl"
+            className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/45 backdrop-blur-sm rounded-2xl"
           >
             <motion.div 
               initial={{ scale: 0.95, y: 10 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 10 }}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-2xl relative"
+              className="w-full bg-white border border-zinc-200 rounded-2xl p-5 shadow-2xl relative"
             >
-              <button onClick={() => setIsEditing(false)} className="absolute top-4 right-4 text-zinc-500 hover:text-white">
+              <button 
+                onClick={() => setIsEditing(false)} 
+                className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-800 cursor-pointer"
+                title="Cerrar"
+              >
                 <X className="w-4 h-4" />
               </button>
               
-              <h4 className="text-lg font-bold text-white mb-4">Editar Métricas</h4>
+              <h4 className="text-base font-bold text-zinc-900 mb-4">Editar Métricas Fisiológicas</h4>
               
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[10px] text-zinc-400 uppercase font-bold mb-1 block">FTP Ciclismo</label>
-                    <input type="number" value={form.current_ftp} onChange={e => setForm({...form, current_ftp: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white focus:border-emerald-500 outline-none" placeholder="250" />
+                    <label htmlFor="ftpInput" className="text-[10px] text-zinc-500 uppercase font-black mb-1 block">FTP Ciclismo</label>
+                    <input 
+                      id="ftpInput"
+                      type="number" 
+                      value={form.current_ftp} 
+                      onChange={e => setForm({...form, current_ftp: e.target.value})} 
+                      className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 focus:border-cyan-550 focus:ring-1 focus:ring-cyan-550 outline-none" 
+                      placeholder="250" 
+                      title="FTP Ciclismo"
+                    />
                   </div>
                   <div>
-                    <label className="text-[10px] text-zinc-400 uppercase font-bold mb-1 block">Ritmo Natación</label>
-                    <input type="text" value={form.current_swim_pace} onChange={e => setForm({...form, current_swim_pace: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white focus:border-emerald-500 outline-none" placeholder="01:45" />
+                    <label htmlFor="swimPaceInput" className="text-[10px] text-zinc-500 uppercase font-black mb-1 block">Ritmo Natación</label>
+                    <input 
+                      id="swimPaceInput"
+                      type="text" 
+                      value={form.current_swim_pace} 
+                      onChange={e => setForm({...form, current_swim_pace: e.target.value})} 
+                      className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 focus:border-cyan-550 focus:ring-1 focus:ring-cyan-550 outline-none" 
+                      placeholder="01:45" 
+                      title="Ritmo Natación"
+                    />
                   </div>
                   <div>
-                    <label className="text-[10px] text-zinc-400 uppercase font-bold mb-1 block">Ritmo Carrera</label>
-                    <input type="text" value={form.current_run_pace} onChange={e => setForm({...form, current_run_pace: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white focus:border-emerald-500 outline-none" placeholder="04:30" />
+                    <label htmlFor="runPaceInput" className="text-[10px] text-zinc-500 uppercase font-black mb-1 block">Ritmo Carrera</label>
+                    <input 
+                      id="runPaceInput"
+                      type="text" 
+                      value={form.current_run_pace} 
+                      onChange={e => setForm({...form, current_run_pace: e.target.value})} 
+                      className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 focus:border-cyan-550 focus:ring-1 focus:ring-cyan-550 outline-none" 
+                      placeholder="04:30" 
+                      title="Ritmo Carrera"
+                    />
                   </div>
                   <div>
-                    <label className="text-[10px] text-zinc-400 uppercase font-bold mb-1 block">Horas Base</label>
-                    <select value={form.baseline_training_hours} onChange={e => setForm({...form, baseline_training_hours: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 text-sm text-white focus:border-emerald-500 outline-none">
+                    <label htmlFor="baselineHours" className="text-[10px] text-zinc-500 uppercase font-black mb-1 block">Horas Base</label>
+                    <select 
+                      id="baselineHours"
+                      value={form.baseline_training_hours} 
+                      onChange={e => setForm({...form, baseline_training_hours: e.target.value})} 
+                      className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-900 focus:border-cyan-550 focus:ring-1 focus:ring-cyan-550 outline-none"
+                      title="Horas base"
+                    >
                       <option value="4-6h">4-6h</option>
                       <option value="7-10h">7-10h</option>
                       <option value="12+h">12+h</option>
@@ -131,7 +167,12 @@ export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours }: Phy
                   </div>
                 </div>
                 
-                <AnimatedButton variant="primary" onClick={handleSave} disabled={loading} className="w-full py-2.5 text-sm !bg-emerald-500 hover:!bg-emerald-400 !text-black flex justify-center">
+                <AnimatedButton 
+                  variant="primary" 
+                  onClick={handleSave} 
+                  disabled={loading} 
+                  className="w-full py-2.5 text-xs font-black !bg-cyan-650 hover:!bg-cyan-550 !text-white flex justify-center shadow-md cursor-pointer"
+                >
                   {loading ? 'Guardando...' : 'Guardar Cambios'}
                 </AnimatedButton>
               </div>

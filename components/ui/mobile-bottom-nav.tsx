@@ -52,7 +52,7 @@ export function MobileBottomNav() {
   ];
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 pt-2 bg-zinc-950/80 backdrop-blur-xl border-t border-zinc-800/80 shadow-lg shadow-black/50">
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 pt-2 bg-white/90 backdrop-blur-md border-t border-zinc-200 shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.08)]">
       <div className="flex items-center justify-around max-w-md mx-auto relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -62,26 +62,26 @@ export function MobileBottomNav() {
             <Link 
               key={item.href} 
               href={item.href}
-              className="flex flex-col items-center gap-1 py-1 px-3 relative group"
+              className="flex flex-col items-center gap-1 py-1.5 px-3 relative group"
               aria-label={item.label}
             >
               {isActive && (
                 <motion.div 
                   layoutId="mobile-nav-bubble" 
-                  className="absolute inset-0 bg-white/10 rounded-2xl -z-10"
+                  className="absolute inset-0 bg-cyan-50 border border-cyan-100/50 rounded-xl -z-10"
                   transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                 />
               )}
               
               <div className="relative">
-                <Icon className={`w-5 h-5 transition-colors duration-200 ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-400'}`} />
+                <Icon className={`w-5 h-5 transition-colors duration-200 ${isActive ? 'text-cyan-500' : 'text-zinc-400 group-hover:text-zinc-800'}`} />
                 <AnimatePresence>
                   {item.showBadge && unreadCount > 0 && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       exit={{ scale: 0 }}
-                      className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-zinc-950 shadow-sm"
+                      className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
                     >
                       <span className="text-[9px] font-bold text-white leading-none">
                         {unreadCount > 9 ? '9+' : unreadCount}
@@ -91,7 +91,7 @@ export function MobileBottomNav() {
                 </AnimatePresence>
               </div>
 
-              <span className={`text-[10px] font-medium tracking-wide transition-colors duration-200 ${isActive ? 'text-white font-semibold' : 'text-zinc-500 group-hover:text-zinc-400'}`}>
+              <span className={`text-[10px] font-semibold tracking-wide transition-colors duration-200 ${isActive ? 'text-cyan-500' : 'text-zinc-400 group-hover:text-zinc-800'}`}>
                 {item.label}
               </span>
             </Link>

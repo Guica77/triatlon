@@ -263,6 +263,8 @@ export type Database = {
           custom_carbs_per_hour: number | null
           invite_code: string | null
           preferred_ingredients: string[] | null
+          allergies: string[] | null
+          disliked_ingredients: string[] | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -310,6 +312,8 @@ export type Database = {
           custom_carbs_per_hour?: number | null
           invite_code?: string | null
           preferred_ingredients?: string[] | null
+          allergies?: string[] | null
+          disliked_ingredients?: string[] | null
         }
         Update: {
           active_plan_id?: string | null
@@ -357,6 +361,8 @@ export type Database = {
           custom_carbs_per_hour?: number | null
           invite_code?: string | null
           preferred_ingredients?: string[] | null
+          allergies?: string[] | null
+          disliked_ingredients?: string[] | null
         }
         Relationships: [
           {
@@ -625,6 +631,7 @@ export type Database = {
       user_workouts: {
         Row: {
           actual_tss: number | null
+          adjustment_reason: string | null
           auto_adjusted: boolean | null
           completed_at: string | null
           created_at: string
@@ -637,6 +644,7 @@ export type Database = {
         }
         Insert: {
           actual_tss?: number | null
+          adjustment_reason?: string | null
           auto_adjusted?: boolean | null
           completed_at?: string | null
           created_at?: string
@@ -649,6 +657,7 @@ export type Database = {
         }
         Update: {
           actual_tss?: number | null
+          adjustment_reason?: string | null
           auto_adjusted?: boolean | null
           completed_at?: string | null
           created_at?: string

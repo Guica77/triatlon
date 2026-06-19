@@ -10,6 +10,30 @@ interface WeeklyTssCardProps {
   athleteLevel?: string;
 }
 
+function getProgressWidthClass(progress: number): string {
+  if (progress >= 100) return 'w-[100%]';
+  if (progress >= 95) return 'w-[95%]';
+  if (progress >= 90) return 'w-[90%]';
+  if (progress >= 85) return 'w-[85%]';
+  if (progress >= 80) return 'w-[80%]';
+  if (progress >= 75) return 'w-[75%]';
+  if (progress >= 70) return 'w-[70%]';
+  if (progress >= 65) return 'w-[65%]';
+  if (progress >= 60) return 'w-[60%]';
+  if (progress >= 55) return 'w-[55%]';
+  if (progress >= 50) return 'w-[50%]';
+  if (progress >= 45) return 'w-[45%]';
+  if (progress >= 40) return 'w-[40%]';
+  if (progress >= 35) return 'w-[35%]';
+  if (progress >= 30) return 'w-[30%]';
+  if (progress >= 25) return 'w-[25%]';
+  if (progress >= 20) return 'w-[20%]';
+  if (progress >= 15) return 'w-[15%]';
+  if (progress >= 10) return 'w-[10%]';
+  if (progress >= 5) return 'w-[5%]';
+  return 'w-[0%]';
+}
+
 export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio' }: WeeklyTssCardProps) {
   const isBeginner = athleteLevel === 'principiante';
   const [showHelp, setShowHelp] = React.useState(false);
@@ -136,8 +160,7 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
       <div className="space-y-2 pt-4">
         <div className="h-4 w-full bg-zinc-100 rounded-full overflow-hidden p-0.5 border border-zinc-200">
           <div
-            className={`h-full rounded-full transition-all duration-1000 ${statusInfo.barColor}`}
-            style={{ width: `${Math.min(percent, 100)}%` }}
+            className={`h-full rounded-full transition-all duration-1000 ${statusInfo.barColor} ${getProgressWidthClass(Math.min(percent, 100))}`}
           />
         </div>
         <div className="flex justify-between text-xs text-zinc-500 font-medium px-1 uppercase tracking-wider">

@@ -352,10 +352,8 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
         scheduled_date,
         completed_at,
         actual_tss,
-        planned_tss,
         status,
         rpe,
-        feel,
         training_sessions (
           id,
           sport_type,
@@ -364,7 +362,7 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
         )
       `)
       .eq('user_id', userId)
-      .in('status', ['completed', 'scheduled'])
+      .in('status', ['completed', 'pending'])
       .order('scheduled_date', { ascending: true });
 
     if (workouts && workouts.length > 0) {
@@ -372,7 +370,7 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
       workouts.forEach((w: any) => {
         if (!w.training_sessions) return;
         
-        const isScheduled = w.status === 'scheduled';
+        const isScheduled = w.status === 'pending';
         const dateRaw = isScheduled ? w.scheduled_date : (w.completed_at || w.scheduled_date);
         if (!dateRaw) return;
         

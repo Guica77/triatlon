@@ -1,0 +1,29 @@
+{
+  "css.lint.validProperties": [],
+  "css.lint.unknownAtRules": "ignore",
+  "htmlhint.options": {
+    "style-disabled": false,
+    "inline-style-disabled": false
+  },
+  "sonarlint.rules": {
+    "Web:NoInlineStyleCheck": "off",
+    "css:S4666": "off"
+  },
+  "html.format.enable": true,
+  "html.validate.styles": false,
+  "files.exclude": {
+    "**/.superpowers": true
+  },
+  "search.exclude": {
+    "**/.superpowers": true
+  },
+  "sonarlint.analysisExcludesStandalone": "**/.superpowers/**",
+  "files.associations": {
+    "**/supabase/migrations/*.sql": "plaintext",
+    "**/.superpowers/**/*.html": "plaintext"
+  },
+  "mssql.intelliSense.enableErrorChecking": false,
+  "markdownlint.config": {
+    "default": false
+  }
+}

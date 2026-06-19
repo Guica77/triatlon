@@ -21,6 +21,10 @@ interface StepPhysiologyProps {
   onPrev: () => void;
   preferredIngredients: string[];
   setPreferredIngredients: (v: string[]) => void;
+  allergies: string[];
+  setAllergies: (v: string[]) => void;
+  dislikedIngredients: string[];
+  setDislikedIngredients: (v: string[]) => void;
 }
 
 const INGREDIENTS_OPTIONS = [
@@ -34,6 +38,24 @@ const INGREDIENTS_OPTIONS = [
   { id: 'tofu', label: 'Tofu/Legumbres', category: 'Proteínas' },
   { id: 'huevo', label: 'Huevos', category: 'Proteínas' },
   { id: 'aguacate', label: 'Aguacate', category: 'Grasas' },
+];
+
+const ALLERGIES_OPTIONS = [
+  { id: 'gluten', label: 'Gluten', category: 'Alérgeno' },
+  { id: 'lactosa', label: 'Lactosa / Lácteos', category: 'Alérgeno' },
+  { id: 'frutos_secos', label: 'Frutos Secos', category: 'Alérgeno' },
+  { id: 'marisco', label: 'Marisco', category: 'Alérgeno' },
+  { id: 'huevo', label: 'Huevo', category: 'Alérgeno' },
+  { id: 'soja', label: 'Soja', category: 'Alérgeno' },
+];
+
+const DISLIKED_OPTIONS = [
+  { id: 'ajo_cebolla', label: 'Ajo / Cebolla', category: 'Evitar' },
+  { id: 'brocoli', label: 'Brócoli', category: 'Evitar' },
+  { id: 'cilantro', label: 'Cilantro', category: 'Evitar' },
+  { id: 'pescado_azul', label: 'Pescado Azul', category: 'Evitar' },
+  { id: 'carne_roja', label: 'Carne Roja', category: 'Evitar' },
+  { id: 'picante', label: 'Picante', category: 'Evitar' },
 ];
 
 export function StepPhysiology(props: StepPhysiologyProps) {
@@ -115,41 +137,122 @@ export function StepPhysiology(props: StepPhysiologyProps) {
         </AnimatePresence>
 
         {/* Sección de Preferencias de Alimentos para Nutrición */}
-        <div className="pt-6 border-t border-zinc-800/80 space-y-4">
-          <div>
-            <label className="text-xs font-semibold text-zinc-400 block uppercase tracking-wider">
-              Ingredientes Preferidos para Recuperación Post-Entrenamiento
-            </label>
-            <p className="text-xs text-zinc-500 mt-1">
-              Selecciona tus alimentos favoritos. La IA los utilizará para generar sugerencias de platos post-entrenamiento personalizados.
-            </p>
+        <div className="pt-6 border-t border-zinc-800/80 space-y-6">
+          {/* 1. Ingredientes Preferidos */}
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-bold text-zinc-400 block uppercase tracking-wider">
+                Ingredientes Preferidos para Recuperación
+              </label>
+              <p className="text-xs text-zinc-500 mt-1">
+                Selecciona tus alimentos favoritos. La IA los priorizará al sugerir tus comidas post-entrenamiento.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+              {INGREDIENTS_OPTIONS.map((ing) => {
+                const isSelected = props.preferredIngredients.includes(ing.id);
+                return (
+                  <button
+                    key={ing.id}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        props.setPreferredIngredients(props.preferredIngredients.filter(x => x !== ing.id));
+                      } else {
+                        props.setPreferredIngredients([...props.preferredIngredients, ing.id]);
+                      }
+                    }}
+                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
+                      isSelected
+                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400 ring-1 ring-emerald-500 shadow-sm shadow-emerald-500/10'
+                        : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:border-zinc-700'
+                    }`}
+                  >
+                    <span className="text-xs font-bold">{ing.label}</span>
+                    <span className="text-[9px] text-zinc-500 uppercase font-semibold mt-1 tracking-wider">{ing.category}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-            {INGREDIENTS_OPTIONS.map((ing) => {
-              const isSelected = props.preferredIngredients.includes(ing.id);
-              return (
-                <button
-                  key={ing.id}
-                  type="button"
-                  onClick={() => {
-                    if (isSelected) {
-                      props.setPreferredIngredients(props.preferredIngredients.filter(x => x !== ing.id));
-                    } else {
-                      props.setPreferredIngredients([...props.preferredIngredients, ing.id]);
-                    }
-                  }}
-                  className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
-                    isSelected
-                      ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400 ring-1 ring-emerald-500 shadow-sm shadow-emerald-500/10'
-                      : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:border-zinc-700'
-                  }`}
-                >
-                  <span className="text-xs font-bold">{ing.label}</span>
-                  <span className="text-[9px] text-zinc-500 uppercase font-semibold mt-1 tracking-wider">{ing.category}</span>
-                </button>
-              );
-            })}
+          {/* 2. Alergias Alimentarias */}
+          <div className="space-y-4 pt-4 border-t border-zinc-850/50">
+            <div>
+              <label className="text-xs font-bold text-red-400/90 block uppercase tracking-wider">
+                Alergias o Intolerancias Alimentarias
+              </label>
+              <p className="text-xs text-zinc-500 mt-1">
+                Indica si sufres de alguna intolerancia. Excluiremos automáticamente cualquier ingrediente relacionado de tus sugerencias de combustible.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-6 gap-2.5">
+              {ALLERGIES_OPTIONS.map((alg) => {
+                const isSelected = props.allergies.includes(alg.id);
+                return (
+                  <button
+                    key={alg.id}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        props.setAllergies(props.allergies.filter(x => x !== alg.id));
+                      } else {
+                        props.setAllergies([...props.allergies, alg.id]);
+                      }
+                    }}
+                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
+                      isSelected
+                        ? 'bg-red-500/10 border-red-500/40 text-red-400 ring-1 ring-red-500/40 shadow-sm shadow-red-500/10'
+                        : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:border-zinc-700'
+                    }`}
+                  >
+                    <span className="text-xs font-bold">{alg.label}</span>
+                    <span className="text-[9px] text-red-550/60 uppercase font-semibold mt-1 tracking-wider">{alg.category}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 3. Ingredientes a Evitar */}
+          <div className="space-y-4 pt-4 border-t border-zinc-850/50">
+            <div>
+              <label className="text-xs font-bold text-amber-500/90 block uppercase tracking-wider">
+                Ingredientes que prefieres evitar
+              </label>
+              <p className="text-xs text-zinc-500 mt-1">
+                Alimentos que no te gustan o prefieres no incluir en tu plan de nutrición.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-6 gap-2.5">
+              {DISLIKED_OPTIONS.map((dis) => {
+                const isSelected = props.dislikedIngredients.includes(dis.id);
+                return (
+                  <button
+                    key={dis.id}
+                    type="button"
+                    onClick={() => {
+                      if (isSelected) {
+                        props.setDislikedIngredients(props.dislikedIngredients.filter(x => x !== dis.id));
+                      } else {
+                        props.setDislikedIngredients([...props.dislikedIngredients, dis.id]);
+                      }
+                    }}
+                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
+                      isSelected
+                        ? 'bg-amber-500/10 border-amber-500/40 text-amber-400 ring-1 ring-amber-500/40 shadow-sm shadow-amber-500/10'
+                        : 'bg-zinc-950/40 border-zinc-850 text-zinc-400 hover:border-zinc-700'
+                    }`}
+                  >
+                    <span className="text-xs font-bold">{dis.label}</span>
+                    <span className="text-[9px] text-amber-550/60 uppercase font-semibold mt-1 tracking-wider">{dis.category}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
         

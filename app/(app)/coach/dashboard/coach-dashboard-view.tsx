@@ -177,19 +177,19 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pb-24 text-zinc-100">
+    <div className="min-h-screen bg-[var(--color-background)] pb-24 text-zinc-900">
       
       {/* Upper Deck Header */}
-      <header className="sticky top-0 z-50 bg-[var(--color-background)]/90 backdrop-blur-md border-b border-[var(--color-border)] shadow-sm">
-        <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-900/50">
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-sm transition-all duration-300">
+        <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-inner shrink-0 group">
-              <Trophy className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+            <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-sm shrink-0 group hover:border-cyan-500/40 transition-colors">
+              <Trophy className="w-4 h-4 text-cyan-500 group-hover:scale-110 transition-transform duration-300" />
             </div>
             <div>
-              <h1 className="text-base font-semibold text-zinc-50 tracking-tight">Panel del Entrenador (Roster)</h1>
-              <p className="text-xs text-zinc-400 truncate flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></span>
+              <h1 className="text-base font-bold text-zinc-850 truncate tracking-tight">Panel del Entrenador (Roster)</h1>
+              <p className="text-xs text-zinc-500 font-semibold truncate flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse shrink-0"></span>
                 Coach: {coachName} • Plan B2B Premium
               </p>
             </div>
@@ -197,12 +197,12 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
 
           <div className="flex items-center gap-3">
             <Link href="/settings">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-400 hover:text-zinc-100 border border-zinc-800 rounded-xl">
+              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-450 hover:text-zinc-850 hover:bg-zinc-50 border border-zinc-200 rounded-xl">
                 <Settings className="w-4 h-4" />
               </AnimatedButton>
             </Link>
             <form action="/auth/signout" method="post">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-xl border border-transparent">
+              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-450 hover:text-red-500 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100">
                 <LogOut className="w-4 h-4" />
               </AnimatedButton>
             </form>
@@ -210,15 +210,15 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
         </div>
 
         {/* Level 2 Navigation Bar */}
-        <div className="px-6 py-2.5 bg-zinc-950/60 flex items-center justify-between border-t border-zinc-900/30">
+        <div className="px-6 py-2.5 bg-zinc-50/50 flex items-center justify-between border-t border-zinc-100">
           <div className="flex gap-2 overflow-x-auto scrollbar-none">
             <Link href="/coach/dashboard" className="shrink-0">
-              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 bg-zinc-900 border border-zinc-800 text-white font-medium shadow-sm">
+              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 bg-white border border-zinc-200 text-zinc-800 font-bold shadow-sm">
                 Atletas en Roster
               </AnimatedButton>
             </Link>
             <Link href="/coach/chat" className="shrink-0">
-              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 transition-all flex items-center gap-1.5">
+              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-650 hover:text-zinc-850 hover:bg-zinc-50 transition-all flex items-center gap-1.5">
                 <MessageSquare className="w-3.5 h-3.5" />
                 <span>Mensajería Directa</span>
               </AnimatedButton>
@@ -236,14 +236,14 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="p-5 rounded-2xl bg-[#18181b] border border-zinc-800 shadow-xl flex items-center gap-4 group"
+            className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm flex items-center gap-4 group"
           >
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-500 group-hover:scale-105 transition-transform">
               <Users className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">Atletas en Roster</p>
-              <h3 className="text-3xl font-black text-white mt-1">{totalAthletes}</h3>
+              <p className="text-xs text-zinc-450 font-bold uppercase tracking-wider">Atletas en Roster</p>
+              <h3 className="text-3xl font-black text-zinc-900 mt-1">{totalAthletes}</h3>
             </div>
           </motion.div>
 
@@ -251,14 +251,14 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
-            className="p-5 rounded-2xl bg-[#18181b] border border-zinc-800 shadow-xl flex items-center gap-4 group"
+            className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm flex items-center gap-4 group"
           >
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-105 transition-transform">
               <Activity className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">Completados Hoy</p>
-              <h3 className="text-3xl font-black text-white mt-1">{completionRate}%</h3>
+              <p className="text-xs text-zinc-450 font-bold uppercase tracking-wider">Completados Hoy</p>
+              <h3 className="text-3xl font-black text-zinc-900 mt-1">{completionRate}%</h3>
             </div>
           </motion.div>
 
@@ -266,14 +266,14 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
-            className="p-5 rounded-2xl bg-[#18181b] border border-zinc-800 shadow-xl flex items-center gap-4 group"
+            className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm flex items-center gap-4 group"
           >
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 group-hover:scale-105 transition-transform">
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider">Alertas Activas</p>
-              <h3 className="text-3xl font-black text-white mt-1">{activeAlerts}</h3>
+              <p className="text-xs text-zinc-450 font-bold uppercase tracking-wider">Alertas Activas</p>
+              <h3 className="text-3xl font-black text-zinc-900 mt-1">{activeAlerts}</h3>
             </div>
           </motion.div>
         </section>
@@ -283,14 +283,14 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
           
           {/* Roster Search Column */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-850 px-4 py-2.5 rounded-2xl">
-              <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+            <div className="flex items-center gap-3 bg-white border border-zinc-200 px-4 py-2.5 rounded-2xl shadow-sm focus-within:border-cyan-500/50 transition-colors">
+              <Search className="w-4 h-4 text-zinc-400 shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar atleta por nombre o correo..."
-                className="bg-transparent border-none text-zinc-200 outline-none text-sm w-full"
+                className="bg-transparent border-none text-zinc-800 outline-none text-sm w-full placeholder-zinc-400"
               />
             </div>
 
@@ -298,8 +298,8 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
               <AnimatePresence mode="popLayout">
                 {filteredRoster.length === 0 ? (
-                  <div className="col-span-full py-12 text-center bg-[#121214]/50 rounded-2xl border border-dashed border-zinc-800 flex flex-col items-center gap-3">
-                    <Users className="w-8 h-8 text-zinc-600" />
+                  <div className="col-span-full py-12 text-center bg-zinc-50 rounded-2xl border border-dashed border-zinc-250 flex flex-col items-center gap-3">
+                    <Users className="w-8 h-8 text-zinc-400" />
                     <p className="text-zinc-500 text-sm">No se encontraron atletas vinculados a tu roster.</p>
                   </div>
                 ) : (
@@ -322,27 +322,27 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
           {/* Add/Invite Athlete Widget */}
           <div className="lg:col-span-1 space-y-6">
             
-            <div className="p-6 rounded-2xl bg-[#18181b] border border-zinc-800 shadow-xl space-y-5">
-              <div className="flex items-center gap-2 text-cyan-400">
+            <div className="p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-5">
+              <div className="flex items-center gap-2 text-cyan-600">
                 <UserPlus className="w-5 h-5 shrink-0" />
-                <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-100">Vincular Atleta</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-800">Vincular Atleta</h3>
               </div>
 
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-500 leading-relaxed font-medium">
                 Pide a tus atletas que introduzcan este código cuando se registren, o envíales el enlace mágico para que se vinculen automáticamente.
               </p>
 
               <div className="space-y-4">
                 <div className="flex flex-col gap-3">
-                  <div className="bg-zinc-950/50 border border-zinc-800/80 rounded-xl p-4 text-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/5 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                    <p className="text-[10px] text-zinc-500 mb-2 uppercase tracking-widest font-bold">Tu Código de Entrenador</p>
+                  <div className="bg-zinc-50 border border-zinc-150 rounded-xl p-4 text-center relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/3 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                    <p className="text-[10px] text-zinc-450 mb-2 uppercase tracking-widest font-bold">Tu Código de Entrenador</p>
                     
-                    <div className="text-2xl text-white font-black tracking-widest drop-shadow-md">
+                    <div className="text-2xl font-black tracking-widest text-zinc-800">
                       {inviteCode ? (
-                        <span className="text-cyan-400">{inviteCode}</span>
+                        <span className="text-cyan-600">{inviteCode}</span>
                       ) : (
-                        <span className="text-zinc-600 text-lg">No configurado</span>
+                        <span className="text-zinc-400 text-lg">No configurado</span>
                       )}
                     </div>
                   </div>
@@ -352,7 +352,7 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
                       variant="ghost"
                       onClick={handleGenerateCode}
                       disabled={inviteLoading}
-                      className="px-4 py-3 text-xs font-bold text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 rounded-xl transition-all"
+                      className="px-4 py-3 text-xs font-bold text-zinc-650 hover:text-zinc-800 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 rounded-xl transition-all"
                     >
                       {inviteCode ? 'Generar Nuevo' : 'Generar Código'}
                     </AnimatedButton>
@@ -360,9 +360,9 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
                       variant="primary"
                       onClick={handleCopyLink}
                       disabled={inviteLoading || !inviteCode}
-                      className="flex-1 py-3 text-xs font-bold !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-cyan-500/10 shadow-lg flex items-center justify-center gap-1.5"
+                      className="flex-1 py-3 text-xs font-bold !bg-cyan-600 hover:!bg-cyan-500 !text-white shadow-md flex items-center justify-center gap-1.5"
                     >
-                      <UserCheck className="w-3.5 h-3.5 text-black" />
+                      <UserCheck className="w-3.5 h-3.5 text-white" />
                       Copiar Enlace
                     </AnimatedButton>
                   </div>
@@ -377,8 +377,8 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
                     exit={{ opacity: 0 }}
                     className={`p-3.5 rounded-xl border text-xs leading-normal ${
                       inviteMessage.type === 'success'
-                        ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/15'
-                        : 'bg-red-500/5 text-red-400 border-red-500/15'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-150'
+                        : 'bg-red-50 text-red-700 border-red-150'
                     }`}
                   >
                     {inviteMessage.text}
@@ -388,9 +388,9 @@ export function CoachDashboardView({ initialRoster, plans, coachName, coachId, i
             </div>
 
             {/* Quick Tips Box */}
-            <div className="p-6 rounded-2xl bg-zinc-900/30 border border-zinc-850 space-y-3">
-              <h4 className="text-xs font-black uppercase text-zinc-400 tracking-wider">Alertas y HRV</h4>
-              <p className="text-[11px] text-zinc-500 leading-relaxed">
+            <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
+              <h4 className="text-xs font-black uppercase text-zinc-450 tracking-wider">Alertas y HRV</h4>
+              <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
                 El sistema avisa con un punto rojo parpadeante cuando un atleta registra un HRV por debajo de 55ms o un Readiness de Whoop/Oura menor al 60%. Úsalo para ajustar sus entrenamientos en tiempo real y evitar lesiones.
               </p>
             </div>

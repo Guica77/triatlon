@@ -3,8 +3,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { disconnectTelemetry, syncPacesFromStravaAction, pushWeekWorkoutsToGarminAction } from '@/app/(app)/settings/actions';
-import { Watch, Link as LinkIcon, Info, Activity, RefreshCw, UploadCloud, Heart, Check, X, Smartphone } from 'lucide-react';
-import { AnimatedButton } from '@/components/ui/animated-button';
+import { Watch, Link as LinkIcon, RefreshCw, UploadCloud, Heart, Check, X, Smartphone } from 'lucide-react';
 
 interface TelemetryConnectCardProps {
   connectedProviders: string[];
@@ -15,50 +14,50 @@ const PROVIDERS = [
   {
     id: 'strava',
     name: 'Strava',
-    description: 'Puente universal de actividades',
+    description: 'Actividades automáticas',
     iconColor: 'text-[#FC4C02]',
     isReal: true,
   },
   {
     id: 'garmin',
     name: 'Garmin Connect',
-    description: 'Exporta entrenos estructurados',
-    iconColor: 'text-sky-400',
+    description: 'Exporta entrenamientos',
+    iconColor: 'text-sky-600',
     isReal: false,
   },
   {
     id: 'apple_health',
     name: 'Apple Health',
-    description: 'Datos de salud de iOS',
+    description: 'Salud de iOS',
     iconColor: 'text-rose-500',
     isReal: false,
   },
   {
     id: 'wahoo',
     name: 'Wahoo Fitness',
-    description: 'Sincroniza rodillo y sensores',
-    iconColor: 'text-zinc-200',
+    description: 'Sincroniza rodillo',
+    iconColor: 'text-zinc-800',
     isReal: false,
   },
   {
     id: 'polar',
     name: 'Polar Flow',
-    description: 'Métricas de recuperación',
-    iconColor: 'text-red-500',
+    description: 'Recuperación y métricas',
+    iconColor: 'text-red-600',
     isReal: false,
   },
   {
     id: 'coros',
     name: 'Coros',
-    description: 'Carga planes de entrenamiento',
-    iconColor: 'text-teal-400',
+    description: 'Planes adaptativos',
+    iconColor: 'text-teal-600',
     isReal: false,
   },
   {
     id: 'suunto',
     name: 'Suunto',
-    description: 'Importa rutas y entrenamientos',
-    iconColor: 'text-blue-400',
+    description: 'Rutas e historial',
+    iconColor: 'text-blue-600',
     isReal: false,
   },
 ];
@@ -116,101 +115,107 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
   const isGarminConnected = connectedProviders.includes('garmin');
 
   return (
-    <div className="p-5 rounded-2xl bg-gradient-to-br from-zinc-900 to-[#18181b] border border-zinc-800 shadow-xl relative h-full flex flex-col group overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+    <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm relative h-full flex flex-col group overflow-hidden justify-between">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
       
-      <div className="flex items-center gap-3 mb-4 shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-orange-500 shadow-inner">
-          <Watch className="w-4 h-4" />
+      <div>
+        <div className="flex items-center gap-3 mb-4 shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-600 shadow-sm shrink-0">
+            <Watch className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-sm sm:text-base font-bold text-zinc-900 leading-tight">Dispositivos y Telemetría</h3>
+            <p className="text-[10px] sm:text-xs text-zinc-500 font-medium">Conecta tus relojes y sensores</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-sm sm:text-base font-bold text-white leading-tight">Dispositivos y Telemetría</h3>
-          <p className="text-[10px] sm:text-xs text-zinc-400">Sincroniza tus relojes deportivos y sensores</p>
-        </div>
-      </div>
 
-      {/* Scrollable list of providers */}
-      <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[320px] custom-scrollbar mb-4">
-        {PROVIDERS.map((prov) => {
-          const isConnected = connectedProviders.includes(prov.id);
-          const isPendingDisconnect = isDisconnecting === prov.id;
+        {/* Scrollable list of providers */}
+        <div className="flex-1 overflow-y-auto pr-1 space-y-2 max-h-[280px] custom-scrollbar mb-4">
+          {PROVIDERS.map((prov) => {
+            const isConnected = connectedProviders.includes(prov.id);
 
-          return (
-            <div 
-              key={prov.id} 
-              className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
-                isConnected 
-                  ? 'bg-zinc-900/80 border-green-500/20' 
-                  : 'bg-zinc-950/40 border-zinc-800/80 hover:border-zinc-750'
-              }`}
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className={`w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center ${prov.iconColor} shrink-0`}>
-                  {prov.id === 'apple_health' ? (
-                    <Heart className="w-4 h-4" />
-                  ) : prov.id === 'apple_health' ? (
-                    <Smartphone className="w-4 h-4" />
+            return (
+              <div 
+                key={prov.id} 
+                className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
+                  isConnected 
+                    ? 'bg-green-50/40 border-green-200' 
+                    : 'bg-zinc-50 border-zinc-200/80 hover:border-zinc-300'
+                }`}
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className={`w-8 h-8 rounded-lg bg-white border border-zinc-200 flex items-center justify-center ${prov.iconColor} shrink-0 shadow-sm`}>
+                    {prov.id === 'apple_health' ? (
+                      <Heart className="w-4 h-4 fill-current" />
+                    ) : prov.id === 'apple_health' ? (
+                      <Smartphone className="w-4 h-4" />
+                    ) : (
+                      <Watch className="w-4 h-4" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs font-semibold text-zinc-800 truncate">{prov.name}</span>
+                      {isConnected && (
+                        <span className="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-[8px] font-black border border-green-200 flex items-center gap-0.5 uppercase tracking-wider">
+                          <Check className="w-2 h-2" /> Sí
+                        </span>
+                      )}
+                      <span className={`px-1 py-0.5 rounded text-[7px] font-bold border uppercase tracking-wider ${
+                        prov.isReal 
+                          ? 'bg-cyan-50 text-cyan-700 border-cyan-150' 
+                          : 'bg-amber-55 text-amber-700 border-amber-150'
+                      }`}>
+                        {prov.isReal ? 'OAuth' : 'Demo'}
+                      </span>
+                    </div>
+                    <p className="text-[9px] text-zinc-500 font-medium truncate max-w-[110px] sm:max-w-[130px]">{prov.description}</p>
+                  </div>
+                </div>
+
+                <div>
+                  {isConnected ? (
+                    <button
+                      onClick={() => handleDisconnect(prov.id)}
+                      disabled={!!isDisconnecting}
+                      className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 border border-zinc-200 hover:border-red-200 transition-all cursor-pointer disabled:opacity-50"
+                      title="Desconectar"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   ) : (
-                    <Watch className="w-4 h-4" />
+                    <a 
+                      href={`/api/auth/telemetry/connect?provider=${prov.id}`}
+                      title={`Conectar con ${prov.name}`}
+                      aria-label={`Conectar con ${prov.name}`}
+                    >
+                      <button
+                        className="p-1.5 rounded-lg bg-white hover:bg-cyan-50 text-zinc-550 hover:text-cyan-600 border border-zinc-200 hover:border-cyan-200 transition-all cursor-pointer"
+                        title={`Conectar con ${prov.name}`}
+                        aria-label={`Conectar con ${prov.name}`}
+                      >
+                        <LinkIcon className="w-3.5 h-3.5" />
+                      </button>
+                    </a>
                   )}
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-semibold text-white truncate">{prov.name}</span>
-                    {isConnected && (
-                      <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 text-[8px] font-bold border border-green-500/20 flex items-center gap-0.5 uppercase tracking-wider">
-                        <Check className="w-2 h-2" /> Sí
-                      </span>
-                    )}
-                    <span className={`px-1 py-0.5 rounded text-[7px] font-bold border uppercase tracking-wider ${
-                      prov.isReal 
-                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' 
-                        : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                    }`}>
-                      {prov.isReal ? 'OAuth BETA' : 'Simulado'}
-                    </span>
-                  </div>
-                  <p className="text-[9px] text-zinc-400 truncate max-w-[110px] sm:max-w-[130px]">{prov.description}</p>
-                </div>
               </div>
-
-              <div>
-                {isConnected ? (
-                  <button
-                    onClick={() => handleDisconnect(prov.id)}
-                    disabled={!!isDisconnecting}
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-zinc-800 hover:border-red-500/20 transition-all cursor-pointer disabled:opacity-50"
-                    title="Desconectar"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                ) : (
-                  <a href={`/api/auth/telemetry/connect?provider=${prov.id}`}>
-                    <button
-                      className="p-1.5 rounded-lg bg-zinc-800 hover:bg-orange-500/10 text-zinc-300 hover:text-orange-500 border border-zinc-700 hover:border-orange-500/20 transition-all cursor-pointer"
-                      title="Conectar"
-                    >
-                      <LinkIcon className="w-3.5 h-3.5" />
-                    </button>
-                  </a>
-                )}
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Conditionally rendered global actions */}
       {(isStravaConnected || isGarminConnected) && (
-        <div className="pt-3 border-t border-zinc-800 space-y-2 mt-auto shrink-0">
+        <div className="pt-3 border-t border-zinc-200 space-y-2 mt-auto shrink-0">
           {isGarminConnected && (
             <button
               onClick={handlePushWorkouts}
               disabled={isPushingWorkouts || isSyncing || !!isDisconnecting}
-              className="w-full py-2 text-[10px] sm:text-xs font-bold rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-md shadow-cyan-500/10"
+              className="w-full py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-cyan-650 hover:bg-cyan-550 text-white flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-md"
             >
               <UploadCloud className={`w-3.5 h-3.5 ${isPushingWorkouts ? 'animate-bounce' : ''}`} />
-              {isPushingWorkouts ? 'Enviando...' : 'Enviar Entrenos de la Semana a Garmin'}
+              {isPushingWorkouts ? 'Enviando...' : 'Enviar Entrenos a Garmin'}
             </button>
           )}
 
@@ -218,10 +223,10 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
             <button
               onClick={handleSyncPaces}
               disabled={isSyncing || isPushingWorkouts || !!isDisconnecting}
-              className="w-full py-2 text-[10px] sm:text-xs font-bold rounded-xl bg-orange-500 hover:bg-orange-400 text-black flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
+              className="w-full py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-[#FC4C02] hover:bg-[#e34402] text-white flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-md"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-              {isSyncing ? 'Recalculando...' : 'Recalcular Ritmos desde Strava'}
+              {isSyncing ? 'Recalculando...' : 'Recalcular Ritmos Strava'}
             </button>
           )}
         </div>
@@ -229,4 +234,3 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
     </div>
   );
 }
-

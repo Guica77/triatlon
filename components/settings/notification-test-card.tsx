@@ -15,14 +15,12 @@ export function NotificationTestCard() {
     setSuccess(false);
 
     try {
-      // Pedir permiso si no se ha pedido (por si acaso)
       if (typeof window !== 'undefined' && 'Notification' in window) {
         if (Notification.permission !== 'granted') {
           await Notification.requestPermission();
         }
       }
 
-      // 1. Get current subscription from service worker
       const registration = await navigator.serviceWorker.ready;
       const sub = await registration.pushManager.getSubscription();
       
@@ -30,17 +28,12 @@ export function NotificationTestCard() {
         throw new Error('No estás suscrito a las notificaciones en este dispositivo. Pulsa "Permitir Avisos" primero.');
       }
 
-      // 2. Send test notification directly
       const payload = {
         title: '¡Prueba Exitosa! 🎉',
         body: 'Las notificaciones push están funcionando correctamente en tu dispositivo.',
         url: '/settings'
       };
 
-      // Call our API to send it to ourselves using our own sub
-      // Since we don't have a direct "send to myself" route without knowing our own user ID, 
-      // let's create a quick API route or just use the subscription directly?
-      // Wait, we need the server to send the push using VAPID keys.
       const res = await fetch('/api/notifications/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,7 +49,6 @@ export function NotificationTestCard() {
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
       console.error(err);
-      // Mostrar el error EXACTO para poder debuggear
       setError(`Error: ${err.message}`);
       
       if (err.message?.includes('unexpected response code') || err.message?.includes('410') || err.message?.includes('403')) {
@@ -74,36 +66,38 @@ export function NotificationTestCard() {
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-          <BellRing className="w-4 h-4" />
+    <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm relative h-full flex flex-col justify-between">
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-600 shadow-sm shrink-0">
+            <BellRing className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold text-zinc-900">Notificaciones</h3>
+            <p className="text-[10px] sm:text-xs text-zinc-500 font-medium">Prueba la recepción de alertas</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-sm font-bold text-white">Prueba de Notificaciones</h3>
-          <p className="text-xs text-zinc-400">Verifica si tu dispositivo recibe alertas</p>
-        </div>
-      </div>
-      
-      {error && (
-        <div className="mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
-          {error}
-        </div>
-      )}
+        
+        {error && (
+          <div className="mb-3 p-3 rounded-xl bg-red-50 border border-red-150 text-xs text-red-700 font-semibold leading-normal">
+            {error}
+          </div>
+        )}
 
-      {success && (
-        <div className="mb-3 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-xs text-green-400 flex items-center gap-2">
-          <CheckCircle className="w-4 h-4" /> Notificación enviada. Debería sonarte ahora.
-        </div>
-      )}
+        {success && (
+          <div className="mb-3 p-3 rounded-xl bg-green-50 border border-green-150 text-xs text-green-700 font-semibold flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-600 shrink-0" /> Notificación enviada. Deberías recibirla ahora.
+          </div>
+        )}
+      </div>
 
       <AnimatedButton 
         variant="secondary" 
-        className="w-full text-xs py-2 bg-zinc-800 hover:bg-zinc-700" 
+        className="w-full text-xs font-black py-2.5 bg-zinc-50 hover:bg-zinc-100 text-zinc-700 border border-zinc-200 shadow-sm cursor-pointer mt-4" 
         onClick={handleTest}
         disabled={loading}
       >
-        {loading ? 'Enviando...' : 'Enviar Notificación de Prueba'}
+        {loading ? 'Enviando...' : 'Enviar Notificación'}
       </AnimatedButton>
     </div>
   );

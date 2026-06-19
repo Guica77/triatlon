@@ -121,25 +121,24 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
             onClick={() => !loading && onClose()}
             className="absolute inset-0 bg-black/80 backdrop-blur-md"
           />
-
           {/* Modal Body */}
           <motion.div 
             initial={{ scale: 0.95, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 15 }}
             transition={{ type: 'spring', duration: 0.4 }}
-            className="relative w-full max-w-lg bg-zinc-950 border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh]"
+            className="relative w-full max-w-lg bg-white border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh] text-zinc-900"
           >
             
             {/* Header */}
-            <div className="p-5 border-b border-zinc-900 flex justify-between items-center bg-zinc-900/20">
+            <div className="p-5 border-b border-zinc-150 flex justify-between items-center bg-zinc-50">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                <div className="w-8 h-8 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-500">
                   <Edit3 className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-zinc-100">{workout.id === 'new' ? 'Crear Nuevo Entrenamiento' : 'Editar Entrenamiento'}</h3>
-                  <p className="text-[10px] text-zinc-400">{workout.id === 'new' ? 'Configura el bloque para tu atleta.' : 'Modifica los detalles del bloque seleccionado.'}</p>
+                  <h3 className="text-sm font-bold text-zinc-850">{workout.id === 'new' ? 'Crear Nuevo Entrenamiento' : 'Editar Entrenamiento'}</h3>
+                  <p className="text-[10px] text-zinc-500 font-semibold">{workout.id === 'new' ? 'Configura el bloque para tu atleta.' : 'Modifica los detalles del bloque seleccionado.'}</p>
                 </div>
               </div>
               <button 
@@ -147,7 +146,7 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                 aria-label="Cerrar Modal"
                 onClick={onClose}
                 disabled={loading}
-                className="w-8 h-8 rounded-lg border border-zinc-900 flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-zinc-900 transition-colors"
+                className="w-8 h-8 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -157,7 +156,7 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin">
               
               {error && (
-                <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/15 text-red-400 text-xs leading-relaxed text-center">
+                <div className="p-3.5 rounded-xl bg-red-50 border border-red-155 text-red-750 text-xs leading-relaxed text-center font-semibold">
                   {error}
                 </div>
               )}
@@ -168,24 +167,24 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                   animate={{ scale: 1, opacity: 1 }}
                   className="py-12 flex flex-col items-center justify-center space-y-3"
                 >
-                  <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/5">
+                  <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-150 flex items-center justify-center text-emerald-600 shadow-sm">
                     <Check className="w-8 h-8" />
                   </div>
-                  <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">¡Actualizado!</p>
-                  <p className="text-[10px] text-zinc-500">Recalculando carga en el calendario...</p>
+                  <p className="text-xs font-black text-emerald-600 uppercase tracking-widest">¡Actualizado!</p>
+                  <p className="text-[10px] text-zinc-500 font-semibold">Recalculando carga en el calendario...</p>
                 </motion.div>
               ) : (
                 <>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-1.5 col-span-2">
-                      <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Tipo de Deporte</label>
+                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Tipo de Deporte</label>
                       <select 
                         title="Tipo de Deporte"
                         aria-label="Tipo de Deporte"
                         name="sportType"
                         value={formData.sportType}
                         onChange={handleInputChange}
-                        className="w-full bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl p-3 text-xs text-white outline-none transition-colors cursor-pointer"
+                        className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors cursor-pointer"
                       >
                         <option value="ciclismo">🚴‍♂️ Ciclismo</option>
                         <option value="carrera">🏃‍♂️ Carrera</option>
@@ -195,7 +194,7 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                     </div>
 
                     <div className="space-y-1.5 col-span-1">
-                      <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Duración (min)</label>
+                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Duración (min)</label>
                       <div className="relative flex items-center">
                         <input 
                           title="Duración"
@@ -208,15 +207,15 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                           max={600}
                           value={formData.durationMin}
                           onChange={handleInputChange}
-                          className="w-full bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl p-3 pr-8 text-xs text-white outline-none transition-colors"
+                          className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 pr-8 text-xs text-zinc-900 outline-none transition-colors"
                         />
-                        <Clock className="w-3.5 h-3.5 text-zinc-500 absolute right-3" />
+                        <Clock className="w-3.5 h-3.5 text-zinc-400 absolute right-3" />
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Título del Bloque</label>
+                    <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Título del Bloque</label>
                     <input 
                       title="Título"
                       aria-label="Título"
@@ -225,16 +224,16 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                       placeholder="Ej: Intervals VO2Max"
                       value={formData.title}
                       onChange={handleInputChange}
-                      className="w-full bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl p-3 text-xs text-white outline-none transition-colors"
+                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors"
                     />
                   </div>
 
-                  <div className="border-t border-zinc-900 my-2" />
+                  <div className="border-t border-zinc-150 my-2" />
 
                   {/* Warmup */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
-                      <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">1. Calentamiento (Warmup)</label>
+                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">1. Calentamiento (Warmup)</label>
                     </div>
                     <textarea 
                       title="Calentamiento"
@@ -244,14 +243,14 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                       rows={2}
                       value={formData.warmup}
                       onChange={handleInputChange}
-                      className="w-full bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl p-3 text-xs text-white outline-none transition-colors resize-none"
+                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
                     />
                   </div>
 
                   {/* Main */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
-                      <label className="text-[10px] text-cyan-400 uppercase tracking-wider font-semibold">2. Parte Principal</label>
+                      <label className="text-[10px] text-cyan-650 uppercase tracking-wider font-bold">2. Parte Principal</label>
                     </div>
                     <textarea 
                       title="Parte Principal"
@@ -262,14 +261,14 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                       required
                       value={formData.main}
                       onChange={handleInputChange}
-                      className="w-full bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl p-3 text-xs text-white outline-none transition-colors resize-none"
+                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
                     />
                   </div>
 
                   {/* Cooldown */}
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-center">
-                      <label className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">3. Enfriamiento (Cooldown)</label>
+                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">3. Enfriamiento (Cooldown)</label>
                     </div>
                     <textarea 
                       title="Enfriamiento"
@@ -279,7 +278,7 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                       rows={2}
                       value={formData.cooldown}
                       onChange={handleInputChange}
-                      className="w-full bg-zinc-900 border border-zinc-800 focus:border-cyan-500 rounded-xl p-3 text-xs text-white outline-none transition-colors resize-none"
+                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
                     />
                   </div>
 
@@ -288,11 +287,11 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                     variant="primary"
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 !bg-cyan-500 hover:!bg-cyan-400 !text-black shadow-lg shadow-cyan-500/10 font-bold text-xs flex items-center justify-center gap-1.5"
+                    className="w-full py-3.5 !bg-cyan-600 hover:!bg-cyan-500 !text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md"
                   >
                     {loading ? 'Guardando...' : (
                       <>
-                        <Activity className="w-4 h-4 text-black" />
+                        <Activity className="w-4 h-4 text-white" />
                         Guardar Cambios
                       </>
                     )}
@@ -306,5 +305,5 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
         </div>
       )}
     </AnimatePresence>
-  )
+  );
 }

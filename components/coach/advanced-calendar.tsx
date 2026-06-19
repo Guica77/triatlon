@@ -90,11 +90,11 @@ const SportIcon = ({ type, className }: { type: string, className?: string }) =>
 
 const getSportAccent = (type: string) => {
   switch (type?.toLowerCase()) {
-    case 'natacion': return 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]';
-    case 'ciclismo': return 'bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]';
-    case 'carrera': return 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]';
-    case 'fuerza': return 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]';
-    default: return 'bg-zinc-500';
+    case 'natacion': return 'bg-[#00a2e8]';
+    case 'ciclismo': return 'bg-[#2ecc71]';
+    case 'carrera': return 'bg-[#e74c3c]';
+    case 'fuerza': return 'bg-purple-500';
+    default: return 'bg-zinc-300';
   }
 };
 
@@ -127,9 +127,9 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
     return (
       <StyledDiv 
         ref={setNodeRef} styleProps={style} {...attributes} {...listeners}
-        className={`p-2.5 rounded-xl border border-dashed border-zinc-700/50 bg-zinc-900/30 flex items-center justify-center gap-2 cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-30' : 'opacity-100'}`}
+        className={`p-2.5 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 flex items-center justify-center gap-2 cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-30' : 'opacity-100'}`}
       >
-        <span className="text-xs text-zinc-600 font-medium tracking-wide">DESCANSO</span>
+        <span className="text-[10px] text-zinc-400 font-bold tracking-wider">DESCANSO</span>
       </StyledDiv>
     );
   }
@@ -144,25 +144,25 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
       {...attributes}
       {...listeners}
       onClick={() => onEdit(workout)}
-      className={`relative p-3 pl-3.5 rounded-xl border bg-zinc-900/40 backdrop-blur-md shadow-sm cursor-grab active:cursor-grabbing group transition-all overflow-hidden ${
-        isDragging ? 'opacity-50 scale-105 shadow-2xl z-50 border-cyan-500/50' : 'border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/60'
+      className={`relative p-3 pl-4 rounded-xl border bg-white shadow-sm cursor-grab active:cursor-grabbing group transition-all overflow-hidden ${
+        isDragging ? 'opacity-50 scale-105 shadow-md z-50 border-cyan-500/50' : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
       }`}
     >
       {/* Accent Line */}
-      <div className={`absolute left-0 top-0 bottom-0 w-1 ${getSportAccent(session?.sport_type || '')}`} />
+      <div className={`absolute left-0 top-0 bottom-0 w-[5px] ${getSportAccent(session?.sport_type || '')}`} />
       
       <div className="flex flex-col gap-1.5">
         <div className="flex items-start justify-between gap-2">
-          <h4 className="text-[11px] font-black text-zinc-100 uppercase tracking-tight truncate flex-1 flex items-center gap-1.5">
+          <h4 className="text-[11px] font-bold text-zinc-800 uppercase tracking-tight truncate flex-1 flex items-center gap-1.5">
             <SportIcon type={session?.sport_type || ''} className="w-3 h-3 opacity-70" />
             <span className="truncate">{displayTitle}</span>
           </h4>
-          <span className="text-[10px] font-black text-zinc-500 flex items-center gap-1 shrink-0 bg-zinc-950 px-1.5 py-0.5 rounded-md border border-zinc-800/50">
+          <span className="text-[10px] font-bold text-zinc-650 flex items-center gap-1 shrink-0 bg-zinc-50 px-1.5 py-0.5 rounded-md border border-zinc-150">
             {session?.duration_min}'
           </span>
         </div>
         
-        <p className="text-[10px] text-zinc-400 leading-relaxed line-clamp-2 pr-1">
+        <p className="text-[10px] text-zinc-500 leading-relaxed line-clamp-2 pr-1 font-semibold">
           {parsed.main || parsed.warmup || session?.description}
         </p>
       </div>
@@ -197,7 +197,7 @@ function DroppableBackground({ id, isEmpty, onAddClick, children }: { id: string
             e.stopPropagation();
             onAddClick(id);
           }}
-          className="absolute inset-2 border-2 border-dashed border-zinc-800/50 rounded-xl bg-zinc-900/20 text-[10px] text-zinc-600 hover:text-cyan-400 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all font-medium uppercase tracking-wider flex items-center justify-center cursor-pointer z-0"
+          className="absolute inset-2 border-2 border-dashed border-zinc-200 rounded-xl bg-zinc-50/50 text-[10px] text-zinc-450 hover:text-cyan-600 hover:border-cyan-500/30 hover:bg-cyan-50 transition-all font-bold uppercase tracking-wider flex items-center justify-center cursor-pointer z-0"
         >
           Crear Aquí ➕
         </div>
@@ -387,13 +387,13 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
       >
         <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
           {days.map(day => (
-            <div key={day.id} className="flex flex-col bg-zinc-950/40 rounded-2xl border border-zinc-800/80 overflow-hidden">
+            <div key={day.id} className="flex flex-col bg-zinc-50 rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
               {/* Day Header */}
-              <div className="p-3 border-b border-zinc-800/80 bg-zinc-900/50 flex flex-col items-center justify-center">
+              <div className="p-3 border-b border-zinc-200 bg-zinc-100/60 flex flex-col items-center justify-center">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                   {day.name}
                 </span>
-                <span className={`text-xl font-black ${day.id === format(new Date(), 'yyyy-MM-dd') ? 'text-cyan-400' : 'text-zinc-200'}`}>
+                <span className={`text-xl font-black ${day.id === format(new Date(), 'yyyy-MM-dd') ? 'text-cyan-600' : 'text-zinc-800'}`}>
                   {day.dayNumber}
                 </span>
               </div>

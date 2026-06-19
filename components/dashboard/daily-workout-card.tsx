@@ -5,7 +5,7 @@ import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/(app)/dashboard/
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info, Droplet, Zap } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info, Droplet, Zap, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
@@ -27,6 +27,7 @@ interface WorkoutCardProps {
     scheduled_date: string;
     status: string;
     auto_adjusted?: boolean | null;
+    adjustment_reason?: string | null;
     actual_tss?: number | null;
     training_sessions: {
       sport_type: string;
@@ -216,9 +217,47 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
 
   const session = workout.training_sessions;
+  const desc = session.description || '';
+  const parsed = React.useMemo(() => {
+    const p = parseWorkoutDescription(desc, session.sport_type);
+    if (workout.auto_adjusted) {
+      if (workout.adjustment_reason === 'lesion') {
+        p.main = `[AJUSTE DE IA: PREVENCIÓN DE LESIONES] Sesión reducida al 50%. Entrena estrictamente en Zona 1 (recuperación activa) y detén la sesión inmediatamente si sientes cualquier molestia o pinchazo. Objetivo original: ${p.main}`;
+      } else if (workout.adjustment_reason === 'adherencia') {
+        p.main = `[AJUSTE DE IA: ADHERENCIA] Carga reducida un 15% para consolidar ritmos. Prioriza terminar la sesión cómodamente en lugar de forzar zonas altas. Objetivo original: ${p.main}`;
+      } else {
+        p.main = `[AJUSTE DE IA: AJUSTE POR FATIGA] Duración principal reducida un 25%. Mantén un esfuerzo moderado y cómodo en Zona 1-2. Objetivo original: ${p.main}`;
+      }
+    }
+    if (athleteLevel === 'principiante') {
+      if (session.sport_type === 'natacion') {
+        p.gear = '🩱 Bañador y gafas de natación (palas o aletas opcionales).';
+      } else if (session.sport_type === 'ciclismo') {
+        p.gear = '🚴‍♂️ Cualquier bicicleta (de carretera, híbrida o montaña) y casco obligatorio.';
+      } else if (session.sport_type === 'carrera') {
+        p.gear = '🏃‍♂️ Zapatillas de running normales y ropa cómoda.';
+      }
+    }
+    return p;
+  }, [desc, session.sport_type, workout.auto_adjusted, workout.adjustment_reason, athleteLevel]);
+
+  const durationMin = React.useMemo(() => {
+    let dur = session.duration_min || 0;
+    if (workout.auto_adjusted) {
+      if (workout.adjustment_reason === 'lesion') {
+        dur = Math.round(dur * 0.5);
+      } else if (workout.adjustment_reason === 'adherencia') {
+        dur = Math.round(dur * 0.85);
+      } else {
+        dur = Math.round(dur * 0.75);
+      }
+    }
+    return dur;
+  }, [session.duration_min, workout.auto_adjusted, workout.adjustment_reason]);
+
   const pacing = calculateSessionPacing(
     session?.sport_type || 'descanso',
-    session?.duration_min || 0,
+    durationMin,
     sweatRate || 0.8,
     customCarbsPerHour
   );
@@ -231,8 +270,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
   const plannedTss = React.useMemo(() => {
     if (!session) return 0;
-    return Math.round(session.duration_min * (session.sport_type === 'carrera' ? 0.8 : session.sport_type === 'ciclismo' ? 0.75 : session.sport_type === 'natacion' ? 0.6 : 0.5));
-  }, [session]);
+    return Math.round(durationMin * (session.sport_type === 'carrera' ? 0.8 : session.sport_type === 'ciclismo' ? 0.75 : session.sport_type === 'natacion' ? 0.6 : 0.5));
+  }, [session, durationMin]);
 
   const telemetry = workout.universal_telemetry?.[0] || (isCompleted ? {
     source_provider: 'garmin',
@@ -341,14 +380,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     }
   }
 
-  const desc = session.description || '';
-  const parsed = parseWorkoutDescription(desc, session.sport_type);
-  let durationMin = session.duration_min || 0;
 
-  if (workout.auto_adjusted) {
-    durationMin = Math.round(durationMin * 0.75);
-    parsed.main = `[SESIÓN ADAPTADA POR FATIGA] Duración principal reducida un 25%. Mantén un esfuerzo moderado y cómodo en Zona 1-2. Objetivo original: ${parsed.main}`;
-  }
 
   const recoveryMeal = calculateRecoveryMeal(
     session?.sport_type || 'descanso',
@@ -362,15 +394,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     preferredIngredients
   );
 
-  if (athleteLevel === 'principiante') {
-    if (session.sport_type === 'natacion') {
-      parsed.gear = '🩱 Bañador y gafas de natación (palas o aletas opcionales).';
-    } else if (session.sport_type === 'ciclismo') {
-      parsed.gear = '🚴‍♂️ Cualquier bicicleta (de carretera, híbrida o montaña) y casco obligatorio.';
-    } else if (session.sport_type === 'carrera') {
-      parsed.gear = '🏃‍♂️ Zapatillas de running normales y ropa cómoda.';
-    }
-  }
+
 
   const localSteps = getLocalStructuredSteps(session.sport_type, desc, durationMin);
 
@@ -423,10 +447,22 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               {session.sport_type} • {session.day_name}
             </p>
             {workout.auto_adjusted && (
-              <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-300 text-amber-600 text-[10px] font-bold flex items-center gap-1">
-                <Flame className="w-3 h-3 text-amber-500" />
-                <span>Reajustado por Fatiga</span>
-              </span>
+              workout.adjustment_reason === 'lesion' ? (
+                <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-300 text-red-600 text-[10px] font-bold flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-red-550" />
+                  <span>IA: Prevención de Lesión</span>
+                </span>
+              ) : workout.adjustment_reason === 'adherencia' ? (
+                <span className="px-2 py-0.5 rounded-full bg-blue-50 border border-blue-300 text-blue-600 text-[10px] font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3 text-blue-500" />
+                  <span>IA: Ajuste de Carga</span>
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-300 text-amber-600 text-[10px] font-bold flex items-center gap-1">
+                  <Flame className="w-3 h-3 text-amber-500" />
+                  <span>IA: Ajuste por Fatiga</span>
+                </span>
+              )
             )}
             {isMissed && (
               <span className="px-2 py-0.5 rounded-full bg-red-50 border border-red-200 text-red-650 text-[10px] font-bold flex items-center gap-1">

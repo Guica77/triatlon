@@ -9,7 +9,7 @@ interface StepTelemetryProps {
   loading: boolean;
   onPrev: () => void;
   handleSave: () => Promise<void>;
-  handleSaveAndConnect: (provider: 'strava' | 'garmin') => Promise<void>;
+  handleSaveAndConnect: (provider: 'strava' | 'garmin' | 'coros') => Promise<void>;
 }
 
 export function StepTelemetry(props: StepTelemetryProps) {
@@ -61,37 +61,45 @@ export function StepTelemetry(props: StepTelemetryProps) {
           <div className="p-4 rounded-xl bg-orange-500/10 border border-orange-500/30 text-xs text-orange-200/90 leading-relaxed font-medium space-y-2">
             <p className="text-center text-sm font-bold text-white mb-2">¿Cómo conecto mi reloj?</p>
             <p>
-              Usamos <strong>Strava</strong> como puente universal y seguro. Sigue estos 2 pasos:
+              Admitimos conexión directa oficial para <strong>Garmin</strong> y <strong>Coros</strong>, o puedes usar <strong>Strava</strong> como puente de sincronización universal para otras marcas (Suunto, Polar, Apple Watch).
             </p>
             <ol className="list-decimal pl-4 space-y-1.5 text-orange-100/80">
-              <li>Haz click en uno de los botones de abajo. Te redirigiremos de forma segura a Strava.</li>
-              <li>Inicia sesión con tu cuenta de Strava y dale a "Autorizar". ¡Listo!</li>
+              <li>Haz click en el botón de tu reloj abajo para sincronizarlo directamente.</li>
+              <li>Si usas otra marca de dispositivo, conéctalo a través de Strava Bridge.</li>
             </ol>
-            <p className="pt-1 text-orange-300/80 italic text-[11px]">
-              * Si tienes un Garmin, Coros o Apple Watch, asegúrate de que tu reloj esté vinculado a tu app de Strava para que podamos leer tus datos a través de ella.
-            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Garmin Connect button */}
             <button
               onClick={() => props.handleSaveAndConnect('garmin')}
               disabled={props.loading}
-              className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden"
+              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden text-center cursor-pointer"
             >
               <span className="text-3xl mb-3 block">🛰️</span>
               <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">Conectar Garmin</span>
               <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Vía Garmin Connect</span>
             </button>
 
-            {/* Coros/Suunto/Otros button */}
+            {/* Coros button */}
+            <button
+              onClick={() => props.handleSaveAndConnect('coros')}
+              disabled={props.loading}
+              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden text-center cursor-pointer"
+            >
+              <span className="text-3xl mb-3 block">⌚</span>
+              <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">Conectar Coros</span>
+              <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Vía Coros API</span>
+            </button>
+
+            {/* Strava Bridge button */}
             <button
               onClick={() => props.handleSaveAndConnect('strava')}
               disabled={props.loading}
-              className="flex flex-col items-center justify-center p-6 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden"
+              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-zinc-800/80 bg-zinc-950/40 hover:bg-orange-500/5 hover:border-orange-500/30 transition-all group relative overflow-hidden text-center cursor-pointer"
             >
-              <span className="text-3xl mb-3 block">⌚</span>
-              <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">Conectar Coros / Suunto</span>
+              <span className="text-3xl mb-3 block">🔄</span>
+              <span className="text-sm font-bold text-white group-hover:text-orange-400 transition-colors">Conectar Strava</span>
               <span className="text-[10px] text-zinc-500 mt-1 uppercase tracking-wider font-semibold">Vía Strava Bridge</span>
             </button>
           </div>

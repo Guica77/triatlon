@@ -198,7 +198,7 @@ export async function completeWorkoutWithFeedback(
 
   // Si tiene alertas, disparar el motor adaptativo (que ya gestiona su mensaje de alerta al coach si procede)
   try {
-    await evaluateFeedbackAndAdjustPlan(user.id, workoutId, rpe, feeling, painLocalized);
+    await evaluateFeedbackAndAdjustPlan(user.id, workoutId, rpe, feeling, painLocalized, intensityAdherence);
   } catch (adjustError) {
     console.error('Error al ejecutar evaluación adaptativa de feedback:', adjustError);
   }

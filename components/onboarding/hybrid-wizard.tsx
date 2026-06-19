@@ -25,6 +25,8 @@ export function HybridWizard() {
   const [currentSwimPace, setCurrentSwimPace] = React.useState('');
   const [currentRunPace, setCurrentRunPace] = React.useState('');
   const [preferredIngredients, setPreferredIngredients] = React.useState<string[]>([]);
+  const [allergies, setAllergies] = React.useState<string[]>([]);
+  const [dislikedIngredients, setDislikedIngredients] = React.useState<string[]>([]);
 
   // Step 2: Virtual Garage
   const [virtualGarage, setVirtualGarage] = React.useState<string[]>([]);
@@ -56,6 +58,8 @@ export function HybridWizard() {
         virtual_garage: virtualGarage,
         wants_coach: wantsCoach,
         preferred_ingredients: preferredIngredients,
+        allergies,
+        disliked_ingredients: dislikedIngredients,
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -69,7 +73,7 @@ export function HybridWizard() {
     }
   };
 
-  const handleSaveAndConnect = async (provider: 'strava' | 'garmin' = 'strava') => {
+  const handleSaveAndConnect = async (provider: 'strava' | 'garmin' | 'coros' = 'strava') => {
     setLoading(true);
     try {
       const result = await saveRaceGoalAndPlan({
@@ -79,6 +83,8 @@ export function HybridWizard() {
         virtual_garage: virtualGarage,
         wants_coach: wantsCoach,
         preferred_ingredients: preferredIngredients,
+        allergies,
+        disliked_ingredients: dislikedIngredients,
       });
       if (result && result.error) {
         console.error('Error:', result.error);
@@ -143,6 +149,10 @@ export function HybridWizard() {
             onNext={() => setStep(2)}
             preferredIngredients={preferredIngredients}
             setPreferredIngredients={setPreferredIngredients}
+            allergies={allergies}
+            setAllergies={setAllergies}
+            dislikedIngredients={dislikedIngredients}
+            setDislikedIngredients={setDislikedIngredients}
           />
         )}
 

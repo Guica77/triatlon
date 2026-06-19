@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getChatParticipants, getAvailableCoaches } from '@/app/(app)/chat/actions'
 import { ChatView } from '@/components/chat/chat-view'
-import { Trophy, ArrowLeft, MessageSquare } from 'lucide-react'
+import { ArrowLeft, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
 
@@ -38,26 +38,26 @@ export default async function AthleteChatPage() {
   }
 
   return (
-    <div className="h-[100dvh] bg-[var(--color-background)] text-zinc-100 flex flex-col pb-[env(safe-area-inset-bottom)] sm:pb-0 overflow-hidden">
+    <div className="h-[100dvh] bg-[var(--color-background)] flex flex-col pb-[env(safe-area-inset-bottom)] sm:pb-0 overflow-hidden">
       
       {/* Top Navbar */}
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-background)]/80 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 shrink-0">
+      <header className="border-b border-zinc-200 bg-white/95 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-all duration-300 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center shadow-inner shrink-0">
-            <MessageSquare className="w-4 h-4 text-cyan-400" />
+          <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-sm shrink-0">
+            <MessageSquare className="w-4 h-4 text-cyan-600" />
           </div>
           <div>
-            <h1 className="text-sm sm:text-base font-semibold text-zinc-50 tracking-tight">Chat con Entrenador</h1>
-            <p className="text-[11px] sm:text-xs text-zinc-400">
+            <h1 className="text-sm sm:text-base font-bold text-zinc-900 tracking-tight">Chat con Entrenador</h1>
+            <p className="text-[11px] sm:text-xs text-zinc-500 font-semibold">
               Comunicación directa y resolución de dudas
             </p>
           </div>
         </div>
 
         <Link href="/dashboard" className="w-full sm:w-auto">
-          <AnimatedButton variant="ghost" className="w-full sm:w-auto border border-zinc-800 flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm shadow-sm bg-zinc-900/50 hover:bg-zinc-800">
+          <AnimatedButton variant="ghost" className="w-full sm:w-auto border border-zinc-200 flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm shadow-sm bg-white hover:bg-zinc-50 text-zinc-650 hover:text-zinc-800 cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
-            <span className="font-semibold text-zinc-300">Volver al Dashboard</span>
+            <span className="font-semibold">Volver al Dashboard</span>
           </AnimatedButton>
         </Link>
       </header>

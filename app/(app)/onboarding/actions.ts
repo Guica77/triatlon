@@ -142,6 +142,8 @@ export async function saveRaceGoalAndPlan(formData: {
   athlete_level?: string;
   wants_coach?: boolean;
   preferred_ingredients?: string[];
+  allergies?: string[];
+  disliked_ingredients?: string[];
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -259,7 +261,9 @@ export async function saveRaceGoalAndPlan(formData: {
     target_bike_time,
     target_run_time,
     active_plan_id: selectedPlanId,
-    preferred_ingredients: formData.preferred_ingredients || []
+    preferred_ingredients: formData.preferred_ingredients || [],
+    allergies: formData.allergies || [],
+    disliked_ingredients: formData.disliked_ingredients || []
   };
 
   let profileError = null;

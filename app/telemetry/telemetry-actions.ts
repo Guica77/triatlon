@@ -374,16 +374,28 @@ export async function evaluateFeedbackAndAdjustPlan(
   workoutId: string,
   rpe: number,
   feeling: string,
-  painLocalized: boolean
+  painLocalized: boolean,
+  intensityAdherence?: string
 ): Promise<{ adjusted: boolean; message: string }> {
   try {
     const supabase = await createClient();
 
-    // 1. Verificar si hay disparadores de fatiga/lesión
-    const hasFatigueAlert = rpe >= 8 || feeling === 'fatigado' || feeling === 'lesionado' || painLocalized;
+    // 1. Verificar si hay disparadores de fatiga/lesión/desviación
+    const hasFatigueAlert = rpe >= 8 || feeling === 'fatigado' || feeling === 'lesionado' || painLocalized || intensityAdherence === 'suave';
 
     if (!hasFatigueAlert) {
       return { adjusted: false, message: 'Feedback normal registrado.' };
+    }
+
+    // Determinar la causa exacta para la adaptación de IA
+    let reason = 'fatiga';
+    let adjustText = 'fatiga acumulada';
+    if (painLocalized || feeling === 'lesionado') {
+      reason = 'lesion';
+      adjustText = 'riesgo de lesión o dolor muscular localizado';
+    } else if (intensityAdherence === 'suave') {
+      reason = 'adherencia';
+      adjustText = 'dificultad para completar la intensidad programada';
     }
 
     // 2. Obtener los siguientes 2 entrenamientos pendientes del atleta
@@ -404,7 +416,10 @@ export async function evaluateFeedbackAndAdjustPlan(
       const ids = upcoming.map(u => u.id);
       const { error: updateError } = await supabase
         .from('user_workouts')
-        .update({ auto_adjusted: true })
+        .update({ 
+          auto_adjusted: true,
+          adjustment_reason: reason
+        })
         .in('id', ids);
 
       if (updateError) {
@@ -441,7 +456,9 @@ export async function evaluateFeedbackAndAdjustPlan(
         lesionado: '🤕 Lesionado'
       };
 
-      const alertMsg = `⚠️ **Alerta de Fatiga/Lesión**\nEl atleta **${athleteName}** ha completado su sesión de **${sport}** con:\n- Esfuerzo Percibido (RPE): **${rpe}/10**\n- Sensaciones: **${feelingEmoji[feeling] || feeling}**\n- ¿Dolor Localizado?: **${painLocalized ? 'Sí 🔴' : 'No 🟢'}**\n\n*La IA ha adaptado preventivamente los entrenamientos de los próximos 2 días (-25% de carga).*`;
+      const alertMsg = `⚠️ **Alerta de IA: Reajuste de Plan**\nEl atleta **${athleteName}** ha completado su sesión de **${sport}** con:\n- Esfuerzo Percibido (RPE): **${rpe}/10**\n- Sensaciones: **${feelingEmoji[feeling] || feeling}**\n- ¿Dolor Localizado?: **${painLocalized ? 'Sí 🔴' : 'No 🟢'}**\n- Adherencia a Intensidad: **${
+        intensityAdherence === 'suave' ? 'Más suave de lo planeado 📉' : intensityAdherence === 'fuerte' ? 'Más fuerte 📈' : 'Clavado 🎯'
+      }**\n\n*La IA ha adaptado preventivamente los entrenamientos de los próximos 2 días debido a: **${adjustText}**.*`;
 
       await adminSupabase.from('chat_messages').insert({
         sender_id: userId,
@@ -454,9 +471,15 @@ export async function evaluateFeedbackAndAdjustPlan(
     revalidatePath('/analytics');
     revalidatePath('/feedback');
 
+    const friendlyMessages: Record<string, string> = {
+      lesion: '¡Aviso! Se han adaptado tus entrenamientos futuros a recuperación activa (Z1) por prevención de lesiones.',
+      adherencia: 'Se han suavizado tus siguientes sesiones para ayudarte a consolidar el ritmo y asentar las zonas.',
+      fatiga: 'Se ha reducido la duración de tus próximas sesiones para asegurar tu descanso y evitar sobrecarga.'
+    };
+
     return {
       adjusted: true,
-      message: '¡Aviso! Se han adaptado tus próximos 2 entrenamientos por el nivel de fatiga detectado.'
+      message: friendlyMessages[reason] || 'Se han adaptado tus próximos entrenamientos preventivamente.'
     };
   } catch (error: any) {
     console.error('Error en evaluateFeedbackAndAdjustPlan:', error);

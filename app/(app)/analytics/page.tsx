@@ -35,9 +35,9 @@ export default async function AnalyticsPage() {
     <div className="min-h-screen bg-[var(--color-background)] pb-24">
       
       {/* Top Navbar */}
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-background)]/85 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+      <header className="border-b border-zinc-200 bg-white/95 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center shadow-xs">
+          <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-xs">
             <BarChart2 className="w-4 h-4 text-cyan-600" />
           </div>
           <div>
