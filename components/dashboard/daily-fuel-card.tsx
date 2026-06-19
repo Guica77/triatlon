@@ -126,22 +126,22 @@ export function DailyFuelCard({
     <ProCard className="p-4 sm:p-6 space-y-4 relative overflow-hidden border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col justify-between min-h-[320px]">
       
       {/* Cabecera Premium con Tabs */}
-      <div className="flex justify-between items-center border-b border-zinc-100 pb-3 relative z-10 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm">
-            <span className="relative flex h-2.5 w-2.5">
+      <div className="flex justify-between items-center border-b border-zinc-100 pb-3 relative z-10 shrink-0 gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm shrink-0">
+            <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
           </div>
-          <span className="text-xs font-bold tracking-widest text-zinc-455 uppercase whitespace-nowrap">Combustible</span>
+          <span className="text-[11px] sm:text-xs font-bold tracking-wider text-zinc-455 uppercase whitespace-nowrap overflow-hidden text-ellipsis">Combustible</span>
         </div>
 
         {/* Selector de Pestañas */}
-        <div className="flex bg-zinc-100 p-0.5 rounded-lg border border-zinc-200/80 text-[10px] font-bold shrink-0">
+        <div className="flex bg-zinc-100 p-0.5 rounded-lg border border-zinc-200/80 text-[9.5px] sm:text-[10px] font-bold shrink-0">
           <button
             onClick={() => setActiveTab('macros')}
-            className={`px-2 py-1 rounded cursor-pointer transition-colors ${
+            className={`px-1.5 sm:px-2.5 py-1 rounded cursor-pointer transition-colors ${
               activeTab === 'macros' ? 'bg-white text-emerald-600 shadow-xs border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'
             }`}
           >
@@ -149,11 +149,11 @@ export function DailyFuelCard({
           </button>
           <button
             onClick={() => setActiveTab('platos')}
-            className={`px-2 py-1 rounded cursor-pointer transition-colors flex items-center gap-1 ${
+            className={`px-1.5 sm:px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-0.5 ${
               activeTab === 'platos' ? 'bg-white text-emerald-600 shadow-xs border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'
             }`}
           >
-            Platos e IA ✨
+            Platos/IA ✨
           </button>
         </div>
       </div>
