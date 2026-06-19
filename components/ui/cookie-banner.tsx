@@ -47,7 +47,7 @@ export function CookieBanner() {
  
       <p className="text-xs text-zinc-550 leading-relaxed font-semibold">
         Utilizamos cookies para optimizar tus entrenamientos, analizar tu rendimiento y sincronizar la telemetría de tus dispositivos. Puedes aceptar o configurar tus opciones. Consulta nuestra{' '}
-        <Link href="/privacidad" className="text-cyan-650 hover:text-cyan-750 underline font-bold">
+        <Link href="/privacidad" className="text-cyan-600 hover:text-cyan-700 underline font-bold">
           Política de Privacidad
         </Link>{' '}
         para más información.
@@ -56,7 +56,7 @@ export function CookieBanner() {
       <div className="flex gap-2">
         <button 
           onClick={handleAccept}
-          className="flex-1 py-2.5 text-xs font-black bg-cyan-650 hover:bg-cyan-550 text-white rounded-xl transition-all shadow-md cursor-pointer text-center"
+          className="flex-1 py-2.5 text-xs font-black bg-cyan-400 hover:bg-cyan-500 text-white rounded-xl transition-all shadow-md cursor-pointer text-center"
         >
           Aceptar Todas
         </button>
