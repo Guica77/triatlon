@@ -19,7 +19,7 @@
   },
   "sonarlint.analysisExcludesStandalone": "**/.superpowers/**",
   "files.associations": {
-    "**/*.sql": "plaintext",
+    "**/*.sql": "postgres",
     "**/.superpowers/**/*.html": "plaintext"
   },
   "mssql.intelliSense.enableErrorChecking": false,
