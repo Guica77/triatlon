@@ -27,10 +27,10 @@ interface StepGarageProps {
 export function StepGarage(props: StepGarageProps) {
   return (
     <motion.div key="step3" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
-      <ProCard className="space-y-6">
-        <div className="border-b border-zinc-800/80 pb-4">
-          <h2 className="text-xl font-medium text-zinc-100 flex items-center gap-2"><Wrench className="w-5 h-5 text-amber-400" /> Garaje Virtual</h2>
-          <p className="text-sm text-zinc-400 mt-1">Selecciona el material que ya posees. La IA usará esto para sugerirte chollos en entrenamientos donde te falte equipamiento.</p>
+      <ProCard className="space-y-6 bg-white border border-zinc-200">
+        <div className="border-b border-zinc-200 pb-4">
+          <h2 className="text-xl font-bold text-zinc-900 flex items-center gap-2"><Wrench className="w-5 h-5 text-orange-500" /> Garaje Virtual</h2>
+          <p className="text-sm text-zinc-500 mt-1">Selecciona el material que ya posees. La IA usará esto para sugerirte chollos en entrenamientos donde te falte equipamiento.</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -40,24 +40,24 @@ export function StepGarage(props: StepGarageProps) {
               <button
                 key={item.id}
                 onClick={() => props.toggleGear(item.id)}
-                className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all ${
+                className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all cursor-pointer relative ${
                   isSelected 
-                    ? 'bg-amber-500/10 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.15)] scale-105' 
-                    : 'bg-zinc-950/50 border-zinc-800/80 hover:border-zinc-600'
+                    ? 'bg-orange-50/50 border-orange-500 text-orange-600 ring-1 ring-orange-500 shadow-xs scale-105 font-semibold' 
+                    : 'bg-zinc-50/30 border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-50'
                 }`}
               >
                 <span className="text-2xl mb-2 block">{item.icon}</span>
-                <span className={`text-xs font-bold text-center block ${isSelected ? 'text-amber-400' : 'text-zinc-300'}`}>{item.label}</span>
+                <span className={`text-xs font-bold text-center block ${isSelected ? 'text-orange-600' : 'text-zinc-800'}`}>{item.label}</span>
                 <span className="text-[10px] text-zinc-500 mt-1">{item.desc}</span>
-                {isSelected && <div className="absolute top-2 right-2 w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center"><Check className="w-3 h-3 text-black stroke-[3]" /></div>}
+                {isSelected && <div className="absolute top-2 right-2 w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center"><Check className="w-3 h-3 text-white stroke-[3]" /></div>}
               </button>
             );
           })}
         </div>
         
-        <div className="flex justify-between pt-4 border-t border-zinc-800/80">
-          <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-400 hover:text-white transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
-          <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm !bg-amber-500 hover:!bg-amber-400 !text-black shadow-amber-500/20">
+        <div className="flex justify-between pt-4 border-t border-zinc-200">
+          <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-500 hover:text-zinc-850 transition flex items-center cursor-pointer"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+          <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm !bg-orange-500 hover:!bg-orange-600 !text-white shadow-orange-500/10">
             Continuar <ChevronRight className="w-4 h-4 ml-1" />
           </AnimatedButton>
         </div>

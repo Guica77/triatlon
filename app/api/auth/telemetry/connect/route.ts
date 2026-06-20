@@ -13,6 +13,7 @@ function getBaseUrl(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const provider = searchParams.get('provider') || 'strava';
+  const isOnboarding = searchParams.get('onboarding') === 'true';
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -26,10 +27,11 @@ export async function GET(request: NextRequest) {
     const clientId = process.env.STRAVA_CLIENT_ID;
     if (!clientId) {
       console.error('STRAVA_CLIENT_ID no configurado en variables de entorno');
-      return NextResponse.redirect(new URL('/settings?error=strava_config_missing', request.url));
+      return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?error=strava_config_missing' : '/settings?error=strava_config_missing', request.url));
     }
     const redirectUri = `${getBaseUrl(request)}/api/auth/telemetry/callback`;
-    const stravaUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&approval_prompt=auto&scope=activity:read_all,read`;
+    const state = isOnboarding ? 'onboarding' : 'settings';
+    const stravaUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&approval_prompt=auto&scope=activity:read_all,read&state=${state}`;
     return NextResponse.redirect(stravaUrl);
   }
 
@@ -65,5 +67,6 @@ export async function GET(request: NextRequest) {
     scopes: ['workout:write', 'telemetry:read']
   }, { onConflict: 'user_id, provider' });
 
-  return NextResponse.redirect(new URL('/settings?telemetry_connected=true', request.url));
+  const nextPath = isOnboarding ? '/dashboard?telemetry_connected=true' : '/settings?telemetry_connected=true';
+  return NextResponse.redirect(new URL(nextPath, request.url));
 }

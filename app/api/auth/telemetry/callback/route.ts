@@ -11,10 +11,12 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   const error = searchParams.get('error');
+  const state = searchParams.get('state') || 'settings';
+  const isOnboarding = state === 'onboarding';
 
   if (error || !code) {
     console.error('Strava OAuth error or code missing:', error);
-    return NextResponse.redirect(new URL('/settings?error=strava_auth_failed', request.url));
+    return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?error=strava_auth_failed' : '/settings?error=strava_auth_failed', request.url));
   }
 
   const supabase = await createClient();
@@ -42,7 +44,7 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
       console.error('Failed to exchange code for token:', errorText);
-      return NextResponse.redirect(new URL('/settings?error=token_exchange_failed', request.url));
+      return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?error=token_exchange_failed' : '/settings?error=token_exchange_failed', request.url));
     }
 
     const tokenData = await tokenResponse.json();
@@ -86,9 +88,9 @@ export async function GET(request: NextRequest) {
     // Sync physiological metrics from Strava activities and athlete profile
     await syncPhysiologyFromStrava(user.id, access_token);
 
-    return NextResponse.redirect(new URL('/settings?telemetry_connected=true', request.url));
+    return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?telemetry_connected=true' : '/settings?telemetry_connected=true', request.url));
   } catch (err) {
     console.error('Exception during Strava token exchange:', err);
-    return NextResponse.redirect(new URL('/settings?error=strava_exception', request.url));
+    return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?error=strava_exception' : '/settings?error=strava_exception', request.url));
   }
 }
