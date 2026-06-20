@@ -28,8 +28,22 @@ export function PushNotificationManager() {
       const sub = await registration.pushManager.getSubscription();
       setSubscription(sub);
 
-      // Auto-subscribe in background if permission is already granted but subscription got lost/not stored
-      if (!sub && Notification.permission === 'granted') {
+      if (sub) {
+        // Asegurar de que la suscripción existente esté sincronizada en la BD de Supabase
+        const lastSynced = localStorage.getItem('push_sub_synced_token');
+        const currentTokenStr = JSON.stringify(sub);
+        if (lastSynced !== currentTokenStr) {
+          const res = await fetch('/api/notifications/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: currentTokenStr
+          });
+          if (res.ok) {
+            localStorage.setItem('push_sub_synced_token', currentTokenStr);
+          }
+        }
+      } else if (Notification.permission === 'granted') {
+        // Auto-subscribe in background if permission is already granted but subscription got lost/not stored
         const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (publicVapidKey) {
           const newSub = await registration.pushManager.subscribe({
@@ -37,11 +51,15 @@ export function PushNotificationManager() {
             applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
           });
           setSubscription(newSub);
-          await fetch('/api/notifications/subscribe', {
+          const currentTokenStr = JSON.stringify(newSub);
+          const res = await fetch('/api/notifications/subscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newSub)
+            body: currentTokenStr
           });
+          if (res.ok) {
+            localStorage.setItem('push_sub_synced_token', currentTokenStr);
+          }
         }
       }
     } catch (err) {
@@ -95,14 +113,17 @@ export function PushNotificationManager() {
       setSubscription(sub);
 
       // Save to Supabase
+      const currentTokenStr = JSON.stringify(sub);
       const res = await fetch('/api/notifications/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sub)
+        body: currentTokenStr
       });
       
       if (!res.ok) {
         throw new Error('Error al guardar la suscripción en la base de datos.');
+      } else {
+        localStorage.setItem('push_sub_synced_token', currentTokenStr);
       }
 
     } catch (err) {
