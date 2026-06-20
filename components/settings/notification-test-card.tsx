@@ -4,6 +4,17 @@ import * as React from 'react';
 import { BellRing, CheckCircle } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
+const urlBase64ToUint8Array = (base64String: string) => {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+};
+
 export function NotificationTestCard() {
   const [loading, setLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
@@ -17,15 +28,37 @@ export function NotificationTestCard() {
     try {
       if (typeof window !== 'undefined' && 'Notification' in window) {
         if (Notification.permission !== 'granted') {
-          await Notification.requestPermission();
+          const perm = await Notification.requestPermission();
+          if (perm !== 'granted') {
+            throw new Error('Permiso de notificaciones denegado.');
+          }
         }
       }
 
       const registration = await navigator.serviceWorker.ready;
-      const sub = await registration.pushManager.getSubscription();
+      let sub = await registration.pushManager.getSubscription();
       
       if (!sub) {
-        throw new Error('No estás suscrito a las notificaciones en este dispositivo. Pulsa "Permitir Avisos" primero.');
+        const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!publicVapidKey) {
+          throw new Error('La clave pública VAPID no está configurada.');
+        }
+        
+        sub = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+        });
+
+        // Save to Supabase so notifications work for this user
+        const subscribeRes = await fetch('/api/notifications/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sub)
+        });
+
+        if (!subscribeRes.ok) {
+          throw new Error('No se pudo guardar la suscripción push en la base de datos.');
+        }
       }
 
       const payload = {
