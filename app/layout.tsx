@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { CookieBanner } from "@/components/ui/cookie-banner";
 import { IosInstallPrompt } from "@/components/ui/ios-install-prompt";
+import { ServiceWorkerRegister } from "@/components/ui/service-worker-register";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -73,26 +74,7 @@ export default function RootLayout({
         {children}
         <CookieBanner />
         <IosInstallPrompt />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                const registerSW = () => {
-                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
-                    console.log('SW registered:', reg.scope);
-                  }).catch(function(err) {
-                    console.error('SW registration failed:', err);
-                  });
-                };
-                if (document.readyState === 'complete') {
-                  registerSW();
-                } else {
-                  window.addEventListener('load', registerSW);
-                }
-              }
-            `
-          }}
-        />
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
