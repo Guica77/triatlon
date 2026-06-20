@@ -121,7 +121,16 @@ export function PushNotificationManager() {
       });
       
       if (!res.ok) {
-        throw new Error('Error al guardar la suscripción en la base de datos.');
+        let errorMsg = 'Error al guardar la suscripción en la base de datos.';
+        try {
+          const errData = await res.json();
+          if (errData.details) {
+            errorMsg += ` Detalle: ${errData.details} (Código: ${errData.code || 'N/A'})`;
+          } else if (errData.error) {
+            errorMsg += ` Error: ${errData.error}`;
+          }
+        } catch (_) {}
+        throw new Error(errorMsg);
       } else {
         localStorage.setItem('push_sub_synced_token', currentTokenStr);
       }

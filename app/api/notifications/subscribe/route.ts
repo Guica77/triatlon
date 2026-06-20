@@ -27,12 +27,20 @@ export async function POST(req: Request) {
 
     if (error) {
       console.error('Error saving subscription:', error);
-      return NextResponse.json({ error: 'Error al guardar la suscripción' }, { status: 500 });
+      return NextResponse.json({ 
+        error: 'Error al guardar la suscripción',
+        details: error.message,
+        hint: error.hint,
+        code: error.code
+      }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Subscription error:', error);
-    return NextResponse.json({ error: 'Error de servidor' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Error de servidor',
+      details: error.message || String(error)
+    }, { status: 500 });
   }
 }

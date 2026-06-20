@@ -57,7 +57,16 @@ export function NotificationTestCard() {
         });
 
         if (!subscribeRes.ok) {
-          throw new Error('No se pudo guardar la suscripción push en la base de datos.');
+          let errorMsg = 'No se pudo guardar la suscripción push en la base de datos.';
+          try {
+            const errData = await subscribeRes.json();
+            if (errData.details) {
+              errorMsg += ` Detalle: ${errData.details} (Código: ${errData.code || 'N/A'})`;
+            } else if (errData.error) {
+              errorMsg += ` Error: ${errData.error}`;
+            }
+          } catch (_) {}
+          throw new Error(errorMsg);
         }
       }
 
