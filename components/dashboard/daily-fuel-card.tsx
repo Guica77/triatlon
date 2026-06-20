@@ -214,9 +214,9 @@ export function DailyFuelCard({
             <div className="relative w-18 h-18 flex items-center justify-center shrink-0">
               <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
                 <circle cx="18" cy="18" r="15.915" fill="none" stroke="#f4f4f5" strokeWidth="4" />
-                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#f43f5e" strokeWidth="4.5" stroke-dasharray={`${carbsPercentage} ${100 - carbsPercentage}`} stroke-dashoffset={100} />
-                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#84cc16" strokeWidth="4.5" stroke-dasharray={`${fatPercentage} ${100 - fatPercentage}`} stroke-dashoffset={100 - carbsPercentage} />
-                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#3b82f6" strokeWidth="4.5" stroke-dasharray={`${proteinPercentage} ${100 - proteinPercentage}`} stroke-dashoffset={100 - carbsPercentage - fatPercentage} />
+                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#f43f5e" strokeWidth="4.5" strokeDasharray={`${carbsPercentage} ${100 - carbsPercentage}`} strokeDashoffset={100} />
+                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#84cc16" strokeWidth="4.5" strokeDasharray={`${fatPercentage} ${100 - fatPercentage}`} strokeDashoffset={100 - carbsPercentage} />
+                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#3b82f6" strokeWidth="4.5" strokeDasharray={`${proteinPercentage} ${100 - proteinPercentage}`} strokeDashoffset={100 - carbsPercentage - fatPercentage} />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center select-none text-[8px] font-black text-zinc-800 leading-none">
                 <span>{carbsPercentage}%</span>
