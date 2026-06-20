@@ -19,19 +19,45 @@ export function PushNotificationManager() {
   const [isSupported, setIsSupported] = React.useState(false);
   const [subscription, setSubscription] = React.useState<PushSubscription | null>(null);
   const [loading, setLoading] = React.useState(false);
-  const [dismissed, setDismissed] = React.useState(false);
+  const [dismissed, setDismissed] = React.useState(true); // Default to true to prevent flashing during hydration
+  const [permission, setPermission] = React.useState<NotificationPermission | null>(null);
 
   const checkSubscription = React.useCallback(async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
       const sub = await registration.pushManager.getSubscription();
       setSubscription(sub);
+
+      // Auto-subscribe in background if permission is already granted but subscription got lost/not stored
+      if (!sub && Notification.permission === 'granted') {
+        const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (publicVapidKey) {
+          const newSub = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+          });
+          setSubscription(newSub);
+          await fetch('/api/notifications/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newSub)
+          });
+        }
+      }
     } catch (err) {
       console.error('Error checking subscription', err);
     }
   }, []);
 
   React.useEffect(() => {
+    // Read persisted dismissed state on client mount
+    const isDismissed = localStorage.getItem('push_notifications_dismissed') === 'true';
+    setDismissed(isDismissed);
+
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setPermission(Notification.permission);
+    }
+
     const timer = setTimeout(() => {
       if ('serviceWorker' in navigator && 'PushManager' in window) {
         setIsSupported(true);
@@ -51,7 +77,14 @@ export function PushNotificationManager() {
       
       const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!publicVapidKey) {
-        throw new Error("La clave pública VAPID no está configurada en el servidor (NEXT_PUBLIC_VAPID_PUBLIC_KEY).");
+        throw new Error("La clave pública VAPID no está configurada.");
+      }
+
+      // Explicitly request browser notification permission
+      const permResult = await Notification.requestPermission();
+      setPermission(permResult);
+      if (permResult !== 'granted') {
+        throw new Error('Permiso de notificaciones denegado.');
       }
 
       const sub = await registration.pushManager.subscribe({
@@ -80,7 +113,12 @@ export function PushNotificationManager() {
     }
   };
 
-  if (!isSupported || subscription || dismissed) return null;
+  const handleDismiss = () => {
+    localStorage.setItem('push_notifications_dismissed', 'true');
+    setDismissed(true);
+  };
+
+  if (!isSupported || subscription || dismissed || permission === 'granted' || permission === 'denied') return null;
 
   return (
     <div className="fixed bottom-20 left-4 right-4 md:left-auto md:right-6 md:w-96 bg-zinc-900 border border-cyan-500/30 rounded-2xl p-4 shadow-2xl shadow-cyan-500/10 z-[100] animate-in slide-in-from-bottom-10">
@@ -106,14 +144,14 @@ export function PushNotificationManager() {
             <AnimatedButton 
               variant="ghost" 
               size="sm" 
-              onClick={() => setDismissed(true)}
+              onClick={handleDismiss}
               className="text-xs text-zinc-400 border border-zinc-800"
             >
               Más tarde
             </AnimatedButton>
           </div>
         </div>
-        <button title="Cerrar" aria-label="Cerrar" onClick={() => setDismissed(true)} className="text-zinc-500 hover:text-zinc-300 shrink-0">
+        <button title="Cerrar" aria-label="Cerrar" onClick={handleDismiss} className="text-zinc-500 hover:text-zinc-300 shrink-0">
           <X className="w-4 h-4" />
         </button>
       </div>
