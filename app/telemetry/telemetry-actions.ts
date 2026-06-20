@@ -97,6 +97,20 @@ export async function ingestActivityTelemetry(payload: TelemetryPayload) {
       })
     );
 
+    // Disparar notificación push para nutrición post-entrenamiento
+    safeWaitUntil(
+      (async () => {
+        const { sendPushNotification } = await import('@/lib/notifications');
+        await sendPushNotification(payload.user_id, {
+          title: 'Nutrición Post-Entreno 🍎',
+          body: '¡Buen entreno completado! Recuerda recargar con tus ingredientes preferidos. Pulsa aquí para ver tus recomendaciones de hoy.',
+          url: '/dashboard'
+        });
+      })().catch(err => {
+        console.error('Error enviando push de nutrición:', err);
+      })
+    );
+
     (revalidateTag as any)('analytics');
     revalidatePath('/dashboard');
     revalidatePath('/analytics');
