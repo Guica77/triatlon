@@ -63,6 +63,7 @@ export function HybridWizard() {
       });
       if (result && result.error) {
         console.error('Error:', result.error);
+        alert(`Error al guardar objetivos: ${result.error}`);
         setLoading(false);
       } else {
         router.push('/dashboard');
@@ -88,6 +89,7 @@ export function HybridWizard() {
       });
       if (result && result.error) {
         console.error('Error:', result.error);
+        alert(`Error al guardar objetivos: ${result.error}`);
         setLoading(false);
       } else {
         window.location.href = `/api/auth/telemetry/connect?provider=${provider}`;
