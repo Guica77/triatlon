@@ -90,5 +90,21 @@ describe('Nutrición Deportiva Utility', () => {
       expect(result.hourlyCarbsG).toBe(90);
       expect(result.totalCarbsG).toBe(90);
     });
+
+    it('debería ajustar hidratación, sodio y carbohidratos según clima y vestimenta', () => {
+      // Caso base: ciclismo de 2 horas (120 min), sweat rate = 1.0, clima templado, ropa normal.
+      const base = calculateSessionPacing('ciclismo', 120, 1.0);
+      
+      // Calor extremo (+45% sudoración, +20% carbohidratos)
+      const hotWeather = calculateSessionPacing('ciclismo', 120, 1.0, null, { temperature: 'extremo' });
+      expect(hotWeather.hourlyFluidMl).toBeGreaterThan(base.hourlyFluidMl);
+      expect(hotWeather.hourlySodiumMg).toBeGreaterThan(base.hourlySodiumMg);
+      expect(hotWeather.hourlyCarbsG).toBeGreaterThan(base.hourlyCarbsG);
+      
+      // Ropa abrigada (+18% sudoración)
+      const heavyClothes = calculateSessionPacing('ciclismo', 120, 1.0, null, { clothing: 'abrigada' });
+      expect(heavyClothes.hourlyFluidMl).toBeGreaterThan(base.hourlyFluidMl);
+    });
   });
 });
+

@@ -160,12 +160,43 @@ export function calculateSessionPacing(
   sportType: string,
   durationMin: number,
   sweatRate: number,
-  customCarbsPerHour?: number | null
+  customCarbsPerHour?: number | null,
+  options?: {
+    temperature?: 'frio' | 'templado' | 'calor' | 'extremo'
+    clothing?: 'ligera' | 'normal' | 'abrigada' | 'neopreno'
+  }
 ): SessionPacingResult {
   const durationHours = durationMin / 60
   
+  // 1. Factores de ajuste por clima y equipación
+  let tempMultiplier = 1.0
+  let tempCarbMultiplier = 1.0
+  if (options?.temperature === 'frio') {
+    tempMultiplier = 0.8
+  } else if (options?.temperature === 'calor') {
+    tempMultiplier = 1.25 // Aumento de 25% en sudoración
+    tempCarbMultiplier = 1.10 // Aumento de 10% en necesidad de carbohidratos
+  } else if (options?.temperature === 'extremo') {
+    tempMultiplier = 1.45 // Aumento de 45% en sudoración
+    tempCarbMultiplier = 1.20 // Aumento de 20% en necesidad de carbohidratos
+  }
+
+  let clothingMultiplier = 1.0
+  if (options?.clothing === 'ligera') {
+    clothingMultiplier = 0.95
+  } else if (options?.clothing === 'abrigada') {
+    clothingMultiplier = 1.18 // Ropa abrigada calienta y aumenta la sudoración
+  } else if (options?.clothing === 'neopreno') {
+    if (sportType === 'natacion' || sportType === 'brick') {
+      clothingMultiplier = 1.12 // El neopreno en natación retiene calor
+    }
+  }
+
+  // Tasa de sudoración ajustada
+  const adjustedSweatRate = sweatRate * tempMultiplier * clothingMultiplier
+
   // Hidratación recomendada (reponemos el 65% de la tasa de sudoración para evitar saturar el estómago)
-  const hourlyFluidMl = Math.round((sweatRate * 0.65) * 1000)
+  const hourlyFluidMl = Math.round((adjustedSweatRate * 0.65) * 1000)
   const totalFluidMl = Math.round(hourlyFluidMl * durationHours)
 
   // Sodio (700 mg de sodio por Litro de agua)
@@ -177,21 +208,30 @@ export function calculateSessionPacing(
   if (customCarbsPerHour) {
     hourlyCarbsG = customCarbsPerHour
   } else {
+    // Si la duración no encaja exactamente, añadimos pasos intermedios para un escalado más suave
     if (sportType === 'ciclismo') {
       if (durationMin >= 150) hourlyCarbsG = 75
+      else if (durationMin >= 120) hourlyCarbsG = 68
       else if (durationMin >= 90) hourlyCarbsG = 60
+      else if (durationMin >= 65) hourlyCarbsG = 52
       else if (durationMin >= 45) hourlyCarbsG = 45
     } else if (sportType === 'carrera') {
       if (durationMin >= 120) hourlyCarbsG = 60
+      else if (durationMin >= 95) hourlyCarbsG = 52
       else if (durationMin >= 75) hourlyCarbsG = 45
+      else if (durationMin >= 55) hourlyCarbsG = 38
       else if (durationMin >= 40) hourlyCarbsG = 30
     } else if (sportType === 'brick') {
-      hourlyCarbsG = durationMin >= 120 ? 75 : 60
+      if (durationMin >= 120) hourlyCarbsG = 75
+      else if (durationMin >= 80) hourlyCarbsG = 65
+      else hourlyCarbsG = 60
     } else if (sportType === 'natacion' || sportType === 'fuerza') {
       hourlyCarbsG = durationMin >= 90 ? 30 : 0
     }
   }
 
+  // Aplicar ajuste de carbohidratos por temperatura (más consumo de glucógeno con calor)
+  hourlyCarbsG = Math.round(hourlyCarbsG * tempCarbMultiplier)
   const totalCarbsG = Math.round(hourlyCarbsG * durationHours)
 
   // Guía Práctica de Alimentos/Suplementos
@@ -206,6 +246,11 @@ export function calculateSessionPacing(
     } else {
       practicalGuide = `Lleva un bidón con isotónico ligero o un gel energético para mitad de la sesión.`
     }
+  }
+
+  // Si hay calor o calor extremo, añadir advertencia/pauta sobre electrolitos
+  if (options?.temperature === 'calor' || options?.temperature === 'extremo') {
+    practicalGuide += ` ⚠️ ALERTA CLIMA: Por la temperatura elevada, prioriza el consumo de sales minerales (sodio) y no te saltes ninguna toma de líquido para prevenir la deshidratación.`
   }
 
   return {

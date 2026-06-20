@@ -38,6 +38,9 @@ interface WorkoutCardProps {
     };
     universal_telemetry?: {
       source_provider: string;
+      actual_duration_min: number;
+      actual_distance_km?: number;
+      actual_tss?: number;
       avg_hr?: number;
       max_hr?: number;
       avg_power?: number;
@@ -216,6 +219,14 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const [isSyncingOpen, setIsSyncingOpen] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
 
+  const [temperature, setTemperature] = React.useState<'frio' | 'templado' | 'calor' | 'extremo'>('templado');
+  const [clothing, setClothing] = React.useState<'ligera' | 'normal' | 'abrigada' | 'neopreno'>('normal');
+
+  React.useEffect(() => {
+    setTemperature('templado');
+    setClothing('normal');
+  }, [workout.id]);
+
   const session = workout.training_sessions;
   const desc = session.description || '';
   const parsed = React.useMemo(() => {
@@ -255,26 +266,12 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     return dur;
   }, [session.duration_min, workout.auto_adjusted, workout.adjustment_reason]);
 
-  const pacing = calculateSessionPacing(
-    session?.sport_type || 'descanso',
-    durationMin,
-    sweatRate || 0.8,
-    customCarbsPerHour
-  );
   const isCompleted = status === 'completed';
   const isMissed = status === 'missed';
 
-  const hasFeedback = React.useMemo(() => {
-    return !!(workout.workout_feedback && workout.workout_feedback.length > 0);
-  }, [workout.workout_feedback]);
-
-  const plannedTss = React.useMemo(() => {
-    if (!session) return 0;
-    return Math.round(durationMin * (session.sport_type === 'carrera' ? 0.8 : session.sport_type === 'ciclismo' ? 0.75 : session.sport_type === 'natacion' ? 0.6 : 0.5));
-  }, [session, durationMin]);
-
   const telemetry = workout.universal_telemetry?.[0] || (isCompleted ? {
     source_provider: 'garmin',
+    actual_duration_min: durationMin - 3,
     avg_hr: 152,
     max_hr: 178,
     avg_power: session?.sport_type === 'ciclismo' ? 215 : undefined,
@@ -285,6 +282,33 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     actual_tss: 85,
     raw_payload: { device: 'Garmin Forerunner 965', firmware: '18.22' }
   } : null);
+
+  const actualDuration = telemetry?.actual_duration_min || durationMin;
+
+  const pacing = calculateSessionPacing(
+    session?.sport_type || 'descanso',
+    durationMin,
+    sweatRate || 0.8,
+    customCarbsPerHour,
+    { temperature, clothing }
+  );
+
+  const realPacing = calculateSessionPacing(
+    session?.sport_type || 'descanso',
+    actualDuration,
+    sweatRate || 0.8,
+    customCarbsPerHour,
+    { temperature, clothing }
+  );
+
+  const hasFeedback = React.useMemo(() => {
+    return !!(workout.workout_feedback && workout.workout_feedback.length > 0);
+  }, [workout.workout_feedback]);
+
+  const plannedTss = React.useMemo(() => {
+    if (!session) return 0;
+    return Math.round(durationMin * (session.sport_type === 'carrera' ? 0.8 : session.sport_type === 'ciclismo' ? 0.75 : session.sport_type === 'natacion' ? 0.6 : 0.5));
+  }, [session, durationMin]);
 
   const complianceStatus = React.useMemo(() => {
     if (session?.sport_type === 'descanso') return 'planned';
@@ -890,44 +914,157 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                             </div>
                           </div>
 
+                          {/* Factores de Ajuste (Clima y Ropa) */}
+                          <div className="p-4 rounded-xl bg-zinc-100/80 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 space-y-4 shadow-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                <Activity className="w-3.5 h-3.5 text-cyan-500" />
+                                Ajustar por Clima y Vestimenta (Tiempo Real)
+                              </span>
+                              {(temperature !== 'templado' || clothing !== 'normal') && (
+                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-extrabold uppercase animate-pulse">
+                                  ⚡ Valores Ajustados
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              {/* Selector de Clima / Temperatura */}
+                              <div className="space-y-2">
+                                <label className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase block tracking-wider">Clima / Temperatura:</label>
+                                <div className="grid grid-cols-4 gap-1 bg-zinc-200/50 dark:bg-zinc-950 p-1 rounded-xl border border-zinc-300/50 dark:border-zinc-850">
+                                  {(['frio', 'templado', 'calor', 'extremo'] as const).map((temp) => (
+                                    <button
+                                      key={temp}
+                                      type="button"
+                                      onClick={() => setTemperature(temp)}
+                                      className={`px-1.5 py-1.5 text-[10px] font-bold rounded-lg capitalize transition-all cursor-pointer text-center ${
+                                        temperature === temp
+                                          ? 'bg-cyan-500 text-black shadow-sm font-black'
+                                          : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/30 dark:hover:bg-zinc-900/50'
+                                      }`}
+                                    >
+                                      {temp === 'frio' ? '❄️ Frío' : temp === 'templado' ? '🍃 Temp' : temp === 'calor' ? '🔥 Calor' : '🥵 Extr.'}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Selector de Ropa / Equipamiento */}
+                              <div className="space-y-2">
+                                <label className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold uppercase block tracking-wider">Equipación / Ropa:</label>
+                                <div className="grid grid-cols-4 gap-1 bg-zinc-200/50 dark:bg-zinc-950 p-1 rounded-xl border border-zinc-300/50 dark:border-zinc-850">
+                                  {(['ligera', 'normal', 'abrigada', 'neopreno'] as const).map((clot) => {
+                                    const isSwimOrBrick = session?.sport_type === 'natacion' || session?.sport_type === 'brick';
+                                    const isDisabled = clot === 'neopreno' && !isSwimOrBrick;
+                                    
+                                    return (
+                                      <button
+                                        key={clot}
+                                        type="button"
+                                        onClick={() => !isDisabled && setClothing(clot)}
+                                        disabled={isDisabled}
+                                        className={`px-1.5 py-1.5 text-[10px] font-bold rounded-lg capitalize transition-all cursor-pointer text-center ${
+                                          clothing === clot
+                                            ? 'bg-cyan-500 text-black shadow-sm font-black'
+                                            : isDisabled
+                                            ? 'text-zinc-450 dark:text-zinc-650 opacity-40 cursor-not-allowed'
+                                            : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/30 dark:hover:bg-zinc-900/50'
+                                        }`}
+                                      >
+                                        {clot === 'ligera' ? '🎽 Lig' : clot === 'normal' ? '👕 Norm' : clot === 'abrigada' ? '🧥 Abr' : '🏊‍♂️ Neo'}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
                           {/* Grid de 3 Pilares */}
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             {/* Hidratación */}
-                            <div className="p-3.5 rounded-xl bg-white border border-zinc-200 shadow-sm flex flex-col justify-between">
-                              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center gap-1">
-                                <Droplet className="w-3.5 h-3.5 text-cyan-450" /> Hidratación
+                            <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col justify-between">
+                              <span className="text-[10px] text-zinc-550 dark:text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                <Droplet className="w-3.5 h-3.5 text-cyan-500" /> Hidratación
                               </span>
                               <div className="mt-2">
-                                <span className="text-lg font-extrabold text-zinc-900">{pacing.hourlyFluidMl}</span>
-                                <span className="text-xs text-zinc-500 font-medium"> ml/h</span>
+                                <span className="text-lg font-extrabold text-zinc-900 dark:text-white">{pacing.hourlyFluidMl}</span>
+                                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium"> ml/h</span>
                               </div>
-                              <span className="text-[10px] text-zinc-400 mt-1.5 block">Total: {pacing.totalFluidMl} ml</span>
+                              {isCompleted ? (
+                                <div className="text-[9px] text-zinc-500 dark:text-zinc-400 mt-2 space-y-0.5 border-t border-zinc-100 dark:border-zinc-800/80 pt-1.5 font-semibold">
+                                  <span className="block font-medium">Planificado: {pacing.totalFluidMl} ml</span>
+                                  <span className="block font-bold text-emerald-600 dark:text-emerald-400">Realidad: {realPacing.totalFluidMl} ml</span>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] text-zinc-400 dark:text-zinc-505 mt-1.5 block">Total: {pacing.totalFluidMl} ml</span>
+                              )}
                             </div>
 
                             {/* Electrolitos (Sodio) */}
-                            <div className="p-3.5 rounded-xl bg-white border border-zinc-200 shadow-sm flex flex-col justify-between">
-                              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center gap-1">
+                            <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col justify-between">
+                              <span className="text-[10px] text-zinc-550 dark:text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1">
                                 <Activity className="w-3.5 h-3.5 text-amber-500" /> Sodio
                               </span>
                               <div className="mt-2">
-                                <span className="text-lg font-extrabold text-zinc-900">{pacing.hourlySodiumMg}</span>
-                                <span className="text-xs text-zinc-500 font-medium"> mg/h</span>
+                                <span className="text-lg font-extrabold text-zinc-900 dark:text-white">{pacing.hourlySodiumMg}</span>
+                                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium"> mg/h</span>
                               </div>
-                              <span className="text-[10px] text-zinc-400 mt-1.5 block">Total: {pacing.totalSodiumMg} mg</span>
+                              {isCompleted ? (
+                                <div className="text-[9px] text-zinc-500 dark:text-zinc-400 mt-2 space-y-0.5 border-t border-zinc-100 dark:border-zinc-800/80 pt-1.5 font-semibold">
+                                  <span className="block font-medium">Planificado: {pacing.totalSodiumMg} mg</span>
+                                  <span className="block font-bold text-emerald-600 dark:text-emerald-400">Realidad: {realPacing.totalSodiumMg} mg</span>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] text-zinc-400 dark:text-zinc-505 mt-1.5 block">Total: {pacing.totalSodiumMg} mg</span>
+                              )}
                             </div>
 
                             {/* Carbohidratos */}
-                            <div className="p-3.5 rounded-xl bg-white border border-zinc-200 shadow-sm flex flex-col justify-between">
-                              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center gap-1">
+                            <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm flex flex-col justify-between">
+                              <span className="text-[10px] text-zinc-550 dark:text-zinc-400 font-bold uppercase tracking-wider flex items-center gap-1">
                                 <Zap className="w-3.5 h-3.5 text-rose-500" /> Carbohidratos
                               </span>
                               <div className="mt-2">
-                                <span className="text-lg font-extrabold text-zinc-900">{pacing.hourlyCarbsG}</span>
-                                <span className="text-xs text-zinc-500 font-medium"> g/h</span>
+                                <span className="text-lg font-extrabold text-zinc-900 dark:text-white">{pacing.hourlyCarbsG}</span>
+                                <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium"> g/h</span>
                               </div>
-                              <span className="text-[10px] text-zinc-400 mt-1.5 block">Total: {pacing.totalCarbsG} g</span>
+                              {isCompleted ? (
+                                <div className="text-[9px] text-zinc-500 dark:text-zinc-400 mt-2 space-y-0.5 border-t border-zinc-100 dark:border-zinc-800/80 pt-1.5 font-semibold">
+                                  <span className="block font-medium">Planificado: {pacing.totalCarbsG} g</span>
+                                  <span className="block font-bold text-emerald-600 dark:text-emerald-400">Realidad: {realPacing.totalCarbsG} g</span>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] text-zinc-400 dark:text-zinc-550 mt-1.5 block">Total: {pacing.totalCarbsG} g</span>
+                              )}
                             </div>
                           </div>
+
+                          {/* Comparativa Planificado vs Realidad */}
+                          {isCompleted && (
+                            <div className="p-3.5 rounded-xl bg-cyan-500/5 dark:bg-cyan-950/20 border border-cyan-200/50 dark:border-cyan-800/30 space-y-2">
+                              <span className="text-[10px] text-cyan-600 dark:text-cyan-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                <Info className="w-3.5 h-3.5 text-cyan-500" />
+                                Análisis de Desviación Nutricional (vs. Realidad del Reloj)
+                              </span>
+                              <p className="text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium">
+                                {actualDuration > durationMin ? (
+                                  <>
+                                    Has entrenado <strong className="text-zinc-900 dark:text-white">{actualDuration - durationMin} min más</strong> de lo planificado ({durationMin}m vs {actualDuration}m). Para cubrir esta desviación, tu cuerpo necesitó aproximadamente <strong className="text-emerald-600 dark:text-emerald-400">+{realPacing.totalFluidMl - pacing.totalFluidMl} ml de líquido</strong>, <strong className="text-emerald-600 dark:text-emerald-400">+{realPacing.totalSodiumMg - pacing.totalSodiumMg} mg de sodio</strong> y <strong className="text-emerald-600 dark:text-emerald-400">+{realPacing.totalCarbsG - pacing.totalCarbsG}g de carbohidratos</strong> adicionales respecto a la pauta inicial.
+                                  </>
+                                ) : actualDuration < durationMin ? (
+                                  <>
+                                    Tu entrenamiento duró <strong className="text-zinc-900 dark:text-white">{durationMin - actualDuration} min menos</strong> de lo planificado ({durationMin}m vs {actualDuration}m). Tu consumo objetivo final de hidratación se redujo en <strong className="text-cyan-600 dark:text-cyan-400">{pacing.totalFluidMl - realPacing.totalFluidMl} ml</strong>, sodio en <strong className="text-cyan-600 dark:text-cyan-400">{pacing.totalSodiumMg - realPacing.totalSodiumMg} mg</strong> y carbohidratos en <strong className="text-cyan-600 dark:text-cyan-400">{pacing.totalCarbsG - realPacing.totalCarbsG}g</strong>.
+                                  </>
+                                ) : (
+                                  <>
+                                    ¡Duración clavada! Has entrenado exactamente los <strong className="text-zinc-900 dark:text-white">{durationMin} min</strong> programados. Tu ingesta nutricional de pacing se ajustó al 100% con lo planificado.
+                                  </>
+                                )}
+                              </p>
+                            </div>
+                          )}
 
                           {/* Guía Práctica de Suplementación */}
                           <div className="p-3.5 rounded-xl bg-emerald-50/50 border border-emerald-200">

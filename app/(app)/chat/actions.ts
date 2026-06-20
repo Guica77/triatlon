@@ -55,7 +55,7 @@ export async function sendMessage(receiverId: string, message: string): Promise<
       return { error: 'Error al enviar el mensaje' }
     }
 
-    // --- PUSH NOTIFICATION TRIGGER ---
+    // --- NOTIFICATION TRIGGER ---
     try {
       const { data: receiverProfile } = await supabase
         .from('profiles')
@@ -63,7 +63,7 @@ export async function sendMessage(receiverId: string, message: string): Promise<
         .eq('id', receiverId)
         .single()
 
-      if (receiverProfile && receiverProfile.push_subscriptions) {
+      if (receiverProfile) {
         // Fetch sender name for the notification
         const { data: senderProfile } = await supabase
           .from('profiles')
@@ -72,29 +72,45 @@ export async function sendMessage(receiverId: string, message: string): Promise<
           .single()
 
         const senderName = senderProfile?.first_name || 'Alguien'
+        let pushSent = false
 
-        if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-          webpush.setVapidDetails(
-            process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com',
-            process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-            process.env.VAPID_PRIVATE_KEY
-          )
+        if (receiverProfile.push_subscriptions && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+          try {
+            webpush.setVapidDetails(
+              process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com',
+              process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+              process.env.VAPID_PRIVATE_KEY
+            )
 
-          await webpush.sendNotification(
-            receiverProfile.push_subscriptions as unknown as webpush.PushSubscription,
-            JSON.stringify({
-              title: `Nuevo mensaje de ${senderName}`,
-              body: message.trim(),
-              url: '/chat',
-            })
-          )
-        } else {
-          console.warn('VAPID keys not configured, skipping push notification.')
+            await webpush.sendNotification(
+              receiverProfile.push_subscriptions as unknown as webpush.PushSubscription,
+              JSON.stringify({
+                title: `Nuevo mensaje de ${senderName}`,
+                body: message.trim(),
+                url: '/chat',
+              })
+            )
+            pushSent = true
+            console.log(`Push notification sent successfully to ${receiverId}`)
+          } catch (pushErr: any) {
+            console.error('Error sending web push notification:', pushErr)
+            
+            // Clean up invalid or expired subscription
+            if (pushErr.statusCode === 410 || pushErr.statusCode === 403 || pushErr.statusCode === 400) {
+              const { createAdminClient } = await import('@/lib/supabase/admin')
+              const supabaseAdmin = createAdminClient()
+              await supabaseAdmin
+                .from('profiles')
+                .update({ push_subscriptions: null })
+                .eq('id', receiverId)
+              console.log(`Cleared invalid push subscription for user ${receiverId} (status ${pushErr.statusCode})`)
+            }
+          }
         }
-      } else {
-        // Trigger Resend email fallback
-        console.log(`No push token for ${receiverId}. Triggering Email Fallback...`);
-        if (receiverProfile?.email) {
+
+        // If push was not sent or failed, fall back to email
+        if (!pushSent && receiverProfile.email) {
+          console.log(`No push token or push failed for ${receiverId}. Triggering Email Fallback...`)
           try {
             await resend.emails.send({
               from: 'Triatlon Pro Notificaciones <onboarding@resend.dev>',
@@ -105,15 +121,15 @@ export async function sendMessage(receiverId: string, message: string): Promise<
                       <p><strong>Mensaje:</strong> "${message.trim()}"</p>
                       <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/chat" style="display: inline-block; padding: 10px 20px; background-color: #22d3ee; color: #000; text-decoration: none; border-radius: 5px; font-weight: bold;">Ver en el Chat</a>
                     </div>`
-            });
-            console.log(`Email fallback sent successfully to ${receiverProfile.email}`);
+            })
+            console.log(`Email fallback sent successfully to ${receiverProfile.email}`)
           } catch (emailErr) {
-            console.error('Error sending fallback email:', emailErr);
+            console.error('Error sending fallback email:', emailErr)
           }
         }
       }
-    } catch (pushErr) {
-      console.error('Error triggering push notification:', pushErr)
+    } catch (notificationErr) {
+      console.error('Error in notification trigger:', notificationErr)
       // We don't return error here because the message was successfully saved
     }
 
