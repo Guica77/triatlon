@@ -46,6 +46,12 @@ interface StepAmbitionProps {
 }
 
 export function StepAmbition(props: StepAmbitionProps) {
+  React.useEffect(() => {
+    const total = props.swimHours + props.bikeHours + props.runHours;
+    const computed = total <= 6 ? '4-6h' : total <= 11 ? '7-10h' : '12+h';
+    props.setBaselineHours(computed);
+  }, [props.swimHours, props.bikeHours, props.runHours, props.setBaselineHours]);
+
   return (
     <motion.div key="step1" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
       <ProCard className="space-y-4">
@@ -118,21 +124,9 @@ export function StepAmbition(props: StepAmbitionProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> Disponibilidad Semanal</label>
-              <div className="grid grid-cols-3 gap-2">
-                {['4-6h', '7-10h', '12+h'].map(h => (
-                  <button key={h} onClick={() => props.setBaselineHours(h)} className={`py-2 rounded-xl border text-sm font-semibold transition-all ${props.baselineHours === h ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-inner' : 'bg-zinc-950/50 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}>
-                    {h}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Timer className="w-3.5 h-3.5" /> Tiempo Objetivo Total</label>
-              <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={props.targetFinishTime} onChange={e => props.setTargetFinishTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all" />
-            </div>
+          <div>
+            <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Timer className="w-3.5 h-3.5" /> Tiempo Objetivo Total</label>
+            <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={props.targetFinishTime} onChange={e => props.setTargetFinishTime(e.target.value)} className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 focus:border-cyan-500 outline-none transition-all" />
           </div>
 
           <div className="border-t border-zinc-800/80 pt-6 space-y-4">
