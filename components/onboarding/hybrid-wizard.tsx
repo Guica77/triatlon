@@ -215,7 +215,7 @@ export function HybridWizard() {
               <span className={`text-[10px] uppercase tracking-wider font-semibold transition-colors duration-200 ${
                 step >= num ? 'text-cyan-400' : 'text-zinc-500 group-hover:text-zinc-300'
               }`}>
-                {num === 1 ? 'Objetivo' : num === 2 ? 'Fisiología' : num === 3 ? (wantsCoach ? 'Entrenador' : 'Garaje') : 'Conexión'}
+                {num === 1 ? 'Fisiología' : num === 2 ? 'Objetivo' : num === 3 ? (wantsCoach ? 'Entrenador' : 'Garaje') : 'Conexión'}
               </span>
             </button>
           );
@@ -224,6 +224,30 @@ export function HybridWizard() {
 
       <AnimatePresence mode="wait">
         {step === 1 && (
+          <StepPhysiology
+            wantsCoach={wantsCoach}
+            setWantsCoach={setWantsCoach}
+            inviteCode={inviteCode}
+            setInviteCode={setInviteCode}
+            currentFtp={currentFtp}
+            setCurrentFtp={setCurrentFtp}
+            currentSwimPace={currentSwimPace}
+            setCurrentSwimPace={setCurrentSwimPace}
+            currentRunPace={currentRunPace}
+            setCurrentRunPace={setCurrentRunPace}
+            onPrev={() => setStep(1)}
+            onNext={() => setStep(2)}
+            preferredIngredients={preferredIngredients}
+            setPreferredIngredients={setPreferredIngredients}
+            allergies={allergies}
+            setAllergies={setAllergies}
+            dislikedIngredients={dislikedIngredients}
+            setDislikedIngredients={setDislikedIngredients}
+            isFirstStep={true}
+          />
+        )}
+
+        {step === 2 && (
           <StepAmbition
             activeTab={activeTab}
             setActiveTab={setActiveTab}
@@ -258,30 +282,8 @@ export function HybridWizard() {
             setBikeHours={setBikeHours}
             runHours={runHours}
             setRunHours={setRunHours}
-            onNext={() => setStep(2)}
-          />
-        )}
-
-        {step === 2 && (
-          <StepPhysiology
-            wantsCoach={wantsCoach}
-            setWantsCoach={setWantsCoach}
-            inviteCode={inviteCode}
-            setInviteCode={setInviteCode}
-            currentFtp={currentFtp}
-            setCurrentFtp={setCurrentFtp}
-            currentSwimPace={currentSwimPace}
-            setCurrentSwimPace={setCurrentSwimPace}
-            currentRunPace={currentRunPace}
-            setCurrentRunPace={setCurrentRunPace}
             onPrev={() => setStep(1)}
             onNext={() => setStep(3)}
-            preferredIngredients={preferredIngredients}
-            setPreferredIngredients={setPreferredIngredients}
-            allergies={allergies}
-            setAllergies={setAllergies}
-            dislikedIngredients={dislikedIngredients}
-            setDislikedIngredients={setDislikedIngredients}
           />
         )}
 

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, Search, Clock, Timer, ChevronRight, Activity } from 'lucide-react';
+import { Trophy, Search, Clock, Timer, ChevronRight, ChevronLeft, Activity } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { RACES_CATALOG, RaceCatalogItem, MultisportModality } from '@/lib/races-data';
@@ -42,6 +42,7 @@ interface StepAmbitionProps {
   runHours: number;
   setRunHours: (v: number) => void;
   onNext: () => void;
+  onPrev?: () => void;
 }
 
 export function StepAmbition(props: StepAmbitionProps) {
@@ -223,7 +224,12 @@ export function StepAmbition(props: StepAmbitionProps) {
 
         </div>
         
-        <div className="flex justify-end pt-4 border-t border-zinc-800/80">
+        <div className="flex justify-between pt-4 border-t border-zinc-800/80">
+          {props.onPrev ? (
+            <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-400 hover:text-white transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+          ) : (
+            <div />
+          )}
           <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm">
             Continuar <ChevronRight className="w-4 h-4 ml-1" />
           </AnimatedButton>

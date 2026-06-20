@@ -25,6 +25,7 @@ interface StepPhysiologyProps {
   setAllergies: (v: string[]) => void;
   dislikedIngredients: string[];
   setDislikedIngredients: (v: string[]) => void;
+  isFirstStep?: boolean;
 }
 
 const INGREDIENTS_OPTIONS = [
@@ -257,7 +258,11 @@ export function StepPhysiology(props: StepPhysiologyProps) {
         </div>
         
         <div className="flex justify-between pt-4 border-t border-zinc-200">
-          <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-500 hover:text-zinc-800 transition flex items-center cursor-pointer"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+          {!props.isFirstStep ? (
+            <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-500 hover:text-zinc-800 transition flex items-center cursor-pointer"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+          ) : (
+            <div />
+          )}
           <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm !bg-cyan-400 hover:!bg-cyan-500 !text-white shadow-cyan-500/10">
             {props.wantsCoach ? 'Siguiente' : 'Continuar'} <ChevronRight className="w-4 h-4 ml-1" />
           </AnimatedButton>
