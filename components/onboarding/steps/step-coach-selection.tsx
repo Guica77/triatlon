@@ -210,6 +210,15 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
 
         <div className="flex justify-between pt-4 border-t border-zinc-800/80 mt-4">
           <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-400 hover:text-white transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+          
+          <AnimatedButton
+            variant="secondary"
+            onClick={props.onSearchDirectory}
+            disabled={props.loading}
+            className="px-6 py-3 text-xs !bg-zinc-850 hover:!bg-zinc-800 !text-white flex items-center gap-1.5 border border-zinc-700/50"
+          >
+            {props.loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Omitir y continuar'} <ChevronRight className="w-3.5 h-3.5" />
+          </AnimatedButton>
         </div>
       </ProCard>
     </motion.div>

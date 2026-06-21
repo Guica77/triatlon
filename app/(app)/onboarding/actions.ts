@@ -149,7 +149,7 @@ export async function saveRaceGoalAndPlan(formData: {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login')
+    return { error: 'No autorizado' };
   }
 
   const { 
@@ -225,7 +225,7 @@ export async function saveRaceGoalAndPlan(formData: {
   }
 
   if (!selectedPlanId) {
-    redirect('/dashboard');
+    return { success: true };
   }
 
   // 1.8 Determinar nivel final
@@ -300,7 +300,7 @@ export async function saveRaceGoalAndPlan(formData: {
     .order('week_number', { ascending: true });
 
   if (sessionsError || !sessions || sessions.length === 0) {
-    redirect('/dashboard');
+    return { success: true };
   }
 
   // Filtrado Inteligente de Sesiones según Modalidad Deportiva (Multisport)
