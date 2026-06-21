@@ -8,7 +8,6 @@ import { RaceGoalCard } from '@/components/settings/race-goal-card';
 import { PhysiologicalCard } from '@/components/settings/physiological-card';
 import { TelemetryConnectCard } from '@/components/settings/telemetry-connect-card';
 import { BillingCard } from '@/components/settings/billing-card';
-import { NotificationTestCard } from '@/components/settings/notification-test-card';
 import { SweatTestCard } from '@/components/settings/sweat-test-card';
 
 export default async function SettingsPage() {
@@ -106,7 +105,7 @@ export default async function SettingsPage() {
               </div>
             </div>
             
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="h-full">
                 <TelemetryConnectCard 
                   connectedProviders={connectedProviders}
@@ -117,9 +116,6 @@ export default async function SettingsPage() {
                 <BillingCard 
                   status={profile.subscription_status}
                 />
-              </div>
-              <div className="h-full">
-                <NotificationTestCard />
               </div>
             </div>
           </div>
