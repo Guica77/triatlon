@@ -44,6 +44,7 @@ export function ChatView({
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
   const { refreshUnreadCount } = useNotifications()
+  const hasSidebar = currentUserRole === 'coach' || participants.length > 1
 
   // Filtered sidebar items
   const filteredParticipants = participants.filter(p => {
@@ -191,8 +192,8 @@ export function ChatView({
     <div className="flex bg-white border-0 sm:border border-zinc-200 rounded-none sm:rounded-2xl overflow-hidden h-full sm:h-[calc(100vh-180px)] sm:min-h-[500px] shadow-none sm:shadow-sm">
       
       {/* Left Sidebar */}
-      {(currentUserRole === 'coach' || participants.length > 1) ? (
-        <div className="w-80 border-r border-zinc-200 flex flex-col shrink-0 bg-zinc-50/50">
+      {hasSidebar ? (
+        <div className={`w-full sm:w-80 border-r border-zinc-200 flex flex-col shrink-0 bg-zinc-50/50 ${selectedPart ? 'hidden sm:flex' : 'flex'}`}>
           
           {/* Search bar */}
           <div className="p-4 border-b border-zinc-200 flex items-center gap-2 bg-zinc-50">
@@ -250,12 +251,21 @@ export function ChatView({
       ) : null}
 
       {/* Main Chat Conversation Viewport */}
-      <div className="flex-1 flex flex-col justify-between bg-zinc-50/10">
+      <div className={`flex-1 flex flex-col justify-between bg-zinc-50/10 ${hasSidebar && !selectedPart ? 'hidden sm:flex' : 'flex'}`}>
         {selectedPart ? (
           <>
             {/* Active chat header */}
             <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-200 bg-white flex items-center justify-between shrink-0 shadow-sm">
               <div className="flex items-center gap-3">
+                {hasSidebar && (
+                  <button 
+                    onClick={() => setSelectedPart(null)}
+                    className="sm:hidden p-1 -ml-1 text-zinc-500 hover:text-zinc-800 transition-colors shrink-0"
+                    aria-label="Volver"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                )}
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-indigo-500 flex items-center justify-center font-bold text-xs text-white shadow-sm shrink-0">
                   {(selectedPart.first_name || 'T')[0].toUpperCase()}
                 </div>
@@ -345,6 +355,7 @@ export function ChatView({
                 onFocus={(e) => {
                   setTimeout(() => {
                     e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    scrollToBottom();
                   }, 150);
                 }}
                 placeholder="Escribe tu mensaje aquí..."
