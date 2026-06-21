@@ -65,7 +65,7 @@ export default async function AthleteChatPage() {
       </header>
 
       {/* Main chat viewport */}
-      <main className="max-w-4xl mx-auto w-full px-0 sm:px-6 pt-2 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-[4.5rem] sm:pb-0">
+      <main className="max-w-4xl mx-auto w-full px-0 sm:px-6 pt-2 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-0">
         <ChatView
           initialParticipants={participants}
           availableCoaches={availableCoaches}

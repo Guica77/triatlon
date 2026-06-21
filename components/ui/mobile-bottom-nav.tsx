@@ -35,8 +35,13 @@ export function MobileBottomNav() {
     fetchRole();
   }, []);
 
-  // Ocultar en login y callback
-  if (pathname.includes('/login') || pathname.includes('/auth')) {
+  // Ocultar en login, callback y chats para dejar todo el espacio de pantalla al chat y teclado móvil
+  if (
+    pathname.includes('/login') || 
+    pathname.includes('/auth') || 
+    pathname.startsWith('/chat') || 
+    pathname.startsWith('/coach/chat')
+  ) {
     return null;
   }
 

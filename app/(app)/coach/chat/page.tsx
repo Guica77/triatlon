@@ -19,19 +19,21 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
     redirect('/login')
   }
 
-  // 1. Verify user profile and coach role
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, first_name')
-    .eq('id', user.id)
-    .single()
+  // 1. Verify user profile and fetch roster athletes in parallel
+  const [profileRes, participantsRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('role, first_name')
+      .eq('id', user.id)
+      .single(),
+    getChatParticipants()
+  ]);
 
+  const profile = profileRes.data;
   if (!profile || profile.role !== 'coach') {
     redirect('/dashboard')
   }
 
-  // 2. Fetch conversation athletes
-  const participantsRes = await getChatParticipants()
   const participants = participantsRes.data || []
   
   const params = await searchParams
@@ -90,7 +92,7 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
       </header>
 
       {/* Reusable Chat Interface */}
-      <main className="max-w-6xl mx-auto w-full px-0 sm:px-6 pt-0 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-[4.5rem] sm:pb-0">
+      <main className="max-w-6xl mx-auto w-full px-0 sm:px-6 pt-0 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-0">
         <ChatView
           initialParticipants={participants}
           currentUserRole="coach"

@@ -188,7 +188,7 @@ export function ChatView({
   }
 
   return (
-    <div className="flex bg-white border border-zinc-200 rounded-2xl overflow-hidden h-[calc(100vh-180px)] min-h-[500px] shadow-sm">
+    <div className="flex bg-white border-0 sm:border border-zinc-200 rounded-none sm:rounded-2xl overflow-hidden h-full sm:h-[calc(100vh-180px)] sm:min-h-[500px] shadow-none sm:shadow-sm">
       
       {/* Left Sidebar */}
       {(currentUserRole === 'coach' || participants.length > 1) ? (
@@ -254,7 +254,7 @@ export function ChatView({
         {selectedPart ? (
           <>
             {/* Active chat header */}
-            <div className="px-6 py-4 border-b border-zinc-200 bg-white flex items-center justify-between shrink-0 shadow-sm">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-200 bg-white flex items-center justify-between shrink-0 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-indigo-500 flex items-center justify-center font-bold text-xs text-white shadow-sm shrink-0">
                   {(selectedPart.first_name || 'T')[0].toUpperCase()}
@@ -277,7 +277,7 @@ export function ChatView({
             </div>
 
             {/* Messages body list */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar">
               {loadingMessages ? (
                 <div className="h-full flex items-center justify-center text-xs text-zinc-500 font-semibold">
                   Cargando conversación...
