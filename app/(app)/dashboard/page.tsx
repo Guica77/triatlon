@@ -23,6 +23,20 @@ export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
   const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startDayIdx = startOfMonth.getDay() || 7;
+  const calendarStart = new Date(startOfMonth);
+  calendarStart.setDate(calendarStart.getDate() - startDayIdx + 1);
+  calendarStart.setHours(0, 0, 0, 0);
+
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  const endDayIdx = endOfMonth.getDay() || 7;
+  const calendarEnd = new Date(endOfMonth);
+  calendarEnd.setDate(calendarEnd.getDate() + (7 - endDayIdx));
+  calendarEnd.setHours(23, 59, 59, 999);
+
+  const todayStr = now.toISOString().split('T')[0];
+
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -31,24 +45,42 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // 1. Obtener perfil y plan activo
-  const { data: profileData } = await supabase
-    .from('profiles')
-    .select('*, training_plans(*)')
-    .eq('id', user.id)
-    .single();
+  // 1. Obtener perfil y todos los datos en paralelo
+  const [
+    profileRes,
+    biometricsRes,
+    nutritionRes,
+    analyticsData,
+    devicesRes,
+    workoutsRes
+  ] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*, training_plans(*)')
+      .eq('id', user.id)
+      .single(),
+    getDailyBiometrics(),
+    getDailyNutrition(todayStr),
+    getAnalyticsDashboardData(),
+    supabase
+      .from('user_connected_devices')
+      .select('provider')
+      .eq('user_id', user.id),
+    supabase
+      .from('user_workouts')
+      .select('*, training_sessions(*), universal_telemetry(*), workout_feedback(*)')
+      .eq('user_id', user.id)
+      .gte('scheduled_date', calendarStart.toISOString().split('T')[0])
+      .lte('scheduled_date', calendarEnd.toISOString().split('T')[0])
+      .order('scheduled_date', { ascending: true })
+  ]);
 
+  const profileData = profileRes.data;
   if (!profileData) {
     redirect('/onboarding');
   }
 
   const profile = profileData as any;
-
-  let coachProfile = null;
-  if (profile.coach_id) {
-    const { data } = await supabase.from('profiles').select('first_name, last_name').eq('id', profile.coach_id).single();
-    coachProfile = data;
-  }
 
   if (profile.role === 'coach') {
     redirect('/coach/dashboard');
@@ -59,48 +91,21 @@ export default async function DashboardPage() {
   }
   const activePlan = profile.training_plans;
 
-  // 1.5 Obtener Biometría del Día (con auto-simulación inicial)
-  const biometricsRes = await getDailyBiometrics();
+  let coachProfile = null;
+  if (profile.coach_id) {
+    const { data } = await supabase.from('profiles').select('first_name, last_name').eq('id', profile.coach_id).single();
+    coachProfile = data;
+  }
+
   const biometrics = biometricsRes.data || null;
   const biometricsHistory = biometricsRes.history || [];
 
-  // 1.5.5 Obtener Nutrición Deportiva Dinámica (Estilo INDYA)
-  const todayStr = now.toISOString().split('T')[0];
-  const { data: nutritionData, error: nutritionError } = await getDailyNutrition(todayStr);
+  const nutritionData = nutritionRes.data || null;
 
-  // 1.6 Obtener Datos PMC para el FormStatusWidget
-  const analyticsData = await getAnalyticsDashboardData();
-
-  // 1.8 Verificar conexiones de dispositivos OAuth activas (Garmin / Strava)
-  const { data: devices } = await supabase
-    .from('user_connected_devices')
-    .select('provider')
-    .eq('user_id', user.id);
+  const devices = devicesRes.data;
   const isConnected = Boolean(profile.garmin_connected || profile.strava_connected || (devices && devices.length > 0));
 
-  // 2. Obtener entrenamientos del mes en curso (rango completo de calendario)
-  
-  // Calcular primer día del mes actual, y luego retroceder al Lunes de esa semana
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const startDayIdx = startOfMonth.getDay() || 7;
-  const calendarStart = new Date(startOfMonth);
-  calendarStart.setDate(calendarStart.getDate() - startDayIdx + 1);
-  calendarStart.setHours(0, 0, 0, 0);
-
-  // Calcular último día del mes actual, y luego avanzar al Domingo de esa semana
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  const endDayIdx = endOfMonth.getDay() || 7;
-  const calendarEnd = new Date(endOfMonth);
-  calendarEnd.setDate(calendarEnd.getDate() + (7 - endDayIdx));
-  calendarEnd.setHours(23, 59, 59, 999);
-
-  const { data: workouts } = await supabase
-    .from('user_workouts')
-    .select('*, training_sessions(*), universal_telemetry(*), workout_feedback(*)')
-    .eq('user_id', user.id)
-    .gte('scheduled_date', calendarStart.toISOString().split('T')[0])
-    .lte('scheduled_date', calendarEnd.toISOString().split('T')[0])
-    .order('scheduled_date', { ascending: true });
+  const workouts = workoutsRes.data;
 
   // 3. Identificar estadísticas rápidas de la semana actual
   const currentDay = now.getDay() || 7;

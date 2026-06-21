@@ -19,17 +19,18 @@ export default async function AnalyticsPage() {
     redirect('/login');
   }
 
-  // Obtener perfil activo
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('first_name, level, training_plans(name)')
-    .eq('id', user.id)
-    .single();
+  // Obtener perfil activo y analíticas en paralelo
+  const [profileRes, analyticsData] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('first_name, level, training_plans(name)')
+      .eq('id', user.id)
+      .single(),
+    getAnalyticsDashboardData()
+  ]);
 
+  const profile = profileRes.data;
   const activePlan = profile?.training_plans;
-
-  // Obtener datos del Bento Grid de analíticas
-  const analyticsData = await getAnalyticsDashboardData();
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] pb-24">

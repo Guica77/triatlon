@@ -18,21 +18,25 @@ export default async function SettingsPage() {
     redirect('/login');
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*, training_plans(name)')
-    .eq('id', user.id)
-    .single();
+  // Obtener perfil y dispositivos conectados en paralelo
+  const [profileRes, devicesRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*, training_plans(name)')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('user_connected_devices')
+      .select('provider')
+      .eq('user_id', user.id)
+  ]);
+
+  const profile = profileRes.data;
+  const devices = devicesRes.data;
 
   if (!profile) {
     redirect('/onboarding');
   }
-
-  // 1.8 Obtener todos los dispositivos conectados de la base de datos
-  const { data: devices } = await supabase
-    .from('user_connected_devices')
-    .select('provider')
-    .eq('user_id', user.id);
 
   const connectedProviders = [
     ...(profile.garmin_connected ? ['garmin'] : []),

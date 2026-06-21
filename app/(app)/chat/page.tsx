@@ -15,22 +15,24 @@ export default async function AthleteChatPage() {
     redirect('/login')
   }
 
-  // 1. Verify user profile (and prevent coaches from accessing the athlete endpoint directly)
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+  // 1. Verify user profile and fetch participants in parallel
+  const [profileRes, participantsRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single(),
+    getChatParticipants()
+  ]);
 
+  const profile = profileRes.data;
   if (profile && profile.role === 'coach') {
     redirect('/coach/chat')
   }
 
-  // 2. Fetch athlete's assigned coach
-  const participantsRes = await getChatParticipants()
   const participants = participantsRes.data || []
 
-  // 3. If no coach is assigned, fetch available coaches
+  // 2. If no coach is assigned, fetch available coaches
   let availableCoaches: any[] = []
   if (participants.length === 0) {
     const coachesRes = await getAvailableCoaches()
