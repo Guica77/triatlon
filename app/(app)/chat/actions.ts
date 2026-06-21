@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import webpush from 'web-push'
 import { Resend } from 'resend'
+import { configureVapid } from '@/lib/notifications'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key')
 
@@ -74,13 +75,8 @@ export async function sendMessage(receiverId: string, message: string): Promise<
         const senderName = senderProfile?.first_name || 'Alguien'
         let pushSent = false
 
-        if (receiverProfile.push_subscriptions && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+        if (receiverProfile.push_subscriptions && configureVapid()) {
           try {
-            webpush.setVapidDetails(
-              process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com',
-              process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-              process.env.VAPID_PRIVATE_KEY
-            )
 
             await webpush.sendNotification(
               receiverProfile.push_subscriptions as unknown as webpush.PushSubscription,

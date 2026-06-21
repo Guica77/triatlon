@@ -1,6 +1,29 @@
 import webpush from 'web-push';
 import { createAdminClient } from '@/lib/supabase/admin';
 
+export function configureVapid(): boolean {
+  let publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  let privateKey = process.env.VAPID_PRIVATE_KEY;
+  let subject = process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com';
+
+  if (!publicKey || !privateKey) {
+    return false;
+  }
+
+  // Clean keys (trim and strip quotes/whitespace)
+  publicKey = publicKey.trim().replace(/^['"]|['"]$/g, '');
+  privateKey = privateKey.trim().replace(/^['"]|['"]$/g, '');
+  subject = subject.trim().replace(/^['"]|['"]$/g, '');
+
+  try {
+    webpush.setVapidDetails(subject, publicKey, privateKey);
+    return true;
+  } catch (error) {
+    console.error('Failed to set VAPID details:', error);
+    return false;
+  }
+}
+
 export async function sendPushNotification(
   userId: string, 
   payload: { title: string; body: string; url?: string }
@@ -18,13 +41,7 @@ export async function sendPushNotification(
       return false;
     }
 
-    if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-      webpush.setVapidDetails(
-        process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com',
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-        process.env.VAPID_PRIVATE_KEY
-      );
-
+    if (configureVapid()) {
       await webpush.sendNotification(
         profile.push_subscriptions as any,
         JSON.stringify(payload)

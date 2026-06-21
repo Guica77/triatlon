@@ -1,16 +1,11 @@
 import { NextResponse } from 'next/server';
 import webpush from 'web-push';
+import { configureVapid } from '@/lib/notifications';
 
 export async function POST(req: Request) {
   try {
-    if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-      webpush.setVapidDetails(
-        process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com',
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-        process.env.VAPID_PRIVATE_KEY
-      );
-    } else {
-      throw new Error('VAPID keys missing on server');
+    if (!configureVapid()) {
+      throw new Error('VAPID keys missing or invalid on server');
     }
 
     const { subscription, payload } = await req.json();

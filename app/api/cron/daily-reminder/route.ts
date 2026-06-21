@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import webpush from 'web-push';
+import { configureVapid } from '@/lib/notifications';
 
 // Permite simular desde el navegador si pasamos un secret
 export const maxDuration = 300;
@@ -18,14 +19,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-      webpush.setVapidDetails(
-        process.env.VAPID_SUBJECT || 'mailto:support@triatlonpro.com',
-        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-        process.env.VAPID_PRIVATE_KEY
-      );
-    } else {
-      console.warn("Faltan las claves VAPID para enviar notificaciones push.");
+    if (!configureVapid()) {
+      console.warn("Faltan o son inválidas las claves VAPID para enviar notificaciones push.");
     }
 
     const adminSupabase = createAdminClient();
