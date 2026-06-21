@@ -27,6 +27,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('Error sending test push:', error);
-    return NextResponse.json({ error: error.message || 'Server Error' }, { status: 500 });
+    return NextResponse.json({ 
+      error: error.message || 'Server Error',
+      statusCode: error.statusCode || null,
+      body: error.body || null
+    }, { status: 500 });
   }
 }

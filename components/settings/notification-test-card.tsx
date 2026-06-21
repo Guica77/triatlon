@@ -84,7 +84,14 @@ export function NotificationTestCard() {
 
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData.error || 'Error al enviar la notificación de prueba');
+        let errorMsg = errData.error || 'Error al enviar la notificación de prueba';
+        if (errData.statusCode) {
+          errorMsg += ` (Código: ${errData.statusCode})`;
+        }
+        if (errData.body) {
+          errorMsg += ` - Detalle: ${errData.body}`;
+        }
+        throw new Error(errorMsg);
       }
 
       setSuccess(true);
