@@ -52,14 +52,25 @@ const INGREDIENTS_OPTIONS = [
 ];
 
 const ALLERGIES_OPTIONS = [
-  { id: 'gluten', label: 'Gluten', category: 'Alérgeno' },
-  { id: 'lactosa', label: 'Lactosa / Lácteos', category: 'Alérgeno' },
-  { id: 'frutos_secos', label: 'Frutos Secos', category: 'Alérgeno' },
-  { id: 'marisco', label: 'Marisco', category: 'Alérgeno' },
-  { id: 'huevo', label: 'Huevo', category: 'Alérgeno' },
-  { id: 'soja', label: 'Soja', category: 'Alérgeno' },
-  { id: 'fructosa', label: 'Fructosa', category: 'Alérgeno' },
+  // Los 14 Alérgenos principales (Reglamento UE)
+  { id: 'gluten', label: 'Gluten / Cereales', category: 'Alérgeno (UE)' },
+  { id: 'crustaceos', label: 'Crustáceos', category: 'Alérgeno (UE)' },
+  { id: 'huevos', label: 'Huevos', category: 'Alérgeno (UE)' },
+  { id: 'pescado', label: 'Pescado', category: 'Alérgeno (UE)' },
+  { id: 'cacahuetes', label: 'Cacahuetes', category: 'Alérgeno (UE)' },
+  { id: 'soja', label: 'Soja', category: 'Alérgeno (UE)' },
+  { id: 'lactosa', label: 'Lácteos / Lactosa', category: 'Alérgeno (UE)' },
+  { id: 'frutos_secos', label: 'Frutos de Cáscara', category: 'Alérgeno (UE)' },
+  { id: 'apio', label: 'Apio', category: 'Alérgeno (UE)' },
+  { id: 'mostaza', label: 'Mostaza', category: 'Alérgeno (UE)' },
+  { id: 'sesamo', label: 'Sésamo', category: 'Alérgeno (UE)' },
+  { id: 'sulfitos', label: 'Sulfitos', category: 'Alérgeno (UE)' },
+  { id: 'altramuces', label: 'Altramuces', category: 'Alérgeno (UE)' },
+  { id: 'moluscos', label: 'Moluscos', category: 'Alérgeno (UE)' },
+  // Intolerancias comunes adicionales
+  { id: 'fructosa', label: 'Fructosa', category: 'Intolerancia' },
   { id: 'histamina', label: 'Histamina', category: 'Intolerancia' },
+  { id: 'sorbitol', label: 'Sorbitol', category: 'Intolerancia' },
 ];
 
 const DISLIKED_OPTIONS = [
