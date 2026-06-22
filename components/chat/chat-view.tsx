@@ -8,7 +8,14 @@ import {
   MessageSquare, 
   ChevronRight, 
   ArrowLeft,
-  Sparkles
+  Sparkles,
+  Plus,
+  Smile,
+  Paperclip,
+  Mic,
+  Phone,
+  Video,
+  MoreVertical
 } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { ChatParticipant, ChatMessageItem, sendMessage, getMessages, linkCoachByAthlete, linkCoachByCode, markMessagesAsRead } from '@/app/(app)/chat/actions'
@@ -280,14 +287,37 @@ export function ChatView({
                 </div>
               </div>
               
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-[9px] text-emerald-700 font-black uppercase tracking-wider">
-                <Sparkles className="w-3 h-3 text-emerald-600 animate-pulse" />
-                Conectado (Realtime)
+              <div className="flex items-center gap-1 sm:gap-3">
+                {/* Realtime badge (hidden on narrow screens to save space for call buttons) */}
+                <div className="hidden xs:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-[8px] sm:text-[9px] text-emerald-700 font-black uppercase tracking-wider shrink-0">
+                  <Sparkles className="w-3 h-3 text-emerald-600 animate-pulse" />
+                  <span className="hidden sm:inline">Conectado (Realtime)</span>
+                  <span className="sm:hidden">Realtime</span>
+                </div>
+                
+                {/* Call Icons */}
+                <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
+                  <button type="button" className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors rounded-full hover:bg-zinc-100 cursor-pointer" aria-label="Llamar">
+                    <Phone className="w-4 h-4" />
+                  </button>
+                  <button type="button" className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors rounded-full hover:bg-zinc-100 cursor-pointer" aria-label="Videollamada">
+                    <Video className="w-4 h-4" />
+                  </button>
+                  <button type="button" className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors rounded-full hover:bg-zinc-100 cursor-pointer" aria-label="Opciones">
+                    <MoreVertical className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Messages body list */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar">
+            <div 
+              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative bg-[#efeae2]"
+              style={{
+                backgroundImage: `radial-gradient(#dfdcd6 1.2px, transparent 1.2px)`,
+                backgroundSize: '20px 20px',
+              }}
+            >
               {loadingMessages ? (
                 <div className="h-full flex items-center justify-center text-xs text-zinc-500 font-semibold">
                   Cargando conversación...
@@ -310,18 +340,23 @@ export function ChatView({
                         <motion.div
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
-                          className={`max-w-[70%] p-3.5 rounded-2xl text-xs leading-relaxed shadow-sm ${
+                          className={`max-w-[75%] p-3 px-3.5 rounded-2xl text-xs leading-relaxed shadow-sm border ${
                             isOwn 
-                              ? 'bg-cyan-600 text-white font-bold rounded-tr-none' 
-                              : 'bg-zinc-100 text-zinc-800 rounded-tl-none border border-zinc-200/60 font-semibold'
+                              ? 'bg-[#d7f3ff] text-zinc-900 font-medium rounded-tr-none border-[#b2e3ff]' 
+                              : 'bg-white text-zinc-900 rounded-tl-none border-zinc-200/40 font-medium'
                           }`}
                         >
-                          <p>{m.message}</p>
-                          <span className={`text-[8px] mt-1.5 block text-right font-bold ${
-                            isOwn ? 'text-white/80' : 'text-zinc-400'
-                          }`}>
-                            {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
+                          <p className="whitespace-pre-wrap">{m.message}</p>
+                          {isOwn ? (
+                            <span className="text-[8px] mt-1 flex items-center justify-end gap-1 font-bold text-zinc-450">
+                              {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              <span className="text-cyan-600 font-black tracking-normal">✓✓</span>
+                            </span>
+                          ) : (
+                            <span className="text-[8px] mt-1 block text-right font-bold text-zinc-400">
+                              {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          )}
                         </motion.div>
                       </div>
                     )
@@ -346,29 +381,71 @@ export function ChatView({
             {/* Input form */}
             <form 
               onSubmit={handleSendMessage}
-              className="p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] border-t border-zinc-200 bg-white flex items-center gap-2 shrink-0 shadow-sm"
+              className="p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-zinc-200 bg-[#f0f2f5] flex items-center gap-2 shrink-0 shadow-sm"
             >
-              <input
-                type="text"
-                value={newMessageText}
-                onChange={(e) => setNewMessageText(e.target.value)}
-                onFocus={(e) => {
-                  setTimeout(() => {
-                    e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    scrollToBottom();
-                  }, 150);
-                }}
-                placeholder="Escribe tu mensaje aquí..."
-                className="bg-white border border-zinc-200 focus:border-cyan-550 focus:ring-1 focus:ring-cyan-550 rounded-xl p-3 text-sm text-zinc-850 outline-none w-full transition-colors"
-              />
-              <AnimatedButton
-                type="submit"
-                variant="primary"
-                size="icon"
-                className="w-10 h-10 shrink-0 !bg-cyan-650 hover:!bg-cyan-550 !text-white rounded-xl shadow-md flex items-center justify-center cursor-pointer"
+              {/* Attachment Icon */}
+              <button 
+                type="button" 
+                className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors shrink-0 rounded-full hover:bg-zinc-200/50 cursor-pointer"
+                aria-label="Adjuntar archivo"
               >
-                <Send className="w-4 h-4 text-white" />
-              </AnimatedButton>
+                <Plus className="w-5 h-5" />
+              </button>
+              
+              {/* Input container wrapper */}
+              <div className="flex-1 flex items-center bg-white border border-zinc-200 focus-within:border-cyan-550 focus-within:ring-1 focus-within:ring-cyan-550 rounded-2xl px-3 py-1 shadow-sm">
+                {/* Emoji Icon */}
+                <button 
+                  type="button" 
+                  className="p-1.5 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer"
+                  aria-label="Emojis"
+                >
+                  <Smile className="w-4.5 h-4.5" />
+                </button>
+                
+                <input
+                  type="text"
+                  value={newMessageText}
+                  onChange={(e) => setNewMessageText(e.target.value)}
+                  onFocus={(e) => {
+                    setTimeout(() => {
+                      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      scrollToBottom();
+                    }, 150);
+                  }}
+                  placeholder="Escribe tu mensaje aquí..."
+                  className="bg-transparent border-none text-sm text-zinc-850 outline-none w-full py-1.5 px-2 placeholder-zinc-400"
+                />
+                
+                {/* Paperclip Icon */}
+                <button 
+                  type="button" 
+                  className="p-1.5 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer"
+                  aria-label="Compartir documento"
+                >
+                  <Paperclip className="w-4 h-4" />
+                </button>
+              </div>
+              
+              {/* Send or Voice Record Icon */}
+              {newMessageText.trim() ? (
+                <AnimatedButton
+                  type="submit"
+                  variant="primary"
+                  size="icon"
+                  className="w-10 h-10 shrink-0 !bg-cyan-600 hover:!bg-cyan-550 !text-white rounded-full shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 scale-100 active:scale-95"
+                >
+                  <Send className="w-4 h-4 text-white" />
+                </AnimatedButton>
+              ) : (
+                <button
+                  type="button"
+                  className="w-10 h-10 shrink-0 bg-white border border-zinc-200 text-zinc-450 hover:text-zinc-600 rounded-full shadow-sm flex items-center justify-center transition-all duration-200 hover:bg-zinc-150 cursor-pointer"
+                  aria-label="Grabar audio"
+                >
+                  <Mic className="w-4.5 h-4.5" />
+                </button>
+              )}
             </form>
           </>
         ) : (
