@@ -29,26 +29,70 @@ interface StepPhysiologyProps {
 }
 
 const INGREDIENTS_OPTIONS = [
+  // Carbohidratos
   { id: 'pasta', label: 'Pasta', category: 'Carbohidratos' },
   { id: 'arroz', label: 'Arroz', category: 'Carbohidratos' },
   { id: 'patata', label: 'Patatas', category: 'Carbohidratos' },
   { id: 'avena', label: 'Avena', category: 'Carbohidratos' },
-  { id: 'platano', label: 'Plátanos', category: 'Carbohidratos' },
   { id: 'quinoa', label: 'Quinoa', category: 'Carbohidratos' },
   { id: 'boniato', label: 'Boniato', category: 'Carbohidratos' },
+  { id: 'pan_integral', label: 'Pan Integral', category: 'Carbohidratos' },
+  { id: 'cuscus', label: 'Cuscús', category: 'Carbohidratos' },
+  
+  // Frutas (Alta y Baja fructosa)
+  { id: 'platano', label: 'Plátano', category: 'Frutas' },
+  { id: 'manzana', label: 'Manzana', category: 'Frutas' },
+  { id: 'frutos_rojos', label: 'Frutos Rojos', category: 'Frutas' },
+  { id: 'naranja', label: 'Naranja / Cítricos', category: 'Frutas' },
+  { id: 'kiwi', label: 'Kiwi', category: 'Frutas' },
+  { id: 'pina', label: 'Piña', category: 'Frutas' },
+  { id: 'melon_sandia', label: 'Melón / Sandía', category: 'Frutas' },
+  
+  // Verduras
+  { id: 'espinacas', label: 'Espinacas / Hoja Verde', category: 'Verduras' },
+  { id: 'zanahoria', label: 'Zanahoria', category: 'Verduras' },
+  { id: 'calabacin', label: 'Calabacín', category: 'Verduras' },
+  { id: 'berenjena', label: 'Berenjena', category: 'Verduras' },
+  { id: 'calabaza', label: 'Calabaza', category: 'Verduras' },
+  
+  // Proteínas Animales
   { id: 'pollo', label: 'Pollo', category: 'Proteínas' },
   { id: 'pavo', label: 'Pavo', category: 'Proteínas' },
   { id: 'salmon', label: 'Salmón', category: 'Proteínas' },
   { id: 'pescado_blanco', label: 'Pescado Blanco', category: 'Proteínas' },
   { id: 'atun', label: 'Atún', category: 'Proteínas' },
   { id: 'ternera', label: 'Ternera', category: 'Proteínas' },
-  { id: 'tofu', label: 'Tofu/Soja', category: 'Proteínas' },
+  { id: 'cerdo_magro', label: 'Cerdo (Magro)', category: 'Proteínas' },
   { id: 'huevo', label: 'Huevos', category: 'Proteínas' },
+  
+  // Proteínas Vegetales / Legumbres
+  { id: 'tofu', label: 'Tofu / Tempeh', category: 'Proteína Veg.' },
+  { id: 'soja', label: 'Soja Texturizada', category: 'Proteína Veg.' },
+  { id: 'lentejas', label: 'Lentejas', category: 'Legumbres' },
+  { id: 'garbanzos', label: 'Garbanzos', category: 'Legumbres' },
+  { id: 'alubias', label: 'Alubias', category: 'Legumbres' },
+  
+  // Grasas Saludables
   { id: 'aguacate', label: 'Aguacate', category: 'Grasas' },
   { id: 'frutos_secos', label: 'Frutos Secos', category: 'Grasas' },
   { id: 'aceite_oliva', label: 'Aceite de Oliva', category: 'Grasas' },
-  { id: 'queso', label: 'Queso', category: 'Grasas' },
-  { id: 'yogur', label: 'Yogur', category: 'Grasas' },
+  { id: 'semillas', label: 'Semillas (Chía, Lino)', category: 'Grasas' },
+  
+  // Lácteos
+  { id: 'queso', label: 'Queso', category: 'Lácteos' },
+  { id: 'yogur', label: 'Yogur / Kéfir', category: 'Lácteos' },
+  { id: 'leche', label: 'Leche', category: 'Lácteos' },
+  
+  // Suplementos & Recuperación Rápida
+  { id: 'whey', label: 'Proteína Whey', category: 'Suplementos' },
+  { id: 'creatina', label: 'Creatina', category: 'Suplementos' },
+  { id: 'magnesio', label: 'Magnesio', category: 'Suplementos' },
+  { id: 'omega3', label: 'Omega 3', category: 'Suplementos' },
+  { id: 'vitamina_c', label: 'Vitamina C', category: 'Vitaminas' },
+  { id: 'hierro', label: 'Hierro', category: 'Vitaminas' },
+  { id: 'bcaa', label: 'BCAAs / Aminoácidos', category: 'Suplementos' },
+  { id: 'geles', label: 'Geles Deportivos', category: 'Intra-Entreno' },
+  { id: 'iso', label: 'Bebida Isotónica', category: 'Intra-Entreno' },
 ];
 
 const ALLERGIES_OPTIONS = [
@@ -74,16 +118,21 @@ const ALLERGIES_OPTIONS = [
 ];
 
 const DISLIKED_OPTIONS = [
-  { id: 'ajo_cebolla', label: 'Ajo / Cebolla', category: 'Evitar' },
-  { id: 'brocoli', label: 'Brócoli', category: 'Evitar' },
-  { id: 'cilantro', label: 'Cilantro', category: 'Evitar' },
-  { id: 'pescado_azul', label: 'Pescado Azul', category: 'Evitar' },
-  { id: 'carne_roja', label: 'Carne Roja', category: 'Evitar' },
-  { id: 'picante', label: 'Picante', category: 'Evitar' },
-  { id: 'tomate', label: 'Tomate', category: 'Evitar' },
-  { id: 'champiñones', label: 'Champiñones', category: 'Evitar' },
-  { id: 'aceitunas', label: 'Aceitunas', category: 'Evitar' },
-  { id: 'pimiento', label: 'Pimiento', category: 'Evitar' },
+  { id: 'ajo_cebolla', label: 'Ajo / Cebolla', category: 'Vegetales Fuertes' },
+  { id: 'brocoli', label: 'Brócoli / Col', category: 'Vegetales Fuertes' },
+  { id: 'cilantro', label: 'Cilantro', category: 'Hierbas' },
+  { id: 'pescado_azul', label: 'Pescado Azul', category: 'Pescado' },
+  { id: 'carne_roja', label: 'Carne Roja', category: 'Carne' },
+  { id: 'picante', label: 'Comida Picante', category: 'Especias' },
+  { id: 'tomate', label: 'Tomate', category: 'Vegetales' },
+  { id: 'champiñones', label: 'Setas / Champiñones', category: 'Vegetales' },
+  { id: 'aceitunas', label: 'Aceitunas', category: 'Encurtidos' },
+  { id: 'pimiento', label: 'Pimiento', category: 'Vegetales Fuertes' },
+  { id: 'berpimiento', label: 'Berenjena', category: 'Vegetales' },
+  { id: 'legumbres_enteras', label: 'Legumbres Enteras', category: 'Legumbres' },
+  { id: 'queso_fuerte', label: 'Quesos Fuertes/Azules', category: 'Lácteos' },
+  { id: 'cafe', label: 'Café / Cafeína', category: 'Bebidas' },
+  { id: 'endulzantes', label: 'Edulcorantes Artif.', category: 'Aditivos' },
 ];
 
 export function StepPhysiology(props: StepPhysiologyProps) {

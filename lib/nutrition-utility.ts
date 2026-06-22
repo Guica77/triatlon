@@ -436,10 +436,24 @@ export function generateAlternativeMeal(
     boniato: 'Boniato',
     quinoa: 'Quinoa',
     avena: 'Avena',
+    pan_integral: 'Pan Integral',
+    cuscus: 'Cuscús',
     platano: 'Plátano',
+    manzana: 'Manzana',
+    frutos_rojos: 'Frutos Rojos',
+    naranja: 'Naranja / Cítricos',
+    kiwi: 'Kiwi',
+    pina: 'Piña',
+    melon_sandia: 'Melón o Sandía',
+    espinacas: 'Espinacas',
+    zanahoria: 'Zanahoria',
+    calabacin: 'Calabacín',
+    berenjena: 'Berenjena',
+    calabaza: 'Calabaza',
     pollo: 'Pollo',
     pavo: 'Pavo',
     ternera: 'Ternera magra',
+    cerdo_magro: 'Cerdo (Magro)',
     pescado_blanco: 'Pescado blanco',
     salmon: 'Salmón',
     atun: 'Atún',
@@ -449,16 +463,28 @@ export function generateAlternativeMeal(
     aguacate: 'Aguacate',
     frutos_secos: 'Frutos secos',
     aceite_oliva: 'Aceite de Oliva Extra Virgen',
+    semillas: 'Semillas',
     queso: 'Queso fresco',
     yogur: 'Yogur natural',
+    leche: 'Leche',
     lentejas: 'Lentejas',
-    garbanzos: 'Garbanzos'
+    garbanzos: 'Garbanzos',
+    alubias: 'Alubias',
+    whey: 'Proteína Whey',
+    creatina: 'Creatina',
+    magnesio: 'Magnesio',
+    omega3: 'Omega 3',
+    vitamina_c: 'Vitamina C',
+    hierro: 'Hierro',
+    bcaa: 'BCAA',
+    geles: 'Geles Deportivos',
+    iso: 'Isotónico',
   };
 
   // Categorías base (ampliadas para más variedad)
-  const allCarbs = ['pasta', 'arroz', 'patata', 'boniato', 'quinoa', 'avena', 'platano', 'lentejas', 'garbanzos'];
-  const allProteins = ['pollo', 'pavo', 'ternera', 'pescado_blanco', 'salmon', 'atun', 'tofu', 'soja', 'huevo'];
-  const allFats = ['aguacate', 'frutos_secos', 'aceite_oliva', 'queso'];
+  const allCarbs = ['pasta', 'arroz', 'patata', 'boniato', 'quinoa', 'avena', 'pan_integral', 'cuscus', 'platano', 'manzana', 'lentejas', 'garbanzos', 'alubias'];
+  const allProteins = ['pollo', 'pavo', 'ternera', 'cerdo_magro', 'pescado_blanco', 'salmon', 'atun', 'tofu', 'soja', 'huevo', 'whey'];
+  const allFats = ['aguacate', 'frutos_secos', 'aceite_oliva', 'semillas', 'queso'];
 
   // Función para elegir un ingrediente que NO esté en dislikes. 
   // Prioriza los que están en prefs, si no, uno aleatorio.
