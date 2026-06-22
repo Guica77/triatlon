@@ -15,33 +15,31 @@ export default async function CoachDashboardPage() {
     redirect('/login')
   }
 
-  // 1. Verify user profile and coach role
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role, first_name, invite_code')
-    .eq('id', user.id)
-    .single()
+  // 1. Fetch coach profile, roster data, and training plans in parallel
+  const [profileRes, rosterResult, plansRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('role, first_name, invite_code')
+      .eq('id', user.id)
+      .single(),
+    fetchCoachAthletes(),
+    supabase
+      .from('training_plans')
+      .select('id, name')
+      .order('name', { ascending: true })
+  ]);
 
+  const profile = profileRes.data;
   if (!profile || profile.role !== 'coach') {
-    // If not a coach, send back to standard athlete dashboard
-    redirect('/dashboard')
+    redirect('/dashboard');
   }
 
-  // 2. Fetch roster data (biometrics, alerts, tss, workouts)
-  const rosterResult = await fetchCoachAthletes()
   if (rosterResult.error) {
-    console.error('Error fetching roster for coach page:', rosterResult.error)
+    console.error('Error fetching roster for coach page:', rosterResult.error);
   }
-  const roster = rosterResult.data || []
-
-  // 3. Fetch all available training plans to display in assignments selector
-  const { data: plansData } = await supabase
-    .from('training_plans')
-    .select('id, name')
-    .order('name', { ascending: true })
-
-  const plans = plansData || []
-  const coachName = profile.first_name || 'Entrenador'
+  const roster = rosterResult.data || [];
+  const plans = plansRes.data || [];
+  const coachName = profile.first_name || 'Entrenador';
 
   return (
     <CoachDashboardView 

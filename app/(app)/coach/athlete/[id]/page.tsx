@@ -25,94 +25,6 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     redirect('/login');
   }
 
-  // 1. Verify user profile and coach role
-  const { data: coachProfile } = await supabase
-    .from('profiles')
-    .select('role, first_name')
-    .eq('id', user.id)
-    .single();
-
-  if (!coachProfile || coachProfile.role !== 'coach') {
-    redirect('/dashboard');
-  }
-
-  // 2. Security Check: Verify athlete is in coach's roster
-  const { data: rosterCheck } = await supabase
-    .from('coach_athletes')
-    .select('id')
-    .eq('coach_id', user.id)
-    .eq('athlete_id', athleteId)
-    .maybeSingle();
-
-  if (!rosterCheck) {
-    // If not in roster, redirect back to coach dashboard
-    redirect('/coach/dashboard');
-  }
-
-  // 3. Fetch athlete profile and active plan
-  const { data: athleteProfileData } = await supabase
-    .from('profiles')
-    .select('*, training_plans(*)')
-    .eq('id', athleteId)
-    .single();
-
-  if (!athleteProfileData) {
-    redirect('/coach/dashboard');
-  }
-
-  const athleteProfile = athleteProfileData as {
-    first_name?: string;
-    last_name?: string;
-    level?: string;
-    garmin_connected?: boolean;
-    strava_connected?: boolean;
-    training_plans?: { name?: string };
-  };
-  const activePlan = athleteProfile.training_plans;
-
-  // 4. Fetch daily biometrics for the athlete (simulated or real)
-  const today = new Date().toISOString().split('T')[0];
-  const { data: realBiometrics } = await supabase
-    .from('user_biometrics')
-    .select('*')
-    .eq('user_id', athleteId)
-    .eq('date', today)
-    .maybeSingle();
-
-  // Query last 7 days of biometrics for the coach to see athlete trends
-  const { data: biometricsHistoryData } = await supabase
-    .from('user_biometrics')
-    .select('date, hrv, rhr, sleep_hours, readiness_score')
-    .eq('user_id', athleteId)
-    .order('date', { ascending: false })
-    .limit(7);
-
-  const biometricsHistory = biometricsHistoryData ? [...biometricsHistoryData].reverse() : [];
-
-  const biometrics = realBiometrics || {
-    user_id: athleteId,
-    date: today,
-    hrv: null,
-    rhr: null,
-    sleep_hours: null,
-    sleep_score: null,
-    weight: null,
-    fatigue_rating: null,
-    stress_level: null,
-    readiness_score: null,
-  };
-
-  // 5. Fetch PMC analytics for the athlete
-  const analyticsData = await fetchAndCalculateAnalytics(athleteId);
-
-  // 6. Fetch athlete connected devices (Strava / Garmin)
-  const { data: devices } = await supabase
-    .from('user_connected_devices')
-    .select('provider')
-    .eq('user_id', athleteId);
-  const isConnected = Boolean(athleteProfile.garmin_connected || athleteProfile.strava_connected || (devices && devices.length > 0));
-
-  // 7. Fetch calendar workouts for the current month range (standard calendar window)
   const now = new Date();
   
   // Calculate first day of current month, then go back to the Monday of that week
@@ -129,13 +41,102 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
   calendarEnd.setDate(calendarEnd.getDate() + (7 - endDayIdx));
   calendarEnd.setHours(23, 59, 59, 999);
 
-  const { data: workouts } = await supabase
-    .from('user_workouts')
-    .select('*, training_sessions(*), universal_telemetry(*)')
-    .eq('user_id', athleteId)
-    .gte('scheduled_date', calendarStart.toISOString().split('T')[0])
-    .lte('scheduled_date', calendarEnd.toISOString().split('T')[0])
-    .order('scheduled_date', { ascending: true });
+  const today = now.toISOString().split('T')[0];
+
+  // 1. Fetch coach role, security check, profiles, biometrics, analytics, devices, and workouts in parallel
+  const [
+    coachProfileRes,
+    rosterCheckRes,
+    athleteProfileRes,
+    realBiometricsRes,
+    biometricsHistoryRes,
+    analyticsData,
+    devicesRes,
+    workoutsRes
+  ] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('role, first_name')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('coach_athletes')
+      .select('id')
+      .eq('coach_id', user.id)
+      .eq('athlete_id', athleteId)
+      .maybeSingle(),
+    supabase
+      .from('profiles')
+      .select('*, training_plans(*)')
+      .eq('id', athleteId)
+      .single(),
+    supabase
+      .from('user_biometrics')
+      .select('*')
+      .eq('user_id', athleteId)
+      .eq('date', today)
+      .maybeSingle(),
+    supabase
+      .from('user_biometrics')
+      .select('date, hrv, rhr, sleep_hours, readiness_score')
+      .eq('user_id', athleteId)
+      .order('date', { ascending: false })
+      .limit(7),
+    fetchAndCalculateAnalytics(athleteId),
+    supabase
+      .from('user_connected_devices')
+      .select('provider')
+      .eq('user_id', athleteId),
+    supabase
+      .from('user_workouts')
+      .select('*, training_sessions(*), universal_telemetry(*)')
+      .eq('user_id', athleteId)
+      .gte('scheduled_date', calendarStart.toISOString().split('T')[0])
+      .lte('scheduled_date', calendarEnd.toISOString().split('T')[0])
+      .order('scheduled_date', { ascending: true })
+  ]);
+
+  const coachProfile = coachProfileRes.data;
+  if (!coachProfile || coachProfile.role !== 'coach') {
+    redirect('/dashboard');
+  }
+
+  if (!rosterCheckRes.data) {
+    redirect('/coach/dashboard');
+  }
+
+  const athleteProfileData = athleteProfileRes.data;
+  if (!athleteProfileData) {
+    redirect('/coach/dashboard');
+  }
+
+  const athleteProfile = athleteProfileData as {
+    first_name?: string;
+    last_name?: string;
+    level?: string;
+    garmin_connected?: boolean;
+    strava_connected?: boolean;
+    training_plans?: { name?: string };
+  };
+  const activePlan = athleteProfile.training_plans;
+
+  const biometrics = realBiometricsRes.data || {
+    user_id: athleteId,
+    date: today,
+    hrv: null,
+    rhr: null,
+    sleep_hours: null,
+    sleep_score: null,
+    weight: null,
+    fatigue_rating: null,
+    stress_level: null,
+    readiness_score: null,
+  };
+
+  const biometricsHistory = biometricsHistoryRes.data ? [...biometricsHistoryRes.data].reverse() : [];
+  const devices = devicesRes.data;
+  const isConnected = Boolean(athleteProfile.garmin_connected || athleteProfile.strava_connected || (devices && devices.length > 0));
+  const workouts = workoutsRes.data;
 
   // 8. Weekly stats for progress percent
   const currentDay = now.getDay() || 7;
