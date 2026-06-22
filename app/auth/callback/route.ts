@@ -81,9 +81,12 @@ export async function GET(request: Request) {
       const { data: profile } = await supabase.from('profiles').select('role, active_plan_id, coach_id').eq('id', user.id).maybeSingle()
       
       let finalNext = next;
-      if (profile?.role === 'coach') {
+      if (!profile) {
+        // Si no tiene perfil (usuario completamente nuevo por OAuth), redirigir directamente a onboarding
+        finalNext = '/onboarding';
+      } else if (profile.role === 'coach') {
         finalNext = '/coach/dashboard';
-      } else if (profile?.role === 'athlete' && !profile?.active_plan_id && !profile?.coach_id && next === '/dashboard') {
+      } else if (profile.role === 'athlete' && !profile.active_plan_id && !profile.coach_id && next === '/dashboard') {
         finalNext = '/onboarding';
       }
       
