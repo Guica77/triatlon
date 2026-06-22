@@ -34,11 +34,21 @@ const INGREDIENTS_OPTIONS = [
   { id: 'patata', label: 'Patatas', category: 'Carbohidratos' },
   { id: 'avena', label: 'Avena', category: 'Carbohidratos' },
   { id: 'platano', label: 'Plátanos', category: 'Carbohidratos' },
+  { id: 'quinoa', label: 'Quinoa', category: 'Carbohidratos' },
+  { id: 'boniato', label: 'Boniato', category: 'Carbohidratos' },
   { id: 'pollo', label: 'Pollo', category: 'Proteínas' },
+  { id: 'pavo', label: 'Pavo', category: 'Proteínas' },
   { id: 'salmon', label: 'Salmón', category: 'Proteínas' },
-  { id: 'tofu', label: 'Tofu/Legumbres', category: 'Proteínas' },
+  { id: 'pescado_blanco', label: 'Pescado Blanco', category: 'Proteínas' },
+  { id: 'atun', label: 'Atún', category: 'Proteínas' },
+  { id: 'ternera', label: 'Ternera', category: 'Proteínas' },
+  { id: 'tofu', label: 'Tofu/Soja', category: 'Proteínas' },
   { id: 'huevo', label: 'Huevos', category: 'Proteínas' },
   { id: 'aguacate', label: 'Aguacate', category: 'Grasas' },
+  { id: 'frutos_secos', label: 'Frutos Secos', category: 'Grasas' },
+  { id: 'aceite_oliva', label: 'Aceite de Oliva', category: 'Grasas' },
+  { id: 'queso', label: 'Queso', category: 'Grasas' },
+  { id: 'yogur', label: 'Yogur', category: 'Grasas' },
 ];
 
 const ALLERGIES_OPTIONS = [
@@ -48,6 +58,8 @@ const ALLERGIES_OPTIONS = [
   { id: 'marisco', label: 'Marisco', category: 'Alérgeno' },
   { id: 'huevo', label: 'Huevo', category: 'Alérgeno' },
   { id: 'soja', label: 'Soja', category: 'Alérgeno' },
+  { id: 'fructosa', label: 'Fructosa', category: 'Alérgeno' },
+  { id: 'histamina', label: 'Histamina', category: 'Intolerancia' },
 ];
 
 const DISLIKED_OPTIONS = [
@@ -57,6 +69,10 @@ const DISLIKED_OPTIONS = [
   { id: 'pescado_azul', label: 'Pescado Azul', category: 'Evitar' },
   { id: 'carne_roja', label: 'Carne Roja', category: 'Evitar' },
   { id: 'picante', label: 'Picante', category: 'Evitar' },
+  { id: 'tomate', label: 'Tomate', category: 'Evitar' },
+  { id: 'champiñones', label: 'Champiñones', category: 'Evitar' },
+  { id: 'aceitunas', label: 'Aceitunas', category: 'Evitar' },
+  { id: 'pimiento', label: 'Pimiento', category: 'Evitar' },
 ];
 
 export function StepPhysiology(props: StepPhysiologyProps) {
