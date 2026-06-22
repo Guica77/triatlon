@@ -119,6 +119,7 @@ export async function getDailyNutrition(dateString: string): Promise<{ data?: Dy
     let hasStrengthSession = false
     let hasBrickSession = false
 
+    const weather = await getForecastForLocation(undefined, undefined, dateString) // TODO: Pasar lat/lng del usuario si está disponible
     const sessionsPacing: Array<any> = []
 
     workouts?.forEach((w: any) => {
@@ -139,7 +140,6 @@ export async function getDailyNutrition(dateString: string): Promise<{ data?: Dy
 
       // Calcular pacing con integración climática
       const sweatRate = Number(profile.sweat_rate || 0.8)
-      const weather = await getForecastForLocation(undefined, undefined, dateString) // TODO: Pasar lat/lng del usuario si está disponible
       const pacing = calculateSessionPacing(sport, durationMin, sweatRate, profile.custom_carbs_per_hour, {
         temperature: weather.temperature,
         clothing: weather.clothing,
