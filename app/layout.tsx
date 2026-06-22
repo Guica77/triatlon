@@ -4,6 +4,7 @@ import "./globals.css";
 import { CookieBanner } from "@/components/ui/cookie-banner";
 import { IosInstallPrompt } from "@/components/ui/ios-install-prompt";
 import { ServiceWorkerRegister } from "@/components/ui/service-worker-register";
+import { AppLifecycleManager } from "@/components/ui/app-lifecycle-manager";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,6 +77,7 @@ export default function RootLayout({
         <CookieBanner />
         <IosInstallPrompt />
         <ServiceWorkerRegister />
+        <AppLifecycleManager />
       </body>
     </html>
   );

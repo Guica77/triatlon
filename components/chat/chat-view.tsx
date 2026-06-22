@@ -312,10 +312,10 @@ export function ChatView({
 
             {/* Messages body list */}
             <div 
-              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative bg-[#efeae2]"
+              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative bg-[#e5ddd5]"
               style={{
-                backgroundImage: `radial-gradient(#dfdcd6 1.2px, transparent 1.2px)`,
-                backgroundSize: '20px 20px',
+                backgroundImage: `radial-gradient(#cfc8c0 1px, transparent 1px)`,
+                backgroundSize: '24px 24px',
               }}
             >
               {loadingMessages ? (
@@ -335,28 +335,29 @@ export function ChatView({
                     return (
                       <div 
                         key={m.id}
-                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-1`}
                       >
                         <motion.div
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className={`max-w-[75%] p-3 px-3.5 rounded-2xl text-xs leading-relaxed shadow-sm border ${
+                          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          className={`max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl text-[13px] leading-relaxed shadow-sm relative ${
                             isOwn 
-                              ? 'bg-[#d7f3ff] text-zinc-900 font-medium rounded-tr-none border-[#b2e3ff]' 
-                              : 'bg-white text-zinc-900 rounded-tl-none border-zinc-200/40 font-medium'
+                              ? 'bg-[#d9fdd3] text-zinc-900 font-medium rounded-tr-sm border border-[#c6ecc0]' 
+                              : 'bg-white text-zinc-900 rounded-tl-sm border border-zinc-200/50 font-medium'
                           }`}
                         >
                           <p className="whitespace-pre-wrap">{m.message}</p>
                           {isOwn ? (
-                            <span className="text-[8px] mt-1 flex items-center justify-end gap-1 font-bold text-zinc-450">
+                            <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-450 float-right ml-3 translate-y-1">
                               {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              <span className="text-cyan-600 font-black tracking-normal">✓✓</span>
-                            </span>
+                              <span className="text-cyan-600 font-black tracking-normal text-[10px]">✓✓</span>
+                            </div>
                           ) : (
-                            <span className="text-[8px] mt-1 block text-right font-bold text-zinc-400">
+                            <div className="text-[9px] mt-0.5 text-right font-bold text-zinc-400 float-right ml-3 translate-y-1">
                               {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
+                            </div>
                           )}
+                          <div className="clear-both"></div>
                         </motion.div>
                       </div>
                     )
@@ -381,7 +382,7 @@ export function ChatView({
             {/* Input form */}
             <form 
               onSubmit={handleSendMessage}
-              className="p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-zinc-200 bg-[#f0f2f5] flex items-center gap-2 shrink-0 shadow-sm"
+              className="p-2 sm:p-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] border-t border-zinc-200/60 bg-[#f0f2f5] flex items-end gap-2 shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] z-10"
             >
               {/* Attachment Icon */}
               <button 
@@ -393,37 +394,39 @@ export function ChatView({
               </button>
               
               {/* Input container wrapper */}
-              <div className="flex-1 flex items-center bg-white border border-zinc-200 focus-within:border-cyan-550 focus-within:ring-1 focus-within:ring-cyan-550 rounded-2xl px-3 py-1 shadow-sm">
+              <div className="flex-1 flex items-end bg-white rounded-3xl px-1.5 py-1 shadow-sm min-h-[40px]">
                 {/* Emoji Icon */}
                 <button 
                   type="button" 
-                  className="p-1.5 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer"
+                  className="p-2 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
                   aria-label="Emojis"
                 >
-                  <Smile className="w-4.5 h-4.5" />
+                  <Smile className="w-5 h-5" />
                 </button>
                 
-                <input
-                  type="text"
+                <textarea
                   value={newMessageText}
-                  onChange={(e) => setNewMessageText(e.target.value)}
-                  onFocus={(e) => {
-                    setTimeout(() => {
-                      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      scrollToBottom();
-                    }, 150);
+                  onChange={(e) => {
+                    setNewMessageText(e.target.value);
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
                   }}
-                  placeholder="Escribe tu mensaje aquí..."
-                  className="bg-transparent border-none text-sm text-zinc-850 outline-none w-full py-1.5 px-2 placeholder-zinc-400"
+                  onFocus={(e) => {
+                    setTimeout(() => scrollToBottom(), 150);
+                  }}
+                  placeholder="Mensaje..."
+                  rows={1}
+                  className="bg-transparent border-none text-[15px] text-zinc-850 outline-none w-full py-2 px-1 placeholder-zinc-400 resize-none max-h-[120px] custom-scrollbar self-center"
+                  style={{ minHeight: '36px' }}
                 />
                 
                 {/* Paperclip Icon */}
                 <button 
                   type="button" 
-                  className="p-1.5 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer"
+                  className="p-2 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
                   aria-label="Compartir documento"
                 >
-                  <Paperclip className="w-4 h-4" />
+                  <Paperclip className="w-5 h-5" />
                 </button>
               </div>
               
@@ -433,17 +436,17 @@ export function ChatView({
                   type="submit"
                   variant="primary"
                   size="icon"
-                  className="w-10 h-10 shrink-0 !bg-cyan-600 hover:!bg-cyan-550 !text-white rounded-full shadow-md flex items-center justify-center cursor-pointer transition-all duration-200 scale-100 active:scale-95"
+                  className="w-10 h-10 shrink-0 !bg-emerald-500 hover:!bg-emerald-600 !text-white rounded-full shadow-sm flex items-center justify-center cursor-pointer transition-all duration-200 self-end mb-0.5"
                 >
-                  <Send className="w-4 h-4 text-white" />
+                  <Send className="w-4 h-4 text-white ml-0.5" />
                 </AnimatedButton>
               ) : (
                 <button
                   type="button"
-                  className="w-10 h-10 shrink-0 bg-white border border-zinc-200 text-zinc-450 hover:text-zinc-600 rounded-full shadow-sm flex items-center justify-center transition-all duration-200 hover:bg-zinc-150 cursor-pointer"
+                  className="w-10 h-10 shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-sm flex items-center justify-center transition-all duration-200 cursor-pointer self-end mb-0.5"
                   aria-label="Grabar audio"
                 >
-                  <Mic className="w-4.5 h-4.5" />
+                  <Mic className="w-5 h-5" />
                 </button>
               )}
             </form>
