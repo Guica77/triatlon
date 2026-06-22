@@ -10,9 +10,12 @@ import { useRouter } from 'next/navigation';
  */
 export function AppLifecycleManager() {
   const router = useRouter();
-  const lastActive = React.useRef<number>(Date.now());
+  const lastActive = React.useRef<number>(0);
 
   React.useEffect(() => {
+    if (lastActive.current === 0) {
+      lastActive.current = Date.now();
+    }
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         const now = Date.now();

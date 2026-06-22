@@ -483,8 +483,8 @@ export function generateAlternativeMeal(
   
   // Elegimos ingredientes
   let carbSelection = pickIngredient(allCarbs, prefs, dislikes);
-  let proteinSelection = pickIngredient(allProteins, prefs, dislikes);
-  let fatSelection = pickIngredient(allFats, prefs, dislikes);
+  const proteinSelection = pickIngredient(allProteins, prefs, dislikes);
+  const fatSelection = pickIngredient(allFats, prefs, dislikes);
 
   // Si es pre-entreno y eligió legumbres (lentejas/garbanzos), forzamos un cambio por digestión
   if (!isPostWorkout && ['lentejas', 'garbanzos'].includes(carbSelection)) {
