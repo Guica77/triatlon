@@ -196,13 +196,35 @@ export async function completeWorkoutWithFeedback(
     });
   }
 
+  let aiAdjustment = null;
   // Si tiene alertas, disparar el motor adaptativo (que ya gestiona su mensaje de alerta al coach si procede)
   try {
-    await evaluateFeedbackAndAdjustPlan(user.id, workoutId, rpe, feeling, painLocalized, intensityAdherence);
+    aiAdjustment = await evaluateFeedbackAndAdjustPlan(user.id, workoutId, rpe, feeling, painLocalized, intensityAdherence);
+    
+    // Disparar notificación push al dispositivo del usuario informando del ajuste
+    if (aiAdjustment?.adjusted) {
+      safeWaitUntil(
+        (async () => {
+          const { sendPushNotification } = await import('@/lib/notifications');
+          await sendPushNotification(user.id, {
+            title: 'Plan Adaptado 🧠',
+            body: aiAdjustment.message,
+            url: '/dashboard'
+          });
+        })().catch(err => {
+          console.error('Error enviando push notification de ajuste AI:', err);
+        })
+      );
+    }
   } catch (adjustError) {
     console.error('Error al ejecutar evaluación adaptativa de feedback:', adjustError);
   }
 
   // Marcar como completado
-  return updateWorkoutStatus(workoutId, 'completed');
+  const result = await updateWorkoutStatus(workoutId, 'completed');
+  return { 
+    ...result, 
+    aiMessage: aiAdjustment?.message, 
+    aiAdjusted: aiAdjustment?.adjusted 
+  };
 }

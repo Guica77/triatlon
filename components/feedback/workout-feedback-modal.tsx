@@ -50,7 +50,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
     setErrorMessage(null);
 
     try {
-      await completeWorkoutWithFeedback(
+      const result = await completeWorkoutWithFeedback(
         workoutId,
         rpe,
         feeling,
@@ -58,11 +58,20 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
         pain !== 'ninguno',
         notes
       );
-      setSuccessMessage('¡Feedback registrado y entrenamiento completado!');
-      setTimeout(() => {
-        setSuccessMessage(null);
-        onClose();
-      }, 2000);
+      
+      if (result.aiAdjusted) {
+        setSuccessMessage(result.aiMessage || '¡Feedback registrado! La IA ha adaptado tus próximas sesiones.');
+        setTimeout(() => {
+          setSuccessMessage(null);
+          onClose();
+        }, 4000);
+      } else {
+        setSuccessMessage('¡Feedback registrado y entrenamiento completado!');
+        setTimeout(() => {
+          setSuccessMessage(null);
+          onClose();
+        }, 2000);
+      }
     } catch (err: any) {
       setErrorMessage(err.message || 'Error guardando feedback');
     } finally {
