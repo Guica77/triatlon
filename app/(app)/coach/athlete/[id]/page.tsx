@@ -10,6 +10,8 @@ import Link from 'next/link';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { SessionPlanner } from '@/components/coach/session-planner';
 import { AdvancedCalendarWrapper } from '@/components/coach/advanced-calendar-wrapper';
+import { AthleteNutritionCard } from '@/components/coach/athlete-nutrition-card';
+import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 
 interface AthletePageProps {
   params: Promise<{ id: string }>;
@@ -52,7 +54,8 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     biometricsHistoryRes,
     analyticsData,
     devicesRes,
-    workoutsRes
+    workoutsRes,
+    nutritionRes
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -93,7 +96,8 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
       .eq('user_id', athleteId)
       .gte('scheduled_date', calendarStart.toISOString().split('T')[0])
       .lte('scheduled_date', calendarEnd.toISOString().split('T')[0])
-      .order('scheduled_date', { ascending: true })
+      .order('scheduled_date', { ascending: true }),
+    getDailyNutrition(today, athleteId)
   ]);
 
   const coachProfile = coachProfileRes.data;
@@ -117,6 +121,9 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     garmin_connected?: boolean;
     strava_connected?: boolean;
     training_plans?: { name?: string };
+    allergies?: string[];
+    preferred_ingredients?: string[];
+    disliked_ingredients?: string[];
   };
   const activePlan = athleteProfile.training_plans;
 
@@ -137,6 +144,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
   const devices = devicesRes.data;
   const isConnected = Boolean(athleteProfile.garmin_connected || athleteProfile.strava_connected || (devices && devices.length > 0));
   const workouts = workoutsRes.data;
+  const dailyNutritionData = nutritionRes.data;
 
   // 8. Weekly stats for progress percent
   const currentDay = now.getDay() || 7;
@@ -248,6 +256,16 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
               progressPercent={progressPercent}
             />
           </div>
+        </section>
+
+        {/* Section Nutrition */}
+        <section>
+          <AthleteNutritionCard 
+            allergies={athleteProfile.allergies}
+            preferredIngredients={athleteProfile.preferred_ingredients}
+            dislikedIngredients={athleteProfile.disliked_ingredients}
+            dailyNutrition={dailyNutritionData}
+          />
         </section>
 
         {/* Advanced Builder */}

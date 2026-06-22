@@ -4,9 +4,10 @@ import * as React from 'react'
 import { ProCard } from '@/components/ui/pro-card'
 import { Flame, Zap, Dumbbell, Droplet, Watch } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { askNutritionAI } from '@/app/(app)/dashboard/nutrition-actions'
-import { calculatePreWorkoutMeal, calculateRecoveryMeal, DynamicNutritionData } from '@/lib/nutrition-utility'
-import { Bot, Sparkles, Send, Loader2, Info } from 'lucide-react'
+import { askNutritionAI, rejectDishAndGetAlternative } from '@/app/(app)/dashboard/nutrition-actions'
+import { calculatePreWorkoutMeal, calculateRecoveryMeal, DynamicNutritionData, NutritionMeal } from '@/lib/nutrition-utility'
+import { Bot, Sparkles, Send, Loader2, Info, ThumbsDown } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface DailyFuelCardProps {
   nutritionData?: DynamicNutritionData | null
@@ -29,6 +30,10 @@ export function DailyFuelCard({
   const [aiQuestion, setAiQuestion] = React.useState('')
   const [aiAnswer, setAiAnswer] = React.useState('')
   const [isAiThinking, setIsAiThinking] = React.useState(false)
+  const router = useRouter()
+  const [localPreMeal, setLocalPreMeal] = React.useState<NutritionMeal | null>(null)
+  const [localPostMeal, setLocalPostMeal] = React.useState<NutritionMeal | null>(null)
+  const [isRejecting, setIsRejecting] = React.useState(false)
 
   if (loading) {
     return (
@@ -74,8 +79,26 @@ export function DailyFuelCard({
   const sportType = activeWorkout?.training_sessions?.sport_type || 'descanso'
   const durationMin = activeWorkout?.training_sessions?.duration_min || activeWorkout?.training_sessions?.duration_minutes || 0
 
-  const preWorkoutMeal = calculatePreWorkoutMeal(sportType, durationMin, preferredIngredients)
-  const recoveryMeal = calculateRecoveryMeal(sportType, durationMin, preferredIngredients)
+  const preWorkoutMeal = localPreMeal || calculatePreWorkoutMeal(sportType, durationMin, preferredIngredients)
+  const recoveryMeal = localPostMeal || calculateRecoveryMeal(sportType, durationMin, preferredIngredients)
+
+  // Rechazar Plato
+  const handleRejectMeal = async (meal: NutritionMeal, isPre: boolean) => {
+    if (isRejecting) return;
+    setIsRejecting(true);
+    try {
+      const res = await rejectDishAndGetAlternative(meal.mealName, sportType, durationMin, isPre);
+      if (res.success && res.newMeal) {
+        if (isPre) setLocalPreMeal(res.newMeal);
+        else setLocalPostMeal(res.newMeal);
+        router.refresh(); // Update the backend data without full page load
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsRejecting(false);
+    }
+  }
 
   // Manejo del Chat de IA
   const handleAskAI = async (questionText: string) => {
@@ -279,24 +302,60 @@ export function DailyFuelCard({
           <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 max-h-[170px] custom-scrollbar">
             
             {/* Pre-Entreno */}
-            <div className="border-l-2 border-emerald-500 pl-2 py-0.5">
+            <div className="border-l-2 border-emerald-500 pl-2 py-0.5 relative group">
               <span className="text-[8px] text-emerald-600 font-bold uppercase tracking-wider block">Combustible Pre-Entreno</span>
-              <h5 className="text-[10px] font-black text-zinc-900 leading-tight mt-0.5">{preWorkoutMeal.mealName}</h5>
-              <p className="text-[9px] text-zinc-500 leading-relaxed mt-0.5 font-medium">{preWorkoutMeal.recipeDescription}</p>
+              <div className="flex justify-between items-start gap-2">
+                <div>
+                  <h5 className="text-[10px] font-black text-zinc-900 leading-tight mt-0.5">{preWorkoutMeal.mealName}</h5>
+                  <p className="text-[9px] text-zinc-500 leading-relaxed mt-0.5 font-medium">{preWorkoutMeal.recipeDescription}</p>
+                </div>
+                <button 
+                  onClick={() => handleRejectMeal(preWorkoutMeal, true)}
+                  disabled={isRejecting}
+                  className="shrink-0 p-1 rounded-md text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100"
+                  title="No me gusta este plato"
+                >
+                  <ThumbsDown className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
 
             {/* Post-Entreno (Sólo si entrenó hoy) */}
             {sportType !== 'descanso' ? (
-              <div className="border-l-2 border-cyan-500 pl-2 py-0.5">
+              <div className="border-l-2 border-cyan-500 pl-2 py-0.5 relative group">
                 <span className="text-[8px] text-cyan-600 font-bold uppercase tracking-wider block">Recuperación Post-Entreno</span>
-                <h5 className="text-[10px] font-black text-zinc-900 leading-tight mt-0.5">{recoveryMeal.mealName}</h5>
-                <p className="text-[9px] text-zinc-500 leading-relaxed mt-0.5 font-medium">{recoveryMeal.recipeDescription}</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <h5 className="text-[10px] font-black text-zinc-900 leading-tight mt-0.5">{recoveryMeal.mealName}</h5>
+                    <p className="text-[9px] text-zinc-500 leading-relaxed mt-0.5 font-medium">{recoveryMeal.recipeDescription}</p>
+                  </div>
+                  <button 
+                    onClick={() => handleRejectMeal(recoveryMeal, false)}
+                    disabled={isRejecting}
+                    className="shrink-0 p-1 rounded-md text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100"
+                    title="No me gusta este plato"
+                  >
+                    <ThumbsDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             ) : (
-              <div className="border-l-2 border-zinc-400 pl-2 py-0.5">
+              <div className="border-l-2 border-zinc-400 pl-2 py-0.5 relative group">
                 <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider block">Nutrición de Base (Día Libre)</span>
-                <h5 className="text-[10px] font-black text-zinc-900 leading-tight mt-0.5">{recoveryMeal.mealName}</h5>
-                <p className="text-[9px] text-zinc-500 leading-relaxed mt-0.5 font-medium">{recoveryMeal.recipeDescription}</p>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <h5 className="text-[10px] font-black text-zinc-900 leading-tight mt-0.5">{recoveryMeal.mealName}</h5>
+                    <p className="text-[9px] text-zinc-500 leading-relaxed mt-0.5 font-medium">{recoveryMeal.recipeDescription}</p>
+                  </div>
+                  <button 
+                    onClick={() => handleRejectMeal(recoveryMeal, false)}
+                    disabled={isRejecting}
+                    className="shrink-0 p-1 rounded-md text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100"
+                    title="No me gusta este plato"
+                  >
+                    <ThumbsDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
             )}
 

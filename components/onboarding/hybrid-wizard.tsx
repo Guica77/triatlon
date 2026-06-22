@@ -249,6 +249,7 @@ export function HybridWizard() {
 
         {step === 2 && (
           <StepAmbition
+            wantsCoach={wantsCoach}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             searchQuery={searchQuery}

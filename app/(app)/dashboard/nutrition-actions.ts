@@ -69,7 +69,7 @@ export async function saveSweatTest(data: SweatTestData): Promise<{ success?: bo
  * Calcula las calorías, macros del día y la estrategia de pacing del entrenamiento
  * basado en la carga programada para la fecha y el perfil biométrico del usuario
  */
-export async function getDailyNutrition(dateString: string): Promise<{ data?: DynamicNutritionData; error?: string }> {
+export async function getDailyNutrition(dateString: string, targetUserId?: string): Promise<{ data?: DynamicNutritionData; error?: string }> {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -78,11 +78,26 @@ export async function getDailyNutrition(dateString: string): Promise<{ data?: Dy
   }
 
   try {
+    let effectiveUserId = user.id;
+
+    if (targetUserId && targetUserId !== user.id) {
+      // Verificar que el usuario actual es coach del targetUserId
+      const { data: checkRole } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+      if (checkRole?.role !== 'coach') {
+        return { error: 'No autorizado para ver la nutrición de otro atleta.' };
+      }
+      const { data: rosterCheck } = await supabase.from('coach_athletes').select('id').eq('coach_id', user.id).eq('athlete_id', targetUserId).maybeSingle();
+      if (!rosterCheck) {
+        return { error: 'No estás asignado como entrenador de este atleta.' };
+      }
+      effectiveUserId = targetUserId;
+    }
+
     // 1. Obtener perfil del atleta
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('sweat_rate, custom_carbs_per_hour')
-      .eq('id', user.id)
+      .eq('id', effectiveUserId)
       .single()
 
     if (profileError || !profile) {
@@ -93,7 +108,7 @@ export async function getDailyNutrition(dateString: string): Promise<{ data?: Dy
     const { data: latestBiometrics } = await supabase
       .from('user_biometrics')
       .select('weight, daily_steps')
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
       .order('date', { ascending: false })
       .limit(1)
 
@@ -105,7 +120,7 @@ export async function getDailyNutrition(dateString: string): Promise<{ data?: Dy
     const { data: workouts, error: workoutsError } = await supabase
       .from('user_workouts')
       .select('id, status, training_sessions(sport_type, duration_min, description)')
-      .eq('user_id', user.id)
+      .eq('user_id', effectiveUserId)
       .eq('scheduled_date', dateString)
 
     if (workoutsError) {
@@ -339,6 +354,60 @@ ${dislikes.length > 0 ? `Ingredientes que evitamos: *${dislikes.join(", ")}*.` :
       success: false,
       response: "Ha ocurrido un error inesperado al procesar la consulta con el asistente de IA."
     }
+  }
+}
+
+/**
+ * Añade un plato a la lista de disgustos del usuario y genera una alternativa nueva
+ */
+export async function rejectDishAndGetAlternative(
+  dishName: string,
+  sportType: string,
+  durationMin: number,
+  isPreWorkout: boolean
+) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { error: 'No autorizado' };
+  }
+
+  try {
+    // 1. Obtener perfil actual
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('disliked_ingredients, preferred_ingredients')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return { error: 'No se pudo cargar el perfil del atleta.' };
+    }
+
+    const currentDisliked = profile.disliked_ingredients || [];
+    
+    // 2. Extraer ingrediente o concepto clave del nombre del plato de forma sencilla
+    // Ej: "Batido de Avena y Plátano" -> "avena" o "plátano" (Lo simplificamos a guardar el nombre entero del plato para evitar que vuelva a salir exactamente igual)
+    if (!currentDisliked.includes(dishName)) {
+      currentDisliked.push(dishName);
+
+      // 3. Actualizar perfil
+      await supabase
+        .from('profiles')
+        .update({ disliked_ingredients: currentDisliked })
+        .eq('id', user.id);
+    }
+
+    // 4. Generar nueva alternativa
+    const { generateAlternativeMeal } = await import('@/lib/nutrition-utility');
+    const newMeal = generateAlternativeMeal(sportType, durationMin, profile.preferred_ingredients || [], currentDisliked, isPreWorkout);
+
+    return { success: true, newMeal };
+
+  } catch (err: any) {
+    console.error("Error al rechazar plato:", err);
+    return { error: err.message };
   }
 }
 
