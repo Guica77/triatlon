@@ -8,8 +8,10 @@ import {
   calculateDailyMacros,
   calculateSessionPacing,
   calculateWorkoutCalories,
+  generateAlternativeMeal,
   DynamicNutritionData
 } from '@/lib/nutrition-utility'
+import { getForecastForLocation } from '@/lib/weather-service'
 
 export interface SweatTestData {
   weightBefore: number
@@ -87,16 +89,17 @@ export async function getDailyNutrition(dateString: string): Promise<{ data?: Dy
       return { error: 'No se pudo cargar el perfil del atleta.' }
     }
 
-    // 2. Obtener peso del atleta para el día (de biometrics) o el más reciente
+    // 2. Obtener peso y pasos del atleta para el día (de biometrics) o el más reciente
     const { data: latestBiometrics } = await supabase
       .from('user_biometrics')
-      .select('weight')
+      .select('weight, daily_steps')
       .eq('user_id', user.id)
       .order('date', { ascending: false })
       .limit(1)
 
     // Si no hay registro previo, usamos 72.0 kg por defecto
     const weight = Number(latestBiometrics?.[0]?.weight || 72.0)
+    const dailySteps = latestBiometrics?.[0]?.daily_steps || 0
 
     // 3. Obtener entrenamientos del día
     const { data: workouts, error: workoutsError } = await supabase
@@ -134,9 +137,14 @@ export async function getDailyNutrition(dateString: string): Promise<{ data?: Dy
       const kcalBurned = calculateWorkoutCalories(sport, weight, durationMin)
       activeExpenditure += kcalBurned
 
-      // Calcular pacing
+      // Calcular pacing con integración climática
       const sweatRate = Number(profile.sweat_rate || 0.8)
-      const pacing = calculateSessionPacing(sport, durationMin, sweatRate, profile.custom_carbs_per_hour)
+      const weather = await getForecastForLocation(undefined, undefined, dateString) // TODO: Pasar lat/lng del usuario si está disponible
+      const pacing = calculateSessionPacing(sport, durationMin, sweatRate, profile.custom_carbs_per_hour, {
+        temperature: weather.temperature,
+        clothing: weather.clothing,
+        humidity: weather.humidity
+      })
 
       sessionsPacing.push({
         workoutId: w.id,
@@ -158,7 +166,8 @@ export async function getDailyNutrition(dateString: string): Promise<{ data?: Dy
       totalWorkoutHours,
       hasStrengthSession,
       hasBrickSession,
-      activeExpenditure
+      activeExpenditure,
+      dailySteps
     )
 
     const data: DynamicNutritionData = {
@@ -202,6 +211,22 @@ export async function askNutritionAI(
       }
     }
 
+    // Obtener preferencias completas del usuario
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    let dislikes: string[] = []
+    let preferences = preferredIngredients
+    if (user) {
+      const { data: profileData } = await supabase.from('profiles').select('disliked_ingredients, preferred_ingredients').eq('id', user.id).single()
+      if (profileData) {
+        dislikes = profileData.disliked_ingredients || []
+        // Si no se pasaron desde el cliente, usarlas de la BD
+        if (preferences.length === 0 && profileData.preferred_ingredients) {
+          preferences = profileData.preferred_ingredients
+        }
+      }
+    }
+
     const q = question.toLowerCase().trim()
     let response = ""
 
@@ -218,10 +243,26 @@ export async function askNutritionAI(
     const proteinGrams = nutrition.macros.protein.grams
     const totalKcal = nutrition.totalCalories
 
+    // Caso 1.5: Cambiar plato completo (Nueva funcionalidad)
+    if (q.includes("cambia mi plato") || q.includes("cambiar plato") || q.includes("otro plato") || q.includes("no me gusta") || q.includes("generar plato") || q.includes("nueva receta")) {
+      const isPost = !q.includes("antes") && !q.includes("pre-entreno");
+      const altMeal = generateAlternativeMeal(workoutSport, workoutDuration, preferences, dislikes, isPost);
+      
+      response = `### 🔄 Nueva Propuesta Nutricional
+      
+He generado una alternativa completamente diferente para ti, evitando los ingredientes que no toleras y respetando tus macros de hoy (${proteinGrams}g Proteína, ${carbGrams}g Carbohidratos).
+
+**${altMeal.mealName}**
+*Foco:* ${altMeal.macronutrientFocus}
+
+${altMeal.recipeDescription}
+
+¿Te parece bien esta opción o prefieres que ajustemos algo más?`;
+
     // Caso 1: Pregunta sobre sustitución de ingredientes (pollo, arroz, etc.)
-    if (q.includes("sustitu") || q.includes("cambiar") || q.includes("pollo") || q.includes("salmon") || q.includes("tofu") || q.includes("ingrediente")) {
-      const proteins = preferredIngredients.filter(i => ["pollo", "salmon", "tofu", "huevo"].includes(i))
-      const carbs = preferredIngredients.filter(i => ["pasta", "arroz", "patata", "avena", "platano"].includes(i))
+    } else if (q.includes("sustitu") || q.includes("cambiar") || q.includes("pollo") || q.includes("salmon") || q.includes("tofu") || q.includes("ingrediente")) {
+      const proteins = preferences.filter(i => ["pollo", "salmon", "tofu", "huevo"].includes(i))
+      const carbs = preferences.filter(i => ["pasta", "arroz", "patata", "avena", "platano"].includes(i))
       
       const pAlternatives = proteins.length > 0 
         ? proteins.map(p => `- **${p.toUpperCase()}**: Una de tus fuentes favoritas del onboarding. Aporta aproximadamente la misma densidad proteica de alta biodisponibilidad.`).join("\n")
@@ -279,7 +320,8 @@ Hola. Analizando tu perfil para la fecha seleccionada:
 - Tus necesidades calóricas totales son de **${totalKcal} kcal** (metabolismo basal de ${nutrition.bmr} kcal + gasto activo).
 - Tus macros objetivos son: **${carbGrams}g CHO** | **${proteinGrams}g PRO** | **${nutrition.macros.fat.grams}g FAT**.
 
-Tus ingredientes preferidos son: *${preferredIngredients.join(", ")}*.
+Tus ingredientes preferidos son: *${preferences.join(", ")}*.
+${dislikes.length > 0 ? `Ingredientes que evitamos: *${dislikes.join(", ")}*.` : ''}
 
 ¿En qué puedo ayudarte hoy? Puedes preguntarme sobre:
 1. *¿Cómo sustituir un ingrediente de mi plato de hoy?*

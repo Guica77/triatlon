@@ -102,11 +102,20 @@ export function calculateDailyMacros(
   totalWorkoutHours: number,
   hasStrengthSession: boolean,
   hasBrickSession: boolean,
-  activeExpenditure: number
+  activeExpenditure: number,
+  dailySteps?: number | null
 ): DailyMacrosResult {
   const bmr = calculateBmr(weight)
   const baseExpenditure = Math.round(bmr * 1.2)
-  let totalCalories = baseExpenditure + activeExpenditure
+  
+  // Calcular gasto extra por NEAT (Pasos)
+  // Aproximadamente 40 kcal por cada 1000 pasos por encima de la base (asumiendo 5000 como base del factor 1.2)
+  let stepsExpenditure = 0;
+  if (dailySteps && dailySteps > 5000) {
+    stepsExpenditure = Math.round(((dailySteps - 5000) / 1000) * 40);
+  }
+
+  let totalCalories = baseExpenditure + activeExpenditure + stepsExpenditure
 
   // --- Carbohidratos ---
   let carbsRate = 4.0 // g/kg para días de descanso
@@ -164,6 +173,7 @@ export function calculateSessionPacing(
   options?: {
     temperature?: 'frio' | 'templado' | 'calor' | 'extremo'
     clothing?: 'ligera' | 'normal' | 'abrigada' | 'neopreno'
+    humidity?: number // 0-100 percentage
   }
 ): SessionPacingResult {
   const durationHours = durationMin / 60
@@ -192,8 +202,15 @@ export function calculateSessionPacing(
     }
   }
 
+  // Factor de humedad: Si la humedad es muy alta (>75%), el sudor no evapora bien y el cuerpo
+  // suda más para intentar enfriarse sin éxito. Aumentamos hidratación un 15% extra.
+  let humidityMultiplier = 1.0;
+  if (options?.humidity && options.humidity > 75) {
+    humidityMultiplier = 1.15;
+  }
+
   // Tasa de sudoración ajustada
-  const adjustedSweatRate = sweatRate * tempMultiplier * clothingMultiplier
+  const adjustedSweatRate = sweatRate * tempMultiplier * clothingMultiplier * humidityMultiplier
 
   // Hidratación recomendada (reponemos el 65% de la tasa de sudoración para evitar saturar el estómago)
   const hourlyFluidMl = Math.round((adjustedSweatRate * 0.65) * 1000)
@@ -251,6 +268,10 @@ export function calculateSessionPacing(
   // Si hay calor o calor extremo, añadir advertencia/pauta sobre electrolitos
   if (options?.temperature === 'calor' || options?.temperature === 'extremo') {
     practicalGuide += ` ⚠️ ALERTA CLIMA: Por la temperatura elevada, prioriza el consumo de sales minerales (sodio) y no te saltes ninguna toma de líquido para prevenir la deshidratación.`
+  }
+  
+  if (options?.humidity && options.humidity > 75) {
+    practicalGuide += ` 💧 ALERTA HUMEDAD (${options.humidity}%): La alta humedad impide que el sudor te enfríe bien. Tu necesidad de agua ha aumentado. ¡Bebe más a menudo!`
   }
 
   return {
@@ -387,3 +408,112 @@ export function calculatePreWorkoutMeal(
   };
 }
 
+/**
+ * Genera una receta/plato completamente alternativo, asegurando evitar ingredientes no deseados
+ * y rotando los ingredientes preferidos para dar variedad.
+ */
+export function generateAlternativeMeal(
+  sportType: string,
+  durationMin: number,
+  preferredIngredients: string[] | null,
+  dislikedIngredients: string[] | null,
+  isPostWorkout: boolean = true
+): { mealName: string; macronutrientFocus: string; recipeDescription: string } {
+  const prefs = preferredIngredients || [];
+  const dislikes = dislikedIngredients || [];
+
+  // Mapear ID de ingredientes a etiquetas legibles en español
+  const ingredientLabels: Record<string, string> = {
+    pasta: 'Pasta',
+    arroz: 'Arroz',
+    patata: 'Patata',
+    boniato: 'Boniato',
+    quinoa: 'Quinoa',
+    avena: 'Avena',
+    platano: 'Plátano',
+    pollo: 'Pollo',
+    pavo: 'Pavo',
+    ternera: 'Ternera magra',
+    pescado_blanco: 'Pescado blanco',
+    salmon: 'Salmón',
+    atun: 'Atún',
+    tofu: 'Tofu',
+    soja: 'Soja texturizada',
+    huevo: 'Huevo',
+    aguacate: 'Aguacate',
+    frutos_secos: 'Frutos secos',
+    aceite_oliva: 'Aceite de Oliva Extra Virgen',
+    queso: 'Queso fresco',
+    yogur: 'Yogur natural',
+    lentejas: 'Lentejas',
+    garbanzos: 'Garbanzos'
+  };
+
+  // Categorías base (ampliadas para más variedad)
+  const allCarbs = ['pasta', 'arroz', 'patata', 'boniato', 'quinoa', 'avena', 'platano', 'lentejas', 'garbanzos'];
+  const allProteins = ['pollo', 'pavo', 'ternera', 'pescado_blanco', 'salmon', 'atun', 'tofu', 'soja', 'huevo'];
+  const allFats = ['aguacate', 'frutos_secos', 'aceite_oliva', 'queso'];
+
+  // Función para elegir un ingrediente que NO esté en dislikes. 
+  // Prioriza los que están en prefs, si no, uno aleatorio.
+  const pickIngredient = (categoryList: string[], currentPrefs: string[], currentDislikes: string[]) => {
+    const safeOptions = categoryList.filter(i => !currentDislikes.includes(i));
+    if (safeOptions.length === 0) return categoryList[0]; // Fallback extremo
+    
+    // Buscar en preferencias primero
+    const preferredSafe = safeOptions.filter(i => currentPrefs.includes(i));
+    if (preferredSafe.length > 0) {
+      // Devolver uno aleatorio de los preferidos para dar variedad
+      return preferredSafe[Math.floor(Math.random() * preferredSafe.length)];
+    }
+    
+    // Si no hay preferidos seguros, devolver uno aleatorio de los seguros
+    return safeOptions[Math.floor(Math.random() * safeOptions.length)];
+  };
+
+  const isHighCarbs = durationMin >= 60;
+  
+  // En post-entreno priorizamos reparación. En pre-entreno, digestión fácil (menos grasa/fibra).
+  
+  // Elegimos ingredientes
+  let carbSelection = pickIngredient(allCarbs, prefs, dislikes);
+  let proteinSelection = pickIngredient(allProteins, prefs, dislikes);
+  let fatSelection = pickIngredient(allFats, prefs, dislikes);
+
+  // Si es pre-entreno y eligió legumbres (lentejas/garbanzos), forzamos un cambio por digestión
+  if (!isPostWorkout && ['lentejas', 'garbanzos'].includes(carbSelection)) {
+    const easyCarbs = ['arroz', 'pasta', 'patata', 'avena', 'platano'];
+    carbSelection = pickIngredient(easyCarbs, prefs, dislikes);
+  }
+
+  const carbLabel = ingredientLabels[carbSelection] || carbSelection;
+  const proteinLabel = ingredientLabels[proteinSelection] || proteinSelection;
+  const fatLabel = ingredientLabels[fatSelection] || fatSelection;
+
+  let mealName = '';
+  let recipeDescription = '';
+  let macronutrientFocus = '';
+
+  if (isPostWorkout) {
+    if (isHighCarbs) {
+      macronutrientFocus = 'Reposición de Glucógeno + Síntesis Proteica';
+      mealName = `Bowl Alternativo: ${proteinLabel} al estilo ${carbLabel}`;
+      recipeDescription = `Hemos evitado tus ingredientes no deseados. Disfruta de un bowl nutritivo con una base abundante de ${carbLabel} (120g en crudo), acompañado de ${proteinLabel} (150-180g) a la plancha o al horno. Añade un toque de ${fatLabel} para aportar ácidos grasos esenciales y reducir la inflamación tras tus ${durationMin} min de ${sportType}.`;
+    } else {
+      macronutrientFocus = 'Estructural: Proteína limpia + Grasas saludables (Bajo CHO)';
+      mealName = `Plato Ligero de Recuperación: ${proteinLabel} y ${fatLabel}`;
+      recipeDescription = `Dado que la sesión ha sido más corta, limitamos los carbohidratos. Toma 180-200g de ${proteinLabel} cocinado de forma ligera, servido con una porción generosa de verduras de temporada y ${fatLabel}. Perfecto para una recuperación muscular óptima sin excesos calóricos.`;
+    }
+  } else {
+    // Pre-workout
+    macronutrientFocus = 'Energía de rápida/media asimilación (Fácil Digestión)';
+    mealName = `Carga Alternativa Pre-Entreno: ${carbLabel}`;
+    recipeDescription = `Adaptado a tus gustos y evitando lo que no toleras. Para rendir en tu sesión de ${sportType}, prepara una ración moderada de ${carbLabel} unas 2 horas antes de empezar. Puedes acompañarlo con un poco de ${proteinLabel} muy limpio si tienes hambre, pero evita el exceso de ${fatLabel} ahora para no retrasar el vaciado gástrico.`;
+  }
+
+  return {
+    mealName,
+    macronutrientFocus,
+    recipeDescription
+  };
+}

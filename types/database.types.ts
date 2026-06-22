@@ -553,6 +553,7 @@ export type Database = {
           stress_level: number | null
           user_id: string
           weight: number | null
+          daily_steps: number | null
         }
         Insert: {
           created_at?: string
@@ -567,6 +568,7 @@ export type Database = {
           stress_level?: number | null
           user_id: string
           weight?: number | null
+          daily_steps?: number | null
         }
         Update: {
           created_at?: string
@@ -581,6 +583,7 @@ export type Database = {
           stress_level?: number | null
           user_id?: string
           weight?: number | null
+          daily_steps?: number | null
         }
         Relationships: []
       }
