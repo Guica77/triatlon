@@ -2,8 +2,19 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 
-const getBaseUrl = () => {
+const getDynamicBaseUrl = async () => {
+  const headerStore = await headers();
+  const host = headerStore.get('host');
+  const proto = headerStore.get('x-forwarded-proto') || 'https';
+  
+  if (host) {
+    if (host.includes('localhost') || host.includes('127.0.0.1') || host.includes('192.168.')) {
+      return `http://${host}`;
+    }
+    return `${proto}://${host}`;
+  }
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL;
   }
@@ -30,10 +41,11 @@ export async function getOAuthUrl(provider: 'apple' | 'google', role?: 'athlete'
     });
   }
 
+  const baseUrl = await getDynamicBaseUrl();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${getBaseUrl()}/auth/callback`,
+      redirectTo: `${baseUrl}/auth/callback`,
     },
   });
 
@@ -219,8 +231,9 @@ export async function sendResetPasswordEmail(formData: FormData) {
   const email = formData.get('email') as string;
   const supabase = await createClient();
 
+  const baseUrl = await getDynamicBaseUrl();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${getBaseUrl()}/reset-password`,
+    redirectTo: `${baseUrl}/reset-password`,
   });
 
   if (error) {
