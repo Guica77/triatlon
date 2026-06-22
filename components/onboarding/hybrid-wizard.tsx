@@ -37,6 +37,11 @@ export function HybridWizard() {
   const [targetSwimTime, setTargetSwimTime] = React.useState('');
   const [targetBikeTime, setTargetBikeTime] = React.useState('');
   const [targetRunTime, setTargetRunTime] = React.useState('');
+  
+  const [currentFinishTime, setCurrentFinishTime] = React.useState('');
+  const [currentSwimTime, setCurrentSwimTime] = React.useState('');
+  const [currentBikeTime, setCurrentBikeTime] = React.useState('');
+  const [currentRunTime, setCurrentRunTime] = React.useState('');
 
   const filteredCatalog = React.useMemo(() => {
     if (!searchQuery) return RACES_CATALOG;
@@ -275,6 +280,14 @@ export function HybridWizard() {
             setTargetBikeTime={setTargetBikeTime}
             targetRunTime={targetRunTime}
             setTargetRunTime={setTargetRunTime}
+            currentFinishTime={currentFinishTime}
+            setCurrentFinishTime={setCurrentFinishTime}
+            currentSwimTime={currentSwimTime}
+            setCurrentSwimTime={setCurrentSwimTime}
+            currentBikeTime={currentBikeTime}
+            setCurrentBikeTime={setCurrentBikeTime}
+            currentRunTime={currentRunTime}
+            setCurrentRunTime={setCurrentRunTime}
             swimHours={swimHours}
             setSwimHours={setSwimHours}
             bikeHours={bikeHours}

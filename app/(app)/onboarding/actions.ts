@@ -145,7 +145,10 @@ export async function saveRaceGoalAndPlan(formData: {
   allergies?: string[];
   disliked_ingredients?: string[];
   current_weight?: number;
-  daily_steps?: number;
+  current_finish_time?: string;
+  current_swim_time?: string;
+  current_bike_time?: string;
+  current_run_time?: string;
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -159,7 +162,8 @@ export async function saveRaceGoalAndPlan(formData: {
     target_race_distance = 'half', target_race_modality = 'triatlon',
     target_finish_time, baseline_training_hours = '7-10h', virtual_garage = [],
     swim_weekly_hours = 2, bike_weekly_hours = 4, run_weekly_hours = 3,
-    target_swim_time, target_bike_time, target_run_time, athlete_level = 'intermedio'
+    target_swim_time, target_bike_time, target_run_time, athlete_level = 'intermedio',
+    current_finish_time, current_swim_time, current_bike_time, current_run_time
   } = formData;
 
   // AI Estimation Fallback Logic for Physiological Metrics
@@ -264,6 +268,10 @@ export async function saveRaceGoalAndPlan(formData: {
     target_swim_time,
     target_bike_time,
     target_run_time,
+    current_finish_time,
+    current_swim_time,
+    current_bike_time,
+    current_run_time,
     active_plan_id: selectedPlanId,
     preferred_ingredients: formData.preferred_ingredients || [],
     allergies: formData.allergies || [],

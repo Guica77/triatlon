@@ -36,6 +36,14 @@ interface StepAmbitionProps {
   setTargetBikeTime: (v: string) => void;
   targetRunTime: string;
   setTargetRunTime: (v: string) => void;
+  currentFinishTime: string;
+  setCurrentFinishTime: (v: string) => void;
+  currentSwimTime: string;
+  setCurrentSwimTime: (v: string) => void;
+  currentBikeTime: string;
+  setCurrentBikeTime: (v: string) => void;
+  currentRunTime: string;
+  setCurrentRunTime: (v: string) => void;
   swimHours: number;
   setSwimHours: (v: number) => void;
   bikeHours: number;
@@ -207,16 +215,51 @@ export function StepAmbition(props: StepAmbitionProps) {
           </div>
 
           {!props.wantsCoach && (
-            <div>
-              <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider flex items-center gap-1"><Timer className="w-3.5 h-3.5" /> Tiempo Objetivo Total</label>
-              <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={props.targetFinishTime} onChange={e => props.setTargetFinishTime(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
+            <div className="border-t border-zinc-200 pt-6 space-y-4">
+              <label className="text-xs font-bold text-zinc-400 block uppercase tracking-wider flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-cyan-500" /> Tiempos Actuales en esta Distancia (Opcional)
+              </label>
+              
+              <div className="space-y-1.5 mb-4">
+                <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Mejor Tiempo Total (Actual)</label>
+                <input type="text" placeholder="Ej. 5h 30m, o déjalo vacío si es tu primera vez" value={props.currentFinishTime} onChange={e => props.setCurrentFinishTime(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-xs text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
+              </div>
+
+              <div className={`grid grid-cols-1 gap-4 ${props.customModality === 'carrera' ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
+                {props.customModality !== 'carrera' && (
+                  <>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Natación (Actual)</label>
+                      <input type="text" placeholder="Ej. 40 min o 0:40" value={props.currentSwimTime} onChange={e => props.setCurrentSwimTime(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-xs text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Ciclismo (Actual)</label>
+                      <input type="text" placeholder="Ej. 3h 00m o 3:00" value={props.currentBikeTime} onChange={e => props.setCurrentBikeTime(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-xs text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
+                    </div>
+                  </>
+                )}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Carrera (Actual)</label>
+                  <input type="text" placeholder={props.customModality === 'carrera' ? "Ej. 3h 45m" : "Ej. 1h 45m"} value={props.currentRunTime} onChange={e => props.setCurrentRunTime(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-xs text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
+                </div>
+              </div>
             </div>
           )}
 
           {!props.wantsCoach && (
             <div className="border-t border-zinc-200 pt-6 space-y-4">
               <label className="text-xs font-bold text-zinc-400 block uppercase tracking-wider flex items-center gap-1.5">
-                <Trophy className="w-4 h-4 text-cyan-500" /> Marcas / Tiempos Objetivo {props.customModality !== 'carrera' && 'por Segmento'} (Opcional)
+                <Trophy className="w-4 h-4 text-cyan-500" /> Tiempos Objetivo a lograr
+              </label>
+              
+              <div className="space-y-1.5 mb-4">
+                <label className="text-[10px] text-zinc-400 block uppercase tracking-wider font-semibold">Tiempo Objetivo Total</label>
+                <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={props.targetFinishTime} onChange={e => props.setTargetFinishTime(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
+              </div>
+
+          {!props.wantsCoach && (
+              <label className="text-xs font-bold text-zinc-400 block uppercase tracking-wider flex items-center gap-1.5">
+                <Trophy className="w-4 h-4 text-cyan-500" /> Marcas Objetivo por Segmento {props.customModality !== 'carrera' && 'por Segmento'} (Opcional)
               </label>
               
               <div className={`grid grid-cols-1 gap-4 ${props.customModality === 'carrera' ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
