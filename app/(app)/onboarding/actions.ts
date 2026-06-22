@@ -125,7 +125,7 @@ export async function selectPlan(planId: string) {
 export async function saveRaceGoalAndPlan(formData: {
   target_race_name?: string;
   target_race_date?: string;
-  target_race_distance?: 'sprint' | 'olimpico' | 'half' | 'full';
+  target_race_distance?: 'sprint' | 'olimpico' | 'half' | 'full' | '5k' | '10k' | 'medio_maraton' | 'maraton' | 'ultra' | string;
   target_race_modality?: string;
   target_finish_time?: string;
   baseline_training_hours?: string;
@@ -199,7 +199,8 @@ export async function saveRaceGoalAndPlan(formData: {
         (target_race_distance === 'sprint' && dist.includes('sprint')) ||
         (target_race_distance === 'olimpico' && (dist.includes('olimpico') || dist.includes('olímpico'))) ||
         (target_race_distance === 'half' && (dist.includes('half') || dist.includes('70.3') || dist.includes('media'))) ||
-        (target_race_distance === 'full' && (dist.includes('full') || dist.includes('ironman') || dist.includes('larga')));
+        (target_race_distance === 'full' && (dist.includes('full') || dist.includes('ironman') || dist.includes('larga'))) ||
+        (target_race_modality === 'carrera' && (dist.includes('maraton') || dist.includes('carrera') || dist.includes('run') || true)); // Fallback para carrera
 
       const levelMatch = 
         planLvl === targetLvl || 
@@ -215,7 +216,8 @@ export async function saveRaceGoalAndPlan(formData: {
         return (target_race_distance === 'sprint' && dist.includes('sprint')) ||
                (target_race_distance === 'olimpico' && (dist.includes('olimpico') || dist.includes('olímpico'))) ||
                (target_race_distance === 'half' && (dist.includes('half') || dist.includes('70.3') || dist.includes('media'))) ||
-               (target_race_distance === 'full' && (dist.includes('full') || dist.includes('ironman') || dist.includes('larga')));
+               (target_race_distance === 'full' && (dist.includes('full') || dist.includes('ironman') || dist.includes('larga'))) ||
+               (target_race_modality === 'carrera' && (dist.includes('maraton') || dist.includes('carrera') || dist.includes('run') || true));
       });
     }
 
@@ -309,6 +311,7 @@ export async function saveRaceGoalAndPlan(formData: {
     if (target_race_modality === 'acuabike' && sport.includes('run')) return false; // Sin carrera a pie
     if (target_race_modality === 'duatlon' && sport.includes('swim')) return false; // Sin natación
     if (target_race_modality === 'acuatlon' && sport.includes('bike')) return false; // Sin ciclismo
+    if (target_race_modality === 'carrera' && (sport.includes('swim') || sport.includes('bike'))) return false; // Solo carrera a pie y fuerza
     return true;
   });
 

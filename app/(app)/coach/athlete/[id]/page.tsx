@@ -261,6 +261,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
         {/* Section Nutrition */}
         <section>
           <AthleteNutritionCard 
+            athleteId={athleteId}
             allergies={athleteProfile.allergies}
             preferredIngredients={athleteProfile.preferred_ingredients}
             dislikedIngredients={athleteProfile.disliked_ingredients}

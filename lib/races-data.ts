@@ -1,4 +1,4 @@
-export type MultisportModality = 'triatlon' | 'duatlon' | 'acuatlon' | 'acuabike' | 'cross';
+export type MultisportModality = 'triatlon' | 'duatlon' | 'acuatlon' | 'acuabike' | 'cross' | 'carrera';
 
 export interface RaceCatalogItem {
   id: string;

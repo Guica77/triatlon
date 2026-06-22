@@ -22,6 +22,12 @@ export interface SessionPacingResult {
   practicalGuide: string
 }
 
+export interface NutritionMeal {
+  mealName: string;
+  macronutrientFocus: string;
+  recipeDescription: string;
+}
+
 export interface DynamicNutritionData {
   bmr: number
   baseExpenditure: number

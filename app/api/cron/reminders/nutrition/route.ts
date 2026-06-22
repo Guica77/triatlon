@@ -65,7 +65,7 @@ export async function GET(request: Request) {
         .order('date', { ascending: false })
         .limit(1);
 
-      const latestBio = biometrics?.[0] || {};
+      const latestBio: any = biometrics?.[0] || {};
       const sleepHours = latestBio.sleep_hours || 8;
       const sleepScore = latestBio.sleep_score || 80;
       const dailySteps = latestBio.daily_steps || 0;

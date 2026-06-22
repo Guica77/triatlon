@@ -312,11 +312,7 @@ export function ChatView({
 
             {/* Messages body list */}
             <div 
-              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative bg-[#e5ddd5]"
-              style={{
-                backgroundImage: `radial-gradient(#cfc8c0 1px, transparent 1px)`,
-                backgroundSize: '24px 24px',
-              }}
+              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative bg-[#e5ddd5] bg-[radial-gradient(#cfc8c0_1px,transparent_1px)] bg-[size:24px_24px]"
             >
               {loadingMessages ? (
                 <div className="h-full flex items-center justify-center text-xs text-zinc-500 font-semibold">
@@ -416,8 +412,7 @@ export function ChatView({
                   }}
                   placeholder="Mensaje..."
                   rows={1}
-                  className="bg-transparent border-none text-[15px] text-zinc-850 outline-none w-full py-2 px-1 placeholder-zinc-400 resize-none max-h-[120px] custom-scrollbar self-center"
-                  style={{ minHeight: '36px' }}
+                  className="bg-transparent border-none text-[15px] text-zinc-850 outline-none w-full py-2 px-1 placeholder-zinc-400 resize-none max-h-[120px] min-h-[36px] custom-scrollbar self-center"
                 />
                 
                 {/* Paperclip Icon */}

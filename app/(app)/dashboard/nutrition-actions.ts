@@ -411,3 +411,58 @@ export async function rejectDishAndGetAlternative(
   }
 }
 
+/**
+ * Update athlete nutrition preferences (ingredients, dislikes, allergies)
+ */
+export async function updateNutritionPreferences(
+  targetUserId: string,
+  data: {
+    preferred_ingredients?: string[];
+    disliked_ingredients?: string[];
+    allergies?: string[];
+  }
+) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    let effectiveUserId = user.id;
+
+    if (targetUserId && targetUserId !== user.id) {
+      // Verificar que el usuario actual es coach del targetUserId
+      const { data: checkRole } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+      if (checkRole?.role !== 'coach') {
+        return { success: false, error: 'No autorizado para editar la nutrición de otro atleta.' };
+      }
+      const { data: rosterCheck } = await supabase.from('coach_athletes').select('id').eq('coach_id', user.id).eq('athlete_id', targetUserId).maybeSingle();
+      if (!rosterCheck) {
+        return { success: false, error: 'No estás asignado como entrenador de este atleta.' };
+      }
+      effectiveUserId = targetUserId;
+    }
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        preferred_ingredients: data.preferred_ingredients,
+        disliked_ingredients: data.disliked_ingredients,
+        allergies: data.allergies
+      })
+      .eq('id', effectiveUserId);
+
+    if (updateError) {
+      return { success: false, error: updateError.message };
+    }
+
+    revalidatePath('/dashboard');
+    revalidatePath(`/coach/athlete/${targetUserId}`);
+    return { success: true };
+  } catch (err: any) {
+    console.error('Excepción en updateNutritionPreferences:', err);
+    return { success: false, error: err.message || 'Error interno al guardar.' };
+  }
+}
