@@ -313,7 +313,13 @@ export function StepPhysiology(props: StepPhysiologyProps) {
           ) : (
             <div />
           )}
-          <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm !bg-cyan-400 hover:!bg-cyan-500 !text-white shadow-cyan-500/10">
+          <AnimatedButton variant="primary" onClick={() => {
+            if (props.preferredIngredients.length < 3) {
+              alert('Por favor, selecciona al menos 3 ingredientes preferidos para que la IA pueda generar tus recetas.');
+              return;
+            }
+            props.onNext();
+          }} className="px-8 py-3 text-sm !bg-cyan-400 hover:!bg-cyan-500 !text-white shadow-cyan-500/10">
             {props.wantsCoach ? 'Siguiente' : 'Continuar'} <ChevronRight className="w-4 h-4 ml-1" />
           </AnimatedButton>
         </div>

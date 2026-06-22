@@ -23,17 +23,15 @@ export async function GET(request: NextRequest) {
   }
 
   // Conexión real con Strava si el proveedor es strava
-  if (provider === 'strava') {
+  if (provider === 'strava' && process.env.STRAVA_CLIENT_ID) {
     const clientId = process.env.STRAVA_CLIENT_ID;
-    if (!clientId) {
-      console.error('STRAVA_CLIENT_ID no configurado en variables de entorno');
-      return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?error=strava_config_missing' : '/settings?error=strava_config_missing', request.url));
-    }
     const redirectUri = `${getBaseUrl(request)}/api/auth/telemetry/callback`;
     const state = isOnboarding ? 'onboarding' : 'settings';
     const stravaUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&approval_prompt=auto&scope=activity:read_all,read&state=${state}`;
     return NextResponse.redirect(stravaUrl);
   }
+
+  // Si es strava pero no hay CLIENT_ID, o si es garmin/coros, usamos el mock.
 
   // Simulación/Handshake para otros proveedores (por ejemplo, Garmin mock)
   const mockExternalAthleteId = `${provider}_user_${user.id.substring(0, 8)}`;
@@ -47,6 +45,8 @@ export async function GET(request: NextRequest) {
   if (provider === 'garmin') {
     updateData.garmin_connected = true;
     updateData.garmin_auth_tokens = { access_token: mockAccessToken, refresh_token: mockRefreshToken, expires_at: Date.now() + 86400000 * 30 };
+  } else if (provider === 'strava') {
+    updateData.strava_connected = true;
   }
 
   const { error: profileError } = await supabase

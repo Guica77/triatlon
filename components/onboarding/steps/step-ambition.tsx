@@ -48,6 +48,10 @@ interface StepAmbitionProps {
   setCurrentSwimPace: (v: string) => void;
   currentRunPace: string;
   setCurrentRunPace: (v: string) => void;
+  currentWeight: string;
+  setCurrentWeight: (v: string) => void;
+  dailySteps: string;
+  setDailySteps: (v: string) => void;
   onNext: () => void;
   onPrev?: () => void;
 }
@@ -82,6 +86,14 @@ export function StepAmbition(props: StepAmbitionProps) {
               <div>
                 <label className="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider">Ritmo Carrera (/km)</label>
                 <input type="text" placeholder="Ej. 04:30" value={props.currentRunPace} onChange={e => props.setCurrentRunPace(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider">Peso Actual (kg)</label>
+                <input type="number" step="0.1" placeholder="Ej. 75.5" value={props.currentWeight} onChange={e => props.setCurrentWeight(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider">Pasos Diarios (Media)</label>
+                <input type="number" placeholder="Ej. 8000" value={props.dailySteps} onChange={e => props.setDailySteps(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm" />
               </div>
             </div>
             <p className="text-[10px] text-zinc-400 mt-2">Si no conoces tus zonas, déjalo en blanco y la IA las estimará según tu experiencia.</p>

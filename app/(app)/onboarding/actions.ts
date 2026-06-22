@@ -144,6 +144,8 @@ export async function saveRaceGoalAndPlan(formData: {
   preferred_ingredients?: string[];
   allergies?: string[];
   disliked_ingredients?: string[];
+  current_weight?: number;
+  daily_steps?: number;
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -265,7 +267,9 @@ export async function saveRaceGoalAndPlan(formData: {
     active_plan_id: selectedPlanId,
     preferred_ingredients: formData.preferred_ingredients || [],
     allergies: formData.allergies || [],
-    disliked_ingredients: formData.disliked_ingredients || []
+    disliked_ingredients: formData.disliked_ingredients || [],
+    current_weight: formData.current_weight,
+    daily_steps: formData.daily_steps
   };
 
   let profileError = null;

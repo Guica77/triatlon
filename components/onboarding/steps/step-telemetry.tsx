@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Activity, Zap, ChevronLeft } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 
@@ -13,6 +13,25 @@ interface StepTelemetryProps {
 }
 
 export function StepTelemetry(props: StepTelemetryProps) {
+  const [activeModal, setActiveModal] = React.useState<'strava' | 'garmin' | 'coros' | null>(null);
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [isConnecting, setIsConnecting] = React.useState(false);
+
+  const handleConnectClick = (provider: 'strava' | 'garmin' | 'coros') => {
+    setActiveModal(provider);
+  };
+
+  const handleConfirmConnect = async () => {
+    if (!activeModal) return;
+    setIsConnecting(true);
+    // Simulamos un pequeño delay de validación
+    await new Promise(r => setTimeout(r, 1000));
+    await props.handleSaveAndConnect(activeModal);
+    setIsConnecting(false);
+    setActiveModal(null);
+  };
+
   return (
     <motion.div key="step4" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
       <ProCard className="space-y-6 bg-white border border-zinc-200">
@@ -72,7 +91,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Garmin Connect button */}
             <button
-              onClick={() => props.handleSaveAndConnect('garmin')}
+              onClick={() => handleConnectClick('garmin')}
               disabled={props.loading}
               className="flex flex-col items-center justify-center p-5 rounded-2xl border border-zinc-200 bg-zinc-55/30 hover:bg-orange-50/50 hover:border-orange-500/50 hover:ring-1 hover:ring-orange-500/50 hover:shadow-xs transition-all group relative overflow-hidden text-center cursor-pointer"
             >
@@ -83,7 +102,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
 
             {/* Coros button */}
             <button
-              onClick={() => props.handleSaveAndConnect('coros')}
+              onClick={() => handleConnectClick('coros')}
               disabled={props.loading}
               className="flex flex-col items-center justify-center p-5 rounded-2xl border border-zinc-200 bg-zinc-55/30 hover:bg-orange-50/50 hover:border-orange-500/50 hover:ring-1 hover:ring-orange-500/50 hover:shadow-xs transition-all group relative overflow-hidden text-center cursor-pointer"
             >
@@ -94,7 +113,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
 
             {/* Strava Bridge button */}
             <button
-              onClick={() => props.handleSaveAndConnect('strava')}
+              onClick={() => handleConnectClick('strava')}
               disabled={props.loading}
               className="flex flex-col items-center justify-center p-5 rounded-2xl border border-zinc-200 bg-zinc-55/30 hover:bg-orange-50/50 hover:border-orange-500/50 hover:ring-1 hover:ring-orange-500/50 hover:shadow-xs transition-all group relative overflow-hidden text-center cursor-pointer"
             >
@@ -116,6 +135,62 @@ export function StepTelemetry(props: StepTelemetryProps) {
           </button>
         </div>
       </ProCard>
+
+      {/* Modal de Credenciales */}
+      <AnimatePresence>
+        {activeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-zinc-900/40 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm relative"
+            >
+              <h3 className="text-lg font-bold text-zinc-900 mb-1 capitalize">Conectar {activeModal}</h3>
+              <p className="text-xs text-zinc-500 mb-6">Introduce tus credenciales para autorizar el acceso a tus entrenamientos.</p>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-zinc-700 block mb-1">Email / Usuario</label>
+                  <input 
+                    type="text" 
+                    value={username}
+                    onChange={e => setUsername(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:border-orange-500 outline-none" 
+                    placeholder="tu@email.com"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-zinc-700 block mb-1">Contraseña / API Key</label>
+                  <input 
+                    type="password" 
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:border-orange-500 outline-none" 
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-8">
+                <button 
+                  onClick={() => setActiveModal(null)} 
+                  className="flex-1 py-2.5 text-sm font-semibold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={handleConfirmConnect}
+                  disabled={isConnecting || !username || !password}
+                  className="flex-1 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-colors disabled:opacity-50"
+                >
+                  {isConnecting ? 'Conectando...' : 'Autorizar'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
