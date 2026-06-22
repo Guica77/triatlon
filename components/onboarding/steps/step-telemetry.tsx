@@ -92,29 +92,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
             </ol>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Garmin Connect button */}
-            <button
-              onClick={() => handleConnectClick('garmin')}
-              disabled={props.loading}
-              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-zinc-200 bg-zinc-55/30 hover:bg-orange-50/50 hover:border-orange-500/50 hover:ring-1 hover:ring-orange-500/50 hover:shadow-xs transition-all group relative overflow-hidden text-center cursor-pointer"
-            >
-              <span className="text-3xl mb-3 block">🛰️</span>
-              <span className="text-sm font-bold text-zinc-800 group-hover:text-orange-600 transition-colors">Conectar Garmin</span>
-              <span className="text-[10px] text-zinc-400 mt-1 uppercase tracking-wider font-semibold">Vía Garmin Connect</span>
-            </button>
-
-            {/* Coros button */}
-            <button
-              onClick={() => handleConnectClick('coros')}
-              disabled={props.loading}
-              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-zinc-200 bg-zinc-55/30 hover:bg-orange-50/50 hover:border-orange-500/50 hover:ring-1 hover:ring-orange-500/50 hover:shadow-xs transition-all group relative overflow-hidden text-center cursor-pointer"
-            >
-              <span className="text-3xl mb-3 block">⌚</span>
-              <span className="text-sm font-bold text-zinc-800 group-hover:text-orange-600 transition-colors">Conectar Coros</span>
-              <span className="text-[10px] text-zinc-400 mt-1 uppercase tracking-wider font-semibold">Vía Coros API</span>
-            </button>
-
+          <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 max-w-sm mx-auto">
             {/* Strava Bridge button */}
             <button
               onClick={() => handleConnectClick('strava')}
