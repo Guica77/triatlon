@@ -42,6 +42,12 @@ interface StepAmbitionProps {
   setBikeHours: (v: number) => void;
   runHours: number;
   setRunHours: (v: number) => void;
+  currentFtp: string;
+  setCurrentFtp: (v: string) => void;
+  currentSwimPace: string;
+  setCurrentSwimPace: (v: string) => void;
+  currentRunPace: string;
+  setCurrentRunPace: (v: string) => void;
   onNext: () => void;
   onPrev?: () => void;
 }
@@ -62,6 +68,25 @@ export function StepAmbition(props: StepAmbitionProps) {
         </div>
 
         <div className="space-y-4">
+          <div className="pt-2 pb-4 border-b border-zinc-100">
+            <label className="text-xs font-bold text-zinc-400 block mb-3 uppercase tracking-wider">Estado de Forma Actual (Punto de partida)</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider">FTP Ciclismo (W)</label>
+                <input type="number" placeholder="Ej. 250" value={props.currentFtp} onChange={e => props.setCurrentFtp(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider">Ritmo Natación (/100m)</label>
+                <input type="text" placeholder="Ej. 01:45" value={props.currentSwimPace} onChange={e => props.setCurrentSwimPace(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider">Ritmo Carrera (/km)</label>
+                <input type="text" placeholder="Ej. 04:30" value={props.currentRunPace} onChange={e => props.setCurrentRunPace(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm" />
+              </div>
+            </div>
+            <p className="text-[10px] text-zinc-400 mt-2">Si no conoces tus zonas, déjalo en blanco y la IA las estimará según tu experiencia.</p>
+          </div>
+
           <div>
             <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider">Horas Semanales de Entrenamiento</label>
             <div className="space-y-3">

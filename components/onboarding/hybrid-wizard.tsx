@@ -229,12 +229,6 @@ export function HybridWizard() {
             setWantsCoach={setWantsCoach}
             inviteCode={inviteCode}
             setInviteCode={setInviteCode}
-            currentFtp={currentFtp}
-            setCurrentFtp={setCurrentFtp}
-            currentSwimPace={currentSwimPace}
-            setCurrentSwimPace={setCurrentSwimPace}
-            currentRunPace={currentRunPace}
-            setCurrentRunPace={setCurrentRunPace}
             onPrev={() => setStep(1)}
             onNext={() => setStep(2)}
             preferredIngredients={preferredIngredients}
@@ -283,6 +277,12 @@ export function HybridWizard() {
             setBikeHours={setBikeHours}
             runHours={runHours}
             setRunHours={setRunHours}
+            currentFtp={currentFtp}
+            setCurrentFtp={setCurrentFtp}
+            currentSwimPace={currentSwimPace}
+            setCurrentSwimPace={setCurrentSwimPace}
+            currentRunPace={currentRunPace}
+            setCurrentRunPace={setCurrentRunPace}
             onPrev={() => setStep(1)}
             onNext={() => setStep(3)}
           />

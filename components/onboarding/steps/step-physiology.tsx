@@ -11,12 +11,6 @@ interface StepPhysiologyProps {
   setWantsCoach: (v: boolean) => void;
   inviteCode?: string;
   setInviteCode?: (v: string) => void;
-  currentFtp: string;
-  setCurrentFtp: (v: string) => void;
-  currentSwimPace: string;
-  setCurrentSwimPace: (v: string) => void;
-  currentRunPace: string;
-  setCurrentRunPace: (v: string) => void;
   onNext: () => void;
   onPrev: () => void;
   preferredIngredients: string[];
@@ -180,27 +174,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
         </div>
 
         <AnimatePresence mode="popLayout">
-          {!props.wantsCoach ? (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4 border-t border-zinc-200"
-            >
-              <div>
-                <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider">FTP Ciclismo (W)</label>
-                <input type="number" placeholder="Ej. 250" value={props.currentFtp} onChange={e => props.setCurrentFtp(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Natación (/100m)</label>
-                <input type="text" placeholder="Ej. 01:45" value={props.currentSwimPace} onChange={e => props.setCurrentSwimPace(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
-              </div>
-              <div>
-                <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider">Ritmo Carrera (/km)</label>
-                <input type="text" placeholder="Ej. 04:30" value={props.currentRunPace} onChange={e => props.setCurrentRunPace(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all" />
-              </div>
-            </motion.div>
-          ) : (
+          {props.wantsCoach && (
             <motion.div 
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
