@@ -45,7 +45,26 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // 1. Obtener perfil y todos los datos en paralelo
+  // 1. Check profile early to avoid fetching all data if user needs onboarding
+  const { data: earlyProfile } = await supabase
+    .from('profiles')
+    .select('role, active_plan_id, coach_id')
+    .eq('id', user.id)
+    .single();
+
+  if (!earlyProfile) {
+    redirect('/onboarding');
+  }
+
+  if (earlyProfile.role === 'coach') {
+    redirect('/coach/dashboard');
+  }
+
+  if (!earlyProfile.active_plan_id && !earlyProfile.coach_id) {
+    redirect('/onboarding');
+  }
+
+  // 2. Fetch all other data in parallel
   const [
     profileRes,
     biometricsRes,
@@ -76,19 +95,7 @@ export default async function DashboardPage() {
   ]);
 
   const profileData = profileRes.data;
-  if (!profileData) {
-    redirect('/onboarding');
-  }
-
   const profile = profileData as any;
-
-  if (profile.role === 'coach') {
-    redirect('/coach/dashboard');
-  }
-
-  if (!profile.active_plan_id && !profile.coach_id) {
-    redirect('/onboarding');
-  }
   const activePlan = profile.training_plans;
 
   let coachProfile = null;
