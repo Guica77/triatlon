@@ -19,10 +19,11 @@ interface AIWorkoutGeneratorProps {
   onClose: () => void;
   onGenerate: (workouts: GeneratedWorkout[]) => void;
   currentDate: string;
+  initialPrompt?: string;
 }
 
-export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }: AIWorkoutGeneratorProps) {
-  const [prompt, setPrompt] = React.useState('');
+export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, initialPrompt = '' }: AIWorkoutGeneratorProps) {
+  const [prompt, setPrompt] = React.useState(initialPrompt);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [generationStep, setGenerationStep] = React.useState(0);
 
@@ -35,11 +36,13 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
 
   React.useEffect(() => {
     if (!isOpen) {
-      setPrompt('');
+      setPrompt(initialPrompt);
       setIsGenerating(false);
       setGenerationStep(0);
+    } else {
+      setPrompt(initialPrompt);
     }
-  }, [isOpen]);
+  }, [isOpen, initialPrompt]);
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,10 +82,18 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate }:
       {
         date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 2)).toISOString().split('T')[0], // Wednesday
         sport_type: 'natacion',
-        title: 'Técnica y Fuerza en Agua',
+        title: 'Técnica y Fuerza en Agua (AM)',
         duration_minutes: 45,
         tss: 40,
         description: 'Calentamiento 400m libre. Bloque: 10 x 100m con palas y pullboy enfocado en tracción. Enfriamiento 200m estilos.'
+      },
+      {
+        date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 2)).toISOString().split('T')[0], // Wednesday
+        sport_type: 'carrera',
+        title: 'Rodaje Suave (PM)',
+        duration_minutes: 40,
+        tss: 35,
+        description: 'Doble sesión. Rodaje muy suave en Z1/Z2 para soltar piernas tras la natación de la mañana.'
       },
       {
         date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 3)).toISOString().split('T')[0], // Thursday

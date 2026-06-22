@@ -13,6 +13,7 @@ import { GymTrackerModal } from '@/components/workouts/gym-tracker-modal';
 import Link from 'next/link';
 import { WatchSyncModal } from '@/components/dashboard/watch-sync-modal';
 import { calculateSessionPacing, calculateRecoveryMeal, calculatePreWorkoutMeal } from '@/lib/nutrition-utility';
+import { StravaMapSVG } from '@/components/ui/strava-map-svg';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
@@ -211,21 +212,56 @@ const renderAsBulletList = (text: string) => {
 };
 
 export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio', readOnly = false, sweatRate = 0.8, customCarbsPerHour, preferredIngredients = [] }: WorkoutCardProps) {
-  const [status, setStatus] = React.useState(workout.status);
-  const [loading, setLoading] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry' | 'nutrition'>('main');
+  const [loading, setLoading] = React.useState(false);
+  const [status, setStatus] = React.useState(workout.status);
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
+  
+  // Weather states for dynamic nutrition calculation
+  const [weatherCondition, setWeatherCondition] = React.useState<'frio' | 'templado' | 'calor' | 'extremo'>('templado');
+  const [humidityLevel, setHumidityLevel] = React.useState<number>(50);
+  const [isWeatherLoading, setIsWeatherLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    // Re-set when workout changes
+    setWeatherCondition('templado');
+    setHumidityLevel(50);
+    
+    // Fetch REAL weather data using Open-Meteo for Madrid (demo coordinates)
+    const fetchRealWeather = async () => {
+      try {
+        setIsWeatherLoading(true);
+        // Using Madrid coordinates as fallback (User geolocation could be used here)
+        const lat = 40.4168;
+        const lon = -3.7038;
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m&timezone=auto`);
+        if (res.ok) {
+          const data = await res.json();
+          const temp = data.current.temperature_2m;
+          const hum = data.current.relative_humidity_2m;
+          
+          let condition: 'frio' | 'templado' | 'calor' | 'extremo' = 'templado';
+          if (temp < 10) condition = 'frio';
+          else if (temp > 28 && temp <= 35) condition = 'calor';
+          else if (temp > 35) condition = 'extremo';
+          
+          setWeatherCondition(condition);
+          setHumidityLevel(hum);
+          console.log(`Fetched Real Weather: ${temp}°C, Hum: ${hum}%, Cond: ${condition}`);
+        }
+      } catch (err) {
+        console.error("Failed to fetch real weather", err);
+      } finally {
+        setIsWeatherLoading(false);
+      }
+    };
+    
+    fetchRealWeather();
+  }, [workout.id]);
+  
   const [isGymModeOpen, setIsGymModeOpen] = React.useState(false);
   const [isSyncingOpen, setIsSyncingOpen] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
-
-  const [temperature, setTemperature] = React.useState<'frio' | 'templado' | 'calor' | 'extremo'>('templado');
-  const [clothing, setClothing] = React.useState<'ligera' | 'normal' | 'abrigada' | 'neopreno'>('normal');
-
-  React.useEffect(() => {
-    setTemperature('templado');
-    setClothing('normal');
-  }, [workout.id]);
 
   const session = workout.training_sessions;
   const desc = session.description || '';
@@ -280,25 +316,44 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     training_effect_aerobic: 4.2,
     training_effect_anaerobic: 2.1,
     actual_tss: 85,
-    raw_payload: { device: 'Garmin Forerunner 965', firmware: '18.22' }
+    actual_elevation_gain: session?.sport_type === 'ciclismo' ? 850 : (session?.sport_type === 'carrera' ? 150 : 0),
+    raw_payload: { 
+      device: 'Garmin Forerunner 965', 
+      firmware: '18.22',
+      map: {
+        summary_polyline: "u{~vF|uyUv@z@v@fArBfDx@z@`AlARH`@n@b@hARZTRZ^hAfC^p@l@|AxA~Dt@fCl@fCP`@l@zAz@vAbB~CxB|ElCvG|B|Et@fBbC~EjA`CpBrEfApCfAxBbBfElBxE|A`ChBvCxC|EtD~Gn@rAjAtBtB`ExB~DvBxC~A|BnAzAzBjDlBlC`C~DpAfCtAhD`B|DtAnDpBzEzCxGxAlDzAzDlBpE`AxC|ApEvAzDlBhFzAvEvAdE|AjF~ApF~AjF|AlFx@zDl@vCn@vCl@fDr@hEf@dEx@bHl@fGh@pEd@rEj@lFz@|Hv@fGn@lFv@bHnAzHlBfKhB|IxArHtAdHlAxGzAbH|AfHzAdGvAnGrAvF|AjF`B`E|AhDxA`D`B~ClBfDxBhEjCxEdCnEhCpEnCbFxCvF~CxGvDnInEzI|DnI~CnG|BvE|BrEhCzElCpFjCxExBvErBxExB|EjCbGlCtFpCxExCzEtCxEtCxEvC`ExC`EpChEpChErChErClFrBxDhBdDxB~DtBxDrB~DjBxDrB~DtBnDtBvDpBzDtB~DnB~DnBzDtBvDpBzDvBxDvB~DjBzDtBpDxBvDlBnDtBzDvBzDlBzDpBxDpBxDpBvDpB~DjBzDtBxDxBzDpBxDpBxDpBzDlB~DjB",
+      }
+    }
   } : null);
 
   const actualDuration = telemetry?.actual_duration_min || durationMin;
 
-  const pacing = calculateSessionPacing(
-    session?.sport_type || 'descanso',
-    durationMin,
-    sweatRate || 0.8,
-    customCarbsPerHour,
-    { temperature, clothing }
-  );
+  const pacing = React.useMemo(() => {
+    return calculateSessionPacing(
+      session?.sport_type || 'descanso',
+      actualDuration,
+      sweatRate || 0.8,
+      customCarbsPerHour,
+      {
+        temperature: weatherCondition,
+        humidity: humidityLevel,
+        clothing: 'normal',
+        elevationGainMeters: (telemetry as any)?.actual_elevation_gain || 0
+      }
+    );
+  }, [session?.sport_type, actualDuration, sweatRate, customCarbsPerHour, weatherCondition, humidityLevel, telemetry]);
 
   const realPacing = calculateSessionPacing(
     session?.sport_type || 'descanso',
     actualDuration,
     sweatRate || 0.8,
     customCarbsPerHour,
-    { temperature, clothing }
+    { 
+      temperature: weatherCondition, 
+      clothing: 'normal', 
+      humidity: humidityLevel,
+      elevationGainMeters: (telemetry as any)?.actual_elevation_gain || 0
+    }
   );
 
   const hasFeedback = React.useMemo(() => {
@@ -858,9 +913,34 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                 {activeTab === 'nutrition' && (
                   <div className="space-y-4 w-full">
                     <div className="space-y-4">
-                      <p className="font-semibold text-emerald-600 mb-2 flex items-center gap-1.5 text-xs tracking-wide uppercase">
-                        <Sparkles className="w-4 h-4 text-emerald-500" /> Estrategia de Nutrición y Pacing:
-                      </p>
+                      <div className="flex justify-between items-center flex-wrap gap-2">
+                        <p className="font-semibold text-emerald-600 flex items-center gap-1.5 text-xs tracking-wide uppercase">
+                          <Sparkles className="w-4 h-4 text-emerald-500" /> Estrategia de Nutrición y Pacing:
+                        </p>
+                        
+                        {!readOnly && session?.sport_type !== 'descanso' && (
+                          <div className="flex gap-1.5 items-center bg-zinc-100 p-1 rounded-lg border border-zinc-200/80">
+                            <button
+                              onClick={() => { setWeatherCondition('frio'); setHumidityLevel(40); }}
+                              className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'frio' ? 'bg-white text-cyan-500 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                            >
+                              ❄️ Frío
+                            </button>
+                            <button
+                              onClick={() => { setWeatherCondition('templado'); setHumidityLevel(50); }}
+                              className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'templado' ? 'bg-white text-emerald-500 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                            >
+                              🌤️ Templado
+                            </button>
+                            <button
+                              onClick={() => { setWeatherCondition('calor'); setHumidityLevel(85); }}
+                              className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'calor' ? 'bg-white text-amber-500 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                            >
+                              🔥 Calor (85% Hum)
+                            </button>
+                          </div>
+                        )}
+                      </div>
                       
                       {session?.sport_type === 'descanso' ? (
                         <div className="space-y-4">
@@ -1213,7 +1293,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                         <p className="text-[10px] text-purple-650 font-medium mt-0.5">Anaeróbico: {telemetry.training_effect_anaerobic || 2.1}</p>
                       </div>
 
-                      <div className="p-3 rounded-xl bg-zinc-55 border border-zinc-200 col-span-2 sm:col-span-2">
+                      <div className="p-3 rounded-xl bg-zinc-55 border border-zinc-200 col-span-2 sm:col-span-3">
                         <p className="text-xs text-zinc-505 mb-1 flex items-center gap-1">
                           Carga de Entrenamiento (TSS)
                           {athleteLevel === 'principiante' && <span className="text-[9px] text-zinc-400 font-normal ml-1">(Métrica Pro)</span>}
@@ -1229,6 +1309,43 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                             <p className="text-[10px] text-zinc-450 mt-0.5">Sincronizado e integrado en predicción de fatiga</p>
                           </>
                         )}
+                      </div>
+
+                      {/* Strava / Route Map Visualizer */}
+                      <div className="p-0 rounded-xl bg-zinc-900 border border-zinc-800 col-span-2 sm:col-span-3 overflow-hidden shadow-inner relative h-40 sm:h-48 flex items-center justify-center group">
+                        
+                        {(telemetry as any).raw_payload?.map?.summary_polyline ? (
+                          <div className="absolute inset-0 opacity-70 transition-opacity group-hover:opacity-100 flex items-center justify-center p-2">
+                             <StravaMapSVG 
+                               polyline={(telemetry as any).raw_payload.map.summary_polyline} 
+                               className="w-full h-full max-w-[80%]" 
+                               strokeColor="#06b6d4" 
+                               strokeWidth={4} 
+                             />
+                          </div>
+                        ) : (
+                          <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/outdoors-v12/static/path-5+f44-0.5(%7DecxFlf_V%7D@b@c@h@a@j@c@l@e@n@g@p@i@r@k@t@m@v@o@x@q@z@s@%7C@u@~@w@`AaAa@aAc@aAg@aAk@aAo@aAs@aAw@aA_AaA_AaA)/-3.7038,40.4168,12,0/800x400?access_token=mock')] bg-cover bg-center opacity-30 mix-blend-multiply grayscale"></div>
+                        )}
+                        
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-transparent to-transparent"></div>
+                        
+                        <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                          <p className="text-xs font-black text-cyan-400 tracking-wide uppercase flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span> 
+                            Ruta {(telemetry.source_provider)}
+                          </p>
+                          <div className="flex items-center gap-4 bg-zinc-900/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-zinc-700/50">
+                            <div className="text-right">
+                              <p className="text-[9px] text-zinc-400 font-bold uppercase">Distancia</p>
+                              <p className="text-sm font-black text-zinc-100">{(actualDuration * (session.sport_type === 'ciclismo' ? 0.45 : 0.20)).toFixed(1)} km</p>
+                            </div>
+                            <div className="w-px h-5 bg-zinc-700"></div>
+                            <div className="text-left">
+                              <p className="text-[9px] text-zinc-400 font-bold uppercase">Desnivel</p>
+                              <p className="text-sm font-black text-zinc-100">+{(telemetry as any).actual_elevation_gain || 0} m</p>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

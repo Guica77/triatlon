@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { sendPushNotification } from '@/lib/notifications';
 
 /**
  * Strava Webhooks verification handler (GET)
@@ -108,8 +109,22 @@ export async function POST(request: NextRequest) {
               });
 
             console.log(`Workout ${workout.id} marked completed via webhook!`);
+
+            // Send Push Notification from AI
+            await sendPushNotification(userId, {
+              title: "¡Entrenamiento Sincronizado! 🏃",
+              body: `He detectado tu ${mappedSport} de ${distanceKm.toFixed(1)}km. ¿Cómo te has sentido? Abre la app para ajustar nutrición o cargas.`,
+              url: `/dashboard`
+            });
+
           } else {
             console.log('No pending workout for today, storing activity detail.');
+            // Send Push Notification from AI for unplanned activity
+            await sendPushNotification(userId, {
+              title: "¡Actividad Extra Detectada! 👀",
+              body: `He registrado tu ${mappedSport} no planificado. Toca para ver cómo afecta a tu recuperación y nutrición.`,
+              url: `/dashboard`
+            });
           }
         } else {
           console.error('Failed to fetch activity details from Strava:', await activityResponse.text());

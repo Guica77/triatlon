@@ -19,7 +19,11 @@ export function StepTelemetry(props: StepTelemetryProps) {
   const [isConnecting, setIsConnecting] = React.useState(false);
 
   const handleConnectClick = (provider: 'strava' | 'garmin' | 'coros') => {
-    setActiveModal(provider);
+    if (provider === 'strava') {
+      window.location.href = '/api/auth/telemetry/connect?provider=strava&onboarding=true';
+    } else {
+      setActiveModal(provider);
+    }
   };
 
   const handleConfirmConnect = async () => {
@@ -59,7 +63,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
               <li className="flex items-start gap-2.5">
                 <div className="w-5 h-5 rounded bg-zinc-50 border border-zinc-200 flex items-center justify-center text-xs font-bold text-zinc-650 shrink-0 mt-0.5">2</div>
                 <p className="text-xs text-zinc-600 leading-relaxed font-semibold">
-                  <strong className="text-zinc-900 font-bold">Envío a tu Reloj:</strong> Una vez completado el onboarding, en la pestaña <strong className="text-zinc-900 font-bold">Configuración</strong> tendrás un botón para "Enviar Entrenos a Garmin/Coros". Esto volcará toda la semana en tu reloj.
+                  <strong className="text-zinc-900 font-bold">Envío a tu Reloj:</strong> Una vez completado el onboarding, en tu Dashboard tendrás un botón para <strong className="text-zinc-900">"Enviar al Reloj"</strong>. Esto descargará el entrenamiento estructurado en un archivo <strong className="text-zinc-900">.TCX</strong> que puedes importar manualmente en tu cuenta web de Garmin Connect o Coros Training Hub.
                 </p>
               </li>
               <li className="flex items-start gap-2.5">

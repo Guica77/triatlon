@@ -54,6 +54,7 @@ export function DashboardViewTabs({
   const [activeTab, setActiveTab] = React.useState<'semana' | 'mes'>('semana');
   const [isManualModalOpen, setIsManualModalOpen] = React.useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = React.useState(false);
+  const [aiInitialPrompt, setAiInitialPrompt] = React.useState('');
   const [aiWorkouts, setAiWorkouts] = React.useState<GeneratedWorkout[]>([]);
   
   // Merge initialWorkouts with AI generated ones
@@ -389,7 +390,10 @@ export function DashboardViewTabs({
             <div className="flex items-center gap-2">
               <AnimatedButton
                 variant="ghost"
-                onClick={() => setIsAiModalOpen(true)}
+                onClick={() => {
+                  setAiInitialPrompt('');
+                  setIsAiModalOpen(true);
+                }}
                 className="bg-cyan-50 hover:bg-cyan-100/80 text-cyan-700 border border-cyan-200 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
               >
                 <Bot className="w-4 h-4" />
@@ -522,6 +526,38 @@ export function DashboardViewTabs({
                 )
               )}
             </div>
+
+            {/* AI Feedback Loop */}
+            {!readOnly && (
+              <div className="pt-6 border-t border-zinc-200/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Bot className="w-4 h-4 text-cyan-500" />
+                  <p className="text-xs text-zinc-600 font-medium">¿Necesitas ajustar la semana?</p>
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <AnimatedButton
+                    variant="ghost"
+                    onClick={() => {
+                      setAiInitialPrompt('Noto poca carga esta semana. Por favor, añádeme más volumen general, en especial rodajes largos.');
+                      setIsAiModalOpen(true);
+                    }}
+                    className="flex-1 sm:flex-none border border-zinc-200 text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-zinc-650 hover:bg-zinc-50 hover:text-zinc-900 shadow-sm"
+                  >
+                    📈 Poco volumen
+                  </AnimatedButton>
+                  <AnimatedButton
+                    variant="ghost"
+                    onClick={() => {
+                      setAiInitialPrompt('Siento demasiada fatiga muscular. Por favor, reduce el volumen general de la semana un 20% y prioriza descansos activos o natación suave.');
+                      setIsAiModalOpen(true);
+                    }}
+                    className="flex-1 sm:flex-none border border-zinc-200 text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-zinc-650 hover:bg-zinc-50 hover:text-red-600 shadow-sm"
+                  >
+                    📉 Demasiada carga
+                  </AnimatedButton>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className={activeTab === 'mes' ? 'block' : 'hidden'}>
@@ -856,10 +892,11 @@ export function DashboardViewTabs({
       </AnimatePresence>
 
       <AIWorkoutGenerator 
-        isOpen={isAiModalOpen}
-        onClose={() => setIsAiModalOpen(false)}
-        onGenerate={(workouts) => setAiWorkouts(workouts)}
-        currentDate={currentDate.toISOString().split('T')[0]}
+        isOpen={isAiModalOpen} 
+        onClose={() => setIsAiModalOpen(false)} 
+        onGenerate={(newAiWorkouts) => setAiWorkouts(newAiWorkouts)}
+        currentDate={todayStr}
+        initialPrompt={aiInitialPrompt}
       />
     </div>
   );

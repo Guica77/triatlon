@@ -180,6 +180,7 @@ export function calculateSessionPacing(
     temperature?: 'frio' | 'templado' | 'calor' | 'extremo'
     clothing?: 'ligera' | 'normal' | 'abrigada' | 'neopreno'
     humidity?: number // 0-100 percentage
+    elevationGainMeters?: number // Desnivel positivo en metros
   }
 ): SessionPacingResult {
   const durationHours = durationMin / 60
@@ -253,8 +254,14 @@ export function calculateSessionPacing(
     }
   }
 
-  // Aplicar ajuste de carbohidratos por temperatura (más consumo de glucógeno con calor)
-  hourlyCarbsG = Math.round(hourlyCarbsG * tempCarbMultiplier)
+  // Ajuste por desnivel (Elevación)
+  // Por cada 500m de desnivel positivo, añadimos un 10% más de carbohidratos porque el esfuerzo es mayor.
+  let elevationMultiplier = 1.0;
+  if (options?.elevationGainMeters && options.elevationGainMeters > 0) {
+    elevationMultiplier = 1.0 + (options.elevationGainMeters / 500) * 0.10;
+  }
+
+  hourlyCarbsG = Math.round(hourlyCarbsG * tempCarbMultiplier * elevationMultiplier);
   const totalCarbsG = Math.round(hourlyCarbsG * durationHours)
 
   // Guía Práctica de Alimentos/Suplementos
