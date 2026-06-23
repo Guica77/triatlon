@@ -26,7 +26,8 @@ export async function GET(request: NextRequest) {
   if (provider === 'strava' && process.env.STRAVA_CLIENT_ID) {
     const clientId = process.env.STRAVA_CLIENT_ID;
     const redirectUri = `${getBaseUrl(request)}/api/auth/telemetry/callback`;
-    const state = isOnboarding ? 'onboarding' : 'settings';
+    const isPopup = searchParams.get('popup') === 'true';
+    const state = (isOnboarding ? 'onboarding' : 'settings') + (isPopup ? '_popup' : '');
     const stravaUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&approval_prompt=auto&scope=activity:read_all,read&state=${state}`;
     return NextResponse.redirect(stravaUrl);
   }

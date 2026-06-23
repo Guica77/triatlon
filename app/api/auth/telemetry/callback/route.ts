@@ -12,10 +12,14 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const error = searchParams.get('error');
   const state = searchParams.get('state') || 'settings';
-  const isOnboarding = state === 'onboarding';
+  const isPopup = state.includes('_popup');
+  const isOnboarding = state.includes('onboarding');
 
   if (error || !code) {
     console.error('Strava OAuth error or code missing:', error);
+    if (isPopup) {
+       return new NextResponse(`<html><body><script>window.close();</script></body></html>`, { headers: { 'Content-Type': 'text/html' } });
+    }
     return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?error=strava_auth_failed' : '/settings?error=strava_auth_failed', request.url));
   }
 
@@ -88,9 +92,27 @@ export async function GET(request: NextRequest) {
     // Sync physiological metrics from Strava activities and athlete profile
     await syncPhysiologyFromStrava(user.id, access_token);
 
+    if (isPopup) {
+       return new NextResponse(`
+         <html>
+           <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+           <body style="font-family: sans-serif; text-align: center; margin-top: 50px; background: #fafafa; color: #333;">
+             <h2 style="color: #10b981;">✅ Conexión completada</h2>
+             <p style="color: #666;">Tu cuenta está conectada con éxito. Ya puedes cerrar esta ventana y volver a la aplicación.</p>
+             <button onclick="window.close()" style="margin-top: 20px; padding: 12px 24px; background: #f97316; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer;">Cerrar esta ventana</button>
+             <script>
+               try { window.opener.postMessage('strava_connected', '*'); } catch(e) {}
+             </script>
+           </body>
+         </html>
+       `, { headers: { 'Content-Type': 'text/html' } });
+    }
     return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?telemetry_connected=true' : '/settings?telemetry_connected=true', request.url));
   } catch (err) {
     console.error('Exception during Strava token exchange:', err);
+    if (isPopup) {
+       return new NextResponse(`<html><body><script>window.close();</script></body></html>`, { headers: { 'Content-Type': 'text/html' } });
+    }
     return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?error=strava_exception' : '/settings?error=strava_exception', request.url));
   }
 }

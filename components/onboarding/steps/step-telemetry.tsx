@@ -20,7 +20,8 @@ export function StepTelemetry(props: StepTelemetryProps) {
 
   const handleConnectClick = (provider: 'strava' | 'garmin' | 'coros') => {
     if (provider === 'strava') {
-      window.location.href = '/api/auth/telemetry/connect?provider=strava&onboarding=true';
+      window.open('/api/auth/telemetry/connect?provider=strava&onboarding=true&popup=true', '_blank');
+      setActiveModal('strava_confirm' as any);
     } else {
       setActiveModal(provider);
     }
@@ -31,7 +32,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
     setIsConnecting(true);
     // Simulamos un pequeño delay de validación
     await new Promise(r => setTimeout(r, 1000));
-    await props.handleSaveAndConnect(activeModal);
+    await props.handleSaveAndConnect(activeModal === 'strava_confirm' ? 'strava' : activeModal);
     setIsConnecting(false);
     setActiveModal(null);
   };
@@ -128,47 +129,75 @@ export function StepTelemetry(props: StepTelemetryProps) {
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm relative"
             >
-              <h3 className="text-lg font-bold text-zinc-900 mb-1 capitalize">Conectar {activeModal}</h3>
-              <p className="text-xs text-zinc-500 mb-6">Introduce tus credenciales para autorizar el acceso a tus entrenamientos.</p>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-zinc-700 block mb-1">Email / Usuario</label>
-                  <input 
-                    type="text" 
-                    value={username}
-                    onChange={e => setUsername(e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:border-orange-500 outline-none" 
-                    placeholder="tu@email.com"
-                  />
+              {activeModal === 'strava_confirm' ? (
+                <div className="text-center">
+                  <h3 className="text-lg font-bold text-zinc-900 mb-2">Conexión con Strava</h3>
+                  <p className="text-sm text-zinc-600 mb-6">Se ha abierto una nueva pestaña para que autorices la conexión de forma segura. Una vez hayas terminado, vuelve a esta pestaña y pulsa Continuar.</p>
+                  
+                  <button 
+                    onClick={async () => {
+                      setIsConnecting(true);
+                      await props.handleSaveAndConnect('strava');
+                      setIsConnecting(false);
+                      setActiveModal(null);
+                    }}
+                    disabled={isConnecting}
+                    className="w-full py-3 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    {isConnecting ? 'Generando Plan...' : 'Ya me he conectado (Continuar)'}
+                  </button>
+                  <button 
+                    onClick={() => setActiveModal(null)} 
+                    className="w-full mt-3 py-2 text-xs font-semibold text-zinc-500 hover:text-zinc-700 transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
                 </div>
-                <div>
-                  <label className="text-xs font-bold text-zinc-700 block mb-1">Contraseña / API Key</label>
-                  <input 
-                    type="password" 
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:border-orange-500 outline-none" 
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
+              ) : (
+                <>
+                  <h3 className="text-lg font-bold text-zinc-900 mb-1 capitalize">Conectar {activeModal}</h3>
+                  <p className="text-xs text-zinc-500 mb-6">Introduce tus credenciales para autorizar el acceso a tus entrenamientos.</p>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs font-bold text-zinc-700 block mb-1">Email / Usuario</label>
+                      <input 
+                        type="text" 
+                        value={username}
+                        onChange={e => setUsername(e.target.value)}
+                        className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:border-orange-500 outline-none" 
+                        placeholder="tu@email.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-zinc-700 block mb-1">Contraseña / API Key</label>
+                      <input 
+                        type="password" 
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:border-orange-500 outline-none" 
+                        placeholder="••••••••"
+                      />
+                    </div>
+                  </div>
 
-              <div className="flex gap-3 mt-8">
-                <button 
-                  onClick={() => setActiveModal(null)} 
-                  className="flex-1 py-2.5 text-sm font-semibold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  onClick={handleConfirmConnect}
-                  disabled={isConnecting || !username || !password}
-                  className="flex-1 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-colors disabled:opacity-50"
-                >
-                  {isConnecting ? 'Conectando...' : 'Autorizar'}
-                </button>
-              </div>
+                  <div className="flex gap-3 mt-8">
+                    <button 
+                      onClick={() => setActiveModal(null)} 
+                      className="flex-1 py-2.5 text-sm font-semibold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition-colors cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+                    <button 
+                      onClick={handleConfirmConnect}
+                      disabled={isConnecting || !username || !password}
+                      className="flex-1 py-2.5 text-sm font-bold text-white bg-orange-500 rounded-xl hover:bg-orange-600 transition-colors disabled:opacity-50 cursor-pointer"
+                    >
+                      {isConnecting ? 'Conectando...' : 'Autorizar'}
+                    </button>
+                  </div>
+                </>
+              )}
             </motion.div>
           </div>
         )}
