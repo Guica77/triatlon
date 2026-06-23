@@ -5,7 +5,7 @@ import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/(app)/dashboard/
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info, Droplet, Zap, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info, Droplet, Zap, AlertTriangle, Cloud } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
@@ -736,6 +736,43 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               >
                 {activeTab === 'main' && (
                   <div className="space-y-4 w-full">
+                    {/* Clima / Meteo Widget (Añadido por petición del usuario para prever la sesión) */}
+                    {session.sport_type !== 'fuerza' && session.sport_type !== 'descanso' && !isCompleted && (
+                      <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <Cloud className="w-5 h-5 text-sky-500" />
+                          <div>
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Meteorología (En Vivo)</p>
+                            <p className="text-sm font-bold text-zinc-900 capitalize">{weatherCondition} • Hum {humidityLevel}%</p>
+                          </div>
+                        </div>
+                        <span className="text-[9px] text-zinc-500 max-w-[120px] text-right font-medium leading-tight">
+                          Nutrición ajustada para este clima.
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Strava Map (Mostrado en Resumen si está completado) */}
+                    {isCompleted && (telemetry as any)?.raw_payload?.map?.summary_polyline && (
+                      <div className="p-0 rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden relative h-36 flex items-center justify-center">
+                         <div className="absolute inset-0 flex items-center justify-center p-2 opacity-90">
+                           <StravaMapSVG 
+                             polyline={(telemetry as any).raw_payload.map.summary_polyline} 
+                             className="w-full h-full max-w-[90%]" 
+                             strokeColor="#06b6d4" 
+                             strokeWidth={4} 
+                           />
+                         </div>
+                         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-transparent to-transparent pointer-events-none"></div>
+                         <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between pointer-events-none">
+                           <p className="text-xs font-black text-cyan-400 tracking-wide uppercase flex items-center gap-1.5">
+                             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span> 
+                             Ruta Strava
+                           </p>
+                         </div>
+                      </div>
+                    )}
+
                     <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200">
                       <p className="font-semibold text-cyan-400 mb-1.5 flex items-center gap-1.5 text-xs tracking-wide uppercase">
                         <Target className="w-4 h-4 text-cyan-400" /> Objetivo Principal de la Sesión:
