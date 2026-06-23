@@ -107,32 +107,7 @@ export function StepAmbition(props: StepAmbitionProps) {
             <p className="text-[10px] text-zinc-400 mt-2">Si no conoces tus zonas, déjalo en blanco y la IA las estimará según tu experiencia.</p>
           </div>
 
-          <div>
-            <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider">Horas Semanales de Entrenamiento</label>
-            <div className="space-y-3">
-              {props.customModality !== 'carrera' && (
-                <>
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs text-zinc-600 font-medium">Natación ({props.swimHours}h)</span>
-                    </div>
-                    <input title="Horas Natación Base" aria-label="Horas Natación Base" type="range" min="0" max="10" step="0.5" value={props.swimHours} onChange={e => props.setSwimHours(parseFloat(e.target.value))} className="w-full accent-cyan-500" />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs text-zinc-600 font-medium">Ciclismo ({props.bikeHours}h)</span>
-                    </div>
-                    <input title="Horas Bici Base" aria-label="Horas Bici Base" type="range" min="0" max="15" step="0.5" value={props.bikeHours} onChange={e => props.setBikeHours(parseFloat(e.target.value))} className="w-full accent-cyan-500" />
-                  </div>
-                </>
-              )}
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-xs text-zinc-600 font-medium">Carrera a pie ({props.runHours}h)</span>
-                </div>
-                <input title="Horas Carrera Base" aria-label="Horas Carrera Base" type="range" min="0" max="10" step="0.5" value={props.runHours} onChange={e => props.setRunHours(parseFloat(e.target.value))} className="w-full accent-cyan-500" />
-              </div>
-            </div>
+
             <label className="text-xs font-bold text-zinc-400 block mt-4 mb-2 uppercase tracking-wider">¿Qué carrera estás preparando?</label>
             <div className="flex gap-2 p-1 bg-zinc-100 rounded-xl border border-zinc-200 mb-3">
               <button onClick={() => props.setActiveTab('catalog')} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors cursor-pointer ${props.activeTab === 'catalog' ? 'bg-white text-cyan-600 shadow-sm border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'}`}>Catálogo Oficial</button>
