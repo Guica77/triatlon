@@ -268,19 +268,46 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                   </div>
                 </div>
 
-                {/* Notes Input */}
+                {/* AI Week Adjustment (Added per user request to be in every training) */}
                 <div className="pt-2">
+                  <label className="block text-sm font-semibold text-zinc-300 mb-2">¿Necesitas ajustar el resto de la semana?</label>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <button
+                      type="button"
+                      onClick={() => setNotes(prev => (prev ? prev + '\n' : '') + 'Noto poca carga. Por favor, añádeme más volumen general.')}
+                      className="border border-zinc-700/50 bg-zinc-800/40 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-center gap-1.5 transition-colors text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                    >
+                      📈 Poco volumen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNotes(prev => (prev ? prev + '\n' : '') + 'Siento demasiada fatiga. Por favor, reduce el volumen general de la semana.')}
+                      className="border border-zinc-700/50 bg-zinc-800/40 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-center gap-1.5 transition-colors text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                    >
+                      📉 Demasiada carga
+                    </button>
+                  </div>
+                </div>
+
+                {/* Notes Input */}
+                <div>
                   <label htmlFor="feedback-notes" className="block text-sm font-semibold text-zinc-300 mb-2">
-                    Notas adicionales (Opcional)
+                    Notas adicionales / Instrucciones para la IA
                   </label>
                   <textarea
                     id="feedback-notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={2}
-                    placeholder="Ej: Sensaciones espectaculares en las series, pero gemelo algo cargado..."
-                    className="w-full p-4 text-sm text-white placeholder-zinc-500 border rounded-2xl bg-zinc-800/50 border-zinc-700/80 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all resize-none"
+                    placeholder="Ej: Sensaciones espectaculares en las series..."
+                    className="w-full p-3 text-sm text-white placeholder-zinc-500 border rounded-2xl bg-zinc-800/50 border-zinc-700/80 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all resize-none"
                   />
+                </div>
+
+                {/* Nutrition Reminder */}
+                <div className="p-3 text-xs border rounded-xl bg-cyan-500/10 border-cyan-500/30 text-cyan-300 flex items-center gap-2 mt-2">
+                  <CheckCircle className="w-4 h-4 shrink-0 text-cyan-400" />
+                  <p><strong>Nutrición Post-Entreno:</strong> Recuerda revisar tus macros y recuperar líquidos en la pestaña de Nutrición.</p>
                 </div>
 
                 {/* Submit Button */}

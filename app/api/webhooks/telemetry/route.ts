@@ -112,8 +112,8 @@ export async function POST(request: NextRequest) {
 
             // Send Push Notification from AI
             await sendPushNotification(userId, {
-              title: "¡Entrenamiento Sincronizado! 🏃",
-              body: `He detectado tu ${mappedSport} de ${distanceKm.toFixed(1)}km. ¿Cómo te has sentido? Abre la app para ajustar nutrición o cargas.`,
+              title: "¡Entrenamiento Completado! 🏅",
+              body: `¿Necesitas ajustar la carga o volumen de tu semana tras este ${mappedSport}? Toca aquí para evaluarlo y revisar tu nutrición post-entreno.`,
               url: `/dashboard`
             });
 
