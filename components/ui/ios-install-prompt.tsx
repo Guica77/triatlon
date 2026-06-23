@@ -6,6 +6,7 @@ import { Share, PlusSquare, MoreVertical, Download } from 'lucide-react';
 export function IosInstallPrompt() {
   const [osType, setOsType] = React.useState<'ios' | 'android' | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(true); // Default true to prevent flash
+  const [isDismissed, setIsDismissed] = React.useState(false);
 
   React.useEffect(() => {
     // Detect iOS
@@ -23,7 +24,7 @@ export function IosInstallPrompt() {
     setIsStandalone(isInStandaloneMode || isMatchMediaStandalone);
   }, []);
 
-  if (!osType || isStandalone) {
+  if (!osType || isStandalone || isDismissed) {
     return null; // Don't show if it's not a mobile device or it's already installed
   }
 
@@ -102,8 +103,13 @@ export function IosInstallPrompt() {
           )}
         </div>
 
-        <div className="pt-4 animate-pulse">
-          <div className="h-1 w-12 bg-zinc-700 rounded-full mx-auto" />
+        <div className="pt-6 text-center">
+          <button 
+            onClick={() => setIsDismissed(true)}
+            className="text-xs text-zinc-500 hover:text-zinc-300 font-medium underline underline-offset-4 cursor-pointer"
+          >
+            Saltar por ahora (Solo para pruebas)
+          </button>
         </div>
       </div>
       
