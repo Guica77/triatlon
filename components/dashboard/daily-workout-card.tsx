@@ -1432,10 +1432,10 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                   {session.sport_type === 'fuerza' && (
                     <AnimatedButton
                       variant="ghost"
-                      className="flex-1 justify-center py-6 border border-zinc-200 bg-zinc-50 text-zinc-700 hover:bg-zinc-100 hover:text-zinc-900 flex items-center justify-center gap-2 font-semibold whitespace-nowrap"
+                      className="flex-1 justify-center py-6 border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:text-purple-900 flex items-center justify-center gap-2 font-bold whitespace-nowrap shadow-sm"
                       onClick={() => setIsGymModeOpen(true)}
                     >
-                      <Dumbbell className="w-4 h-4 text-zinc-500" />
+                      <Dumbbell className="w-4 h-4 text-purple-600" />
                       <span>Iniciar Modo Gym</span>
                     </AnimatedButton>
                   )}
