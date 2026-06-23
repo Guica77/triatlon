@@ -163,7 +163,6 @@ export function StepAmbition(props: StepAmbitionProps) {
                 </select>
               </div>
             )}
-          </div>
 
           <div>
             <label className="text-xs font-bold text-zinc-400 block mb-2 uppercase tracking-wider">Nivel de Experiencia</label>
