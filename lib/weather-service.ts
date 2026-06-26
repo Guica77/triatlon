@@ -35,10 +35,10 @@ export async function getForecastForLocation(
 
   if (currentMonth >= 5 && currentMonth <= 8) { // Junio a Septiembre
     celsius = 33;
-    humidity = 85; // Simular alta humedad en verano
+    humidity = 60; // Humedad normal (antes 85) para permitir que la nutrición estándar se envíe
     temperature = 'calor';
     clothing = 'ligera';
-    description = 'Día soleado y caluroso con alta humedad';
+    description = 'Día soleado y caluroso';
   } else if (currentMonth >= 11 || currentMonth <= 1) { // Diciembre a Febrero
     celsius = 8;
     humidity = 70;

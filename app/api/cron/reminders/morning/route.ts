@@ -59,13 +59,13 @@ export async function GET(request: Request) {
 
       let bodyText = '';
       if (activeWorkouts.length === 0) {
-        bodyText = '¡Hoy toca descanso! Aprovecha para recuperar. Recuerda registrar tu biometría y preparación diaria. 💤';
+        bodyText = '¡Hoy toca descanso! Aprovecha para recuperar. Recuerda registrar tus stats de hoy (sueño, peso, etc) en la app. 💤';
       } else {
         const sports = activeWorkouts.map(w => {
           const type = w.training_sessions?.sport_type;
           return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'entrenamiento';
         }).join(' y ');
-        bodyText = `¡Buenos días! Hoy tienes sesión de ${sports}. No olvides registrar tu biometría antes de empezar. 🚀`;
+        bodyText = `¡Buenos días! Hoy tienes sesión de ${sports}. No olvides registrar tus stats matutinos (sueño, peso, fatiga) antes de empezar. 🚀`;
       }
 
       // Enviar notificación push

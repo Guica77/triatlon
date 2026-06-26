@@ -271,11 +271,10 @@ export async function syncAllPendingWorkouts() {
       if (w.training_sessions?.sport_type === 'descanso') continue;
 
       if (w.scheduled_date <= todayStr && w.status === 'pending') {
-        // INGESTA AUTOMÁTICA: Sincronizar telemetría de sesiones pasadas/hoy
-        const res = await simulateWatchIngestion(w.id, w.training_sessions.sport_type || 'ciclismo');
-        if (res?.success) {
-          syncedCount++;
-        }
+        // INGESTA AUTOMÁTICA: Aquí se consultaría la API real (Garmin/Strava) para ver si
+        // el usuario realmente completó la actividad. 
+        // Hemos desactivado simulateWatchIngestion() para evitar que la demo marque
+        // como completadas actividades que el usuario no ha realizado.
       } else if (w.scheduled_date > todayStr && w.status === 'pending') {
         // PUSH AUTOMÁTICO AL RELOJ: Enviar sesiones futuras al calendario del dispositivo (Garmin/Strava)
         const pushRes = await pushWorkoutToDevice(w.id, 'garmin');

@@ -61,8 +61,11 @@ export async function GET(request: Request) {
         continue;
       }
 
-      // Comprobar si hay alguno pendiente
+      // Comprobar los diferentes estados
       const pendingWorkouts = activeWorkouts.filter(w => w.status === 'pending');
+      const completedWorkouts = activeWorkouts.filter(w => w.status === 'completed');
+      const missedWorkouts = activeWorkouts.filter(w => w.status === 'missed');
+      
       const hasPending = pendingWorkouts.length > 0;
 
       // Si el entrenamiento de hoy no se completó, lo marcamos como 'missed' en BD
@@ -83,16 +86,19 @@ export async function GET(request: Request) {
       let title = '';
       let bodyText = '';
 
-      if (hasPending) {
-        const missedSessionNames = pendingWorkouts
+      if (hasPending || missedWorkouts.length > 0) {
+        const sessionsToReport = hasPending ? pendingWorkouts : missedWorkouts;
+        const missedSessionNames = sessionsToReport
           .map(w => w.training_sessions?.sport_type?.toUpperCase() || 'ENTRENAMIENTO')
           .join(' y ');
 
         title = 'Recordatorio de Tarde 🌙';
         bodyText = `¡Oye, ${profile.first_name || 'Triatleta'}! Hoy tenías sesión de ${missedSessionNames} pendiente. Recuerda que la constancia es la clave. ¡Mañana reajustamos! 🚀`;
-      } else {
+      } else if (completedWorkouts.length === activeWorkouts.length) {
         title = '¡Excelente trabajo hoy! 🎉';
         bodyText = `¡Felicidades, ${profile.first_name || 'Triatleta'}! Has completado todas tus sesiones programadas de hoy. ¡Sigue así! 🏆`;
+      } else {
+        continue; // Fallback
       }
 
       // Enviar notificación push
