@@ -13,10 +13,10 @@ const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButtonProps>(
   ({ className, variant = "primary", size = "md", children, ...props }, ref) => {
     
     const variants = {
-      primary: "bg-[var(--color-primary)] text-[var(--color-primary-foreground)] hover:opacity-90 font-medium",
-      secondary: "bg-[var(--color-surface)] text-white border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)]",
-      danger: "bg-[var(--color-zone-5)] text-white font-medium",
-      ghost: "bg-transparent text-zinc-400 hover:text-white hover:bg-[var(--color-surface)]",
+      primary: "bg-primary text-primary-foreground hover:opacity-90 font-medium",
+      secondary: "bg-secondary text-secondary-foreground border border-border hover:opacity-90",
+      danger: "bg-destructive text-destructive-foreground font-medium hover:opacity-90",
+      ghost: "bg-transparent text-muted-foreground hover:text-foreground hover:bg-accent",
     }
 
     const sizes = {

@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createManualWorkoutAction } from '@/app/(app)/dashboard/actions';
 import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
 import { WeeklyNav } from '@/components/dashboard/weekly-nav';
-import { ProCard } from '@/components/ui/pro-card';
+import { Card, CardContent } from '@/components/ui/card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Calendar, Plus, X, Flame, Sparkles, ChevronLeft, ChevronRight, Activity, Bot, Eye, ListFilter } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AIWorkoutGenerator, GeneratedWorkout } from './ai-workout-generator';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
 import { DailyFuelCard } from '@/components/dashboard/daily-fuel-card';
@@ -322,6 +323,7 @@ export function DashboardViewTabs({
               initialBiometrics={initialBiometrics} 
               initialBiometricsHistory={initialBiometricsHistory}
               readOnly={readOnly}
+              isGarminConnected={profile?.garmin_connected === true}
             />
           </div>
         )}
@@ -338,39 +340,12 @@ export function DashboardViewTabs({
       </section>
 
       {/* Tabs and Quick Actions */}
-      <div className="flex justify-between items-center flex-wrap gap-3 pb-2 border-b border-zinc-205">
-        <div className="flex bg-zinc-100 p-1 rounded-xl border border-zinc-200/80 shadow-sm">
-          <button
-            onClick={() => setActiveTab('semana')}
-            className={`relative px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-              activeTab === 'semana' ? 'text-cyan-400 font-bold' : 'text-zinc-500 hover:text-zinc-800'
-            }`}
-          >
-            {activeTab === 'semana' && (
-              <motion.div
-                layoutId="active-dashboard-tab"
-                className="absolute inset-0 bg-white border border-zinc-200 shadow-sm rounded-lg"
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
-            )}
-            <span className="relative z-10">Vista Semanal</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('mes')}
-            className={`relative px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-              activeTab === 'mes' ? 'text-cyan-400 font-bold' : 'text-zinc-500 hover:text-zinc-800'
-            }`}
-          >
-            {activeTab === 'mes' && (
-              <motion.div
-                layoutId="active-dashboard-tab"
-                className="absolute inset-0 bg-white border border-zinc-200 shadow-sm rounded-lg"
-                transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-              />
-            )}
-            <span className="relative z-10">Vista Mensual</span>
-          </button>
-        </div>
+      <Tabs value={activeTab} onValueChange={(v: string) => setActiveTab(v as 'semana' | 'mes')} className="w-full">
+        <div className="flex justify-between items-center flex-wrap gap-3 pb-2 border-b border-border">
+          <TabsList>
+            <TabsTrigger value="semana">Vista Semanal</TabsTrigger>
+            <TabsTrigger value="mes">Vista Mensual</TabsTrigger>
+          </TabsList>
 
         <div className="flex items-center gap-2">
           {activeTab === 'semana' && (
@@ -431,29 +406,16 @@ export function DashboardViewTabs({
                   {viewMode === 'focus' ? 'Sesión del Día Seleccionado' : 'Entrenamientos Planificados de la Semana'}
                 </h2>
                 
-                {/* Selector de modo de vista */}
-                <div className="flex bg-zinc-100 p-1 rounded-lg border border-zinc-200/80 text-[10px] font-bold shrink-0">
-                  <button
-                    onClick={() => setViewMode('focus')}
-                    className={cn(
-                      "px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-1",
-                      viewMode === 'focus' ? "bg-white text-cyan-400 shadow-sm border border-zinc-200" : "text-zinc-550 hover:text-zinc-800"
-                    )}
-                  >
-                    <Eye className="w-3 h-3" />
-                    Día Seleccionado
-                  </button>
-                  <button
-                    onClick={() => setViewMode('all')}
-                    className={cn(
-                      "px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-1",
-                      viewMode === 'all' ? "bg-white text-cyan-400 shadow-sm border border-zinc-200" : "text-zinc-550 hover:text-zinc-800"
-                    )}
-                  >
-                    <ListFilter className="w-3 h-3" />
-                    Toda la Semana
-                  </button>
-                </div>
+          <TabsList className="h-8">
+            <TabsTrigger value="focus" onClick={() => setViewMode('focus')} className="text-[10px] px-2.5 h-6">
+              <Eye className="w-3 h-3 mr-1" />
+              Día Seleccionado
+            </TabsTrigger>
+            <TabsTrigger value="all" onClick={() => setViewMode('all')} className="text-[10px] px-2.5 h-6">
+              <ListFilter className="w-3 h-3 mr-1" />
+              Toda la Semana
+            </TabsTrigger>
+          </TabsList>
               </div>
 
               {viewMode === 'focus' ? (
@@ -469,6 +431,7 @@ export function DashboardViewTabs({
                       sweatRate={profile?.sweat_rate}
                       customCarbsPerHour={profile?.custom_carbs_per_hour}
                       preferredIngredients={profile?.preferred_ingredients || []}
+                      readinessScore={initialBiometrics?.readiness_score}
                     />
                   ))
                 ) : (
@@ -514,15 +477,18 @@ export function DashboardViewTabs({
                           sweatRate={profile?.sweat_rate}
                           customCarbsPerHour={profile?.custom_carbs_per_hour}
                           preferredIngredients={profile?.preferred_ingredients || []}
+                          readinessScore={initialBiometrics?.readiness_score}
                         />
                       </div>
                     );
                   })
                 ) : (
-                  <ProCard className="text-center py-12 bg-zinc-900/30">
-                    <Activity className="w-8 h-8 text-zinc-650 mx-auto mb-2" />
-                    <p className="text-sm font-medium text-zinc-350">No hay sesiones planificadas para esta semana</p>
-                  </ProCard>
+                  <Card className="text-center py-12 bg-zinc-900/30">
+                    <CardContent>
+                      <Activity className="w-8 h-8 text-zinc-650 mx-auto mb-2" />
+                      <p className="text-sm font-medium text-zinc-350">No hay sesiones planificadas para esta semana</p>
+                    </CardContent>
+                  </Card>
                 )
               )}
             </div>
@@ -563,11 +529,12 @@ export function DashboardViewTabs({
         <div className={activeTab === 'mes' ? 'block' : 'hidden'}>
           <div className="space-y-6 animate-fade-in">
             {/* Monthly Calendar View */}
-            <ProCard className="p-5">
+            <Card>
+              <CardContent className="p-5">
               
               {/* Calendar Header */}
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm sm:text-base font-bold text-zinc-800 flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-cyan-400" />
                   <span>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</span>
                 </h3>
@@ -576,7 +543,7 @@ export function DashboardViewTabs({
                     title="Mes Anterior"
                     aria-label="Mes Anterior"
                     onClick={handlePrevMonth}
-                    className="p-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 bg-white text-zinc-500 hover:text-zinc-800 transition cursor-pointer"
+                    className="p-1.5 rounded-lg border border-input hover:border-border hover:bg-accent bg-background text-muted-foreground hover:text-foreground transition cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </button>
@@ -584,7 +551,7 @@ export function DashboardViewTabs({
                     title="Mes Siguiente"
                     aria-label="Mes Siguiente"
                     onClick={handleNextMonth}
-                    className="p-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 bg-white text-zinc-500 hover:text-zinc-800 transition cursor-pointer"
+                    className="p-1.5 rounded-lg border border-input hover:border-border hover:bg-accent bg-background text-muted-foreground hover:text-foreground transition cursor-pointer"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -592,7 +559,7 @@ export function DashboardViewTabs({
               </div>
 
               {/* Calendar Grid Header */}
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs font-semibold text-zinc-500 mb-2">
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs font-semibold text-muted-foreground mb-2">
                 <div>Lun</div>
                 <div>Mar</div>
                 <div>Mié</div>
@@ -627,10 +594,10 @@ export function DashboardViewTabs({
                     } else if (hasPending && daySessions.some(w => w.scheduled_date <= todayStr)) {
                       complianceClass = 'bg-[#fff8e6] border-[#ffe8b3] text-amber-800 hover:bg-[#fff0cc]';
                     } else {
-                      complianceClass = 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50';
+                      complianceClass = 'bg-background border-border text-foreground hover:bg-accent';
                     }
                   } else {
-                    complianceClass = 'bg-[#fcfcfd] border-zinc-200/80 text-zinc-400 hover:bg-zinc-50';
+                    complianceClass = 'bg-muted/30 border-transparent text-muted-foreground hover:bg-accent';
                   }
 
                   return (
@@ -647,7 +614,7 @@ export function DashboardViewTabs({
                     >
                       {/* Day Number */}
                       <span className={`text-[10px] sm:text-xs font-bold leading-none ${
-                        isToday ? 'text-cyan-600' : isSelected ? 'text-cyan-800' : 'text-zinc-650'
+                        isToday ? 'text-cyan-600' : isSelected ? 'text-cyan-800' : 'text-muted-foreground'
                       }`}>
                         {d.getDate()}
                       </span>
@@ -670,7 +637,8 @@ export function DashboardViewTabs({
                   );
                 })}
               </div>
-            </ProCard>
+              </CardContent>
+            </Card>
 
             {/* Workouts for Selected Day */}
             <div className="space-y-4 pt-2">
@@ -701,6 +669,7 @@ export function DashboardViewTabs({
                     sweatRate={profile?.sweat_rate}
                     customCarbsPerHour={profile?.custom_carbs_per_hour}
                     preferredIngredients={profile?.preferred_ingredients || []}
+                    readinessScore={initialBiometrics?.readiness_score}
                   />
                 ))
               ) : (
@@ -761,84 +730,70 @@ export function DashboardViewTabs({
               </div>
 
               {/* Modal Form */}
-              <form onSubmit={handleManualSubmit} className="space-y-4">
-                
-                {errorMessage && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold">
-                    {errorMessage}
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
-                    Título de la Sesión *
-                  </label>
-                  <input
-                    type="text"
-                    value={formTitle}
-                    onChange={(e) => setFormTitle(e.target.value)}
-                    placeholder="Ej. Rodaje continuo, Natación técnica, HIIT"
-                    required
-                    className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              <Card>
+              <CardContent className="p-5">
+                <h3 className="text-sm font-bold text-foreground mb-4">Añadir Sesión Manual</h3>
+                <form action={handleCreateManualWorkout} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
-                      Disciplina *
-                    </label>
-                    <select
-                      title="Disciplina"
-                      aria-label="Disciplina"
-                      value={formSport}
-                      onChange={(e) => setFormSport(e.target.value)}
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition-colors cursor-pointer"
-                    >
-                      <option value="carrera">🏃‍♂️ Carrera</option>
-                      <option value="ciclismo">🚴‍♂️ Ciclismo</option>
-                      <option value="natacion">🏊‍♂️ Natación</option>
-                      <option value="fuerza">🏋️ Fuerza</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
-                      Duración (min) *
-                    </label>
-                    <input
-                      title="Duración en minutos"
-                      aria-label="Duración en minutos"
-                      placeholder="45"
-                      type="number"
-                      value={formDuration}
-                      onChange={(e) => setFormDuration(e.target.value)}
-                      min="1"
+                    <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Título de la Sesión</label>
+                    <input 
+                      name="title"
+                      type="text" 
+                      value={formTitle}
+                      onChange={e => setFormTitle(e.target.value)}
+                      placeholder="Ej. Series en pista" 
+                      className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       required
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition-colors"
                     />
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Deporte</label>
+                      <select 
+                        name="sport_type"
+                        value={formSport}
+                        onChange={e => setFormSport(e.target.value)}
+                        title="Seleccionar Deporte"
+                        className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
+                      >
+                        <option value="carrera">Carrera</option>
+                        <option value="ciclismo">Ciclismo</option>
+                        <option value="natacion">Natación</option>
+                        <option value="fuerza">Fuerza</option>
+                        <option value="brick">Brick</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Duración (min)</label>
+                      <input 
+                        name="duration_min"
+                        type="number" 
+                        value={formDuration}
+                        onChange={e => setFormDuration(e.target.value)}
+                        title="Duración en minutos"
+                        placeholder="Ej. 60"
+                        className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        required
+                        min="1"
+                      />
+                    </div>
+                  </div>
                   <div>
-                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
-                      Fecha Programada *
-                    </label>
-                    <input
-                      title="Fecha Programada"
-                      aria-label="Fecha Programada"
-                      placeholder="YYYY-MM-DD"
-                      type="date"
+                    <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Fecha</label>
+                    <input 
+                      name="scheduled_date"
+                      type="date" 
                       value={formDate}
                       onChange={(e) => setFormDate(e.target.value)}
+                      title="Fecha de la sesión"
+                      placeholder="dd/mm/aaaa"
                       required
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition-colors cursor-pointer"
+                      className="w-full bg-background border border-input focus:border-primary rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
                       Estado de Realización *
                     </label>
                     <select
@@ -846,51 +801,51 @@ export function DashboardViewTabs({
                       aria-label="Estado"
                       value={formStatus}
                       onChange={(e) => setFormStatus(e.target.value as 'pending' | 'completed')}
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 outline-none transition-colors cursor-pointer"
+                      className="w-full bg-background border border-input focus:border-primary rounded-xl px-4 py-2.5 text-sm text-foreground outline-none transition-colors cursor-pointer"
                     >
                       <option value="completed">✓ Completado</option>
                       <option value="pending">⏳ Pendiente</option>
                     </select>
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-zinc-500 uppercase tracking-wider mb-1.5">
-                    Descripción / Notas (Opcional)
-                  </label>
-                  <textarea
-                    value={formDescription}
-                    onChange={(e) => setFormDescription(e.target.value)}
-                    placeholder="Detalles sobre las sensaciones, ritmos o series realizadas..."
-                    rows={3}
-                    className="w-full bg-white border border-zinc-200 focus:border-cyan-500/50 rounded-xl px-3.5 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition-colors resize-none"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-1.5">
+                      Descripción / Notas (Opcional)
+                    </label>
+                    <textarea
+                      value={formDescription}
+                      onChange={(e) => setFormDescription(e.target.value)}
+                      placeholder="Detalles sobre las sensaciones, ritmos o series realizadas..."
+                      rows={3}
+                      className="w-full bg-background border border-input focus:border-primary rounded-xl px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none transition-colors resize-none"
+                    />
+                  </div>
 
-                <div className="pt-2 flex justify-end gap-3 border-t border-zinc-205">
-                  <AnimatedButton
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setIsManualModalOpen(false)}
-                    className="px-4 py-2 border border-zinc-200 bg-zinc-50 text-zinc-600 hover:text-zinc-800 hover:bg-zinc-100 text-xs rounded-xl"
-                  >
-                    Cancelar
-                  </AnimatedButton>
-                  <AnimatedButton
-                    type="submit"
-                    variant="primary"
-                    disabled={isSubmitting}
-                    className="bg-cyan-500 hover:bg-cyan-600 text-white px-5 py-2 text-xs font-bold rounded-xl disabled:opacity-50"
-                  >
-                    {isSubmitting ? 'Guardando...' : 'Registrar Sesión'}
-                  </AnimatedButton>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                  <div className="pt-4 flex justify-end gap-3 border-t border-border">
+                    <AnimatedButton
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setIsManualModalOpen(false)}
+                    >
+                      Cancelar
+                    </AnimatedButton>
+                    <AnimatedButton
+                      type="submit"
+                      variant="primary"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Guardando...' : 'Registrar Sesión'}
+                    </AnimatedButton>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
 
+      </Tabs>
       <AIWorkoutGenerator 
         isOpen={isAiModalOpen} 
         onClose={() => setIsAiModalOpen(false)} 

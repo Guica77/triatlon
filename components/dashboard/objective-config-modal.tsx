@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Target, X, Save, AlertCircle } from 'lucide-react';
+import { Target, Save, AlertCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { StepAmbition } from '@/components/onboarding/steps/step-ambition';
 import { RACES_CATALOG, RaceCatalogItem, MultisportModality } from '@/lib/races-data';
 import { saveRaceGoalAndPlan } from '@/app/(app)/onboarding/actions';
@@ -98,38 +98,19 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
 
   if (!isOpen) return null;
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"
-          onClick={onClose}
-        />
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white border border-zinc-200 rounded-2xl shadow-2xl p-6 scrollbar-none"
-        >
-          <button 
-            onClick={onClose}
-            title="Cerrar"
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-zinc-550 hover:text-zinc-800 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          <div className="mb-6 flex items-center gap-3">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6 scrollbar-none">
+        <DialogHeader className="mb-6">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
               <Target className="w-5 h-5 text-cyan-500" />
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Define tu Objetivo</h2>
-              <p className="text-sm text-zinc-500">Selecciona tu carrera y disponibilidad para que la IA recalibre tu plan.</p>
+            <div className="text-left">
+              <DialogTitle className="text-xl font-bold tracking-tight">Define tu Objetivo</DialogTitle>
+              <DialogDescription className="text-sm">Selecciona tu carrera y disponibilidad para que la IA recalibre tu plan.</DialogDescription>
             </div>
           </div>
+        </DialogHeader>
 
           <div className="bg-zinc-50 p-4 sm:p-6 rounded-xl border border-zinc-200">
             <StepAmbition
@@ -177,11 +158,10 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
             </div>
           )}
 
-          <div className="mt-6 flex justify-end gap-3 border-t border-zinc-150 pt-6">
+          <div className="mt-6 flex justify-end gap-3 border-t border-border pt-6">
             <AnimatedButton
               variant="ghost"
               onClick={onClose}
-              className="text-zinc-600 hover:text-zinc-800 bg-zinc-50 border border-zinc-200"
             >
               Cancelar
             </AnimatedButton>
@@ -189,14 +169,13 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
               variant="primary"
               onClick={handleSave}
               disabled={loading}
-              className="!bg-cyan-500 hover:!bg-cyan-400 !text-white flex items-center gap-2 font-bold"
+              className="flex items-center gap-2 font-bold"
             >
               <Save className="w-4 h-4" />
               <span>{loading ? 'Calculando Plan...' : 'Guardar y Recalibrar'}</span>
             </AnimatedButton>
           </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+      </DialogContent>
+    </Dialog>
   );
 }

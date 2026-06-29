@@ -258,3 +258,68 @@ export async function updateNutritionSettings(data: {
   
   return { success: true };
 }
+
+export async function saveGarminCredentialsAction(email: string, password: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'No autorizado' };
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      garmin_connected: true,
+      garmin_auth_tokens: { email, password }, // For local test only
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', user.id);
+
+  if (error) {
+    console.error('Error saving Garmin credentials:', error);
+    return { error: 'Error al conectar con Garmin' };
+  }
+
+  revalidatePath('/settings');
+  revalidatePath('/dashboard');
+  
+  return { success: true };
+}
+
+export async function testGarminSyncLocalAction() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'No autorizado' };
+  }
+
+  return new Promise((resolve) => {
+    const { exec } = require('child_process');
+    const path = require('path');
+    
+    const scriptDir = path.join(process.cwd(), '../scripts/garmin_sync');
+    const venvActivate = path.join(scriptDir, 'venv/bin/activate');
+    const scriptPath = path.join(scriptDir, 'sync_test.py');
+    
+    // Pass user ID to python script
+    const cmd = `source ${venvActivate} && python ${scriptPath} --user-id ${user.id}`;
+    
+    exec(cmd, { shell: '/bin/bash' }, (error: any, stdout: string, stderr: string) => {
+      if (error) {
+        console.error('Error running garmin sync test:', error, stderr);
+        resolve({ error: 'Fallo al ejecutar el script local: ' + (stderr || error.message) });
+        return;
+      }
+      
+      try {
+        const result = JSON.parse(stdout.trim());
+        resolve(result);
+      } catch (e) {
+        console.error('Error parsing garmin script output:', e, stdout);
+        resolve({ error: 'La salida del script no es un JSON válido. Revisa los logs.' });
+      }
+    });
+  });
+}

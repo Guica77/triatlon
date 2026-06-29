@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Info, Heart, Moon, Activity, Flame, Brain } from 'lucide-react'
+import { Info, Heart, Moon, Activity, Flame, Brain } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { DailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions'
 import { AnimatedButton } from '@/components/ui/animated-button'
 
@@ -104,30 +104,14 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
     : { title: 'Sin seleccionar', desc: 'Por favor, selecciona tu nivel de carga mental para hoy (1-5).' }
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="relative w-full max-w-2xl rounded-2xl bg-white border border-zinc-200 p-6 md:p-8 shadow-2xl max-h-[90vh] overflow-y-auto my-8"
-        >
-          {/* Botón Cerrar */}
-          <button
-            onClick={onClose}
-            title="Cerrar"
-            className="absolute top-6 right-6 p-2 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
- 
-          <div className="mb-6">
-            <h2 className="text-2xl font-light tracking-tight text-zinc-900">Diario Biométrico del Atleta</h2>
-            <p className="text-sm text-zinc-500 mt-1">
-              Ajusta tus métricas matutinas para recalcular tu Readiness Score al instante.
-            </p>
-          </div>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6 md:p-8">
+        <DialogHeader className="mb-6 text-left">
+          <DialogTitle className="text-2xl font-light tracking-tight text-zinc-900">Diario Biométrico del Atleta</DialogTitle>
+          <DialogDescription className="text-sm text-zinc-500 mt-1">
+            Ajusta tus métricas matutinas para recalcular tu Readiness Score al instante.
+          </DialogDescription>
+        </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-8">
             
@@ -332,8 +316,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
             </AnimatedButton>
 
           </form>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+      </DialogContent>
+    </Dialog>
   )
 }

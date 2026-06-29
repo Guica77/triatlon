@@ -109,7 +109,9 @@ export function calculateDailyMacros(
   hasStrengthSession: boolean,
   hasBrickSession: boolean,
   activeExpenditure: number,
-  dailySteps?: number | null
+  dailySteps?: number | null,
+  readinessScore?: number | null,
+  fatigueRating?: number | null
 ): DailyMacrosResult {
   const bmr = calculateBmr(weight)
   const baseExpenditure = Math.round(bmr * 1.2)
@@ -129,13 +131,27 @@ export function calculateDailyMacros(
   else if (totalWorkoutHours > 1.0) carbsRate = 7.0
   else if (totalWorkoutHours > 0) carbsRate = 5.5
 
-  const carbsGrams = Math.round(weight * carbsRate)
-  const carbsCalories = carbsGrams * 4
-
   // --- Proteínas ---
   let proteinRate = 1.6 // g/kg base
   if (hasBrickSession || totalWorkoutHours > 2.5) proteinRate = 2.0
   else if (hasStrengthSession || totalWorkoutHours > 1.5) proteinRate = 1.8
+
+  // --- Ajuste Biométrico (Inteligencia Garmin) ---
+  const isFatigued = (readinessScore !== undefined && readinessScore !== null && readinessScore < 60) || 
+                     (fatigueRating !== undefined && fatigueRating !== null && fatigueRating >= 4)
+  const isOptimal = (readinessScore !== undefined && readinessScore !== null && readinessScore >= 80)
+  
+  if (isFatigued) {
+    // Priorizamos recuperación estructural si hay mucha fatiga
+    proteinRate += 0.4
+    carbsRate = Math.max(3.0, carbsRate - 1.0) // Reducimos CH porque el cuerpo no asimila tanta intensidad
+  } else if (isOptimal) {
+    // Maximizamos energía disponible para rendir a tope
+    carbsRate += 0.5
+  }
+
+  const carbsGrams = Math.round(weight * carbsRate)
+  const carbsCalories = carbsGrams * 4
 
   const proteinGrams = Math.round(weight * proteinRate)
   const proteinCalories = proteinGrams * 4

@@ -104,17 +104,23 @@ export async function getDailyNutrition(dateString: string, targetUserId?: strin
       return { error: 'No se pudo cargar el perfil del atleta.' }
     }
 
-    // 2. Obtener peso y pasos del atleta para el día (de biometrics) o el más reciente
+    // 2. Obtener peso, pasos y biométricas del atleta para el día
     const { data: latestBiometrics } = await supabase
       .from('user_biometrics')
-      .select('weight, daily_steps')
+      .select('weight, daily_steps, readiness_score, fatigue_rating, raw_garmin_data')
       .eq('user_id', effectiveUserId)
       .order('date', { ascending: false })
       .limit(1)
 
     // Si no hay registro previo, usamos 72.0 kg por defecto
-    const weight = Number(latestBiometrics?.[0]?.weight || 72.0)
-    const dailySteps = latestBiometrics?.[0]?.daily_steps || 0
+    const biometricsData: any = latestBiometrics?.[0] || {}
+    const weight = Number(biometricsData.weight || 72.0)
+    const dailySteps = biometricsData.daily_steps || 0
+    const readinessScore = biometricsData.readiness_score
+    const fatigueRating = biometricsData.fatigue_rating
+    
+    // Extraer calorías activas reales de Garmin si existen
+    const garminActiveCals = biometricsData.raw_garmin_data?.stats?.wellnessActiveKilocalories
 
     // 3. Obtener entrenamientos del día
     const { data: workouts, error: workoutsError } = await supabase
@@ -175,14 +181,21 @@ export async function getDailyNutrition(dateString: string, targetUserId?: strin
       })
     })
 
-    // 5. Calcular distribución diaria de macronutrientes
+    // Si Garmin registró más calorías activas de las que estimamos matemáticamente, usamos el dato real del reloj
+    if (garminActiveCals && garminActiveCals > activeExpenditure) {
+      activeExpenditure = Math.round(garminActiveCals)
+    }
+
+    // 5. Calcular distribución diaria de macronutrientes (con inteligencia Garmin)
     const macrosCalc = calculateDailyMacros(
       weight,
       totalWorkoutHours,
       hasStrengthSession,
       hasBrickSession,
       activeExpenditure,
-      dailySteps
+      dailySteps,
+      readinessScore,
+      fatigueRating
     )
 
     const data: DynamicNutritionData = {

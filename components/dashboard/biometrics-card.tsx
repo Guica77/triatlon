@@ -1,22 +1,26 @@
 'use client'
  
 import * as React from 'react'
-import { ProCard } from '@/components/ui/pro-card'
+import { Card, CardContent } from '@/components/ui/card'
 import { AnimatedButton } from '@/components/ui/animated-button'
-import { Activity, Moon, Heart, Settings, Flame, Brain } from 'lucide-react'
-import { DailyBiometrics, updateBiometrics, calculateReadiness } from '@/app/(app)/dashboard/biometrics-actions'
+import { Activity, Moon, Heart, Settings, Flame, Brain, Watch, Loader2 } from 'lucide-react'
+import { DailyBiometrics, updateBiometrics, calculateReadiness, syncGarminToDatabaseAction } from '@/app/(app)/dashboard/biometrics-actions'
 import { BiometricsModal } from '@/components/dashboard/biometrics-modal'
+import { DetailedBiometricsModal } from '@/components/dashboard/detailed-biometrics-modal'
 import { motion } from 'framer-motion'
  
 interface BiometricsCardProps {
   initialBiometrics: DailyBiometrics
   initialBiometricsHistory?: any[]
   readOnly?: boolean
+  isGarminConnected?: boolean
 }
  
-export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [], readOnly = false }: BiometricsCardProps) {
+export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [], readOnly = false, isGarminConnected = false }: BiometricsCardProps) {
   const [biometrics, setBiometrics] = React.useState<DailyBiometrics>(initialBiometrics)
   const [isModalOpen, setIsModalOpen] = React.useState(false)
+  const [isDetailedModalOpen, setIsDetailedModalOpen] = React.useState(false)
+  const [isSyncing, setIsSyncing] = React.useState(false)
   const [statusLabels, setStatusLabels] = React.useState({
     sleepStatus: 'Pendiente',
     hrvStatus: 'Pendiente',
@@ -85,6 +89,33 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
  
     await updateBiometrics(formData)
   }
+
+  async function handleSyncGarmin() {
+    setIsSyncing(true)
+    try {
+      const res = await syncGarminToDatabaseAction() as any
+      if (res.error) {
+        alert(res.error)
+      } else {
+        alert('¡Datos sincronizados desde Garmin correctamente!')
+      }
+    } catch (e) {
+      console.error(e)
+      alert('Error inesperado al conectar con Garmin')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+  
+  // Auto-sync on mount if not registered
+  const hasAttemptedAutoSync = React.useRef(false)
+  
+  React.useEffect(() => {
+    if (!readOnly && isGarminConnected && !isRegistered && !hasAttemptedAutoSync.current) {
+      hasAttemptedAutoSync.current = true
+      handleSyncGarmin()
+    }
+  }, [readOnly, isGarminConnected, isRegistered])
  
   const score = biometrics.readiness_score || 85
   const isOptimal = score >= 80
@@ -117,17 +148,27 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
       const x = (idx / (data.length - 1)) * width;
       const y = height - 3 - ((d.val - minVal) / range) * (height - 6);
       return `${x.toFixed(1)},${y.toFixed(1)}`;
-    });
+    }).join(' ');
 
     return {
-      linePath: `M ${points.join(' L ')}`,
-      areaPath: `M 0,${height} L ${points.join(' L ')} L ${width},${height} Z`,
+      linePath: `M ${points}`,
+      areaPath: `M ${points} L ${width},${height} L 0,${height} Z`
     };
   };
+
+  // Extract raw garmin data if available
+  const rawData = biometrics.raw_garmin_data || {}
+  const stats = rawData.stats || {}
+  const training = rawData.training_status || {}
+  const bodyBattery = stats.bodyBatteryHighestValue || stats.bodyBatteryHighest || '--'
+  const steps = stats.totalSteps ? stats.totalSteps.toLocaleString() : '--'
+  const activeCals = stats.wellnessActiveKilocalories ? Math.round(stats.wellnessActiveKilocalories) : '--'
+  const vo2Max = training.vo2Max || '--';
  
   return (
     <>
-      <ProCard className="p-4 sm:p-6 space-y-6 relative overflow-hidden border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col justify-between">
+      <Card className="relative overflow-hidden border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col justify-between">
+        <CardContent className="p-4 sm:p-6 space-y-6">
         
         {/* Cabecera */}
         <div className="flex justify-between items-center border-b border-zinc-100 pb-4 relative z-10">
@@ -137,21 +178,35 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
             </div>
             <span className="text-xs font-bold tracking-widest text-zinc-450 uppercase">Biometría y Preparación</span>
           </div>
-          {!readOnly && (
+          <div className="flex items-center gap-2">
+          {!readOnly && isGarminConnected && !isRegistered && (
             <AnimatedButton
-              variant={isRegistered ? 'secondary' : 'primary'}
+              variant="ghost"
               size="sm"
-              onClick={() => setIsModalOpen(true)}
-              className={`flex items-center gap-1.5 text-xs py-1.5 px-3 transition-all duration-300 cursor-pointer shadow-sm ${
-                !isRegistered
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white font-black border-transparent'
-                  : 'border-zinc-200 hover:border-zinc-300 text-zinc-700 bg-white hover:bg-zinc-50'
-              }`}
+              onClick={handleSyncGarmin}
+              disabled={isSyncing}
+              className="flex items-center gap-1.5 text-[10px] font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 border border-sky-200 py-1.5 px-2.5 rounded-lg transition-all"
             >
-              <Settings className={`w-3.5 h-3.5 ${!isRegistered ? 'text-white' : 'text-zinc-500'}`} />
-              <span>{isRegistered ? 'Ajustar' : 'Registrar Hoy'}</span>
+              {isSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Watch className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{isSyncing ? 'Conectando...' : 'Sincronizar Reloj'}</span>
+              <span className="sm:hidden">{isSyncing ? '...' : 'Sincronizar'}</span>
             </AnimatedButton>
           )}
+          
+          {!readOnly && (
+            <div className="flex items-center gap-1.5">
+              <AnimatedButton
+                variant="secondary"
+                size="sm"
+                onClick={() => setIsModalOpen(true)}
+                className={`flex items-center gap-1.5 text-xs py-1.5 px-3 transition-all duration-300 cursor-pointer shadow-sm border-zinc-200 hover:border-zinc-300 text-zinc-700 bg-white hover:bg-zinc-50`}
+              >
+                <Settings className={`w-3.5 h-3.5 text-zinc-500`} />
+                <span className="hidden sm:inline">Ajuste Manual</span>
+              </AnimatedButton>
+            </div>
+          )}
+          </div>
         </div>
  
         {/* Sección Principal: Anillo y Estado */}
@@ -328,19 +383,43 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
  
         </div>
  
-        {/* Factores Subjetivos (Atleta) */}
-        <div className="flex flex-wrap gap-2.5 pt-3 relative z-10 border-t border-zinc-100">
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
-            <Flame className="w-3.5 h-3.5 text-amber-500" />
-            <span>Fatiga Muscular: <strong className="text-amber-600">{isRegistered ? `Nivel ${biometrics.fatigue_rating}/5` : 'Pendiente'}</strong></span>
+        {/* Factores Subjetivos y Extras de Garmin */}
+        <div className="flex flex-col gap-3 pt-3 relative z-10 border-t border-zinc-100">
+          <div className="flex flex-wrap gap-2.5">
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
+              <Flame className="w-3.5 h-3.5 text-amber-500" />
+              <span>Fatiga Muscular: <strong className="text-amber-600">{isRegistered ? `Nivel ${biometrics.fatigue_rating}/5` : 'Pendiente'}</strong></span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
+              <Brain className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Carga Mental: <strong className="text-emerald-650">{isRegistered ? `Nivel ${biometrics.stress_level}/5` : 'Pendiente'}</strong></span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
-            <Brain className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Carga Mental: <strong className="text-emerald-650">{isRegistered ? `Nivel ${biometrics.stress_level}/5` : 'Pendiente'}</strong></span>
-          </div>
+          
+          {biometrics.raw_garmin_data && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
+              <div className="bg-sky-50/50 border border-sky-100 rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
+                <span className="text-[8px] sm:text-[9px] font-bold text-sky-600/80 uppercase tracking-wider block mb-0.5 truncate">Batería</span>
+                <span className="text-sm sm:text-base font-black text-sky-700 truncate block">{bodyBattery}</span>
+              </div>
+              <div className="bg-orange-50/50 border border-orange-100 rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
+                <span className="text-[8px] sm:text-[9px] font-bold text-orange-600/80 uppercase tracking-wider block mb-0.5 truncate">Calorías</span>
+                <span className="text-sm sm:text-base font-black text-orange-700 truncate block">{activeCals}</span>
+              </div>
+              <div className="bg-teal-50/50 border border-teal-100 rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
+                <span className="text-[8px] sm:text-[9px] font-bold text-teal-600/80 uppercase tracking-wider block mb-0.5 truncate">Pasos</span>
+                <span className="text-sm sm:text-base font-black text-teal-700 truncate block">{steps}</span>
+              </div>
+              <div className="bg-violet-50/50 border border-violet-100 rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
+                <span className="text-[8px] sm:text-[9px] font-bold text-violet-600/80 uppercase tracking-wider block mb-0.5 truncate">VO2 Max</span>
+                <span className="text-sm sm:text-base font-black text-violet-700 truncate block">{vo2Max}</span>
+              </div>
+            </div>
+          )}
         </div>
  
-      </ProCard>
+        </CardContent>
+      </Card>
  
       {/* Modal Interactivo */}
       {!readOnly && (

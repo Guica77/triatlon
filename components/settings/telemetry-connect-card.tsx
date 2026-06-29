@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { disconnectTelemetry, syncPacesFromStravaAction, pushWeekWorkoutsToGarminAction } from '@/app/(app)/settings/actions';
-import { Watch, Link as LinkIcon, RefreshCw, UploadCloud, Heart, Check, X, Smartphone } from 'lucide-react';
+import { disconnectTelemetry, syncPacesFromStravaAction, pushWeekWorkoutsToGarminAction, saveGarminCredentialsAction } from '@/app/(app)/settings/actions';
+import { Watch, Link as LinkIcon, RefreshCw, UploadCloud, Heart, Check, X, Smartphone, Loader2 } from 'lucide-react';
 
 interface TelemetryConnectCardProps {
   connectedProviders: string[];
@@ -66,6 +66,34 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
   const [isDisconnecting, setIsDisconnecting] = React.useState<string | null>(null);
   const [isSyncing, setIsSyncing] = React.useState(false);
   const [isPushingWorkouts, setIsPushingWorkouts] = React.useState(false);
+  const [isTestingGarmin, setIsTestingGarmin] = React.useState(false);
+  
+  const [showGarminModal, setShowGarminModal] = React.useState(false);
+  const [garminEmail, setGarminEmail] = React.useState('');
+  const [garminPassword, setGarminPassword] = React.useState('');
+  const [isConnectingGarmin, setIsConnectingGarmin] = React.useState(false);
+
+  const handleConnectGarmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!garminEmail || !garminPassword) return;
+    
+    setIsConnectingGarmin(true);
+    try {
+      const res = await saveGarminCredentialsAction(garminEmail, garminPassword);
+      if (res.error) {
+        alert(res.error);
+      } else {
+        setShowGarminModal(false);
+        setGarminEmail('');
+        setGarminPassword('');
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error inesperado al conectar.");
+    } finally {
+      setIsConnectingGarmin(false);
+    }
+  };
 
   const handleDisconnect = async (provider: string) => {
     if (!confirm(`¿Estás seguro de que quieres desconectar tu cuenta de ${provider}?`)) return;
@@ -108,6 +136,25 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
       console.error(e);
     } finally {
       setIsPushingWorkouts(false);
+    }
+  };
+
+  const handleTestGarmin = async () => {
+    setIsTestingGarmin(true);
+    try {
+      const { testGarminSyncLocalAction } = await import('@/app/(app)/settings/actions');
+      const res = await testGarminSyncLocalAction() as any;
+      if (res.error) {
+        alert(res.error);
+      } else {
+        const data = (res as any).data;
+        alert(`✅ Conexión exitosa con Garmin.\n\nSe han extraído decenas de métricas (Pasos, Fases de Sueño, Estrés, Calorías, etc).\n\nVe a la pestaña de 'Dashboard', pulsa 'Sincronizar Reloj' y luego 'Detalles' para ver el informe completo.`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Hubo un error inesperado al probar la conexión con Garmin.");
+    } finally {
+      setIsTestingGarmin(false);
     }
   };
 
@@ -183,21 +230,30 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
-                  ) : (
-                    <a 
-                      href={`/api/auth/telemetry/connect?provider=${prov.id}`}
-                      title={`Conectar con ${prov.name}`}
-                      aria-label={`Conectar con ${prov.name}`}
-                    >
+                  ) : prov.id === 'garmin' ? (
                       <button
+                        onClick={() => setShowGarminModal(true)}
                         className="p-1.5 rounded-lg bg-white hover:bg-cyan-50 text-zinc-550 hover:text-cyan-600 border border-zinc-200 hover:border-cyan-200 transition-all cursor-pointer"
                         title={`Conectar con ${prov.name}`}
                         aria-label={`Conectar con ${prov.name}`}
                       >
                         <LinkIcon className="w-3.5 h-3.5" />
                       </button>
-                    </a>
-                  )}
+                    ) : (
+                      <a 
+                        href={`/api/auth/telemetry/connect?provider=${prov.id}`}
+                        title={`Conectar con ${prov.name}`}
+                        aria-label={`Conectar con ${prov.name}`}
+                      >
+                        <button
+                          className="p-1.5 rounded-lg bg-white hover:bg-cyan-50 text-zinc-550 hover:text-cyan-600 border border-zinc-200 hover:border-cyan-200 transition-all cursor-pointer"
+                          title={`Conectar con ${prov.name}`}
+                          aria-label={`Conectar con ${prov.name}`}
+                        >
+                          <LinkIcon className="w-3.5 h-3.5" />
+                        </button>
+                      </a>
+                    )}
                 </div>
               </div>
             );
@@ -209,26 +265,103 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
       {(isStravaConnected || isGarminConnected) && (
         <div className="pt-3 border-t border-zinc-200 space-y-2 mt-auto shrink-0">
           {isGarminConnected && (
-            <button
-              onClick={handlePushWorkouts}
-              disabled={isPushingWorkouts || isSyncing || !!isDisconnecting}
-              className="w-full py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-cyan-650 hover:bg-cyan-550 text-white flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-md"
-            >
-              <UploadCloud className={`w-3.5 h-3.5 ${isPushingWorkouts ? 'animate-bounce' : ''}`} />
-              {isPushingWorkouts ? 'Enviando...' : 'Enviar Entrenos a Garmin'}
-            </button>
+            <>
+              <button
+                onClick={handlePushWorkouts}
+                disabled={isPushingWorkouts || isSyncing || !!isDisconnecting || isTestingGarmin}
+                className="w-full py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-cyan-650 hover:bg-cyan-550 text-white flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-md"
+              >
+                <UploadCloud className={`w-3.5 h-3.5 ${isPushingWorkouts ? 'animate-bounce' : ''}`} />
+                {isPushingWorkouts ? 'Enviando...' : 'Enviar Entrenos a Garmin'}
+              </button>
+              
+              <button
+                onClick={handleTestGarmin}
+                disabled={isPushingWorkouts || isSyncing || !!isDisconnecting || isTestingGarmin}
+                className="w-full py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-md"
+              >
+                <Heart className={`w-3.5 h-3.5 ${isTestingGarmin ? 'animate-pulse' : ''}`} />
+                {isTestingGarmin ? 'Extrayendo...' : 'Probar Extracción VFC (Local)'}
+              </button>
+            </>
           )}
 
           {isStravaConnected && (
             <button
               onClick={handleSyncPaces}
-              disabled={isSyncing || isPushingWorkouts || !!isDisconnecting}
+              disabled={isSyncing || isPushingWorkouts || !!isDisconnecting || isTestingGarmin}
               className="w-full py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-[#FC4C02] hover:bg-[#e34402] text-white flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer shadow-md"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
               {isSyncing ? 'Recalculando...' : 'Recalcular Ritmos Strava'}
             </button>
           )}
+        </div>
+      )}
+
+      {/* Garmin Connection Modal */}
+      {showGarminModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-zinc-200">
+            <div className="p-5 border-b border-zinc-100 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sky-600">
+                <Watch className="w-5 h-5" />
+                <h3 className="font-bold text-zinc-900">Conectar Garmin</h3>
+              </div>
+              <button 
+                onClick={() => setShowGarminModal(false)}
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors"
+                title="Cerrar modal"
+                aria-label="Cerrar modal"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleConnectGarmin} className="p-5 space-y-4">
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Email de Garmin</label>
+                  <input
+                    type="email"
+                    required
+                    value={garminEmail}
+                    onChange={(e) => setGarminEmail(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all bg-zinc-50 focus:bg-white"
+                    placeholder="tu-email@ejemplo.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1.5">Contraseña</label>
+                  <input
+                    type="password"
+                    required
+                    value={garminPassword}
+                    onChange={(e) => setGarminPassword(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-all bg-zinc-50 focus:bg-white"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+              
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-[10px] sm:text-xs text-amber-800 font-medium">
+                Al usar la integración local (no oficial), almacenamos estas credenciales únicamente para poder extraer tu VFC y sueño diario en segundo plano.
+              </div>
+              
+              <button
+                type="submit"
+                disabled={isConnectingGarmin || !garminEmail || !garminPassword}
+                className="w-full py-2.5 font-bold rounded-xl bg-sky-600 hover:bg-sky-700 text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              >
+                {isConnectingGarmin ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <LinkIcon className="w-4 h-4" />
+                )}
+                {isConnectingGarmin ? 'Conectando...' : 'Conectar con Garmin'}
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>

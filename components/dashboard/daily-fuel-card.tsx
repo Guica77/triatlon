@@ -1,7 +1,7 @@
 'use client'
  
 import * as React from 'react'
-import { ProCard } from '@/components/ui/pro-card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Flame, Zap, Dumbbell, Droplet, Watch } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { askNutritionAI, rejectDishAndGetAlternative } from '@/app/(app)/dashboard/nutrition-actions'
@@ -37,22 +37,26 @@ export function DailyFuelCard({
 
   if (loading) {
     return (
-      <ProCard className="p-4 sm:p-6 h-[320px] flex flex-col justify-center items-center space-y-3 border-zinc-200 bg-white shadow-sm">
-        <div className="w-8 h-8 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin" />
-        <span className="text-xs text-zinc-500 font-medium">Calculando combustible diario...</span>
-      </ProCard>
+      <Card className="h-[320px] border-zinc-200 bg-white shadow-sm">
+        <CardContent className="p-4 sm:p-6 h-[320px] flex flex-col justify-center items-center space-y-3">
+          <div className="w-8 h-8 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin" />
+          <span className="text-xs text-zinc-500 font-medium">Calculando combustible diario...</span>
+        </CardContent>
+      </Card>
     )
   }
 
   if (error || !nutritionData) {
     return (
-      <ProCard className="p-4 sm:p-6 h-[320px] flex flex-col justify-center items-center text-center p-6 border-zinc-200 bg-white shadow-sm">
-        <Flame className="w-8 h-8 text-zinc-300 mb-2" />
-        <h4 className="text-sm font-semibold text-zinc-700">Servicio de Nutrición Inactivo</h4>
-        <p className="text-xs text-zinc-500 mt-1 max-w-[240px]">
-          No pudimos calcular tus necesidades calóricas hoy. Asegúrate de configurar tu peso en Ajustes.
-        </p>
-      </ProCard>
+      <Card className="h-[320px] border-zinc-200 bg-white shadow-sm">
+        <CardContent className="p-4 sm:p-6 flex flex-col justify-center items-center text-center p-6 h-full">
+          <Flame className="w-8 h-8 text-zinc-300 mb-2" />
+          <h4 className="text-sm font-semibold text-zinc-700">Servicio de Nutrición Inactivo</h4>
+          <p className="text-xs text-zinc-500 mt-1 max-w-[240px]">
+            No pudimos calcular tus necesidades calóricas hoy. Asegúrate de configurar tu peso en Ajustes.
+          </p>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -146,7 +150,8 @@ export function DailyFuelCard({
   }
 
   return (
-    <ProCard className="p-4 sm:p-6 space-y-4 relative overflow-hidden border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col justify-between min-h-[320px]">
+    <Card className="relative overflow-hidden border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col justify-between min-h-[320px]">
+      <CardContent className="p-4 sm:p-6 space-y-4 flex flex-col justify-between h-full">
       
       {/* Cabecera Premium con Tabs */}
       <div className="flex justify-between items-center border-b border-zinc-100 pb-3 relative z-10 shrink-0 gap-2">
@@ -448,6 +453,7 @@ export function DailyFuelCard({
 
         </div>
       )}
-    </ProCard>
+      </CardContent>
+    </Card>
   )
 }

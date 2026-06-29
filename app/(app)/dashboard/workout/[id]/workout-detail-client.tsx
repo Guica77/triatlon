@@ -306,22 +306,22 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
     }
 
     return (
-      <div key={index} className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-850 flex items-center justify-between flex-wrap gap-3 text-xs sm:text-sm">
+      <div key={index} className="p-3.5 rounded-xl bg-card border border-border flex items-center justify-between flex-wrap gap-3 text-xs sm:text-sm">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-zinc-950 flex items-center justify-center border border-zinc-850">
+          <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center border border-zinc-200">
             {renderStepIcon(step.type)}
           </div>
           <div>
-            <p className="font-semibold text-white capitalize">
+            <p className="font-semibold text-foreground capitalize">
               {step.type === 'Warmup' ? 'Calentamiento' : step.type === 'Cooldown' ? 'Vuelta a la Calma' : 'Intervalo'}
             </p>
-            <p className="text-[10px] sm:text-xs text-zinc-400">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">
               {formatCondition(step.endCondition, step.endConditionValue)}
             </p>
           </div>
         </div>
         <div>
-          <span className="px-3 py-1 rounded-lg bg-zinc-950 text-zinc-300 font-bold border border-zinc-850 text-xs">
+          <span className="px-3 py-1 rounded-lg bg-zinc-100 text-foreground font-bold border border-zinc-200 text-xs">
             {formatTarget(step.targetType, step.targetValueOne, step.targetValueTwo)}
           </span>
         </div>
@@ -355,14 +355,14 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
       <div className="lg:col-span-2 space-y-6">
         
         {/* Hero Card */}
-        <div className={`p-6 rounded-2xl bg-gradient-to-br border shadow-xl relative overflow-hidden ${sportBgColors[session.sport_type] || 'from-zinc-900 to-zinc-950 border-zinc-800'}`}>
+        <div className={`p-6 rounded-2xl bg-gradient-to-br border shadow-sm relative overflow-hidden ${sportBgColors[session.sport_type] || 'from-zinc-50 to-white border-zinc-200'}`}>
           <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none ${sportGlows[session.sport_type] || 'bg-transparent'}`} />
           
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="px-2 py-0.5 rounded bg-black/40 text-[9px] font-bold uppercase tracking-widest text-zinc-300 border border-zinc-800">
+            <span className="px-2 py-0.5 rounded bg-zinc-500/10 text-[9px] font-bold uppercase tracking-widest text-zinc-600 border border-zinc-200">
               {session.day_name}
             </span>
-            <span className={`text-[10px] font-extrabold uppercase tracking-widest ${sportTextColors[session.sport_type] || 'text-white'}`}>
+            <span className={`text-[10px] font-extrabold uppercase tracking-widest ${sportTextColors[session.sport_type] || 'text-foreground'}`}>
               • {session.sport_type}
             </span>
             {workout.auto_adjusted && (
@@ -385,21 +385,21 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
             )}
           </div>
 
-          <h2 className="text-2xl font-bold text-white capitalize leading-tight mb-4">
+          <h2 className="text-2xl font-bold text-foreground capitalize leading-tight mb-4">
             {session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
           </h2>
 
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/5">
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-black/5">
             <div>
-              <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Duración</p>
-              <p className="text-base font-bold text-white mt-0.5">{durationMin} min</p>
+              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Duración</p>
+              <p className="text-base font-bold text-foreground mt-0.5">{durationMin} min</p>
             </div>
             <div>
-              <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Tipo</p>
-              <p className="text-base font-bold text-white mt-0.5 capitalize">{session.sport_type}</p>
+              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Tipo</p>
+              <p className="text-base font-bold text-foreground mt-0.5 capitalize">{session.sport_type}</p>
             </div>
             <div>
-              <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Estado</p>
+              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Estado</p>
               <p className={`text-base font-bold mt-0.5 flex items-center gap-1 capitalize ${
                 isCompleted ? 'text-green-400' : isMissed ? 'text-red-400' : 'text-amber-400'
               }`}>
@@ -605,9 +605,9 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
             >
-              <ProCard className="p-5 border-zinc-850 bg-zinc-900/40 space-y-4">
-                <div className="flex items-center justify-between border-b border-zinc-850 pb-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+              <ProCard className="p-5 space-y-4">
+                <div className="flex items-center justify-between border-b border-border pb-2">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4 text-green-400" />
                     Valoración de la Sesión
                   </h3>
@@ -622,12 +622,12 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider">Esfuerzo (RPE)</p>
-                    <p className="text-sm font-bold text-white mt-0.5">{rpe}/10</p>
+                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Esfuerzo (RPE)</p>
+                    <p className="text-sm font-bold text-foreground mt-0.5">{rpe}/10</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider">Sensación</p>
-                    <p className="text-sm font-bold text-white mt-0.5 capitalize flex items-center gap-1">
+                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Sensación</p>
+                    <p className="text-sm font-bold text-foreground mt-0.5 capitalize flex items-center gap-1">
                       {feeling === 'excelente' && '😃 Excelente'}
                       {feeling === 'buena' && '🙂 Bueno'}
                       {feeling === 'fatigado' && '🥱 Fatigado'}
@@ -635,15 +635,15 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider">Adherencia</p>
-                    <p className="text-sm font-bold text-white mt-0.5 capitalize">
+                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Adherencia</p>
+                    <p className="text-sm font-bold text-foreground mt-0.5 capitalize">
                       {intensityAdherence === 'suave' && '📉 Más suave'}
                       {intensityAdherence === 'clavado' && '🎯 Clavado'}
                       {intensityAdherence === 'fuerte' && '📈 Más fuerte'}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider">Dolor muscular</p>
+                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Dolor muscular</p>
                     <p className={`text-sm font-bold mt-0.5 ${painLocalized ? 'text-red-400' : 'text-green-400'}`}>
                       {painLocalized ? 'Sí 🔴' : 'No 🟢'}
                     </p>
@@ -665,18 +665,18 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
 
         {/* Coaching Notes / Description */}
         <ProCard className="p-5 space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-550 flex items-center gap-1.5">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <Info className="w-4 h-4 text-cyan-400" />
             Notas del Entrenador
           </h3>
-          <p className="text-sm text-zinc-300 leading-relaxed font-normal whitespace-pre-line">
+          <p className="text-sm text-foreground leading-relaxed font-normal whitespace-pre-line">
             {adaptWorkoutDescription(adaptedDescription, session.sport_type, profile) || 'Sin notas descriptivas para este entrenamiento.'}
           </p>
         </ProCard>
 
         {/* Structured steps checklist */}
         <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Desglose Estructurado del Bloque
           </h3>
           
@@ -684,9 +684,9 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
             {stepsList.length > 0 ? (
               stepsList.map((step, index) => renderStepCard(step, index))
             ) : (
-              <ProCard className="p-6 text-center bg-zinc-950/20">
-                <p className="text-sm text-zinc-400">Esta sesión no dispone de bloques de intervalos estructurados.</p>
-                <p className="text-xs text-zinc-550 mt-1">Completa la sesión de forma continua basándote en la descripción.</p>
+              <ProCard className="p-6 text-center bg-zinc-50">
+                <p className="text-sm text-zinc-500">Esta sesión no dispone de bloques de intervalos estructurados.</p>
+                <p className="text-xs text-zinc-400 mt-1">Completa la sesión de forma continua basándote en la descripción.</p>
               </ProCard>
             )}
           </div>
@@ -699,28 +699,28 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
         
         {/* Actions panel */}
         <ProCard className="p-5 space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Acciones rápidas</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Acciones rápidas</h3>
           
           <div className="space-y-2">
             {!isCompleted && !isMissed && (
               <>
                 <AnimatedButton 
                   variant="primary" 
-                  className="w-full justify-center py-6 text-sm font-semibold shadow-lg shadow-cyan-500/10"
+                  className="w-full justify-center py-6 text-sm font-semibold shadow-lg shadow-primary/10"
                   onClick={handleToggle}
                   disabled={loading}
                 >
-                  <Circle className="w-4 h-4 text-zinc-400" />
+                  <Circle className="w-4 h-4" />
                   <span>Completar Entrenamiento</span>
                 </AnimatedButton>
 
                 <AnimatedButton
-                  variant="ghost"
-                  className="w-full justify-center py-6 border border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+                  variant="secondary"
+                  className="w-full justify-center py-6 text-muted-foreground"
                   onClick={handleToggleMissed}
                   disabled={loading}
                 >
-                  <XCircle className="w-4 h-4 text-zinc-500" />
+                  <XCircle className="w-4 h-4 text-muted-foreground" />
                   <span>Saltar esta sesión</span>
                 </AnimatedButton>
               </>
@@ -775,59 +775,59 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                 const hasGear = virtualGarage.includes(gear);
                 return (
                   <div key={idx} className="flex items-center justify-between text-xs py-1">
-                    <span className="text-zinc-300 font-medium">{gear}</span>
+                    <span className="text-foreground font-medium">{gear}</span>
                     {hasGear ? (
-                      <span className="text-[10px] text-green-400 font-semibold bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">✓ En Garaje</span>
+                      <span className="text-[10px] text-green-600 font-semibold bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">✓ En Garaje</span>
                     ) : (
-                      <span className="text-[10px] text-orange-400 font-semibold bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">⚠️ Falta</span>
+                      <span className="text-[10px] text-orange-600 font-semibold bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">⚠️ Falta</span>
                     )}
                   </div>
                 );
               })}
 
               {missingGear.length > 0 && (
-                <div className="pt-3 border-t border-zinc-800">
-                  <span className="w-full py-2 text-zinc-400 text-[11px] font-bold rounded-lg flex items-center justify-center gap-1">
+                <div className="pt-3 border-t border-border">
+                  <span className="w-full py-2 text-muted-foreground text-[11px] font-bold rounded-lg flex items-center justify-center gap-1">
                     Recuerda conseguir este material antes de la sesión.
                   </span>
                 </div>
               )}
             </div>
           ) : (
-            <p className="text-xs text-zinc-500 italic">No se especifica equipamiento especial.</p>
+            <p className="text-xs text-muted-foreground italic">No se especifica equipamiento especial.</p>
           )}
         </ProCard>
 
         {/* Physiological Zones guidance */}
         <ProCard className="p-5 space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Zonas de Intensidad</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Zonas de Intensidad</h3>
           <div className="space-y-3 pt-1 text-xs">
             <div className="flex items-start gap-2.5">
-              <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-bold border border-zinc-700 text-[10px]">Z1</span>
+              <span className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-700 font-bold border border-border text-[10px]">Z1</span>
               <div>
-                <p className="font-semibold text-zinc-350">Recuperación Pasiva</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Fácil, conversación fluida. Ritmo regenerativo post-intervalos.</p>
+                <p className="font-semibold text-foreground">Recuperación Pasiva</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Fácil, conversación fluida. Ritmo regenerativo post-intervalos.</p>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 font-bold border border-green-500/20 text-[10px]">Z2</span>
+              <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-600 font-bold border border-green-500/20 text-[10px]">Z2</span>
               <div>
-                <p className="font-semibold text-zinc-300">Resistencia Aeróbica Base</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Esfuerzo moderado y sostenible. Base de la carga de volumen.</p>
+                <p className="font-semibold text-foreground">Resistencia Aeróbica Base</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Esfuerzo moderado y sostenible. Base de la carga de volumen.</p>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <span className="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20 text-[10px]">Z3</span>
+              <span className="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-600 font-bold border border-cyan-500/20 text-[10px]">Z3</span>
               <div>
-                <p className="font-semibold text-zinc-300">Tempo / Ritmo Medio</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Exigente pero aeróbico. Ritmo de competición media distancia.</p>
+                <p className="font-semibold text-foreground">Tempo / Ritmo Medio</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Exigente pero aeróbico. Ritmo de competición media distancia.</p>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-400 font-bold border border-red-500/20 text-[10px]">Z4</span>
+              <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 font-bold border border-red-500/20 text-[10px]">Z4</span>
               <div>
-                <p className="font-semibold text-zinc-300">Umbral Lactato / Series</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Zonas de series intensas. Mejora del VO2Máx y tolerancia al lactato.</p>
+                <p className="font-semibold text-foreground">Umbral Lactato / Series</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Zonas de series intensas. Mejora del VO2Máx y tolerancia al lactato.</p>
               </div>
             </div>
           </div>

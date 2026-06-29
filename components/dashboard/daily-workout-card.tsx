@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/(app)/dashboard/actions';
-import { ProCard } from '@/components/ui/pro-card';
+import { Card, CardContent } from '@/components/ui/card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
 import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info, Droplet, Zap, AlertTriangle, Cloud } from 'lucide-react';
@@ -23,6 +23,7 @@ interface WorkoutCardProps {
   sweatRate?: number | null;
   customCarbsPerHour?: number | null;
   preferredIngredients?: string[] | null;
+  readinessScore?: number | null;
   workout: {
     id: string;
     scheduled_date: string;
@@ -211,7 +212,7 @@ const renderAsBulletList = (text: string) => {
   );
 };
 
-export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio', readOnly = false, sweatRate = 0.8, customCarbsPerHour, preferredIngredients = [] }: WorkoutCardProps) {
+export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualGarage = [], athleteLevel = 'intermedio', readOnly = false, sweatRate = 0.8, customCarbsPerHour, preferredIngredients = [], readinessScore }: WorkoutCardProps) {
   const [activeTab, setActiveTab] = React.useState<'main' | 'warmup' | 'cooldown' | 'gear' | 'telemetry' | 'nutrition'>('main');
   const [loading, setLoading] = React.useState(false);
   const [status, setStatus] = React.useState(workout.status);
@@ -220,20 +221,17 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   // Weather states for dynamic nutrition calculation
   const [weatherCondition, setWeatherCondition] = React.useState<'frio' | 'templado' | 'calor' | 'extremo'>('templado');
   const [humidityLevel, setHumidityLevel] = React.useState<number>(50);
+  const [clothing, setClothing] = React.useState<'ligera' | 'normal' | 'abrigada' | 'neopreno'>('normal');
   const [isWeatherLoading, setIsWeatherLoading] = React.useState(false);
+  const [weatherCelsius, setWeatherCelsius] = React.useState<number | null>(null);
 
   React.useEffect(() => {
     // Re-set when workout changes
     setWeatherCondition('templado');
     setHumidityLevel(50);
     
-    // Fetch REAL weather data using Open-Meteo for Madrid (demo coordinates)
-    const fetchRealWeather = async () => {
+    const fetchWeatherForCoords = async (lat: number, lon: number) => {
       try {
-        setIsWeatherLoading(true);
-        // Using Madrid coordinates as fallback (User geolocation could be used here)
-        const lat = 40.4168;
-        const lon = -3.7038;
         const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m&timezone=auto`);
         if (res.ok) {
           const data = await res.json();
@@ -247,16 +245,53 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
           
           setWeatherCondition(condition);
           setHumidityLevel(hum);
-          console.log(`Fetched Real Weather: ${temp}°C, Hum: ${hum}%, Cond: ${condition}`);
+          setWeatherCelsius(temp);
+          console.log(`[Weather] ${temp}°C, Hum: ${hum}%, Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`);
         }
       } catch (err) {
-        console.error("Failed to fetch real weather", err);
+        console.error("[Weather] Failed to fetch weather", err);
       } finally {
         setIsWeatherLoading(false);
       }
     };
-    
-    fetchRealWeather();
+
+    // Fallback: get location from IP address (no permission needed)
+    const fetchLocationByIP = async () => {
+      try {
+        const res = await fetch('https://ipapi.co/json/');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.latitude && data.longitude) {
+            console.log(`[Weather] IP location: ${data.city}, ${data.country_name}`);
+            fetchWeatherForCoords(data.latitude, data.longitude);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('[Weather] IP geolocation failed:', err);
+      }
+      // Ultimate fallback: Madrid
+      fetchWeatherForCoords(40.4168, -3.7038);
+    };
+
+    setIsWeatherLoading(true);
+
+    // Try browser geolocation first, then IP geolocation, then Madrid
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          fetchWeatherForCoords(position.coords.latitude, position.coords.longitude);
+        },
+        () => {
+          // Browser geolocation denied → try IP-based location
+          console.warn('[Weather] Browser geolocation denied, trying IP location...');
+          fetchLocationByIP();
+        },
+        { timeout: 5000, maximumAge: 300000 }
+      );
+    } else {
+      fetchLocationByIP();
+    }
   }, [workout.id]);
   
   const [isGymModeOpen, setIsGymModeOpen] = React.useState(false);
@@ -513,9 +548,37 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   }
 
   return (
-    <ProCard className={`p-4 sm:p-6 space-y-6 transition-all duration-300 relative overflow-hidden ${leftBorderClass} ${backgroundClass}`}>
+    <Card className={`transition-all duration-300 relative overflow-hidden ${leftBorderClass} ${backgroundClass} shadow-md hover:shadow-lg`}>
+      <CardContent className="p-4 sm:p-6 space-y-6">
       
       {/* Esquina decorativa con el color del deporte - Eliminada para un diseño minimalista */}
+
+
+      {/* Aviso de Inteligencia Biométrica (Readiness Bajo) */}
+      {readinessScore !== undefined && readinessScore !== null && readinessScore < 60 && session.sport_type !== 'descanso' && !isCompleted && (
+        <motion.div 
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 bg-rose-50/80 border border-rose-200/60 rounded-xl p-3.5 flex items-start gap-3 relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-rose-100/50 to-transparent w-32" />
+          <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center shrink-0 border border-rose-200/50 relative z-10">
+            <AlertTriangle className="w-4 h-4 text-rose-600" />
+          </div>
+          <div className="relative z-10 flex-1">
+            <h4 className="text-[13px] font-bold text-rose-900 tracking-tight flex items-center gap-1.5">
+              Alerta de Readiness Bajo ({readinessScore})
+              <span className="flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-rose-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+              </span>
+            </h4>
+            <p className="text-[11px] text-rose-700/90 leading-relaxed font-medium mt-0.5">
+              Tu cuerpo no está preparado para alta intensidad. Considera reducir la duración o intensidad de esta sesión para evitar sobreentrenamiento.
+            </p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Cabecera Limpia */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-zinc-100 pb-4 relative z-10">
@@ -743,7 +806,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           <Cloud className="w-5 h-5 text-sky-500" />
                           <div>
                             <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Meteorología (En Vivo)</p>
-                            <p className="text-sm font-bold text-zinc-900 capitalize">{weatherCondition} • Hum {humidityLevel}%</p>
+                            <p className="text-sm font-bold text-zinc-900 capitalize">{weatherCelsius !== null ? `${Math.round(weatherCelsius)}°C` : weatherCondition} • Hum {humidityLevel}%</p>
                           </div>
                         </div>
                         <span className="text-[9px] text-zinc-500 max-w-[120px] text-right font-medium leading-tight">
@@ -1038,7 +1101,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                 <Activity className="w-3.5 h-3.5 text-cyan-500" />
                                 Ajustar por Clima y Vestimenta (Tiempo Real)
                               </span>
-                              {(temperature !== 'templado' || clothing !== 'normal') && (
+                              {(weatherCondition !== 'templado' || clothing !== 'normal') && (
                                 <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-extrabold uppercase animate-pulse">
                                   ⚡ Valores Ajustados
                                 </span>
@@ -1054,9 +1117,9 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                     <button
                                       key={temp}
                                       type="button"
-                                      onClick={() => setTemperature(temp)}
+                                      onClick={() => setWeatherCondition(temp)}
                                       className={`px-1.5 py-1.5 text-[10px] font-bold rounded-lg capitalize transition-all cursor-pointer text-center ${
-                                        temperature === temp
+                                        weatherCondition === temp
                                           ? 'bg-cyan-500 text-black shadow-sm font-black'
                                           : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-200/30 dark:hover:bg-zinc-900/50'
                                       }`}
@@ -1582,6 +1645,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
         onClose={() => setIsSyncingOpen(false)}
         workout={workout as any}
       />
-    </ProCard>
+      </CardContent>
+    </Card>
   );
 }

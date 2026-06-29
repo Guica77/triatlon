@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Zap, ArrowRight, Calendar } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
  
 interface FormStatusWidgetProps {
   tsb: number;
@@ -143,8 +144,9 @@ export function FormStatusWidget({
   const tsbAreaPath = historyPoints.length >= 2 ? `M ${getX(0, historyPoints.length).toFixed(1)},${getY_T(0).toFixed(1)} L ${tsbValues.map((val, i) => `${getX(i, historyPoints.length).toFixed(1)},${getY_T(val).toFixed(1)}`).join(' L ')} L ${getX(historyPoints.length - 1, historyPoints.length).toFixed(1)},${getY_T(0).toFixed(1)} Z` : '';
  
   return (
-    <Link href="/analytics" className="block group w-full h-full cursor-pointer">
-      <div className={`p-5 sm:p-6 rounded-2xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 ${borderHoverClass} shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.01] flex flex-col justify-between h-full min-h-[320px] relative overflow-hidden`}>
+    <Link href="/analytics" className="block group w-full h-full cursor-pointer hover:scale-[1.01] transition-transform duration-300">
+      <Card className={`rounded-2xl border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 ${borderHoverClass} shadow-sm hover:shadow-md transition-all duration-300 h-full min-h-[320px] relative overflow-hidden`}>
+        <CardContent className="p-5 sm:p-6 flex flex-col justify-between h-full">
         
         {/* Encabezado */}
         <div className="flex items-center justify-between mb-2 relative z-10 shrink-0">
@@ -277,7 +279,8 @@ export function FormStatusWidget({
             {description}
           </p>
         </div>
-      </div>
+        </CardContent>
+      </Card>
     </Link>
   );
 }

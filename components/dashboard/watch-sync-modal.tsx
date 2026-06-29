@@ -2,8 +2,10 @@
 
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Watch, Check, RefreshCw, Smartphone } from 'lucide-react'
+import { X, Watch, Check, RefreshCw } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 
 interface WatchSyncModalProps {
   isOpen: boolean
@@ -99,35 +101,27 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
   }
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        {/* Backdrop */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={syncState === 'success' ? onClose : undefined}
-          className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"
-        />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent 
+        showCloseButton={false}
+        onInteractOutside={(e) => { if (syncState !== 'success') e.preventDefault() }}
+        onEscapeKeyDown={(e) => { if (syncState !== 'success') e.preventDefault() }}
+        className="max-w-sm p-6 sm:rounded-2xl flex flex-col items-center text-center space-y-6 overflow-hidden border-zinc-200"
+      >
+        <VisuallyHidden>
+          <DialogTitle>Sincronización con el reloj</DialogTitle>
+        </VisuallyHidden>
 
-        {/* Modal container */}
-        <motion.div 
-          initial={{ scale: 0.95, opacity: 0, y: 15 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 15 }}
-          transition={{ type: 'spring', duration: 0.4 }}
-          className="relative w-full max-w-sm bg-white border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col p-6 items-center text-center space-y-6"
-        >
-          {/* Close button */}
-          {syncState === 'success' && (
-            <button 
-              onClick={onClose}
-              title="Cerrar"
-              className="absolute top-4 right-4 w-7 h-7 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-650 hover:bg-zinc-100 transition-colors"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
+        {/* Close button (solo en éxito) */}
+        {syncState === 'success' && (
+          <button 
+            onClick={onClose}
+            title="Cerrar"
+            className="absolute top-4 right-4 w-7 h-7 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-650 hover:bg-zinc-100 transition-colors"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
 
           {/* Sync Animation Widget */}
           <div className="relative w-40 h-40 flex items-center justify-center">
@@ -251,25 +245,27 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
             </div>
           </div>
 
-          {/* Action trigger button */}
-          <div className="w-full pt-2">
-            {syncState === 'success' ? (
-              <AnimatedButton
-                variant="primary"
-                onClick={onClose}
-                className="w-full py-3 !bg-emerald-500 hover:!bg-emerald-400 !text-black font-bold text-xs"
-              >
-                Cerrar y Empezar Entreno
-              </AnimatedButton>
-            ) : (
-              <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-500">
-                <Smartphone className="w-3.5 h-3.5 animate-pulse" />
-                <span>Compatible con Garmin, Apple Watch y Coros</span>
-              </div>
-            )}
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+          {/* Action Button */}
+        <div className="w-full pt-2">
+          {syncState === 'success' ? (
+            <AnimatedButton
+              onClick={onClose}
+              variant="primary"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 rounded-xl shadow-lg shadow-emerald-500/20"
+            >
+              Continuar
+            </AnimatedButton>
+          ) : (
+            <AnimatedButton
+              disabled
+              variant="secondary"
+              className="w-full bg-zinc-50 border-zinc-200 text-zinc-400 font-bold h-12 rounded-xl opacity-75"
+            >
+              Cancelando...
+            </AnimatedButton>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
