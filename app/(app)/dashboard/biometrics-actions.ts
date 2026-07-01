@@ -173,7 +173,7 @@ export async function syncGarminToDatabaseAction() {
       .eq('id', user.id)
       .single()
 
-    const tokens = profile?.garmin_auth_tokens
+    const tokens = profile?.garmin_auth_tokens as { email?: string; password?: string } | null | undefined
     if (!tokens || !tokens.email || !tokens.password) {
       return { error: 'No hay credenciales de Garmin guardadas. Por favor conéctalo en Ajustes.' }
     }
@@ -208,9 +208,9 @@ export async function syncGarminToDatabaseAction() {
     const fatigue = existing?.fatigue_rating ?? garminFatigue ?? 2
     const garminStress = garminData.stress ? Math.max(1, Math.min(5, Math.ceil(garminData.stress / 20))) : null
     const stress = garminStress ?? existing?.stress_level ?? 2
-    const rawHrv = garminData.raw_garmin_data?.hrv?.hrvSummary?.lastNightAvg 
-      ?? garminData.raw_garmin_data?.hrv?.lastNightAvg 
-      ?? null
+    const rawHrv = (garminData.raw_garmin_data?.hrv as any)?.hrvSummary?.lastNightAvg 
+          ?? (garminData.raw_garmin_data?.hrv as any)?.lastNightAvg 
+          ?? null
     
     const hrv = rawHrv ?? existing?.hrv ?? 65 // Default o el que tuviera
     

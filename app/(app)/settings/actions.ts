@@ -303,7 +303,7 @@ export async function testGarminSyncLocalAction() {
       .eq('id', user.id)
       .single();
 
-    const tokens = profile?.garmin_auth_tokens;
+    const tokens = profile?.garmin_auth_tokens as { email?: string; password?: string } | null | undefined;
     if (!tokens || !tokens.email || !tokens.password) {
       return { error: 'No hay credenciales de Garmin guardadas. Por favor conéctalo en Ajustes.' };
     }

@@ -21,7 +21,7 @@ export async function fetchGarminData(email: string, password: string, userId: s
       const profile = await gcClient.getUserProfile();
       const displayName = profile.displayName || profile.userName;
       if (displayName) {
-        stats = await gcClient.get(`/usersummary-service/usersummary/daily/${displayName}?calendarDate=${dateStr}`).catch(() => ({}));
+        stats = await gcClient.get(`/usersummary-service/usersummary/daily/${displayName}?calendarDate=${dateStr}`).catch(() => ({} as any));
       }
     } catch (e) {
       console.warn("Could not fetch Garmin user summary stats", e);
@@ -30,7 +30,7 @@ export async function fetchGarminData(email: string, password: string, userId: s
     // Fetch HRV
     let hrvData = {};
     try {
-      hrvData = await gcClient.get(`/hrv-service/hrv/daily/${dateStr}`).catch(() => ({}));
+      hrvData = await gcClient.get(`/hrv-service/hrv/daily/${dateStr}`).catch(() => ({} as any));
     } catch (e) {
       console.warn("Could not fetch Garmin HRV", e);
     }
@@ -38,7 +38,7 @@ export async function fetchGarminData(email: string, password: string, userId: s
     // Fetch Training Status
     let trainingStatus = {};
     try {
-      trainingStatus = await gcClient.get(`/metrics-service/metrics/trainingstatus/daily/${dateStr}`).catch(() => ({}));
+      trainingStatus = await gcClient.get(`/metrics-service/metrics/trainingstatus/daily/${dateStr}`).catch(() => ({} as any));
     } catch (e) {
       console.warn("Could not fetch Garmin Training Status", e);
     }
