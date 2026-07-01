@@ -3,8 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { exec } from 'child_process'
-import path from 'path'
+import { fetchGarminData } from '@/lib/telemetry/garmin-sync'
 
 export interface DailyBiometrics {
   id?: string
@@ -166,94 +165,88 @@ export async function syncGarminToDatabaseAction() {
     return { error: 'No autorizado' }
   }
 
-  return new Promise((resolve) => {
-    const scriptDir = path.join(process.cwd(), '../scripts/garmin_sync')
-    const venvActivate = path.join(scriptDir, 'venv/bin/activate')
-    const scriptPath = path.join(scriptDir, 'sync_test.py')
+  try {
+    // 1. Fetch Garmin credentials from user profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('garmin_auth_tokens')
+      .eq('id', user.id)
+      .single()
+
+    const tokens = profile?.garmin_auth_tokens
+    if (!tokens || !tokens.email || !tokens.password) {
+      return { error: 'No hay credenciales de Garmin guardadas. Por favor conéctalo en Ajustes.' }
+    }
+
+    // 2. Fetch data natively
+    const res = await fetchGarminData(tokens.email, tokens.password, user.id)
+    if (res.error || !res.data) {
+      return { error: res.error || 'Fallo al ejecutar la extracción de Garmin.' }
+    }
+
+    const garminData = res.data
+    const today = new Date().toISOString().split('T')[0]
     
-    const cmd = `source ${venvActivate} && python ${scriptPath} --user-id ${user.id}`
-    
-    exec(cmd, { shell: '/bin/bash' }, async (error: any, stdout: string, stderr: string) => {
-      if (error) {
-        console.error('Error ejecutando script Garmin:', error, stderr)
-        return resolve({ error: 'Fallo al ejecutar la extracción de Garmin.' })
-      }
+    // Fetch current biometrics to not overwrite manual fatigue/stress
+    const { data: existing } = await supabase
+      .from('user_biometrics')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('date', today)
+      .single()
       
-      try {
-        const lines = stdout.split('\n').filter((l: string) => l.trim().startsWith('{'))
-        if (lines.length === 0) throw new Error("No JSON found")
-        const jsonStr = lines[lines.length - 1]
-        const data = JSON.parse(jsonStr)
-        
-        if (data.error) {
-          return resolve({ error: data.error })
-        }
-        
-        const garminData = data.data
-        const today = new Date().toISOString().split('T')[0]
-        
-        // Fetch current biometrics to not overwrite manual fatigue/stress
-        const { data: existing } = await supabase
-          .from('user_biometrics')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('date', today)
-          .single()
-          
-        let garminFatigue = null
-        if (garminData.body_battery) {
-          const bb = garminData.body_battery
-          if (bb > 75) garminFatigue = 1
-          else if (bb > 50) garminFatigue = 2
-          else if (bb > 25) garminFatigue = 3
-          else if (bb > 10) garminFatigue = 4
-          else garminFatigue = 5
-        }
-          
-        const fatigue = existing?.fatigue_rating ?? garminFatigue ?? 2
-        const garminStress = garminData.stress ? Math.max(1, Math.min(5, Math.ceil(garminData.stress / 20))) : null
-        const stress = garminStress ?? existing?.stress_level ?? 2
-        const rawHrv = garminData.raw_garmin_data?.hrv?.hrvSummary?.lastNightAvg 
-          ?? garminData.raw_garmin_data?.hrv?.lastNightAvg 
-          ?? null
-        
-        const hrv = rawHrv ?? existing?.hrv ?? 65 // Default o el que tuviera
-        
-        const rhr = garminData.resting_hr ?? existing?.rhr ?? 52
-        const sleepHours = garminData.sleep_duration_hours ?? existing?.sleep_hours ?? 7.5
-        const sleepScore = garminData.sleep_score ?? existing?.sleep_score ?? Math.round(sleepHours * 10)
-        
-        // Calculate new readiness
-        const { data: calc } = await calculateReadiness(hrv, rhr, sleepHours, fatigue, stress)
-        
-        const { error: upsertError } = await supabase
-          .from('user_biometrics')
-          .upsert({
-            user_id: user.id,
-            date: today,
-            hrv,
-            rhr,
-            sleep_hours: Number(sleepHours.toFixed(1)),
-            sleep_score: sleepScore,
-            fatigue_rating: fatigue,
-            stress_level: stress,
-            readiness_score: calc?.readiness_score ?? 0,
-            raw_garmin_data: garminData.raw_garmin_data
-          } as any, { onConflict: 'user_id, date' })
-          
-        if (upsertError) {
-          console.error("Error upsert Garmin data:", upsertError)
-          return resolve({ error: 'Error guardando datos de Garmin en la BD.' })
-        }
-        
-        revalidatePath('/dashboard')
-        revalidatePath('/settings')
-        return resolve({ success: true, data: garminData })
-        
-      } catch (e) {
-        console.error('Error parseando JSON de Garmin:', e, stdout)
-        return resolve({ error: 'Error procesando respuesta de Garmin.' })
-      }
-    })
-  })
+    let garminFatigue = null
+    if (garminData.body_battery) {
+      const bb = garminData.body_battery
+      if (bb > 75) garminFatigue = 1
+      else if (bb > 50) garminFatigue = 2
+      else if (bb > 25) garminFatigue = 3
+      else if (bb > 10) garminFatigue = 4
+      else garminFatigue = 5
+    }
+      
+    const fatigue = existing?.fatigue_rating ?? garminFatigue ?? 2
+    const garminStress = garminData.stress ? Math.max(1, Math.min(5, Math.ceil(garminData.stress / 20))) : null
+    const stress = garminStress ?? existing?.stress_level ?? 2
+    const rawHrv = garminData.raw_garmin_data?.hrv?.hrvSummary?.lastNightAvg 
+      ?? garminData.raw_garmin_data?.hrv?.lastNightAvg 
+      ?? null
+    
+    const hrv = rawHrv ?? existing?.hrv ?? 65 // Default o el que tuviera
+    
+    const rhr = garminData.resting_hr ?? existing?.rhr ?? 52
+    const sleepHours = garminData.sleep_duration_hours ?? existing?.sleep_hours ?? 7.5
+    const sleepScore = garminData.sleep_score ?? existing?.sleep_score ?? Math.round(sleepHours * 10)
+    
+    // Calculate new readiness
+    const { data: calc } = await calculateReadiness(hrv, rhr, sleepHours, fatigue, stress)
+    
+    const { error: upsertError } = await supabase
+      .from('user_biometrics')
+      .upsert({
+        user_id: user.id,
+        date: today,
+        hrv,
+        rhr,
+        sleep_hours: Number(sleepHours.toFixed(1)),
+        sleep_score: sleepScore,
+        fatigue_rating: fatigue,
+        stress_level: stress,
+        readiness_score: calc?.readiness_score ?? 0,
+        raw_garmin_data: garminData.raw_garmin_data
+      } as any, { onConflict: 'user_id, date' })
+      
+    if (upsertError) {
+      console.error("Error upsert Garmin data:", upsertError)
+      return { error: 'Error guardando datos de Garmin en la BD.' }
+    }
+    
+    revalidatePath('/dashboard')
+    revalidatePath('/settings')
+    return { success: true, data: garminData }
+    
+  } catch (e: any) {
+    console.error('Error in syncGarminToDatabaseAction:', e)
+    return { error: 'Error inesperado durante la sincronización.' }
+  }
 }

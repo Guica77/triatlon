@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { fetchGarminData } from '@/lib/telemetry/garmin-sync';
 
 export async function updatePhysiologicalData(data: {
   current_ftp?: number | null;
@@ -295,31 +296,26 @@ export async function testGarminSyncLocalAction() {
     return { error: 'No autorizado' };
   }
 
-  return new Promise((resolve) => {
-    const { exec } = require('child_process');
-    const path = require('path');
-    
-    const scriptDir = path.join(process.cwd(), '../scripts/garmin_sync');
-    const venvActivate = path.join(scriptDir, 'venv/bin/activate');
-    const scriptPath = path.join(scriptDir, 'sync_test.py');
-    
-    // Pass user ID to python script
-    const cmd = `source ${venvActivate} && python ${scriptPath} --user-id ${user.id}`;
-    
-    exec(cmd, { shell: '/bin/bash' }, (error: any, stdout: string, stderr: string) => {
-      if (error) {
-        console.error('Error running garmin sync test:', error, stderr);
-        resolve({ error: 'Fallo al ejecutar el script local: ' + (stderr || error.message) });
-        return;
-      }
-      
-      try {
-        const result = JSON.parse(stdout.trim());
-        resolve(result);
-      } catch (e) {
-        console.error('Error parsing garmin script output:', e, stdout);
-        resolve({ error: 'La salida del script no es un JSON válido. Revisa los logs.' });
-      }
-    });
-  });
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('garmin_auth_tokens')
+      .eq('id', user.id)
+      .single();
+
+    const tokens = profile?.garmin_auth_tokens;
+    if (!tokens || !tokens.email || !tokens.password) {
+      return { error: 'No hay credenciales de Garmin guardadas. Por favor conéctalo en Ajustes.' };
+    }
+
+    const res = await fetchGarminData(tokens.email, tokens.password, user.id);
+    if (res.error || !res.data) {
+      return { error: res.error || 'Fallo al ejecutar la extracción de Garmin.' };
+    }
+
+    return res;
+  } catch (e: any) {
+    console.error('Error in testGarminSyncLocalAction:', e);
+    return { error: 'Error inesperado al probar conexión.' };
+  }
 }
