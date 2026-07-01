@@ -13,7 +13,7 @@ export async function fetchGarminData(email: string, password: string, userId: s
     const sleep = await gcClient.getSleepData(today).catch(() => ({}));
 
     // Fetch Stats (usersummary-service)
-    let stats = {};
+    let stats: any = {};
     try {
       // The API endpoint used in python is usersummary-service/usersummary/daily/{username}?calendarDate={date}
       // garmin-connect has getSteps and other helpers, but let's fetch the summary directly if we can
@@ -28,7 +28,7 @@ export async function fetchGarminData(email: string, password: string, userId: s
     }
 
     // Fetch HRV
-    let hrvData = {};
+    let hrvData: any = {};
     try {
       hrvData = await gcClient.get(`/hrv-service/hrv/daily/${dateStr}`).catch(() => ({} as any));
     } catch (e) {
@@ -36,7 +36,7 @@ export async function fetchGarminData(email: string, password: string, userId: s
     }
 
     // Fetch Training Status
-    let trainingStatus = {};
+    let trainingStatus: any = {};
     try {
       trainingStatus = await gcClient.get(`/metrics-service/metrics/trainingstatus/daily/${dateStr}`).catch(() => ({} as any));
     } catch (e) {
