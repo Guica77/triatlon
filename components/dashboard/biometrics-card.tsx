@@ -161,7 +161,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
   const stats = rawData.stats || {}
   const training = rawData.training_status || {}
   const bodyBattery = stats.bodyBatteryHighestValue || stats.bodyBatteryHighest || '--'
-  const steps = stats.totalSteps ? stats.totalSteps.toLocaleString() : '--'
+  const steps = stats.totalSteps ? stats.totalSteps.toLocaleString('es-ES') : '--'
   const activeCals = stats.wellnessActiveKilocalories ? Math.round(stats.wellnessActiveKilocalories) : '--'
   const vo2Max = training.vo2Max || '--';
  

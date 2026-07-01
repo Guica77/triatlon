@@ -13,7 +13,7 @@ interface StepTelemetryProps {
 }
 
 export function StepTelemetry(props: StepTelemetryProps) {
-  const [activeModal, setActiveModal] = React.useState<'strava' | 'garmin' | 'coros' | null>(null);
+  const [activeModal, setActiveModal] = React.useState<'strava' | 'garmin' | 'coros' | 'strava_confirm' | null>(null);
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isConnecting, setIsConnecting] = React.useState(false);
@@ -21,7 +21,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
   const handleConnectClick = (provider: 'strava' | 'garmin' | 'coros') => {
     if (provider === 'strava') {
       window.open('/api/auth/telemetry/connect?provider=strava&onboarding=true&popup=true', '_blank');
-      setActiveModal('strava_confirm' as any);
+      setActiveModal('strava_confirm');
     } else {
       setActiveModal(provider);
     }

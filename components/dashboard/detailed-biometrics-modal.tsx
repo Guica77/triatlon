@@ -70,7 +70,7 @@ export function DetailedBiometricsModal({ isOpen, onClose, rawGarminData }: Deta
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-orange-50/50 border border-orange-100 rounded-2xl p-4">
                   <span className="text-[10px] font-bold text-orange-600/80 uppercase tracking-wider block mb-1">Pasos Totales</span>
-                  <span className="text-2xl font-black text-orange-700">{steps.toLocaleString()}</span>
+                  <span className="text-2xl font-black text-orange-700">{steps.toLocaleString('es-ES')}</span>
                 </div>
                 <div className="bg-orange-50/50 border border-orange-100 rounded-2xl p-4">
                   <span className="text-[10px] font-bold text-orange-600/80 uppercase tracking-wider block mb-1">Calorías Activas</span>

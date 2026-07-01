@@ -18,12 +18,6 @@ const urlBase64ToUint8Array = (base64String: string) => {
 };
 
 export function PushNotificationProvider() {
-  React.useEffect(() => {
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      registerServiceWorkerAndSubscribe();
-    }
-  }, []);
-
   async function registerServiceWorkerAndSubscribe() {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
@@ -52,6 +46,12 @@ export function PushNotificationProvider() {
       console.error('Error during service worker registration/subscription:', error);
     }
   }
+
+  React.useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      registerServiceWorkerAndSubscribe();
+    }
+  }, []);
 
   return null;
 }
