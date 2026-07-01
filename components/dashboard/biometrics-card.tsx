@@ -111,11 +111,12 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
   const hasAttemptedAutoSync = React.useRef(false)
   
   React.useEffect(() => {
-    if (!readOnly && isGarminConnected && !isRegistered && !hasAttemptedAutoSync.current) {
+    const hasGarminData = !!biometrics.raw_garmin_data && Object.keys(biometrics.raw_garmin_data).length > 0
+    if (!readOnly && isGarminConnected && !hasAttemptedAutoSync.current && (!isRegistered || !hasGarminData)) {
       hasAttemptedAutoSync.current = true
       handleSyncGarmin()
     }
-  }, [readOnly, isGarminConnected, isRegistered])
+  }, [readOnly, isGarminConnected, isRegistered, biometrics.raw_garmin_data])
  
   const score = biometrics.readiness_score || 85
   const isOptimal = score >= 80
