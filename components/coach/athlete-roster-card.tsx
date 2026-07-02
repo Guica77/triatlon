@@ -10,9 +10,10 @@ import { AthleteRosterItem } from '@/app/(app)/coach/dashboard/actions';
 interface AthleteRosterCardProps {
   athlete: AthleteRosterItem;
   plans: { id: string; name: string }[];
+  groups: any[];
   assigningId: string | null;
   removingId: string | null;
-  onPlanSelect: (athleteId: string, planId: string) => void;
+  onAssignPlan: (athleteId: string, planId: string) => void;
   onRemove: (athleteId: string) => void;
 }
 
@@ -24,11 +25,26 @@ StyledDiv.displayName = 'StyledDiv';
 export function AthleteRosterCard({
   athlete,
   plans,
+  groups,
   assigningId,
   removingId,
-  onPlanSelect,
+  onAssignPlan,
   onRemove
 }: AthleteRosterCardProps) {
+  const [isAssigningGroup, setIsAssigningGroup] = React.useState(false);
+  
+  const handleGroupChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newGroupId = e.target.value === 'none' ? null : e.target.value;
+    setIsAssigningGroup(true);
+    try {
+      const { assignAthleteToGroup } = await import('@/app/(app)/coach/dashboard/actions');
+      await assignAthleteToGroup(athlete.id, newGroupId);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsAssigningGroup(false);
+    }
+  };
   const today = athlete.today_workout;
   const bio = athlete.today_biometrics;
   const weekly = athlete.weekly_stats;
@@ -103,13 +119,14 @@ export function AthleteRosterCard({
             </div>
           ) : (
             <select
-              aria-label="Plan de Entrenamiento"
-              title="Plan de Entrenamiento"
+              aria-label="Asignar Plan"
+              title="Asignar Plan"
               value={athlete.active_plan_id || ''}
-              onChange={(e) => onPlanSelect(athlete.id, e.target.value)}
-              className="bg-transparent text-xs text-zinc-700 outline-none w-full cursor-pointer font-bold"
+              onChange={(e) => onAssignPlan(athlete.id, e.target.value)}
+              disabled={assigningId === athlete.id}
+              className="w-full bg-white border border-zinc-200 text-zinc-800 text-xs rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-cyan-500 outline-none truncate font-medium appearance-none cursor-pointer"
             >
-              <option value="">Sin Plan Activo</option>
+              <option value="">Sin plan asignado</option>
               {plans.map(p => (
                 <option key={p.id} value={p.id}>{p.name}</option>
               ))}
@@ -117,6 +134,33 @@ export function AthleteRosterCard({
           )}
         </div>
 
+        {/* Group Select */}
+        <div className="space-y-1.5 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200/80">
+          <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-450">Grupo</label>
+          {isAssigningGroup ? (
+            <div className="flex items-center gap-1.5 text-xs text-zinc-500 py-1 font-medium">
+              <span className="w-3 h-3 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+              Asignando...
+            </div>
+          ) : (
+            <select
+              aria-label="Asignar Grupo"
+              title="Asignar Grupo"
+              value={athlete.group_id || 'none'}
+              onChange={handleGroupChange}
+              disabled={isAssigningGroup}
+              className="w-full bg-white border border-zinc-200 text-zinc-800 text-xs rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-cyan-500 outline-none truncate font-medium appearance-none cursor-pointer"
+            >
+              <option value="none">Sin grupo</option>
+              {groups.map(g => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-4 relative z-10">
         {/* Biometrics / Readiness */}
         <div className={`space-y-1.5 p-2.5 rounded-xl border ${hasAlert ? 'bg-red-50 border-red-150' : 'bg-zinc-50 border-zinc-200/80'}`}>
           <div className="flex items-center justify-between">
