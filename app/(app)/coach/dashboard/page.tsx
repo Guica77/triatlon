@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { fetchCoachAthletes } from './actions'
+import { fetchCoachAthletes, getCoachGroups } from './actions'
 import { CoachDashboardView } from './coach-dashboard-view'
 
 export const dynamic = 'force-dynamic'
@@ -16,7 +16,7 @@ export default async function CoachDashboardPage() {
   }
 
   // 1. Fetch coach profile, roster data, and training plans in parallel
-  const [profileRes, rosterResult, plansRes] = await Promise.all([
+  const [profileRes, rosterResult, plansRes, groupsRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('role, first_name, invite_code')
@@ -26,7 +26,8 @@ export default async function CoachDashboardPage() {
     supabase
       .from('training_plans')
       .select('id, name')
-      .order('name', { ascending: true })
+      .order('name', { ascending: true }),
+    getCoachGroups()
   ]);
 
   const profile = profileRes.data;
@@ -39,12 +40,14 @@ export default async function CoachDashboardPage() {
   }
   const roster = rosterResult.data || [];
   const plans = plansRes.data || [];
+  const groups = groupsRes.data || [];
   const coachName = profile.first_name || 'Entrenador';
 
   return (
     <CoachDashboardView 
       initialRoster={roster} 
       plans={plans} 
+      groups={groups}
       coachName={coachName} 
       coachId={user.id}
       initialInviteCode={profile.invite_code}

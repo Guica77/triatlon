@@ -193,3 +193,46 @@ export async function updateCoachWorkoutDetails(
   }
 }
 
+export async function updateAthleteZonesByCoach(athleteId: string, payload: {
+  current_ftp?: number | null;
+  current_swim_pace?: string | null;
+  current_run_pace?: string | null;
+}) {
+  const supabase = await createClient()
+
+  // 1. Authenticate coach
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  // 2. Verify athlete belongs to coach roster
+  const { data: rosterCheck } = await supabase
+    .from('coach_athletes')
+    .select('id')
+    .eq('coach_id', user.id)
+    .eq('athlete_id', athleteId)
+    .maybeSingle()
+
+  if (!rosterCheck) return { error: 'No autorizado' }
+
+  try {
+    // 3. Use Admin Client to bypass RLS since users can normally only update their own profile
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const adminSupabase = createAdminClient()
+
+    const { error: updateError } = await adminSupabase
+      .from('profiles')
+      .update(payload)
+      .eq('id', athleteId)
+
+    if (updateError) {
+      console.error('Error updating athlete zones:', updateError)
+      return { error: 'Error al actualizar las métricas fisiológicas' }
+    }
+
+    revalidatePath(`/coach/athlete/${athleteId}`)
+    return { success: true }
+  } catch (err: unknown) {
+    console.error('Exception in updateAthleteZonesByCoach:', err)
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
+  }
+}

@@ -12,6 +12,7 @@ import { SessionPlanner } from '@/components/coach/session-planner';
 import { AdvancedCalendarWrapper } from '@/components/coach/advanced-calendar-wrapper';
 import { AthleteNutritionCard } from '@/components/coach/athlete-nutrition-card';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
+import { CoachAthleteZonesEditor } from '@/components/coach/coach-athlete-zones-editor';
 
 interface AthletePageProps {
   params: Promise<{ id: string }>;
@@ -125,6 +126,9 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     preferred_ingredients?: string[];
     disliked_ingredients?: string[];
     previous_injuries?: string;
+    current_ftp?: number;
+    current_swim_pace?: string;
+    current_run_pace?: string;
   };
   const activePlan = athleteProfile.training_plans;
 
@@ -238,8 +242,8 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
             </Link>
             <SessionPlanner athleteId={athleteId} />
           </div>
-          <span className="px-3 py-1 rounded-full bg-white border border-zinc-200 text-[10px] text-zinc-500 font-bold uppercase tracking-wider shadow-sm">
-            Modo Supervisor (Solo Lectura)
+          <span className="px-3 py-1 rounded-full bg-cyan-50 border border-cyan-200 text-[10px] text-cyan-650 font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+            <Activity className="w-3.5 h-3.5" /> Modo Entrenador Activo
           </span>
         </div>
       </header>
@@ -279,15 +283,25 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
           </div>
         </section>
 
-        {/* Section Nutrition */}
-        <section>
-          <AthleteNutritionCard 
-            athleteId={athleteId}
-            allergies={athleteProfile.allergies}
-            preferredIngredients={athleteProfile.preferred_ingredients}
-            dislikedIngredients={athleteProfile.disliked_ingredients}
-            dailyNutrition={dailyNutritionData}
-          />
+        {/* Section Nutrition & Zones */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="h-full">
+            <AthleteNutritionCard 
+              athleteId={athleteId}
+              allergies={athleteProfile.allergies}
+              preferredIngredients={athleteProfile.preferred_ingredients}
+              dislikedIngredients={athleteProfile.disliked_ingredients}
+              dailyNutrition={dailyNutritionData}
+            />
+          </div>
+          <div className="h-full">
+            <CoachAthleteZonesEditor 
+              athleteId={athleteId}
+              initialFtp={athleteProfile.current_ftp || null}
+              initialSwimPace={athleteProfile.current_swim_pace || null}
+              initialRunPace={athleteProfile.current_run_pace || null}
+            />
+          </div>
         </section>
 
         {/* Advanced Builder */}

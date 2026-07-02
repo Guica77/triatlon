@@ -85,6 +85,7 @@ export type Database = {
           created_at: string
           id: string
           status: string | null
+          group_id: string | null
         }
         Insert: {
           athlete_id: string
@@ -92,6 +93,7 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string | null
+          group_id?: string | null
         }
         Update: {
           athlete_id?: string
@@ -99,6 +101,7 @@ export type Database = {
           created_at?: string
           id?: string
           status?: string | null
+          group_id?: string | null
         }
         Relationships: [
           {
@@ -115,6 +118,45 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "coach_athletes_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "coach_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_groups: {
+        Row: {
+          id: string
+          coach_id: string
+          name: string
+          color: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          coach_id: string
+          name: string
+          color?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          coach_id?: string
+          name?: string
+          color?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_groups_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
         ]
       }
       coach_feedback: {

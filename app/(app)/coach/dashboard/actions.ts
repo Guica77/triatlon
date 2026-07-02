@@ -11,6 +11,8 @@ export interface AthleteRosterItem {
   level: string | null
   active_plan_id: string | null
   active_plan_name: string | null
+  group_id: string | null
+  group_name: string | null
   today_workout: {
     sport_type: string
     description: string
@@ -48,10 +50,14 @@ export async function fetchCoachAthletes(): Promise<{ data?: AthleteRosterItem[]
   }
 
   try {
-    // 1. Get athlete links
+    // 1. Get athlete links with group info
     const { data: roster, error: rosterError } = await supabase
       .from('coach_athletes')
-      .select('athlete_id')
+      .select(`
+        athlete_id,
+        group_id,
+        coach_groups(name)
+      `)
       .eq('coach_id', user.id)
 
     if (rosterError) {
@@ -167,22 +173,26 @@ export async function fetchCoachAthletes(): Promise<{ data?: AthleteRosterItem[]
 
       // Target TSS defaults to 400 for beginners, 480 for intermediate, 600 for advanced
       let target_tss = 450
-      if (p.level === 'principiante') target_tss = 350
-      if (p.level === 'avanzado') target_tss = 600
+      if (p?.level === 'principiante') target_tss = 350
+      if (p?.level === 'avanzado') target_tss = 600
 
-      // Alerts
       const low_hrv = today_biometrics ? ((today_biometrics.hrv !== null && today_biometrics.hrv < 55) || (today_biometrics.readiness_score !== null && today_biometrics.readiness_score < 60)) : false
       const high_tss = actual_tss > target_tss
       const high_fatigue = today_biometrics ? (today_biometrics.fatigue_rating !== null && today_biometrics.fatigue_rating >= 4) : false
 
+      const rosterMatch = roster.find(r => r.athlete_id === athleteId)
+      const groupData = rosterMatch?.coach_groups as any
+
       return {
         id: athleteId,
-        first_name: p.first_name,
-        last_name: p.last_name,
-        email: p.email,
-        level: p.level,
-        active_plan_id: p.active_plan_id,
-        active_plan_name: p.training_plans?.name || null,
+        first_name: p?.first_name || null,
+        last_name: p?.last_name || null,
+        email: p?.email || null,
+        level: p?.level || null,
+        active_plan_id: p?.active_plan_id || null,
+        active_plan_name: p?.training_plans?.name || null,
+        group_id: rosterMatch?.group_id || null,
+        group_name: groupData?.name || null,
         today_workout,
         today_biometrics,
         weekly_stats: {
@@ -473,3 +483,78 @@ export async function updateInviteCode(code: string): Promise<{ success?: boolea
     return { error: err.message || 'Error inesperado' }
   }
 }
+
+// --- GROUP MANAGEMENT ACTIONS ---
+
+export async function getCoachGroups() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { data: [], error: 'No autorizado' }
+
+  const { data, error } = await supabase
+    .from('coach_groups')
+    .select('*')
+    .eq('coach_id', user.id)
+    .order('name', { ascending: true })
+
+  if (error) return { error: error.message }
+  return { data }
+}
+
+export async function createCoachGroup(name: string, color: string = 'bg-zinc-100 text-zinc-800') {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  const { error } = await supabase
+    .from('coach_groups')
+    .insert({
+      coach_id: user.id,
+      name,
+      color
+    })
+
+  if (error) return { error: error.message }
+  
+  revalidatePath('/coach/dashboard')
+  return { success: true }
+}
+
+export async function deleteCoachGroup(groupId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  const { error } = await supabase
+    .from('coach_groups')
+    .delete()
+    .eq('id', groupId)
+    .eq('coach_id', user.id)
+
+  if (error) return { error: error.message }
+  
+  revalidatePath('/coach/dashboard')
+  return { success: true }
+}
+
+export async function assignAthleteToGroup(athleteId: string, groupId: string | null) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  const { error } = await supabase
+    .from('coach_athletes')
+    .update({ group_id: groupId })
+    .eq('athlete_id', athleteId)
+    .eq('coach_id', user.id)
+
+  if (error) return { error: error.message }
+  
+  revalidatePath('/coach/dashboard')
+  return { success: true }
+}
+
