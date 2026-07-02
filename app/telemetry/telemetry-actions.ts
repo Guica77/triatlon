@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { pushWorkoutToDevice } from '@/app/telemetry/workout-push-actions';
 import { sendWorkoutCompletionEmail } from '@/lib/email';
+import { getOrRefreshStravaToken } from '@/lib/telemetry/strava-sync';
 
 function safeWaitUntil(promise: Promise<any>) {
   if (typeof (globalThis as any).waitUntil === 'function') {
@@ -310,55 +311,10 @@ export async function getRecentStravaActivities() {
 
     const userId = authData.user.id;
 
-    // Find profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('strava_connected, strava_auth_tokens')
-      .eq('id', userId)
-      .single();
-
-    if (!profile || !profile.strava_connected) {
-      return { activities: [] };
-    }
-
-    const tokens = profile.strava_auth_tokens as any;
-    let accessToken = tokens?.access_token;
+    const accessToken = await getOrRefreshStravaToken(userId);
 
     if (!accessToken) {
       return { activities: [] };
-    }
-
-    // Refresh if needed
-    if (tokens?.expires_at && tokens.expires_at < Date.now()) {
-      const refreshResponse = await fetch('https://www.strava.com/oauth/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_id: process.env.STRAVA_CLIENT_ID,
-          client_secret: process.env.STRAVA_CLIENT_SECRET,
-          refresh_token: tokens.refresh_token,
-          grant_type: 'refresh_token',
-        }),
-      });
-
-      if (refreshResponse.ok) {
-        const refreshData = await refreshResponse.json();
-        accessToken = refreshData.access_token;
-        
-        await supabase
-          .from('profiles')
-          .update({
-            strava_auth_tokens: {
-              access_token: refreshData.access_token,
-              refresh_token: refreshData.refresh_token || tokens.refresh_token,
-              expires_at: refreshData.expires_at * 1000,
-            }
-          } as any)
-          .eq('id', userId);
-      } else {
-        console.error('Failed to refresh Strava token:', await refreshResponse.text());
-        return { error: 'Error al refrescar credenciales de Strava' };
-      }
     }
 
     // Fetch last 10 activities
