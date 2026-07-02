@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Info, Heart, Moon, Activity, Flame, Brain } from 'lucide-react'
+import { Info, Heart, Moon, Activity, Flame, Brain, Utensils } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { DailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions'
 import { AnimatedButton } from '@/components/ui/animated-button'
@@ -36,6 +36,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
   const [weight, setWeight] = React.useState(initialData?.weight !== null && initialData?.weight !== undefined ? initialData.weight.toString() : '')
   const [fatigueRating, setFatigueRating] = React.useState<number | null>(initialData?.fatigue_rating ?? null)
   const [stressLevel, setStressLevel] = React.useState<number | null>(initialData?.stress_level ?? null)
+  const [nutritionAdherence, setNutritionAdherence] = React.useState<number | null>(initialData?.nutrition_adherence ?? null)
   const [loading, setLoading] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
 
@@ -48,6 +49,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
       setWeight(initialData.weight !== null && initialData.weight !== undefined ? initialData.weight.toString() : '')
       setFatigueRating(initialData.fatigue_rating)
       setStressLevel(initialData.stress_level)
+      setNutritionAdherence(initialData.nutrition_adherence ?? null)
       setErrorMessage(null)
     }
   }, [initialData])
@@ -74,6 +76,11 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
       return
     }
 
+    if (nutritionAdherence === null || nutritionAdherence === 0) {
+      setErrorMessage('Por favor, indica tu adherencia nutricional del día anterior.')
+      return
+    }
+
     setLoading(true)
     setErrorMessage(null)
 
@@ -85,6 +92,7 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
         weight: parseFloat(weight),
         fatigue_rating: fatigueRating,
         stress_level: stressLevel,
+        nutrition_adherence: nutritionAdherence,
       })
       onClose()
     } catch (err) {
@@ -294,6 +302,44 @@ export function BiometricsModal({ isOpen, onClose, initialData, onSave }: Biomet
                 <div className="p-3.5 rounded-lg bg-emerald-50 border-l-2 border-emerald-500 space-y-1">
                   <p className="text-xs font-semibold text-emerald-600">{currentStress.title}</p>
                   <p className="text-xs text-zinc-500 leading-relaxed">{currentStress.desc}</p>
+                </div>
+              </div>
+
+              {/* Adherencia Nutricional */}
+              <div className="p-5 rounded-xl bg-zinc-50 border border-zinc-200 space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-zinc-850 flex items-center gap-2">
+                    <Utensils className="w-4 h-4 text-cyan-600" />
+                    Adherencia Nutricional (Día Anterior)
+                  </span>
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded bg-cyan-500/10 text-cyan-600 border border-cyan-500/20">
+                    {nutritionAdherence !== null && nutritionAdherence > 0 ? `${nutritionAdherence} / 10` : 'Pendiente'}
+                  </span>
+                </div>
+
+                <div className="space-y-4 mt-2">
+                  <input 
+                    type="range" 
+                    min="1" 
+                    max="10" 
+                    step="1"
+                    value={nutritionAdherence ?? 5} 
+                    onChange={(e) => setNutritionAdherence(parseInt(e.target.value))}
+                    aria-label="Adherencia nutricional"
+                    title="Adherencia nutricional"
+                    className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                  />
+                  <div className="flex justify-between text-[10px] font-bold text-zinc-400 uppercase">
+                    <span>1 (Muy pobre)</span>
+                    <span>5 (Media)</span>
+                    <span>10 (Perfecta)</span>
+                  </div>
+                </div>
+                
+                {/* Ayuda Dinámica */}
+                <div className="p-3.5 rounded-lg bg-cyan-50 border-l-2 border-cyan-500 space-y-1">
+                  <p className="text-xs font-semibold text-cyan-600">Evalúa tu alimentación</p>
+                  <p className="text-xs text-zinc-500 leading-relaxed">Considera si cumpliste los gramos de carbohidratos, hidratación y proteínas recomendados por tu entrenador ayer.</p>
                 </div>
               </div>
 

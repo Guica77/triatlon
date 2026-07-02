@@ -58,6 +58,17 @@ export function DashboardViewTabs({
   const [aiInitialPrompt, setAiInitialPrompt] = React.useState('');
   const [aiWorkouts, setAiWorkouts] = React.useState<GeneratedWorkout[]>([]);
   
+  async function handleCreateManualWorkout(formData: FormData) {
+    const title = formData.get('title') as string;
+    const sport_type = formData.get('sport_type') as string;
+    const duration_min = parseInt(formData.get('duration_min') as string, 10);
+    const scheduled_date = formData.get('scheduled_date') as string;
+    const status = formData.get('status') as "pending" | "completed";
+
+    await createManualWorkoutAction({ title, sport_type, duration_min, scheduled_date, status });
+    setIsManualModalOpen(false);
+  }
+  
   // Merge initialWorkouts with AI generated ones
   const allWorkouts = React.useMemo(() => {
     const mappedAiWorkouts = aiWorkouts.map((aiw, idx) => ({

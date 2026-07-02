@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { AnimatedButton } from '@/components/ui/animated-button'
-import { Activity, Moon, Heart, Settings, Flame, Brain, Watch, Loader2 } from 'lucide-react'
+import { Activity, Moon, Heart, Settings, Flame, Brain, Watch, Loader2, Utensils } from 'lucide-react'
 import { DailyBiometrics, updateBiometrics, calculateReadiness, syncGarminToDatabaseAction } from '@/app/(app)/dashboard/biometrics-actions'
 import { BiometricsModal } from '@/components/dashboard/biometrics-modal'
 import { DetailedBiometricsModal } from '@/components/dashboard/detailed-biometrics-modal'
@@ -68,6 +68,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
     const sleep_hours = formData.sleep_hours ?? 7.5
     const fatigue_rating = formData.fatigue_rating ?? 2
     const stress_level = formData.stress_level ?? 2
+    const nutrition_adherence = formData.nutrition_adherence ?? null
  
     const res = await calculateReadiness(hrv, rhr, sleep_hours, fatigue_rating, stress_level)
     const readiness_score = res.data?.readiness_score ?? 85
@@ -394,6 +395,10 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
               <Brain className="w-3.5 h-3.5 text-emerald-500" />
               <span>Carga Mental: <strong className="text-emerald-650">{isRegistered ? `Nivel ${biometrics.stress_level}/5` : 'Pendiente'}</strong></span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
+              <Utensils className="w-3.5 h-3.5 text-cyan-500" />
+              <span>Nutrición: <strong className="text-cyan-650">{biometrics.nutrition_adherence ? `${biometrics.nutrition_adherence}/10` : 'Pendiente'}</strong></span>
             </div>
           </div>
           

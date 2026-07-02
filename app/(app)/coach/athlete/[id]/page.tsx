@@ -124,6 +124,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     allergies?: string[];
     preferred_ingredients?: string[];
     disliked_ingredients?: string[];
+    previous_injuries?: string;
   };
   const activePlan = athleteProfile.training_plans;
 
@@ -184,6 +185,26 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse shrink-0"></span>
                 Plan: {activePlan?.name || 'Sin plan activo'} • Nivel {athleteProfile.level}
               </p>
+              
+              <div className="flex items-center gap-3 mt-2 flex-wrap">
+                <div className="flex items-center gap-2 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200" title="Carga Crónica (Fitness)">
+                    CTL: {Math.round(analyticsData.currentCtl)}
+                  </span>
+                  <span className="px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200" title="Carga Aguda (Fatiga)">
+                    ATL: {Math.round(analyticsData.currentAtl)}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded border ${analyticsData.currentTsb > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`} title="Balance de Estrés (Estado de Forma)">
+                    TSB: {Math.round(analyticsData.currentTsb)}
+                  </span>
+                </div>
+                
+                {athleteProfile.previous_injuries && (
+                  <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold flex items-center gap-1" title={athleteProfile.previous_injuries}>
+                    <Activity className="w-3 h-3" /> Lesiones previas documentadas
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 

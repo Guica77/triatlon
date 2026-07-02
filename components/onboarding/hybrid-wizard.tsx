@@ -66,6 +66,7 @@ export function HybridWizard() {
   const [dislikedIngredients, setDislikedIngredients] = React.useState<string[]>([]);
   const [currentWeight, setCurrentWeight] = React.useState('');
   const [dailySteps, setDailySteps] = React.useState('');
+  const [previousInjuries, setPreviousInjuries] = React.useState('');
 
   // Step 3: Virtual Garage
   const [virtualGarage, setVirtualGarage] = React.useState<string[]>([]);
@@ -126,6 +127,7 @@ export function HybridWizard() {
         preferred_ingredients: preferredIngredients,
         allergies,
         disliked_ingredients: dislikedIngredients,
+        previous_injuries: previousInjuries || undefined,
       });
 
       if (result && result.error) {
@@ -182,6 +184,7 @@ export function HybridWizard() {
         disliked_ingredients: dislikedIngredients,
         current_weight: currentWeight ? parseFloat(currentWeight) : undefined,
         daily_steps: dailySteps ? parseInt(dailySteps) : undefined,
+        previous_injuries: previousInjuries || undefined,
       });
 
       if (result && result.error) {
@@ -304,6 +307,8 @@ export function HybridWizard() {
             setCurrentWeight={setCurrentWeight}
             dailySteps={dailySteps}
             setDailySteps={setDailySteps}
+            previousInjuries={previousInjuries}
+            setPreviousInjuries={setPreviousInjuries}
             onPrev={() => setStep(1)}
             onNext={() => setStep(3)}
           />

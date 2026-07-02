@@ -9,6 +9,7 @@ import { PhysiologicalCard } from '@/components/settings/physiological-card';
 import { TelemetryConnectCard } from '@/components/settings/telemetry-connect-card';
 import { BillingCard } from '@/components/settings/billing-card';
 import { SweatTestCard } from '@/components/settings/sweat-test-card';
+import { TrainingZonesCard } from '@/components/settings/training-zones-card';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -95,6 +96,7 @@ export default async function SettingsPage() {
                   swimPace={profile.current_swim_pace}
                   runPace={profile.current_run_pace}
                   baselineHours={profile.baseline_training_hours}
+                  previousInjuries={profile.previous_injuries}
                 />
               </div>
               <div className="h-full">
@@ -107,6 +109,14 @@ export default async function SettingsPage() {
                   customCarbsPerHour={profile.custom_carbs_per_hour}
                 />
               </div>
+            </div>
+
+            <div className="h-full">
+              <TrainingZonesCard 
+                ftp={profile.current_ftp}
+                swimPace={profile.current_swim_pace}
+                runPace={profile.current_run_pace}
+              />
             </div>
             
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6">

@@ -145,10 +145,12 @@ export async function saveRaceGoalAndPlan(formData: {
   allergies?: string[];
   disliked_ingredients?: string[];
   current_weight?: number;
+  daily_steps?: number;
   current_finish_time?: string;
   current_swim_time?: string;
   current_bike_time?: string;
   current_run_time?: string;
+  previous_injuries?: string;
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -277,7 +279,8 @@ export async function saveRaceGoalAndPlan(formData: {
     allergies: formData.allergies || [],
     disliked_ingredients: formData.disliked_ingredients || [],
     current_weight: formData.current_weight,
-    daily_steps: formData.daily_steps
+    daily_steps: formData.daily_steps,
+    previous_injuries: formData.previous_injuries
   };
 
   let profileError = null;

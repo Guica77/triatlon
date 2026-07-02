@@ -33,6 +33,16 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
   const [targetSwimTime, setTargetSwimTime] = React.useState('');
   const [targetBikeTime, setTargetBikeTime] = React.useState('');
   const [targetRunTime, setTargetRunTime] = React.useState('');
+  const [currentFinishTime, setCurrentFinishTime] = React.useState('');
+  const [currentSwimTime, setCurrentSwimTime] = React.useState('');
+  const [currentBikeTime, setCurrentBikeTime] = React.useState('');
+  const [currentRunTime, setCurrentRunTime] = React.useState('');
+  const [currentWeight, setCurrentWeight] = React.useState('');
+  const [dailySteps, setDailySteps] = React.useState('');
+  const [previousInjuries, setPreviousInjuries] = React.useState('');
+  const [currentFtp, setCurrentFtp] = React.useState('');
+  const [currentSwimPace, setCurrentSwimPace] = React.useState('');
+  const [currentRunPace, setCurrentRunPace] = React.useState('');
 
   const filteredCatalog = React.useMemo(() => {
     if (!searchQuery) return RACES_CATALOG;
@@ -147,7 +157,27 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
               setBikeHours={setBikeHours}
               runHours={runHours}
               setRunHours={setRunHours}
-              onNext={() => {}} // Not used inside the modal
+              currentFinishTime={currentFinishTime}
+              setCurrentFinishTime={setCurrentFinishTime}
+              currentSwimTime={currentSwimTime}
+              setCurrentSwimTime={setCurrentSwimTime}
+              currentBikeTime={currentBikeTime}
+              setCurrentBikeTime={setCurrentBikeTime}
+              currentRunTime={currentRunTime}
+              setCurrentRunTime={setCurrentRunTime}
+              currentWeight={currentWeight}
+              setCurrentWeight={setCurrentWeight}
+              dailySteps={dailySteps}
+              setDailySteps={setDailySteps}
+              previousInjuries={previousInjuries}
+              setPreviousInjuries={setPreviousInjuries}
+              currentFtp={currentFtp}
+              setCurrentFtp={setCurrentFtp}
+              currentSwimPace={currentSwimPace}
+              setCurrentSwimPace={setCurrentSwimPace}
+              currentRunPace={currentRunPace}
+              setCurrentRunPace={setCurrentRunPace}
+              onNext={() => {}}
             />
           </div>
 

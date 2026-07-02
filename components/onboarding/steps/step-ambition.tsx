@@ -60,6 +60,8 @@ interface StepAmbitionProps {
   setCurrentWeight: (v: string) => void;
   dailySteps: string;
   setDailySteps: (v: string) => void;
+  previousInjuries: string;
+  setPreviousInjuries: (v: string) => void;
   onNext: () => void;
   onPrev?: () => void;
 }
@@ -103,6 +105,15 @@ export function StepAmbition(props: StepAmbitionProps) {
                 <label className="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider">Pasos Diarios (Media)</label>
                 <input type="number" placeholder="Ej. 8000" value={props.dailySteps} onChange={e => props.setDailySteps(e.target.value)} className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm" />
               </div>
+            </div>
+            <div className="mt-4">
+              <label className="text-[10px] font-bold text-zinc-500 block mb-1.5 uppercase tracking-wider">Lesiones Previas o Patologías (Opcional)</label>
+              <textarea 
+                placeholder="Ej. Condromalacia rotuliana, operación de menisco hace 2 años..." 
+                value={props.previousInjuries} 
+                onChange={e => props.setPreviousInjuries(e.target.value)} 
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 placeholder-zinc-400 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-all shadow-sm min-h-[80px]" 
+              />
             </div>
             <p className="text-[10px] text-zinc-400 mt-2">Si no conoces tus zonas, déjalo en blanco y la IA las estimará según tu experiencia.</p>
           </div>

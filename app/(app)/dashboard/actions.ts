@@ -173,6 +173,15 @@ export async function completeWorkoutWithFeedback(
       notes: notes || null
     })
 
+  // También actualizar el workout directamente (por esquema nuevo)
+  await supabase
+    .from('user_workouts')
+    .update({ 
+      rpe: rpe,
+      feelings: feeling
+    })
+    .eq('id', workoutId)
+
   if (error) {
     console.error("Error guardando feedback:", error)
     throw new Error("No se pudo guardar el feedback")

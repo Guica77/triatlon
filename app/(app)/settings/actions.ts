@@ -9,6 +9,7 @@ export async function updatePhysiologicalData(data: {
   current_swim_pace?: string | null;
   current_run_pace?: string | null;
   baseline_training_hours?: string;
+  previous_injuries?: string | null;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -24,6 +25,7 @@ export async function updatePhysiologicalData(data: {
       current_swim_pace: data.current_swim_pace,
       current_run_pace: data.current_run_pace,
       baseline_training_hours: data.baseline_training_hours,
+      previous_injuries: data.previous_injuries,
       updated_at: new Date().toISOString(),
     })
     .eq('id', user.id);

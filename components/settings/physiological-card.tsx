@@ -11,9 +11,10 @@ interface PhysiologicalCardProps {
   swimPace: string | null;
   runPace: string | null;
   baselineHours: string | null;
+  previousInjuries: string | null;
 }
 
-export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours }: PhysiologicalCardProps) {
+export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours, previousInjuries }: PhysiologicalCardProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   
@@ -22,6 +23,7 @@ export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours }: Phy
     current_swim_pace: swimPace || '',
     current_run_pace: runPace || '',
     baseline_training_hours: baselineHours || '7-10h',
+    previous_injuries: previousInjuries || '',
   });
 
   const handleSave = async () => {
@@ -31,6 +33,7 @@ export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours }: Phy
       current_swim_pace: form.current_swim_pace || null,
       current_run_pace: form.current_run_pace || null,
       baseline_training_hours: form.baseline_training_hours,
+      previous_injuries: form.previous_injuries || null,
     });
     setLoading(false);
     setIsEditing(false);
@@ -55,7 +58,7 @@ export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours }: Phy
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 flex-1">
+      <div className="grid grid-cols-2 gap-4 flex-1 mb-4">
         <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/80 flex flex-col justify-center shadow-sm">
           <div className="flex items-center gap-1.5 text-zinc-450 mb-1">
             <Zap className="w-3.5 h-3.5 text-amber-500" />
@@ -88,6 +91,13 @@ export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours }: Phy
           <p className="text-[9px] text-zinc-500 mt-0.5">/ semana</p>
         </div>
       </div>
+
+      {previousInjuries && (
+        <div className="mt-2 p-3 bg-red-50 border border-red-100 rounded-xl">
+          <p className="text-[10px] font-bold text-red-600 uppercase tracking-widest mb-1">Lesiones / Patologías Previas</p>
+          <p className="text-xs text-red-800">{previousInjuries}</p>
+        </div>
+      )}
 
       <AnimatePresence>
         {isEditing && (
@@ -165,6 +175,17 @@ export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours }: Phy
                       <option value="12+h">12+h</option>
                     </select>
                   </div>
+                </div>
+                
+                <div className="mt-2">
+                  <label htmlFor="injuriesInput" className="text-[10px] text-zinc-500 uppercase font-black mb-1 block">Lesiones / Patologías Previas</label>
+                  <textarea 
+                    id="injuriesInput"
+                    value={form.previous_injuries} 
+                    onChange={e => setForm({...form, previous_injuries: e.target.value})} 
+                    className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-sm text-zinc-900 focus:border-cyan-550 focus:ring-1 focus:ring-cyan-550 outline-none min-h-[60px]" 
+                    placeholder="Ej. Condromalacia, esguince..." 
+                  />
                 </div>
                 
                 <AnimatedButton 

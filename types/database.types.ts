@@ -265,6 +265,13 @@ export type Database = {
           preferred_ingredients: string[] | null
           allergies: string[] | null
           disliked_ingredients: string[] | null
+          daily_steps: number | null
+          current_finish_time: string | null
+          current_swim_time: string | null
+          current_bike_time: string | null
+          current_run_time: string | null
+          current_weight: number | null
+          previous_injuries: string | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -314,6 +321,13 @@ export type Database = {
           preferred_ingredients?: string[] | null
           allergies?: string[] | null
           disliked_ingredients?: string[] | null
+          daily_steps?: number | null
+          current_finish_time?: string | null
+          current_swim_time?: string | null
+          current_bike_time?: string | null
+          current_run_time?: string | null
+          current_weight?: number | null
+          previous_injuries?: string | null
         }
         Update: {
           active_plan_id?: string | null
@@ -363,6 +377,13 @@ export type Database = {
           preferred_ingredients?: string[] | null
           allergies?: string[] | null
           disliked_ingredients?: string[] | null
+          daily_steps?: number | null
+          current_finish_time?: string | null
+          current_swim_time?: string | null
+          current_bike_time?: string | null
+          current_run_time?: string | null
+          current_weight?: number | null
+          previous_injuries?: string | null
         }
         Relationships: [
           {
@@ -554,6 +575,7 @@ export type Database = {
           user_id: string
           weight: number | null
           daily_steps: number | null
+          nutrition_adherence: number | null
         }
         Insert: {
           created_at?: string
@@ -569,6 +591,7 @@ export type Database = {
           user_id: string
           weight?: number | null
           daily_steps?: number | null
+          nutrition_adherence?: number | null
         }
         Update: {
           created_at?: string
@@ -584,6 +607,7 @@ export type Database = {
           user_id?: string
           weight?: number | null
           daily_steps?: number | null
+          nutrition_adherence?: number | null
         }
         Relationships: []
       }
@@ -644,6 +668,8 @@ export type Database = {
           status: string | null
           updated_at: string
           user_id: string
+          rpe: number | null
+          feelings: string | null
         }
         Insert: {
           actual_tss?: number | null
@@ -657,6 +683,8 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id: string
+          rpe?: number | null
+          feelings?: string | null
         }
         Update: {
           actual_tss?: number | null
@@ -670,6 +698,8 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id?: string
+          rpe?: number | null
+          feelings?: string | null
         }
         Relationships: [
           {

@@ -17,6 +17,7 @@ export interface DailyBiometrics {
   fatigue_rating: number | null // 1 a 5
   stress_level: number | null // 1 a 5
   readiness_score: number | null
+  nutrition_adherence?: number | null // 1 a 10
   raw_garmin_data?: any
 }
 
@@ -96,6 +97,7 @@ export async function getDailyBiometrics(): Promise<{ data?: DailyBiometrics; hi
       weight: null,
       fatigue_rating: null,
       stress_level: null,
+      nutrition_adherence: null,
       readiness_score: null,
     }
 
@@ -123,6 +125,7 @@ export async function updateBiometrics(formData: Partial<DailyBiometrics>): Prom
     const weight = formData.weight ?? 72.0
     const fatigue_rating = formData.fatigue_rating ?? 2
     const stress_level = formData.stress_level ?? 2
+    const nutrition_adherence = formData.nutrition_adherence ?? null
 
     const { data: calc } = await calculateReadiness(hrv, rhr, sleep_hours, fatigue_rating, stress_level)
 
@@ -139,6 +142,7 @@ export async function updateBiometrics(formData: Partial<DailyBiometrics>): Prom
           weight,
           fatigue_rating,
           stress_level,
+          nutrition_adherence,
           readiness_score: calc.readiness_score,
         },
         { onConflict: 'user_id,date' }
