@@ -3,8 +3,9 @@
 import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { Plus, X, Trash2, Users } from 'lucide-react';
+import { Plus, X, Trash2, Users, ArrowRight } from 'lucide-react';
 import { createCoachGroup, deleteCoachGroup } from '@/app/(app)/coach/dashboard/actions';
+import Link from 'next/link';
 
 interface CoachGroupsManagerProps {
   isOpen: boolean;
@@ -70,14 +71,24 @@ export function CoachGroupsManager({ isOpen, onClose, groups }: CoachGroupsManag
             groups.map(g => (
               <div key={g.id} className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 bg-white shadow-sm">
                 <span className="font-semibold text-sm text-zinc-800">{g.name}</span>
-                <button 
-                  type="button"
-                  onClick={() => handleDelete(g.id)}
-                  disabled={loading}
-                  className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1">
+                  <Link 
+                    href={`/coach/group/${g.id}`}
+                    className="p-1.5 text-zinc-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition"
+                    title="Ver Dashboard del Grupo"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <button 
+                    type="button"
+                    onClick={() => handleDelete(g.id)}
+                    disabled={loading}
+                    className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+                    title="Eliminar Grupo"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             ))
           )}
