@@ -72,6 +72,8 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
       </div>
       
       <button 
+        title="Eliminar plantilla"
+        aria-label="Eliminar plantilla"
         onClick={(e) => { e.stopPropagation(); onDelete(template.id); }}
         className="opacity-0 group-hover:opacity-100 p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
       >
@@ -154,13 +156,13 @@ export function CoachWorkoutLibrary({ initialTemplates }: CoachWorkoutLibraryPro
             </DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4 mt-4">
               <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Nombre</label>
-                <input required type="text" value={name} onChange={e => setName(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Ej. Series 5x1000m" />
+                <label htmlFor="name" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Nombre</label>
+                <input id="name" title="Nombre de la plantilla" aria-label="Nombre de la plantilla" required type="text" value={name} onChange={e => setName(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Ej. Series 5x1000m" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Deporte</label>
-                  <select value={sportType} onChange={e => setSportType(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500">
+                  <label htmlFor="sportType" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Deporte</label>
+                  <select id="sportType" title="Seleccionar Deporte" aria-label="Seleccionar Deporte" value={sportType} onChange={e => setSportType(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500">
                     <option value="ciclismo">Ciclismo</option>
                     <option value="carrera">Carrera</option>
                     <option value="natacion">Natación</option>
@@ -168,13 +170,13 @@ export function CoachWorkoutLibrary({ initialTemplates }: CoachWorkoutLibraryPro
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Duración (min)</label>
-                  <input required type="number" min={1} value={duration} onChange={e => setDuration(parseInt(e.target.value))} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500" />
+                  <label htmlFor="duration" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Duración (min)</label>
+                  <input id="duration" title="Duración en minutos" aria-label="Duración en minutos" required type="number" min={1} value={duration} onChange={e => setDuration(parseInt(e.target.value))} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500" placeholder="60" />
                 </div>
               </div>
               <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Intensidad</label>
-                <select value={intensity} onChange={e => setIntensity(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500">
+                <label htmlFor="intensity" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Intensidad</label>
+                <select id="intensity" title="Seleccionar Intensidad" aria-label="Seleccionar Intensidad" value={intensity} onChange={e => setIntensity(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500">
                   <option value="z1">Z1 - Recuperación</option>
                   <option value="z2">Z2 - Resistencia</option>
                   <option value="z3">Z3 - Tempo</option>
@@ -183,16 +185,16 @@ export function CoachWorkoutLibrary({ initialTemplates }: CoachWorkoutLibraryPro
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Calentamiento</label>
-                <textarea value={warmup} onChange={e => setWarmup(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500 resize-none h-20" />
+                <label htmlFor="warmup" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Calentamiento</label>
+                <textarea id="warmup" title="Calentamiento" aria-label="Calentamiento" value={warmup} onChange={e => setWarmup(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500 resize-none h-20" placeholder="Ej. 10 min suave" />
               </div>
               <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Parte Principal</label>
-                <textarea required value={main} onChange={e => setMain(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500 resize-none h-24" />
+                <label htmlFor="main" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Parte Principal</label>
+                <textarea id="main" title="Parte Principal" aria-label="Parte Principal" required value={main} onChange={e => setMain(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500 resize-none h-24" placeholder="Ej. 5x1000m Z4" />
               </div>
               <div>
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Enfriamiento</label>
-                <textarea value={cooldown} onChange={e => setCooldown(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500 resize-none h-20" />
+                <label htmlFor="cooldown" className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Enfriamiento</label>
+                <textarea id="cooldown" title="Enfriamiento" aria-label="Enfriamiento" value={cooldown} onChange={e => setCooldown(e.target.value)} className="w-full mt-1 p-2 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-cyan-500 resize-none h-20" placeholder="Ej. 10 min soltar piernas" />
               </div>
               
               <AnimatedButton type="submit" disabled={loading} className="w-full py-3 bg-zinc-900 text-white rounded-xl text-sm font-semibold hover:bg-zinc-800 transition">
