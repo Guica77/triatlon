@@ -236,3 +236,133 @@ export async function updateAthleteZonesByCoach(athleteId: string, payload: {
     return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
+
+// --- COACH WORKOUT LIBRARY ACTIONS ---
+
+export async function getCoachLibrary() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { data: [], error: 'No autorizado' }
+
+  const { data, error } = await supabase
+    .from('coach_workout_library')
+    .select('*')
+    .eq('coach_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error) return { error: error.message }
+  return { data }
+}
+
+export async function createLibraryTemplate(payload: {
+  name: string
+  sport_type: string
+  duration_min: number
+  warmup?: string
+  main?: string
+  cooldown?: string
+  intensity_type?: string
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  const { data, error } = await supabase
+    .from('coach_workout_library')
+    .insert({
+      coach_id: user.id,
+      ...payload
+    })
+    .select()
+    .single()
+
+  if (error) return { error: error.message }
+  
+  // No revalidation needed if we handle state client-side, but let's revalidate the path
+  revalidatePath('/coach/athlete/[id]', 'page')
+  return { data }
+}
+
+export async function deleteLibraryTemplate(templateId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  const { error } = await supabase
+    .from('coach_workout_library')
+    .delete()
+    .eq('id', templateId)
+    .eq('coach_id', user.id)
+
+  if (error) return { error: error.message }
+  
+  revalidatePath('/coach/athlete/[id]', 'page')
+  return { success: true }
+}
+
+export async function assignTemplateToAthleteDay(athleteId: string, templateId: string, date: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  // Verify athlete belongs to coach
+  const { data: rosterCheck } = await supabase
+    .from('coach_athletes')
+    .select('id')
+    .eq('coach_id', user.id)
+    .eq('athlete_id', athleteId)
+    .maybeSingle()
+
+  if (!rosterCheck) return { error: 'No autorizado' }
+
+  // Get template details
+  const { data: template } = await supabase
+    .from('coach_workout_library')
+    .select('*')
+    .eq('id', templateId)
+    .eq('coach_id', user.id)
+    .single()
+
+  if (!template) return { error: 'Plantilla no encontrada' }
+
+  try {
+    const description = `Calentamiento: ${template.warmup || 'Suave'}\nParte principal: ${template.main || 'Rodaje'}\nEnfriamiento: ${template.cooldown || 'Suave'}`
+
+    // Create session
+    const { data: session, error: sessionError } = await supabase
+      .from('training_sessions')
+      .insert({
+        sport_type: template.sport_type,
+        duration_min: template.duration_min,
+        description: description,
+        day_name: 'Custom',
+        week_number: 0
+      })
+      .select('id')
+      .single()
+
+    if (sessionError) throw sessionError
+
+    // Create workout linked to session
+    const { error: workoutError } = await supabase
+      .from('user_workouts')
+      .insert({
+        user_id: athleteId,
+        session_id: session.id,
+        scheduled_date: date,
+        status: 'pending'
+      })
+
+    if (workoutError) throw workoutError
+
+    revalidatePath(`/coach/athlete/${athleteId}`)
+    return { success: true }
+  } catch (err: unknown) {
+    console.error('Error in assignTemplateToAthleteDay:', err)
+    return { error: err instanceof Error ? err.message : 'Error inesperado' }
+  }
+}

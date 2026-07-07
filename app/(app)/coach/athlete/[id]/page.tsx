@@ -12,6 +12,7 @@ import { SessionPlanner } from '@/components/coach/session-planner';
 import { AdvancedCalendarWrapper } from '@/components/coach/advanced-calendar-wrapper';
 import { AthleteNutritionCard } from '@/components/coach/athlete-nutrition-card';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
+import { getCoachLibrary } from './actions';
 import { CoachAthleteZonesEditor } from '@/components/coach/coach-athlete-zones-editor';
 
 interface AthletePageProps {
@@ -56,7 +57,8 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     analyticsData,
     devicesRes,
     workoutsRes,
-    nutritionRes
+    nutritionRes,
+    libraryRes
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -98,7 +100,8 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
       .gte('scheduled_date', calendarStart.toISOString().split('T')[0])
       .lte('scheduled_date', calendarEnd.toISOString().split('T')[0])
       .order('scheduled_date', { ascending: true }),
-    getDailyNutrition(today, athleteId)
+    getDailyNutrition(today, athleteId),
+    getCoachLibrary()
   ]);
 
   const coachProfile = coachProfileRes.data;
@@ -315,7 +318,11 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
               Arrastra y suelta para reprogramar
             </span>
           </div>
-          <AdvancedCalendarWrapper athleteId={athleteId} initialWorkouts={workouts || []} />
+          <AdvancedCalendarWrapper 
+            athleteId={athleteId} 
+            initialWorkouts={workouts || []} 
+            initialLibraryTemplates={libraryRes?.data || []}
+          />
         </section>
 
         {/* Tabs of Calendar / List View */}

@@ -159,6 +159,54 @@ export type Database = {
           }
         ]
       }
+
+      coach_workout_library: {
+        Row: {
+          id: string
+          coach_id: string
+          name: string
+          sport_type: string
+          duration_min: number
+          warmup: string | null
+          main: string | null
+          cooldown: string | null
+          intensity_type: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          coach_id: string
+          name: string
+          sport_type: string
+          duration_min: number
+          warmup?: string | null
+          main?: string | null
+          cooldown?: string | null
+          intensity_type?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          coach_id?: string
+          name?: string
+          sport_type?: string
+          duration_min?: number
+          warmup?: string | null
+          main?: string | null
+          cooldown?: string | null
+          intensity_type?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_workout_library_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       coach_feedback: {
         Row: {
           athlete_id: string | null

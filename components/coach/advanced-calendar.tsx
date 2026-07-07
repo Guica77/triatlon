@@ -27,6 +27,7 @@ import { Calendar, GripVertical, Activity, Flame, Droplets, Dumbbell } from 'luc
 import { format, parseISO, addDays, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EditWorkoutModal, EditWorkoutData } from './edit-workout-modal';
+import { CoachWorkoutLibrary } from './coach-workout-library';
 
 // --- Types ---
 export interface WorkoutItem {
@@ -45,6 +46,8 @@ interface AdvancedCalendarProps {
   onWorkoutMove: (workoutId: string, newDate: string) => Promise<void>;
   startDate?: Date; // Usually the Monday of the current week
   athleteId?: string; // Needed for EditWorkoutModal
+  libraryTemplates?: any[];
+  onTemplateDrop?: (templateId: string, date: string) => Promise<void>;
 }
 
 // --- Helper for parsing description ---
@@ -212,7 +215,7 @@ function DroppableBackground({ id, isEmpty, onAddClick, children }: { id: string
 }
 
 // --- Main Calendar Component ---
-export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date(), athleteId }: AdvancedCalendarProps) {
+export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date(), athleteId, libraryTemplates, onTemplateDrop }: AdvancedCalendarProps) {
   // Normalize start date to Monday
   const weekStart = startOfWeek(startDate, { weekStartsOn: 1 });
   
@@ -230,6 +233,7 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
   // Local state for optimistic UI updates during drag
   const [columns, setColumns] = React.useState<Record<string, WorkoutItem[]>>({});
   const [activeWorkout, setActiveWorkout] = React.useState<WorkoutItem | null>(null);
+  const [activeTemplate, setActiveTemplate] = React.useState<any | null>(null);
   const [isUpdating, setIsUpdating] = React.useState(false);
   
   // Edit Modal State
@@ -287,13 +291,21 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const { workout } = active.data.current as { workout: WorkoutItem };
-    setActiveWorkout(workout);
+    const type = active.data.current?.type;
+    
+    if (type === 'Template') {
+      setActiveTemplate(active.data.current?.template);
+    } else {
+      const { workout } = active.data.current as { workout: WorkoutItem };
+      setActiveWorkout(workout);
+    }
   };
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
+    
+    if (active.data.current?.type === 'Template') return; // Don't sort templates while dragging over
 
     const activeId = active.id;
     const overId = over.id;
@@ -332,13 +344,35 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
-    setActiveWorkout(null);
     const { active, over } = event;
+    setActiveWorkout(null);
+    setActiveTemplate(null);
     if (!over) return;
 
     const activeId = active.id;
     const overId = over.id;
 
+    // Handle dropping a Template
+    if (active.data.current?.type === 'Template') {
+      const template = active.data.current?.template;
+      // overId might be the day string directly, or a workout inside the day
+      const targetDay = Object.keys(columns).find(key => columns[key].some(w => w.id === overId)) || overId.toString();
+      
+      // Ensure targetDay is one of the valid columns (a date)
+      if (columns[targetDay] && onTemplateDrop) {
+        setIsUpdating(true);
+        try {
+          await onTemplateDrop(template.id, targetDay);
+        } catch (err) {
+          console.error("Failed to drop template", err);
+        } finally {
+          setIsUpdating(false);
+        }
+      }
+      return;
+    }
+
+    // Handle dropping a Workout
     const activeContainer = Object.keys(columns).find(key => columns[key].some(w => w.id === activeId));
     const overContainer = Object.keys(columns).find(key => columns[key].some(w => w.id === overId)) || overId.toString();
 
@@ -385,37 +419,50 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
-          {days.map(day => (
-            <div key={day.id} className="flex flex-col bg-zinc-50 rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
-              {/* Day Header */}
-              <div className="p-3 border-b border-zinc-200 bg-zinc-100/60 flex flex-col items-center justify-center">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  {day.name}
-                </span>
-                <span className={`text-xl font-black ${day.id === format(new Date(), 'yyyy-MM-dd') ? 'text-cyan-600' : 'text-zinc-800'}`}>
-                  {day.dayNumber}
-                </span>
-              </div>
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="w-full lg:w-1/4 shrink-0 hidden md:block">
+            {libraryTemplates && (
+              <CoachWorkoutLibrary initialTemplates={libraryTemplates} />
+            )}
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-7 gap-3 w-full lg:w-3/4">
+            {days.map(day => (
+              <div key={day.id} className="flex flex-col bg-zinc-50 rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
+                {/* Day Header */}
+                <div className="p-3 border-b border-zinc-200 bg-zinc-100/60 flex flex-col items-center justify-center">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                    {day.name}
+                  </span>
+                  <span className={`text-xl font-black ${day.id === format(new Date(), 'yyyy-MM-dd') ? 'text-cyan-600' : 'text-zinc-800'}`}>
+                    {day.dayNumber}
+                  </span>
+                </div>
 
-              {/* Day Drop Zone */}
-              <SortableContext 
-                id={day.id} 
-                items={columns[day.id]?.map(w => w.id) || []} 
-                strategy={verticalListSortingStrategy}
-              >
-                <DroppableBackground id={day.id} onAddClick={handleCreateClick} isEmpty={(!columns[day.id] || columns[day.id].length === 0)}>
-                  {columns[day.id]?.map(workout => (
-                    <SortableWorkoutCard key={workout.id} workout={workout} onEdit={handleEditClick} />
-                  ))}
-                </DroppableBackground>
-              </SortableContext>
-            </div>
-          ))}
+                {/* Day Drop Zone */}
+                <SortableContext 
+                  id={day.id} 
+                  items={columns[day.id]?.map(w => w.id) || []} 
+                  strategy={verticalListSortingStrategy}
+                >
+                  <DroppableBackground id={day.id} onAddClick={handleCreateClick} isEmpty={(!columns[day.id] || columns[day.id].length === 0)}>
+                    {columns[day.id]?.map(workout => (
+                      <SortableWorkoutCard key={workout.id} workout={workout} onEdit={handleEditClick} />
+                    ))}
+                  </DroppableBackground>
+                </SortableContext>
+              </div>
+            ))}
+          </div>
         </div>
 
         <DragOverlay dropAnimation={dropAnimation}>
           {activeWorkout ? <SortableWorkoutCard workout={activeWorkout} onEdit={() => {}} /> : null}
+          {activeTemplate ? (
+            <div className="bg-white p-3 rounded-xl border border-cyan-500 shadow-xl scale-105 opacity-90 flex items-center gap-3 w-48">
+              <span className="font-bold text-zinc-800 text-sm truncate">{activeTemplate.name}</span>
+            </div>
+          ) : null}
         </DragOverlay>
       </DndContext>
 
