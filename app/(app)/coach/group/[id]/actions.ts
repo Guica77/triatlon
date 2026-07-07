@@ -10,6 +10,8 @@ export interface GroupAthleteItem {
   last_name: string | null;
   email: string | null;
   today_workout: any | null;
+  readiness_score: number | null;
+  hrv: number | null;
   alerts: {
     low_hrv: boolean;
     high_tss: boolean;
@@ -91,6 +93,8 @@ export async function getGroupData(groupId: string) {
       last_name: profile.last_name,
       email: profile.email,
       today_workout: todayWorkout?.training_sessions || null,
+      readiness_score: latestBiometrics?.readiness_score || null,
+      hrv: latestBiometrics?.hrv || null,
       alerts: {
         low_hrv: lowHrvAlert,
         high_tss: false, // Could compute from telemetry

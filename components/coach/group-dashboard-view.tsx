@@ -94,28 +94,70 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
           <Users className="w-4 h-4 text-cyan-600" /> Miembros del Grupo
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {athletes.map(athlete => (
-            <Link 
-              href={`/coach/athlete/${athlete.id}`}
-              key={athlete.id}
-              className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 hover:border-cyan-200 hover:bg-cyan-50/30 transition group"
-            >
-              <div>
-                <p className="font-bold text-zinc-800 text-sm group-hover:text-cyan-700 transition">
-                  {athlete.first_name} {athlete.last_name}
-                </p>
-                <p className="text-xs text-zinc-500 truncate">{athlete.email}</p>
+          {athletes.map(athlete => {
+            const hasAlert = athlete.alerts.low_hrv || athlete.alerts.high_fatigue;
+            return (
+              <div 
+                key={athlete.id}
+                className={`flex flex-col p-4 rounded-xl border transition group bg-white shadow-sm ${
+                  hasAlert ? 'border-red-200 hover:border-red-300' : 'border-zinc-200 hover:border-cyan-300'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <Link href={`/coach/athlete/${athlete.id}`} className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-indigo-500 text-white flex items-center justify-center font-bold shadow-sm hover:scale-105 transition">
+                      {(athlete.first_name || 'A')[0].toUpperCase()}
+                    </Link>
+                    <div>
+                      <Link href={`/coach/athlete/${athlete.id}`} className="font-bold text-zinc-800 text-sm hover:text-cyan-700 transition">
+                        {athlete.first_name} {athlete.last_name}
+                      </Link>
+                      <p className="text-[11px] text-zinc-500 truncate">{athlete.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {athlete.alerts.low_hrv && (
+                      <span title="HRV Bajo" className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-sm" />
+                    )}
+                    {athlete.alerts.high_fatigue && (
+                      <span title="Fatiga Alta" className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm" />
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  <div className={`p-2 rounded-lg border ${hasAlert ? 'bg-red-50 border-red-100' : 'bg-zinc-50 border-zinc-100'}`}>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-0.5">Readiness</p>
+                    <p className={`text-sm font-black ${athlete.alerts.high_fatigue ? 'text-red-600' : 'text-zinc-800'}`}>
+                      {athlete.readiness_score ? `${athlete.readiness_score}%` : '--'}
+                    </p>
+                  </div>
+                  <div className={`p-2 rounded-lg border ${athlete.alerts.low_hrv ? 'bg-red-50 border-red-100' : 'bg-zinc-50 border-zinc-100'}`}>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-0.5">HRV</p>
+                    <p className={`text-sm font-black ${athlete.alerts.low_hrv ? 'text-red-600' : 'text-zinc-800'}`}>
+                      {athlete.hrv ? `${athlete.hrv}ms` : '--'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-2 rounded-lg bg-zinc-50 border border-zinc-100">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1">Hoy</p>
+                  {athlete.today_workout ? (
+                    <div className="flex items-center gap-2">
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase border bg-white border-zinc-200 text-zinc-600">
+                        {athlete.today_workout.sport_type}
+                      </span>
+                      <span className="text-xs text-zinc-700 truncate font-medium">
+                        {athlete.today_workout.duration_min ? `${athlete.today_workout.duration_min}m` : 'Sesión'}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-zinc-400 font-medium">Descanso / Sin sesión</span>
+                  )}
+                </div>
               </div>
-              <div className="flex gap-2">
-                {athlete.alerts.low_hrv && (
-                  <span title="HRV Bajo" className="w-2 h-2 rounded-full bg-red-500 mt-2" />
-                )}
-                {athlete.alerts.high_fatigue && (
-                  <span title="Fatiga Alta" className="w-2 h-2 rounded-full bg-orange-500 mt-2" />
-                )}
-              </div>
-            </Link>
-          ))}
+            );
+          })}
           {athletes.length === 0 && (
             <p className="text-sm text-zinc-500 col-span-full">No hay atletas en este grupo.</p>
           )}
