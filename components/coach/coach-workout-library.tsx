@@ -29,6 +29,11 @@ const getSportAccent = (type: string) => {
   }
 };
 
+const StyledDiv = React.forwardRef<HTMLDivElement, any>(({ styleProps, ...props }, ref) => 
+  React.createElement('div', { ref, style: styleProps, ...props })
+);
+StyledDiv.displayName = 'StyledDiv';
+
 // Draggable Item Component
 interface DraggableTemplateProps {
   template: any;
@@ -49,9 +54,9 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
   };
 
   return (
-    <div 
+    <StyledDiv 
       ref={setNodeRef} 
-      style={style} 
+      styleProps={style} 
       className={`group flex items-center justify-between p-3 mb-2 rounded-xl border bg-white shadow-sm transition-all ${
         isDragging ? 'opacity-50 z-50 shadow-lg border-cyan-500 scale-105' : 'border-zinc-200 hover:border-cyan-300'
       }`}
@@ -79,7 +84,7 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
       >
         <Trash2 className="w-4 h-4" />
       </button>
-    </div>
+    </StyledDiv>
   );
 }
 
