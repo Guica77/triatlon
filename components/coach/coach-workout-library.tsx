@@ -6,7 +6,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Plus, Trash2, Droplets, Activity, Flame, Dumbbell, GripVertical, FileText } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { createLibraryTemplate, deleteLibraryTemplate } from '@/app/(app)/coach/athlete/[id]/actions';
+import { createLibraryTemplate, deleteLibraryTemplate, seedDefaultTemplates } from '@/app/(app)/coach/athlete/[id]/actions';
 
 // Icon and color helpers
 const SportIcon = ({ type, className }: { type: string, className?: string }) => {
@@ -212,9 +212,20 @@ export function CoachWorkoutLibrary({ initialTemplates }: CoachWorkoutLibraryPro
 
       <div className="p-4 overflow-y-auto flex-1 scrollbar-thin">
         {templates.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center opacity-50 space-y-3">
-            <FileText className="w-10 h-10 text-zinc-400" />
-            <p className="text-xs font-medium text-zinc-500 px-4">Tu librería está vacía. Crea plantillas para arrastrarlas al calendario.</p>
+          <div className="h-full flex flex-col items-center justify-center text-center opacity-70 space-y-4 p-4">
+            <FileText className="w-12 h-12 text-zinc-300" />
+            <p className="text-xs font-medium text-zinc-500">Tu librería está vacía. Crea plantillas para arrastrarlas al calendario.</p>
+            <AnimatedButton 
+              variant="ghost" 
+              size="sm" 
+              className="text-xs font-semibold mt-4 border border-cyan-200 text-cyan-600 hover:bg-cyan-50"
+              onClick={async () => {
+                await seedDefaultTemplates();
+                window.location.reload();
+              }}
+            >
+              Cargar Entrenos Profesionales (TP)
+            </AnimatedButton>
           </div>
         ) : (
           templates.map(t => (

@@ -34,6 +34,9 @@ export interface WorkoutItem {
   id: string;
   scheduled_date: string;
   status: string | null;
+  actual_tss?: number | null;
+  rpe?: number | null;
+  feelings?: string | null;
   training_sessions?: {
     sport_type: string | null;
     duration_min: number | null;
@@ -131,13 +134,29 @@ function calculateWorkoutMetrics(workout: WorkoutItem) {
   return { plannedDuration, actualDuration, plannedTss, actualTss, telemetry: t };
 }
 
-function getComplianceColor(actual: number, planned: number) {
-  if (planned === 0 && actual === 0) return 'bg-zinc-100';
-  if (planned === 0 && actual > 0) return 'bg-yellow-400';
-  const ratio = actual / planned;
-  if (ratio >= 0.8 && ratio <= 1.2) return 'bg-green-500';
-  if (ratio >= 0.5 && ratio < 0.8) return 'bg-yellow-400';
-  return 'bg-red-500';
+function getComplianceColor(workout: WorkoutItem, actual: number, planned: number) {
+  if (workout.status === 'missed') return 'bg-red-500';
+  
+  if (workout.status === 'completed') {
+    // Si tenemos RPE o sensaciones explícitas, mandan sobre la duración
+    if (workout.rpe || workout.feelings) {
+      if ((workout.rpe && workout.rpe >= 8) || workout.feelings === 'fatigado' || workout.feelings === 'lesionado') {
+        return 'bg-orange-500'; // Le costó mucho o acabó mal
+      }
+      return 'bg-green-500'; // Bien completado
+    }
+    
+    // Si no hay feedback, calcular por ratio de duración
+    if (planned === 0 && actual === 0) return 'bg-zinc-200';
+    if (planned === 0 && actual > 0) return 'bg-green-500';
+    
+    const ratio = actual / planned;
+    if (ratio >= 0.8 && ratio <= 1.2) return 'bg-green-500';
+    if (ratio >= 0.5 && ratio < 0.8) return 'bg-orange-500';
+    return 'bg-red-500';
+  }
+  
+  return 'bg-transparent';
 }
 
 function MiniZonesChart({ zonesSummary }: { zonesSummary: Record<string, number> }) {
@@ -201,7 +220,7 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
   const displayTitle = parsed.title || session?.sport_type || 'Sesión';
   const isCompleted = workout.status === 'completed';
   const metrics = calculateWorkoutMetrics(workout);
-  const complianceColor = isCompleted ? getComplianceColor(metrics.actualDuration, metrics.plannedDuration) : 'bg-transparent';
+  const complianceColor = getComplianceColor(workout, metrics.actualDuration, metrics.plannedDuration);
 
   return (
     <StyledDiv
@@ -215,8 +234,8 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
       }`}
     >
       {/* Background Compliance fill (TP style) */}
-      {isCompleted && (
-        <div className={`absolute left-0 right-0 bottom-0 h-1 ${complianceColor} opacity-80`} />
+      {(isCompleted || workout.status === 'missed') && (
+        <div className={`absolute left-0 right-0 bottom-0 h-1.5 ${complianceColor} opacity-90`} />
       )}
 
       {/* Header Info: Title, Sport, Duration */}

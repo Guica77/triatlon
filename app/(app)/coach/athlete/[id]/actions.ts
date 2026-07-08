@@ -417,3 +417,75 @@ export async function getWorkoutComments(workoutId: string) {
 
   return { data: data as any };
 }
+
+export async function seedDefaultTemplates() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'No autorizado' };
+
+  const defaultTemplates = [
+    {
+      coach_id: user.id,
+      name: 'Test FTP Ciclismo (20 min)',
+      sport_type: 'ciclismo',
+      duration_min: 60,
+      intensity_type: 'z5',
+      warmup: '15 min Z1-Z2 progresivo.\n3 x (1 min Z4 + 1 min Z1).\n5 min Z1 fácil.',
+      main: '5 min Z5 (Vaciado).\n10 min Z1 recuperación.\n20 min TEST FTP (Máximo esfuerzo sostenido).',
+      cooldown: '10 min Z1 rodar suave para soltar.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Rodaje Largo Aeróbico',
+      sport_type: 'carrera',
+      duration_min: 90,
+      intensity_type: 'z2',
+      warmup: '10 min Z1 suave, movilidad articular.',
+      main: '70 min Z2 estricto. Mantener pulsaciones bajas. Si suben, caminar.',
+      cooldown: '10 min Z1 + estiramientos completos.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Series Umbral 4x2000m',
+      sport_type: 'carrera',
+      duration_min: 75,
+      intensity_type: 'z4',
+      warmup: '15 min Z1-Z2 + Técnica de carrera + 4 progresiones de 80m.',
+      main: '4 x 2000m en Z4 (Ritmo 10k). Recuperación 90 seg trote muy suave (Z1) entre series.',
+      cooldown: '15 min Z1 trote cochinero.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Nado Continuo 80/20',
+      sport_type: 'natacion',
+      duration_min: 60,
+      intensity_type: 'z2',
+      warmup: '400m libres suave.\n200m estilos (50m cada).',
+      main: '1500m continuos en Z2. Foco en la técnica y deslizamiento, respiración bilateral.',
+      cooldown: '200m suaves a elección.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Series VO2Max Bici 5x3min',
+      sport_type: 'ciclismo',
+      duration_min: 75,
+      intensity_type: 'z5',
+      warmup: '20 min progresivos hasta Z3.\n3x30 seg Z4 (rec 1 min).',
+      main: '5 x 3 min en Z5 (>106% FTP). Recuperación 3 min en Z1 entre series.',
+      cooldown: '15 min Z1 alta cadencia (>95rpm).'
+    }
+  ];
+
+  const { error } = await supabase
+    .from('coach_workout_library')
+    .insert(defaultTemplates);
+
+  if (error) {
+    console.error('Error seeding templates:', error);
+    return { error: 'Error al generar plantillas' };
+  }
+
+  revalidatePath('/coach/dashboard');
+  revalidatePath(`/coach/athlete/[id]`, 'page');
+  return { success: true };
+}
