@@ -344,12 +344,12 @@ export function ChatView({
                         >
                           <p className="whitespace-pre-wrap">{m.message}</p>
                           {isOwn ? (
-                            <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-450 float-right ml-3 translate-y-1">
+                            <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-450 float-right ml-3 translate-y-1" suppressHydrationWarning>
                               {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               <span className="text-cyan-600 font-black tracking-normal text-[10px]">✓✓</span>
                             </div>
                           ) : (
-                            <div className="text-[9px] mt-0.5 text-right font-bold text-zinc-400 float-right ml-3 translate-y-1">
+                            <div className="text-[9px] mt-0.5 text-right font-bold text-zinc-400 float-right ml-3 translate-y-1" suppressHydrationWarning>
                               {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </div>
                           )}

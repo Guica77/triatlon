@@ -13,7 +13,12 @@ interface AdvancedCalendarWrapperProps {
 }
 
 export function AdvancedCalendarWrapper({ athleteId, initialWorkouts, initialLibraryTemplates = [] }: AdvancedCalendarWrapperProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
   const [workouts, setWorkouts] = React.useState<WorkoutItem[]>(initialWorkouts);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleWorkoutMove = async (workoutId: string, newDate: string) => {
     // Optimistic update
@@ -47,6 +52,12 @@ export function AdvancedCalendarWrapper({ athleteId, initialWorkouts, initialLib
   React.useEffect(() => {
     setWorkouts(initialWorkouts);
   }, [initialWorkouts]);
+
+  if (!isMounted) {
+    return <div className="h-96 flex items-center justify-center bg-zinc-50 rounded-2xl animate-pulse">
+      <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+    </div>;
+  }
 
   return (
     <AdvancedCalendar 

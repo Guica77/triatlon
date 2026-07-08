@@ -48,7 +48,7 @@ export function RaceGoalCard({
               </div>
               <div>
                 <p className="text-[10px] text-zinc-450 uppercase tracking-wider font-bold">Fecha del Evento</p>
-                <p className="font-semibold text-zinc-800">{targetRaceDate ? new Date(targetRaceDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Fecha por definir'}</p>
+                <p className="font-semibold text-zinc-800" suppressHydrationWarning>{targetRaceDate ? new Date(targetRaceDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Fecha por definir'}</p>
               </div>
             </div>
             

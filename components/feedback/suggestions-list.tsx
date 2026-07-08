@@ -152,7 +152,7 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
                     {s.content}
                   </p>
                   <p className="text-[10px] text-zinc-500 font-mono flex justify-between items-center">
-                    <span>Enviado el {new Date(s.created_at).toLocaleDateString()}</span>
+                    <span suppressHydrationWarning>Enviado el {new Date(s.created_at).toLocaleDateString()}</span>
                     <span>ID: #{s.id.substring(0, 6)}</span>
                   </p>
                 </ProCard>
