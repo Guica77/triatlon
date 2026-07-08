@@ -2,7 +2,34 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
+
+async function resolveInviteCookie(userId: string, supabaseClient: any) {
+  const cookieStore = await cookies();
+  const inviteCoachId = cookieStore.get('invite_coach_id')?.value;
+  
+  if (inviteCoachId) {
+    try {
+      const { error: linkError } = await supabaseClient
+        .from('coach_athletes')
+        .insert({
+          coach_id: inviteCoachId,
+          athlete_id: userId,
+          status: 'active'
+        });
+        
+      if (!linkError || linkError.code === '23505') {
+        await supabaseClient
+          .from('profiles')
+          .update({ coach_id: inviteCoachId })
+          .eq('id', userId);
+      }
+    } catch (e) {
+      console.error("Error resolving magic link:", e);
+    }
+    cookieStore.delete('invite_coach_id');
+  }
+}
 
 export async function login(formData: FormData) {
   const email = formData.get('email') as string
@@ -49,6 +76,9 @@ export async function login(formData: FormData) {
   // Comprobar si tiene perfil y plan activo
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
+    // Vincular al atleta con el coach si viene de una invitación
+    await resolveInviteCookie(user.id, supabase);
+
     // Seeding on login for demo users
     if (email === 'coach-demo@triatlonpro.com' || email === 'demo@triatlonpro.com') {
       const { seedDemoData } = await import('@/lib/demo-seeder')
@@ -156,6 +186,9 @@ export async function signup(formData: FormData) {
       if (profileError) {
         console.error("Error creando perfil:", profileError)
       }
+
+      // Vincular al atleta con el coach si viene de una invitación
+      await resolveInviteCookie(authData.user.id, supabaseAdmin);
     }
   }
 
