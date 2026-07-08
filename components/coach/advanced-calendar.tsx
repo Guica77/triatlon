@@ -39,6 +39,7 @@ export interface WorkoutItem {
     duration_min: number | null;
     description: string | null;
   } | null;
+  universal_telemetry?: any[];
 }
 
 interface AdvancedCalendarProps {
@@ -248,13 +249,16 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
     
     setEditingWorkout({
       id: workout.id,
-      session_id: session.id,
+      session_id: workout.training_sessions ? (workout as any).session_id : '',
       sport_type: session.sport_type || 'ciclismo',
       duration_min: session.duration_min || 60,
       title: parsed.title,
       warmup: parsed.warmup,
       main: parsed.main,
       cooldown: parsed.cooldown,
+      scheduled_date: workout.scheduled_date,
+      status: workout.status,
+      telemetry: workout.universal_telemetry?.[0] || null
     });
     setIsEditModalOpen(true);
   };

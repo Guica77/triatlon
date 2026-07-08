@@ -366,3 +366,54 @@ export async function assignTemplateToAthleteDay(athleteId: string, templateId: 
     return { error: err instanceof Error ? err.message : 'Error inesperado' }
   }
 }
+
+export async function addWorkoutComment(workoutId: string, athleteId: string, content: string) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'No autorizado' };
+  
+  const { data, error } = await supabase
+    .from('workout_comments')
+    .insert({
+      workout_id: workoutId,
+      user_id: user.id,
+      content: content
+    })
+    .select(`
+      id, content, created_at, user_id,
+      profiles ( first_name, last_name, role )
+    `)
+    .single();
+
+  if (error) {
+    console.error('Error adding comment:', error);
+    return { error: 'Error al añadir el comentario' };
+  }
+
+  revalidatePath(`/coach/athlete/${athleteId}`);
+  return { data: data as any };
+}
+
+export async function getWorkoutComments(workoutId: string) {
+  const supabase = await createClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'No autorizado' };
+
+  const { data, error } = await supabase
+    .from('workout_comments')
+    .select(`
+      id, content, created_at, user_id,
+      profiles ( first_name, last_name, role )
+    `)
+    .eq('workout_id', workoutId)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching comments:', error);
+    return { error: 'Error al obtener comentarios' };
+  }
+
+  return { data: data as any };
+}

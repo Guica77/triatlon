@@ -13,7 +13,10 @@ import { AdvancedCalendarWrapper } from '@/components/coach/advanced-calendar-wr
 import { AthleteNutritionCard } from '@/components/coach/athlete-nutrition-card';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getCoachLibrary } from './actions';
+import { getAthletePMC } from './pmc-actions';
 import { CoachAthleteZonesEditor } from '@/components/coach/coach-athlete-zones-editor';
+import { PMCChart } from '@/components/coach/pmc-chart';
+import { BiometricsTrendChart } from '@/components/coach/biometrics-trend-chart';
 
 interface AthletePageProps {
   params: Promise<{ id: string }>;
@@ -58,7 +61,8 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     devicesRes,
     workoutsRes,
     nutritionRes,
-    libraryRes
+    libraryRes,
+    pmcRes
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -87,7 +91,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
       .select('date, hrv, rhr, sleep_hours, readiness_score')
       .eq('user_id', athleteId)
       .order('date', { ascending: false })
-      .limit(7),
+      .limit(30),
     fetchAndCalculateAnalytics(athleteId),
     supabase
       .from('user_connected_devices')
@@ -101,7 +105,8 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
       .lte('scheduled_date', calendarEnd.toISOString().split('T')[0])
       .order('scheduled_date', { ascending: true }),
     getDailyNutrition(today, athleteId),
-    getCoachLibrary()
+    getCoachLibrary(),
+    getAthletePMC(athleteId)
   ]);
 
   const coachProfile = coachProfileRes.data;
@@ -326,7 +331,25 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
         </section>
 
         {/* Tabs of Calendar / List View */}
-        <DashboardViewTabs 
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+            <div className="bg-white rounded-3xl p-6 border border-zinc-200 shadow-sm">
+              <h2 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-cyan-600" />
+                Rendimiento PMC (Fitness / Fatiga)
+              </h2>
+              <PMCChart data={pmcRes?.data || []} />
+            </div>
+
+            <div className="bg-white rounded-3xl p-6 border border-zinc-200 shadow-sm">
+              <h2 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-indigo-500" />
+                Tendencia de Salud (30 días)
+              </h2>
+              <BiometricsTrendChart data={biometricsHistoryRes.data || []} />
+            </div>
+          </div>
+
+          <DashboardViewTabs 
           initialWorkouts={workouts || []} 
           isConnected={isConnected} 
           profile={athleteProfile} 

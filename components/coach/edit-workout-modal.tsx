@@ -17,7 +17,14 @@ export interface EditWorkoutData {
   main: string
   cooldown: string
   scheduled_date?: string
+  status?: string | null
+  telemetry?: any | null
 }
+
+import { WorkoutZonesChart } from './workout-zones-chart';
+import { WorkoutComments, WorkoutComment } from './workout-comments';
+import { getWorkoutComments } from '@/app/(app)/coach/athlete/[id]/actions';
+import { createClient } from '@/lib/supabase/client';
 
 interface EditWorkoutModalProps {
   athleteId: string
@@ -28,9 +35,13 @@ interface EditWorkoutModalProps {
 
 export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWorkoutModalProps) {
   const router = useRouter()
+  const [user, setUser] = React.useState<any>(null)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [success, setSuccess] = React.useState(false)
+  
+  const [comments, setComments] = React.useState<WorkoutComment[]>([])
+  const [loadingComments, setLoadingComments] = React.useState(false)
 
   const [formData, setFormData] = React.useState({
     sportType: 'ciclismo',
@@ -40,6 +51,11 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
     main: '',
     cooldown: ''
   })
+
+  React.useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
+  }, [])
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -54,6 +70,17 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
         })
         setError(null)
         setSuccess(false)
+        
+        // Fetch comments if existing workout
+        if (workout.id !== 'new') {
+          setLoadingComments(true)
+          getWorkoutComments(workout.id).then(res => {
+            if (res.data) setComments(res.data)
+            setLoadingComments(false)
+          })
+        } else {
+          setComments([])
+        }
       }
     }, 0);
     return () => clearTimeout(timer);
@@ -283,23 +310,42 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                   </div>
 
                   {/* Submit Button */}
-                  <AnimatedButton
-                    variant="primary"
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 !bg-cyan-600 hover:!bg-cyan-500 !text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md"
-                  >
-                    {loading ? 'Guardando...' : (
-                      <>
-                        <Activity className="w-4 h-4 text-white" />
-                        Guardar Cambios
-                      </>
-                    )}
-                  </AnimatedButton>
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full px-5 py-3.5 bg-zinc-900 text-white rounded-xl text-xs font-bold shadow-md hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                    >
+                      {loading ? 'Guardando...' : workout.id === 'new' ? 'Crear Entrenamiento' : 'Guardar Cambios'}
+                    </button>
+                  </div>
                 </>
               )}
 
             </form>
+
+            {/* Zones Chart for Completed Workouts */}
+            {workout.status === 'completed' && workout.telemetry?.hr_zones_summary && (
+              <div className="px-5 pb-5 bg-zinc-50 border-t border-zinc-150">
+                <WorkoutZonesChart zonesSummary={workout.telemetry.hr_zones_summary} />
+              </div>
+            )}
+
+            {/* Comments Thread */}
+            {workout.id !== 'new' && user && (
+              <div className="px-5 pb-5 bg-zinc-50 border-t border-zinc-150 pt-5">
+                {loadingComments ? (
+                  <p className="text-xs text-center text-zinc-500 py-4">Cargando comentarios...</p>
+                ) : (
+                  <WorkoutComments 
+                    workoutId={workout.id} 
+                    athleteId={athleteId}
+                    currentUserId={user.id}
+                    initialComments={comments}
+                  />
+                )}
+              </div>
+            )}
 
           </motion.div>
         </div>
