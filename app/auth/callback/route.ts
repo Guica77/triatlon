@@ -53,7 +53,10 @@ export async function GET(request: Request) {
       if (inviteCoachId) {
         // Attempt to link athlete to coach
         try {
-          const { error: linkError } = await supabase
+          const { createAdminClient } = await import('@/lib/supabase/admin')
+          const supabaseAdmin = createAdminClient()
+          
+          const { error: linkError } = await supabaseAdmin
             .from('coach_athletes')
             .insert({
               coach_id: inviteCoachId,
@@ -63,7 +66,7 @@ export async function GET(request: Request) {
             
           if (!linkError || linkError.code === '23505') {
             // Also update backwards compatibility
-            await supabase
+            await supabaseAdmin
               .from('profiles')
               .update({ coach_id: inviteCoachId })
               .eq('id', user.id)
