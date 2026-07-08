@@ -72,7 +72,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-background text-foreground flex flex-col font-sans selection:bg-primary/30">
+      <body className="min-h-full bg-background text-foreground flex flex-col font-sans selection:bg-primary/30" suppressHydrationWarning>
         {children}
         <CookieBanner />
         <IosInstallPrompt />
