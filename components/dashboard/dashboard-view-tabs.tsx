@@ -52,6 +52,12 @@ export function DashboardViewTabs({
   initialNutrition,
   initialAnalytics
 }: DashboardViewTabsProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const router = useRouter();
   const [activeTab, setActiveTab] = React.useState<'semana' | 'mes'>('semana');
   const [isManualModalOpen, setIsManualModalOpen] = React.useState(false);
@@ -163,7 +169,13 @@ export function DashboardViewTabs({
       },
       sessionsPacing
     };
-  }, [selectedDateStr, allWorkouts, profile, initialNutrition]);
+  }, [allWorkouts, selectedDateStr, profile, initialNutrition]);
+
+  if (!isMounted) {
+    return <div className="min-h-screen animate-pulse bg-zinc-50 flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+    </div>;
+  }
 
   // Form states for manual workout logger
   const [formTitle, setFormTitle] = React.useState('');
