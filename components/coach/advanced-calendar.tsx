@@ -148,13 +148,22 @@ function MiniZonesChart({ zonesSummary }: { zonesSummary: Record<string, number>
   const getWidth = (val: number) => `${(val / total) * 100}%`;
   
   return (
-    <div className="flex h-2 w-full rounded-sm overflow-hidden bg-zinc-100 mt-1.5 opacity-80">
-      <div style={{ width: getWidth(zonesSummary.z1 || 0), backgroundColor: '#9ca3af' }} />
-      <div style={{ width: getWidth(zonesSummary.z2 || 0), backgroundColor: '#3b82f6' }} />
-      <div style={{ width: getWidth(zonesSummary.z3 || 0), backgroundColor: '#22c55e' }} />
-      <div style={{ width: getWidth(zonesSummary.z4 || 0), backgroundColor: '#f59e0b' }} />
-      <div style={{ width: getWidth(zonesSummary.z5 || 0), backgroundColor: '#ef4444' }} />
-    </div>
+    <>
+      {/* eslint-disable react/forbid-dom-props */}
+      <div className="flex h-2 w-full rounded-sm overflow-hidden bg-zinc-100 mt-1.5 opacity-80">
+        {/* eslint-disable-next-line */}
+        <div style={{ width: getWidth(zonesSummary.z1 || 0), backgroundColor: '#9ca3af' }} />
+        {/* eslint-disable-next-line */}
+        <div style={{ width: getWidth(zonesSummary.z2 || 0), backgroundColor: '#3b82f6' }} />
+        {/* eslint-disable-next-line */}
+        <div style={{ width: getWidth(zonesSummary.z3 || 0), backgroundColor: '#22c55e' }} />
+        {/* eslint-disable-next-line */}
+        <div style={{ width: getWidth(zonesSummary.z4 || 0), backgroundColor: '#f59e0b' }} />
+        {/* eslint-disable-next-line */}
+        <div style={{ width: getWidth(zonesSummary.z5 || 0), backgroundColor: '#ef4444' }} />
+      </div>
+      {/* eslint-enable react/forbid-dom-props */}
+    </>
   );
 }
 

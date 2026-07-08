@@ -33,12 +33,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
           {format(parseISO(label), "d MMM yyyy", { locale: es })}
         </p>
         {payload.map((entry: any, index: number) => {
-          const dotStyle = { backgroundColor: entry.color };
+          const getBgClass = (color: string) => {
+            if (color === '#6366f1') return 'bg-indigo-500';
+            if (color === '#0ea5e9') return 'bg-cyan-500';
+            if (color === '#f59e0b') return 'bg-amber-500';
+            return 'bg-zinc-500';
+          };
           return (
             <div key={`item-${index}`} className="flex items-center gap-2">
               <span 
-                className="w-2 h-2 rounded-full" 
-                style={dotStyle}
+                className={`w-2 h-2 rounded-full ${getBgClass(entry.color)}`}
               />
               <span className="font-medium text-zinc-500 uppercase tracking-wider">{entry.name}:</span>
               <span className="font-black text-zinc-900 ml-auto">{entry.value} {entry.name === 'HRV' ? 'ms' : '%'}</span>
