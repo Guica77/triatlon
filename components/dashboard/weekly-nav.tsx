@@ -21,6 +21,12 @@ interface WeeklyNavProps {
 }
 
 export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNavProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Generar los 7 días de la semana actual
   const now = new Date();
   const currentDay = now.getDay() || 7; // 1 Lunes ... 7 Domingo
@@ -57,6 +63,14 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
     brick: 'bg-amber-400',
     descanso: 'bg-zinc-600',
   };
+
+  if (!isMounted) {
+    return (
+      <ProCard className="p-4 py-6 relative z-10 border-zinc-200 bg-white shadow-sm h-32 animate-pulse flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+      </ProCard>
+    );
+  }
 
   return (
     <ProCard className="p-4 py-6 relative z-10 border-zinc-200 bg-white shadow-sm">
