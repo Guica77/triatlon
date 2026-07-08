@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { Trophy, ArrowRight, UserPlus, LogIn } from 'lucide-react'
-import { cookies } from 'next/headers'
+
 
 export default async function InviteLandingPage({
   params,
@@ -26,17 +26,8 @@ export default async function InviteLandingPage({
     redirect('/')
   }
 
-  // 2. Set the secure cookie that will be read during the Auth Callback
-  const cookieStore = await cookies()
-  cookieStore.set({
-    name: 'invite_coach_id',
-    value: coach.id,
-    httpOnly: true,
-    path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 1 semana
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  })
+  // We cannot use cookies().set() in a Server Component.
+  // Instead, we will inject a small script to set the cookie securely on the client side.
 
   const coachName = coach.first_name 
     ? `${coach.first_name} ${coach.last_name || ''}`.trim() 
@@ -45,6 +36,9 @@ export default async function InviteLandingPage({
   return (
     <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-6 relative overflow-hidden">
       
+      {/* Script to set the invite cookie so auth/callback can read it after login/register */}
+      <script dangerouslySetInnerHTML={{ __html: `document.cookie = "invite_coach_id=${coach.id}; path=/; max-age=604800; samesite=lax";` }} />
+
       {/* Background decorations */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-cyan-500/5 rounded-full blur-[120px] pointer-events-none opacity-50"></div>
       
