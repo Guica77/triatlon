@@ -13,11 +13,14 @@ import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2, ShoppingBag, BookOpen, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
-import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { ObjectiveConfigCard } from '@/components/dashboard/objective-config-card';
 import { PushNotificationManager } from '@/components/chat/push-notification-manager';
+import dynamic from 'next/dynamic';
+
+const DashboardViewTabs = dynamic(() => import('@/components/dashboard/dashboard-view-tabs').then(mod => mod.DashboardViewTabs), { ssr: false, loading: () => <div className="h-64 animate-pulse bg-zinc-50 rounded-xl flex items-center justify-center"><div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div></div> });
+const WeeklyNav = dynamic(() => import('@/components/dashboard/weekly-nav').then(mod => mod.WeeklyNav), { ssr: false });
+const ActivitiesFeed = dynamic(() => import('@/components/dashboard/activities-feed').then(mod => mod.ActivitiesFeed), { ssr: false });
 
 export const dynamic = 'force-dynamic'
 
@@ -279,7 +282,6 @@ export default async function DashboardPage() {
           </section>
         )}
 
-        <PushNotificationManager />
       </main>
     </div>
   );
