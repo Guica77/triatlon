@@ -108,6 +108,56 @@ const StyledDiv = React.forwardRef<HTMLDivElement, any>(({ styleProps, ...props 
 StyledDiv.displayName = 'StyledDiv';
 
 
+// --- Helpers for TP Style ---
+function formatDuration(minutes: number | null | undefined): string {
+  if (!minutes) return '0m';
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  if (h > 0) return `${h}h${m > 0 ? ` ${m}m` : ''}`;
+  return `${m}m`;
+}
+
+function calculateWorkoutMetrics(workout: WorkoutItem) {
+  const session = workout.training_sessions;
+  const t = workout.universal_telemetry?.[0];
+  
+  const plannedDuration = session?.duration_min || 0;
+  const actualDuration = t?.actual_duration_min || 0;
+  
+  // Estimate planned TSS if not present (assuming ~60 TSS per hour for easy)
+  const plannedTss = session ? Math.round((session.duration_min || 0) * (session.sport_type === 'descanso' ? 0 : 1.2)) : 0; 
+  const actualTss = t?.actual_tss || 0;
+
+  return { plannedDuration, actualDuration, plannedTss, actualTss, telemetry: t };
+}
+
+function getComplianceColor(actual: number, planned: number) {
+  if (planned === 0 && actual === 0) return 'bg-zinc-100';
+  if (planned === 0 && actual > 0) return 'bg-yellow-400';
+  const ratio = actual / planned;
+  if (ratio >= 0.8 && ratio <= 1.2) return 'bg-green-500';
+  if (ratio >= 0.5 && ratio < 0.8) return 'bg-yellow-400';
+  return 'bg-red-500';
+}
+
+function MiniZonesChart({ zonesSummary }: { zonesSummary: Record<string, number> }) {
+  // zonesSummary: { z1: 10, z2: 40, z3: 5, z4: 0, z5: 0 } -> total minutes
+  const total = Object.values(zonesSummary).reduce((a, b) => a + b, 0);
+  if (total === 0) return null;
+
+  const getWidth = (val: number) => `${(val / total) * 100}%`;
+  
+  return (
+    <div className="flex h-2 w-full rounded-sm overflow-hidden bg-zinc-100 mt-1.5 opacity-80">
+      <div style={{ width: getWidth(zonesSummary.z1 || 0), backgroundColor: '#9ca3af' }} />
+      <div style={{ width: getWidth(zonesSummary.z2 || 0), backgroundColor: '#3b82f6' }} />
+      <div style={{ width: getWidth(zonesSummary.z3 || 0), backgroundColor: '#22c55e' }} />
+      <div style={{ width: getWidth(zonesSummary.z4 || 0), backgroundColor: '#f59e0b' }} />
+      <div style={{ width: getWidth(zonesSummary.z5 || 0), backgroundColor: '#ef4444' }} />
+    </div>
+  );
+}
+
 // --- Sortable Item Component ---
 function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit: (w: WorkoutItem) => void }) {
   const {
@@ -140,6 +190,9 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
 
   const parsed = parseDescription(session?.description || '');
   const displayTitle = parsed.title || session?.sport_type || 'Sesión';
+  const isCompleted = workout.status === 'completed';
+  const metrics = calculateWorkoutMetrics(workout);
+  const complianceColor = isCompleted ? getComplianceColor(metrics.actualDuration, metrics.plannedDuration) : 'bg-transparent';
 
   return (
     <StyledDiv
@@ -148,27 +201,53 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
       {...attributes}
       {...listeners}
       onClick={() => onEdit(workout)}
-      className={`relative p-3 pl-4 rounded-xl border bg-white shadow-sm cursor-grab active:cursor-grabbing group transition-all overflow-hidden ${
+      className={`relative p-2 rounded-xl border bg-white shadow-sm cursor-grab active:cursor-grabbing group transition-all overflow-hidden ${
         isDragging ? 'opacity-50 scale-105 shadow-md z-50 border-cyan-500/50' : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
       }`}
     >
-      {/* Accent Line */}
-      <div className={`absolute left-0 top-0 bottom-0 w-[5px] ${getSportAccent(session?.sport_type || '')}`} />
-      
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-start justify-between gap-2">
-          <h4 className="text-[11px] font-bold text-zinc-800 uppercase tracking-tight truncate flex-1 flex items-center gap-1.5">
-            <SportIcon type={session?.sport_type || ''} className="w-3 h-3 opacity-70" />
-            <span className="truncate">{displayTitle}</span>
-          </h4>
-          <span className="text-[10px] font-bold text-zinc-650 flex items-center gap-1 shrink-0 bg-zinc-50 px-1.5 py-0.5 rounded-md border border-zinc-150">
-            {session?.duration_min}'
+      {/* Background Compliance fill (TP style) */}
+      {isCompleted && (
+        <div className={`absolute left-0 right-0 bottom-0 h-1 ${complianceColor} opacity-80`} />
+      )}
+
+      {/* Header Info: Title, Sport, Duration */}
+      <div className="flex flex-col gap-1">
+        <div className="flex items-start justify-between gap-1">
+          <div className="flex items-center gap-1 min-w-0">
+            <div className={`w-1.5 h-3 rounded-full shrink-0 ${getSportAccent(session?.sport_type || '')}`} />
+            <h4 className="text-[10px] font-bold text-zinc-800 uppercase tracking-tight truncate">
+              {displayTitle}
+            </h4>
+          </div>
+          <span className="text-[9px] font-black text-zinc-500 shrink-0">
+            {isCompleted ? formatDuration(metrics.actualDuration) : formatDuration(metrics.plannedDuration)}
           </span>
         </div>
-        
-        <p className="text-[10px] text-zinc-500 leading-relaxed line-clamp-2 pr-1 font-semibold">
-          {parsed.main || parsed.warmup || session?.description}
-        </p>
+
+        {/* Dense Metrics Row */}
+        <div className="flex items-center justify-between text-[9px] font-bold">
+          <div className="flex gap-1.5 text-zinc-600">
+            {metrics.telemetry?.raw_payload?.average_heartrate && (
+              <span className="text-red-500">{Math.round(metrics.telemetry.raw_payload.average_heartrate)}bpm</span>
+            )}
+            {metrics.telemetry?.raw_payload?.average_watts && (
+              <span className="text-purple-600">{Math.round(metrics.telemetry.raw_payload.average_watts)}w</span>
+            )}
+            {!isCompleted && metrics.plannedDuration > 0 && (
+              <span className="text-zinc-400 font-medium line-clamp-1">{parsed.main || parsed.warmup || 'Planificado'}</span>
+            )}
+          </div>
+          
+          {/* TSS/Load */}
+          <div className="text-zinc-400 shrink-0">
+            L: <span className={`font-black ${isCompleted ? 'text-zinc-700' : ''}`}>{isCompleted ? metrics.actualTss : metrics.plannedTss}</span>
+          </div>
+        </div>
+
+        {/* Mini Zones Chart for completed activities */}
+        {isCompleted && metrics.telemetry?.hr_zones_summary && (
+          <MiniZonesChart zonesSummary={metrics.telemetry.hr_zones_summary} />
+        )}
       </div>
     </StyledDiv>
   );
@@ -240,6 +319,30 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
   // Edit Modal State
   const [editingWorkout, setEditingWorkout] = React.useState<EditWorkoutData | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+
+  const weeklyMetrics = React.useMemo(() => {
+    let plannedTotalDur = 0, actualTotalDur = 0;
+    let plannedTotalTss = 0, actualTotalTss = 0;
+
+    Object.values(columns).flat().forEach(w => {
+      const m = calculateWorkoutMetrics(w);
+      plannedTotalDur += m.plannedDuration;
+      actualTotalDur += m.actualDuration;
+      plannedTotalTss += m.plannedTss;
+      actualTotalTss += m.actualTss;
+    });
+    
+    return { plannedTotalDur, actualTotalDur, plannedTotalTss, actualTotalTss };
+  }, [columns]);
+
+  const getDayMetrics = (dayId: string) => {
+    let pDur = 0, aDur = 0, pTss = 0, aTss = 0;
+    (columns[dayId] || []).forEach(w => {
+      const m = calculateWorkoutMetrics(w);
+      pDur += m.plannedDuration; aDur += m.actualDuration; pTss += m.plannedTss; aTss += m.actualTss;
+    });
+    return { pDur, aDur, pTss, aTss };
+  };
 
   const handleEditClick = (workout: WorkoutItem) => {
     if (!workout.training_sessions) return;
@@ -424,23 +527,73 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
         onDragEnd={handleDragEnd}
       >
         <div className="flex flex-col lg:flex-row gap-4">
-          <div className="w-full lg:w-1/4 shrink-0 hidden md:block">
+          <div className="w-full lg:w-1/5 shrink-0 hidden md:block">
             {libraryTemplates && (
               <CoachWorkoutLibrary initialTemplates={libraryTemplates} />
             )}
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-7 gap-3 w-full lg:w-3/4">
-            {days.map(day => (
+          <div className="grid grid-cols-1 md:grid-cols-8 gap-2 w-full lg:w-4/5">
+            {/* Weekly Summary Column */}
+            <div className="hidden md:flex flex-col bg-zinc-50/50 rounded-2xl overflow-hidden shadow-sm">
+              <div className="p-3 border-b border-zinc-200 bg-zinc-100/60 flex flex-col items-center justify-center">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Semana</span>
+                <span className="text-xl font-black text-zinc-800">Total</span>
+              </div>
+              <div className="p-3 flex flex-col gap-3 text-[10px]">
+                <div className="flex flex-col">
+                  <span className="text-zinc-500 font-bold uppercase tracking-wider mb-1">Duración</span>
+                  <div className="flex justify-between items-end border-b border-zinc-200 pb-1">
+                    <span className="font-medium text-zinc-400">Plan:</span>
+                    <span className="font-bold text-zinc-700">{formatDuration(weeklyMetrics.plannedTotalDur)}</span>
+                  </div>
+                  <div className="flex justify-between items-end mt-1">
+                    <span className="font-medium text-zinc-400">Real:</span>
+                    <span className={`font-black ${weeklyMetrics.actualTotalDur >= weeklyMetrics.plannedTotalDur * 0.9 ? 'text-green-600' : 'text-zinc-800'}`}>
+                      {formatDuration(weeklyMetrics.actualTotalDur)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col mt-2">
+                  <span className="text-zinc-500 font-bold uppercase tracking-wider mb-1">Carga (Load)</span>
+                  <div className="flex justify-between items-end border-b border-zinc-200 pb-1">
+                    <span className="font-medium text-zinc-400">Plan:</span>
+                    <span className="font-bold text-zinc-700">{weeklyMetrics.plannedTotalTss}</span>
+                  </div>
+                  <div className="flex justify-between items-end mt-1">
+                    <span className="font-medium text-zinc-400">Real:</span>
+                    <span className={`font-black ${weeklyMetrics.actualTotalTss >= weeklyMetrics.plannedTotalTss * 0.9 ? 'text-green-600' : 'text-zinc-800'}`}>
+                      {weeklyMetrics.actualTotalTss}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Days Columns */}
+            {days.map(day => {
+              const dm = getDayMetrics(day.id);
+              return (
               <div key={day.id} className="flex flex-col bg-zinc-50 rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
                 {/* Day Header */}
-                <div className="p-3 border-b border-zinc-200 bg-zinc-100/60 flex flex-col items-center justify-center">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                <div className="p-2 border-b border-zinc-200 bg-zinc-100/60 flex flex-col items-center justify-center relative">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">
                     {day.name}
                   </span>
-                  <span className={`text-xl font-black ${day.id === format(new Date(), 'yyyy-MM-dd') ? 'text-cyan-600' : 'text-zinc-800'}`}>
+                  <span className={`text-lg font-black ${day.id === format(new Date(), 'yyyy-MM-dd') ? 'text-cyan-600' : 'text-zinc-800'}`}>
                     {day.dayNumber}
                   </span>
+                  
+                  {/* Daily Metric Summary */}
+                  <div className="flex w-full justify-between px-1 mt-1 text-[9px] font-semibold">
+                    <div className="flex flex-col items-center text-zinc-500">
+                      <span>⏱ {dm.aDur > 0 ? formatDuration(dm.aDur) : formatDuration(dm.pDur)}</span>
+                    </div>
+                    <div className="flex flex-col items-center text-zinc-500">
+                      <span>L: {dm.aTss > 0 ? dm.aTss : dm.pTss}</span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Day Drop Zone */}
@@ -456,7 +609,8 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
                   </DroppableBackground>
                 </SortableContext>
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

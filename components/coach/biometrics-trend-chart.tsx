@@ -32,16 +32,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="font-bold text-zinc-800 mb-2 border-b border-zinc-100 pb-1">
           {format(parseISO(label), "d MMM yyyy", { locale: es })}
         </p>
-        {payload.map((entry: any, index: number) => (
-          <div key={`item-${index}`} className="flex items-center gap-2">
-            <span 
-              className="w-2 h-2 rounded-full" 
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="font-medium text-zinc-500 uppercase tracking-wider">{entry.name}:</span>
-            <span className="font-black text-zinc-900 ml-auto">{entry.value} {entry.name === 'HRV' ? 'ms' : '%'}</span>
-          </div>
-        ))}
+        {payload.map((entry: any, index: number) => {
+          const dotStyle = { backgroundColor: entry.color };
+          return (
+            <div key={`item-${index}`} className="flex items-center gap-2">
+              <span 
+                className="w-2 h-2 rounded-full" 
+                style={dotStyle}
+              />
+              <span className="font-medium text-zinc-500 uppercase tracking-wider">{entry.name}:</span>
+              <span className="font-black text-zinc-900 ml-auto">{entry.value} {entry.name === 'HRV' ? 'ms' : '%'}</span>
+            </div>
+          );
+        })}
       </div>
     );
   }
