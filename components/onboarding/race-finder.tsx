@@ -306,12 +306,13 @@ export function RaceFinder() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">
+                  <label htmlFor="custom-date-input" className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">
                     Fecha de la Competición
                   </label>
                   <div className="relative">
                     <Calendar className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-500" />
                     <input
+                      id="custom-date-input"
                       type="date"
                       value={customDate}
                       onChange={(e) => setCustomDate(e.target.value)}
