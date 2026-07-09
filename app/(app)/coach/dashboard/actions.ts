@@ -54,7 +54,9 @@ export async function fetchCoachAthletes(): Promise<{ data?: AthleteRosterItem[]
     const { data: roster, error: rosterError } = await supabase
       .from('coach_athletes')
       .select(`
-        athlete_id
+        athlete_id,
+        group_id,
+        coach_groups(name)
       `)
       .eq('coach_id', user.id)
 
