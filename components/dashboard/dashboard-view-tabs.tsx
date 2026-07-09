@@ -445,31 +445,18 @@ export function DashboardViewTabs({
               {viewMode === 'focus' ? (
                 selectedDayWorkouts.length > 0 ? (
                   selectedDayWorkouts.map(w => (
-                    selectedDateStr === todayStr ? (
-                      <DailyFocusCard
-                        key={w.id}
-                        workout={w}
-                        athleteLevel={profile?.level}
-                        sweatRate={profile?.sweat_rate}
-                        onToggleComplete={async () => {
-                          await toggleWorkoutStatus(w.id, w.status);
-                          // Option to trigger a local refresh or just let server actions revalidate
-                        }}
-                      />
-                    ) : (
-                      <DailyWorkoutCard
-                        key={w.id}
-                        workout={w}
-                        initialIsConnected={isConnected}
-                        virtualGarage={profile?.virtual_garage || []}
-                        athleteLevel={profile?.level}
-                        readOnly={readOnly}
-                        sweatRate={profile?.sweat_rate}
-                        customCarbsPerHour={profile?.custom_carbs_per_hour}
-                        preferredIngredients={profile?.preferred_ingredients || []}
-                        readinessScore={initialBiometrics?.readiness_score}
-                      />
-                    )
+                    <DailyWorkoutCard
+                      key={w.id}
+                      workout={w}
+                      initialIsConnected={isConnected}
+                      virtualGarage={profile?.virtual_garage || []}
+                      athleteLevel={profile?.level}
+                      readOnly={readOnly}
+                      sweatRate={profile?.sweat_rate}
+                      customCarbsPerHour={profile?.custom_carbs_per_hour}
+                      preferredIngredients={profile?.preferred_ingredients || []}
+                      readinessScore={initialBiometrics?.readiness_score}
+                    />
                   ))
                 ) : (
                   <div className="p-8 rounded-2xl bg-white border border-dashed border-zinc-200 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group shadow-sm">
