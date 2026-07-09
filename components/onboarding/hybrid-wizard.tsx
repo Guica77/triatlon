@@ -17,6 +17,11 @@ export function HybridWizard() {
   const router = useRouter();
   const [step, setStep] = React.useState(1);
   const [loading, setLoading] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Step 1: Objetivo / Ambición (Race Goal)
   const [athleteLevel, setAthleteLevel] = React.useState('intermedio');
@@ -203,8 +208,16 @@ export function HybridWizard() {
   // Determine which steps to show
   const totalSteps = wantsCoach ? 3 : 4;
 
+  if (!isMounted) {
+    return (
+      <div className="w-full max-w-5xl space-y-8 min-h-[600px] flex items-center justify-center bg-zinc-950/50 rounded-3xl animate-pulse">
+        <div className="w-10 h-10 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full max-w-4xl space-y-8">
+    <div className="w-full max-w-5xl space-y-8">
       {/* Stepper Header */}
       <div className="flex items-center justify-between relative mb-12 max-w-2xl mx-auto">
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-zinc-200 -z-10" />
