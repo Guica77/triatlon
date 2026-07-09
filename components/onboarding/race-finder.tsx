@@ -23,6 +23,11 @@ export function RaceFinder() {
   const [customDate, setCustomDate] = React.useState('2027-10-18');
 
   const [loading, setLoading] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Filtrar catálogo
   const filteredCatalog = React.useMemo(() => {
@@ -110,6 +115,14 @@ export function RaceFinder() {
       setLoading(false);
     }
   };
+
+  if (!isMounted) {
+    return (
+      <div className="w-full max-w-5xl space-y-8 min-h-[400px] flex items-center justify-center bg-zinc-950/50 rounded-2xl animate-pulse">
+        <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-5xl space-y-8">
