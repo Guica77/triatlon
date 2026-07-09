@@ -2,9 +2,7 @@ import * as React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { fetchCoachAthletes, getCoachGroups } from './actions'
-import dynamic from 'next/dynamic'
-
-const CoachDashboardView = dynamic(() => import('./coach-dashboard-view').then(mod => mod.CoachDashboardView), { ssr: false, loading: () => <div className="min-h-screen animate-pulse bg-zinc-50 flex items-center justify-center"><div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div></div> })
+import { CoachDashboardView } from './coach-dashboard-view'
 
 export const dynamic = 'force-dynamic'
 
