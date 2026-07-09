@@ -60,6 +60,18 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
     loadStatus()
   }, [biometrics?.hrv, biometrics?.rhr, biometrics?.sleep_hours, biometrics?.fatigue_rating, biometrics?.stress_level, biometrics?.readiness_score])
  
+  // Auto-sync on mount if not registered
+  const hasAttemptedAutoSync = React.useRef(false)
+  
+  React.useEffect(() => {
+    if (!biometrics) return;
+    const hasGarminData = !!biometrics.raw_garmin_data && Object.keys(biometrics.raw_garmin_data).length > 0
+    if (!readOnly && isGarminConnected && !hasAttemptedAutoSync.current && (!isRegistered || !hasGarminData)) {
+      hasAttemptedAutoSync.current = true
+      handleSyncGarmin()
+    }
+  }, [readOnly, isGarminConnected, isRegistered, biometrics?.raw_garmin_data, biometrics])
+
   if (!biometrics) return null
  
   async function handleSaveBiometrics(formData: Partial<DailyBiometrics>) {
@@ -108,16 +120,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
     }
   }
   
-  // Auto-sync on mount if not registered
-  const hasAttemptedAutoSync = React.useRef(false)
-  
-  React.useEffect(() => {
-    const hasGarminData = !!biometrics.raw_garmin_data && Object.keys(biometrics.raw_garmin_data).length > 0
-    if (!readOnly && isGarminConnected && !hasAttemptedAutoSync.current && (!isRegistered || !hasGarminData)) {
-      hasAttemptedAutoSync.current = true
-      handleSyncGarmin()
-    }
-  }, [readOnly, isGarminConnected, isRegistered, biometrics.raw_garmin_data])
+
  
   const score = biometrics.readiness_score || 85
   const isOptimal = score >= 80
