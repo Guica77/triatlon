@@ -171,12 +171,6 @@ export function DashboardViewTabs({
     };
   }, [allWorkouts, selectedDateStr, profile, initialNutrition]);
 
-  if (!isMounted) {
-    return <div className="min-h-screen animate-pulse bg-zinc-50 flex items-center justify-center">
-      <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
-    </div>;
-  }
-
   // Form states for manual workout logger
   const [formTitle, setFormTitle] = React.useState('');
   const [formSport, setFormSport] = React.useState('carrera');
@@ -325,6 +319,12 @@ export function DashboardViewTabs({
     const total = weeklyWorkouts.filter(w => w.training_sessions?.sport_type !== 'descanso').length;
     return total > 0 ? Math.round((completed / total) * 100) : 0;
   }, [allWorkouts]);
+
+  if (!isMounted) {
+    return <div className="min-h-screen animate-pulse bg-zinc-50 flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+    </div>;
+  }
 
   return (
     <div className="space-y-6">
