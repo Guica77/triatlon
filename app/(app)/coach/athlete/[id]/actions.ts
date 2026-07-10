@@ -424,6 +424,7 @@ export async function seedDefaultTemplates() {
   if (!user) return { error: 'No autorizado' };
 
   const defaultTemplates = [
+    // --- CICLISMO ---
     {
       coach_id: user.id,
       name: 'Test FTP Ciclismo (20 min)',
@@ -434,6 +435,48 @@ export async function seedDefaultTemplates() {
       main: '5 min Z5 (Vaciado).\n10 min Z1 recuperación.\n20 min TEST FTP (Máximo esfuerzo sostenido).',
       cooldown: '10 min Z1 rodar suave para soltar.'
     },
+    {
+      coach_id: user.id,
+      name: 'Rodaje Endurance (Base)',
+      sport_type: 'ciclismo',
+      duration_min: 120,
+      intensity_type: 'z2',
+      warmup: '15 min Z1 soltando piernas y buscando cadencia ágil (90+ rpm).',
+      main: '90 min Z2 constante. Evitar picos de potencia en repechos. Comer cada 40 min.',
+      cooldown: '15 min Z1 pedaleo muy suave.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Series Sweet Spot 3x15min',
+      sport_type: 'ciclismo',
+      duration_min: 90,
+      intensity_type: 'z3',
+      warmup: '15 min Z1 a Z2 progresivo.',
+      main: '3 x 15 min en Sweet Spot (88-93% FTP). Recuperación 5 min en Z1.',
+      cooldown: '15 min Z1 alta cadencia.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Series VO2Max 5x3min',
+      sport_type: 'ciclismo',
+      duration_min: 75,
+      intensity_type: 'z5',
+      warmup: '20 min progresivos hasta Z3.\n3x30 seg Z4 (rec 1 min).',
+      main: '5 x 3 min en Z5 (>106% FTP). Recuperación 3 min en Z1 entre series.',
+      cooldown: '15 min Z1 alta cadencia (>95rpm).'
+    },
+    {
+      coach_id: user.id,
+      name: 'Fuerza Resistencia en Subida',
+      sport_type: 'ciclismo',
+      duration_min: 60,
+      intensity_type: 'z3',
+      warmup: '15 min Z1-Z2 en llano.',
+      main: '4 x 5 min en repecho (5-7% desnivel) en Z3 bajo, cadencia muy baja (55-60 rpm). Mucha fuerza concéntrica. Recuperación bajando en Z1.',
+      cooldown: '15 min Z1 cadencia alta para limpiar lactato.'
+    },
+    
+    // --- CARRERA ---
     {
       coach_id: user.id,
       name: 'Rodaje Largo Aeróbico',
@@ -451,9 +494,41 @@ export async function seedDefaultTemplates() {
       duration_min: 75,
       intensity_type: 'z4',
       warmup: '15 min Z1-Z2 + Técnica de carrera + 4 progresiones de 80m.',
-      main: '4 x 2000m en Z4 (Ritmo 10k). Recuperación 90 seg trote muy suave (Z1) entre series.',
+      main: '4 x 2000m en Z4 (Ritmo 10k o Medio Maratón). Recuperación 90 seg trote muy suave (Z1) entre series.',
       cooldown: '15 min Z1 trote cochinero.'
     },
+    {
+      coach_id: user.id,
+      name: 'Fartlek 1min/1min',
+      sport_type: 'carrera',
+      duration_min: 45,
+      intensity_type: 'z4',
+      warmup: '15 min Z1 a Z2.',
+      main: '10 x (1 min Z4 rápido / 1 min Z1 trote suave).',
+      cooldown: '10 min Z1 rodar suave.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Series Cortas Pista 10x400m',
+      sport_type: 'carrera',
+      duration_min: 60,
+      intensity_type: 'z5',
+      warmup: '20 min Z1-Z2 + Drills de técnica + 4 sprints cortos.',
+      main: '10 x 400m en Z5 (Ritmo 5k o superior). Recuperación 1 min parado o caminando.',
+      cooldown: '15 min Z1 descalzo en césped (opcional).'
+    },
+    {
+      coach_id: user.id,
+      name: 'Transición Carrera Tras Bici (Brick)',
+      sport_type: 'brick',
+      duration_min: 20,
+      intensity_type: 'z3',
+      warmup: 'Directo de la bicicleta. Calzado rápido.',
+      main: '15 min Z3 ritmo de carrera (Tempo). Acostumbrar a las piernas a correr fatigadas.',
+      cooldown: '5 min Z1 caminar y estirar.'
+    },
+
+    // --- NATACIÓN ---
     {
       coach_id: user.id,
       name: 'Nado Continuo 80/20',
@@ -466,13 +541,55 @@ export async function seedDefaultTemplates() {
     },
     {
       coach_id: user.id,
-      name: 'Series VO2Max Bici 5x3min',
-      sport_type: 'ciclismo',
-      duration_min: 75,
-      intensity_type: 'z5',
-      warmup: '20 min progresivos hasta Z3.\n3x30 seg Z4 (rec 1 min).',
-      main: '5 x 3 min en Z5 (>106% FTP). Recuperación 3 min en Z1 entre series.',
-      cooldown: '15 min Z1 alta cadencia (>95rpm).'
+      name: 'Series CSS (Umbral) 10x100m',
+      sport_type: 'natacion',
+      duration_min: 60,
+      intensity_type: 'z4',
+      warmup: '300m libres, 200m pull, 4x50m progresivos.',
+      main: '10 x 100m a ritmo CSS (Ritmo Umbral). Descanso corto de 15 segundos entre series.',
+      cooldown: '200m remada y nado muy suave.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Simulación Aguas Abiertas',
+      sport_type: 'natacion',
+      duration_min: 50,
+      intensity_type: 'z3',
+      warmup: '200m suaves.',
+      main: '4 x 400m Z3. Respiración cada 3 brazadas. Ojos fuera del agua cada 6 brazadas simulando avistamiento de boya.',
+      cooldown: '100m espalda.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Técnica y Sensibilidad',
+      sport_type: 'natacion',
+      duration_min: 45,
+      intensity_type: 'z1',
+      warmup: '200m libres.',
+      main: '8x50m Remada (Sculling).\n8x50m Punto Muerto.\n8x50m Nado a un brazo.',
+      cooldown: '200m nado largo y relajado.'
+    },
+
+    // --- FUERZA ---
+    {
+      coach_id: user.id,
+      name: 'Fuerza General Triatlón',
+      sport_type: 'fuerza',
+      duration_min: 45,
+      intensity_type: 'z2',
+      warmup: '10 min movilidad articular (caderas, hombros, tobillos).',
+      main: '3 series de:\n- 12 Sentadillas\n- 10 Zancadas (por pierna)\n- 12 Flexiones\n- 10 Remo con TRX o mancuerna\n- 30 seg Plancha',
+      cooldown: '5 min estiramientos.'
+    },
+    {
+      coach_id: user.id,
+      name: 'Core y Estabilidad',
+      sport_type: 'fuerza',
+      duration_min: 30,
+      intensity_type: 'z1',
+      warmup: '5 min de gato/camello y bird-dog.',
+      main: 'Circuito 3 vueltas:\n- 45 seg Plancha frontal\n- 30 seg Plancha lateral (por lado)\n- 15 Crunch abdominal\n- 15 Superman lumbar',
+      cooldown: 'Estiramiento de abdomen y lumbares.'
     }
   ];
 
