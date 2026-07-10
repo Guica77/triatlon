@@ -313,6 +313,7 @@ export type Database = {
           coach_id: string | null
           created_at: string
           current_ftp: number | null
+          max_hr: number | null
           current_run_pace: string | null
           current_swim_pace: string | null
           external_athlete_id: string | null
@@ -369,6 +370,7 @@ export type Database = {
           coach_id?: string | null
           created_at?: string
           current_ftp?: number | null
+          max_hr?: number | null
           current_run_pace?: string | null
           current_swim_pace?: string | null
           external_athlete_id?: string | null
@@ -425,6 +427,7 @@ export type Database = {
           coach_id?: string | null
           created_at?: string
           current_ftp?: number | null
+          max_hr?: number | null
           current_run_pace?: string | null
           current_swim_pace?: string | null
           external_athlete_id?: string | null
