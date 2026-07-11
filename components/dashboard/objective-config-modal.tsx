@@ -16,7 +16,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
 
   // State for StepAmbition
   const [athleteLevel, setAthleteLevel] = React.useState('intermedio');
-  const [activeTab, setActiveTab] = React.useState<'catalog' | 'custom'>('catalog');
+  const [activeTab, setActiveTab] = React.useState<'catalog' | 'custom' | 'none'>('catalog');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedRace, setSelectedRace] = React.useState<RaceCatalogItem | null>(RACES_CATALOG[0]);
   
@@ -62,6 +62,13 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
         distance: selectedRace.distance,
         modality: selectedRace.modality
       };
+    } else if (activeTab === 'none') {
+      return {
+        name: 'Mantenimiento / Off-Season',
+        date: null,
+        distance: 'sprint',
+        modality: 'triatlon'
+      };
     } else {
       return {
         name: customName || 'Mi Desafío',
@@ -78,7 +85,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
     try {
       const result = await saveRaceGoalAndPlan({
         target_race_name: currentGoal.name,
-        target_race_date: currentGoal.date,
+        target_race_date: currentGoal.date || undefined,
         target_race_distance: currentGoal.distance as any,
         target_race_modality: currentGoal.modality,
         target_finish_time: targetFinishTime,

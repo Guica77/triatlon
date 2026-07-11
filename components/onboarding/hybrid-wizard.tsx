@@ -25,7 +25,7 @@ export function HybridWizard() {
 
   // Step 1: Objetivo / Ambición (Race Goal)
   const [athleteLevel, setAthleteLevel] = React.useState('intermedio');
-  const [activeTab, setActiveTab] = React.useState<'catalog' | 'custom'>('catalog');
+  const [activeTab, setActiveTab] = React.useState<'catalog' | 'custom' | 'none'>('catalog');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedRace, setSelectedRace] = React.useState<RaceCatalogItem | null>(RACES_CATALOG[0]);
   
@@ -103,6 +103,13 @@ export function HybridWizard() {
             distance: selectedRace.distance,
             modality: selectedRace.modality
           }
+        : activeTab === 'none'
+        ? {
+            name: 'Mantenimiento / Off-Season',
+            date: null,
+            distance: 'sprint',
+            modality: 'triatlon'
+          }
         : {
             name: customName || 'Mi Desafío',
             date: customDate || '2027-10-18',
@@ -112,7 +119,7 @@ export function HybridWizard() {
 
       const result = await saveRaceGoalAndPlan({
         target_race_name: currentGoal.name,
-        target_race_date: currentGoal.date,
+        target_race_date: currentGoal.date || undefined,
         target_race_distance: currentGoal.distance as any,
         target_race_modality: currentGoal.modality,
         target_finish_time: targetFinishTime || undefined,
@@ -158,6 +165,13 @@ export function HybridWizard() {
             distance: selectedRace.distance,
             modality: selectedRace.modality
           }
+        : activeTab === 'none'
+        ? {
+            name: 'Mantenimiento / Off-Season',
+            date: null,
+            distance: 'sprint',
+            modality: 'triatlon'
+          }
         : {
             name: customName || 'Mi Desafío',
             date: customDate || '2027-10-18',
@@ -167,7 +181,7 @@ export function HybridWizard() {
 
       const result = await saveRaceGoalAndPlan({
         target_race_name: currentGoal.name,
-        target_race_date: currentGoal.date,
+        target_race_date: currentGoal.date || undefined,
         target_race_distance: currentGoal.distance as any,
         target_race_modality: currentGoal.modality,
         target_finish_time: targetFinishTime || undefined,
