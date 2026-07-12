@@ -197,9 +197,9 @@ export function RaceFinder() {
                       }`}
                     >
                       <div className="flex items-center gap-4">
+                        {/* We use tailwind background classes mapped in races-data.ts instead of inline style */}
                         <div
-                          className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-zinc-950 text-xs shadow-md shrink-0"
-                          style={{ backgroundColor: race.logoBg }}
+                          className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-zinc-950 text-xs shadow-md shrink-0 ${race.logoBg}`}
                         >
                           {race.distance === 'half' ? '70.3' : race.distance === 'full' ? 'FULL' : race.distance.toUpperCase().slice(0, 3)}
                         </div>
@@ -372,12 +372,15 @@ export function RaceFinder() {
               {/* Barra Visual */}
               <div className="flex gap-1 h-3 bg-zinc-950 rounded-full overflow-hidden p-0.5 border border-zinc-800/80">
                 {phases.map((p, i) => (
-                  <div
-                    key={i}
-                    className={`h-full first:rounded-l-full last:rounded-r-full transition-all duration-500 ${p.color}`}
-                    style={{ width: `${Math.max(5, (p.weeks / weeksRemaining) * 100)}%` }}
-                    title={`${p.name}: ${p.weeks} semanas`}
-                  />
+                  <React.Fragment key={i}>
+                    <style>{`
+                      .phase-bar-${i} { width: ${Math.max(5, (p.weeks / weeksRemaining) * 100)}%; }
+                    `}</style>
+                    <div
+                      className={`h-full first:rounded-l-full last:rounded-r-full transition-all duration-500 ${p.color} phase-bar-${i}`}
+                      title={`${p.name}: ${p.weeks} semanas`}
+                    />
+                  </React.Fragment>
                 ))}
               </div>
 

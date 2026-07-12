@@ -23,7 +23,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'half',
     month: 'Abril',
     estimatedDate: '2027-04-18',
-    logoBg: '#f59e0b'
+    logoBg: 'bg-amber-500'
   },
   {
     id: 'im-703-marbella',
@@ -34,7 +34,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'half',
     month: 'Octubre',
     estimatedDate: '2027-10-24',
-    logoBg: '#f59e0b'
+    logoBg: 'bg-amber-500'
   },
   {
     id: 'im-703-mallorca',
@@ -45,7 +45,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'half',
     month: 'Mayo',
     estimatedDate: '2027-05-09',
-    logoBg: '#f59e0b'
+    logoBg: 'bg-amber-500'
   },
   {
     id: 'im-703-cascais',
@@ -56,7 +56,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'half',
     month: 'Octubre',
     estimatedDate: '2027-10-17',
-    logoBg: '#f59e0b'
+    logoBg: 'bg-amber-500'
   },
 
   // Franquicia Ironman (Larga Distancia)
@@ -69,7 +69,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'full',
     month: 'Julio',
     estimatedDate: '2027-07-11',
-    logoBg: '#dc2626'
+    logoBg: 'bg-red-600'
   },
   {
     id: 'im-lanzarote',
@@ -80,7 +80,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'full',
     month: 'Mayo',
     estimatedDate: '2027-05-15',
-    logoBg: '#dc2626'
+    logoBg: 'bg-red-600'
   },
   {
     id: 'im-barcelona',
@@ -91,7 +91,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'full',
     month: 'Octubre',
     estimatedDate: '2027-10-03',
-    logoBg: '#dc2626'
+    logoBg: 'bg-red-600'
   },
 
   // Franquicia Challenge Family
@@ -104,7 +104,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'full',
     month: 'Julio',
     estimatedDate: '2027-07-04',
-    logoBg: '#ea580c'
+    logoBg: 'bg-orange-600'
   },
   {
     id: 'challenge-peguera',
@@ -115,7 +115,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'half',
     month: 'Octubre',
     estimatedDate: '2027-10-16',
-    logoBg: '#ea580c'
+    logoBg: 'bg-orange-600'
   },
 
   // Pruebas ITU / World Series & Locales Icónicas
@@ -128,7 +128,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'olimpico',
     month: 'Junio',
     estimatedDate: '2027-06-13',
-    logoBg: '#38bdf8'
+    logoBg: 'bg-sky-400'
   },
   {
     id: 'tri-zarautz',
@@ -139,7 +139,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'half',
     month: 'Junio',
     estimatedDate: '2027-06-12',
-    logoBg: '#f59e0b'
+    logoBg: 'bg-amber-500'
   },
 
   // --- NUEVAS MODALIDADES MULTISPORT ---
@@ -154,7 +154,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'full', // Distancia larga de acuabike (3k swim / 120k bike)
     month: 'Septiembre',
     estimatedDate: '2027-09-25',
-    logoBg: '#06b6d4' // Cyan Acuabike
+    logoBg: 'bg-cyan-500' // Cyan Acuabike
   },
   {
     id: 'aquabike-madrid',
@@ -165,7 +165,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'olimpico',
     month: 'Junio',
     estimatedDate: '2027-06-13',
-    logoBg: '#06b6d4'
+    logoBg: 'bg-cyan-500'
   },
 
   // Duatlón (Carrera + Ciclismo + Carrera - Sin natación)
@@ -178,7 +178,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'half',
     month: 'Abril',
     estimatedDate: '2027-04-10',
-    logoBg: '#10b981' // Verde Duatlón
+    logoBg: 'bg-emerald-500' // Verde Duatlón
   },
   {
     id: 'duatlon-aviles',
@@ -189,7 +189,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'sprint',
     month: 'Abril',
     estimatedDate: '2027-04-03',
-    logoBg: '#10b981'
+    logoBg: 'bg-emerald-500'
   },
 
   // Acuatlón (Natación + Carrera - Sin ciclismo)
@@ -202,7 +202,7 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'sprint',
     month: 'Agosto',
     estimatedDate: '2027-08-15',
-    logoBg: '#3b82f6' // Azul Acuatlón
+    logoBg: 'bg-blue-500' // Azul Acuatlón
   },
 
   // Triatlón Cross / XTERRA (Off-road BTT + Trail)
@@ -215,6 +215,6 @@ export const RACES_CATALOG: RaceCatalogItem[] = [
     distance: 'olimpico',
     month: 'Junio',
     estimatedDate: '2027-06-05',
-    logoBg: '#84cc16' // Lima XTERRA
+    logoBg: 'bg-lime-500' // Lima XTERRA
   }
 ];
