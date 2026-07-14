@@ -135,6 +135,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
     disliked_ingredients?: string[];
     previous_injuries?: string;
     current_ftp?: number;
+    max_hr?: number;
     current_swim_pace?: string;
     current_run_pace?: string;
   };
@@ -306,6 +307,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
             <CoachAthleteZonesEditor 
               athleteId={athleteId}
               initialFtp={athleteProfile.current_ftp || null}
+              initialMaxHr={athleteProfile.max_hr || null}
               initialSwimPace={athleteProfile.current_swim_pace || null}
               initialRunPace={athleteProfile.current_run_pace || null}
             />
@@ -323,11 +325,13 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
               Arrastra y suelta para reprogramar
             </span>
           </div>
-          <AdvancedCalendarWrapper 
-            athleteId={athleteId} 
-            initialWorkouts={workouts || []} 
-            initialLibraryTemplates={libraryRes?.data || []}
-          />
+          <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden">
+            <AdvancedCalendarWrapper 
+              athleteId={athleteId} 
+              initialWorkouts={workouts as any} 
+              initialLibraryTemplates={libraryRes?.data || []}
+            />
+          </div>
         </section>
 
         {/* Tabs of Calendar / List View */}

@@ -41,6 +41,7 @@ export interface WorkoutItem {
     sport_type: string | null;
     duration_min: number | null;
     description: string | null;
+    structured_blocks?: any[] | null;
   } | null;
   universal_telemetry?: any[];
 }
@@ -389,7 +390,8 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
       cooldown: parsed.cooldown,
       scheduled_date: workout.scheduled_date,
       status: workout.status,
-      telemetry: workout.universal_telemetry?.[0] || null
+      telemetry: workout.universal_telemetry?.[0] || null,
+      structured_blocks: session.structured_blocks || []
     });
     setIsEditModalOpen(true);
   };
@@ -405,7 +407,8 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
       warmup: '',
       main: '',
       cooldown: '',
-      scheduled_date: targetDate
+      scheduled_date: targetDate,
+      structured_blocks: []
     });
     setIsEditModalOpen(true);
   };

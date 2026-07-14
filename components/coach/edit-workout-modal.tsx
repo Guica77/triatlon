@@ -19,12 +19,14 @@ export interface EditWorkoutData {
   scheduled_date?: string
   status?: string | null
   telemetry?: any | null
+  structured_blocks?: any[]
 }
 
 import { WorkoutZonesChart } from './workout-zones-chart';
 import { WorkoutComments, WorkoutComment } from './workout-comments';
 import { getWorkoutComments } from '@/app/(app)/coach/athlete/[id]/actions';
 import { createClient } from '@/lib/supabase/client';
+import { VisualWorkoutBuilder, WorkoutBlock } from './visual-workout-builder';
 
 interface EditWorkoutModalProps {
   athleteId: string
@@ -49,8 +51,11 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
     title: '',
     warmup: '',
     main: '',
-    cooldown: ''
+    cooldown: '',
+    structuredBlocks: [] as WorkoutBlock[]
   })
+  
+  const [isVisualMode, setIsVisualMode] = React.useState(false)
 
   React.useEffect(() => {
     const supabase = createClient()
@@ -66,8 +71,10 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
           title: workout.title || '',
           warmup: workout.warmup || '',
           main: workout.main || '',
-          cooldown: workout.cooldown || ''
+          cooldown: workout.cooldown || '',
+          structuredBlocks: workout.structured_blocks || []
         })
+        setIsVisualMode((workout.structured_blocks && workout.structured_blocks.length > 0) ? true : false)
         setError(null)
         setSuccess(false)
         
@@ -113,10 +120,14 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
           title: formData.title,
           warmup: formData.warmup,
           main: formData.main,
-          cooldown: formData.cooldown
+          cooldown: formData.cooldown,
+          structured_blocks: isVisualMode ? formData.structuredBlocks : []
         })
       } else {
-        res = await updateCoachWorkoutDetails(athleteId, workout.id, workout.session_id, formData)
+        res = await updateCoachWorkoutDetails(athleteId, workout.id, workout.session_id, {
+          ...formData,
+          structured_blocks: isVisualMode ? formData.structuredBlocks : []
+        })
       }
 
       if (res.error) {
@@ -257,57 +268,78 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
 
                   <div className="border-t border-zinc-150 my-2" />
 
-                  {/* Warmup */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">1. Calentamiento (Warmup)</label>
+                  <div className="flex justify-between items-center bg-zinc-50 p-2 rounded-xl border border-zinc-200">
+                    <span className="text-xs font-bold text-zinc-600 uppercase tracking-wider">Modo de Edición</span>
+                    <div className="flex bg-zinc-200/50 p-1 rounded-lg">
+                      <button type="button" onClick={() => setIsVisualMode(true)} className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${isVisualMode ? 'bg-white text-cyan-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}>Visual Builder</button>
+                      <button type="button" onClick={() => setIsVisualMode(false)} className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${!isVisualMode ? 'bg-white text-cyan-600 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}>Texto Básico</button>
                     </div>
-                    <textarea 
-                      title="Calentamiento"
-                      aria-label="Calentamiento"
-                      placeholder="Detalles del calentamiento"
-                      name="warmup"
-                      rows={2}
-                      value={formData.warmup}
-                      onChange={handleInputChange}
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
-                    />
                   </div>
 
-                  {/* Main */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] text-cyan-650 uppercase tracking-wider font-bold">2. Parte Principal</label>
+                  {isVisualMode ? (
+                    <div className="py-2">
+                      <VisualWorkoutBuilder 
+                        blocks={formData.structuredBlocks} 
+                        onChange={(blocks) => {
+                          setFormData(prev => ({ ...prev, structuredBlocks: blocks, durationMin: blocks.reduce((acc, b) => acc + b.duration, 0) }))
+                        }} 
+                      />
                     </div>
-                    <textarea 
-                      title="Parte Principal"
-                      aria-label="Parte Principal"
-                      placeholder="Detalles de la parte principal"
-                      name="main"
-                      rows={3}
-                      required
-                      value={formData.main}
-                      onChange={handleInputChange}
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
-                    />
-                  </div>
+                  ) : (
+                    <>
+                      {/* Warmup */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">1. Calentamiento (Warmup)</label>
+                        </div>
+                        <textarea 
+                          title="Calentamiento"
+                          aria-label="Calentamiento"
+                          placeholder="Detalles del calentamiento"
+                          name="warmup"
+                          rows={2}
+                          value={formData.warmup}
+                          onChange={handleInputChange}
+                          className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
+                        />
+                      </div>
 
-                  {/* Cooldown */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">3. Enfriamiento (Cooldown)</label>
-                    </div>
-                    <textarea 
-                      title="Enfriamiento"
-                      aria-label="Enfriamiento"
-                      placeholder="Detalles del enfriamiento"
-                      name="cooldown"
-                      rows={2}
-                      value={formData.cooldown}
-                      onChange={handleInputChange}
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
-                    />
-                  </div>
+                      {/* Main */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[10px] text-cyan-650 uppercase tracking-wider font-bold">2. Parte Principal</label>
+                        </div>
+                        <textarea 
+                          title="Parte Principal"
+                          aria-label="Parte Principal"
+                          placeholder="Detalles de la parte principal"
+                          name="main"
+                          rows={3}
+                          required={!isVisualMode}
+                          value={formData.main}
+                          onChange={handleInputChange}
+                          className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
+                        />
+                      </div>
+
+                      {/* Cooldown */}
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">3. Enfriamiento (Cooldown)</label>
+                        </div>
+                        <textarea 
+                          title="Enfriamiento"
+                          aria-label="Enfriamiento"
+                          placeholder="Detalles del enfriamiento"
+                          name="cooldown"
+                          rows={2}
+                          value={formData.cooldown}
+                          onChange={handleInputChange}
+                          className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
+                        />
+                      </div>
+                    </>
+                  )}
 
                   {/* Submit Button */}
                   <div className="pt-2">

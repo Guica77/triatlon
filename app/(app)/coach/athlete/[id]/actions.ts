@@ -13,6 +13,7 @@ export async function saveCoachWorkout(
     warmup: string
     main: string
     cooldown: string
+    structured_blocks?: any[]
   }
 ) {
   const supabase = await createClient()
@@ -46,8 +47,17 @@ export async function saveCoachWorkout(
   }
 
   try {
-    // 3. Format description using expected markers
-    const description = `Calentamiento: ${data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${data.cooldown || 'Enfriamiento y estiramientos.'}`
+    // 3. Format description using expected markers or structured blocks
+    let description = '';
+    if (data.structured_blocks && data.structured_blocks.length > 0) {
+      const warmupBlocks = data.structured_blocks.filter(b => b.type === 'warmup').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
+      const mainBlocks = data.structured_blocks.filter(b => b.type === 'active' || b.type === 'recovery').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
+      const cooldownBlocks = data.structured_blocks.filter(b => b.type === 'cooldown').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
+      
+      description = `Calentamiento: ${warmupBlocks || data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${mainBlocks || data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${cooldownBlocks || data.cooldown || 'Enfriamiento y estiramientos.'}`;
+    } else {
+      description = `Calentamiento: ${data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${data.cooldown || 'Enfriamiento y estiramientos.'}`;
+    }
 
     // 4. Calculate day name (timezone-safe)
     const daysOfWeek = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -63,7 +73,8 @@ export async function saveCoachWorkout(
         duration_min: data.durationMin,
         description: description,
         week_number: 1,
-        day_name: dayName
+        day_name: dayName,
+        structured_blocks: data.structured_blocks || []
       })
       .select('id')
       .single()
@@ -146,6 +157,7 @@ export async function updateCoachWorkoutDetails(
     warmup: string
     main: string
     cooldown: string
+    structured_blocks?: any[]
   }
 ) {
   const supabase = await createClient()
@@ -165,8 +177,17 @@ export async function updateCoachWorkoutDetails(
   if (!rosterCheck) return { error: 'No autorizado' }
 
   try {
-    // 3. Format description using expected markers
-    const description = `Calentamiento: ${data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${data.cooldown || 'Enfriamiento y estiramientos.'}`
+    // 3. Format description using expected markers or structured blocks
+    let description = '';
+    if (data.structured_blocks && data.structured_blocks.length > 0) {
+      const warmupBlocks = data.structured_blocks.filter(b => b.type === 'warmup').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
+      const mainBlocks = data.structured_blocks.filter(b => b.type === 'active' || b.type === 'recovery').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
+      const cooldownBlocks = data.structured_blocks.filter(b => b.type === 'cooldown').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
+      
+      description = `Calentamiento: ${warmupBlocks || data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${mainBlocks || data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${cooldownBlocks || data.cooldown || 'Enfriamiento y estiramientos.'}`;
+    } else {
+      description = `Calentamiento: ${data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${data.cooldown || 'Enfriamiento y estiramientos.'}`;
+    }
 
     // 4. Update training_sessions
     const { error: sessionError } = await supabase
@@ -175,6 +196,7 @@ export async function updateCoachWorkoutDetails(
         sport_type: data.sportType,
         duration_min: data.durationMin,
         description: description,
+        structured_blocks: data.structured_blocks || []
       })
       .eq('id', sessionId)
 
@@ -195,6 +217,7 @@ export async function updateCoachWorkoutDetails(
 
 export async function updateAthleteZonesByCoach(athleteId: string, payload: {
   current_ftp?: number | null;
+  max_hr?: number | null;
   current_swim_pace?: string | null;
   current_run_pace?: string | null;
 }) {

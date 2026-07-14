@@ -536,6 +536,7 @@ export type Database = {
           plan_id: string | null
           sport_type: string
           week_number: number
+          structured_blocks: Json | null
         }
         Insert: {
           created_at?: string
@@ -547,6 +548,7 @@ export type Database = {
           plan_id?: string | null
           sport_type: string
           week_number: number
+          structured_blocks?: Json | null
         }
         Update: {
           created_at?: string
@@ -558,6 +560,7 @@ export type Database = {
           plan_id?: string | null
           sport_type?: string
           week_number?: number
+          structured_blocks?: Json | null
         }
         Relationships: [
           {
