@@ -193,7 +193,8 @@ export async function assignTemplateToGroupDay(groupId: string, templateId: stri
           duration_min: template.duration_min,
           description: description,
           day_name: 'Custom',
-          week_number: 0
+          week_number: 0,
+          structured_blocks: template.structured_blocks
         })
         .select('id')
         .single();
@@ -220,4 +221,60 @@ export async function assignTemplateToGroupDay(groupId: string, templateId: stri
     console.error(err);
     return { error: 'Failed to assign template to group' };
   }
+}
+
+export async function updateGroupGoal(groupId: string, targetName: string | null, targetDate: string | null) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Not authenticated' };
+  }
+
+  // Update group goal
+  const { error } = await supabase
+    .from('coach_groups')
+    .update({ target_name: targetName, target_date: targetDate })
+    .eq('id', groupId)
+    .eq('coach_id', user.id);
+
+  if (error) {
+    console.error('Error updating group goal:', error);
+    return { error: 'Failed to update group goal' };
+  }
+
+  revalidatePath('/coach/dashboard');
+  revalidatePath(`/coach/group/${groupId}`);
+  return { success: true };
+}
+
+export interface RoadmapEvent {
+  id: string;
+  title: string;
+  date: string;
+  type: 'A-Race' | 'B-Race' | 'Test' | 'Camp' | 'Other';
+}
+
+export async function updateGroupRoadmap(groupId: string, roadmapEvents: RoadmapEvent[]) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Not authenticated' };
+  }
+
+  const { error } = await supabase
+    .from('coach_groups')
+    .update({ roadmap_events: roadmapEvents })
+    .eq('id', groupId)
+    .eq('coach_id', user.id);
+
+  if (error) {
+    console.error('Error updating roadmap:', error);
+    return { error: 'Failed to update roadmap' };
+  }
+
+  revalidatePath('/coach/dashboard');
+  revalidatePath(`/coach/group/${groupId}`);
+  return { success: true };
 }

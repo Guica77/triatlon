@@ -133,6 +133,9 @@ export type Database = {
           coach_id: string
           name: string
           color: string | null
+          target_name: string | null
+          target_date: string | null
+          roadmap_events: any[] | null
           created_at: string
         }
         Insert: {
@@ -140,6 +143,9 @@ export type Database = {
           coach_id: string
           name: string
           color?: string | null
+          target_name?: string | null
+          target_date?: string | null
+          roadmap_events?: any[] | null
           created_at?: string
         }
         Update: {
@@ -147,6 +153,9 @@ export type Database = {
           coach_id?: string
           name?: string
           color?: string | null
+          target_name?: string | null
+          target_date?: string | null
+          roadmap_events?: any[] | null
           created_at?: string
         }
         Relationships: [

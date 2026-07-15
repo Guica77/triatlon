@@ -18,10 +18,12 @@ import {
   Clock, 
   Zap, 
   UserCheck,
-  Eye
+  Eye,
+  ArrowRight
 } from 'lucide-react'
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
+import { GroupTabContent } from '@/components/coach/group-tab-content'
 import { 
   assignPlanToAthlete, 
   addAthleteByEmail, 
@@ -42,6 +44,10 @@ interface CoachDashboardViewProps {
 
 export function CoachDashboardView({ initialRoster, plans, groups, coachName, coachId, initialInviteCode }: CoachDashboardViewProps) {
   const [roster, setRoster] = React.useState<AthleteRosterItem[]>(initialRoster)
+
+  React.useEffect(() => {
+    setRoster(initialRoster)
+  }, [initialRoster])
   const [searchQuery, setSearchQuery] = React.useState('')
   const [selectedGroupId, setSelectedGroupId] = React.useState<string | 'all'>('all')
   const [isGroupManagerOpen, setIsGroupManagerOpen] = React.useState(false)
@@ -316,13 +322,17 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
           </section>
 
           {/* Search and Invite Split */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Roster Search Column */}
-            <div className="lg:col-span-2 space-y-4">
-              {/* Athlete Bento Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <AnimatePresence mode="popLayout">
+          {selectedGroupId !== 'all' ? (
+            <section className="mt-6">
+              <GroupTabContent groupId={selectedGroupId} />
+            </section>
+          ) : (
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Roster Search Column */}
+              <div className="lg:col-span-2 space-y-4">
+                {/* Athlete Bento Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <AnimatePresence mode="popLayout">
                   {filteredRoster.length === 0 ? (
                     <div className="col-span-full py-12 text-center bg-zinc-50 rounded-2xl border border-dashed border-zinc-250 flex flex-col items-center gap-3">
                       <Users className="w-8 h-8 text-zinc-400" />
@@ -421,8 +431,9 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
                   El sistema avisa con un punto rojo parpadeante cuando un atleta registra un HRV por debajo de 55ms o un Readiness de Whoop/Oura menor al 60%. Úsalo para ajustar sus entrenamientos en tiempo real y evitar lesiones.
                 </p>
               </div>
-            </div>
-          </section>
+              </div>
+            </section>
+          )}
         </motion.div>
       </main>
       
