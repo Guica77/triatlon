@@ -9,8 +9,8 @@ import { RACES_CATALOG, RaceCatalogItem, MultisportModality } from '@/lib/races-
 
 interface StepAmbitionProps {
   wantsCoach?: boolean;
-  activeTab: 'catalog' | 'custom';
-  setActiveTab: (v: 'catalog' | 'custom') => void;
+  activeTab: 'catalog' | 'custom' | 'none';
+  setActiveTab: (v: 'catalog' | 'custom' | 'none') => void;
   searchQuery: string;
   setSearchQuery: (v: string) => void;
   filteredCatalog: RaceCatalogItem[];
@@ -123,6 +123,7 @@ export function StepAmbition(props: StepAmbitionProps) {
             <div className="flex gap-2 p-1 bg-zinc-100 rounded-xl border border-zinc-200 mb-3">
               <button onClick={() => props.setActiveTab('catalog')} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors cursor-pointer ${props.activeTab === 'catalog' ? 'bg-white text-cyan-600 shadow-sm border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'}`}>Catálogo Oficial</button>
               <button onClick={() => props.setActiveTab('custom')} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors cursor-pointer ${props.activeTab === 'custom' ? 'bg-white text-cyan-600 shadow-sm border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'}`}>Carrera a Medida</button>
+              <button onClick={() => props.setActiveTab('none')} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors cursor-pointer ${props.activeTab === 'none' ? 'bg-white text-cyan-600 shadow-sm border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'}`}>Sin Objetivo (Mantenimiento)</button>
             </div>
 
             {props.activeTab === 'catalog' && (
@@ -172,6 +173,13 @@ export function StepAmbition(props: StepAmbitionProps) {
                   <option value="acuabike">Acuabike</option>
                   <option value="carrera">Running (Carrera a pie)</option>
                 </select>
+              </div>
+            )}
+
+            {props.activeTab === 'none' && (
+              <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl text-center mb-4">
+                <p className="text-sm text-zinc-700 font-bold">Has elegido no preparar ninguna carrera en específico.</p>
+                <p className="text-xs text-zinc-500 mt-1">El plan se enfocará en construir base aeróbica, mejorar tus métricas de salud general y prepararte para futuras metas sin la presión de una fecha límite.</p>
               </div>
             )}
 

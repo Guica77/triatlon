@@ -310,69 +310,75 @@ export function ChatView({
               </div>
             </div>
 
-            {/* Messages body list */}
-            <div 
-              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative bg-[#e5ddd5] bg-[radial-gradient(#cfc8c0_1px,transparent_1px)] bg-[size:24px_24px]"
-            >
-              {loadingMessages ? (
-                <div className="h-full flex items-center justify-center text-xs text-zinc-500 font-semibold">
-                  Cargando conversación...
-                </div>
-              ) : messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-500 space-y-2">
-                  <MessageSquare className="w-8 h-8 text-zinc-400" />
-                  <p className="text-xs font-bold">No hay mensajes previos.</p>
-                  <p className="text-[10px] text-zinc-450 font-semibold">¡Escribe tu primer mensaje!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {messages.map(m => {
-                    const isOwn = m.sender_id === currentUserId
-                    return (
-                      <div 
-                        key={m.id}
-                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-1`}
-                      >
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          className={`max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl text-[13px] leading-relaxed shadow-sm relative ${
-                            isOwn 
-                              ? 'bg-[#d9fdd3] text-zinc-900 font-medium rounded-tr-sm border border-[#c6ecc0]' 
-                              : 'bg-white text-zinc-900 rounded-tl-sm border border-zinc-200/50 font-medium'
-                          }`}
+            {/* Main Chat Conversation Viewport */}
+            <div className="flex-1 relative bg-[#e5ddd5] overflow-hidden flex flex-col">
+              {/* Fixed Background Pattern */}
+              <div className="absolute inset-0 bg-[radial-gradient(#cfc8c0_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
+              {/* Messages body list */}
+              <div 
+                className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar relative z-10 flex flex-col"
+              >
+                {loadingMessages ? (
+                  <div className="h-full flex items-center justify-center text-xs text-zinc-500 font-semibold">
+                    Cargando conversación...
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-zinc-500 space-y-2">
+                    <MessageSquare className="w-8 h-8 text-zinc-400" />
+                    <p className="text-xs font-bold">No hay mensajes previos.</p>
+                    <p className="text-[10px] text-zinc-450 font-semibold">¡Escribe tu primer mensaje!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 flex-1">
+                    {messages.map(m => {
+                      const isOwn = m.sender_id === currentUserId
+                      return (
+                        <div 
+                          key={m.id}
+                          className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-1`}
                         >
-                          <p className="whitespace-pre-wrap">{m.message}</p>
-                          {isOwn ? (
-                            <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-450 float-right ml-3 translate-y-1" suppressHydrationWarning>
-                              {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              <span className="text-cyan-600 font-black tracking-normal text-[10px]">✓✓</span>
-                            </div>
-                          ) : (
-                            <div className="text-[9px] mt-0.5 text-right font-bold text-zinc-400 float-right ml-3 translate-y-1" suppressHydrationWarning>
-                              {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                          )}
-                          <div className="clear-both"></div>
-                        </motion.div>
-                      </div>
-                    )
-                  })}
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            className={`max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl text-[13px] leading-relaxed shadow-sm relative ${
+                              isOwn 
+                                ? 'bg-[#d9fdd3] text-zinc-900 font-medium rounded-tr-sm border border-[#c6ecc0]' 
+                                : 'bg-white text-zinc-900 rounded-tl-sm border border-zinc-200/50 font-medium'
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap">{m.message}</p>
+                            {isOwn ? (
+                              <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-450 float-right ml-3 translate-y-1" suppressHydrationWarning>
+                                {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                <span className="text-cyan-600 font-black tracking-normal text-[10px]">✓✓</span>
+                              </div>
+                            ) : (
+                              <div className="text-[9px] mt-0.5 text-right font-bold text-zinc-400 float-right ml-3 translate-y-1" suppressHydrationWarning>
+                                {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            )}
+                            <div className="clear-both"></div>
+                          </motion.div>
+                        </div>
+                      )
+                    })}
 
-                  {/* Typing Indicator */}
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="bg-zinc-100 border border-zinc-200 text-zinc-500 p-3.5 rounded-2xl rounded-tl-none flex items-center gap-1.5 shadow-sm">
-                        <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                        <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                        <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                    {/* Typing Indicator */}
+                    {isTyping && (
+                      <div className="flex justify-start">
+                        <div className="bg-zinc-100 border border-zinc-200 text-zinc-500 p-3.5 rounded-2xl rounded-tl-none flex items-center gap-1.5 shadow-sm">
+                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
+                    <div ref={messagesEndRef} className="h-2" />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Input form */}

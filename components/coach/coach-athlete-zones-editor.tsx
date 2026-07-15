@@ -9,15 +9,17 @@ import { updateAthleteZonesByCoach } from '@/app/(app)/coach/athlete/[id]/action
 interface CoachAthleteZonesEditorProps {
   athleteId: string;
   initialFtp: number | null;
+  initialMaxHr: number | null;
   initialSwimPace: string | null;
   initialRunPace: string | null;
 }
 
-export function CoachAthleteZonesEditor({ athleteId, initialFtp, initialSwimPace, initialRunPace }: CoachAthleteZonesEditorProps) {
+export function CoachAthleteZonesEditor({ athleteId, initialFtp, initialMaxHr, initialSwimPace, initialRunPace }: CoachAthleteZonesEditorProps) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   
   const [ftp, setFtp] = React.useState(initialFtp?.toString() || '');
+  const [maxHr, setMaxHr] = React.useState(initialMaxHr?.toString() || '');
   const [swim, setSwim] = React.useState(initialSwimPace || '');
   const [run, setRun] = React.useState(initialRunPace || '');
 
@@ -25,6 +27,7 @@ export function CoachAthleteZonesEditor({ athleteId, initialFtp, initialSwimPace
     setLoading(true);
     const payload = {
       current_ftp: ftp ? parseInt(ftp, 10) : null,
+      max_hr: maxHr ? parseInt(maxHr, 10) : null,
       current_swim_pace: swim || null,
       current_run_pace: run || null,
     };
@@ -36,6 +39,7 @@ export function CoachAthleteZonesEditor({ athleteId, initialFtp, initialSwimPace
 
   const handleCancel = () => {
     setFtp(initialFtp?.toString() || '');
+    setMaxHr(initialMaxHr?.toString() || '');
     setSwim(initialSwimPace || '');
     setRun(initialRunPace || '');
     setIsEditing(false);
@@ -68,6 +72,8 @@ export function CoachAthleteZonesEditor({ athleteId, initialFtp, initialSwimPace
             <button 
               onClick={handleCancel}
               disabled={loading}
+              title="Cancelar"
+              aria-label="Cancelar edición"
               className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition"
             >
               <X className="w-4 h-4" />
@@ -75,6 +81,8 @@ export function CoachAthleteZonesEditor({ athleteId, initialFtp, initialSwimPace
             <button 
               onClick={handleSave}
               disabled={loading}
+              title="Guardar"
+              aria-label="Guardar umbrales"
               className="p-2 text-cyan-600 hover:bg-cyan-50 rounded-xl transition disabled:opacity-50"
             >
               <Check className="w-4 h-4" />
@@ -102,6 +110,25 @@ export function CoachAthleteZonesEditor({ athleteId, initialFtp, initialSwimPace
             )}
           </div>
           <Activity className="w-6 h-6 text-orange-400 opacity-20" />
+        </div>
+
+        {/* FC Max */}
+        <div className="flex justify-between items-center p-3 rounded-xl bg-zinc-50 border border-zinc-150">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-450">FC Máxima / Umbral (ppm)</p>
+            {!isEditing ? (
+              <p className="text-lg font-black text-zinc-800">{maxHr || 'N/A'}</p>
+            ) : (
+              <input 
+                type="number" 
+                value={maxHr} 
+                onChange={e => setMaxHr(e.target.value)}
+                placeholder="Ej. 185"
+                className="w-20 mt-1 bg-white border border-zinc-200 text-sm font-bold text-zinc-800 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-cyan-500"
+              />
+            )}
+          </div>
+          <Activity className="w-6 h-6 text-red-400 opacity-20" />
         </div>
 
         {/* Ritmo Nado */}

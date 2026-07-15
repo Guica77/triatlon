@@ -171,6 +171,7 @@ export type Database = {
           main: string | null
           cooldown: string | null
           intensity_type: string | null
+          structured_blocks: Json | null
           created_at: string
         }
         Insert: {
@@ -183,6 +184,7 @@ export type Database = {
           main?: string | null
           cooldown?: string | null
           intensity_type?: string | null
+          structured_blocks?: Json | null
           created_at?: string
         }
         Update: {
@@ -195,6 +197,7 @@ export type Database = {
           main?: string | null
           cooldown?: string | null
           intensity_type?: string | null
+          structured_blocks?: Json | null
           created_at?: string
         }
         Relationships: [

@@ -50,9 +50,19 @@ export async function saveCoachWorkout(
     // 3. Format description using expected markers or structured blocks
     let description = '';
     if (data.structured_blocks && data.structured_blocks.length > 0) {
-      const warmupBlocks = data.structured_blocks.filter(b => b.type === 'warmup').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
-      const mainBlocks = data.structured_blocks.filter(b => b.type === 'active' || b.type === 'recovery').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
-      const cooldownBlocks = data.structured_blocks.filter(b => b.type === 'cooldown').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
+      const formatBlock = (b: any) => {
+        if (b.type === 'interval') {
+          const work = b.workTargetType === 'distance' ? `${b.workDistance}m` : `${b.workDuration}m`;
+          const rest = b.restTargetType === 'distance' ? `${b.restDistance}m` : `${b.restDuration}m`;
+          return `${b.repeats}x (${work} Z${b.workZone} + ${rest} Z${b.restZone})`;
+        }
+        const val = b.targetType === 'distance' ? `${b.distance}m` : `${b.duration}m`;
+        return `${val} Z${b.zone}${b.notes ? ` [${b.notes}]` : ''}`;
+      };
+
+      const warmupBlocks = data.structured_blocks.filter((b: any) => b.type === 'warmup').map(formatBlock).join(' + ');
+      const mainBlocks = data.structured_blocks.filter((b: any) => b.type === 'active' || b.type === 'recovery' || b.type === 'interval').map(formatBlock).join(' + ');
+      const cooldownBlocks = data.structured_blocks.filter((b: any) => b.type === 'cooldown').map(formatBlock).join(' + ');
       
       description = `Calentamiento: ${warmupBlocks || data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${mainBlocks || data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${cooldownBlocks || data.cooldown || 'Enfriamiento y estiramientos.'}`;
     } else {
@@ -180,9 +190,19 @@ export async function updateCoachWorkoutDetails(
     // 3. Format description using expected markers or structured blocks
     let description = '';
     if (data.structured_blocks && data.structured_blocks.length > 0) {
-      const warmupBlocks = data.structured_blocks.filter(b => b.type === 'warmup').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
-      const mainBlocks = data.structured_blocks.filter(b => b.type === 'active' || b.type === 'recovery').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
-      const cooldownBlocks = data.structured_blocks.filter(b => b.type === 'cooldown').map(b => `${b.duration}m Z${b.zone}`).join(' + ');
+      const formatBlock = (b: any) => {
+        if (b.type === 'interval') {
+          const work = b.workTargetType === 'distance' ? `${b.workDistance}m` : `${b.workDuration}m`;
+          const rest = b.restTargetType === 'distance' ? `${b.restDistance}m` : `${b.restDuration}m`;
+          return `${b.repeats}x (${work} Z${b.workZone} + ${rest} Z${b.restZone})`;
+        }
+        const val = b.targetType === 'distance' ? `${b.distance}m` : `${b.duration}m`;
+        return `${val} Z${b.zone}${b.notes ? ` [${b.notes}]` : ''}`;
+      };
+
+      const warmupBlocks = data.structured_blocks.filter((b: any) => b.type === 'warmup').map(formatBlock).join(' + ');
+      const mainBlocks = data.structured_blocks.filter((b: any) => b.type === 'active' || b.type === 'recovery' || b.type === 'interval').map(formatBlock).join(' + ');
+      const cooldownBlocks = data.structured_blocks.filter((b: any) => b.type === 'cooldown').map(formatBlock).join(' + ');
       
       description = `Calentamiento: ${warmupBlocks || data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${mainBlocks || data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${cooldownBlocks || data.cooldown || 'Enfriamiento y estiramientos.'}`;
     } else {
@@ -363,7 +383,8 @@ export async function assignTemplateToAthleteDay(athleteId: string, templateId: 
         duration_min: template.duration_min,
         description: description,
         day_name: 'Custom',
-        week_number: 0
+        week_number: 0,
+        structured_blocks: template.structured_blocks || []
       })
       .select('id')
       .single()
@@ -456,7 +477,16 @@ export async function seedDefaultTemplates() {
       intensity_type: 'z5',
       warmup: '15 min Z1-Z2 progresivo.\n3 x (1 min Z4 + 1 min Z1).\n5 min Z1 fácil.',
       main: '5 min Z5 (Vaciado).\n10 min Z1 recuperación.\n20 min TEST FTP (Máximo esfuerzo sostenido).',
-      cooldown: '10 min Z1 rodar suave para soltar.'
+      cooldown: '10 min Z1 rodar suave para soltar.',
+      structured_blocks: [
+        { id: '1', type: 'warmup', duration: 15, durationType: 'min', zone: 2, notes: 'Z1-Z2 progresivo' },
+        { id: '2', type: 'interval', repeats: 3, work: { duration: 1, durationType: 'min', zone: 4 }, rest: { duration: 1, durationType: 'min', zone: 1 } },
+        { id: '3', type: 'warmup', duration: 5, durationType: 'min', zone: 1, notes: 'Fácil' },
+        { id: '4', type: 'main', duration: 5, durationType: 'min', zone: 5, notes: 'Vaciado' },
+        { id: '5', type: 'main', duration: 10, durationType: 'min', zone: 1, notes: 'Recuperación' },
+        { id: '6', type: 'main', duration: 20, durationType: 'min', zone: 5, notes: 'TEST FTP (Máximo esfuerzo)' },
+        { id: '7', type: 'cooldown', duration: 10, durationType: 'min', zone: 1, notes: 'Rodar suave' }
+      ]
     },
     {
       coach_id: user.id,
@@ -466,7 +496,12 @@ export async function seedDefaultTemplates() {
       intensity_type: 'z2',
       warmup: '15 min Z1 soltando piernas y buscando cadencia ágil (90+ rpm).',
       main: '90 min Z2 constante. Evitar picos de potencia en repechos. Comer cada 40 min.',
-      cooldown: '15 min Z1 pedaleo muy suave.'
+      cooldown: '15 min Z1 pedaleo muy suave.',
+      structured_blocks: [
+        { id: '1', type: 'warmup', duration: 15, durationType: 'min', zone: 1, notes: 'Cadencia >90rpm' },
+        { id: '2', type: 'main', duration: 90, durationType: 'min', zone: 2, notes: 'Constante. Comer cada 40 min' },
+        { id: '3', type: 'cooldown', duration: 15, durationType: 'min', zone: 1, notes: 'Muy suave' }
+      ]
     },
     {
       coach_id: user.id,
@@ -476,7 +511,12 @@ export async function seedDefaultTemplates() {
       intensity_type: 'z3',
       warmup: '15 min Z1 a Z2 progresivo.',
       main: '3 x 15 min en Sweet Spot (88-93% FTP). Recuperación 5 min en Z1.',
-      cooldown: '15 min Z1 alta cadencia.'
+      cooldown: '15 min Z1 alta cadencia.',
+      structured_blocks: [
+        { id: '1', type: 'warmup', duration: 15, durationType: 'min', zone: 2, notes: 'Z1 a Z2 progresivo' },
+        { id: '2', type: 'interval', repeats: 3, work: { duration: 15, durationType: 'min', zone: 3 }, rest: { duration: 5, durationType: 'min', zone: 1 } },
+        { id: '3', type: 'cooldown', duration: 15, durationType: 'min', zone: 1, notes: 'Alta cadencia' }
+      ]
     },
     {
       coach_id: user.id,

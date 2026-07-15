@@ -280,8 +280,23 @@ export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWo
                     <div className="py-2">
                       <VisualWorkoutBuilder 
                         blocks={formData.structuredBlocks} 
+                        sportType={formData.sportType}
                         onChange={(blocks) => {
-                          setFormData(prev => ({ ...prev, structuredBlocks: blocks, durationMin: blocks.reduce((acc, b) => acc + b.duration, 0) }))
+                          setFormData(prev => ({ 
+                            ...prev, 
+                            structuredBlocks: blocks, 
+                            durationMin: Math.round(blocks.reduce((acc, b) => {
+                              if (b.type === 'interval') {
+                                const reps = b.repeats || 1;
+                                const workDur = b.workTargetType === 'distance' ? ((b.workDistance || 0) / 1000 * 5) : (b.workDuration || 0);
+                                const restDur = b.restTargetType === 'distance' ? ((b.restDistance || 0) / 1000 * 5) : (b.restDuration || 0);
+                                return acc + (workDur + restDur) * reps;
+                              } else {
+                                const dur = b.targetType === 'distance' ? ((b.distance || 0) / 1000 * 5) : (b.duration || 0);
+                                return acc + dur;
+                              }
+                            }, 0))
+                          }))
                         }} 
                       />
                     </div>
