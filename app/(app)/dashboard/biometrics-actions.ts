@@ -254,3 +254,34 @@ export async function syncGarminToDatabaseAction() {
     return { error: 'Error inesperado durante la sincronización.' }
   }
 }
+
+/**
+ * Update injury history for the athlete
+ */
+export async function updateInjuryHistory(injuries: string[]): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  try {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ previous_injuries: injuries.join(' | ') })
+      .eq('id', user.id)
+
+    if (error) {
+      console.error('Error updating injury history:', error)
+      return { error: 'No se pudo guardar el historial de lesiones.' }
+    }
+
+    revalidatePath('/settings')
+    revalidatePath('/dashboard')
+    return { success: true }
+  } catch (err: any) {
+    return { error: err.message || 'Error interno' }
+  }
+}
+

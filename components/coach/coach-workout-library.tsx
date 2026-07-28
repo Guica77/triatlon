@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { createPortal } from 'react-dom';
@@ -42,6 +43,9 @@ interface DraggableTemplateProps {
 }
 
 function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const [hoverCoords, setHoverCoords] = React.useState({ top: 0, left: 0 });
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `template-${template.id}`,
     data: {
@@ -68,6 +72,7 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
 
   return (
     <>
+<<<<<<< HEAD
       <StyledDiv 
         ref={(node: HTMLDivElement) => {
           setNodeRef(node);
@@ -109,6 +114,46 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
           <Trash2 className="w-3.5 h-3.5" />
         </button>
       </StyledDiv>
+=======
+    <StyledDiv
+      ref={setNodeRef}
+      styleProps={style}
+      onClick={() => setIsOpen(true)}
+      onMouseEnter={(e: React.MouseEvent) => {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        setHoverCoords({ top: rect.top, left: rect.right + 8 });
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`group flex items-center justify-between p-3 mb-2 rounded-xl border bg-white shadow-sm transition-all ${
+        isDragging ? 'opacity-50 z-50 shadow-lg border-cyan-500 scale-105' : 'border-zinc-200 hover:border-cyan-300'
+      }`}
+    >
+      <div className="flex items-center gap-3 overflow-hidden">
+        <div {...listeners} {...attributes} className="cursor-grab hover:bg-zinc-100 p-1 rounded transition-colors active:cursor-grabbing">
+          <GripVertical className="w-4 h-4 text-zinc-400" />
+        </div>
+        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${getSportAccent(template.sport_type)}`}>
+          <SportIcon type={template.sport_type} className="w-4 h-4" />
+        </div>
+        <div className="truncate">
+          <p className="text-sm font-bold text-zinc-800 truncate">{template.name}</p>
+          <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-semibold">
+            {template.duration_min} min • {template.intensity_type?.toUpperCase() || 'Z2'}
+          </p>
+        </div>
+      </div>
+
+      <button
+        title="Eliminar plantilla"
+        aria-label="Eliminar plantilla"
+        onClick={(e) => { e.stopPropagation(); onDelete(template.id); }}
+        className="opacity-0 group-hover:opacity-100 p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </StyledDiv>
+>>>>>>> prueba
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-sm p-6">
@@ -157,7 +202,11 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
 
       {/* Hover Card para Desktop */}
       {isHovered && typeof document !== 'undefined' && createPortal(
+<<<<<<< HEAD
         <div 
+=======
+        <div
+>>>>>>> prueba
           style={{ top: hoverCoords.top, left: hoverCoords.left }}
           className="fixed z-[100] w-80 bg-white rounded-xl shadow-2xl border border-zinc-200 p-5 pointer-events-none animate-in fade-in zoom-in-95 duration-200"
         >

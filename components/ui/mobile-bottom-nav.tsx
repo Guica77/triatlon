@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BarChart2, MessageSquare, Settings } from 'lucide-react';
+import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications } from '@/components/providers/notification-provider';
 
@@ -45,19 +45,24 @@ export function MobileBottomNav() {
     return null;
   }
 
-  const navItems = role === 'coach' ? [
+  const navItems = role === 'owner' ? [
+    { href: '/owner', label: 'Negocio', icon: Trophy },
+    { href: '/coach/dashboard', label: 'Roster', icon: Home },
+    { href: '/settings', label: 'Ajustes', icon: Settings },
+  ] : role === 'coach' ? [
     { href: '/coach/dashboard', label: 'Roster', icon: Home },
     { href: '/coach/chat', label: 'Mensajes', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ] : [
     { href: '/dashboard', label: 'Inicio', icon: Home },
+    { href: '/exercises', label: 'Ejercicios', icon: BookOpen },
     { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
     { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 pt-2 bg-white/90 backdrop-blur-md border-t border-zinc-200 shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.08)]">
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[max(env(safe-area-inset-bottom),24px)] pt-2 bg-white/95 backdrop-blur-md border-t border-zinc-200 shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.08)] motion-safe:transition-all">
       <div className="flex items-center justify-around max-w-md mx-auto relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));

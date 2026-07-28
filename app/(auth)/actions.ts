@@ -76,6 +76,14 @@ export async function loginAthlete(formData: FormData) {
   // Magic Link resolution on Login
   const { data: { session } } = await supabase.auth.getSession();
   if (session?.user) {
+    // Track first login date for feedback timing
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const supabaseAdmin = createAdminClient();
+    const { data: profile } = await supabaseAdmin.from('profiles').select('first_login_at').eq('id', session.user.id).single();
+    if (!profile?.first_login_at) {
+      await supabaseAdmin.from('profiles').update({ first_login_at: new Date().toISOString() }).eq('id', session.user.id);
+    }
+
     const { cookies } = await import('next/headers');
     const cookieStore = await cookies();
     const inviteCoachId = cookieStore.get('invite_coach_id')?.value;

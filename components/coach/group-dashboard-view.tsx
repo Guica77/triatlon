@@ -7,8 +7,19 @@ import { ChevronLeft, Users, Activity, AlertTriangle, CheckCircle, Calendar as C
 import { GroupAthleteItem } from '@/app/(app)/coach/group/[id]/actions';
 import { GroupCalendarWrapper } from './group-calendar-wrapper';
 import { EditGroupRoadmapModal } from './edit-group-roadmap-modal';
+<<<<<<< HEAD
 import { RoadmapEvent } from '@/app/(app)/coach/group/[id]/actions';
 import { parseISO, isAfter, isSameDay, startOfDay } from 'date-fns';
+=======
+import { CloneWeekModal } from './clone-week-modal';
+import { ComplianceGrid } from './compliance-grid';
+import { GroupAnnouncement } from './group-announcement';
+import { RoadmapEvent } from '@/app/(app)/coach/group/[id]/actions';
+import { parseISO, isAfter, isSameDay, startOfDay } from 'date-fns';
+import { MessageSquare } from 'lucide-react';
+import { GroupChatPanel } from './group-chat-panel';
+import { AnimatedButton } from '@/components/ui/animated-button';
+>>>>>>> prueba
 
 interface GroupDashboardViewProps {
   group: any;
@@ -19,6 +30,10 @@ interface GroupDashboardViewProps {
 }
 
 export function GroupDashboardView({ group, athletes, workouts, libraryTemplates, hideBackButton }: GroupDashboardViewProps) {
+<<<<<<< HEAD
+=======
+  const [isChatOpen, setIsChatOpen] = React.useState(false);
+>>>>>>> prueba
   const totalAthletes = athletes.length;
   
   // Calculate athletes with alerts
@@ -29,6 +44,7 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
   const completedToday = activeToday.filter(a => a.today_workout?.status === 'completed');
   const completionRate = activeToday.length > 0 ? Math.round((completedToday.length / activeToday.length) * 100) : 100;
 
+<<<<<<< HEAD
   // Calculate athletes with readiness
   const athletesWithReadiness = athletes.filter(a => a.readiness_score !== null);
   const averageReadiness = athletesWithReadiness.length > 0
@@ -60,6 +76,9 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
       default: return 'text-indigo-600 bg-indigo-50';
     }
   };
+=======
+  const today = new Date();
+>>>>>>> prueba
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -79,7 +98,17 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
               <h1 className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight">
                 Grupo: <span className="text-cyan-600">{group.name}</span>
               </h1>
-              <p className="text-sm text-zinc-500 font-medium">Dashboard y Calendario Grupal</p>
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-zinc-500 font-medium">Dashboard y Calendario Grupal</p>
+                <AnimatedButton
+                  variant="secondary"
+                  size="sm" 
+                  onClick={() => setIsChatOpen(true)}
+                  className="h-7 text-[10px] px-2 py-0 border-cyan-200 text-cyan-700 bg-cyan-50 hover:bg-cyan-100"
+                >
+                  <MessageSquare className="w-3 h-3 mr-1" /> Chat
+                </AnimatedButton>
+              </div>
             </div>
           </div>
         </div>
@@ -158,6 +187,10 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
             <p className="text-[11px] text-zinc-500 font-medium mt-2">Volumen de entrenamiento planificado en los calendarios.</p>
           </div>
 
+<<<<<<< HEAD
+=======
+<div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm flex flex-col justify-between">
+>>>>>>> prueba
           {/* Cumplimiento Hoy */}
           <div className="bg-gradient-to-br from-white to-zinc-50 rounded-2xl p-5 border border-zinc-200 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
@@ -175,7 +208,11 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
                 <p className="text-sm text-zinc-500 font-medium">/ {activeToday.length} atletas</p>
               </div>
               <div className="w-full bg-zinc-100 h-2.5 rounded-full overflow-hidden">
+<<<<<<< HEAD
                 <div 
+=======
+                <div
+>>>>>>> prueba
                   className="h-full bg-cyan-500 rounded-full transition-all"
                   style={{ width: `${completionRate}%` }}
                 />
@@ -183,6 +220,10 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
             </div>
             <p className="text-[11px] text-zinc-500 font-medium mt-3">Han completado su sesión de hoy.</p>
           </div>
+<<<<<<< HEAD
+=======
+        </div>
+>>>>>>> prueba
 
           {/* Alertas */}
           <div className={`rounded-2xl p-5 border shadow-sm flex flex-col justify-between ${athletesWithAlerts.length > 0 ? 'bg-red-50 border-red-100' : 'bg-gradient-to-br from-white to-zinc-50 border-zinc-200'}`}>
@@ -214,6 +255,16 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Announcement & Compliance Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mt-4">
+          <div className="lg:col-span-1">
+            <GroupAnnouncement groupId={group.id} initialAnnouncement={group.announcement} />
+          </div>
+          <div className="lg:col-span-3">
+            <ComplianceGrid athletes={athletes} />
           </div>
         </div>
       </section>
@@ -301,9 +352,12 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
             <CalendarIcon className="w-4 h-4 text-cyan-600" /> 
             Calendario de Grupo
           </h2>
-          <span className="text-xs text-zinc-500 font-semibold bg-white px-2.5 py-1 rounded-md border border-zinc-200 shadow-sm">
-            Arrastra para asignar a todo el equipo
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="hidden md:inline-flex text-xs text-zinc-500 font-semibold bg-white px-2.5 py-1 rounded-md border border-zinc-200 shadow-sm">
+              Arrastra para asignar a todo el equipo
+            </span>
+            <CloneWeekModal groupId={group.id} currentDate={today} />
+          </div>
         </div>
         
         <GroupCalendarWrapper 
@@ -312,6 +366,12 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
           initialLibraryTemplates={libraryTemplates}
         />
       </section>
+
+      <GroupChatPanel 
+        groupId={group.id} 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+      />
     </div>
   );
 }

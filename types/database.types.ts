@@ -78,6 +78,38 @@ export type Database = {
           },
         ]
       }
+      group_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          group_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          group_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          group_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coach_athletes: {
         Row: {
           athlete_id: string
@@ -136,6 +168,7 @@ export type Database = {
           target_name: string | null
           target_date: string | null
           roadmap_events: any[] | null
+          announcement: string | null
           created_at: string
         }
         Insert: {
@@ -146,6 +179,7 @@ export type Database = {
           target_name?: string | null
           target_date?: string | null
           roadmap_events?: any[] | null
+          announcement?: string | null
           created_at?: string
         }
         Update: {
@@ -156,6 +190,7 @@ export type Database = {
           target_name?: string | null
           target_date?: string | null
           roadmap_events?: any[] | null
+          announcement?: string | null
           created_at?: string
         }
         Relationships: [
@@ -375,6 +410,7 @@ export type Database = {
           current_run_time: string | null
           current_weight: number | null
           previous_injuries: string | null
+          first_login_at: string | null
         }
         Insert: {
           active_plan_id?: string | null
@@ -432,6 +468,7 @@ export type Database = {
           current_run_time?: string | null
           current_weight?: number | null
           previous_injuries?: string | null
+          first_login_at?: string | null
         }
         Update: {
           active_plan_id?: string | null
@@ -489,6 +526,7 @@ export type Database = {
           current_run_time?: string | null
           current_weight?: number | null
           previous_injuries?: string | null
+          first_login_at?: string | null
         }
         Relationships: [
           {

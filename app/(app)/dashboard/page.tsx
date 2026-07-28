@@ -1,4 +1,5 @@
 import * as React from 'react';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
@@ -9,15 +10,20 @@ import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
-import { ProCard } from '@/components/ui/pro-card';
-import { AnimatedButton } from '@/components/ui/animated-button';
-import { Flame, Trophy, Calendar, User, Settings, LogOut, Activity, BarChart2, ShoppingBag, BookOpen, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
+import { Flame, Calendar, Trophy, Activity, BookOpen, ChevronRight, Megaphone, Sparkles } from 'lucide-react';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
+import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
 import { ObjectiveConfigCard } from '@/components/dashboard/objective-config-card';
 import { PushNotificationManager } from '@/components/chat/push-notification-manager';
+import { AnimatedButton } from '@/components/ui/animated-button';
+import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
+import { WorkoutAIFeedback } from '@/components/dashboard/workout-ai-feedback';
+import { BadgesGrid } from '@/components/dashboard/badges-grid';
+import { ProfileCompletion } from '@/components/dashboard/profile-completion';
+import { RecoveryDashboard } from '@/components/dashboard/recovery-dashboard';
+import { evaluateBadges, getEarnedCount } from '@/lib/badges';
+import { analyzeRecovery } from '@/lib/recovery-analysis';
 
 export const dynamic = 'force-dynamic'
 
@@ -99,9 +105,23 @@ export default async function DashboardPage() {
   const activePlan = profile.training_plans;
 
   let coachProfile = null;
+  let groupAnnouncement = null;
+  let athleteGroupId = null;
   if (profile.coach_id) {
     const { data } = await supabase.from('profiles').select('first_name, last_name').eq('id', profile.coach_id).single();
     coachProfile = data;
+
+    const { data: athleteGroup } = await supabase
+      .from('coach_athletes')
+      .select('group_id, coach_groups(announcement)')
+      .eq('athlete_id', user.id)
+      .eq('coach_id', profile.coach_id)
+      .single();
+    
+    if (athleteGroup && athleteGroup.coach_groups) {
+      athleteGroupId = athleteGroup.group_id;
+      groupAnnouncement = (athleteGroup.coach_groups as any).announcement;
+    }
   }
 
   const biometrics = biometricsRes.data || null;
@@ -132,9 +152,9 @@ export default async function DashboardPage() {
   const totalCount = weeklyWorkouts.filter(w => w.training_sessions?.sport_type !== 'descanso').length || 0;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
-  // 4. Calcular días transcurridos desde registro para disparar feedback modal (NPS)
-  const createdDate = new Date(profile.created_at || new Date());
-  const diffTime = Math.abs(now.getTime() - createdDate.getTime());
+  // 4. Calcular días desde primer login para disparar feedback modal (NPS)
+  const loginDate = new Date(profile.first_login_at || profile.created_at || new Date());
+  const diffTime = Math.abs(now.getTime() - loginDate.getTime());
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
   const feedbackHistory = Array.isArray(profile.feedback_history)
@@ -148,65 +168,105 @@ export default async function DashboardPage() {
     activeFeedbackDays = 21;
   }
 
+  const hasCompletedCheckIn = biometrics?.fatigue_rating !== null && biometrics?.fatigue_rating !== undefined;
+
+  // Find today's workout for AI coach feedback
+  const todayWorkout = workouts?.find((w: any) => w.scheduled_date === todayStr && w.training_sessions?.sport_type !== 'descanso');
+
+  // Analyze recovery
+  const recoveryData = {
+    date: todayStr,
+    hrv: biometrics?.hrv || null,
+    sleepHours: biometrics?.sleep_hours || null,
+    sleepScore: biometrics?.sleep_score || null,
+    readinessScore: biometrics?.readiness_score || null,
+    fatigueRating: biometrics?.fatigue_rating || null,
+    stressLevel: biometrics?.stress_level || null,
+    rhr: biometrics?.rhr || null,
+    weight: biometrics?.weight || null,
+  }
+
+  const recoveryHistory = (biometricsHistory || []).slice(-7).map((b: any) => ({
+    date: b.date,
+    hrv: b.hrv || null,
+    sleepHours: b.sleep_hours || null,
+    sleepScore: b.sleep_score || null,
+    readinessScore: b.readiness_score || null,
+    fatigueRating: b.fatigue_rating || null,
+    stressLevel: b.stress_level || null,
+    rhr: b.rhr || null,
+    weight: b.weight || null,
+  }))
+
+  const recoveryAnalysis = analyzeRecovery(recoveryData, recoveryHistory)
+
+  // Evaluate badges
+  const allWorkoutsCompleted = workouts?.filter((w: any) => w.status === 'completed').length || 0
+  const totalTss = workouts?.reduce((sum: number, w: any) => sum + (w.actual_tss || 0), 0) || 0
+
+  // Count consecutive compliant weeks
+  const now2 = new Date()
+  let consecutiveWeeks = 0
+  for (let weekOffset = 0; weekOffset < 52; weekOffset++) {
+    const weekStart = new Date(now2)
+    weekStart.setDate(weekStart.getDate() - (weekOffset * 7 + 6))
+    const weekEnd = new Date(now2)
+    weekEnd.setDate(weekEnd.getDate() - weekOffset * 7)
+    const weekStr = weekStart.toISOString().split('T')[0]
+    const weekEndStr = weekEnd.toISOString().split('T')[0]
+    const weekWorkouts = workouts?.filter((w: any) => w.scheduled_date >= weekStr && w.scheduled_date <= weekEndStr && w.training_sessions?.sport_type !== 'descanso') || []
+    if (weekWorkouts.length === 0) break
+    const completed = weekWorkouts.filter((w: any) => w.status === 'completed').length
+    if (completed >= weekWorkouts.length * 0.7) consecutiveWeeks++
+    else break
+  }
+
+  // Check for all three sports in any week
+  const recentSports = new Set(workouts?.filter((w: any) => w.scheduled_date >= monStr && w.scheduled_date <= sunStr && w.status === 'completed').map((w: any) => w.training_sessions?.sport_type))
+  const hasAllThree = recentSports.has('natacion') && recentSports.has('ciclismo') && recentSports.has('carrera')
+
+  // Count brick sessions
+  const brickCount = workouts?.filter((w: any) => w.training_sessions?.sport_type === 'brick' && w.status === 'completed').length || 0
+
+  // Check recent HRV days (last 7 days)
+  const recentHrvDays = biometricsHistory?.filter((b: any) => b.hrv && b.hrv > 70).slice(0, 7).length || 0
+
+  const badgeChecks = evaluateBadges({
+    totalWorkoutsCompleted: allWorkoutsCompleted,
+    totalTss,
+    consecutiveWeeksCompliant: consecutiveWeeks,
+    currentCtl: analyticsData?.currentCtl || 0,
+    currentHrv: biometrics?.hrv || 0,
+    hasCoach: !!profile.coach_id,
+    onboardingDone: !!profile.active_plan_id,
+    hasAllThreeSports: hasAllThree,
+    brickSessionsCount: brickCount,
+    recentHrvDays,
+  })
+
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pb-24">
+    <div className="min-h-screen bg-zinc-950">
       {activeFeedbackDays !== null && (
         <AppFeedbackModal daysUsed={activeFeedbackDays} />
       )}
-      
-      {/* Upper Deck (Bento Header / Doble Nivel) */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-sm transition-all duration-300">
-        {/* Nivel 1: Fila Superior (Identidad del Atleta y Salida) */}
-        <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-100">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-sm shrink-0 group hover:border-cyan-500/40 transition-colors">
-              <Trophy className="w-4 h-4 text-cyan-500 group-hover:scale-110 transition-transform duration-300" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-base font-bold text-zinc-850 truncate tracking-tight">{activePlan?.name || 'Plan de Entrenamiento'}</h1>
-              <p className="text-xs text-zinc-500 font-semibold truncate flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse shrink-0"></span>
-                Atleta: {profile.first_name || 'Triatleta'} • Nivel {profile.level}
-                {coachProfile && (
-                  <span className="text-cyan-500 ml-1 font-bold">• Entrenador: {coachProfile.first_name} {coachProfile.last_name}</span>
-                )}
-              </p>
+      <MorningCheckInModal hasCompletedCheckIn={hasCompletedCheckIn} hasGarminSync={isConnected} />
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-8 space-y-8">
+        
+        {/* Pizarra del Entrenador */}
+        {groupAnnouncement && (
+          <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 relative overflow-hidden shadow-sm">
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-400" />
+            <div className="flex items-start gap-3 pl-2">
+              <Megaphone className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+              <div>
+                <h3 className="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-1">Nota de tu Entrenador</h3>
+                <p className="text-sm text-amber-900 whitespace-pre-wrap leading-relaxed">{groupAnnouncement}</p>
+              </div>
             </div>
           </div>
+        )}
 
-          <form action="/auth/signout" method="post" className="shrink-0 ml-3">
-            <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-450 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all duration-200 border border-transparent hover:border-red-100">
-              <LogOut className="w-4 h-4" />
-            </AnimatedButton>
-          </form>
-        </div>
-
-        {/* Nivel 2: Fila Inferior (Barra de Píldoras de Acción / Quick Actions) */}
-        <div className="px-6 py-2.5 bg-zinc-50/50 flex items-center gap-2 overflow-x-auto scrollbar-none border-t border-zinc-100">
-          <Link href="/principiantes" className="shrink-0">
-            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-emerald-500/20 bg-emerald-500/10 flex items-center gap-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/20 shadow-sm transition-all duration-200">
-              <BookOpen className="w-3.5 h-3.5" />
-              <span className="font-semibold">Zona Principiantes</span>
-            </AnimatedButton>
-          </Link>
-
-          <Link href="/analytics" className="shrink-0">
-            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-cyan-500/20 bg-cyan-500/10 flex items-center gap-1.5 text-cyan-600 hover:text-cyan-700 hover:bg-cyan-500/20 transition-all duration-200">
-              <BarChart2 className="w-3.5 h-3.5" />
-              <span className="font-semibold">Analíticas</span>
-            </AnimatedButton>
-          </Link>
-          <Link href="/settings" className="shrink-0">
-            <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-650 hover:text-zinc-800 hover:bg-zinc-50 transition-all duration-200 flex items-center gap-1.5">
-              <Settings className="w-3.5 h-3.5" />
-              <span className="font-semibold">Ajustes y Perfil</span>
-            </AnimatedButton>
-          </Link>
-        </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto px-6 pt-8 space-y-8">
-        
         {/* Objective Configuration Card (If pending or to edit) */}
         <ObjectiveConfigCard targetRaceName={profile.target_race_name} />
         
@@ -262,7 +322,26 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        <DashboardViewTabs 
+        {/* Recovery Dashboard */}
+	<RecoveryDashboard analysis={recoveryAnalysis} />
+
+	{/* Coach IA */}
+	<section className="space-y-4">
+	  <WorkoutAIFeedback
+	    todayWorkout={todayWorkout ?? null}
+	    hrv={biometrics?.hrv}
+	    readiness={biometrics?.readiness_score}
+	    fatigue={biometrics?.fatigue_rating}
+	  />
+	</section>
+
+	{/* Badges / Logros */}
+	<BadgesGrid badges={badgeChecks} />
+
+	{/* Profile Completion */}
+	<ProfileCompletion profile={profile} />
+
+	<DashboardViewTabs 
           initialWorkouts={workouts || []} 
           isConnected={isConnected} 
           profile={profile}

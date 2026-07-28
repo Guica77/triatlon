@@ -10,6 +10,7 @@ export interface GroupAthleteItem {
   last_name: string | null;
   email: string | null;
   today_workout: any | null;
+  week_workouts: any[];
   readiness_score: number | null;
   hrv: number | null;
   alerts: {
@@ -56,14 +57,22 @@ export async function getGroupData(groupId: string) {
   }
 
   const athleteIds = rosterData.map(r => r.athlete_id);
-  const todayStr = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  
+  // Calculate current week boundaries (Monday to Sunday)
+  const weekStart = startOfWeek(today, { weekStartsOn: 1 });
+  const weekEnd = addDays(weekStart, 6);
+  const weekStartStr = weekStart.toISOString().split('T')[0];
+  const weekEndStr = weekEnd.toISOString().split('T')[0];
 
-  // Fetch today's workouts for these athletes
+  // Fetch this week's workouts for these athletes
   const { data: workoutsData } = await supabase
     .from('user_workouts')
     .select('*, training_sessions(*)')
     .in('user_id', athleteIds)
-    .eq('scheduled_date', todayStr);
+    .gte('scheduled_date', weekStartStr)
+    .lte('scheduled_date', weekEndStr);
 
   // Fetch recent biometrics for alerts
   const { data: biometricsData } = await supabase
@@ -77,8 +86,9 @@ export async function getGroupData(groupId: string) {
     const profile = r.profiles as any;
     const athleteId = profile.id;
     
-    // Find today's workout
-    const todayWorkout = workoutsData?.find(w => w.user_id === athleteId);
+    // Find workouts
+    const athleteWorkouts = workoutsData?.filter(w => w.user_id === athleteId) || [];
+    const todayWorkout = athleteWorkouts.find(w => w.scheduled_date === todayStr);
     
     // Calculate alerts
     const athleteBiometrics = biometricsData?.filter(b => b.user_id === athleteId) || [];
@@ -93,6 +103,7 @@ export async function getGroupData(groupId: string) {
       last_name: profile.last_name,
       email: profile.email,
       today_workout: todayWorkout?.training_sessions || null,
+      week_workouts: athleteWorkouts,
       readiness_score: latestBiometrics?.readiness_score || null,
       hrv: latestBiometrics?.hrv || null,
       alerts: {
@@ -278,3 +289,100 @@ export async function updateGroupRoadmap(groupId: string, roadmapEvents: Roadmap
   revalidatePath(`/coach/group/${groupId}`);
   return { success: true };
 }
+<<<<<<< HEAD
+=======
+
+export async function updateGroupAnnouncement(groupId: string, announcement: string | null) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Not authenticated' };
+  }
+
+  const { error } = await supabase
+    .from('coach_groups')
+    .update({ announcement })
+    .eq('id', groupId)
+    .eq('coach_id', user.id);
+
+  if (error) {
+    console.error('Error updating announcement:', error);
+    return { error: 'Failed to update announcement' };
+  }
+
+  revalidatePath('/coach/dashboard');
+  revalidatePath(`/coach/group/${groupId}`);
+  return { success: true };
+}
+
+export async function cloneGroupWeek(groupId: string, sourceWeekStartStr: string, targetWeekStartStr: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) return { error: 'Not authenticated' };
+
+  // Fetch athletes
+  const { data: rosterData } = await supabase
+    .from('coach_athletes')
+    .select('athlete_id')
+    .eq('coach_id', user.id)
+    .eq('group_id', groupId);
+
+  if (!rosterData || rosterData.length === 0) return { error: 'No athletes in group' };
+  const athleteIds = rosterData.map(r => r.athlete_id);
+
+  // Calculate dates
+  const sourceStart = parseISO(sourceWeekStartStr);
+  const targetStart = parseISO(targetWeekStartStr);
+  
+  // Calculate the exact difference in days
+  const diffTime = Math.abs(targetStart.getTime() - sourceStart.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const isForward = targetStart > sourceStart;
+  const daysToShift = isForward ? diffDays : -diffDays;
+
+  // Fetch source week workouts
+  const sourceEnd = addDays(sourceStart, 6);
+  const { data: sourceWorkouts, error: fetchError } = await supabase
+    .from('user_workouts')
+    .select('*')
+    .in('user_id', athleteIds)
+    .gte('scheduled_date', sourceWeekStartStr)
+    .lte('scheduled_date', sourceEnd.toISOString().split('T')[0]);
+
+  if (fetchError || !sourceWorkouts) {
+    return { error: 'Failed to fetch source workouts' };
+  }
+
+  // Create new workouts
+  const newWorkouts = sourceWorkouts.map(w => {
+    const originalDate = parseISO(w.scheduled_date);
+    const newDate = addDays(originalDate, daysToShift);
+    
+    return {
+      user_id: w.user_id,
+      session_id: w.session_id, // Links to the same template
+      scheduled_date: newDate.toISOString().split('T')[0],
+      status: 'pending',
+    };
+  });
+
+  if (newWorkouts.length === 0) {
+    return { error: 'No hay entrenamientos en la semana de origen' };
+  }
+
+  const { error: insertError } = await supabase
+    .from('user_workouts')
+    .insert(newWorkouts);
+
+  if (insertError) {
+    console.error('Error cloning week:', insertError);
+    return { error: 'Failed to clone week' };
+  }
+
+  revalidatePath('/coach/dashboard');
+  revalidatePath(`/coach/group/${groupId}`);
+  return { success: true };
+}
+>>>>>>> prueba
