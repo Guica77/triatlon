@@ -93,7 +93,7 @@ export function EditGroupGoalModal({ groupId, initialTargetName, initialTargetDa
           <div className="pt-4 flex gap-3">
             <AnimatedButton 
               type="button" 
-              variant="outline" 
+              variant="secondary" 
               className="flex-1 rounded-xl"
               onClick={() => setIsOpen(false)}
             >

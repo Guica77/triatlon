@@ -23,9 +23,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
-<<<<<<< HEAD
-import { GroupTabContent } from '@/components/coach/group-tab-content'
-=======
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -35,7 +32,7 @@ function getGreeting() {
 }
 import { PageHeader } from '@/components/ui/page-header'
 import { LeaderboardCard } from '@/components/coach/leaderboard-card'
->>>>>>> prueba
+import { GroupTabContent } from '@/components/coach/group-tab-content'
 import { 
   assignPlanToAthlete, 
   addAthleteByEmail, 
@@ -430,11 +427,6 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
                   El sistema avisa cuando un atleta registra un HRV por debajo de 55ms o un Readiness menor al 60%. Úsalo para ajustar sus entrenamientos en tiempo real y prevenir lesiones.
                 </p>
               </div>
-<<<<<<< HEAD
-              </div>
-            </section>
-          )}
-=======
 
               {/* Leaderboard */}
               <LeaderboardCard
@@ -450,7 +442,7 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
               />
             </div>
           </section>
->>>>>>> prueba
+          )}
         </motion.div>
       </main>
       

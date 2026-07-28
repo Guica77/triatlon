@@ -4,7 +4,6 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { createPortal } from 'react-dom';
 import { Plus, Trash2, Droplets, Activity, Flame, Dumbbell, GripVertical, FileText, Search } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -53,11 +52,8 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
       template,
     }
   });
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [hoverCoords, setHoverCoords] = React.useState({ top: 0, left: 0 });
-  const containerRef = React.useRef<HTMLDivElement>(null);
 
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const style = {
     transform: CSS.Translate.toString(transform),
   };
@@ -72,49 +68,6 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
 
   return (
     <>
-<<<<<<< HEAD
-      <StyledDiv 
-        ref={(node: HTMLDivElement) => {
-          setNodeRef(node);
-          if (node) containerRef.current = node;
-        }}
-        styleProps={style} 
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={() => setIsHovered(false)}
-        className={`group flex items-center justify-between p-2 mb-1.5 rounded-lg border bg-white shadow-sm transition-all ${
-          isDragging ? 'opacity-50 z-50 shadow-lg border-cyan-500 scale-105' : 'border-zinc-200 hover:border-cyan-300'
-        }`}
-      >
-        <div className="flex items-center gap-2 overflow-hidden flex-1">
-          <div {...listeners} {...attributes} className="cursor-grab hover:bg-zinc-100 p-0.5 rounded transition-colors active:cursor-grabbing shrink-0">
-            <GripVertical className="w-3.5 h-3.5 text-zinc-400" />
-          </div>
-          <div 
-            className="flex items-center gap-2 flex-1 cursor-pointer truncate"
-            onClick={() => setIsOpen(true)}
-          >
-            <div className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${getSportAccent(template.sport_type)}`}>
-              <SportIcon type={template.sport_type} className="w-3.5 h-3.5" />
-            </div>
-            <div className="truncate">
-              <p className="text-xs font-bold text-zinc-800 truncate group-hover:text-cyan-700 transition-colors">{template.name}</p>
-              <p className="text-[9px] text-zinc-500 uppercase tracking-wider font-semibold">
-                {template.duration_min} min • {template.intensity_type?.toUpperCase() || 'Z2'}
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <button 
-          title="Eliminar plantilla"
-          aria-label="Eliminar plantilla"
-          onClick={(e) => { e.stopPropagation(); onDelete(template.id); }}
-          className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded transition shrink-0"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
-      </StyledDiv>
-=======
     <StyledDiv
       ref={setNodeRef}
       styleProps={style}
@@ -153,7 +106,6 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
         <Trash2 className="w-4 h-4" />
       </button>
     </StyledDiv>
->>>>>>> prueba
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-sm p-6">
@@ -202,11 +154,7 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
 
       {/* Hover Card para Desktop */}
       {isHovered && typeof document !== 'undefined' && createPortal(
-<<<<<<< HEAD
-        <div 
-=======
         <div
->>>>>>> prueba
           style={{ top: hoverCoords.top, left: hoverCoords.left }}
           className="fixed z-[100] w-80 bg-white rounded-xl shadow-2xl border border-zinc-200 p-5 pointer-events-none animate-in fade-in zoom-in-95 duration-200"
         >

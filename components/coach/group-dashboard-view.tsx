@@ -3,23 +3,17 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { differenceInWeeks } from 'date-fns';
-import { ChevronLeft, Users, Activity, AlertTriangle, CheckCircle, Calendar as CalendarIcon, BatteryMedium, Target, TrendingUp, Flag, Clock, Map } from 'lucide-react';
+import { ChevronLeft, Users, Activity, AlertTriangle, CheckCircle, Calendar as CalendarIcon, BatteryMedium, Target, TrendingUp, Flag, Clock, Map, MessageSquare } from 'lucide-react';
 import { GroupAthleteItem } from '@/app/(app)/coach/group/[id]/actions';
 import { GroupCalendarWrapper } from './group-calendar-wrapper';
 import { EditGroupRoadmapModal } from './edit-group-roadmap-modal';
-<<<<<<< HEAD
-import { RoadmapEvent } from '@/app/(app)/coach/group/[id]/actions';
-import { parseISO, isAfter, isSameDay, startOfDay } from 'date-fns';
-=======
 import { CloneWeekModal } from './clone-week-modal';
 import { ComplianceGrid } from './compliance-grid';
 import { GroupAnnouncement } from './group-announcement';
 import { RoadmapEvent } from '@/app/(app)/coach/group/[id]/actions';
 import { parseISO, isAfter, isSameDay, startOfDay } from 'date-fns';
-import { MessageSquare } from 'lucide-react';
 import { GroupChatPanel } from './group-chat-panel';
 import { AnimatedButton } from '@/components/ui/animated-button';
->>>>>>> prueba
 
 interface GroupDashboardViewProps {
   group: any;
@@ -30,28 +24,24 @@ interface GroupDashboardViewProps {
 }
 
 export function GroupDashboardView({ group, athletes, workouts, libraryTemplates, hideBackButton }: GroupDashboardViewProps) {
-<<<<<<< HEAD
-=======
   const [isChatOpen, setIsChatOpen] = React.useState(false);
->>>>>>> prueba
   const totalAthletes = athletes.length;
-  
+
   // Calculate athletes with alerts
   const athletesWithAlerts = athletes.filter(a => a.alerts.low_hrv || a.alerts.high_fatigue || a.alerts.high_tss);
-  
+
   // Calculate completed today
   const activeToday = athletes.filter(a => a.today_workout && a.today_workout.sport_type !== 'descanso');
   const completedToday = activeToday.filter(a => a.today_workout?.status === 'completed');
   const completionRate = activeToday.length > 0 ? Math.round((completedToday.length / activeToday.length) * 100) : 100;
 
-<<<<<<< HEAD
   // Calculate athletes with readiness
-  const athletesWithReadiness = athletes.filter(a => a.readiness_score !== null);
+  const athletesWithReadiness = athletes.filter(a => a.today_biometrics?.readiness_score !== null && a.today_biometrics?.readiness_score !== undefined);
   const averageReadiness = athletesWithReadiness.length > 0
-    ? Math.round(athletesWithReadiness.reduce((acc, a) => acc + (a.readiness_score || 0), 0) / athletesWithReadiness.length)
+    ? Math.round(athletesWithReadiness.reduce((acc, a) => acc + (a.today_biometrics?.readiness_score || 0), 0) / athletesWithReadiness.length)
     : null;
 
-  // Calculate planned weekly load (from the first athlete, since they all get the same templates assigned)
+  // Calculate planned weekly load
   const firstAthleteWorkouts = athletes.length > 0 ? workouts.filter(w => w.user_id === athletes[0].id) : [];
   const weeklyPlannedMinutes = firstAthleteWorkouts.reduce((acc, w) => acc + (w.training_sessions?.duration_min || 0), 0);
   const weeklyPlannedHours = Math.floor(weeklyPlannedMinutes / 60);
@@ -76,9 +66,6 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
       default: return 'text-indigo-600 bg-indigo-50';
     }
   };
-=======
-  const today = new Date();
->>>>>>> prueba
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -102,7 +89,7 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
                 <p className="text-sm text-zinc-500 font-medium">Dashboard y Calendario Grupal</p>
                 <AnimatedButton
                   variant="secondary"
-                  size="sm" 
+                  size="sm"
                   onClick={() => setIsChatOpen(true)}
                   className="h-7 text-[10px] px-2 py-0 border-cyan-200 text-cyan-700 bg-cyan-50 hover:bg-cyan-100"
                 >
@@ -112,42 +99,44 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
             </div>
           </div>
         </div>
-        
+
         {/* Próximo Objetivo Dynamic Block */}
-        <EditGroupRoadmapModal 
-          groupId={group.id} 
-          initialRoadmapEvents={group.roadmap_events}
+        <EditGroupRoadmapModal
+          groupId={group.id}
+          initialEvents={roadmapEvents}
+          open={false}
+          onOpenChange={() => {}}
         >
-          {nextEvent ? (
-            <div className="bg-white px-4 py-3 rounded-2xl border border-zinc-200 shadow-sm flex items-center gap-3 group-hover:border-indigo-300 transition-colors">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getEventIconColor(nextEvent.type)}`}>
-                <Map className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Próximo Hito • {nextEvent.type === 'A-Race' ? 'CARRERA A' : nextEvent.type === 'B-Race' ? 'CARRERA B' : nextEvent.type.toUpperCase()}
-                </p>
-                <p className="text-sm font-bold text-zinc-900 line-clamp-1">{nextEvent.title}</p>
-              </div>
-              <div className="ml-2 pl-3 border-l border-zinc-100 flex flex-col items-center justify-center min-w-[3rem]">
-                <p className="text-2xl font-black text-indigo-600 leading-none">
-                  {Math.max(0, differenceInWeeks(parseISO(nextEvent.date), today))}
-                </p>
-                <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-500 mt-0.5">Semanas</p>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-zinc-50 px-4 py-3 rounded-2xl border border-dashed border-zinc-300 flex items-center gap-3 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer">
-              <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-400 shrink-0">
-                <Map className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-zinc-600">Roadmap de Temporada</p>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Planificar hitos del grupo</p>
-              </div>
-            </div>
-          )}
         </EditGroupRoadmapModal>
+        {nextEvent ? (
+          <div className="bg-white px-4 py-3 rounded-2xl border border-zinc-200 shadow-sm flex items-center gap-3 group-hover:border-indigo-300 transition-colors">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getEventIconColor(nextEvent.type)}`}>
+              <Map className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                Próximo Hito • {nextEvent.type === 'A-Race' ? 'CARRERA A' : nextEvent.type === 'B-Race' ? 'CARRERA B' : nextEvent.type.toUpperCase()}
+              </p>
+              <p className="text-sm font-bold text-zinc-900 line-clamp-1">{nextEvent.title}</p>
+            </div>
+            <div className="ml-2 pl-3 border-l border-zinc-100 flex flex-col items-center justify-center min-w-[3rem]">
+              <p className="text-2xl font-black text-indigo-600 leading-none">
+                {Math.max(0, differenceInWeeks(parseISO(nextEvent.date), today))}
+              </p>
+              <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-500 mt-0.5">Semanas</p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-zinc-50 px-4 py-3 rounded-2xl border border-dashed border-zinc-300 flex items-center gap-3 hover:border-indigo-300 hover:bg-indigo-50/30 transition-all cursor-pointer">
+            <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-400 shrink-0">
+              <Map className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-zinc-600">Roadmap de Temporada</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Planificar hitos del grupo</p>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Intelligence Hub (KPIs) */}
@@ -174,7 +163,7 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
             </div>
             <p className="text-[11px] text-zinc-500 font-medium mt-2">Promedio de los {athletesWithReadiness.length} atletas que usan Whoop/Oura.</p>
           </div>
-          
+
           {/* Carga Semanal Planificada */}
           <div className="bg-gradient-to-br from-white to-zinc-50 rounded-2xl p-5 border border-zinc-200 shadow-sm flex flex-col justify-between">
             <div className="flex items-center gap-2 text-zinc-500 mb-2">
@@ -187,10 +176,6 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
             <p className="text-[11px] text-zinc-500 font-medium mt-2">Volumen de entrenamiento planificado en los calendarios.</p>
           </div>
 
-<<<<<<< HEAD
-=======
-<div className="bg-white rounded-2xl p-5 border border-zinc-200 shadow-sm flex flex-col justify-between">
->>>>>>> prueba
           {/* Cumplimiento Hoy */}
           <div className="bg-gradient-to-br from-white to-zinc-50 rounded-2xl p-5 border border-zinc-200 shadow-sm flex flex-col justify-between">
             <div className="flex items-center justify-between mb-2">
@@ -208,11 +193,7 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
                 <p className="text-sm text-zinc-500 font-medium">/ {activeToday.length} atletas</p>
               </div>
               <div className="w-full bg-zinc-100 h-2.5 rounded-full overflow-hidden">
-<<<<<<< HEAD
-                <div 
-=======
                 <div
->>>>>>> prueba
                   className="h-full bg-cyan-500 rounded-full transition-all"
                   style={{ width: `${completionRate}%` }}
                 />
@@ -220,10 +201,6 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
             </div>
             <p className="text-[11px] text-zinc-500 font-medium mt-3">Han completado su sesión de hoy.</p>
           </div>
-<<<<<<< HEAD
-=======
-        </div>
->>>>>>> prueba
 
           {/* Alertas */}
           <div className={`rounded-2xl p-5 border shadow-sm flex flex-col justify-between ${athletesWithAlerts.length > 0 ? 'bg-red-50 border-red-100' : 'bg-gradient-to-br from-white to-zinc-50 border-zinc-200'}`}>
@@ -278,7 +255,7 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
           {athletes.map(athlete => {
             const hasAlert = athlete.alerts.low_hrv || athlete.alerts.high_fatigue;
             return (
-              <div 
+              <div
                 key={athlete.id}
                 className={`flex flex-col p-4 rounded-xl border transition group bg-white shadow-sm ${
                   hasAlert ? 'border-red-200 hover:border-red-300' : 'border-zinc-200 hover:border-cyan-300'
@@ -310,13 +287,13 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
                   <div className={`p-2 rounded-lg border ${hasAlert ? 'bg-red-50 border-red-100' : 'bg-zinc-50 border-zinc-100'}`}>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-0.5">Readiness</p>
                     <p className={`text-sm font-black ${athlete.alerts.high_fatigue ? 'text-red-600' : 'text-zinc-800'}`}>
-                      {athlete.readiness_score ? `${athlete.readiness_score}%` : '--'}
+                      {athlete.today_biometrics?.readiness_score ? `${athlete.today_biometrics.readiness_score}%` : '--'}
                     </p>
                   </div>
                   <div className={`p-2 rounded-lg border ${athlete.alerts.low_hrv ? 'bg-red-50 border-red-100' : 'bg-zinc-50 border-zinc-100'}`}>
                     <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-0.5">HRV</p>
                     <p className={`text-sm font-black ${athlete.alerts.low_hrv ? 'text-red-600' : 'text-zinc-800'}`}>
-                      {athlete.hrv ? `${athlete.hrv}ms` : '--'}
+                      {athlete.today_biometrics?.hrv ? `${athlete.today_biometrics.hrv}ms` : '--'}
                     </p>
                   </div>
                 </div>
@@ -345,11 +322,11 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
         </div>
       </section>
 
-      {/* Advanced Builder (Group Level) */}
+      {/* Calendar (Group Level) */}
       <section className="space-y-4 pt-4 border-t border-zinc-200">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-zinc-800 flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4 text-cyan-600" /> 
+            <CalendarIcon className="w-4 h-4 text-cyan-600" />
             Calendario de Grupo
           </h2>
           <div className="flex items-center gap-3">
@@ -359,18 +336,18 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
             <CloneWeekModal groupId={group.id} currentDate={today} />
           </div>
         </div>
-        
-        <GroupCalendarWrapper 
-          groupId={group.id} 
-          initialWorkouts={workouts} 
+
+        <GroupCalendarWrapper
+          groupId={group.id}
+          initialWorkouts={workouts}
           initialLibraryTemplates={libraryTemplates}
         />
       </section>
 
-      <GroupChatPanel 
-        groupId={group.id} 
-        isOpen={isChatOpen} 
-        onClose={() => setIsChatOpen(false)} 
+      <GroupChatPanel
+        groupId={group.id}
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
       />
     </div>
   );
