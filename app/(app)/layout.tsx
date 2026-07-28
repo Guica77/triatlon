@@ -1,6 +1,9 @@
 import { MobileBottomNav } from "@/components/ui/mobile-bottom-nav";
+import { DesktopSidebar } from "@/components/ui/desktop-sidebar";
 import { PushNotificationManager } from "@/components/chat/push-notification-manager";
 import { NotificationProvider } from "@/components/providers/notification-provider";
+import { ToastProvider } from "@/components/providers/toast-provider";
+import { PageTransition } from "@/components/providers/page-transition";
 
 export default function AppLayout({
   children,
@@ -9,11 +12,18 @@ export default function AppLayout({
 }) {
   return (
     <NotificationProvider>
-      <div className="relative flex min-h-screen flex-col pb-16 sm:pb-0">
-        <main className="flex-1 overflow-x-hidden">{children}</main>
+      <ToastProvider>
+        <div className="relative flex min-h-screen">
+          <DesktopSidebar />
+          <div className="flex-1 flex flex-col min-h-screen pb-16 sm:pb-0">
+            <main className="flex-1 overflow-x-hidden">
+              <PageTransition>{children}</PageTransition>
+            </main>
+          </div>
+        </div>
         <MobileBottomNav />
         <PushNotificationManager />
-      </div>
+      </ToastProvider>
     </NotificationProvider>
   );
 }

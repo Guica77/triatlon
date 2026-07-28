@@ -1,7 +1,7 @@
 import { type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Refrescar y persistir la sesión en cada request para que no se pierda (remember me)
   return await updateSession(request)
 }

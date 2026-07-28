@@ -12,6 +12,8 @@ import {
   DynamicNutritionData
 } from '@/lib/nutrition-utility'
 import { getForecastForLocation } from '@/lib/weather-service'
+import { isAIAvailable, aiChat } from '@/lib/ai-service'
+import { buildNutritionSystemPrompt, buildMealAlternativePrompt } from '@/lib/ai-prompt-templates'
 
 export interface SweatTestData {
   weightBefore: number
@@ -252,6 +254,43 @@ export async function askNutritionAI(
         if (preferences.length === 0 && profileData.preferred_ingredients) {
           preferences = profileData.preferred_ingredients
         }
+      }
+    }
+
+    // Try AI-powered response first (with fallback to rule-based)
+    if (isAIAvailable()) {
+      try {
+        let workoutSport = 'descanso';
+        let workoutDuration = 0;
+        if (nutrition.sessionsPacing && nutrition.sessionsPacing.length > 0) {
+          workoutSport = nutrition.sessionsPacing[0].sportType;
+          workoutDuration = nutrition.sessionsPacing[0].durationMin;
+        }
+
+        const ctx = {
+          name: 'Atleta',
+          weight: nutrition.weight,
+          bmr: nutrition.bmr,
+          totalCalories: nutrition.totalCalories,
+          macros: nutrition.macros,
+          workouts: nutrition.sessionsPacing.map(s => ({
+            sportType: s.sportType,
+            durationMin: s.durationMin,
+          })),
+          preferredIngredients: preferences,
+          dislikedIngredients: dislikes,
+          sweatRate: undefined,
+        };
+
+        const systemPrompt = buildNutritionSystemPrompt(ctx);
+        const result = await aiChat(systemPrompt, [{ role: 'user', content: question }], { maxTokens: 1024 });
+
+        if (result.success && result.content) {
+          return { success: true, response: result.content };
+        }
+        // If AI failed, fall through to rule-based
+      } catch {
+        // Fall through to rule-based
       }
     }
 

@@ -7,9 +7,8 @@ import { PacePowerHistoryCard } from '@/components/analytics/pace-power-history-
 import { TrainingZonesCard } from '@/components/analytics/training-zones-card';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { AnimatedButton } from '@/components/ui/animated-button';
-import { BarChart2, ArrowLeft } from 'lucide-react';
+import { BarChart2 } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
@@ -32,47 +31,23 @@ export default async function AnalyticsPage() {
   const profile = profileRes.data;
   const activePlan = profile?.training_plans;
 
+  const title = profile?.level === 'principiante' ? 'Mi Progreso y Constancia' : 'Métricas de Rendimiento';
+  const subtitle = `${activePlan?.name || 'Plan de Periodización'} • ${profile?.first_name || 'Triatleta'}`;
+
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pb-24">
-      
-      {/* Top Navbar */}
-      <header className="border-b border-zinc-200 bg-white/95 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-xs">
-            <BarChart2 className="w-4 h-4 text-cyan-600" />
-          </div>
-          <div>
-            <h1 className="text-base font-medium text-zinc-900">
-              {profile?.level === 'principiante' ? 'Mi Progreso y Constancia' : 'Analíticas Avanzadas'}
-            </h1>
-            <p className="text-xs text-zinc-500 capitalize font-medium">
-              {activePlan?.name || 'Plan de Entrenamiento'} • Atleta: {profile?.first_name || 'Triatleta'}
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-zinc-950">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-8 space-y-8">
+        <PageHeader icon={BarChart2} title={title} subtitle={subtitle} />
 
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard">
-            <AnimatedButton variant="ghost" size="sm" className="border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 flex items-center gap-2">
-              <ArrowLeft className="w-4 h-4" />
-              <span>Volver al Dashboard</span>
-            </AnimatedButton>
-          </Link>
-        </div>
-      </header>
-
-      {/* Contenedor Principal Bento Grid */}
-      <main className="max-w-5xl mx-auto px-6 pt-8 space-y-8">
-        
         {/* Encabezado de Sección */}
         <div className="space-y-1">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-600">
-            {profile?.level === 'principiante' ? 'Progreso Semanal' : 'Panel de Rendimiento Unificado'}
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-cyan-500">
+            {profile?.level === 'principiante' ? 'Mi Semana de Entrenamiento' : 'Panel de Rendimiento Unificado'}
           </h2>
-          <p className="text-sm text-zinc-650">
+          <p className="text-sm text-zinc-400">
             {profile?.level === 'principiante'
-              ? 'Sigue tu tiempo de entrenamiento acumulado, tu constancia semanal y la distribución de tus deportes.'
-              : 'Monitoriza tu carga acumulada (TSS), evita el sobreentrenamiento y planifica tus picos de forma con precisión milimétrica.'}
+              ? 'Sigue tus sesiones, tu adherencia al plan y la distribución de los tres deportes.'
+              : 'Monitoriza tu volumen acumulado (CTL), gestionа tu fatiga (ATL) y planifica tus picos de forma (TSB) con precisión.'}
           </p>
         </div>
 

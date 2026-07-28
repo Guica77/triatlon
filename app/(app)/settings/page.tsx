@@ -3,13 +3,17 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { ArrowLeft, Settings } from 'lucide-react';
+import { Settings, ArrowLeft } from 'lucide-react';
 import { RaceGoalCard } from '@/components/settings/race-goal-card';
 import { PhysiologicalCard } from '@/components/settings/physiological-card';
 import { TelemetryConnectCard } from '@/components/settings/telemetry-connect-card';
 import { BillingCard } from '@/components/settings/billing-card';
 import { SweatTestCard } from '@/components/settings/sweat-test-card';
 import { TrainingZonesCard } from '@/components/settings/training-zones-card';
+import { PageHeader } from '@/components/ui/page-header';
+import { InjuryHistory } from '@/components/dashboard/injury-history';
+import { ExportButtons } from '@/components/dashboard/export-buttons';
+import { updateInjuryHistory } from '@/app/(app)/dashboard/biometrics-actions';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -46,32 +50,14 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pb-24">
-      
-      {/* Top Navbar */}
-      <header className="border-b border-zinc-200 bg-white/95 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-all duration-300">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-sm shrink-0">
-            <Settings className="w-4 h-4 text-cyan-500" />
-          </div>
-          <div>
-            <h1 className="text-sm sm:text-base font-bold text-zinc-850 tracking-tight">Ajustes y Perfil del Atleta</h1>
-            <p className="text-[11px] sm:text-xs text-zinc-500 font-semibold capitalize">
-              Hiper-personalización de Entrenamientos
-            </p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-zinc-950">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-8 space-y-6">
 
-        <Link href="/dashboard" className="w-full sm:w-auto">
-          <AnimatedButton variant="ghost" className="w-full sm:w-auto border border-zinc-200 flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm shadow-sm bg-white hover:bg-zinc-50 text-zinc-650 hover:text-zinc-800">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="font-semibold">Volver al Dashboard</span>
-          </AnimatedButton>
-        </Link>
-      </header>
-
-      {/* Main Grid Content */}
-      <main className="max-w-5xl mx-auto px-6 pt-8 space-y-6">
+        <PageHeader
+          icon={Settings}
+          title="Ajustes y Perfil del Atleta"
+          subtitle="Hiper-personalización de Entrenamientos"
+        />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Hero Race Goal (Spans 1 col, but visually impactful) */}
@@ -127,10 +113,23 @@ export default async function SettingsPage() {
                 />
               </div>
               <div className="h-full">
-                <BillingCard 
+                <BillingCard
                   status={profile.subscription_status}
                 />
               </div>
+            </div>
+
+            {/* Injury History */}
+            <InjuryHistory
+              injuries={(profile.previous_injuries || '').split(' | ').filter(Boolean)}
+              onSave={updateInjuryHistory}
+            />
+
+            {/* Export Data */}
+            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5">
+              <h3 className="text-sm font-bold text-white mb-3">Exportar Datos</h3>
+              <p className="text-[10px] text-zinc-500 font-medium mb-4">Descarga tu historial de entrenamientos en formato CSV o exporta tu calendario a tu app favorita.</p>
+              <ExportButtons />
             </div>
           </div>
         </div>

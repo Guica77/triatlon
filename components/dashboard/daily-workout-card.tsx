@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { WatchSyncModal } from '@/components/dashboard/watch-sync-modal';
 import { calculateSessionPacing, calculateRecoveryMeal, calculatePreWorkoutMeal } from '@/lib/nutrition-utility';
 import { StravaMapSVG } from '@/components/ui/strava-map-svg';
+import { SportIllustration } from '@/components/ui/sport-illustration';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
@@ -582,8 +583,12 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
       {/* Cabecera Limpia */}
       <div className="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-zinc-100 pb-4 relative z-10">
-        <div>
-          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+        <div className="flex items-start gap-3">
+          <div className="hidden sm:block shrink-0">
+            <SportIllustration sport={session.sport_type} size="sm" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             <span className={`w-2 h-2 rounded-full ${session.sport_type === 'natacion' ? 'bg-[var(--color-swim)]' : session.sport_type === 'ciclismo' ? 'bg-[var(--color-bike)]' : session.sport_type === 'carrera' ? 'bg-[var(--color-run)]' : session.sport_type === 'fuerza' ? 'bg-purple-400' : 'bg-amber-400'}`} />
             <p className="text-zinc-500 font-semibold tracking-wider uppercase text-xs">
               {session.sport_type} • {session.day_name}
@@ -637,6 +642,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               Día de descanso activo
             </h3>
           )}
+          </div>
         </div>
 
         {session.sport_type !== 'descanso' && (

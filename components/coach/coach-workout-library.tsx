@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { Plus, Trash2, Droplets, Activity, Flame, Dumbbell, GripVertical, FileText } from 'lucide-react';
@@ -41,6 +42,9 @@ interface DraggableTemplateProps {
 }
 
 function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const [hoverCoords, setHoverCoords] = React.useState({ top: 0, left: 0 });
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `template-${template.id}`,
     data: {
@@ -54,9 +58,17 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
   };
 
   return (
-    <StyledDiv 
-      ref={setNodeRef} 
-      styleProps={style} 
+    <>
+    <StyledDiv
+      ref={setNodeRef}
+      styleProps={style}
+      onClick={() => setIsOpen(true)}
+      onMouseEnter={(e: React.MouseEvent) => {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        setHoverCoords({ top: rect.top, left: rect.right + 8 });
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => setIsHovered(false)}
       className={`group flex items-center justify-between p-3 mb-2 rounded-xl border bg-white shadow-sm transition-all ${
         isDragging ? 'opacity-50 z-50 shadow-lg border-cyan-500 scale-105' : 'border-zinc-200 hover:border-cyan-300'
       }`}
@@ -75,8 +87,8 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
           </p>
         </div>
       </div>
-      
-      <button 
+
+      <button
         title="Eliminar plantilla"
         aria-label="Eliminar plantilla"
         onClick={(e) => { e.stopPropagation(); onDelete(template.id); }}
@@ -85,6 +97,93 @@ function DraggableTemplate({ template, onDelete }: DraggableTemplateProps) {
         <Trash2 className="w-4 h-4" />
       </button>
     </StyledDiv>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="max-w-sm p-6">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${getSportAccent(template.sport_type)}`}>
+                <SportIcon type={template.sport_type} className="w-5 h-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-black text-zinc-900 leading-tight">{template.name}</DialogTitle>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-1">
+                  {template.sport_type} • {template.duration_min} MIN • {template.intensity_type?.toUpperCase() || 'Z2'}
+                </p>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-3 mt-2">
+            {template.warmup && (
+              <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
+                <p className="text-[10px] font-black uppercase text-zinc-400 mb-1 tracking-wider">Calentamiento</p>
+                <p className="text-xs text-zinc-700 font-medium whitespace-pre-wrap">{template.warmup}</p>
+              </div>
+            )}
+            
+            {template.main && (
+              <div className="p-3 bg-cyan-50 rounded-xl border border-cyan-100">
+                <p className="text-[10px] font-black uppercase text-cyan-600 mb-1 tracking-wider">Parte Principal</p>
+                <p className="text-sm text-zinc-800 font-bold whitespace-pre-wrap leading-relaxed">{template.main}</p>
+              </div>
+            )}
+            
+            {template.cooldown && (
+              <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
+                <p className="text-[10px] font-black uppercase text-zinc-400 mb-1 tracking-wider">Enfriamiento</p>
+                <p className="text-xs text-zinc-700 font-medium whitespace-pre-wrap">{template.cooldown}</p>
+              </div>
+            )}
+            
+            {!template.warmup && !template.main && !template.cooldown && (
+              <p className="text-sm text-zinc-500 italic text-center py-4">No hay descripción detallada para esta plantilla.</p>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Hover Card para Desktop */}
+      {isHovered && typeof document !== 'undefined' && createPortal(
+        <div
+          style={{ top: hoverCoords.top, left: hoverCoords.left }}
+          className="fixed z-[100] w-80 bg-white rounded-xl shadow-2xl border border-zinc-200 p-5 pointer-events-none animate-in fade-in zoom-in-95 duration-200"
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${getSportAccent(template.sport_type)}`}>
+              <SportIcon type={template.sport_type} className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-black text-zinc-900 leading-tight">{template.name}</p>
+              <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
+                {template.sport_type} • {template.duration_min} MIN • {template.intensity_type?.toUpperCase() || 'Z2'}
+              </p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            {template.warmup && (
+              <div className="p-2 bg-zinc-50 rounded-lg border border-zinc-100">
+                <p className="text-[9px] font-black uppercase text-zinc-400 mb-0.5 tracking-wider">Calentamiento</p>
+                <p className="text-xs text-zinc-700 font-medium whitespace-pre-wrap">{template.warmup}</p>
+              </div>
+            )}
+            {template.main && (
+              <div className="p-2 bg-cyan-50 rounded-lg border border-cyan-100">
+                <p className="text-[9px] font-black uppercase text-cyan-600 mb-0.5 tracking-wider">Parte Principal</p>
+                <p className="text-xs text-zinc-800 font-bold whitespace-pre-wrap leading-relaxed">{template.main}</p>
+              </div>
+            )}
+            {template.cooldown && (
+              <div className="p-2 bg-zinc-50 rounded-lg border border-zinc-100">
+                <p className="text-[9px] font-black uppercase text-zinc-400 mb-0.5 tracking-wider">Enfriamiento</p>
+                <p className="text-xs text-zinc-700 font-medium whitespace-pre-wrap">{template.cooldown}</p>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
 
