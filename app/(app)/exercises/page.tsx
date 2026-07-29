@@ -46,8 +46,8 @@ export default function ExercisesPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-8 space-y-6">
+    <div className="min-h-screen bg-bg-app w-full overflow-x-hidden">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 sm:pb-8 space-y-6">
         <PageHeader
           icon={BookOpen}
           title="Librería de Ejercicios"

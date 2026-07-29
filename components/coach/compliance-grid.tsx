@@ -30,10 +30,10 @@ export function ComplianceGrid({ athletes }: ComplianceGridProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-emerald-500 border-emerald-600 shadow-[0_0_8px_rgba(16,185,129,0.4)]';
-      case 'missed': return 'bg-red-500 border-red-600 shadow-[0_0_8px_rgba(239,68,68,0.4)]';
-      case 'pending': return 'bg-amber-400 border-amber-500 shadow-[0_0_8px_rgba(251,191,36,0.4)]';
-      default: return 'bg-zinc-100 border-zinc-200';
+      case 'completed': return 'bg-emerald-500 border-emerald-600';
+      case 'missed': return 'bg-red-500 border-red-600';
+      case 'pending': return 'bg-amber-400 border-amber-500';
+      default: return 'bg-bg-hover border-border-subtle';
     }
   };
 
@@ -47,18 +47,18 @@ export function ComplianceGrid({ athletes }: ComplianceGridProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
-      <div className="p-4 border-b border-zinc-100 flex items-center justify-between">
+    <div className="bg-white rounded-2xl border border-border-subtle overflow-hidden">
+      <div className="p-4 border-b border-border-subtle flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
             <Activity className="w-4 h-4 text-indigo-600" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-zinc-900">Matriz de Cumplimiento</h3>
-            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Semana Actual</p>
+            <h3 className="text-sm font-bold text-text-primary">Matriz de Cumplimiento</h3>
+            <p className="text-[10px] text-text-muted uppercase tracking-wider font-bold">Semana Actual</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-xs font-medium text-zinc-500">
+        <div className="flex items-center gap-4 text-xs font-medium text-text-muted">
           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Completado</div>
           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-amber-400" /> Pendiente</div>
           <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-red-500" /> Saltado</div>
@@ -67,7 +67,7 @@ export function ComplianceGrid({ athletes }: ComplianceGridProps) {
       
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
-          <thead className="bg-zinc-50 border-b border-zinc-100 text-xs font-bold text-zinc-500 uppercase">
+          <thead className="bg-bg-elevated border-b border-border-subtle text-xs font-bold text-text-muted uppercase">
             <tr>
               <th className="px-4 py-3 min-w-[150px]">Atleta</th>
               {weekDays.map((day, i) => (
@@ -77,10 +77,10 @@ export function ComplianceGrid({ athletes }: ComplianceGridProps) {
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100">
+          <tbody className="divide-y divide-border-subtle">
             {athletes.map(athlete => (
-              <tr key={athlete.id} className="hover:bg-zinc-50/50 transition-colors">
-                <td className="px-4 py-3 font-semibold text-zinc-800">
+              <tr key={athlete.id} className="hover:bg-bg-elevated/50 transition-colors">
+                <td className="px-4 py-3 font-semibold text-text-primary">
                   {athlete.first_name} {athlete.last_name}
                 </td>
                 {weekDays.map((day, i) => {
@@ -102,7 +102,7 @@ export function ComplianceGrid({ athletes }: ComplianceGridProps) {
             ))}
             {athletes.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-zinc-500 font-medium">
+                <td colSpan={8} className="px-4 py-8 text-center text-text-muted font-medium">
                   No hay atletas en este grupo.
                 </td>
               </tr>

@@ -145,28 +145,28 @@ export function FormStatusWidget({
  
   return (
     <Link href="/analytics" className="block group w-full h-full cursor-pointer hover:scale-[1.01] transition-transform duration-300">
-      <Card className={`rounded-2xl border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 ${borderHoverClass} shadow-sm hover:shadow-md transition-all duration-300 h-full min-h-[320px] relative overflow-hidden`}>
+      <Card className={`rounded-2xl border-border-default bg-bg-card ${borderHoverClass} transition-all duration-300 h-full min-h-[320px] relative overflow-hidden`}>
         <CardContent className="p-5 sm:p-6 flex flex-col justify-between h-full">
         
         {/* Encabezado */}
         <div className="flex items-center justify-between mb-2 relative z-10 shrink-0">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-zinc-50 border border-zinc-200 flex items-center justify-center shadow-sm shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-bg-hover border border-border-default flex items-center justify-center shrink-0">
               {isBeginner ? (
                 <Calendar className={`w-4 h-4 ${color}`} />
               ) : (
                 <Zap className={`w-4 h-4 ${color}`} />
               )}
             </div>
-            <h3 className="text-xs font-bold text-zinc-450 tracking-wider uppercase">
+            <h3 className="text-xs font-bold text-text-secondary tracking-wider uppercase">
               {isBeginner ? 'Constancia Semanal' : 'Estado de Forma'}
             </h3>
           </div>
           <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wide">
+            <span className="text-[10px] text-text-muted font-bold uppercase tracking-wide">
               {isBeginner ? 'Ver guía' : 'Análisis'}
             </span>
-            <ArrowRight className="w-3 h-3 text-zinc-400 transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight className="w-3 h-3 text-text-muted transition-transform group-hover:translate-x-0.5" />
           </div>
         </div>
         
@@ -227,10 +227,10 @@ export function FormStatusWidget({
  
             {/* Texto interior del dial */}
             <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
-              <span className={`${showChart ? 'text-xl' : 'text-2xl'} font-black text-zinc-900 leading-none tracking-tight`}>
+              <span className={`${showChart ? 'text-xl' : 'text-2xl'} font-black text-text-primary leading-none tracking-tight`}>
                 {isBeginner ? `${safeProgressPercent}%` : (safeTsb > 0 ? `+${safeTsb}` : safeTsb)}
               </span>
-              <span className="text-[8px] text-zinc-500 uppercase tracking-widest font-bold mt-0.5">
+              <span className="text-[8px] text-text-muted uppercase tracking-widest font-bold mt-0.5">
                 {isBeginner ? 'constancia' : 'balance'}
               </span>
             </div>
@@ -238,7 +238,7 @@ export function FormStatusWidget({
 
           {/* Gráfico de tendencia PMC de 7 días (Solo para atletas intermedios/avanzados) */}
           {showChart && (
-            <div className="w-full mt-3 border-t border-zinc-100 pt-2">
+            <div className="w-full mt-3 border-t border-border-subtle pt-2">
               <div className="w-full h-[55px]">
                 <svg className="w-full h-full overflow-visible" viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none">
                   {/* Línea de referencia Cero */}
@@ -259,7 +259,7 @@ export function FormStatusWidget({
               </div>
 
               {/* Leyenda en miniatura */}
-              <div className="flex justify-between items-center text-[8px] font-bold text-zinc-500 mt-1 uppercase tracking-wider px-1">
+              <div className="flex justify-between items-center text-[8px] font-bold text-text-muted mt-1 uppercase tracking-wider px-1">
                 <span className="text-[#3b82f6]">CTL (Fit): {ctl}</span>
                 <span className="text-[#ef4444]">ATL (Fat): {atl}</span>
                 <span className={safeTsb >= 0 ? 'text-[#10b981]' : 'text-amber-500'}>TSB (Form): {safeTsb}</span>
@@ -275,7 +275,7 @@ export function FormStatusWidget({
               {label}
             </span>
           </div>
-          <p className="text-xs text-zinc-500 font-semibold mt-1 leading-relaxed">
+          <p className="text-xs text-text-muted font-semibold mt-1 leading-relaxed">
             {description}
           </p>
         </div>

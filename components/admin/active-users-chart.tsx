@@ -1,7 +1,6 @@
 'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { motion } from 'framer-motion'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 interface ActiveUsersProps {
   mau: number
@@ -9,67 +8,65 @@ interface ActiveUsersProps {
   dau: number
 }
 
+const COLORS = ['#60a5fa', '#34d399', '#fb7185']
+
 export function ActiveUsersChart({ mau, wau, dau }: ActiveUsersProps) {
   const data = [
-    { period: 'MAU', users: mau, color: '#e56a00' },
-    { period: 'WAU', users: wau, color: '#22c55e' },
-    { period: 'DAU', users: dau, color: '#3b82f6' },
+    { period: 'MAU', users: mau },
+    { period: 'WAU', users: wau },
+    { period: 'DAU', users: dau },
   ]
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5"
-    >
+    <div className="bg-bg-card border border-border-default rounded-xl p-5">
       <div className="mb-4">
-        <h3 className="text-sm font-bold text-white">Usuarios Activos</h3>
-        <p className="text-[10px] text-zinc-500 font-medium mt-0.5">Actividad por ventana temporal</p>
+        <h3 className="text-xs font-bold text-text-primary">Usuarios Activos</h3>
+        <p className="text-[10px] text-text-muted">Actividad por ventana temporal</p>
       </div>
 
-      <div className="flex gap-6 mb-4">
-        <div>
-          <p className="text-2xl font-black text-white">{mau}</p>
-          <p className="text-[10px] text-zinc-500 font-bold uppercase">MAU</p>
-          <p className="text-[9px] text-zinc-600">Últimos 30 días</p>
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        <div className="text-center">
+          <p className="text-xl font-bold text-text-primary">{mau}</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-sport-swim">MAU</p>
+          <p className="text-[8px] text-text-muted">30 días</p>
         </div>
-        <div>
-          <p className="text-2xl font-black text-white">{wau}</p>
-          <p className="text-[10px] text-zinc-500 font-bold uppercase">WAU</p>
-          <p className="text-[9px] text-zinc-600">Últimos 7 días</p>
+        <div className="text-center">
+          <p className="text-xl font-bold text-text-primary">{wau}</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-sport-bike">WAU</p>
+          <p className="text-[8px] text-text-muted">7 días</p>
         </div>
-        <div>
-          <p className="text-2xl font-black text-white">{dau}</p>
-          <p className="text-[10px] text-zinc-500 font-bold uppercase">DAU</p>
-          <p className="text-[9px] text-zinc-600">Hoy</p>
+        <div className="text-center">
+          <p className="text-xl font-bold text-text-primary">{dau}</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-sport-run">DAU</p>
+          <p className="text-[8px] text-text-muted">Hoy</p>
         </div>
       </div>
 
-      <div className="h-[120px]">
+      <div className="h-[100px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
-            <XAxis dataKey="period" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#27272b" />
+            <XAxis dataKey="period" tick={{ fill: '#63636e', fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: '#63636e', fontSize: 10 }} axisLine={false} tickLine={false} />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#18181b',
-                border: '1px solid #27272a',
-                borderRadius: '12px',
-                padding: '12px',
+                backgroundColor: '#18181d',
+                border: '1px solid #27272b',
+                borderRadius: '8px',
+                padding: '10px',
                 fontSize: '12px',
+                color: '#e4e4e7',
               }}
-              cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+              cursor={{ fill: 'rgba(255,255,255,0.03)' }}
             />
-            <Bar dataKey="users" name="Usuarios" radius={[6, 6, 0, 0]}>
-              {data.map((entry, index) => (
-                <rect key={`cell-${index}`} fill={entry.color} />
+            <Bar dataKey="users" radius={[4, 4, 0, 0]}>
+              {data.map((_, index) => (
+                <Cell key={index} fill={COLORS[index]} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </motion.div>
+    </div>
   )
 }

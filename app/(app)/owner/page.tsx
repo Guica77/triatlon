@@ -1,17 +1,19 @@
 import * as React from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getAdminMetrics, checkAdminAccess } from './owner-actions'
-import { BarChart3, Users, TrendingUp } from 'lucide-react'
+import { getBusinessMetrics, checkAdminAccess } from './owner-actions'
+import { BarChart3, Users, TrendingUp, DollarSign, UserMinus, Activity, Target, Zap, UserPlus } from 'lucide-react'
 import { PageHeader } from '@/components/ui/page-header'
-import { KPICard } from '@/components/admin/kpi-card'
+import { MetricCard } from '@/components/admin/business-metric-card'
 import { UserGrowthChart } from '@/components/admin/user-growth-chart'
 import { ActiveUsersChart } from '@/components/admin/active-users-chart'
 import { RecentUsersTable } from '@/components/admin/recent-users-table'
+import { CohortRetentionTable } from '@/components/admin/cohort-retention-table'
+import { ChurnBreakdownCard } from '@/components/admin/churn-breakdown-card'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminPage() {
+export default async function BusinessDashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -25,175 +27,249 @@ export default async function AdminPage() {
   let error: string | null = null
 
   try {
-    metrics = await getAdminMetrics()
+    metrics = await getBusinessMetrics()
   } catch (e) {
     error = 'No se pudieron cargar las métricas. Intenta de nuevo.'
   }
 
   if (error || !metrics) {
     return (
-      <div className="min-h-screen bg-zinc-950 p-6">
-        <div className="max-w-6xl mx-auto space-y-8">
+      <div className="min-h-screen bg-bg-app p-4 sm:p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
           <PageHeader icon={BarChart3} title="Panel de Control" subtitle="Error al cargar métricas" />
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-8 text-center space-y-4">
-            <BarChart3 className="w-12 h-12 text-zinc-600 mx-auto" />
-            <p className="text-sm text-zinc-400 font-medium">{error}</p>
-            <p className="text-xs text-zinc-500">Verifica que tengas datos en la base de datos.</p>
+          <div className="bg-bg-card/80 border border-border-default rounded-xl p-8 text-center space-y-4">
+            <BarChart3 className="w-12 h-12 text-text-secondary mx-auto" />
+            <p className="text-sm text-text-muted font-medium">{error}</p>
+            <p className="text-xs text-text-muted">Verifica que tengas datos en la base de datos.</p>
           </div>
         </div>
       </div>
     )
   }
 
-  const activeUserRate = metrics.totalUsers > 0
-    ? Math.round((metrics.activeUsers.mau / metrics.totalUsers) * 100)
-    : 0
+  const {
+    totalUsers, mrr, arpu, monthlyChurnRate, ltvCacRatio,
+    ltv, cac, estimatedCac, premiumConversionRate,
+    userGrowthPercent, newUsersThisMonth, newUsersLastMonth,
+    premiumUsers, freeUsers, churnedUsers, premiumPercent,
+    mau, wau, dau, dauMauRatio, stickiness, arr,
+    avgSubscriptionMonths, quarterlyChurnRate,
+    userGrowth, cohortRetention, churnByMonth,
+    totalCoaches, avgAthletesPerCoach, recentUsers
+  } = metrics
 
-  const userTrend = metrics.previousMonthUsers > 0
-    ? Math.round(((metrics.totalUsers - metrics.previousMonthUsers) / metrics.previousMonthUsers) * 100)
-    : 0
+  const userGrowthDelta = newUsersThisMonth - newUsersLastMonth
+  const newUsersTrend = userGrowthDelta > 0 ? 'up' as const : userGrowthDelta < 0 ? 'down' as const : 'neutral' as const
+  const userGrowthTrend = userGrowthPercent > 0 ? 'up' as const : userGrowthPercent < 0 ? 'down' as const : 'neutral' as const
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-6">
-      <main className="max-w-6xl mx-auto space-y-8">
-        <PageHeader
-          icon={BarChart3}
-          title="Panel de Control"
-          subtitle="Métricas de crecimiento, retención y actividad • Triatlon Pro Business"
-        />
+    <div className="min-h-screen bg-bg-app w-full overflow-x-hidden">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 sm:pb-8 space-y-8">
 
-        {/* KPI Cards */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <KPICard
-            title="Usuarios Totales"
-            value={metrics.totalUsers}
-            subtitle={`${metrics.activeUsers.mau} activos este mes (${activeUserRate}%)`}
-            trend={userTrend}
-            icon={Users}
-            color="bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/20 text-cyan-400"
-            delay={0}
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <PageHeader
+              icon={BarChart3}
+              title="Business Dashboard"
+              subtitle={`${totalUsers} usuarios · ${mrr}€/mes MRR`}
+            />
+            {estimatedCac && (
+              <p className="text-[9px] text-text-muted mt-1 flex items-center gap-1">
+                <Zap className="w-2.5 h-2.5" />
+                CAC estimado (conecta datos de marketing para precisión real)
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-[10px] text-text-muted bg-bg-card border border-border-default rounded-lg px-3 py-2 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-sport-bike animate-pulse" />
+            Datos en tiempo real
+          </div>
+        </div>
+
+        {/* KPI Row 1 — Core Business Metrics */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <MetricCard
+            title="MRR"
+            value={`${mrr.toLocaleString('es-ES', { minimumFractionDigits: 2 })}€`}
+            subtitle={`${arr.toLocaleString('es-ES', { minimumFractionDigits: 0 })}€/año ARR`}
+            icon={DollarSign}
+            trend={newUsersTrend}
+            trendValue={`${premiumUsers} premium · ${premiumPercent}%`}
+            accentColor="text-sport-swim"
           />
-          <KPICard
-            title="MAU (Mensual)"
-            value={metrics.activeUsers.mau}
-            subtitle={`${metrics.activeUsers.wau} semanales · ${metrics.activeUsers.dau} hoy`}
-            icon={BarChart3}
-            color="bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/20 text-emerald-400"
-            delay={0.1}
+          <MetricCard
+            title="ARPU"
+            value={`${arpu}€`}
+            subtitle="Ingreso medio por usuario"
+            icon={Activity}
+            accentColor="text-sport-swim"
           />
-          <KPICard
-            title="Retención"
-            value={`${100 - metrics.churnRate.monthly}%`}
-            subtitle="Retención mensual de usuarios"
-            trend={metrics.churnRate.monthly > 5 ? -metrics.churnRate.monthly : undefined}
+          <MetricCard
+            title="Churn Mensual"
+            value={`${monthlyChurnRate}%`}
+            subtitle={`${quarterlyChurnRate}% trimestral · ${churnedUsers} perdidos`}
+            icon={UserMinus}
+            trend={monthlyChurnRate > 10 ? 'down' : monthlyChurnRate > 5 ? 'neutral' : 'up'}
+            trendValue={monthlyChurnRate <= 5 ? 'Saludable' : monthlyChurnRate <= 10 ? 'Aceptable' : 'Requiere atención'}
+            accentColor={monthlyChurnRate > 10 ? 'text-sport-run' : monthlyChurnRate > 5 ? 'text-warning' : 'text-sport-bike'}
+          />
+          <MetricCard
+            title="LTV"
+            value={`${ltv}€`}
+            subtitle={`${avgSubscriptionMonths} meses de media`}
+            icon={Target}
+            accentColor="text-sport-bike"
+          />
+          <MetricCard
+            title="CAC"
+            value={`${cac}€`}
+            subtitle={estimatedCac ? 'Estimado · 500€/mes marketing' : 'Real'}
             icon={TrendingUp}
-            color="bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 text-amber-400"
-            delay={0.2}
+            accentColor="text-sport-bike"
           />
-          <KPICard
-            title="Entrenamientos"
-            value={metrics.workoutStats.totalWorkouts}
-            subtitle={`${metrics.workoutStats.completedRate}% completados · ${metrics.workoutStats.avgTss} TSS avg`}
-            icon={BarChart3}
-            color="bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20 text-blue-400"
-            delay={0.3}
+          <MetricCard
+            title="LTV / CAC"
+            value={`${ltvCacRatio}x`}
+            subtitle={`${ltvCacRatio >= 3 ? '✅ Saludable' : ltvCacRatio >= 1 ? '⚠️ Mínimo' : '❌ Insostenible'}`}
+            icon={Zap}
+            trend={ltvCacRatio >= 3 ? 'up' : ltvCacRatio >= 1 ? 'neutral' : 'down'}
+            trendValue={ltvCacRatio >= 3 ? 'Óptimo (>3x)' : ltvCacRatio >= 1 ? 'Mínimo (1x)' : 'Crítico (<1x)'}
+            accentColor={ltvCacRatio >= 3 ? 'text-sport-bike' : ltvCacRatio >= 1 ? 'text-warning' : 'text-sport-run'}
           />
-        </section>
+        </div>
+
+        {/* KPI Row 2 — Growth & Engagement */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <MetricCard
+            title="Usuarios Totales"
+            value={totalUsers.toLocaleString()}
+            subtitle={`+${newUsersThisMonth} este mes`}
+            icon={Users}
+            trend={userGrowthTrend}
+            trendValue={`${userGrowthPercent > 0 ? '+' : ''}${userGrowthPercent}%`}
+            accentColor="text-sport-swim"
+          />
+          <MetricCard
+            title="Nuevos (este mes)"
+            value={newUsersThisMonth}
+            subtitle={`${newUsersLastMonth} el mes pasado`}
+            icon={UserPlus}
+            trend={newUsersTrend}
+            trendValue={userGrowthDelta > 0 ? `+${userGrowthDelta}` : `${userGrowthDelta}`}
+            accentColor="text-sport-swim"
+          />
+          <MetricCard
+            title="MAU"
+            value={mau.toLocaleString()}
+            subtitle={`${dau} hoy · ${dauMauRatio}% DAU/MAU`}
+            icon={Activity}
+            trend={dauMauRatio > 20 ? 'up' : dauMauRatio > 10 ? 'neutral' : 'down'}
+            trendValue={`${stickiness}% semanal`}
+            accentColor="text-sport-swim"
+          />
+          <MetricCard
+            title="Conversión Premium"
+            value={`${premiumConversionRate}%`}
+            subtitle={`${premiumUsers} de ${totalUsers}`}
+            icon={Target}
+            trend={premiumConversionRate > 15 ? 'up' : premiumConversionRate > 5 ? 'neutral' : 'down'}
+            trendValue={premiumConversionRate > 10 ? 'Sobre media' : 'Por mejorar'}
+            accentColor="text-sport-bike"
+          />
+        </div>
 
         {/* Charts Row */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <UserGrowthChart data={metrics.userGrowth} />
-          <ActiveUsersChart
-            mau={metrics.activeUsers.mau}
-            wau={metrics.activeUsers.wau}
-            dau={metrics.activeUsers.dau}
-          />
-        </section>
-
-        {/* Subscription & Coach Stats */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-white mb-3">Distribución de Planes</h3>
-            <div className="space-y-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* User Growth Chart */}
+          <div className="bg-bg-card border border-border-default rounded-xl p-5">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-zinc-400 font-medium">Gratuito</span>
-                  <span className="text-white font-bold">{metrics.subscriptionStats.free}</span>
-                </div>
-                <div className="h-2.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-zinc-500 rounded-full transition-all"
-                    style={{ width: `${metrics.totalUsers > 0 ? (metrics.subscriptionStats.free / metrics.totalUsers) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-zinc-400 font-medium">Premium</span>
-                  <span className="text-emerald-400 font-bold">{metrics.subscriptionStats.premium}</span>
-                </div>
-                <div className="h-2.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 rounded-full transition-all"
-                    style={{ width: `${metrics.totalUsers > 0 ? (metrics.subscriptionStats.premium / metrics.totalUsers) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-zinc-400 font-medium">Inactivos</span>
-                  <span className="text-red-400 font-bold">{metrics.subscriptionStats.churned}</span>
-                </div>
-                <div className="h-2.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-red-500/50 rounded-full transition-all"
-                    style={{ width: `${metrics.totalUsers > 0 ? (metrics.subscriptionStats.churned / metrics.totalUsers) * 100 : 0}%` }}
-                  />
-                </div>
+                <h3 className="text-xs font-bold text-text-primary">Crecimiento de Usuarios</h3>
+                <p className="text-[10px] text-text-muted">Registros mensuales (6 meses)</p>
               </div>
             </div>
+            <UserGrowthChart data={userGrowth} />
           </div>
 
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-white mb-3">Estadísticas de Entrenamiento</h3>
+          {/* Churn Breakdown */}
+          <ChurnBreakdownCard churnByMonth={churnByMonth} />
+        </div>
+
+        {/* Cohort Retention */}
+        <CohortRetentionTable data={cohortRetention} />
+
+        {/* Active Users & Recent Users */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ActiveUsersChart mau={mau} wau={wau} dau={dau} />
+
+          <div className="bg-bg-card border border-border-default rounded-xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-xs font-bold text-text-primary">Suscripciones</h3>
+                <p className="text-[10px] text-text-muted">Distribución actual</p>
+              </div>
+            </div>
             <div className="space-y-4">
-              <div>
-                <p className="text-2xl font-black text-white">{metrics.workoutStats.completedRate}%</p>
-                <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mt-0.5">Tasa de finalización</p>
+              {/* Premium bar */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[10px]">
+                  <span className="font-bold text-text-primary">Premium</span>
+                  <span className="font-medium text-text-secondary">{premiumUsers} ({premiumPercent}%)</span>
+                </div>
+                <div className="h-2 bg-bg-hover rounded-full overflow-hidden">
+                  <div className="h-full bg-sport-swim rounded-full transition-all" style={{ width: `${premiumPercent}%` }} />
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-black text-white">{metrics.workoutStats.avgTss}</p>
-                <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mt-0.5">TSS promedio por sesión</p>
+              {/* Free bar */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[10px]">
+                  <span className="font-bold text-text-primary">Free / Trial</span>
+                  <span className="font-medium text-text-secondary">{freeUsers} ({Math.round((freeUsers / totalUsers) * 100)}%)</span>
+                </div>
+                <div className="h-2 bg-bg-hover rounded-full overflow-hidden">
+                  <div className="h-full bg-text-muted rounded-full transition-all" style={{ width: `${(freeUsers / totalUsers) * 100}%` }} />
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-black text-white">{metrics.workoutStats.totalWorkouts}</p>
-                <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mt-0.5">Entrenamientos registrados (90 días)</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5">
-            <h3 className="text-sm font-bold text-white mb-3">Red de Entrenadores</h3>
-            <div className="space-y-4">
-              <div>
-                <p className="text-2xl font-black text-white">{metrics.coachStats.totalCoaches}</p>
-                <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mt-0.5">Entrenadores registrados</p>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-zinc-800/50 rounded-xl border border-zinc-700/50">
-                <Users className="w-5 h-5 text-amber-400 shrink-0" />
-                <div>
-                  <p className="text-sm font-bold text-white">
-                    {metrics.coachStats.avgAthletesPerCoach} atletas / coach
-                  </p>
-                  <p className="text-[10px] text-zinc-500 font-medium">Ratio promedio</p>
+              {/* Churned bar */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[10px]">
+                  <span className="font-bold text-text-primary">Churned</span>
+                  <span className="font-medium text-text-secondary">{churnedUsers} ({Math.round((churnedUsers / totalUsers) * 100)}%)</span>
+                </div>
+                <div className="h-2 bg-bg-hover rounded-full overflow-hidden">
+                  <div className="h-full bg-sport-run rounded-full transition-all" style={{ width: `${(churnedUsers / totalUsers) * 100}%` }} />
                 </div>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* Recent Users */}
-        <RecentUsersTable users={metrics.recentUsers} />
+            <div className="mt-4 pt-4 border-t border-border-subtle grid grid-cols-2 gap-3 text-center text-[10px]">
+              <div>
+                <p className="font-bold text-text-primary">{totalCoaches}</p>
+                <p className="text-text-muted">Entrenadores</p>
+              </div>
+              <div>
+                <p className="font-bold text-text-primary">{avgAthletesPerCoach}</p>
+                <p className="text-text-muted">Atletas/Coach (media)</p>
+              </div>
+              <div>
+                <p className="font-bold text-text-primary">{mrr.toLocaleString('es-ES', { minimumFractionDigits: 0 })}€</p>
+                <p className="text-text-muted">MRR</p>
+              </div>
+              <div>
+                <p className="font-bold text-text-primary">{premiumConversionRate}%</p>
+                <p className="text-text-muted">Tasa conversión</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Users Table */}
+        <div className="bg-bg-card border border-border-default rounded-xl p-5">
+          <h3 className="text-xs font-bold text-text-primary mb-4">Últimos Usuarios Registrados</h3>
+          <RecentUsersTable users={recentUsers} />
+        </div>
+
       </main>
     </div>
   )

@@ -4,7 +4,6 @@ import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications } from '@/components/providers/notification-provider';
 
 export function MobileBottomNav() {
@@ -35,11 +34,11 @@ export function MobileBottomNav() {
     fetchRole();
   }, []);
 
-  // Ocultar en login, callback y chats para dejar todo el espacio de pantalla al chat y teclado móvil
+  // Ocultar en login, callback y chats
   if (
-    pathname.includes('/login') || 
-    pathname.includes('/auth') || 
-    pathname.startsWith('/chat') || 
+    pathname.includes('/login') ||
+    pathname.includes('/auth') ||
+    pathname.startsWith('/chat') ||
     pathname.startsWith('/coach/chat')
   ) {
     return null;
@@ -62,46 +61,31 @@ export function MobileBottomNav() {
   ];
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[max(env(safe-area-inset-bottom),24px)] pt-2 bg-white/95 backdrop-blur-md border-t border-zinc-200 shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.08)] motion-safe:transition-all">
-      <div className="flex items-center justify-around max-w-md mx-auto relative">
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom, 16px)] pt-2 bg-bg-elevated/90 backdrop-blur-lg border-t border-border-default">
+      <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           const Icon = item.icon;
 
           return (
-            <Link 
-              key={item.href} 
+            <Link
+              key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 py-1.5 px-3 relative group"
+              className="flex flex-col items-center gap-1 py-1.5 px-2.5 relative group"
               aria-label={item.label}
             >
-              {isActive && (
-                <motion.div 
-                  layoutId="mobile-nav-bubble" 
-                  className="absolute inset-0 bg-cyan-50 border border-cyan-100/50 rounded-xl -z-10"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              
               <div className="relative">
-                <Icon className={`w-5 h-5 transition-colors duration-200 ${isActive ? 'text-cyan-500' : 'text-zinc-400 group-hover:text-zinc-800'}`} />
-                <AnimatePresence>
-                  {item.showBadge && unreadCount > 0 && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                      className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
-                    >
-                      <span className="text-[9px] font-bold text-white leading-none">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                      </span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-sport-swim' : 'text-text-muted group-hover:text-text-secondary'}`} />
+                {item.showBadge && unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 w-4 h-4 bg-sport-run rounded-full flex items-center justify-center border-2 border-bg-elevated">
+                    <span className="text-[9px] font-bold text-white leading-none">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  </span>
+                )}
               </div>
 
-              <span className={`text-[10px] font-semibold tracking-wide transition-colors duration-200 ${isActive ? 'text-cyan-500' : 'text-zinc-400 group-hover:text-zinc-800'}`}>
+              <span className={`text-[10px] font-semibold tracking-wide ${isActive ? 'text-sport-swim' : 'text-text-muted'}`}>
                 {item.label}
               </span>
             </Link>

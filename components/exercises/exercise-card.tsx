@@ -38,7 +38,7 @@ export function ExerciseCard({ exercise, index = 0 }: ExerciseCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
       className={cn(
-        'bg-zinc-900/80 border border-zinc-800 rounded-2xl overflow-hidden transition-all hover:border-zinc-700',
+        'bg-bg-card border border-border-default rounded-xl overflow-hidden transition-all hover:border-border-default/60',
         'border-l-4',
         sportColors[exercise.sport] || 'border-l-zinc-500'
       )}
@@ -62,7 +62,7 @@ export function ExerciseCard({ exercise, index = 0 }: ExerciseCardProps) {
                   className="max-w-full max-h-full object-contain"
                 />
               ) : (
-                <p className="text-xs text-zinc-500">GIF no disponible</p>
+                <p className="text-xs text-text-muted">GIF no disponible</p>
               )}
             </div>
           ) : exercise.youtubeId ? (
@@ -75,7 +75,7 @@ export function ExerciseCard({ exercise, index = 0 }: ExerciseCardProps) {
             />
           ) : (
             <div className="w-full h-full bg-zinc-800 flex items-center justify-center">
-              <p className="text-xs text-zinc-500">Vista previa no disponible</p>
+              <p className="text-xs text-text-muted">Vista previa no disponible</p>
             </div>
           )}
         </div>
@@ -94,19 +94,19 @@ export function ExerciseCard({ exercise, index = 0 }: ExerciseCardProps) {
                 {LEVEL_NAMES[exercise.level]}
               </span>
             </div>
-            <p className="text-[10px] text-zinc-500 font-medium">
+            <p className="text-[10px] text-text-muted font-medium">
               {SPORT_NAMES[exercise.sport]} • {exercise.muscleGroup}
             </p>
           </div>
         </div>
 
         {/* Description */}
-        <p className="text-xs text-zinc-400 leading-relaxed mb-3">
+        <p className="text-xs text-text-secondary leading-relaxed mb-3">
           {exercise.description}
         </p>
 
         {/* Quick info */}
-        <div className="flex items-center gap-4 mb-3 text-[10px] text-zinc-500 font-medium">
+        <div className="flex items-center gap-4 mb-3 text-[10px] text-text-muted font-medium">
           {exercise.duration && (
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
@@ -125,14 +125,14 @@ export function ExerciseCard({ exercise, index = 0 }: ExerciseCardProps) {
         <div className="flex gap-2">
           <button
             onClick={() => setShowVideo(!showVideo)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-sport-run/10 text-sport-run border border-sport-run/20 hover:bg-red-500/20 transition-colors"
           >
             <Play className="w-3 h-3" />
             {showVideo ? 'Ocultar Video' : 'Ver Video'}
           </button>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-zinc-700 hover:text-white transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold bg-zinc-800 text-text-secondary border border-zinc-700 hover:text-text-primary transition-colors"
           >
             <Lightbulb className="w-3 h-3" />
             {expanded ? 'Ocultar' : 'Consejos'}
@@ -152,7 +152,7 @@ export function ExerciseCard({ exercise, index = 0 }: ExerciseCardProps) {
               <p className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider mb-2">💡 Consejos del Coach</p>
               <ul className="space-y-1.5">
                 {exercise.coachTips.map((tip, i) => (
-                  <li key={i} className="text-[11px] text-zinc-400 flex items-start gap-2">
+                  <li key={i} className="text-[11px] text-text-secondary flex items-start gap-2">
                     <span className="text-cyan-500 shrink-0">•</span>
                     {tip}
                   </li>
@@ -165,7 +165,7 @@ export function ExerciseCard({ exercise, index = 0 }: ExerciseCardProps) {
               <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-2">🎒 Equipamiento</p>
               <div className="flex flex-wrap gap-1.5">
                 {exercise.equipment.map((item, i) => (
-                  <span key={i} className="px-2 py-0.5 rounded bg-zinc-700 text-[10px] text-zinc-300 font-medium">
+                  <span key={i} className="px-2 py-0.5 rounded text-bg-hover text-[10px] text-text-primary font-medium">
                     {item}
                   </span>
                 ))}

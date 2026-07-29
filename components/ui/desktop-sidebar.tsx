@@ -3,7 +3,6 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
 import {
   Home, BarChart2, MessageSquare, Settings, Users, BookOpen,
   PanelLeftClose, PanelLeft, Trophy
@@ -77,20 +76,20 @@ export function DesktopSidebar() {
   return (
     <div
       className={cn(
-        'hidden sm:flex flex-col border-r border-zinc-200 bg-white shrink-0 transition-all duration-300 ease-in-out',
+        'hidden sm:flex flex-col border-r border-border-default bg-bg-elevated shrink-0 transition-all duration-300',
         isCollapsed ? 'w-[68px]' : 'w-56'
       )}
     >
       {/* Logo */}
       <div className={cn(
-        'flex items-center gap-3 border-b border-zinc-100 shrink-0 transition-all duration-300',
+        'flex items-center gap-3 border-b border-border-subtle shrink-0 transition-all duration-300',
         isCollapsed ? 'px-3.5 py-4 justify-center' : 'px-5 py-4'
       )}>
-        <div className="w-8 h-8 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0">
-          <Trophy className="w-4 h-4 text-cyan-500" />
+        <div className="w-8 h-8 rounded-lg bg-sport-swim/10 border border-sport-swim/20 flex items-center justify-center shrink-0">
+          <span className="text-xs font-extrabold text-sport-swim">T3</span>
         </div>
         {!isCollapsed && (
-          <span className="text-sm font-bold text-zinc-800 tracking-tight whitespace-nowrap">Triatlon Pro</span>
+          <span className="text-sm font-bold text-text-primary tracking-tight whitespace-nowrap">Triatlon Pro</span>
         )}
       </div>
 
@@ -105,26 +104,18 @@ export function DesktopSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'relative flex items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-150',
+                'relative flex items-center gap-3 rounded-lg text-sm font-medium transition-colors',
                 isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5',
                 isActive
-                  ? 'bg-cyan-50 text-cyan-600 border border-cyan-100'
-                  : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 border border-transparent'
+                  ? 'bg-sport-swim/10 text-sport-swim'
+                  : 'text-text-muted hover:text-text-secondary hover:bg-bg-hover'
               )}
               title={isCollapsed ? item.label : undefined}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="sidebar-active"
-                  className="absolute inset-0 bg-cyan-50 rounded-xl border border-cyan-100 -z-10"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-                />
-              )}
-
               <div className="relative shrink-0">
-                <Icon className={cn('w-4.5 h-4.5', isActive ? 'text-cyan-500' : '')} />
+                <Icon className={cn('w-4.5 h-4.5', isActive ? 'text-sport-swim' : '')} />
                 {item.showBadge && unreadCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-white">
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-sport-run rounded-full flex items-center justify-center border-2 border-bg-elevated">
                     <span className="text-[9px] font-bold text-white leading-none">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
@@ -139,11 +130,11 @@ export function DesktopSidebar() {
       </nav>
 
       {/* Collapse Toggle */}
-      <div className="border-t border-zinc-100 p-2 shrink-0">
+      <div className="border-t border-border-subtle p-2 shrink-0">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            'flex items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-150 w-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50 border border-transparent',
+            'flex items-center gap-3 rounded-lg text-sm font-medium transition-colors w-full text-text-muted hover:text-text-secondary hover:bg-bg-hover',
             isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5'
           )}
           title={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}

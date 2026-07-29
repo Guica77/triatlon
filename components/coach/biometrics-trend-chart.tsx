@@ -28,24 +28,24 @@ interface BiometricsTrendChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 border border-zinc-200 shadow-lg rounded-xl text-xs space-y-1 z-50">
-        <p className="font-bold text-zinc-800 mb-2 border-b border-zinc-100 pb-1">
+      <div className="bg-white p-3 border border-border-subtle rounded-xl text-xs space-y-1 z-50">
+        <p className="font-bold text-text-primary mb-2 border-b border-border-subtle pb-1">
           {format(parseISO(label), "d MMM yyyy", { locale: es })}
         </p>
         {payload.map((entry: any, index: number) => {
           const getBgClass = (color: string) => {
             if (color === '#6366f1') return 'bg-indigo-500';
-            if (color === '#0ea5e9') return 'bg-cyan-500';
+            if (color === '#0ea5e9') return 'bg-sport-swim';
             if (color === '#f59e0b') return 'bg-amber-500';
-            return 'bg-zinc-500';
+            return 'bg-bg-elevated0';
           };
           return (
             <div key={`item-${index}`} className="flex items-center gap-2">
               <span 
                 className={`w-2 h-2 rounded-full ${getBgClass(entry.color)}`}
               />
-              <span className="font-medium text-zinc-500 uppercase tracking-wider">{entry.name}:</span>
-              <span className="font-black text-zinc-900 ml-auto">{entry.value} {entry.name === 'HRV' ? 'ms' : '%'}</span>
+              <span className="font-medium text-text-muted uppercase tracking-wider">{entry.name}:</span>
+              <span className="font-black text-text-primary ml-auto">{entry.value} {entry.name === 'HRV' ? 'ms' : '%'}</span>
             </div>
           );
         })}
@@ -61,8 +61,8 @@ export function BiometricsTrendChart({ data }: BiometricsTrendChartProps) {
 
   if (!sortedData || sortedData.length === 0) {
     return (
-      <div className="h-[250px] flex items-center justify-center bg-zinc-50 rounded-2xl border border-zinc-200 border-dashed">
-        <div className="text-center text-zinc-400 space-y-2">
+      <div className="h-[250px] flex items-center justify-center bg-bg-elevated rounded-2xl border border-border-subtle border-dashed">
+        <div className="text-center text-text-muted space-y-2">
           <HeartPulse className="w-8 h-8 mx-auto opacity-50" />
           <p className="text-sm font-medium">No hay historial biométrico.</p>
         </div>
@@ -72,9 +72,9 @@ export function BiometricsTrendChart({ data }: BiometricsTrendChartProps) {
 
   return (
     <div className="w-full h-[300px] relative">
-      <div className="absolute top-0 right-4 flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500 z-10 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-zinc-200">
+      <div className="absolute top-0 right-4 flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-text-muted z-10 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle">
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-cyan-500" />
+          <span className="w-2 h-2 rounded-full bg-sport-swim" />
           Readiness
         </div>
         <div className="flex items-center gap-1.5">

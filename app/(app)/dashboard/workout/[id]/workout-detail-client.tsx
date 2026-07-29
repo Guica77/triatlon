@@ -285,7 +285,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           </div>
           <div className="space-y-3 pl-4 border-l border-purple-500/10">
             {step.workoutSteps?.map((subStep, subIdx) => (
-              <div key={subIdx} className="p-3 rounded-lg bg-zinc-950/40 border border-zinc-850 flex items-center justify-between flex-wrap gap-2 text-xs">
+              <div key={subIdx} className="p-3 rounded-lg bg-bg-app/40 border border-zinc-850 flex items-center justify-between flex-wrap gap-2 text-xs">
                 <div className="flex items-center gap-2">
                   {renderStepIcon(subStep.type)}
                   <div>
@@ -294,7 +294,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="px-2.5 py-1 rounded bg-zinc-900 text-zinc-300 font-bold border border-zinc-800">
+                  <span className="px-2.5 py-1 rounded bg-zinc-900 text-zinc-300 font-bold border border-border-subtle">
                     Objetivo: {formatTarget(subStep.targetType, subStep.targetValueOne, subStep.targetValueTwo)}
                   </span>
                 </div>
@@ -420,7 +420,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
             >
               <ProCard className="p-6 border-cyan-500/30 bg-zinc-900/90 shadow-xl space-y-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none bg-cyan-500/5" />
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <div className="flex items-center justify-between border-b border-border-subtle pb-3">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-cyan-400" />
                     Valoración del Entrenamiento
@@ -446,7 +446,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                     {/* RPE Buttons Grid */}
                     <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5 pt-1">
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((val) => {
-                        let btnClass = "bg-zinc-950 border-zinc-800 text-zinc-400 hover:bg-zinc-850";
+                        let btnClass = "bg-bg-app border-border-subtle text-zinc-400 hover:bg-zinc-850";
                         if (rpe === val) {
                           if (val <= 3) btnClass = "bg-green-500/25 border-green-400 text-green-300 scale-105 font-bold shadow-lg shadow-green-950/20";
                           else if (val <= 7) btnClass = "bg-yellow-500/25 border-yellow-400 text-yellow-300 scale-105 font-bold shadow-lg shadow-yellow-950/20";
@@ -495,7 +495,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                             className={`py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
                               isSelected 
                                 ? `${item.color} font-bold scale-102` 
-                                : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300"
+                                : "border-border-subtle bg-bg-app text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300"
                             }`}
                           >
                             <span className="text-base">{item.emoji}</span>
@@ -526,7 +526,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                             className={`py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
                               isSelected 
                                 ? "border-cyan-500 text-cyan-300 bg-cyan-500/5 font-bold scale-102" 
-                                : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300"
+                                : "border-border-subtle bg-bg-app text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300"
                             }`}
                           >
                             <span>{item.emoji}</span>
@@ -538,7 +538,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                   </div>
 
                   {/* 4. Dolor Localizado */}
-                  <div className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-950 flex flex-col space-y-2">
+                  <div className="p-3.5 rounded-xl border border-border-subtle bg-bg-app flex flex-col space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className={`w-4 h-4 ${painLocalized ? 'text-red-400' : 'text-zinc-500'}`} />
@@ -580,7 +580,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                       onChange={(e) => setNotes(e.target.value.slice(0, 1000))}
                       placeholder="¿Cómo fue el viento, la temperatura? ¿Tuviste problemas mecánicos o de nutrición? Cuéntaselo al entrenador..."
                       rows={3}
-                      className="w-full rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 p-3 text-xs focus:outline-none focus:border-cyan-500/50 resize-none font-normal"
+                      className="w-full rounded-xl bg-bg-app border border-border-subtle text-zinc-100 p-3 text-xs focus:outline-none focus:border-cyan-500/50 resize-none font-normal"
                     />
                   </div>
 
@@ -653,7 +653,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                 {notes && (
                   <div className="pt-2 border-t border-zinc-850">
                     <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider mb-1">Notas registradas</p>
-                    <p className="text-xs text-zinc-300 italic bg-zinc-950/20 p-2.5 rounded-lg border border-zinc-850/50 leading-relaxed font-normal">
+                    <p className="text-xs text-zinc-300 italic bg-bg-app/20 p-2.5 rounded-lg border border-zinc-850/50 leading-relaxed font-normal">
                       {notes}
                     </p>
                   </div>

@@ -38,12 +38,12 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
     <ProCard className="relative flex flex-col justify-between space-y-6 md:col-span-1 overflow-hidden">
       {/* Help Overlay */}
       {showHelp && (
-        <div className="absolute inset-0 bg-white/95 border border-zinc-200 rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 shadow-lg">
+        <div className="absolute inset-0 bg-white/95 border border-border-subtle rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-cyan-650 uppercase tracking-widest">
+            <h4 className="text-xs font-bold text-sport-swim uppercase tracking-widest">
               ¿Qué es la Distribución de Esfuerzo?
             </h4>
-            <p className="text-[11px] text-zinc-650 leading-relaxed">
+            <p className="text-[11px] text-text-secondary leading-relaxed">
               Muestra el porcentaje del esfuerzo físico total (**TSS**) y el volumen real (**distancia**) que has dedicado a cada deporte durante esta semana:
               <br /><br />
               • <strong className="text-[#00a2e8]">Natación 🔵</strong> (en metros)
@@ -57,7 +57,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
           </div>
           <button
             onClick={() => setShowHelp(false)}
-            className="text-[10px] font-bold text-zinc-500 hover:text-zinc-800 uppercase tracking-wider text-right w-full pt-4 cursor-pointer"
+            className="text-[10px] font-bold text-text-muted hover:text-text-primary uppercase tracking-wider text-right w-full pt-4 cursor-pointer"
           >
             Entendido
           </button>
@@ -67,23 +67,23 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
       {/* Encabezado */}
       <div className="flex justify-between items-start border-b border-[var(--color-border)] pb-6 relative z-10">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
             Desglose de Disciplinas
           </span>
           <div className="flex items-center gap-2 mt-1">
-            <h3 className="text-2xl font-light text-zinc-900">
+            <h3 className="text-2xl font-light text-text-primary">
               Distribución de Esfuerzo
             </h3>
             <button
               onClick={() => setShowHelp(true)}
-              className="text-zinc-500 hover:text-cyan-550 transition-colors p-0.5 cursor-pointer"
+              className="text-text-muted hover:text-sport-swim transition-colors p-0.5 cursor-pointer"
               title="¿Qué es esto?"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
           </div>
         </div>
-        <span className="text-xs font-medium px-3 py-1 rounded-full border text-zinc-600 bg-zinc-50 border-zinc-200">
+        <span className="text-xs font-medium px-3 py-1 rounded-full border text-text-secondary bg-bg-elevated border-border-subtle">
           Volumen Semanal
         </span>
       </div>
@@ -148,10 +148,10 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
 
           {/* Texto Central */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <span className="text-2xl font-light text-zinc-900">
+            <span className="text-2xl font-light text-text-primary">
               {natacion.tss + ciclismo.tss + carrera.tss}
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-zinc-500 font-medium">
+            <span className="text-[10px] uppercase tracking-wider text-text-muted font-medium">
               TSS Total
             </span>
           </div>
@@ -160,48 +160,48 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
         {/* Leyenda de Disciplinas */}
         <div className="space-y-4 w-full sm:w-auto">
           {/* Ciclismo */}
-          <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200 min-w-[170px]">
+          <div className="flex items-center justify-between sm:justify-start gap-4 bg-bg-elevated p-2.5 rounded-xl border border-border-subtle min-w-[170px]">
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-[#2ecc71]" />
-              <span className="text-sm font-medium text-zinc-700">Ciclismo</span>
+              <span className="text-sm font-medium text-text-secondary">Ciclismo</span>
             </div>
             <div className="text-right">
-              <span className="text-sm font-semibold text-zinc-900">
+              <span className="text-sm font-semibold text-text-primary">
                 {ciclismo.percentage}%
               </span>
-              <span className="text-xs text-zinc-500 block">
+              <span className="text-xs text-text-muted block">
                 {ciclismo.tss} TSS • <strong className="text-[#2ecc71]">{weeklyDistance.ciclismo} km</strong>
               </span>
             </div>
           </div>
 
           {/* Carrera */}
-          <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200 min-w-[170px]">
+          <div className="flex items-center justify-between sm:justify-start gap-4 bg-bg-elevated p-2.5 rounded-xl border border-border-subtle min-w-[170px]">
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-[#e74c3c]" />
-              <span className="text-sm font-medium text-zinc-700">Carrera</span>
+              <span className="text-sm font-medium text-text-secondary">Carrera</span>
             </div>
             <div className="text-right">
-              <span className="text-sm font-semibold text-zinc-900">
+              <span className="text-sm font-semibold text-text-primary">
                 {carrera.percentage}%
               </span>
-              <span className="text-xs text-zinc-500 block">
+              <span className="text-xs text-text-muted block">
                 {carrera.tss} TSS • <strong className="text-[#e74c3c]">{weeklyDistance.carrera} km</strong>
               </span>
             </div>
           </div>
 
           {/* Natación */}
-          <div className="flex items-center justify-between sm:justify-start gap-4 bg-zinc-50 p-2.5 rounded-xl border border-zinc-200 min-w-[170px]">
+          <div className="flex items-center justify-between sm:justify-start gap-4 bg-bg-elevated p-2.5 rounded-xl border border-border-subtle min-w-[170px]">
             <div className="flex items-center gap-3">
               <span className="w-3 h-3 rounded-full bg-[#00a2e8]" />
-              <span className="text-sm font-medium text-zinc-700">Natación</span>
+              <span className="text-sm font-medium text-text-secondary">Natación</span>
             </div>
             <div className="text-right">
-              <span className="text-sm font-semibold text-zinc-900">
+              <span className="text-sm font-semibold text-text-primary">
                 {natacion.percentage}%
               </span>
-              <span className="text-xs text-zinc-500 block">
+              <span className="text-xs text-text-muted block">
                 {natacion.tss} TSS • <strong className="text-[#00a2e8]">{weeklyDistance.natacion} m</strong>
               </span>
             </div>

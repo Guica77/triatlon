@@ -104,7 +104,7 @@ export async function GET(request: Request) {
   // Determine fallback based on cookie
   const cookieStore = await cookies();
   const oauthRole = cookieStore.get('oauth_role')?.value;
-  const fallback = oauthRole === 'coach' ? '/coach/login' : '/athlete/login';
+  const fallback = oauthRole === 'coach' ? '/login?role=coach' : '/login?role=athlete';
 
   return NextResponse.redirect(`${origin}${fallback}?error=AuthCallbackError`)
 }

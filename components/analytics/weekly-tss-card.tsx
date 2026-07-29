@@ -61,8 +61,8 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
     if (percent < 70) {
       return {
         label: isBeginner ? 'Progreso Inicial' : 'Recuperación / Carga Baja',
-        color: 'text-cyan-600 bg-cyan-50 border-cyan-200',
-        barColor: 'bg-cyan-500'
+        color: 'text-sport-swim bg-sport-swim border-sport-swim',
+        barColor: 'bg-sport-swim'
       };
     } else if (percent <= 110) {
       return {
@@ -83,12 +83,12 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
     <ProCard className="relative flex flex-col justify-between space-y-6 md:col-span-1 overflow-hidden">
       {/* Help Overlay */}
       {showHelp && (
-        <div className="absolute inset-0 bg-white/95 border border-zinc-200 rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 shadow-lg">
+        <div className="absolute inset-0 bg-white/95 border border-border-subtle rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-cyan-650 uppercase tracking-widest">
+            <h4 className="text-xs font-bold text-sport-swim uppercase tracking-widest">
               {isBeginner ? '¿Qué es el Tiempo Semanal?' : '¿Qué es el Progreso de TSS?'}
             </h4>
-            <p className="text-[11px] text-zinc-650 leading-relaxed">
+            <p className="text-[11px] text-text-secondary leading-relaxed">
               {isBeginner ? (
                 <>
                   Suma la duración estimada de todas tus sesiones de entrenamiento de la semana actual.
@@ -106,7 +106,7 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
           </div>
           <button
             onClick={() => setShowHelp(false)}
-            className="text-[10px] font-bold text-zinc-500 hover:text-zinc-800 uppercase tracking-wider text-right w-full pt-4 cursor-pointer"
+            className="text-[10px] font-bold text-text-muted hover:text-text-primary uppercase tracking-wider text-right w-full pt-4 cursor-pointer"
           >
             Entendido
           </button>
@@ -116,16 +116,16 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
       {/* Encabezado */}
       <div className="flex justify-between items-start border-b border-[var(--color-border)] pb-6 relative z-10">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
             {isBeginner ? 'Tiempo Semanal Acumulado' : 'Carga Semanal Acumulada'}
           </span>
           <div className="flex items-center gap-2 mt-1">
-            <h3 className="text-2xl font-light text-zinc-900">
+            <h3 className="text-2xl font-light text-text-primary">
               {isBeginner ? 'Horas de Entrenamiento' : 'Progreso de TSS'}
             </h3>
             <button
               onClick={() => setShowHelp(true)}
-              className="text-zinc-500 hover:text-cyan-550 transition-colors p-0.5 cursor-pointer"
+              className="text-text-muted hover:text-sport-swim transition-colors p-0.5 cursor-pointer"
               title="¿Qué es esto?"
             >
               <HelpCircle className="w-4 h-4" />
@@ -143,14 +143,14 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
       <div className="flex items-baseline justify-between pt-2">
         <div>
           <div className="flex items-baseline gap-2">
-            <span className="text-5xl font-light tracking-tight text-zinc-900">
+            <span className="text-5xl font-light tracking-tight text-text-primary">
               {isBeginner ? actualHours : actualTss}
             </span>
-            <span className="text-xl font-light text-zinc-500">
+            <span className="text-xl font-light text-text-muted">
               / {isBeginner ? `${targetHours} h` : `${targetTss} TSS`}
             </span>
           </div>
-          <p className="text-sm text-zinc-500 mt-1">
+          <p className="text-sm text-text-muted mt-1">
             {percent}% {isBeginner ? 'de las horas semanales completadas' : 'del objetivo semanal completado'}
           </p>
         </div>
@@ -158,27 +158,27 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
 
       {/* Barra de Progreso Visual */}
       <div className="space-y-2 pt-4">
-        <div className="h-4 w-full bg-zinc-100 rounded-full overflow-hidden p-0.5 border border-zinc-200">
+        <div className="h-4 w-full bg-bg-hover rounded-full overflow-hidden p-0.5 border border-border-subtle">
           <div
             className={`h-full rounded-full transition-all duration-1000 ${statusInfo.barColor} ${getProgressWidthClass(Math.min(percent, 100))}`}
           />
         </div>
-        <div className="flex justify-between text-xs text-zinc-500 font-medium px-1 uppercase tracking-wider">
+        <div className="flex justify-between text-xs text-text-muted font-medium px-1 uppercase tracking-wider">
           <span>0 {isBeginner ? 'horas' : 'TSS'}</span>
           <span>Meta ({isBeginner ? `${targetHours} h` : targetTss})</span>
         </div>
       </div>
 
       {/* Consejo de Entrenamiento */}
-      <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-200 mt-4">
-        <p className="text-xs text-zinc-600 leading-relaxed">
+      <div className="bg-bg-elevated rounded-xl p-4 border border-border-subtle mt-4">
+        <p className="text-xs text-text-secondary leading-relaxed">
           {isBeginner ? (
             <>
-              <strong className="text-zinc-800">Consejo de Constancia:</strong> Distribuir tus horas a lo largo de la semana de forma regular es infinitamente mejor que intentar hacer entrenamientos largos de golpe. ¡Disfruta del camino!
+              <strong className="text-text-primary">Consejo de Constancia:</strong> Distribuir tus horas a lo largo de la semana de forma regular es infinitamente mejor que intentar hacer entrenamientos largos de golpe. ¡Disfruta del camino!
             </>
           ) : (
             <>
-              <strong className="text-zinc-800">Consejo de Carga:</strong> El TSS mide tanto la duración como la intensidad. Mantener el cumplimiento entre el 90% y 110% asegura adaptaciones aeróbicas óptimas sin riesgo de lesión.
+              <strong className="text-text-primary">Consejo de Carga:</strong> El TSS mide tanto la duración como la intensidad. Mantener el cumplimiento entre el 90% y 110% asegura adaptaciones aeróbicas óptimas sin riesgo de lesión.
             </>
           )}
         </p>

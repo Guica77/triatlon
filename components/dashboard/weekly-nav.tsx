@@ -4,7 +4,6 @@ import * as React from 'react';
 import { ProCard } from '@/components/ui/pro-card';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface WeeklyNavProps {
   workouts: Array<{
@@ -66,14 +65,14 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
 
   if (!isMounted) {
     return (
-      <ProCard className="p-4 py-6 relative z-10 border-zinc-200 bg-white shadow-sm h-32 animate-pulse flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+      <ProCard className="p-4 py-6 relative z-10 border-border-default bg-bg-card h-32 animate-pulse flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-4 border-sport-swim border-t-transparent animate-spin"></div>
       </ProCard>
     );
   }
 
   return (
-    <ProCard className="p-4 py-6 relative z-10 border-zinc-200 bg-white shadow-sm">
+    <ProCard className="p-4 py-6 relative z-10 border-border-default bg-bg-card">
       <div className="flex justify-between items-center gap-2 max-w-2xl mx-auto">
         {days.map((d, i) => {
           let complianceClass = '';
@@ -86,22 +85,22 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
             const hasPending = d.workouts.some(w => w.status === 'pending');
  
             if (d.workouts.every(w => w.status === 'completed')) {
-              complianceClass = 'bg-emerald-50 border border-emerald-300 text-emerald-700';
+              complianceClass = 'bg-sport-bike/10 border border-sport-bike/30 text-sport-bike';
             } else if (hasMissed) {
-              complianceClass = 'bg-red-50 border border-red-300 text-red-700';
+              complianceClass = 'bg-danger/10 border border-danger/30 text-danger';
             } else if (hasPending && d.workouts.some(w => w.scheduled_date <= todayStr)) {
-              complianceClass = 'bg-amber-50 border border-amber-300 text-amber-700';
+              complianceClass = 'bg-warning/10 border border-warning/30 text-warning';
             } else {
-              complianceClass = 'bg-zinc-50 border border-zinc-200 text-zinc-650 hover:bg-zinc-100';
+              complianceClass = 'bg-bg-hover border border-border-default text-text-secondary hover:bg-bg-hover';
             }
           } else {
             complianceClass = d.isToday 
-              ? 'bg-zinc-100 border border-zinc-300 text-zinc-800 shadow-sm' 
-              : 'border border-transparent hover:bg-zinc-100/60 text-zinc-500';
+              ? 'bg-bg-hover border border-border-default text-text-primary' 
+              : 'border border-transparent hover:bg-bg-hover text-text-muted';
           }
  
           const activeClass = isSelected
-            ? 'bg-white border-cyan-500 ring-1 ring-cyan-500 text-cyan-400'
+            ? 'bg-bg-elevated border-sport-swim ring-1 ring-sport-swim text-sport-swim'
             : complianceClass;
  
           return (
@@ -111,22 +110,15 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
               className={cn(
                 "relative flex flex-col items-center justify-center p-3 rounded-2xl w-16 transition-all border cursor-pointer select-none",
                 activeClass,
-                d.isToday && !isSelected && "bg-zinc-150 border-zinc-300 shadow-sm text-zinc-800"
+                d.isToday && !isSelected && "bg-bg-hover border-border-default text-text-primary"
               )}
             >
-              {isSelected && (
-                <motion.div
-                  layoutId="activeWeeklyDay"
-                  className="absolute inset-0 bg-white border border-cyan-500 rounded-2xl -z-10 shadow-sm"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-              <span className="text-[10px] sm:text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1 z-10">
+              <span className="text-[10px] sm:text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 z-10">
                 {d.dayName}
               </span>
               <span className={cn(
                 "text-lg font-bold mb-2 z-10", 
-                isSelected ? "text-cyan-400" : d.isToday ? "text-zinc-900" : "text-zinc-700"
+                isSelected ? "text-sport-swim" : d.isToday ? "text-text-primary" : "text-text-secondary"
               )}>
                 {d.dayNum}
               </span>

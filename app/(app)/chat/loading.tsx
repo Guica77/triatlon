@@ -58,7 +58,7 @@ export default function ChatLoading() {
 
         {/* Input Bar Placeholder */}
         <div className="p-4 bg-white border border-zinc-200 rounded-2xl flex gap-3 items-center shrink-0">
-          <div className="flex-1 h-10 bg-zinc-100 rounded-xl" />
+          <div className="flex-1 h-10 bg-bg-hover rounded-xl" />
           <div className="w-12 h-10 bg-zinc-200 rounded-xl" />
         </div>
 

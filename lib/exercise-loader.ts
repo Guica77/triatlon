@@ -16,6 +16,22 @@ import { EXERCISES, Exercise } from '@/lib/exercises-db'
 
 let externalExercisesCache: Exercise[] | null = null
 
+const GITHUB_RAW = 'https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main'
+
+// Lazy-loaded media filename mapping
+let mediaMap: Record<string, { gif?: string; jpg?: string }> | null = null
+
+function getMediaMap(): Record<string, { gif?: string; jpg?: string }> {
+  if (mediaMap) return mediaMap
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    mediaMap = require('./external-media-map.json')
+  } catch {
+    mediaMap = {}
+  }
+  return mediaMap as Record<string, { gif?: string; jpg?: string }>
+}
+
 export function getExternalCount(): number {
   return 1324
 }
@@ -73,11 +89,14 @@ export function loadExternalExercises(): Exercise[] {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const raw = require('./external-exercises.json') as any[]
 
+    const map = getMediaMap()
+
     externalExercisesCache = raw.map((ex: any) => {
       const category = ex.category || ''
       const sport = mapCategoryToSport(category)
       const steps = ex.instruction_steps?.es || ex.instruction_steps?.en || []
       const instruction = ex.instructions?.es || ex.instructions?.en || ''
+      const media = map[ex.id]
 
       return {
         id: `ext-${ex.id}`,
@@ -87,8 +106,8 @@ export function loadExternalExercises(): Exercise[] {
         level: getLevel(ex.equipment || ''),
         description: steps.slice(0, 2).join(' ') || instruction.slice(0, 120) || `Ejercicio de ${getCategoryLabel(category)}`,
         youtubeId: '',
-        externalImage: `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/images/${ex.id}.jpg`,
-        externalGif: `https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/videos/${ex.id}.gif`,
+        externalImage: media?.jpg ? `${GITHUB_RAW}/images/${media.jpg}` : undefined,
+        externalGif: media?.gif ? `${GITHUB_RAW}/videos/${media.gif}` : undefined,
         externalSource: true,
         coachTips: steps.slice(0, 4).map((s: string) => s),
         equipment: [ex.equipment || 'body weight'],

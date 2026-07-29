@@ -48,9 +48,9 @@ export default async function OnboardingPage() {
         
         {/* Header */}
         <header className="text-center space-y-3 max-w-xl mx-auto">
-          <p className="text-xs text-cyan-500 uppercase tracking-widest font-bold">Onboarding Pro</p>
-          <h1 className="text-4xl font-black tracking-tight text-zinc-900">Configura tu Objetivo</h1>
-          <p className="text-sm text-zinc-600 font-medium leading-relaxed">
+          <p className="text-xs text-sport-swim uppercase tracking-widest font-bold">Onboarding Pro</p>
+          <h1 className="text-4xl font-black tracking-tight text-text-primary">Configura tu Objetivo</h1>
+          <p className="text-sm text-text-secondary font-medium leading-relaxed">
             Define tu meta, calibra tu fisiología y configura tu Garaje Virtual. La Inteligencia Artificial generará tu periodización de rendimiento al instante.
           </p>
         </header>

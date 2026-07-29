@@ -245,13 +245,13 @@ export default async function DashboardPage() {
   })
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-bg-app w-full overflow-x-hidden">
       {activeFeedbackDays !== null && (
         <AppFeedbackModal daysUsed={activeFeedbackDays} />
       )}
       <MorningCheckInModal hasCompletedCheckIn={hasCompletedCheckIn} hasGarminSync={isConnected} />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-8 space-y-8">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 sm:pb-8 space-y-6">
         
         {/* Pizarra del Entrenador */}
         {groupAnnouncement && (

@@ -1,78 +1,113 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #f3f4f6; /* TrainingPeaks gray-100 background */
-  --color-foreground: #09090b; /* zinc-950 dark text */
-  
-  --color-surface: #ffffff; /* White cards */
-  --color-surface-hover: #f4f4f5; /* Hover state light zinc */
-  
-  --color-border: #e4e4e7; /* Clean zinc-200 border */
-  
-  --color-primary: #18181b; /* zinc-900 for dark buttons */
-  --color-primary-foreground: #ffffff; /* white text */
+  /* ── Background hierarchy (dark only, committed) ── */
+  --color-bg-app: #07070a;
+  --color-bg-elevated: #0f0f14;
+  --color-bg-card: #18181d;
+  --color-bg-hover: #212126;
 
-  /* Triathlon Zones - Pure, no glows */
-  --color-zone-1: #3b82f6; /* Blue */
-  --color-zone-2: #22c55e; /* Green */
-  --color-zone-3: #eab308; /* Yellow */
-  --color-zone-4: #f97316; /* Orange */
-  --color-zone-5: #ef4444; /* Red */
+  /* ── Border hierarchy ── */
+  --color-border-default: #27272b;
+  --color-border-subtle: #1f1f24;
 
-  /* Disciplines (TrainingPeaks Convencion) */
-  --color-swim: #00a2e8; /* Sky Blue */
-  --color-bike: #2ecc71; /* Emerald Green */
-  --color-run: #e74c3c;  /* Crimson Red */
+  /* ── Text hierarchy ── */
+  --color-text-primary: #e4e4e7;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #63636e;
+  --color-text-inverse: #07070a;
 
-  /* Map Cyan tailwind utilities globally to TrainingPeaks Orange */
-  --color-cyan-50: #fff7ed;
-  --color-cyan-100: #ffedd5;
-  --color-cyan-200: #fed7aa;
-  --color-cyan-300: #fdbb74;
-  --color-cyan-400: #ff7e00; /* TP Orange */
-  --color-cyan-500: #e56a00; /* Active/hover TP Orange */
-  --color-cyan-600: #d95d00;
-  --color-cyan-700: #b34b00;
-  --color-cyan-800: #8c3a00;
-  --color-cyan-900: #592500;
-  --color-cyan-950: #fff7ed; /* Light background orange tint in light mode */
+  /* ── Sport palette (used contextually, not as generic accent) ── */
+  --color-sport-swim: #60a5fa;
+  --color-sport-swim-subtle: #1e3a5f;
+  --color-sport-bike: #34d399;
+  --color-sport-bike-subtle: #14532d;
+  --color-sport-run: #fb7185;
+  --color-sport-run-subtle: #4c1d28;
 
-  /* Shadcn UI Variables (Mapped to current clean design) */
-  --color-card: var(--color-surface);
-  --color-card-foreground: var(--color-foreground);
-  
-  --color-popover: var(--color-surface);
-  --color-popover-foreground: var(--color-foreground);
-  
-  --color-secondary: #f4f4f5; /* zinc-100 */
-  --color-secondary-foreground: #18181b; /* zinc-900 */
-  
-  --color-muted: #f4f4f5; /* zinc-100 */
-  --color-muted-foreground: #71717a; /* zinc-500 */
-  
-  --color-accent: #f4f4f5; /* zinc-100 */
-  --color-accent-foreground: #18181b; /* zinc-900 */
-  
-  --color-destructive: #ef4444; /* red-500 */
+  /* ── Semantic ── */
+  --color-accent: var(--color-sport-swim);
+  --color-accent-subtle: var(--color-sport-swim-subtle);
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-danger: #ef4444;
+  --color-info: var(--color-sport-swim);
+
+  /* ── Zone colors (training zones) ── */
+  --color-zone-1: #3b82f6;
+  --color-zone-2: #22c55e;
+  --color-zone-3: #eab308;
+  --color-zone-4: #f97316;
+  --color-zone-5: #ef4444;
+
+  /* ── Discipline (TrainingPeaks convention, kept for data viz) ── */
+  --color-swim: #00a2e8;
+  --color-bike: #2ecc71;
+  --color-run: #e74c3c;
+
+  /* ── Shadcn-like aliases ── */
+  --color-background: var(--color-bg-app);
+  --color-foreground: var(--color-text-primary);
+  --color-card: var(--color-bg-card);
+  --color-card-foreground: var(--color-text-primary);
+  --color-popover: var(--color-bg-elevated);
+  --color-popover-foreground: var(--color-text-primary);
+  --color-primary: var(--color-accent);
+  --color-primary-foreground: var(--color-text-inverse);
+  --color-secondary: var(--color-bg-hover);
+  --color-secondary-foreground: var(--color-text-primary);
+  --color-muted: var(--color-bg-hover);
+  --color-muted-foreground: var(--color-text-muted);
+  --color-accent-foreground: var(--color-accent);
+  --color-destructive: var(--color-danger);
   --color-destructive-foreground: #ffffff;
-  
-  --color-input: var(--color-border);
-  --color-ring: #a1a1aa; /* zinc-400 */
-  
-  --radius-sm: 0.25rem; /* rounded */
-  --radius-md: 0.375rem; /* rounded-md */
-  --radius-lg: 0.5rem; /* rounded-lg */
-  --radius-xl: 0.75rem; /* rounded-xl */
-  --radius: 0.5rem; /* default to rounded-lg */
+  --color-border: var(--color-border-default);
+  --color-input: var(--color-border-default);
+  --color-ring: var(--color-accent);
+
+  /* ── Radius — tighter, more professional ── */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius: 0.5rem;
 }
 
 @layer base {
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    color-scheme: light;
+    background-color: var(--color-bg-app);
+    color: var(--color-text-primary);
+    color-scheme: dark;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    @apply font-sans;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+    color: var(--color-text-primary);
+  }
+
+  /* Remove the default focus-visible ring in favor of our own */
+  *:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-default);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
   }
 }
-

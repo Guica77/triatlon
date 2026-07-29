@@ -41,7 +41,7 @@ export default async function CoachGroupPage({ params }: GroupPageProps) {
   }
 
   return (
-    <div className="flex-1 bg-zinc-950 p-4 md:p-8 overflow-y-auto">
+    <div className="flex-1 bg-bg-app p-4 md:p-8 overflow-y-auto">
       <GroupDashboardView 
         group={groupDataRes.group}
         athletes={groupDataRes.athletes || []}

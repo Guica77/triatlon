@@ -49,7 +49,7 @@ export default function AthleteLoginPage() {
       subtitle="Tu plan de entrenamiento personalizado te espera"
       isAthlete={true}
     >
-      <div className="space-y-6 relative z-10">
+      <div className="space-y-6 relative z-10 overflow-x-hidden w-full pb-24 sm:pb-8">
         <AnimatePresence mode="wait">
           {success ? (
             <motion.div
@@ -62,7 +62,7 @@ export default function AthleteLoginPage() {
               <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
                 <CheckCircle className="w-8 h-8 text-emerald-400" />
               </div>
-              <p className="text-sm text-zinc-300 font-medium">¡Bienvenido! Cargando tu dashboard...</p>
+              <p className="text-sm text-text-secondary font-medium">¡Bienvenido! Cargando tu dashboard...</p>
             </motion.div>
           ) : (
             <motion.form
@@ -89,9 +89,9 @@ export default function AthleteLoginPage() {
               </AnimatePresence>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Correo Electrónico</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Correo Electrónico</label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                   <input
                     name="email"
                     type="email"
@@ -99,8 +99,8 @@ export default function AthleteLoginPage() {
                     onChange={e => { setEmail(e.target.value); validateEmail(e.target.value); }}
                     placeholder="atleta@triatlonpro.com"
                     required
-                    className={`w-full bg-zinc-800/50 border rounded-xl pl-10 pr-3.5 py-3 text-sm text-white placeholder-zinc-600 outline-none transition-all ${
-                      emailError ? 'border-red-500/50 focus:border-red-500' : 'border-zinc-700/50 focus:border-cyan-500/50'
+                    className={`w-full bg-bg-hover border rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none transition-all ${
+                      emailError ? 'border-red-500/50 focus:border-red-500' : 'border-border-subtle focus:border-sport-swim'
                     }`}
                   />
                 </div>
@@ -117,11 +117,11 @@ export default function AthleteLoginPage() {
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Contraseña</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Contraseña</label>
                   <button
                     type="button"
                     onClick={() => router.push('/forgot-password')}
-                    className="text-[10px] text-cyan-500 hover:text-cyan-400 transition-colors font-bold uppercase tracking-wider"
+                    className="text-[10px] text-sport-swim hover:text-sport-swim transition-colors font-bold uppercase tracking-wider"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -132,12 +132,12 @@ export default function AthleteLoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl pl-3.5 pr-10 py-3 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 transition-all font-mono"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-3.5 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-swim transition-all font-mono"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-400 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -147,7 +147,7 @@ export default function AthleteLoginPage() {
 
               <motion.button
                 whileTap={{ scale: 0.98 }}
-                className="w-full mt-4 py-3.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 transition-all shadow-lg shadow-cyan-500/20 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full mt-4 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-sport-swim hover:bg-sport-swim/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 type="submit"
                 disabled={loading || !!emailError}
               >
@@ -168,9 +168,9 @@ export default function AthleteLoginPage() {
           <button
             type="button"
             onClick={() => router.push('/athlete/register')}
-            className="text-xs text-zinc-500 hover:text-cyan-400 transition-colors font-medium"
+            className="text-xs text-text-muted hover:text-sport-swim transition-colors font-medium"
           >
-            ¿No tienes cuenta? <span className="text-cyan-500 font-bold">Regístrate aquí</span>
+            ¿No tienes cuenta? <span className="text-sport-swim font-bold">Regístrate aquí</span>
           </button>
         </div>
       </div>

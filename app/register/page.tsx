@@ -12,7 +12,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-6">
-      <div className="text-zinc-400 text-sm">Redirigiendo a registro...</div>
+      <div className="text-text-muted text-sm">Redirigiendo a registro...</div>
     </div>
   );
 }

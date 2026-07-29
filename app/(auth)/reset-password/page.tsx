@@ -11,8 +11,8 @@ export default function ResetPasswordProxyPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-6">
-      <div className="text-zinc-400 text-sm">Redirigiendo a recuperación de contraseña...</div>
+    <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-6 overflow-x-hidden w-full pb-24 sm:pb-8">
+      <div className="text-text-secondary text-sm">Redirigiendo a recuperación de contraseña...</div>
     </div>
   );
 }

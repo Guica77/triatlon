@@ -167,18 +167,18 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-cyan-500 animate-pulse" />
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <span className="h-2 w-2 rounded-full bg-sport-swim animate-pulse" />
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               Historial de Rendimiento
             </h2>
           </div>
-          <h3 className="text-2xl font-light text-zinc-900 mt-1">
+          <h3 className="text-2xl font-light text-text-primary mt-1">
             Progresión Fisiológica y Umbrales
           </h3>
         </div>
 
         {/* Pestañas de disciplina */}
-        <div className="flex items-center bg-zinc-100 p-0.5 rounded-lg border border-zinc-200 w-full sm:w-auto">
+        <div className="flex items-center bg-bg-hover p-0.5 rounded-lg border border-border-subtle w-full sm:w-auto">
           {[
             { id: 'ftp', label: 'Bici (FTP)' },
             { id: 'run', label: 'Carrera' },
@@ -189,8 +189,8 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
               onClick={() => { setActiveTab(tab.id as any); setHoveredIndex(null); }}
               className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-white text-zinc-900 border border-zinc-200/80 shadow-xs'
-                  : 'text-zinc-500 hover:text-zinc-800'
+                  ? 'bg-white text-text-primary border border-border-subtle/80'
+                  : 'text-text-muted hover:text-text-primary'
               }`}
             >
               {tab.label}
@@ -200,16 +200,16 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
       </div>
 
       {/* Panel de progreso superior */}
-      <div className="flex items-baseline justify-between bg-zinc-50 p-4 rounded-xl border border-zinc-200">
+      <div className="flex items-baseline justify-between bg-bg-elevated p-4 rounded-xl border border-border-subtle">
         <div>
-          <p className="text-[10px] text-zinc-650 uppercase tracking-widest font-bold">
+          <p className="text-[10px] text-text-secondary uppercase tracking-widest font-bold">
             {hoveredIndex !== null && activePoint ? `Semana del ${formatDate(activePoint.date)}` : 'Nivel Actual / Último Registro'}
           </p>
-          <p className="text-3xl font-light text-zinc-900 mt-1 transition-all">
+          <p className="text-3xl font-light text-text-primary mt-1 transition-all">
             {renderCurrentValue()}
           </p>
         </div>
-        <div className="text-right text-[11px] text-cyan-600 font-semibold">
+        <div className="text-right text-[11px] text-sport-swim font-semibold">
           {renderProgressMessage()}
         </div>
       </div>
@@ -218,12 +218,12 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
       <div 
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="relative w-full aspect-[3/1] min-h-[160px] bg-zinc-50/50 rounded-xl border border-zinc-200 p-4 overflow-hidden cursor-crosshair select-none flex flex-col justify-between"
+        className="relative w-full aspect-[3/1] min-h-[160px] bg-bg-elevated/50 rounded-xl border border-border-subtle p-4 overflow-hidden cursor-crosshair select-none flex flex-col justify-between"
       >
         <div className="absolute inset-0 flex flex-col justify-between pointer-events-none px-4 py-6">
-          <div className="w-full border-b border-zinc-200" />
-          <div className="w-full border-b border-zinc-200" />
-          <div className="w-full border-b border-zinc-200" />
+          <div className="w-full border-b border-border-subtle" />
+          <div className="w-full border-b border-border-subtle" />
+          <div className="w-full border-b border-border-subtle" />
         </div>
 
         <svg
@@ -286,7 +286,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
         </svg>
 
         {/* Leyenda fechas eje X */}
-        <div className="flex justify-between text-[9px] text-zinc-500 font-bold uppercase tracking-wider px-2">
+        <div className="flex justify-between text-[9px] text-text-muted font-bold uppercase tracking-wider px-2">
           <span>{formatDate(history[0]?.date)}</span>
           <span>{formatDate(history[Math.floor(history.length / 2)]?.date)}</span>
           <span>{formatDate(history[history.length - 1]?.date)} (Hoy)</span>
