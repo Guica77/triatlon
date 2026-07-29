@@ -3,26 +3,15 @@
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Users,
-  Trophy,
-  Activity,
-  AlertTriangle,
-  MessageSquare,
-  Trash2,
-  UserPlus,
-  Check,
-  Search,
-  ChevronRight,
-  Settings,
-  LogOut,
-  Clock,
-  Zap,
-  UserCheck,
-  Eye,
-  ArrowRight
+  Users, Activity, AlertTriangle, MessageSquare,
+  Trash2, UserPlus, Search, Settings,
+  LogOut, Zap, UserCheck, Heart,
 } from 'lucide-react'
-import Link from 'next/link'
-import { AnimatedButton } from '@/components/ui/animated-button'
+import { LeaderboardCard } from '@/components/coach/leaderboard-card'
+import { GroupTabContent } from '@/components/coach/group-tab-content'
+import { assignPlanToAthlete, removeAthlete, AthleteRosterItem } from './actions'
+import { AthleteRosterCard } from '@/components/coach/athlete-roster-card'
+import { CoachGroupsManager } from '@/components/coach/coach-groups-manager'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -30,17 +19,6 @@ function getGreeting() {
   if (hour < 19) return 'Buenas tardes'
   return 'Buenas noches'
 }
-import { PageHeader } from '@/components/ui/page-header'
-import { LeaderboardCard } from '@/components/coach/leaderboard-card'
-import { GroupTabContent } from '@/components/coach/group-tab-content'
-import { 
-  assignPlanToAthlete, 
-  addAthleteByEmail, 
-  removeAthlete, 
-  AthleteRosterItem
-} from './actions'
-import { AthleteRosterCard } from '@/components/coach/athlete-roster-card'
-import { CoachGroupsManager } from '@/components/coach/coach-groups-manager'
 
 interface CoachDashboardViewProps {
   initialRoster: AthleteRosterItem[]
@@ -53,46 +31,40 @@ interface CoachDashboardViewProps {
 
 export function CoachDashboardView({ initialRoster, plans, groups, coachName, coachId, initialInviteCode }: CoachDashboardViewProps) {
   const [roster, setRoster] = React.useState<AthleteRosterItem[]>(initialRoster)
-
-  React.useEffect(() => {
-    setRoster(initialRoster)
-  }, [initialRoster])
+  React.useEffect(() => { setRoster(initialRoster) }, [initialRoster])
   const [searchQuery, setSearchQuery] = React.useState('')
   const [selectedGroupId, setSelectedGroupId] = React.useState<string | 'all'>('all')
   const [isGroupManagerOpen, setIsGroupManagerOpen] = React.useState(false)
   const [inviteCode, setInviteCode] = React.useState(initialInviteCode || '')
   const [inviteLoading, setInviteLoading] = React.useState(false)
   const [inviteMessage, setInviteMessage] = React.useState<{ text: string; type: 'success' | 'error' } | null>(null)
-  
   const [assigningId, setAssigningId] = React.useState<string | null>(null)
   const [removingId, setRemovingId] = React.useState<string | null>(null)
 
-  // Filter roster by name or email AND group
   const filteredRoster = roster.filter(item => {
     const name = `${item.first_name || ''} ${item.last_name || ''}`.toLowerCase()
     const email = (item.email || '').toLowerCase()
     const query = searchQuery.toLowerCase()
-    const matchesSearch = name.includes(query) || email.includes(query)
-    const matchesGroup = selectedGroupId === 'all' || item.group_id === selectedGroupId
-    return matchesSearch && matchesGroup
+    return (name.includes(query) || email.includes(query)) &&
+      (selectedGroupId === 'all' || item.group_id === selectedGroupId)
   })
 
-  // Stats
   const totalAthletes = roster.length
   const activeAlerts = roster.filter(item => item.alerts.low_hrv || item.alerts.high_tss || item.alerts.high_fatigue).length
-  
-  // Calculate completed today percentage
   const activeToday = roster.filter(item => item.today_workout && item.today_workout.sport_type !== 'descanso')
   const completedToday = activeToday.filter(item => item.today_workout?.status === 'completed')
-  const completionRate = activeToday.length > 0 
-    ? Math.round((completedToday.length / activeToday.length) * 100) 
-    : 100
+  const completionRate = activeToday.length > 0 ? Math.round((completedToday.length / activeToday.length) * 100) : 100
 
-  // Invite handler (Magic Link)
+  // Weekly TSS (sum across all athletes)
+  const weeklyTSS = roster.reduce((sum, a) => sum + (a.weekly_stats?.actual_tss || 0), 0)
+  // Average readiness
+  const avgReadiness = roster.length > 0
+    ? Math.round(roster.reduce((sum, a) => sum + (a.today_biometrics?.readiness_score || 75), 0) / roster.length)
+    : 0
+
   const handleCopyLink = async () => {
     setInviteLoading(true)
     setInviteMessage(null)
-
     try {
       const codeToUse = inviteCode || coachId
       const inviteUrl = `${window.location.origin}/invite/${codeToUse}`
@@ -100,243 +72,226 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
         await navigator.clipboard.writeText(inviteUrl)
         setInviteMessage({ text: '¡Enlace Mágico copiado!', type: 'success' })
       } else {
-        // Fallback for non-secure contexts (like testing on local IP)
-        const textArea = document.createElement("textarea");
-        textArea.value = inviteUrl;
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-          document.execCommand('copy');
-          setInviteMessage({ text: '¡Enlace Mágico copiado!', type: 'success' })
-        } catch (err) {
-          setInviteMessage({ text: 'No se pudo copiar automáticamente. Por favor, cópialo a mano del recuadro.', type: 'error' })
-        }
-        document.body.removeChild(textArea);
+        const textArea = document.createElement("textarea")
+        textArea.value = inviteUrl
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+        setInviteMessage({ text: '¡Enlace Mágico copiado!', type: 'success' })
       }
-      
-      // Auto hide success message
       setTimeout(() => setInviteMessage(null), 4000)
-    } catch (err) {
-      setInviteMessage({ text: 'Error al copiar el enlace', type: 'error' })
-    } finally {
-      setInviteLoading(false)
-    }
+    } catch { setInviteMessage({ text: 'Error al copiar', type: 'error' })
+    } finally { setInviteLoading(false) }
   }
 
   const handleGenerateCode = async () => {
     setInviteLoading(true)
     setInviteMessage(null)
     try {
-      // Generar código aleatorio tipo: TR-8A2F9B
       const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase()
       const newCode = `TR-${randomPart}`
-
       const { updateInviteCode } = await import('./actions')
       const res = await updateInviteCode(newCode)
-      if (res.error) {
-        setInviteMessage({ text: res.error, type: 'error' })
-      } else {
-        setInviteCode(newCode)
-        setInviteMessage({ text: 'Código generado y actualizado con éxito', type: 'success' })
-      }
-    } catch (err) {
-      setInviteMessage({ text: 'Error de conexión', type: 'error' })
-    } finally {
-      setInviteLoading(false)
-      setTimeout(() => setInviteMessage(null), 4000)
-    }
+      if (res.error) setInviteMessage({ text: res.error, type: 'error' })
+      else { setInviteCode(newCode); setInviteMessage({ text: 'Código generado', type: 'success' }) }
+    } catch { setInviteMessage({ text: 'Error de conexión', type: 'error' })
+    } finally { setInviteLoading(false); setTimeout(() => setInviteMessage(null), 4000) }
   }
 
-  // Plan assignment handler
   const handlePlanSelect = async (athleteId: string, planId: string) => {
     if (!planId) return
     setAssigningId(athleteId)
-
     try {
       const res = await assignPlanToAthlete(athleteId, planId)
-      if (res.error) {
-        alert(res.error)
-      } else {
-        // Update local state
-        setRoster(prev => prev.map(item => {
-          if (item.id === athleteId) {
-            const planName = plans.find(p => p.id === planId)?.name || 'Plan Asignado'
-            return {
-              ...item,
-              active_plan_id: planId,
-              active_plan_name: planName
-            }
-          }
-          return item
-        }))
-      }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setAssigningId(null)
-    }
+      if (!res.error) setRoster(prev => prev.map(item =>
+        item.id === athleteId
+          ? { ...item, active_plan_id: planId, active_plan_name: plans.find(p => p.id === planId)?.name || 'Plan Asignado' }
+          : item
+      ))
+      else alert(res.error)
+    } catch (err) { console.error(err)
+    } finally { setAssigningId(null) }
   }
 
-  // Remove handler
   const handleRemoveClick = async (athleteId: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar a este atleta de tu roster?')) return
+    if (!confirm('¿Eliminar este atleta del roster?')) return
     setRemovingId(athleteId)
-
     try {
       const res = await removeAthlete(athleteId)
-      if (res.error) {
-        alert(res.error)
-      } else {
-        setRoster(prev => prev.filter(item => item.id !== athleteId))
-      }
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setRemovingId(null)
-    }
+      if (!res.error) setRoster(prev => prev.filter(item => item.id !== athleteId))
+      else alert(res.error)
+    } catch { } finally { setRemovingId(null) }
   }
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] text-zinc-900">
+    <div className="min-h-screen bg-surface-app text-text-primary w-full overflow-x-hidden">
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
 
-      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 pt-6 pb-8">
-        {/* Header with greeting */}
-        <div className="flex items-center justify-between mb-6">
+        {/* ── Header: greeting with contrast fix ── */}
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-amber-500/20">
+            <div className="w-12 h-12 rounded-xl bg-coral-500 flex items-center justify-center text-white font-black text-lg shadow-button shrink-0">
               {coachName.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-2xl font-black text-zinc-900 tracking-tight">
-                {getGreeting()}, {coachName.split(' ')[0]} 👋
+              <h1 className="text-2xl font-bold text-text-primary tracking-tight">
+                {getGreeting()}, {coachName.split(' ')[0]}
               </h1>
-              <p className="text-sm text-zinc-500 font-medium">Panel de control de tu grupo de atletas</p>
+              <p className="text-sm text-text-secondary">Panel de control de tu grupo de atletas</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <a href="/owner" className="px-3 py-2 text-xs font-bold text-zinc-500 hover:text-amber-600 transition-colors rounded-xl border border-zinc-200 hover:border-amber-300">
-              🏢 Owner
+            <a href="/admin" className="text-xs font-semibold text-text-muted hover:text-coral-500 transition-colors px-3 py-1.5 rounded-lg border border-border-default hover:border-coral-500/30">
+              Business
             </a>
             <form action="/auth/signout" method="post">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-450 hover:text-red-500 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100">
+              <button type="submit" className="w-9 h-9 flex items-center justify-center rounded-lg text-text-muted hover:text-run hover:bg-run/10 border border-transparent hover:border-run/20 transition-all cursor-pointer">
                 <LogOut className="w-4 h-4" />
-              </AnimatedButton>
+              </button>
             </form>
           </div>
         </div>
-        
-        {/* Filters and Search Bar */}
+
+        {/* ── Stats row: Bento cards with consistent typography ── */}
+        <section className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 mb-8">
+          {/* Atletas en Grupo */}
+          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
+            <div className="w-12 h-12 rounded-lg bg-coral-500/15 flex items-center justify-center shrink-0">
+              <Users className="w-5 h-5 text-coral-500" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Atletas en Grupo</p>
+              <p className="text-3xl font-black text-text-primary mt-0.5">{totalAthletes}</p>
+              <p className="text-[10px] text-text-muted">{selectedGroupId === 'all' ? 'En todos los grupos' : 'En este grupo'}</p>
+            </div>
+          </div>
+
+          {/* Sesiones Ejecutadas */}
+          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
+            <div className="w-12 h-12 rounded-lg bg-bike/15 flex items-center justify-center shrink-0">
+              <Activity className="w-5 h-5 text-bike" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Sesiones Ejecutadas</p>
+              <p className="text-3xl font-black text-text-primary mt-0.5">{completionRate}%</p>
+              <p className="text-[10px] text-text-muted">{completedToday.length} de {activeToday.length} atletas</p>
+            </div>
+          </div>
+
+          {/* TSS Semanal */}
+          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
+            <div className="w-12 h-12 rounded-lg bg-swim/15 flex items-center justify-center shrink-0">
+              <Zap className="w-5 h-5 text-swim" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">TSS Semanal</p>
+              <p className="text-3xl font-black text-text-primary mt-0.5">{weeklyTSS}</p>
+              <p className="text-[10px] text-text-muted">Total del grupo</p>
+            </div>
+          </div>
+
+          {/* Readiness */}
+          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
+            <div className="w-12 h-12 rounded-lg bg-run/15 flex items-center justify-center shrink-0">
+              <Heart className="w-5 h-5 text-run" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Readiness Medio</p>
+              <p className="text-3xl font-black text-text-primary mt-0.5">{avgReadiness}%</p>
+              <p className="text-[10px] text-text-muted">{activeAlerts > 0 ? `${activeAlerts} alertas` : 'Sin alertas'}</p>
+            </div>
+          </div>
+
+          {/* Señales de Fatiga */}
+          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
+            <div className="w-12 h-12 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5 text-warning" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Señales de Fatiga</p>
+              <p className="text-3xl font-black text-text-primary mt-0.5">{activeAlerts}</p>
+              <p className="text-[10px] text-text-muted">{activeAlerts > 0 ? 'Requieren atención' : 'Todo en orden'}</p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Filters ── */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+          <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => setSelectedGroupId('all')}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${selectedGroupId === 'all' ? 'bg-zinc-900 text-white shadow-sm' : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50'}`}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border ${
+                selectedGroupId === 'all'
+                  ? 'bg-surface-card border-border-default text-text-primary shadow-card'
+                  : 'border-border-default/50 text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+              }`}
             >
-              Todos los Atletas
+              Todos
             </button>
             {groups.map(g => (
               <button
                 key={g.id}
                 onClick={() => setSelectedGroupId(g.id)}
-                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition ${selectedGroupId === g.id ? 'bg-zinc-900 text-white shadow-sm' : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50'}`}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border ${
+                  selectedGroupId === g.id
+                    ? 'bg-surface-card border-border-default text-text-primary shadow-card'
+                    : 'border-border-default/50 text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+                }`}
               >
                 {g.name}
               </button>
             ))}
-            
             <button
               onClick={() => setIsGroupManagerOpen(true)}
-              className="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition bg-cyan-50 border border-cyan-200 text-cyan-700 hover:bg-cyan-100 flex items-center gap-1.5"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap border border-border-default/50 text-text-muted hover:text-text-secondary hover:bg-surface-hover flex items-center gap-1.5 transition-all"
             >
-              <Settings className="w-3.5 h-3.5" />
+              <Settings className="w-3 h-3" />
               Grupos
             </button>
           </div>
 
-          <div className="relative w-full md:w-80 shrink-0">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-zinc-400" />
+          <div className="relative w-full md:w-72 shrink-0">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar por nombre o correo..."
-              className="w-full pl-9 pr-4 py-2 bg-white border border-zinc-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
+              className="w-full pl-9 pr-4 py-2 bg-surface-hover border border-border-default rounded-lg text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-coral-500/40 transition-colors"
             />
           </div>
         </div>
 
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="space-y-8"
-        >
-          {/* Bento stats row */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm flex items-center gap-4 group hover:shadow-md hover:border-cyan-200 transition-all">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 flex items-center justify-center text-white group-hover:scale-105 transition-transform shadow-sm shadow-cyan-500/20">
-                <Users className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider">Atletas en Grupo</p>
-                <h3 className="text-3xl font-black text-zinc-900 mt-1">{totalAthletes}</h3>
-                <p className="text-[10px] text-zinc-500 font-medium">{selectedGroupId === 'all' ? 'En todos los grupos' : 'En este grupo'}</p>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm flex items-center gap-4 group hover:shadow-md hover:border-emerald-200 transition-all">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white group-hover:scale-105 transition-transform shadow-sm shadow-emerald-500/20">
-                <Activity className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider">Sesiones Ejecutadas Hoy</p>
-                <h3 className="text-3xl font-black text-zinc-900 mt-1">{completionRate}%</h3>
-                <p className="text-[10px] text-zinc-500 font-medium">{completedToday.length} de {activeToday.length} atletas</p>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-white border border-zinc-200 shadow-sm flex items-center gap-4 group hover:shadow-md hover:border-amber-200 transition-all">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white group-hover:scale-105 transition-transform shadow-sm shadow-amber-500/20">
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-[10px] text-zinc-450 font-bold uppercase tracking-wider">Señales de Fatiga</p>
-                <h3 className="text-3xl font-black text-zinc-900 mt-1">{activeAlerts}</h3>
-                <p className="text-[10px] text-zinc-500 font-medium">{activeAlerts > 0 ? 'Requieren atención' : 'Todo en orden'}</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Search and Invite Split */}
+        {/* ── Main content: responsive grid ── */}
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           {selectedGroupId !== 'all' ? (
-            <section className="mt-6">
+            <section className="mt-4">
               <GroupTabContent groupId={selectedGroupId} />
             </section>
           ) : (
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Roster Search Column */}
-              <div className="lg:col-span-2 space-y-4">
-                {/* Athlete Bento Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <AnimatePresence mode="popLayout">
+            <section className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
+              {/* Roster cards */}
+              <div className="contents">
+                <AnimatePresence mode="popLayout">
                   {filteredRoster.length === 0 ? (
-                    <div className="col-span-full py-12 text-center bg-zinc-50 rounded-2xl border border-dashed border-zinc-300 flex flex-col items-center gap-3">
-                      <div className="w-16 h-16 rounded-2xl bg-zinc-100 flex items-center justify-center">
-                        <Users className="w-8 h-8 text-zinc-400" />
+                    <div className="col-span-full py-12 text-center bg-surface-card rounded-xl border border-dashed border-border-default flex flex-col items-center gap-3">
+                      <div className="w-14 h-14 rounded-xl bg-surface-hover flex items-center justify-center">
+                        <Users className="w-7 h-7 text-text-muted" />
                       </div>
                       <div>
-                        <p className="text-zinc-700 text-sm font-bold">
-                          {searchQuery ? 'No hay resultados para tu búsqueda' : 'Tu grupo de atletas está vacío'}
+                        <p className="text-text-secondary text-sm font-bold">
+                          {searchQuery ? 'No hay resultados' : 'Tu grupo está vacío'}
                         </p>
-                        <p className="text-zinc-400 text-xs mt-1 max-w-xs">
-                          {searchQuery ? 'Intenta con otro nombre o correo electrónico' : 'Invita a tu primer atleta usando el código de invitación o el enlace mágico →'}
+                        <p className="text-text-muted text-xs mt-1 max-w-xs">
+                          {searchQuery ? 'Prueba con otro nombre o correo' : 'Invita a tu primer atleta con el código →'}
                         </p>
                       </div>
                     </div>
                   ) : (
                     filteredRoster.map(item => (
-                      <AthleteRosterCard 
+                      <AthleteRosterCard
                         key={item.id}
                         athlete={item}
                         plans={plans}
@@ -350,103 +305,86 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
                   )}
                 </AnimatePresence>
               </div>
-            </div>
 
-            {/* Add/Invite Athlete Widget */}
-            <div className="lg:col-span-1 space-y-6">
-              
-              <div className="p-6 rounded-2xl bg-white border border-zinc-200 shadow-sm space-y-5">
-                <div className="flex items-center gap-2 text-cyan-600">
-                  <UserPlus className="w-5 h-5 shrink-0" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-800">Vincular Atleta</h3>
-                </div>
-
-                <p className="text-xs text-zinc-500 leading-relaxed font-medium">
-                  Pide a tus atletas que introduzcan este código cuando se registren, o envíales el enlace mágico para que se vinculen automáticamente.
-                </p>
-
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-3">
-                    <div className="bg-zinc-50 border border-zinc-150 rounded-xl p-4 text-center relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/3 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                      <p className="text-[10px] text-zinc-450 mb-2 uppercase tracking-widest font-bold">Tu Código de Entrenador</p>
-                      
-                      <div className="text-2xl font-black tracking-widest text-zinc-800">
-                        {inviteCode ? (
-                          <span className="text-cyan-600">{inviteCode}</span>
-                        ) : (
-                          <span className="text-zinc-400 text-lg">No configurado</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <AnimatedButton
-                        variant="ghost"
-                        onClick={handleGenerateCode}
-                        disabled={inviteLoading}
-                        className="px-4 py-3 text-xs font-bold text-zinc-650 hover:text-zinc-800 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 rounded-xl transition-all"
-                      >
-                        {inviteCode ? 'Generar Nuevo' : 'Generar Código'}
-                      </AnimatedButton>
-                      <AnimatedButton
-                        variant="primary"
-                        onClick={handleCopyLink}
-                        disabled={inviteLoading || !inviteCode}
-                        className="flex-1 py-3 text-xs font-bold !bg-cyan-600 hover:!bg-cyan-500 !text-white shadow-md flex items-center justify-center gap-1.5"
-                      >
-                        <UserCheck className="w-3.5 h-3.5 text-white" />
-                        Copiar Enlace
-                      </AnimatedButton>
-                    </div>
+              {/* Invite + Leaderboard sidebar — flows into responsive grid */}
+              <div className="space-y-5">
+                {/* Vincular Atleta */}
+                <div className="bg-surface-card rounded-xl p-5 shadow-card space-y-4">
+                  <div className="flex items-center gap-2">
+                    <UserPlus className="w-4 h-4 text-coral-500 shrink-0" />
+                    <h3 className="text-sm font-bold text-text-primary">Vincular Atleta</h3>
                   </div>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Pide a tus atletas que introduzcan este código al registrarse, o envíales el enlace mágico.
+                  </p>
+                  <div className="bg-surface-hover border border-border-subtle rounded-lg p-4 text-center">
+                    <p className="text-[9px] text-text-muted mb-1.5 uppercase tracking-widest font-bold">Tu Código</p>
+                    <p className="text-xl font-black tracking-widest text-coral-500">
+                      {inviteCode || <span className="text-text-muted text-sm">No configurado</span>}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleGenerateCode}
+                      disabled={inviteLoading}
+                      className="px-3 py-2 text-xs font-semibold text-text-muted hover:text-text-secondary border border-border-default hover:border-border-default/80 rounded-lg transition-all bg-transparent cursor-pointer disabled:opacity-40"
+                    >
+                      {inviteCode ? 'Nuevo' : 'Generar'}
+                    </button>
+                    <button
+                      onClick={handleCopyLink}
+                      disabled={inviteLoading || !inviteCode}
+                      className="flex-1 py-2 rounded-lg text-xs font-bold text-white bg-coral-500 hover:bg-coral-600 shadow-button flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-40"
+                    >
+                      <UserCheck className="w-3.5 h-3.5" />
+                      Copiar Enlace
+                    </button>
+                  </div>
+                  <AnimatePresence>
+                    {inviteMessage && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        className={`p-2.5 rounded-lg text-xs border ${
+                          inviteMessage.type === 'success'
+                            ? 'bg-bike/10 text-bike border-bike/20'
+                            : 'bg-run/10 text-run border-run/20'
+                        }`}
+                      >
+                        {inviteMessage.text}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
-                <AnimatePresence>
-                  {inviteMessage && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className={`p-3.5 rounded-xl border text-xs leading-normal ${
-                        inviteMessage.type === 'success'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-150'
-                          : 'bg-red-50 text-red-700 border-red-150'
-                      }`}
-                    >
-                      {inviteMessage.text}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                {/* HRV Tips */}
+                <div className="bg-surface-card rounded-xl p-5 shadow-card space-y-2">
+                  <h4 className="text-xs font-bold text-text-primary">Señales de Fatiga y HRV</h4>
+                  <p className="text-[11px] text-text-muted leading-relaxed">
+                    El sistema avisa cuando un atleta registra HRV &lt;55ms o Readiness &lt;60%. Úsalo para ajustar entrenamientos y prevenir lesiones.
+                  </p>
+                </div>
 
-              {/* Quick Tips Box */}
-              <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
-                <h4 className="text-xs font-black uppercase text-zinc-450 tracking-wider">Señales de Fatiga y HRV</h4>
-                <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
-                  El sistema avisa cuando un atleta registra un HRV por debajo de 55ms o un Readiness menor al 60%. Úsalo para ajustar sus entrenamientos en tiempo real y prevenir lesiones.
-                </p>
+                {/* Leaderboard */}
+                <LeaderboardCard
+                  entries={filteredRoster.map(item => ({
+                    id: item.id,
+                    name: `${item.first_name || ''} ${item.last_name || ''}`.trim() || item.email || 'Atleta',
+                    totalTss: item.weekly_stats?.actual_tss || 0,
+                    compliance: item.weekly_stats?.total_workouts
+                      ? Math.round((item.weekly_stats.completed_workouts / item.weekly_stats.total_workouts) * 100)
+                      : 0,
+                    workoutsCompleted: item.weekly_stats?.completed_workouts || 0,
+                  }))}
+                />
               </div>
-
-              {/* Leaderboard */}
-              <LeaderboardCard
-                entries={filteredRoster.map(item => ({
-                  id: item.id,
-                  name: `${item.first_name || ''} ${item.last_name || ''}`.trim() || item.email || 'Atleta',
-                  totalTss: item.weekly_stats?.actual_tss || 0,
-                  compliance: item.weekly_stats?.total_workouts
-                    ? Math.round((item.weekly_stats.completed_workouts / item.weekly_stats.total_workouts) * 100)
-                    : 0,
-                  workoutsCompleted: item.weekly_stats?.completed_workouts || 0,
-                }))}
-              />
-            </div>
-          </section>
+            </section>
           )}
         </motion.div>
       </main>
-      
-      <CoachGroupsManager 
+
+      <CoachGroupsManager
         isOpen={isGroupManagerOpen}
         onClose={() => setIsGroupManagerOpen(false)}
         groups={groups}
