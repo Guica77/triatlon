@@ -38,8 +38,8 @@ export function RecoveryDashboard({ analysis }: RecoveryDashboardProps) {
       </div>
 
       {/* Score ring */}
-      <div className="flex items-center gap-6 mb-5">
-        <div className="relative w-20 h-20">
+      <div className="flex items-start gap-6 mb-5">
+        <div className="relative w-20 h-20 shrink-0">
           <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
             <circle cx="40" cy="40" r="35" fill="none" stroke="#27272a" strokeWidth="6" />
             <circle

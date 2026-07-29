@@ -62,7 +62,7 @@ export function MobileBottomNav() {
 
   return (
     <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom, 16px)] pt-2 bg-surface-elevated/90 backdrop-blur-lg border-t border-border-default">
-      <div className="flex items-center justify-around max-w-md mx-auto">
+      <div className="flex items-center justify-evenly max-w-md mx-auto w-full">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           const Icon = item.icon;
@@ -71,7 +71,7 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 py-1.5 px-2.5 relative group"
+              className="flex flex-col items-center gap-1 py-1.5 px-3 min-w-0 relative group"
               aria-label={item.label}
             >
               <div className="relative">

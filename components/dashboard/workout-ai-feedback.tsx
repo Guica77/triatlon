@@ -163,7 +163,7 @@ export function WorkoutAIFeedback({
             <Activity className="w-8 h-8 text-text-muted" />
             <div className="text-center">
               <p className="text-sm font-bold text-text-primary mb-1">¿Cómo fue tu entrenamiento?</p>
-              <p className="text-[11px] text-text-muted max-w-xs">
+              <p className="text-[11px] text-text-muted leading-relaxed overflow-wrap-break-word">
                 Pide un análisis de tu sesión o un consejo para optimizar tu rendimiento.
               </p>
             </div>
