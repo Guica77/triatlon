@@ -1,82 +1,97 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Background hierarchy (dark only, committed) ── */
-  --color-bg-app: #07070a;
-  --color-bg-elevated: #0f0f14;
-  --color-bg-card: #18181d;
-  --color-bg-hover: #212126;
+  /* ── Typography ── */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  /* ── Border hierarchy ── */
-  --color-border-default: #27272b;
-  --color-border-subtle: #1f1f24;
+  /* ── Brand palette — #FF6B35 Coral + #0F1419 Deep ── */
+  --color-coral-50: #FFF3ED;
+  --color-coral-100: #FFE0D0;
+  --color-coral-200: #FFC4A6;
+  --color-coral-300: #FFA37A;
+  --color-coral-400: #FF8A5C;
+  --color-coral-500: #FF6B35;
+  --color-coral-600: #E55A25;
+  --color-coral-700: #C44A1A;
+  --color-coral-800: #A33A10;
+  --color-coral-900: #7A2B08;
+
+  /* ── Background hierarchy ── */
+  --color-bg-deep: #0F1419;
+  --color-bg-elevated: #1A1F26;
+  --color-bg-card: #242932;
+  --color-bg-hover: #2D3340;
+
+  /* ── Surface variants ── */
+  --color-surface-app: var(--color-bg-deep);
+  --color-surface-elevated: var(--color-bg-elevated);
+  --color-surface-card: var(--color-bg-card);
+  --color-surface-hover: var(--color-bg-hover);
 
   /* ── Text hierarchy ── */
-  --color-text-primary: #e4e4e7;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #63636e;
-  --color-text-inverse: #07070a;
+  --color-text-primary: #F0F2F5;
+  --color-text-secondary: #9CA3AF;
+  --color-text-muted: #6B7280;
 
-  /* ── Sport palette (used contextually, not as generic accent) ── */
-  --color-sport-swim: #60a5fa;
-  --color-sport-swim-subtle: #1e3a5f;
-  --color-sport-bike: #34d399;
-  --color-sport-bike-subtle: #14532d;
-  --color-sport-run: #fb7185;
-  --color-sport-run-subtle: #4c1d28;
+  /* ── Border ── */
+  --color-border-default: #374151;
+  --color-border-subtle: #2D3340;
+  --color-border-card: #374151;
+
+  /* ── Discipline palette (swim / bike / run) ── */
+  --color-swim: #3B82F6;
+  --color-swim-subtle: #1E3A5F;
+  --color-bike: #22C55E;
+  --color-bike-subtle: #14532D;
+  --color-run: #FB7185;
+  --color-run-subtle: #4C1D28;
 
   /* ── Semantic ── */
-  --color-accent: var(--color-sport-swim);
-  --color-accent-subtle: var(--color-sport-swim-subtle);
-  --color-success: #22c55e;
-  --color-warning: #eab308;
-  --color-danger: #ef4444;
-  --color-info: var(--color-sport-swim);
+  --color-accent: var(--color-coral-500);
+  --color-accent-subtle: var(--color-coral-700);
+  --color-success: #22C55E;
+  --color-warning: #EAB308;
+  --color-danger: #EF4444;
+  --color-info: var(--color-swim);
 
-  /* ── Zone colors (training zones) ── */
-  --color-zone-1: #3b82f6;
-  --color-zone-2: #22c55e;
-  --color-zone-3: #eab308;
-  --color-zone-4: #f97316;
-  --color-zone-5: #ef4444;
+  /* ── Shadows ── */
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.15);
+  --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.15);
+  --shadow-elevated: 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-button: 0 1px 3px rgba(0,0,0,0.25);
 
-  /* ── Discipline (TrainingPeaks convention, kept for data viz) ── */
-  --color-swim: #00a2e8;
-  --color-bike: #2ecc71;
-  --color-run: #e74c3c;
+  /* ── Radius ── */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius: 12px;
 
-  /* ── Shadcn-like aliases ── */
-  --color-background: var(--color-bg-app);
+  /* ── Shadcn aliases ── */
+  --color-background: var(--color-bg-deep);
   --color-foreground: var(--color-text-primary);
   --color-card: var(--color-bg-card);
   --color-card-foreground: var(--color-text-primary);
   --color-popover: var(--color-bg-elevated);
   --color-popover-foreground: var(--color-text-primary);
   --color-primary: var(--color-accent);
-  --color-primary-foreground: var(--color-text-inverse);
+  --color-primary-foreground: #FFFFFF;
   --color-secondary: var(--color-bg-hover);
   --color-secondary-foreground: var(--color-text-primary);
   --color-muted: var(--color-bg-hover);
   --color-muted-foreground: var(--color-text-muted);
   --color-accent-foreground: var(--color-accent);
   --color-destructive: var(--color-danger);
-  --color-destructive-foreground: #ffffff;
+  --color-destructive-foreground: #FFFFFF;
   --color-border: var(--color-border-default);
-  --color-input: var(--color-border-default);
+  --color-input: var(--color-bg-hover);
   --color-ring: var(--color-accent);
-
-  /* ── Radius — tighter, more professional ── */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
-  --radius-2xl: 1rem;
-  --radius: 0.5rem;
 }
 
 @layer base {
   body {
-    background-color: var(--color-bg-app);
+    background-color: var(--color-bg-deep);
     color: var(--color-text-primary);
     color-scheme: dark;
     -webkit-font-smoothing: antialiased;
@@ -85,29 +100,17 @@
   }
 
   ::selection {
-    background-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
-    color: var(--color-text-primary);
+    background-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    color: #FFFFFF;
   }
 
-  /* Remove the default focus-visible ring in favor of our own */
   *:focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 
-  /* Scrollbar styling */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-border-default);
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-muted);
-  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 }

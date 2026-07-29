@@ -7,23 +7,23 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { loginAthlete, loginCoach, getOAuthUrl } from '../actions';
 import {
   Eye, EyeOff, Loader2, CheckCircle, AlertCircle, Mail,
-  Activity, Users,
+  Waves, Bike, ArrowRight,
 } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Role = 'athlete' | 'coach';
 
 const ROLE_CONFIG = {
   athlete: {
     label: 'Atleta',
-    icon: Activity,
+    icon: Waves,
     redirectPath: '/dashboard',
     placeholder: 'atleta@triatlonpro.com',
     registerPath: '/athlete/register',
   },
   coach: {
     label: 'Entrenador',
-    icon: Users,
+    icon: Bike,
     redirectPath: '/coach/dashboard',
     placeholder: 'coach@triatlonpro.com',
     registerPath: '/coach/register',
@@ -84,10 +84,10 @@ function UnifiedLoginForm() {
 
   return (
     <AuthLayout title="Triatlon Pro" subtitle="Inicia sesión en tu cuenta">
-      <div className="space-y-5">
+      <div className="space-y-6">
 
-        {/* Role Toggle — static segmented control, no animation */}
-        <div className="grid grid-cols-2 gap-1.5">
+        {/* Role Toggle — with smooth micro-interaction */}
+        <div className="relative grid grid-cols-2 gap-2 p-1.5 bg-surface-hover rounded-lg border border-border-subtle/50">
           {(['athlete', 'coach'] as const).map(r => {
             const Icon = ROLE_CONFIG[r].icon;
             const isActive = role === r;
@@ -96,16 +96,21 @@ function UnifiedLoginForm() {
                 key={r}
                 type="button"
                 onClick={() => { setRole(r); setError(null); }}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer select-none border ${
-                  isActive
-                    ? r === 'athlete'
-                      ? 'bg-sport-swim/10 border-sport-swim/25 text-sport-swim'
-                      : 'bg-sport-bike/10 border-sport-bike/25 text-sport-bike'
-                    : 'bg-transparent border-border-default text-text-muted hover:text-text-secondary hover:border-border-default/60'
+                className={`relative flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-md text-sm font-semibold transition-all cursor-pointer select-none ${
+                  isActive ? 'text-white' : 'text-text-muted hover:text-text-secondary'
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
-                {ROLE_CONFIG[r].label}
+                {isActive && (
+                  <motion.div
+                    layoutId="role-bg"
+                    className="absolute inset-0 bg-coral-500 rounded-md shadow-button"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-2.5">
+                  <Icon className={`w-4 h-4 ${isActive ? '' : ''}`} />
+                  {ROLE_CONFIG[r].label}
+                </span>
               </button>
             );
           })}
@@ -114,28 +119,49 @@ function UnifiedLoginForm() {
         {/* Form */}
         <AnimatePresence mode="wait">
           {success ? (
-            <div className="flex flex-col items-center justify-center py-8 space-y-3">
-              <div className="w-12 h-12 rounded-full bg-sport-swim/15 flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-sport-swim" />
+            <motion.div
+              key="success"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center py-10 space-y-3"
+            >
+              <div className="w-14 h-14 rounded-full bg-coral-500/15 flex items-center justify-center">
+                <CheckCircle className="w-7 h-7 text-coral-500" />
               </div>
-              <p className="text-sm text-text-primary font-medium">Bienvenido</p>
-              <p className="text-xs text-text-muted">Redirigiendo...</p>
-            </div>
+              <p className="text-base font-semibold text-text-primary">Bienvenido</p>
+              <p className="text-sm text-text-muted">Redirigiendo...</p>
+            </motion.div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <motion.form
+              key={`form-${role}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+              {/* Error state */}
               <AnimatePresence>
                 {error && (
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-sport-run/10 border border-sport-run/20 text-sport-run text-xs font-medium">
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="flex items-center gap-2.5 p-3 rounded-lg bg-run/10 border border-run/20 text-run text-xs font-medium"
+                  >
                     <AlertCircle className="w-4 h-4 shrink-0" />
                     {error}
-                  </div>
+                  </motion.div>
                 )}
               </AnimatePresence>
 
+              {/* Email */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-text-primary">Correo electrónico</label>
+                <label className="text-xs font-semibold text-text-primary">Correo electrónico</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
                   <input
                     name="email"
                     type="email"
@@ -143,19 +169,22 @@ function UnifiedLoginForm() {
                     onChange={e => { setEmail(e.target.value); validateEmail(e.target.value); }}
                     placeholder={cfg.placeholder}
                     required
-                    className={`w-full bg-bg-hover border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors ${
-                      emailError ? 'border-sport-run/50' : 'border-border-default focus:border-text-secondary'
+                    className={`w-full bg-surface-hover border rounded-lg pl-10 pr-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors ${
+                      emailError ? 'border-run/50' : 'border-border-default focus:border-coral-500/50'
                     }`}
                   />
                 </div>
                 {emailError && (
-                  <p className="text-[10px] text-sport-run font-medium">{emailError}</p>
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] text-run font-medium">
+                    {emailError}
+                  </motion.p>
                 )}
               </div>
 
+              {/* Password */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-[11px] font-semibold text-text-primary">Contraseña</label>
+                  <label className="text-xs font-semibold text-text-primary">Contraseña</label>
                   <button
                     type="button"
                     onClick={() => router.push('/forgot-password')}
@@ -170,12 +199,12 @@ function UnifiedLoginForm() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-bg-hover border border-border-default rounded-lg pl-3 pr-9 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-text-secondary transition-colors font-mono"
+                    className="w-full bg-surface-hover border border-border-default rounded-lg pl-3.5 pr-10 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-coral-500/50 transition-colors font-mono"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -183,8 +212,11 @@ function UnifiedLoginForm() {
                 </div>
               </div>
 
-              <button
-                className="w-full py-2 rounded-lg text-sm font-bold text-text-inverse bg-text-primary hover:bg-text-secondary transition-colors flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer mt-1"
+              {/* Submit */}
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full py-2.5 rounded-lg text-sm font-bold text-white bg-coral-500 hover:bg-coral-600 transition-colors shadow-button flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-1"
                 type="submit"
                 disabled={loading || !!emailError}
               >
@@ -194,27 +226,30 @@ function UnifiedLoginForm() {
                     Verificando...
                   </span>
                 ) : (
-                  'Iniciar sesión'
+                  <span className="flex items-center gap-2">
+                    Iniciar sesión
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </span>
                 )}
-              </button>
-            </form>
+              </motion.button>
+            </motion.form>
           )}
         </AnimatePresence>
 
         {/* Divider */}
-        <div className="flex items-center gap-3 text-[10px] text-text-muted">
-          <div className="flex-1 h-px bg-border-default" />
+        <div className="flex items-center gap-3 text-[11px] text-text-muted">
+          <div className="flex-1 h-px bg-border-subtle" />
           <span>o continúa con</span>
-          <div className="flex-1 h-px bg-border-default" />
+          <div className="flex-1 h-px bg-border-subtle" />
         </div>
 
         {/* OAuth */}
-        <div className="flex gap-2.5">
+        <div className="flex gap-3">
           <button
             type="button"
             onClick={() => handleOAuth('google')}
             disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-bg-hover border border-border-default hover:border-border-default/60 transition-colors text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-40 cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-surface-hover border border-border-default hover:border-border-default/80 transition-colors text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-40 cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -228,7 +263,7 @@ function UnifiedLoginForm() {
             type="button"
             onClick={() => handleOAuth('apple')}
             disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-bg-hover border border-border-default hover:border-border-default/60 transition-colors text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-40 cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-surface-hover border border-border-default hover:border-border-default/80 transition-colors text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-40 cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
@@ -238,12 +273,12 @@ function UnifiedLoginForm() {
         </div>
 
         {/* Register */}
-        <p className="text-center text-[11px] text-text-muted">
+        <p className="text-center text-xs text-text-muted">
           ¿No tienes cuenta?{' '}
           <button
             type="button"
             onClick={() => router.push(cfg.registerPath)}
-            className="font-semibold text-text-primary hover:text-text-secondary transition-colors cursor-pointer"
+            className="font-semibold text-coral-500 hover:text-coral-400 transition-colors cursor-pointer"
           >
             Regístrate
           </button>

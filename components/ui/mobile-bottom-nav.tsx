@@ -61,7 +61,7 @@ export function MobileBottomNav() {
   ];
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom, 16px)] pt-2 bg-bg-elevated/90 backdrop-blur-lg border-t border-border-default">
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom, 16px)] pt-2 bg-surface-elevated/90 backdrop-blur-lg border-t border-border-default">
       <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -75,9 +75,9 @@ export function MobileBottomNav() {
               aria-label={item.label}
             >
               <div className="relative">
-                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-sport-swim' : 'text-text-muted group-hover:text-text-secondary'}`} />
+                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-coral-500' : 'text-text-muted group-hover:text-text-secondary'}`} />
                 {item.showBadge && unreadCount > 0 && (
-                  <span className="absolute -top-2 -right-2 w-4 h-4 bg-sport-run rounded-full flex items-center justify-center border-2 border-bg-elevated">
+                  <span className="absolute -top-2 -right-2 w-4 h-4 bg-run rounded-full flex items-center justify-center border-2 border-surface-elevated">
                     <span className="text-[9px] font-bold text-white leading-none">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
@@ -85,7 +85,7 @@ export function MobileBottomNav() {
                 )}
               </div>
 
-              <span className={`text-[10px] font-semibold tracking-wide ${isActive ? 'text-sport-swim' : 'text-text-muted'}`}>
+              <span className={`text-[10px] font-semibold tracking-wide ${isActive ? 'text-coral-500' : 'text-text-muted'}`}>
                 {item.label}
               </span>
             </Link>
