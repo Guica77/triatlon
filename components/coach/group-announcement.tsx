@@ -55,7 +55,7 @@ export function GroupAnnouncement({ groupId, initialAnnouncement }: GroupAnnounc
               value={announcement}
               onChange={(e) => setAnnouncement(e.target.value)}
               placeholder="Escribe un anuncio o notas para la semana..."
-              className="w-full min-h-[100px] p-3 text-sm text-zinc-800 bg-white border border-amber-300 rounded-xl outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+              className="w-full min-h-[100px] p-3 text-sm text-zinc-800 bg-white border border-amber-300 rounded-xl outline-none focus:ring-2 focus:ring-warning/40 resize-none"
               autoFocus
             />
             <div className="flex gap-2 justify-end">

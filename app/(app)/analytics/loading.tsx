@@ -6,13 +6,13 @@ export default function AnalyticsLoading() {
       {/* Top Navbar Skeleton */}
       <header className="border-b border-border-default bg-surface-card sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3 w-full max-w-sm">
-          <div className="w-9 h-9 rounded-xl bg-zinc-200 shrink-0" />
+          <div className="w-9 h-9 rounded-xl bg-surface-hover shrink-0" />
           <div className="space-y-2 w-full">
-            <div className="h-4 bg-zinc-200 rounded w-2/3" />
+            <div className="h-4 bg-surface-hover rounded w-2/3" />
             <div className="h-3 bg-zinc-150 rounded w-1/2" />
           </div>
         </div>
-        <div className="w-36 h-9 bg-zinc-200 rounded-xl" />
+        <div className="w-36 h-9 bg-surface-hover rounded-xl" />
       </header>
 
       {/* Main Content Skeleton */}
@@ -20,7 +20,7 @@ export default function AnalyticsLoading() {
         {/* Header Text Skeleton */}
         <div className="space-y-2 w-full max-w-md">
           <div className="h-3 bg-zinc-250 rounded w-1/4" />
-          <div className="h-4 bg-zinc-200 rounded w-3/4" />
+          <div className="h-4 bg-surface-hover rounded w-3/4" />
         </div>
 
         {/* Bento Grid Grid Skeleton */}
@@ -28,7 +28,7 @@ export default function AnalyticsLoading() {
           {/* Card 1: PMC Chart skeleton (Height 380px roughly) */}
           <div className="p-6 bg-surface-card border border-border-default rounded-2xl h-80 flex flex-col justify-between">
             <div className="space-y-2">
-              <div className="h-4 bg-zinc-200 rounded w-1/3" />
+              <div className="h-4 bg-surface-hover rounded w-1/3" />
               <div className="h-3 bg-zinc-150 rounded w-1/2" />
             </div>
             <div className="h-40 bg-surface-hover rounded-xl" />
@@ -37,7 +37,7 @@ export default function AnalyticsLoading() {
           {/* Card 2: Weekly TSS skeleton */}
           <div className="p-6 bg-surface-card border border-border-default rounded-2xl h-80 flex flex-col justify-between">
             <div className="space-y-2">
-              <div className="h-4 bg-zinc-200 rounded w-1/3" />
+              <div className="h-4 bg-surface-hover rounded w-1/3" />
               <div className="h-3 bg-zinc-150 rounded w-1/2" />
             </div>
             <div className="h-40 bg-surface-hover rounded-xl" />
@@ -46,7 +46,7 @@ export default function AnalyticsLoading() {
           {/* Card 3: Sport Distribution skeleton */}
           <div className="p-6 bg-surface-card border border-border-default rounded-2xl h-80 flex flex-col justify-between">
             <div className="space-y-2">
-              <div className="h-4 bg-zinc-200 rounded w-1/3" />
+              <div className="h-4 bg-surface-hover rounded w-1/3" />
               <div className="h-3 bg-zinc-150 rounded w-1/2" />
             </div>
             <div className="h-40 bg-surface-hover rounded-xl" />
@@ -55,7 +55,7 @@ export default function AnalyticsLoading() {
           {/* Card 4: Pace/Power History (Span 2) */}
           <div className="md:col-span-2 p-6 bg-surface-card border border-border-default rounded-2xl h-80 flex flex-col justify-between">
             <div className="space-y-2">
-              <div className="h-4 bg-zinc-200 rounded w-1/4" />
+              <div className="h-4 bg-surface-hover rounded w-1/4" />
               <div className="h-3 bg-zinc-150 rounded w-1/3" />
             </div>
             <div className="h-40 bg-surface-hover rounded-xl" />
@@ -64,7 +64,7 @@ export default function AnalyticsLoading() {
           {/* Card 5: Training Zones (Span 2) */}
           <div className="md:col-span-2 p-6 bg-surface-card border border-border-default rounded-2xl h-80 flex flex-col justify-between">
             <div className="space-y-2">
-              <div className="h-4 bg-zinc-200 rounded w-1/4" />
+              <div className="h-4 bg-surface-hover rounded w-1/4" />
               <div className="h-3 bg-zinc-150 rounded w-1/3" />
             </div>
             <div className="h-40 bg-surface-hover rounded-xl" />

@@ -129,7 +129,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
           </div>
         </DialogHeader>
 
-          <div className="bg-zinc-50 p-4 sm:p-6 rounded-xl border border-zinc-200">
+          <div className="bg-surface-hover p-4 sm:p-6 rounded-xl border border-zinc-200">
             <StepAmbition
               activeTab={activeTab}
               setActiveTab={setActiveTab}

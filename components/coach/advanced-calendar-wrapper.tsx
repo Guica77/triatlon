@@ -54,7 +54,7 @@ export function AdvancedCalendarWrapper({ athleteId, initialWorkouts, initialLib
   }, [initialWorkouts]);
 
   if (!isMounted) {
-    return <div className="h-96 flex items-center justify-center bg-zinc-50 rounded-2xl animate-pulse">
+    return <div className="h-96 flex items-center justify-center bg-surface-hover rounded-2xl animate-pulse">
       <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
     </div>;
   }

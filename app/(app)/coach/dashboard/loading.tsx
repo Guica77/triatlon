@@ -7,9 +7,9 @@ export default function CoachDashboardLoading() {
       <header className="sticky top-0 z-50 bg-surface-card border-b border-border-default ">
         <div className="px-6 py-4 flex justify-between items-center border-b border-border-default/60">
           <div className="flex items-center gap-3 w-full max-w-sm">
-            <div className="w-10 h-10 rounded-xl bg-zinc-200 shrink-0" />
+            <div className="w-10 h-10 rounded-xl bg-surface-hover shrink-0" />
             <div className="space-y-2 w-full">
-              <div className="h-4 bg-zinc-200 rounded w-2/3" />
+              <div className="h-4 bg-surface-hover rounded w-2/3" />
               <div className="h-3 bg-zinc-150 rounded w-1/2" />
             </div>
           </div>
@@ -20,10 +20,10 @@ export default function CoachDashboardLoading() {
         </div>
 
         {/* Level 2 Navigation Bar */}
-        <div className="px-6 py-2.5 bg-zinc-50 flex items-center justify-between border-t border-border-default/30">
+        <div className="px-6 py-2.5 bg-surface-hover flex items-center justify-between border-t border-border-default/30">
           <div className="flex gap-2">
-            <div className="w-28 h-7 rounded-full bg-zinc-200" />
-            <div className="w-28 h-7 rounded-full bg-zinc-200" />
+            <div className="w-28 h-7 rounded-full bg-surface-hover" />
+            <div className="w-28 h-7 rounded-full bg-surface-hover" />
           </div>
         </div>
       </header>
@@ -34,7 +34,7 @@ export default function CoachDashboardLoading() {
         {/* Title / Section Roster */}
         <div className="flex justify-between items-center py-2">
           <div className="h-5 bg-zinc-250 rounded w-48" />
-          <div className="h-8 bg-zinc-200 rounded-xl w-32" />
+          <div className="h-8 bg-surface-hover rounded-xl w-32" />
         </div>
 
         {/* Athlete Roster Cards Grid */}
@@ -42,9 +42,9 @@ export default function CoachDashboardLoading() {
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="p-5 bg-surface-card border border-border-default rounded-2xl space-y-4 ">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-zinc-200 shrink-0" />
+                <div className="w-12 h-12 rounded-xl bg-surface-hover shrink-0" />
                 <div className="space-y-2 w-full">
-                  <div className="h-4 bg-zinc-200 rounded w-3/4" />
+                  <div className="h-4 bg-surface-hover rounded w-3/4" />
                   <div className="h-3 bg-zinc-150 rounded w-1/2" />
                 </div>
               </div>
@@ -54,7 +54,7 @@ export default function CoachDashboardLoading() {
               </div>
               <div className="pt-2 border-t border-zinc-100 flex justify-between gap-3">
                 <div className="h-8 bg-zinc-150 rounded-lg w-1/2" />
-                <div className="h-8 bg-zinc-200 rounded-lg w-1/2" />
+                <div className="h-8 bg-surface-hover rounded-lg w-1/2" />
               </div>
             </div>
           ))}

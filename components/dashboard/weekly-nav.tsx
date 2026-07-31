@@ -137,7 +137,7 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
                     />
                   ))
                 ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-200" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-surface-hover" />
                 )}
               </div>
             </button>
