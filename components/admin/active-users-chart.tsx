@@ -27,17 +27,17 @@ export function ActiveUsersChart({ mau, wau, dau }: ActiveUsersProps) {
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="text-center">
           <p className="text-xl font-bold text-text-primary">{mau}</p>
-          <p className="text-[9px] font-bold uppercase tracking-wider text-sport-swim">MAU</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-swim">MAU</p>
           <p className="text-[8px] text-text-muted">30 días</p>
         </div>
         <div className="text-center">
           <p className="text-xl font-bold text-text-primary">{wau}</p>
-          <p className="text-[9px] font-bold uppercase tracking-wider text-sport-bike">WAU</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-bike">WAU</p>
           <p className="text-[8px] text-text-muted">7 días</p>
         </div>
         <div className="text-center">
           <p className="text-xl font-bold text-text-primary">{dau}</p>
-          <p className="text-[9px] font-bold uppercase tracking-wider text-sport-run">DAU</p>
+          <p className="text-[9px] font-bold uppercase tracking-wider text-run">DAU</p>
           <p className="text-[8px] text-text-muted">Hoy</p>
         </div>
       </div>

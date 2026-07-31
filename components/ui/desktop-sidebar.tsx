@@ -32,7 +32,7 @@ const coachItems: SidebarItem[] = [
 ]
 
 const ownerItems: SidebarItem[] = [
-  { href: '/owner', label: 'Panel Owner', icon: Trophy },
+  { href: '/admin', label: 'Business', icon: Trophy },
   { href: '/coach/dashboard', label: 'Roster', icon: Users },
   { href: '/settings', label: 'Ajustes', icon: Settings },
 ]

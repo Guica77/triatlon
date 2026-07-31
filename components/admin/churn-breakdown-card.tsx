@@ -33,7 +33,7 @@ export function ChurnBreakdownCard({ churnByMonth }: ChurnBreakdownCardProps) {
             <div className="h-2 bg-bg-hover rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${
-                  m.rate > 10 ? 'bg-sport-run' : m.rate > 5 ? 'bg-warning' : 'bg-sport-bike'
+                  m.rate > 10 ? 'bg-run' : m.rate > 5 ? 'bg-warning' : 'bg-bike'
                 }`}
                 style={{ width: `${(m.rate / maxRate) * 100}%` }}
               />

@@ -17,10 +17,10 @@ export function CohortRetentionTable({ data }: CohortRetentionTableProps) {
   if (!data || data.length === 0) return null
 
   const getColor = (value: number) => {
-    if (value >= 60) return 'bg-sport-bike'
-    if (value >= 40) return 'bg-sport-bike/60'
+    if (value >= 60) return 'bg-bike'
+    if (value >= 40) return 'bg-bike/60'
     if (value >= 20) return 'bg-warning/60'
-    return 'bg-sport-run/60'
+    return 'bg-run/60'
   }
 
   const getTextColor = (value: number) => {
@@ -87,10 +87,10 @@ export function CohortRetentionTable({ data }: CohortRetentionTableProps) {
       </table>
 
       <div className="flex items-center gap-3 mt-3 text-[9px] text-text-muted">
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sport-bike" /> &ge;60%</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sport-bike/60" /> 40-60%</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-bike" /> &ge;60%</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-bike/60" /> 40-60%</span>
         <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-warning/60" /> 20-40%</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sport-run/60" /> &lt;20%</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-run/60" /> &lt;20%</span>
       </div>
     </div>
   )

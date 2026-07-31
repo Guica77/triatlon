@@ -45,7 +45,7 @@ export function MobileBottomNav() {
   }
 
   const navItems = role === 'owner' ? [
-    { href: '/owner', label: 'Negocio', icon: Trophy },
+    { href: '/admin', label: 'Business', icon: Trophy },
     { href: '/coach/dashboard', label: 'Roster', icon: Home },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ] : role === 'coach' ? [

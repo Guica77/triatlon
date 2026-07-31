@@ -91,20 +91,20 @@ export default async function AdminDashboardPage() {
 
         {/* KPI Row 1 — Core Business */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <MetricCard title="MRR" value={`${mrr.toFixed(2)}€`} subtitle={`${arr.toFixed(0)}€/año ARR`} icon={DollarSign} trend={newUsersTrend} trendValue={`${premiumUsers} premium`} accentColor="text-sport-swim" />
-          <MetricCard title="ARPU" value={`${arpu}€`} subtitle="Ingreso medio por usuario" icon={Activity} accentColor="text-sport-swim" />
-          <MetricCard title="Churn Mensual" value={`${monthlyChurnRate}%`} subtitle={`${quarterlyChurnRate}% trimestral`} icon={UserMinus} trend={monthlyChurnRate > 10 ? 'down' : 'neutral'} trendValue={monthlyChurnRate <= 5 ? 'Saludable' : monthlyChurnRate <= 10 ? 'Aceptable' : 'Atención'} accentColor={monthlyChurnRate > 10 ? 'text-sport-run' : monthlyChurnRate > 5 ? 'text-warning' : 'text-sport-bike'} />
-          <MetricCard title="LTV" value={`${ltv}€`} subtitle={`${avgSubscriptionMonths} meses media`} icon={Target} accentColor="text-sport-bike" />
-          <MetricCard title="CAC" value={`${cac}€`} subtitle={estimatedCac ? 'Estimado' : 'Real'} icon={TrendingUp} accentColor="text-sport-bike" />
-          <MetricCard title="LTV / CAC" value={`${ltvCacRatio}x`} subtitle={ltvCacRatio >= 3 ? 'Saludable' : ltvCacRatio >= 1 ? 'Mínimo' : 'Crítico'} icon={Zap} trend={ltvCacRatio >= 3 ? 'up' : 'neutral'} trendValue={ltvCacRatio >= 3 ? 'Óptimo >3x' : ltvCacRatio >= 1 ? '>1x' : '<1x'} accentColor={ltvCacRatio >= 3 ? 'text-sport-bike' : ltvCacRatio >= 1 ? 'text-warning' : 'text-sport-run'} />
+          <MetricCard title="MRR" value={`${mrr.toFixed(2)}€`} subtitle={`${arr.toFixed(0)}€/año ARR`} icon={DollarSign} trend={newUsersTrend} trendValue={`${premiumUsers} premium`} accent="swim" />
+          <MetricCard title="ARPU" value={`${arpu}€`} subtitle="Ingreso medio por usuario" icon={Activity} accent="swim" />
+          <MetricCard title="Churn Mensual" value={`${monthlyChurnRate}%`} subtitle={`${quarterlyChurnRate}% trimestral`} icon={UserMinus} trend={monthlyChurnRate > 10 ? 'down' : 'neutral'} trendValue={monthlyChurnRate <= 5 ? 'Saludable' : monthlyChurnRate <= 10 ? 'Aceptable' : 'Atención'} accent={monthlyChurnRate > 10 ? 'run' : monthlyChurnRate > 5 ? 'warning' : 'bike'} />
+          <MetricCard title="LTV" value={`${ltv}€`} subtitle={`${avgSubscriptionMonths} meses media`} icon={Target} accent="bike" />
+          <MetricCard title="CAC" value={`${cac}€`} subtitle={estimatedCac ? 'Estimado' : 'Real'} icon={TrendingUp} accent="bike" />
+          <MetricCard title="LTV / CAC" value={`${ltvCacRatio}x`} subtitle={ltvCacRatio >= 3 ? 'Saludable' : ltvCacRatio >= 1 ? 'Mínimo' : 'Crítico'} icon={Zap} trend={ltvCacRatio >= 3 ? 'up' : 'neutral'} trendValue={ltvCacRatio >= 3 ? 'Óptimo >3x' : ltvCacRatio >= 1 ? '>1x' : '<1x'} accent={ltvCacRatio >= 3 ? 'bike' : ltvCacRatio >= 1 ? 'warning' : 'run'} />
         </div>
 
         {/* KPI Row 2 — Growth */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <MetricCard title="Usuarios Totales" value={totalUsers.toLocaleString()} subtitle={`+${newUsersThisMonth} este mes`} icon={Users} trend={userGrowthTrend} trendValue={`${userGrowthPercent > 0 ? '+' : ''}${userGrowthPercent}%`} accentColor="text-sport-swim" />
-          <MetricCard title="Nuevos (mes)" value={newUsersThisMonth} subtitle={`${newUsersLastMonth} mes pasado`} icon={UserPlus} trend={newUsersTrend} trendValue={userGrowthDelta > 0 ? `+${userGrowthDelta}` : `${userGrowthDelta}`} accentColor="text-sport-swim" />
-          <MetricCard title="MAU" value={mau.toLocaleString()} subtitle={`${dau} hoy · ${dauMauRatio}% DAU/MAU`} icon={Activity} trend={dauMauRatio > 20 ? 'up' : 'neutral'} trendValue={`${stickiness}% semanal`} accentColor="text-sport-swim" />
-          <MetricCard title="Conversión Premium" value={`${premiumConversionRate}%`} subtitle={`${premiumUsers} de ${totalUsers}`} icon={Target} trend={premiumConversionRate > 15 ? 'up' : 'neutral'} trendValue={premiumConversionRate > 10 ? 'Buena' : 'Mejorable'} accentColor="text-sport-bike" />
+          <MetricCard title="Usuarios Totales" value={totalUsers.toLocaleString()} subtitle={`+${newUsersThisMonth} este mes`} icon={Users} trend={userGrowthTrend} trendValue={`${userGrowthPercent > 0 ? '+' : ''}${userGrowthPercent}%`} accent="swim" />
+          <MetricCard title="Nuevos (mes)" value={newUsersThisMonth} subtitle={`${newUsersLastMonth} mes pasado`} icon={UserPlus} trend={newUsersTrend} trendValue={userGrowthDelta > 0 ? `+${userGrowthDelta}` : `${userGrowthDelta}`} accent="swim" />
+          <MetricCard title="MAU" value={mau.toLocaleString()} subtitle={`${dau} hoy · ${dauMauRatio}% DAU/MAU`} icon={Activity} trend={dauMauRatio > 20 ? 'up' : 'neutral'} trendValue={`${stickiness}% semanal`} accent="swim" />
+          <MetricCard title="Conversión Premium" value={`${premiumConversionRate}%`} subtitle={`${premiumUsers} de ${totalUsers}`} icon={Target} trend={premiumConversionRate > 15 ? 'up' : 'neutral'} trendValue={premiumConversionRate > 10 ? 'Buena' : 'Mejorable'} accent="bike" />
         </div>
 
         {/* Charts */}
