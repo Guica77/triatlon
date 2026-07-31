@@ -17,7 +17,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#09090b",
+  viewportFit: "cover",
+  themeColor: "#0F1419",
 };
 
 export const metadata: Metadata = {
@@ -65,10 +66,10 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${inter.variable} h-full antialiased dark`}
+      className={`${inter.variable} h-full antialiased dark overflow-x-hidden`}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-surface-app text-text-primary flex flex-col font-sans selection:bg-accent/30 overflow-x-hidden" suppressHydrationWarning>
+      <body className="min-h-full bg-surface-app text-text-primary flex flex-col font-sans selection:bg-accent/30 overflow-x-hidden w-full" suppressHydrationWarning>
         {children}
         <CookieBanner />
         <IosInstallPrompt />

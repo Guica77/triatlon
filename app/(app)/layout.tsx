@@ -13,9 +13,9 @@ export default function AppLayout({
   return (
     <NotificationProvider>
       <ToastProvider>
-        <div className="relative flex min-h-screen">
+        <div className="relative flex min-h-screen w-full">
           <DesktopSidebar />
-          <div className="flex-1 flex flex-col min-h-screen pb-16 sm:pb-0">
+          <div className="flex-1 flex flex-col min-h-screen pb-[calc(env(safe-area-inset-bottom,0px)+4rem)] sm:pb-0 max-w-full">
             <main className="flex-1 overflow-x-hidden">
               <PageTransition>{children}</PageTransition>
             </main>
