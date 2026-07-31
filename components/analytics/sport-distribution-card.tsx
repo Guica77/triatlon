@@ -40,7 +40,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
       {showHelp && (
         <div className="absolute inset-0 bg-white/95 border border-border-subtle rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-sport-swim uppercase tracking-widest">
+            <h4 className="text-xs font-bold text-swim uppercase tracking-widest">
               ¿Qué es la Distribución de Esfuerzo?
             </h4>
             <p className="text-[11px] text-text-secondary leading-relaxed">
@@ -76,7 +76,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
             </h3>
             <button
               onClick={() => setShowHelp(true)}
-              className="text-text-muted hover:text-sport-swim transition-colors p-0.5 cursor-pointer"
+              className="text-text-muted hover:text-swim transition-colors p-0.5 cursor-pointer"
               title="¿Qué es esto?"
             >
               <HelpCircle className="w-4 h-4" />

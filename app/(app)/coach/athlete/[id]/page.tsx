@@ -195,7 +195,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
                 Vista de Atleta: {athleteProfile.first_name || 'Triatleta'} {athleteProfile.last_name || ''}
               </h1>
               <p className="text-xs text-zinc-500 font-semibold capitalize truncate flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse shrink-0"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-swim/100 animate-pulse shrink-0"></span>
                 Plan: {activePlan?.name || 'Sin plan activo'} • Nivel {athleteProfile.level}
               </p>
               
@@ -245,13 +245,13 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
               </AnimatedButton>
             </Link>
             <Link href={`/coach/chat?athlete=${athleteId}`} className="shrink-0">
-              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-cyan-500/20 bg-cyan-500/10 text-cyan-650 hover:text-cyan-700 hover:bg-cyan-500/20 transition-all flex items-center gap-1.5">
+              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-swim/20 bg-swim/10 text-swim hover:text-swim hover:bg-swim/20 transition-all flex items-center gap-1.5">
                 <span>Chat con {athleteProfile.first_name || 'Atleta'}</span>
               </AnimatedButton>
             </Link>
             <SessionPlanner athleteId={athleteId} />
           </div>
-          <span className="px-3 py-1 rounded-full bg-cyan-50 border border-cyan-200 text-[10px] text-cyan-650 font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+          <span className="px-3 py-1 rounded-full bg-swim/10 border border-swim/20 text-[10px] text-swim font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
             <Activity className="w-3.5 h-3.5" /> Modo Entrenador Activo
           </span>
         </div>
@@ -262,9 +262,9 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
         
         {/* Connection status header */}
         {isConnected && (
-          <div className="p-4 rounded-2xl bg-cyan-50 border border-cyan-100 flex items-center justify-between gap-4 shadow-sm animate-fade-in">
+          <div className="p-4 rounded-2xl bg-swim/10 border border-cyan-100 flex items-center justify-between gap-4 shadow-sm animate-fade-in">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600 shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-swim/15 flex items-center justify-center text-swim shrink-0">
                 <Activity className="w-4 h-4 animate-pulse" />
               </div>
               <div>
@@ -318,7 +318,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
         <section className="space-y-4 pt-4 border-t border-zinc-200">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-zinc-800 flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-cyan-600" /> 
+              <Calendar className="w-4 h-4 text-swim" /> 
               Constructor Semanal Inteligente
             </h2>
             <span className="text-xs text-zinc-500 font-semibold bg-white px-2.5 py-1 rounded-md border border-zinc-200 shadow-sm">
@@ -338,7 +338,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <div className="bg-white rounded-3xl p-6 border border-zinc-200 shadow-sm">
               <h2 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-cyan-600" />
+                <Activity className="w-4 h-4 text-swim" />
                 Rendimiento PMC (Fitness / Fatiga)
               </h2>
               <PMCChart data={pmcRes?.data || []} />

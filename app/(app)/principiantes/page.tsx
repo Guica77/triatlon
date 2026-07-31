@@ -41,7 +41,7 @@ export default function PrincipiantesPage() {
         <div className="px-6 py-4 flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
             <Link href="/dashboard">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-text-muted hover:text-sport-swim hover:bg-sport-swim rounded-xl transition-all duration-200 border border-transparent hover:border-sport-swim">
+              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-text-muted hover:text-swim hover:bg-swim rounded-xl transition-all duration-200 border border-transparent hover:border-swim">
                 <ArrowLeft className="w-4 h-4" />
               </AnimatedButton>
             </Link>
@@ -85,7 +85,7 @@ export default function PrincipiantesPage() {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-5 rounded-2xl bg-white border border-border-subtle space-y-3">
-                <div className="w-9 h-9 rounded-xl bg-sport-swim border border-sport-swim flex items-center justify-center text-sport-swim">
+                <div className="w-9 h-9 rounded-xl bg-swim border border-swim flex items-center justify-center text-swim">
                   <Activity className="w-4 h-4" />
                 </div>
                 <h4 className="text-sm font-bold text-text-primary">1. Consistencia {'>'} Intensidad</h4>
@@ -165,7 +165,7 @@ export default function PrincipiantesPage() {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 rounded-xl bg-bg-elevated border border-border-subtle">
-                <span className="text-[10px] font-extrabold text-sport-swim bg-sport-swim px-2 py-0.5 rounded-full border border-sport-swim uppercase tracking-wider">Transición (T1 / T2)</span>
+                <span className="text-[10px] font-extrabold text-swim bg-swim px-2 py-0.5 rounded-full border border-swim uppercase tracking-wider">Transición (T1 / T2)</span>
                 <p className="text-xs text-text-secondary mt-2 leading-relaxed">
                   Las transiciones son la "cuarta disciplina". Practica bajarte de la bici y empezar a correr de inmediato para acostumbrar a tus piernas a la sensación de pesadez (entrenamientos de transición).
                 </p>
@@ -187,7 +187,7 @@ export default function PrincipiantesPage() {
             <div className="space-y-3">
               <div className="p-4 rounded-2xl bg-white border border-border-subtle">
                 <h4 className="text-xs font-bold text-text-primary flex items-center gap-2">
-                  <HelpCircle className="w-3.5 h-3.5 text-sport-swim" /> ¿Qué distancia me recomiendan para empezar?
+                  <HelpCircle className="w-3.5 h-3.5 text-swim" /> ¿Qué distancia me recomiendan para empezar?
                 </h4>
                 <p className="text-xs text-text-muted mt-1 leading-relaxed">
                   Recomendamos el triatlón Super Sprint (aprox. 350m nado, 10km ciclismo, 2.5km carrera) o Sprint (750m nado, 20km ciclismo, 5km carrera). Son distancias divertidas, asequibles y rápidas de recuperar.
@@ -196,7 +196,7 @@ export default function PrincipiantesPage() {
 
               <div className="p-4 rounded-2xl bg-white border border-border-subtle">
                 <h4 className="text-xs font-bold text-text-primary flex items-center gap-2">
-                  <HelpCircle className="w-3.5 h-3.5 text-sport-swim" /> ¿Necesito obligatoriamente un traje de neopreno?
+                  <HelpCircle className="w-3.5 h-3.5 text-swim" /> ¿Necesito obligatoriamente un traje de neopreno?
                 </h4>
                 <p className="text-xs text-text-muted mt-1 leading-relaxed">
                   Depende de la temperatura del agua. Si el agua está a menos de 14°C-16°C es obligatorio, y si está a más de 22°C-24°C está prohibido (los límites exactos varían según la normativa). Para tu debut, puedes alquilar uno.

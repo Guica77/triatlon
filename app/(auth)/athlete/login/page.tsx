@@ -100,7 +100,7 @@ export default function AthleteLoginPage() {
                     placeholder="atleta@triatlonpro.com"
                     required
                     className={`w-full bg-bg-hover border rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none transition-all ${
-                      emailError ? 'border-red-500/50 focus:border-red-500' : 'border-border-subtle focus:border-sport-swim'
+                      emailError ? 'border-red-500/50 focus:border-red-500' : 'border-border-subtle focus:border-swim'
                     }`}
                   />
                 </div>
@@ -121,7 +121,7 @@ export default function AthleteLoginPage() {
                   <button
                     type="button"
                     onClick={() => router.push('/forgot-password')}
-                    className="text-[10px] text-sport-swim hover:text-sport-swim transition-colors font-bold uppercase tracking-wider"
+                    className="text-[10px] text-swim hover:text-swim transition-colors font-bold uppercase tracking-wider"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -132,7 +132,7 @@ export default function AthleteLoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-3.5 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-swim transition-all font-mono"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-3.5 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-swim transition-all font-mono"
                   />
                   <button
                     type="button"
@@ -147,7 +147,7 @@ export default function AthleteLoginPage() {
 
               <motion.button
                 whileTap={{ scale: 0.98 }}
-                className="w-full mt-4 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-sport-swim hover:bg-sport-swim/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full mt-4 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-swim hover:bg-swim/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 type="submit"
                 disabled={loading || !!emailError}
               >
@@ -168,9 +168,9 @@ export default function AthleteLoginPage() {
           <button
             type="button"
             onClick={() => router.push('/athlete/register')}
-            className="text-xs text-text-muted hover:text-sport-swim transition-colors font-medium"
+            className="text-xs text-text-muted hover:text-swim transition-colors font-medium"
           >
-            ¿No tienes cuenta? <span className="text-sport-swim font-bold">Regístrate aquí</span>
+            ¿No tienes cuenta? <span className="text-swim font-bold">Regístrate aquí</span>
           </button>
         </div>
       </div>

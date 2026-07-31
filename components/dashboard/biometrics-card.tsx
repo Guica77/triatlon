@@ -179,7 +179,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
         <div className="flex justify-between items-center border-b border-border-subtle pb-4 relative z-10">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-bg-hover border-border-subtle flex items-center justify-center">
-              <Activity className="w-4 h-4 text-sport-bike" />
+              <Activity className="w-4 h-4 text-bike" />
             </div>
             <span className="text-xs font-bold tracking-widest text-text-secondary uppercase">Biometría y Preparación</span>
           </div>
@@ -190,7 +190,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
               size="sm"
               onClick={handleSyncGarmin}
               disabled={isSyncing}
-              className="flex items-center gap-1.5 text-[10px] font-bold text-sport-swim bg-bg-hover hover:bg-bg-hover border border-border-default py-1.5 px-2.5 rounded-lg transition-all"
+              className="flex items-center gap-1.5 text-[10px] font-bold text-swim bg-bg-hover hover:bg-bg-hover border border-border-default py-1.5 px-2.5 rounded-lg transition-all"
             >
               {isSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Watch className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">{isSyncing ? 'Conectando...' : 'Sincronizar Reloj'}</span>
@@ -272,7 +272,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
                 {isRegistered ? score : '--'}
               </span>
               {!isRegistered && !readOnly && (
-                <span className="text-[8px] text-sport-bike font-extrabold uppercase tracking-widest mt-1.5 text-center leading-none">
+                <span className="text-[8px] text-bike font-extrabold uppercase tracking-widest mt-1.5 text-center leading-none">
                   REGISTRAR
                 </span>
               )}
@@ -283,7 +283,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
               <h3 className="text-base font-bold text-text-primary tracking-tight leading-tight">
                 {!isRegistered ? 'Métricas Pendientes' : isOptimal ? 'Readiness Óptimo' : isModerate ? 'Readiness Moderado' : 'Descanso Recomendado'}
               </h3>
-              <span className={`w-2 h-2 rounded-full ${!isRegistered ? 'bg-text-muted' : isOptimal ? 'bg-sport-bike' : isModerate ? 'bg-amber-500' : 'bg-rose-500'}`} />
+              <span className={`w-2 h-2 rounded-full ${!isRegistered ? 'bg-text-muted' : isOptimal ? 'bg-bike' : isModerate ? 'bg-amber-500' : 'bg-rose-500'}`} />
             </div>
             <p className="text-xs text-text-muted leading-relaxed font-semibold">
               {statusText}
@@ -320,7 +320,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
                 </svg>
               </div>
             )}
-            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-sport-swim' : 'text-text-muted'}`}>{statusLabels.sleepStatus}</span>
+            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-swim' : 'text-text-muted'}`}>{statusLabels.sleepStatus}</span>
           </motion.div>
   
           {/* HRV */}
@@ -350,7 +350,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
                 </svg>
               </div>
             )}
-            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-sport-run' : 'text-text-muted'}`}>{statusLabels.hrvStatus}</span>
+            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-run' : 'text-text-muted'}`}>{statusLabels.hrvStatus}</span>
           </motion.div>
   
           {/* RHR */}
@@ -380,7 +380,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
                 </svg>
               </div>
             )}
-            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-sport-bike' : 'text-text-muted'}`}>{statusLabels.rhrStatus}</span>
+            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-bike' : 'text-text-muted'}`}>{statusLabels.rhrStatus}</span>
           </motion.div>
  
         </div>
@@ -405,8 +405,8 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
           {biometrics.raw_garmin_data && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
               <div className="bg-bg-hover border border-border-default rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
-                <span className="text-[8px] sm:text-[9px] font-bold text-sport-swim uppercase tracking-wider block mb-0.5 truncate">Batería</span>
-                <span className="text-sm sm:text-base font-black text-sport-swim truncate block">{bodyBattery}</span>
+                <span className="text-[8px] sm:text-[9px] font-bold text-swim uppercase tracking-wider block mb-0.5 truncate">Batería</span>
+                <span className="text-sm sm:text-base font-black text-swim truncate block">{bodyBattery}</span>
               </div>
               <div className="bg-bg-hover border border-border-default rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
                 <span className="text-[8px] sm:text-[9px] font-bold text-text-secondary uppercase tracking-wider block mb-0.5 truncate">Calorías</span>

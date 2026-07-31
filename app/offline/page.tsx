@@ -23,7 +23,7 @@ export default function OfflinePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-text-primary flex flex-col items-center justify-center p-4 selection:bg-sport-swim/20">
+    <div className="min-h-screen bg-[#09090b] text-text-primary flex flex-col items-center justify-center p-4 selection:bg-swim/20">
       
       <ProCard className="w-full max-w-md p-8 text-center space-y-6 bg-bg-app/40 border-border-default/80 backdrop-blur-md">
         <div className="mx-auto w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center animate-pulse">
@@ -39,7 +39,7 @@ export default function OfflinePage() {
 
         <div className="p-4 rounded-xl bg-bg-card/50 border border-border-default text-left space-y-2.5">
           <h3 className="text-xs font-semibold text-text-muted flex items-center gap-1.5">
-            <HelpCircle className="w-3.5 h-3.5 text-sport-swim" /> ¿Qué puedes hacer ahora?
+            <HelpCircle className="w-3.5 h-3.5 text-swim" /> ¿Qué puedes hacer ahora?
           </h3>
           <ul className="text-xs text-text-muted space-y-1.5 list-disc pl-4">
             <li>Comprueba tu conexión Wi-Fi o red móvil.</li>

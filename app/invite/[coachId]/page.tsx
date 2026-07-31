@@ -43,20 +43,20 @@ export default async function InviteLandingPage({
         <div className="bg-white border border-border-subtle rounded-3xl p-8 relative overflow-hidden">
           
           {/* Top Edge Highlight */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sport-swim via-blue-500 to-indigo-500"></div>
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-swim via-blue-500 to-indigo-500"></div>
 
           <div className="flex flex-col items-center text-center space-y-6">
             
             {/* Icon */}
-            <div className="w-20 h-20 rounded-2xl bg-sport-swim border border-sport-swim flex items-center justify-center mt-2 shrink-0">
-              <Trophy className="w-10 h-10 text-sport-swim animate-pulse" />
+            <div className="w-20 h-20 rounded-2xl bg-swim border border-swim flex items-center justify-center mt-2 shrink-0">
+              <Trophy className="w-10 h-10 text-swim animate-pulse" />
             </div>
 
             {/* Typography */}
             <div className="space-y-2">
               <h1 className="text-2xl font-black text-text-primary tracking-tight leading-tight">
                 Únete al equipo de <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-sport-swim to-blue-600">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-swim to-blue-600">
                   {coachName}
                 </span>
               </h1>
@@ -68,7 +68,7 @@ export default async function InviteLandingPage({
             {/* Actions */}
             <div className="w-full space-y-3 pt-4">
               <Link href="/register" className="block w-full">
-                <AnimatedButton variant="primary" className="w-full py-3.5 text-sm font-black bg-sport-swim hover:bg-sport-swim text-white rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer">
+                <AnimatedButton variant="primary" className="w-full py-3.5 text-sm font-black bg-swim hover:bg-swim text-white rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer">
                   <UserPlus className="w-4 h-4" />
                   Soy nuevo, Registrarme
                   <ArrowRight className="w-4 h-4 ml-1" />

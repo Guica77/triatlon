@@ -302,9 +302,9 @@ export default async function DashboardPage() {
 
         {/* Barra de Telemetría Activa (Sólo si está conectado, sin botón manual de forzado) */}
         {isConnected && (
-          <div className="p-4 rounded-2xl bg-cyan-50/50 border border-cyan-100 flex items-center justify-between gap-4 shadow-sm">
+          <div className="p-4 rounded-2xl bg-swim/10 border border-swim/20 flex items-center justify-between gap-4 shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600 shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-swim/15 flex items-center justify-center text-swim shrink-0">
                 <Activity className="w-4 h-4 animate-pulse" />
               </div>
               <div>

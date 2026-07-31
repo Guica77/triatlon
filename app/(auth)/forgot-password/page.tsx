@@ -57,12 +57,12 @@ export default function ForgotPasswordPage() {
               type="email"
               placeholder="tu@correo.com"
               required
-              className="w-full bg-white border border-zinc-200 rounded-xl p-3.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-sport-swim focus:bg-white transition-all"
+              className="w-full bg-white border border-zinc-200 rounded-xl p-3.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-swim focus:bg-white transition-all"
             />
           </div>
 
           <button
-            className="w-full mt-4 py-4 rounded-xl text-sm font-bold text-text-primary bg-sport-swim hover:bg-sport-swim/90 transition-all flex items-center justify-center disabled:opacity-50 cursor-pointer"
+            className="w-full mt-4 py-4 rounded-xl text-sm font-bold text-text-primary bg-swim hover:bg-swim/90 transition-all flex items-center justify-center disabled:opacity-50 cursor-pointer"
             type="submit"
             disabled={loading}
           >
@@ -74,7 +74,7 @@ export default function ForgotPasswordPage() {
           <button
             type="button"
             onClick={() => router.push('/login')}
-            className="text-xs text-text-muted hover:text-sport-swim transition-colors font-bold"
+            className="text-xs text-text-muted hover:text-swim transition-colors font-bold"
           >
             ← Volver a Iniciar Sesión
           </button>

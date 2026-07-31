@@ -167,7 +167,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-sport-swim animate-pulse" />
+            <span className="h-2 w-2 rounded-full bg-swim animate-pulse" />
             <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               Historial de Rendimiento
             </h2>
@@ -209,7 +209,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
             {renderCurrentValue()}
           </p>
         </div>
-        <div className="text-right text-[11px] text-sport-swim font-semibold">
+        <div className="text-right text-[11px] text-swim font-semibold">
           {renderProgressMessage()}
         </div>
       </div>

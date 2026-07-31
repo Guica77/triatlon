@@ -114,7 +114,7 @@ export default function CoachRegisterPage() {
                       type="text"
                       required
                       placeholder="Nombre"
-                      className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-bike transition-all"
+                      className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-bike transition-all"
                     />
                   </div>
                 </div>
@@ -125,7 +125,7 @@ export default function CoachRegisterPage() {
                     type="text"
                     required
                     placeholder="Apellidos"
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl px-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-bike transition-all"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl px-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-bike transition-all"
                   />
                 </div>
               </div>
@@ -139,7 +139,7 @@ export default function CoachRegisterPage() {
                     type="email"
                     placeholder="coach@triatlonpro.com"
                     required
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-bike transition-all"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-bike transition-all"
                   />
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function CoachRegisterPage() {
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-bike transition-all font-mono"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-bike transition-all font-mono"
                   />
                   <button
                     type="button"
@@ -191,7 +191,7 @@ export default function CoachRegisterPage() {
                     placeholder="••••••••"
                     required
                     className={`w-full bg-bg-hover border rounded-xl pl-3.5 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none transition-all font-mono ${
-                      confirmError ? 'border-red-500/50' : 'border-border-subtle focus:border-sport-bike'
+                      confirmError ? 'border-red-500/50' : 'border-border-subtle focus:border-bike'
                     }`}
                   />
                 </div>
@@ -204,7 +204,7 @@ export default function CoachRegisterPage() {
 
               <motion.button
                 whileTap={{ scale: 0.98 }}
-                className="w-full mt-2 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-sport-bike hover:bg-sport-bike/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full mt-2 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-bike hover:bg-bike/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 type="submit"
                 disabled={loading || !!confirmError || strength.score <= 1}
               >
@@ -225,9 +225,9 @@ export default function CoachRegisterPage() {
           <button
             type="button"
             onClick={() => router.push('/login?role=coach')}
-            className="text-xs text-text-muted hover:text-sport-bike transition-colors font-medium"
+            className="text-xs text-text-muted hover:text-bike transition-colors font-medium"
           >
-            ¿Ya eres miembro? <span className="text-sport-bike font-bold">Inicia sesión</span>
+            ¿Ya eres miembro? <span className="text-bike font-bold">Inicia sesión</span>
           </button>
         </div>
       </div>

@@ -14,8 +14,8 @@ interface PageHeaderProps {
 
 export function PageHeader({
   icon: Icon,
-  iconColor = 'text-sport-swim',
-  iconBg = 'bg-sport-swim/10 border-sport-swim/20',
+  iconColor = 'text-swim',
+  iconBg = 'bg-swim/10 border-swim/20',
   title,
   subtitle,
   actions,

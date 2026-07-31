@@ -61,8 +61,8 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
     if (percent < 70) {
       return {
         label: isBeginner ? 'Progreso Inicial' : 'Recuperación / Carga Baja',
-        color: 'text-sport-swim bg-sport-swim border-sport-swim',
-        barColor: 'bg-sport-swim'
+        color: 'text-swim bg-swim border-swim',
+        barColor: 'bg-swim'
       };
     } else if (percent <= 110) {
       return {
@@ -85,7 +85,7 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
       {showHelp && (
         <div className="absolute inset-0 bg-white/95 border border-border-subtle rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
           <div className="space-y-2">
-            <h4 className="text-xs font-bold text-sport-swim uppercase tracking-widest">
+            <h4 className="text-xs font-bold text-swim uppercase tracking-widest">
               {isBeginner ? '¿Qué es el Tiempo Semanal?' : '¿Qué es el Progreso de TSS?'}
             </h4>
             <p className="text-[11px] text-text-secondary leading-relaxed">
@@ -125,7 +125,7 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
             </h3>
             <button
               onClick={() => setShowHelp(true)}
-              className="text-text-muted hover:text-sport-swim transition-colors p-0.5 cursor-pointer"
+              className="text-text-muted hover:text-swim transition-colors p-0.5 cursor-pointer"
               title="¿Qué es esto?"
             >
               <HelpCircle className="w-4 h-4" />

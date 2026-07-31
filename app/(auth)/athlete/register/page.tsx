@@ -115,7 +115,7 @@ export default function AthleteRegisterPage() {
                       type="text"
                       required
                       placeholder="Nombre"
-                      className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-swim transition-all"
+                      className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-swim transition-all"
                     />
                   </div>
                 </div>
@@ -126,7 +126,7 @@ export default function AthleteRegisterPage() {
                     type="text"
                     required
                     placeholder="Apellidos"
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl px-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-swim transition-all"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl px-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-swim transition-all"
                   />
                 </div>
               </div>
@@ -140,7 +140,7 @@ export default function AthleteRegisterPage() {
                     type="email"
                     placeholder="atleta@triatlonpro.com"
                     required
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-swim transition-all"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-swim transition-all"
                   />
                 </div>
               </div>
@@ -156,7 +156,7 @@ export default function AthleteRegisterPage() {
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-swim transition-all font-mono"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-swim transition-all font-mono"
                   />
                   <button
                     type="button"
@@ -193,7 +193,7 @@ export default function AthleteRegisterPage() {
                     placeholder="••••••••"
                     required
                     className={`w-full bg-bg-hover border rounded-xl pl-3.5 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none transition-all font-mono ${
-                      confirmError ? 'border-red-500/50' : 'border-border-subtle focus:border-sport-swim'
+                      confirmError ? 'border-red-500/50' : 'border-border-subtle focus:border-swim'
                     }`}
                   />
                 </div>
@@ -210,7 +210,7 @@ export default function AthleteRegisterPage() {
 
               <motion.button
                 whileTap={{ scale: 0.98 }}
-                className="w-full mt-2 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-sport-swim hover:bg-sport-swim/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full mt-2 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-swim hover:bg-swim/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 type="submit"
                 disabled={loading || !!confirmError || strength.score <= 1}
               >
@@ -231,9 +231,9 @@ export default function AthleteRegisterPage() {
           <button
             type="button"
             onClick={() => router.push('/login?role=athlete')}
-            className="text-xs text-text-muted hover:text-sport-swim transition-colors font-medium"
+            className="text-xs text-text-muted hover:text-swim transition-colors font-medium"
           >
-            ¿Ya eres miembro? <span className="text-sport-swim font-bold">Inicia sesión</span>
+            ¿Ya eres miembro? <span className="text-swim font-bold">Inicia sesión</span>
           </button>
         </div>
       </div>

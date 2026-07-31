@@ -14,12 +14,12 @@ export default function PrivacidadPage() {
         <div className="px-6 py-4 flex items-center justify-between max-w-3xl mx-auto">
           <div className="flex items-center gap-3">
             <Link href="/dashboard">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-450 hover:text-cyan-500 hover:bg-cyan-50 rounded-xl transition-all duration-200 border border-transparent hover:border-cyan-100">
+              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-450 hover:text-swim hover:bg-swim/10 rounded-xl transition-all duration-200 border border-transparent hover:border-swim/20">
                 <ArrowLeft className="w-4 h-4" />
               </AnimatedButton>
             </Link>
             <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-500 shadow-sm shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-swim/10 border border-swim/20 flex items-center justify-center text-swim shadow-sm shrink-0">
                 <Shield className="w-4 h-4" />
               </div>
               <div>
@@ -40,7 +40,7 @@ export default function PrivacidadPage() {
           className="bg-white border border-zinc-200 rounded-2xl p-6 md:p-8 shadow-xs space-y-6 text-zinc-700"
         >
           <div className="flex items-center gap-3 pb-4 border-b border-zinc-150">
-            <div className="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-500 shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-swim/10 flex items-center justify-center text-swim shrink-0">
               <Lock className="w-5 h-5" />
             </div>
             <div>

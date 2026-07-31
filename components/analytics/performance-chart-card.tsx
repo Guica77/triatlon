@@ -495,7 +495,7 @@ export function PerformanceChartCard({
                         }
                       } else {
                         label = 'Programado';
-                        colorClass = 'text-sport-swim bg-sport-swim/10 border-sport-swim/20';
+                        colorClass = 'text-swim bg-swim/10 border-swim/20';
                       }
 
                       return (

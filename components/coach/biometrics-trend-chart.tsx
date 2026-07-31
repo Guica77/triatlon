@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         {payload.map((entry: any, index: number) => {
           const getBgClass = (color: string) => {
             if (color === '#6366f1') return 'bg-indigo-500';
-            if (color === '#0ea5e9') return 'bg-sport-swim';
+            if (color === '#0ea5e9') return 'bg-swim';
             if (color === '#f59e0b') return 'bg-amber-500';
             return 'bg-bg-elevated0';
           };
@@ -74,7 +74,7 @@ export function BiometricsTrendChart({ data }: BiometricsTrendChartProps) {
     <div className="w-full h-[300px] relative">
       <div className="absolute top-0 right-4 flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-text-muted z-10 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle">
         <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-sport-swim" />
+          <span className="w-2 h-2 rounded-full bg-swim" />
           Readiness
         </div>
         <div className="flex items-center gap-1.5">

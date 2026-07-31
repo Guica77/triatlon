@@ -596,8 +596,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                   <span>IA: Prevención de Lesión</span>
                 </span>
               ) : workout.adjustment_reason === 'adherencia' ? (
-                <span className="px-2 py-0.5 rounded-full bg-sport-swim/10 border border-sport-swim/20 text-sport-swim text-[10px] font-bold flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3 text-sport-swim" />
+                <span className="px-2 py-0.5 rounded-full bg-swim/10 border border-swim/20 text-swim text-[10px] font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3 text-swim" />
                   <span>IA: Ajuste de Carga</span>
                 </span>
               ) : (
@@ -626,10 +626,10 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                 {session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
               </h3>
             ) : (
-              <Link href={`/dashboard/workout/${workout.id}`} className="hover:text-sport-swim hover:underline transition-colors decoration-sport-swim">
+              <Link href={`/dashboard/workout/${workout.id}`} className="hover:text-swim hover:underline transition-colors decoration-swim">
                 <h3 className="text-xl font-bold text-text-primary inline-flex items-center gap-1.5 group">
                   {session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
-                  <ChevronRight className="w-4 h-4 text-text-muted group-hover:text-sport-swim transition-transform group-hover:translate-x-0.5" />
+                  <ChevronRight className="w-4 h-4 text-text-muted group-hover:text-swim transition-transform group-hover:translate-x-0.5" />
                 </h3>
               </Link>
             )
@@ -680,7 +680,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               onClick={() => setActiveTab('main')}
               className={`flex-1 min-w-0 sm:min-w-[80px] px-2 py-1.5 rounded-md text-[11px] font-semibold transition-colors flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer ${
                 activeTab === 'main'
-                  ? 'text-sport-swim font-bold bg-bg-elevated border border-border-default'
+                  ? 'text-swim font-bold bg-bg-elevated border border-border-default'
                   : 'text-text-muted hover:text-text-primary'
               }`}
             >
@@ -691,7 +691,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               onClick={() => setActiveTab('warmup')}
               className={`flex-1 min-w-0 sm:min-w-[80px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
                 activeTab === 'warmup'
-                  ? 'text-sport-swim font-bold bg-bg-elevated border border-border-default'
+                  ? 'text-swim font-bold bg-bg-elevated border border-border-default'
                   : 'text-text-muted hover:text-text-primary'
               }`}
             >
@@ -702,7 +702,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               onClick={() => setActiveTab('cooldown')}
               className={`flex-1 min-w-0 sm:min-w-[80px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
                 activeTab === 'cooldown'
-                  ? 'text-sport-swim font-bold bg-bg-elevated border border-border-default'
+                  ? 'text-swim font-bold bg-bg-elevated border border-border-default'
                   : 'text-text-muted hover:text-text-primary'
               }`}
             >
@@ -713,7 +713,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               onClick={() => setActiveTab('gear')}
               className={`flex-1 min-w-0 sm:min-w-[80px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
                 activeTab === 'gear'
-                  ? 'text-sport-swim font-bold bg-bg-elevated border border-border-default'
+                  ? 'text-swim font-bold bg-bg-elevated border border-border-default'
                   : 'text-text-muted hover:text-text-primary'
               }`}
             >
@@ -724,7 +724,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               onClick={() => setActiveTab('nutrition')}
               className={`flex-1 min-w-0 sm:min-w-[80px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
                 activeTab === 'nutrition'
-                  ? 'text-sport-swim font-bold bg-bg-elevated border border-border-default'
+                  ? 'text-swim font-bold bg-bg-elevated border border-border-default'
                   : 'text-text-muted hover:text-text-primary'
               }`}
             >
@@ -736,7 +736,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                 onClick={() => setActiveTab('telemetry')}
                 className={`flex-1 min-w-0 sm:min-w-[80px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   activeTab === 'telemetry'
-                    ? 'text-sport-swim font-bold bg-bg-elevated border border-border-default'
+                    ? 'text-swim font-bold bg-bg-elevated border border-border-default'
                     : 'text-text-muted hover:text-text-primary'
                 }`}
               >
@@ -788,8 +788,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                          </div>
                          <div className="absolute inset-0 bg-bg-elevated pointer-events-none"></div>
                          <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between pointer-events-none">
-                           <p className="text-xs font-black text-sport-swim tracking-wide uppercase flex items-center gap-1.5">
-                             <span className="w-2 h-2 rounded-full bg-sport-swim"></span>
+                           <p className="text-xs font-black text-swim tracking-wide uppercase flex items-center gap-1.5">
+                             <span className="w-2 h-2 rounded-full bg-swim"></span>
                              Ruta Strava
                            </p>
                          </div>
@@ -797,8 +797,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                     )}
 
                     <div className="p-3.5 rounded-xl bg-bg-hover border border-border-default">
-                      <p className="font-semibold text-sport-swim mb-1.5 flex items-center gap-1.5 text-xs tracking-wide uppercase">
-                        <Target className="w-4 h-4 text-sport-swim" /> Objetivo Principal de la Sesión:
+                      <p className="font-semibold text-swim mb-1.5 flex items-center gap-1.5 text-xs tracking-wide uppercase">
+                        <Target className="w-4 h-4 text-swim" /> Objetivo Principal de la Sesión:
                       </p>
                       <p className="text-text-primary text-sm leading-relaxed">{parsed.main}</p>
                     </div>
@@ -813,11 +813,11 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           {/* Pre-Workout Nutrition Block (Chronological order: Before warmup) */}
                           <div className="p-3.5 rounded-xl bg-bg-hover border border-border-default flex flex-col justify-between">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-sport-swim uppercase tracking-wider flex items-center gap-1.5">
-                                <Zap className="w-3.5 h-3.5 text-sport-swim" />
+                              <span className="text-[10px] font-bold text-swim uppercase tracking-wider flex items-center gap-1.5">
+                                <Zap className="w-3.5 h-3.5 text-swim" />
                                 Pre-Entreno
                               </span>
-                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-sport-swim/15 text-sport-swim font-semibold uppercase">
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-swim/15 text-swim font-semibold uppercase">
                                 60-90m antes
                               </span>
                             </div>
@@ -874,8 +874,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                             const stepColorClass = isWarmup
                               ? 'text-warning bg-bg-hover border-border-default'
                               : isCooldown
-                              ? 'text-sport-swim bg-bg-hover border-border-default'
-                              : 'text-sport-swim bg-bg-hover border-border-default';
+                              ? 'text-swim bg-bg-hover border-border-default'
+                              : 'text-swim bg-bg-hover border-border-default';
 
                             const StepIcon = isWarmup 
                               ? Flame 
@@ -904,13 +904,13 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           })}
 
                           {/* Post-Workout Recovery Nutrition Block (Chronological order: After cooldown) */}
-                          <div className="p-3.5 rounded-xl bg-bg-hover border border-sport-bike/30 flex flex-col justify-between">
+                          <div className="p-3.5 rounded-xl bg-bg-hover border border-bike/30 flex flex-col justify-between">
                             <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-bold text-sport-bike uppercase tracking-wider flex items-center gap-1.5">
-                                <Sparkles className="w-3.5 h-3.5 text-sport-bike" />
+                              <span className="text-[10px] font-bold text-bike uppercase tracking-wider flex items-center gap-1.5">
+                                <Sparkles className="w-3.5 h-3.5 text-bike" />
                                 Recuperación
                               </span>
-                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-sport-bike/15 text-sport-bike font-semibold uppercase">
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-bike/15 text-bike font-semibold uppercase">
                                 Ventana 30m
                               </span>
                             </div>
@@ -946,8 +946,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                 )}
                 {activeTab === 'cooldown' && (
                   <div className="w-full">
-                    <p className="font-semibold text-sport-swim mb-1.5 flex items-center gap-1.5 text-xs tracking-wide uppercase">
-                      <Wind className="w-4 h-4 text-sport-swim" /> Vuelta a la Calma y Recuperación:
+                    <p className="font-semibold text-swim mb-1.5 flex items-center gap-1.5 text-xs tracking-wide uppercase">
+                      <Wind className="w-4 h-4 text-swim" /> Vuelta a la Calma y Recuperación:
                     </p>
                     <p className="text-text-primary text-sm leading-relaxed bg-bg-hover border border-border-default p-3.5 rounded-xl">{parsed.cooldown}</p>
                   </div>
@@ -974,21 +974,21 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                   <div className="space-y-4 w-full">
                     <div className="space-y-4">
                       <div className="flex justify-between items-center flex-wrap gap-2">
-                        <p className="font-semibold text-sport-bike flex items-center gap-1.5 text-xs tracking-wide uppercase">
-                          <Sparkles className="w-4 h-4 text-sport-bike" /> Estrategia de Nutrición y Pacing:
+                        <p className="font-semibold text-bike flex items-center gap-1.5 text-xs tracking-wide uppercase">
+                          <Sparkles className="w-4 h-4 text-bike" /> Estrategia de Nutrición y Pacing:
                         </p>
 
                         {!readOnly && session?.sport_type !== 'descanso' && (
                           <div className="flex gap-1.5 items-center bg-bg-hover p-1 rounded-lg border border-border-subtle">
                             <button
                               onClick={() => { setWeatherCondition('frio'); setHumidityLevel(40); }}
-                              className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'frio' ? 'bg-bg-elevated text-sport-swim' : 'text-text-muted hover:text-text-primary'}`}
+                              className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'frio' ? 'bg-bg-elevated text-swim' : 'text-text-muted hover:text-text-primary'}`}
                             >
                               ❄️ Frío
                             </button>
                             <button
                               onClick={() => { setWeatherCondition('templado'); setHumidityLevel(50); }}
-                              className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'templado' ? 'bg-bg-elevated text-sport-bike' : 'text-text-muted hover:text-text-primary'}`}
+                              className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'templado' ? 'bg-bg-elevated text-bike' : 'text-text-muted hover:text-text-primary'}`}
                             >
                               🌤️ Templado
                             </button>
@@ -1011,8 +1011,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           {/* Nutrición de Recuperación Post-Entrenamiento (Día de descanso) */}
                           <div className="p-4 rounded-xl bg-bg-card border border-border-default space-y-4">
                             <div className="flex items-center justify-between flex-wrap gap-2">
-                              <span className="text-[10px] text-sport-bike font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                <Sparkles className="w-3.5 h-3.5 text-sport-bike" />
+                              <span className="text-[10px] text-bike font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                <Sparkles className="w-3.5 h-3.5 text-bike" />
                                 Nutrición Recomendada
                               </span>
                               <span className="px-2 py-0.5 rounded-full bg-bg-hover border border-border-default text-text-muted text-[9px] font-bold tracking-wider uppercase">
@@ -1035,11 +1035,11 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           {/* Nutrición Pre-Entrenamiento */}
                           <div className="p-4 rounded-xl bg-bg-card border border-border-default space-y-3">
                             <div className="flex items-center justify-between flex-wrap gap-2">
-                              <span className="text-[10px] text-sport-swim font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                <Flame className="w-3.5 h-3.5 text-sport-swim" />
+                              <span className="text-[10px] text-swim font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                <Flame className="w-3.5 h-3.5 text-swim" />
                                 Carga Pre-Entrenamiento
                               </span>
-                              <span className="px-2 py-0.5 rounded-full bg-bg-hover border border-border-default text-sport-swim text-[9px] font-bold tracking-wider uppercase">
+                              <span className="px-2 py-0.5 rounded-full bg-bg-hover border border-border-default text-swim text-[9px] font-bold tracking-wider uppercase">
                                 60-120 Min Antes
                               </span>
                             </div>
@@ -1062,7 +1062,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                 Ajustar por Clima y Vestimenta (Tiempo Real)
                               </span>
                               {(weatherCondition !== 'templado' || clothing !== 'normal') && (
-                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-sport-swim font-extrabold uppercase">
+                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-swim font-extrabold uppercase">
                                   ⚡ Valores Ajustados
                                 </span>
                               )}
@@ -1080,7 +1080,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                       onClick={() => setWeatherCondition(temp)}
                                       className={`px-1.5 py-1.5 text-[10px] font-bold rounded-lg capitalize transition-all cursor-pointer text-center ${
                                         weatherCondition === temp
-                                          ? 'bg-sport-swim text-text-inverse font-black'
+                                          ? 'bg-swim text-text-inverse font-black'
                                           : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
                                       }`}
                                     >
@@ -1106,7 +1106,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                         disabled={isDisabled}
                                         className={`px-1.5 py-1.5 text-[10px] font-bold rounded-lg capitalize transition-all cursor-pointer text-center ${
                                           clothing === clot
-                                            ? 'bg-sport-swim text-text-inverse font-black'
+                                            ? 'bg-swim text-text-inverse font-black'
                                             : isDisabled
                                             ? 'text-text-muted opacity-40 cursor-not-allowed'
                                             : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
@@ -1135,7 +1135,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                               {isCompleted ? (
                                 <div className="text-[9px] text-text-muted mt-2 space-y-0.5 border-t border-border-subtle pt-1.5 font-semibold">
                                   <span className="block font-medium">Planificado: {pacing.totalFluidMl} ml</span>
-                                  <span className="block font-bold text-sport-bike">Realidad: {realPacing.totalFluidMl} ml</span>
+                                  <span className="block font-bold text-bike">Realidad: {realPacing.totalFluidMl} ml</span>
                                 </div>
                               ) : (
                                 <span className="text-[10px] text-text-muted mt-1.5 block">Total: {pacing.totalFluidMl} ml</span>
@@ -1154,7 +1154,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                               {isCompleted ? (
                                 <div className="text-[9px] text-text-muted mt-2 space-y-0.5 border-t border-border-subtle pt-1.5 font-semibold">
                                   <span className="block font-medium">Planificado: {pacing.totalSodiumMg} mg</span>
-                                  <span className="block font-bold text-sport-bike">Realidad: {realPacing.totalSodiumMg} mg</span>
+                                  <span className="block font-bold text-bike">Realidad: {realPacing.totalSodiumMg} mg</span>
                                 </div>
                               ) : (
                                 <span className="text-[10px] text-text-muted mt-1.5 block">Total: {pacing.totalSodiumMg} mg</span>
@@ -1173,7 +1173,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                               {isCompleted ? (
                                 <div className="text-[9px] text-text-muted mt-2 space-y-0.5 border-t border-border-subtle pt-1.5 font-semibold">
                                   <span className="block font-medium">Planificado: {pacing.totalCarbsG} g</span>
-                                  <span className="block font-bold text-sport-bike">Realidad: {realPacing.totalCarbsG} g</span>
+                                  <span className="block font-bold text-bike">Realidad: {realPacing.totalCarbsG} g</span>
                                 </div>
                               ) : (
                                 <span className="text-[10px] text-text-muted mt-1.5 block">Total: {pacing.totalCarbsG} g</span>
@@ -1183,19 +1183,19 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
                           {/* Comparativa Planificado vs Realidad */}
                           {isCompleted && (
-                            <div className="p-3.5 rounded-xl bg-sport-swim/10 border border-sport-swim/15 space-y-2">
-                              <span className="text-[10px] text-sport-swim font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                <Info className="w-3.5 h-3.5 text-sport-swim" />
+                            <div className="p-3.5 rounded-xl bg-swim/10 border border-swim/15 space-y-2">
+                              <span className="text-[10px] text-swim font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                <Info className="w-3.5 h-3.5 text-swim" />
                                 Análisis de Desviación Nutricional (vs. Realidad del Reloj)
                               </span>
                               <p className="text-xs text-text-secondary leading-relaxed font-medium">
                                 {actualDuration > durationMin ? (
                                   <>
-                                    Has entrenado <strong className="text-text-primary">{actualDuration - durationMin} min más</strong> de lo planificado ({durationMin}m vs {actualDuration}m). Para cubrir esta desviación, tu cuerpo necesitó aproximadamente <strong className="text-sport-bike">+{realPacing.totalFluidMl - pacing.totalFluidMl} ml de líquido</strong>, <strong className="text-sport-bike">+{realPacing.totalSodiumMg - pacing.totalSodiumMg} mg de sodio</strong> y <strong className="text-sport-bike">+{realPacing.totalCarbsG - pacing.totalCarbsG}g de carbohidratos</strong> adicionales respecto a la pauta inicial.
+                                    Has entrenado <strong className="text-text-primary">{actualDuration - durationMin} min más</strong> de lo planificado ({durationMin}m vs {actualDuration}m). Para cubrir esta desviación, tu cuerpo necesitó aproximadamente <strong className="text-bike">+{realPacing.totalFluidMl - pacing.totalFluidMl} ml de líquido</strong>, <strong className="text-bike">+{realPacing.totalSodiumMg - pacing.totalSodiumMg} mg de sodio</strong> y <strong className="text-bike">+{realPacing.totalCarbsG - pacing.totalCarbsG}g de carbohidratos</strong> adicionales respecto a la pauta inicial.
                                   </>
                                 ) : actualDuration < durationMin ? (
                                   <>
-                                    Tu entrenamiento duró <strong className="text-text-primary">{durationMin - actualDuration} min menos</strong> de lo planificado ({durationMin}m vs {actualDuration}m). Tu consumo objetivo final de hidratación se redujo en <strong className="text-sport-swim">{pacing.totalFluidMl - realPacing.totalFluidMl} ml</strong>, sodio en <strong className="text-sport-swim">{pacing.totalSodiumMg - realPacing.totalSodiumMg} mg</strong> y carbohidratos en <strong className="text-sport-swim">{pacing.totalCarbsG - realPacing.totalCarbsG}g</strong>.
+                                    Tu entrenamiento duró <strong className="text-text-primary">{durationMin - actualDuration} min menos</strong> de lo planificado ({durationMin}m vs {actualDuration}m). Tu consumo objetivo final de hidratación se redujo en <strong className="text-swim">{pacing.totalFluidMl - realPacing.totalFluidMl} ml</strong>, sodio en <strong className="text-swim">{pacing.totalSodiumMg - realPacing.totalSodiumMg} mg</strong> y carbohidratos en <strong className="text-swim">{pacing.totalCarbsG - realPacing.totalCarbsG}g</strong>.
                                   </>
                                 ) : (
                                   <>
@@ -1207,8 +1207,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           )}
 
                           {/* Guía Práctica de Suplementación */}
-                          <div className="p-3.5 rounded-xl bg-sport-bike/10 border border-sport-bike/20">
-                            <span className="text-[10px] text-sport-bike font-bold uppercase tracking-wider flex items-center gap-1">
+                          <div className="p-3.5 rounded-xl bg-bike/10 border border-bike/20">
+                            <span className="text-[10px] text-bike font-bold uppercase tracking-wider flex items-center gap-1">
                               💼 Pack del Entrenamiento
                             </span>
                             <div className="mt-2 text-xs">
@@ -1219,13 +1219,13 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           {/* Nutrición de Recuperación Post-Entrenamiento */}
                           <div className="p-4 rounded-xl bg-bg-card border border-border-default space-y-4">
                             <div className="flex items-center justify-between flex-wrap gap-2">
-                              <span className="text-[10px] text-sport-bike font-bold uppercase tracking-wider flex items-center gap-1.5">
-                                <Sparkles className="w-3.5 h-3.5 text-sport-bike" />
+                              <span className="text-[10px] text-bike font-bold uppercase tracking-wider flex items-center gap-1.5">
+                                <Sparkles className="w-3.5 h-3.5 text-bike" />
                                 Recuperación Post-Entrenamiento
                               </span>
                               {isCompleted ? (
-                                <span className="px-2 py-0.5 rounded-full bg-sport-bike/15 border border-sport-bike/20 text-sport-bike text-[9px] font-bold tracking-wider uppercase flex items-center gap-1">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-sport-bike" />
+                                <span className="px-2 py-0.5 rounded-full bg-bike/15 border border-bike/20 text-bike text-[9px] font-bold tracking-wider uppercase flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-bike" />
                                   ✓ Ingerir ahora (Ventana metabólica)
                                 </span>
                               ) : (
@@ -1281,7 +1281,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
                       {/* Guía Explicativa del Funcionamiento Metodológico */}
                       <div className="p-3.5 rounded-xl bg-bg-hover border border-border-default flex gap-2.5 items-start">
-                        <Info className="w-4 h-4 text-sport-swim shrink-0 mt-0.5" />
+                        <Info className="w-4 h-4 text-swim shrink-0 mt-0.5" />
                         <div className="space-y-1">
                           <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
                             ¿Cómo se calculan estas métricas?
@@ -1299,13 +1299,13 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                   <div className="space-y-4 animate-fade-in">
                     <div className="flex items-center justify-between border-b border-border-subtle pb-3 flex-wrap gap-2">
                       <div className="flex items-center gap-2">
-                        <Watch className="w-5 h-5 text-sport-bike" />
+                        <Watch className="w-5 h-5 text-bike" />
                         <div>
                           <p className="text-xs text-text-muted font-medium uppercase tracking-wider">Dispositivo de Grabación</p>
                           <p className="text-sm font-bold text-text-primary">{telemetry.raw_payload?.device || 'Garmin Forerunner 965'} <span className="text-xs font-normal text-text-muted">(v{telemetry.raw_payload?.firmware || '18.22'})</span></p>
                         </div>
                       </div>
-                      <span className="px-3 py-1 rounded-full bg-sport-bike/15 border border-sport-bike/20 text-sport-bike text-xs font-bold capitalize">
+                      <span className="px-3 py-1 rounded-full bg-bike/15 border border-bike/20 text-bike text-xs font-bold capitalize">
                         {telemetry.source_provider || 'garmin'} Connect
                       </span>
                     </div>
@@ -1342,7 +1342,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                         ) : (
                           <>
                             <p className="text-lg font-bold text-text-primary">{telemetry.avg_cadence || (session?.sport_type === 'carrera' ? 176 : 92)} <span className="text-xs font-normal text-text-muted">ppm</span></p>
-                            <p className="text-[10px] text-sport-bike font-medium mt-0.5">Óptima de carrera</p>
+                            <p className="text-[10px] text-bike font-medium mt-0.5">Óptima de carrera</p>
                           </>
                         )}
                       </div>
@@ -1363,8 +1363,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                         ) : (
                           <>
                             <div className="flex items-baseline gap-2">
-                              <p className="text-lg font-bold text-sport-swim">{(workout as any).actual_tss || (telemetry as any).actual_tss || 145} <span className="text-xs font-normal text-text-muted">TSS Real</span></p>
-                              <span className="px-2 py-0.5 rounded bg-sport-swim/15 border border-sport-swim/15 text-sport-swim text-[10px] font-bold">Z2 Base</span>
+                              <p className="text-lg font-bold text-swim">{(workout as any).actual_tss || (telemetry as any).actual_tss || 145} <span className="text-xs font-normal text-text-muted">TSS Real</span></p>
+                              <span className="px-2 py-0.5 rounded bg-swim/15 border border-swim/15 text-swim text-[10px] font-bold">Z2 Base</span>
                             </div>
                             <p className="text-[10px] text-text-muted mt-0.5">Sincronizado e integrado en predicción de fatiga</p>
                           </>
@@ -1390,8 +1390,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                         <div className="absolute inset-0 bg-bg-elevated/80"></div>
                         
                         <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
-                          <p className="text-xs font-black text-sport-swim tracking-wide uppercase flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-sport-swim"></span>
+                          <p className="text-xs font-black text-swim tracking-wide uppercase flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-swim"></span>
                             Ruta {(telemetry.source_provider)}
                           </p>
                           <div className="flex items-center gap-4 bg-bg-elevated px-3 py-1.5 rounded-lg border border-border-default">
@@ -1436,9 +1436,9 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            className="p-4 rounded-2xl bg-sport-swim/10 border border-sport-swim/20 flex items-start gap-3 text-sport-swim text-xs font-medium leading-relaxed relative z-20"
+            className="p-4 rounded-2xl bg-swim/10 border border-swim/20 flex items-start gap-3 text-swim text-xs font-medium leading-relaxed relative z-20"
           >
-            <Bell className="w-5 h-5 text-sport-swim flex-shrink-0 mt-0.5" />
+            <Bell className="w-5 h-5 text-swim flex-shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="font-bold text-text-primary mb-0.5">Sincronización Inteligente de Telemetría</p>
               <p>{toastMsg}</p>
@@ -1519,12 +1519,12 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                   <div className="flex flex-col sm:flex-row gap-3 w-full">
                     <AnimatedButton
                       variant="secondary"
-                      className="flex-1 justify-center py-6 text-sm font-semibold border-sport-bike/30 bg-sport-bike/15 hover:bg-sport-bike/20 text-sport-bike"
+                      className="flex-1 justify-center py-6 text-sm font-semibold border-bike/30 bg-bike/15 hover:bg-bike/20 text-bike"
                       onClick={handleToggle}
                       disabled={loading}
                     >
-                      <CheckCircle2 className="w-5 h-5 text-sport-bike" />
-                      <span className="text-sport-bike">✓ Completado</span>
+                      <CheckCircle2 className="w-5 h-5 text-bike" />
+                      <span className="text-bike">✓ Completado</span>
                     </AnimatedButton>
 
                     <AnimatedButton
@@ -1532,11 +1532,11 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                       className={`flex-1 justify-center py-6 border flex items-center justify-center gap-2 font-semibold transition-all ${
                         !hasFeedback
                           ? 'border-warning/20 bg-warning/10 text-warning hover:bg-warning/15'
-                          : 'border-sport-swim/20 bg-sport-swim/10 text-sport-swim hover:bg-sport-swim/15'
+                          : 'border-swim/20 bg-swim/10 text-swim hover:bg-swim/15'
                       }`}
                       onClick={() => setIsFeedbackOpen(true)}
                     >
-                      <MessageSquarePlus className={`w-5 h-5 ${!hasFeedback ? 'text-orange-400' : 'text-sport-swim'}`} />
+                      <MessageSquarePlus className={`w-5 h-5 ${!hasFeedback ? 'text-orange-400' : 'text-swim'}`} />
                       <span>{hasFeedback ? 'Editar Valoración' : 'Evaluar Sesión'}</span>
                     </AnimatedButton>
 

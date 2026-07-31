@@ -157,7 +157,7 @@ export function DailyFuelCard({
       <div className="flex justify-between items-center border-b border-border-subtle pb-3 relative z-10 shrink-0 gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <div className="w-7 h-7 rounded-lg bg-bg-hover border border-border-subtle flex items-center justify-center shrink-0">
-            <span className="w-2 h-2 rounded-full bg-sport-bike"></span>
+            <span className="w-2 h-2 rounded-full bg-bike"></span>
           </div>
           <span className="text-[11px] sm:text-xs font-bold tracking-wider text-text-secondary uppercase whitespace-nowrap overflow-hidden text-ellipsis">Combustible</span>
         </div>
@@ -167,7 +167,7 @@ export function DailyFuelCard({
           <button
             onClick={() => setActiveTab('macros')}
             className={`px-1.5 sm:px-2.5 py-1 rounded cursor-pointer transition-colors ${
-              activeTab === 'macros' ? 'bg-bg-elevated text-sport-bike border border-border-default' : 'text-text-muted hover:text-text-primary'
+              activeTab === 'macros' ? 'bg-bg-elevated text-bike border border-border-default' : 'text-text-muted hover:text-text-primary'
             }`}
           >
             Macros
@@ -175,7 +175,7 @@ export function DailyFuelCard({
           <button
             onClick={() => setActiveTab('platos')}
             className={`px-1.5 sm:px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-0.5 ${
-              activeTab === 'platos' ? 'bg-bg-elevated text-sport-bike border border-border-default' : 'text-text-muted hover:text-text-primary'
+              activeTab === 'platos' ? 'bg-bg-elevated text-bike border border-border-default' : 'text-text-muted hover:text-text-primary'
             }`}
           >
             Platos/IA ✨
@@ -228,7 +228,7 @@ export function DailyFuelCard({
                 Balance Energético
               </h4>
               <p className="text-[10px] text-text-muted leading-relaxed font-semibold">
-                Base metabólica: <strong className="text-text-primary">{bmr} kcal</strong>. Gasto activo: <strong className="text-sport-bike">+{activeExpenditure} kcal</strong>.
+                Base metabólica: <strong className="text-text-primary">{bmr} kcal</strong>. Gasto activo: <strong className="text-bike">+{activeExpenditure} kcal</strong>.
               </p>
             </div>
           </div>
@@ -258,11 +258,11 @@ export function DailyFuelCard({
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Carbohidratos ({carbsPercentage}%)
                   </span>
                   <span className="text-text-muted font-bold font-mono">
-                    <strong className="text-sport-run">{Math.round(macros.carbs.grams * 0.74)}g</strong> / {macros.carbs.grams}g
+                    <strong className="text-run">{Math.round(macros.carbs.grams * 0.74)}g</strong> / {macros.carbs.grams}g
                   </span>
                 </div>
                 <div className="w-full h-1 bg-bg-hover rounded-full overflow-hidden border border-border-subtle">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '74%' }} transition={{ duration: 1.2, ease: 'easeOut' }} className="h-full rounded-full" style={{backgroundColor: 'var(--color-sport-run)'}} />
+                  <motion.div initial={{ width: 0 }} animate={{ width: '74%' }} transition={{ duration: 1.2, ease: 'easeOut' }} className="h-full rounded-full" style={{backgroundColor: 'var(--color-run)'}} />
                 </div>
               </div>
               
@@ -273,11 +273,11 @@ export function DailyFuelCard({
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Proteínas ({proteinPercentage}%)
                   </span>
                   <span className="text-text-muted font-bold font-mono">
-                    <strong className="text-sport-swim">{Math.round(macros.protein.grams * 0.7)}g</strong> / {macros.protein.grams}g
+                    <strong className="text-swim">{Math.round(macros.protein.grams * 0.7)}g</strong> / {macros.protein.grams}g
                   </span>
                 </div>
                 <div className="w-full h-1 bg-bg-hover rounded-full overflow-hidden border border-border-subtle">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '70%' }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.1 }} className="h-full rounded-full" style={{backgroundColor: 'var(--color-sport-swim)'}} />
+                  <motion.div initial={{ width: 0 }} animate={{ width: '70%' }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.1 }} className="h-full rounded-full" style={{backgroundColor: 'var(--color-swim)'}} />
                 </div>
               </div>
 
@@ -288,11 +288,11 @@ export function DailyFuelCard({
                     <span className="w-1.5 h-1.5 rounded-full bg-lime-500" /> Grasas ({fatPercentage}%)
                   </span>
                   <span className="text-text-muted font-bold font-mono">
-                    <strong className="text-sport-bike">{Math.round(macros.fat.grams * 0.74)}g</strong> / {macros.fat.grams}g
+                    <strong className="text-bike">{Math.round(macros.fat.grams * 0.74)}g</strong> / {macros.fat.grams}g
                   </span>
                 </div>
                 <div className="w-full h-1 bg-bg-hover rounded-full overflow-hidden border border-border-subtle">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '74%' }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }} className="h-full rounded-full" style={{backgroundColor: 'var(--color-sport-bike)'}} />
+                  <motion.div initial={{ width: 0 }} animate={{ width: '74%' }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }} className="h-full rounded-full" style={{backgroundColor: 'var(--color-bike)'}} />
                 </div>
               </div>
             </div>
@@ -304,8 +304,8 @@ export function DailyFuelCard({
           <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 max-h-[170px] custom-scrollbar">
             
             {/* Pre-Entreno */}
-            <div className="border-l-2 border-sport-bike pl-2 py-0.5 relative group">
-              <span className="text-[8px] text-sport-bike font-bold uppercase tracking-wider block">Combustible Pre-Entreno</span>
+            <div className="border-l-2 border-bike pl-2 py-0.5 relative group">
+              <span className="text-[8px] text-bike font-bold uppercase tracking-wider block">Combustible Pre-Entreno</span>
               <div className="flex justify-between items-start gap-2">
                 <div>
                   <h5 className="text-[10px] font-black text-text-primary leading-tight mt-0.5">{preWorkoutMeal.mealName}</h5>
@@ -324,8 +324,8 @@ export function DailyFuelCard({
 
             {/* Post-Entreno (Sólo si entrenó hoy) */}
             {sportType !== 'descanso' ? (
-              <div className="border-l-2 border-sport-swim pl-2 py-0.5 relative group">
-                <span className="text-[8px] text-sport-swim font-bold uppercase tracking-wider block">Recuperación Post-Entreno</span>
+              <div className="border-l-2 border-swim pl-2 py-0.5 relative group">
+                <span className="text-[8px] text-swim font-bold uppercase tracking-wider block">Recuperación Post-Entreno</span>
                 <div className="flex justify-between items-start gap-2">
                   <div>
                     <h5 className="text-[10px] font-black text-text-primary leading-tight mt-0.5">{recoveryMeal.mealName}</h5>

@@ -86,9 +86,9 @@ export function WorkoutAIFeedback({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-sport-swim/15 border border-sport-swim/15 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-swim/15 border border-swim/15 flex items-center justify-center">
             {aiAvailable ? (
-              <Sparkles className="w-4 h-4 text-sport-swim" />
+              <Sparkles className="w-4 h-4 text-swim" />
             ) : (
               <Bot className="w-4 h-4 text-text-muted" />
             )}
@@ -137,7 +137,7 @@ export function WorkoutAIFeedback({
             <p className="text-xs text-text-muted text-center max-w-xs">{error}</p>
             <button
               onClick={() => requestAnalysis()}
-              className="flex items-center gap-1.5 text-xs font-bold text-sport-swim hover:text-sport-swim transition-colors"
+              className="flex items-center gap-1.5 text-xs font-bold text-swim hover:text-swim transition-colors"
             >
               <RefreshCw className="w-3.5 h-3.5" /> Intentar de nuevo
             </button>
@@ -171,7 +171,7 @@ export function WorkoutAIFeedback({
             <div className="flex gap-2">
               <button
                 onClick={() => requestAnalysis()}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-sport-swim/15 text-sport-swim hover:bg-sport-swim/25 border border-sport-swim/15 transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-swim/15 text-swim hover:bg-swim/25 border border-swim/15 transition-colors"
               >
                 Analizar mi día
               </button>
@@ -192,12 +192,12 @@ export function WorkoutAIFeedback({
                   onChange={e => setQuestion(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSendQuestion()}
                   placeholder="Ej: ¿Qué tal mi carga esta semana?"
-                  className="flex-1 bg-bg-hover border border-border-default rounded-xl px-3.5 py-2.5 text-xs text-text-primary placeholder-text-muted outline-none focus:border-sport-swim/50 transition-all"
+                  className="flex-1 bg-bg-hover border border-border-default rounded-xl px-3.5 py-2.5 text-xs text-text-primary placeholder-text-muted outline-none focus:border-swim/50 transition-all"
                 />
                 <button
                   onClick={handleSendQuestion}
                   disabled={!question.trim()}
-                  className="p-2.5 rounded-xl bg-sport-swim/15 text-sport-swim hover:bg-sport-swim/25 border border-sport-swim/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="p-2.5 rounded-xl bg-swim/15 text-swim hover:bg-swim/25 border border-swim/15 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <Send className="w-4 h-4" />
                 </button>

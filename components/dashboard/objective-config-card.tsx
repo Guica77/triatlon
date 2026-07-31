@@ -19,11 +19,11 @@ export function ObjectiveConfigCard({ targetRaceName }: ObjectiveConfigCardProps
   return (
     <>
       {isPending ? (
-        <div className="p-5 rounded-2xl bg-bg-card border border-sport-swim/20 relative overflow-hidden group mb-6">
-          <div className="absolute -right-16 -top-16 w-36 h-36 rounded-full bg-sport-swim/10 blur-3xl group-hover:bg-sport-swim/15 transition-all duration-500" />
+        <div className="p-5 rounded-2xl bg-bg-card border border-swim/20 relative overflow-hidden group mb-6">
+          <div className="absolute -right-16 -top-16 w-36 h-36 rounded-full bg-swim/10 blur-3xl group-hover:bg-swim/15 transition-all duration-500" />
           
           <div className="flex gap-4 items-start relative z-10">
-            <div className="w-10 h-10 rounded-xl bg-sport-swim/15 border border-sport-swim/20 flex items-center justify-center text-sport-swim shrink-0 mt-0.5">
+            <div className="w-10 h-10 rounded-xl bg-swim/15 border border-swim/20 flex items-center justify-center text-swim shrink-0 mt-0.5">
               <Target className="w-5 h-5" />
             </div>
             <div className="space-y-1.5 w-full">
@@ -38,7 +38,7 @@ export function ObjectiveConfigCard({ targetRaceName }: ObjectiveConfigCardProps
                 <AnimatedButton 
                   size="sm" 
                   onClick={() => setIsModalOpen(true)}
-                  className="!bg-sport-swim hover:!bg-sport-swim !text-text-inverse text-[11px] font-semibold py-1.5 px-3 rounded-lg flex items-center gap-1"
+                  className="!bg-swim hover:!bg-swim !text-text-inverse text-[11px] font-semibold py-1.5 px-3 rounded-lg flex items-center gap-1"
                 >
                   <span>Configurar Objetivo Ahora</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -53,7 +53,7 @@ export function ObjectiveConfigCard({ targetRaceName }: ObjectiveConfigCardProps
             variant="ghost"
             size="sm" 
             onClick={() => setIsModalOpen(true)}
-            className="text-xs text-text-muted hover:text-sport-swim flex items-center gap-1.5 py-1 px-2 -ml-2"
+            className="text-xs text-text-muted hover:text-swim flex items-center gap-1.5 py-1 px-2 -ml-2"
           >
             <Target className="w-3.5 h-3.5" />
             <span>Actualizar Objetivo: {targetRaceName}</span>

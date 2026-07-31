@@ -21,8 +21,8 @@ export function RecoveryDashboard({ analysis }: RecoveryDashboardProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-sport-bike/15 border border-sport-bike/15 flex items-center justify-center">
-            <Heart className="w-4 h-4 text-sport-bike" />
+          <div className="w-9 h-9 rounded-xl bg-bike/15 border border-bike/15 flex items-center justify-center">
+            <Heart className="w-4 h-4 text-bike" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-text-primary">Estado de Recuperación</h3>
@@ -65,8 +65,8 @@ export function RecoveryDashboard({ analysis }: RecoveryDashboardProps) {
           <p className="text-[11px] text-text-muted leading-relaxed">{suggestedToday.description}</p>
           {readinessForHighIntensity && (
             <div className="mt-2 flex items-center gap-1.5">
-              <Zap className="w-3 h-3 text-sport-bike" />
-              <span className="text-[10px] text-sport-bike font-bold">Listo para alta intensidad</span>
+              <Zap className="w-3 h-3 text-bike" />
+              <span className="text-[10px] text-bike font-bold">Listo para alta intensidad</span>
             </div>
           )}
         </div>
@@ -127,7 +127,7 @@ function FactorBar({ factor }: { factor: RecoveryFactor }) {
     <div className="flex items-center gap-3">
       <div className={cn(
         'w-6 h-6 rounded-lg flex items-center justify-center shrink-0',
-        factor.status === 'good' ? 'bg-sport-bike/15 text-sport-bike' :
+        factor.status === 'good' ? 'bg-bike/15 text-bike' :
           factor.status === 'warning' ? 'bg-warning/15 text-warning' :
             'bg-danger/15 text-danger'
       )}>
@@ -136,7 +136,7 @@ function FactorBar({ factor }: { factor: RecoveryFactor }) {
       <div className="flex-1 min-w-0">
         <div className="flex justify-between text-[10px] mb-0.5">
           <span className="text-text-muted font-medium">{factor.name}</span>
-          <span className={cn('font-bold', factor.status === 'good' ? 'text-sport-bike' : factor.status === 'warning' ? 'text-warning' : 'text-danger')}>
+          <span className={cn('font-bold', factor.status === 'good' ? 'text-bike' : factor.status === 'warning' ? 'text-warning' : 'text-danger')}>
             {factor.score}%
           </span>
         </div>

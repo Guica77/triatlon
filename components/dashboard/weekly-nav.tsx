@@ -66,7 +66,7 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
   if (!isMounted) {
     return (
       <ProCard className="p-4 py-6 relative z-10 border-border-default bg-bg-card h-32 animate-pulse flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-4 border-sport-swim border-t-transparent animate-spin"></div>
+        <div className="w-8 h-8 rounded-full border-4 border-swim border-t-transparent animate-spin"></div>
       </ProCard>
     );
   }
@@ -85,7 +85,7 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
             const hasPending = d.workouts.some(w => w.status === 'pending');
  
             if (d.workouts.every(w => w.status === 'completed')) {
-              complianceClass = 'bg-sport-bike/10 border border-sport-bike/30 text-sport-bike';
+              complianceClass = 'bg-bike/10 border border-bike/30 text-bike';
             } else if (hasMissed) {
               complianceClass = 'bg-danger/10 border border-danger/30 text-danger';
             } else if (hasPending && d.workouts.some(w => w.scheduled_date <= todayStr)) {
@@ -100,7 +100,7 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
           }
  
           const activeClass = isSelected
-            ? 'bg-bg-elevated border-sport-swim ring-1 ring-sport-swim text-sport-swim'
+            ? 'bg-bg-elevated border-swim ring-1 ring-swim text-swim'
             : complianceClass;
  
           return (
@@ -118,7 +118,7 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
               </span>
               <span className={cn(
                 "text-lg font-bold mb-2 z-10", 
-                isSelected ? "text-sport-swim" : d.isToday ? "text-text-primary" : "text-text-secondary"
+                isSelected ? "text-swim" : d.isToday ? "text-text-primary" : "text-text-secondary"
               )}>
                 {d.dayNum}
               </span>

@@ -83,7 +83,7 @@ export default function CoachLoginPage() {
                     type="email"
                     placeholder="coach@triatlonpro.com"
                     required
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-bike transition-all"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-bike transition-all"
                   />
                 </div>
               </div>
@@ -94,7 +94,7 @@ export default function CoachLoginPage() {
                   <button
                     type="button"
                     onClick={() => router.push('/forgot-password')}
-                    className="text-[10px] text-sport-bike hover:text-sport-bike transition-colors font-bold uppercase tracking-wider"
+                    className="text-[10px] text-bike hover:text-bike transition-colors font-bold uppercase tracking-wider"
                   >
                     ¿Olvidaste tu contraseña?
                   </button>
@@ -105,7 +105,7 @@ export default function CoachLoginPage() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-3.5 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-sport-bike transition-all font-mono"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-3.5 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-bike transition-all font-mono"
                   />
                   <button
                     type="button"
@@ -120,7 +120,7 @@ export default function CoachLoginPage() {
 
               <motion.button
                 whileTap={{ scale: 0.98 }}
-                className="w-full mt-4 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-sport-bike hover:bg-sport-bike/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-full mt-4 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-bike hover:bg-bike/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 type="submit"
                 disabled={loading}
               >
@@ -144,9 +144,9 @@ export default function CoachLoginPage() {
           <button
             type="button"
             onClick={() => router.push('/coach/register')}
-            className="text-xs text-text-muted hover:text-sport-bike transition-colors font-medium"
+            className="text-xs text-text-muted hover:text-bike transition-colors font-medium"
           >
-            ¿No tienes cuenta? <span className="text-sport-bike font-bold">Regístrate aquí</span>
+            ¿No tienes cuenta? <span className="text-bike font-bold">Regístrate aquí</span>
           </button>
         </div>
       </div>

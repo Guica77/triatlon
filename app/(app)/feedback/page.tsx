@@ -29,12 +29,12 @@ export default async function FeedbackPage() {
       {/* Top Navbar */}
       <header className="border-b border-[var(--color-border)] bg-[var(--color-background)]/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-sport-swim/10 border border-sport-swim/30 flex items-center justify-center">
-            <MessageSquare className="w-4 h-4 text-sport-swim" />
+          <div className="w-9 h-9 rounded-xl bg-swim/10 border border-swim/30 flex items-center justify-center">
+            <MessageSquare className="w-4 h-4 text-swim" />
           </div>
           <div>
             <h1 className="text-base font-medium text-text-primary">Centro de Feedback</h1>
-            <p className="text-xs text-sport-swim font-mono">Buzón de Sugerencias Pro Max</p>
+            <p className="text-xs text-swim font-mono">Buzón de Sugerencias Pro Max</p>
           </div>
         </div>
 
@@ -45,7 +45,7 @@ export default async function FeedbackPage() {
             </AnimatedButton>
           </Link>
           <Link href="/analytics">
-            <AnimatedButton variant="ghost" size="sm" className="border border-border-default flex items-center gap-2 text-sport-swim">
+            <AnimatedButton variant="ghost" size="sm" className="border border-border-default flex items-center gap-2 text-swim">
               <BarChart2 className="w-4 h-4" />
               <span>Analíticas Globales</span>
             </AnimatedButton>
@@ -92,7 +92,7 @@ export default async function FeedbackPage() {
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-sm font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-sport-swim" /> Proponer Mejoras a la App
+                <MessageSquare className="w-4 h-4 text-swim" /> Proponer Mejoras a la App
               </h2>
             </div>
             <CoachSuggestionForm />

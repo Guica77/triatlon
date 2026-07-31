@@ -25,7 +25,7 @@ export default function SignupGatewayPage() {
                 <span className="text-2xl">🏃‍♂️</span>
               </div>
               <div className="text-center">
-                <h3 className="text-lg font-bold text-zinc-800 group-hover:text-sport-swim transition-colors">Soy Atleta</h3>
+                <h3 className="text-lg font-bold text-zinc-800 group-hover:text-swim transition-colors">Soy Atleta</h3>
                 <p className="text-xs text-text-muted font-medium mt-1">Quiero un plan de entrenamiento</p>
               </div>
             </div>
@@ -40,7 +40,7 @@ export default function SignupGatewayPage() {
                 <span className="text-2xl">📋</span>
               </div>
               <div className="text-center">
-                <h3 className="text-lg font-bold text-zinc-800 group-hover:text-sport-swim transition-colors">Soy Entrenador</h3>
+                <h3 className="text-lg font-bold text-zinc-800 group-hover:text-swim transition-colors">Soy Entrenador</h3>
                 <p className="text-xs text-text-muted font-medium mt-1">Quiero gestionar a mis atletas</p>
               </div>
             </div>

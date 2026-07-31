@@ -61,8 +61,8 @@ export default async function AdminDashboardPage() {
       <header className="sticky top-0 z-50 border-b border-border-default bg-bg-elevated/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-sport-swim/10 border border-sport-swim/20 flex items-center justify-center">
-              <LayoutDashboard className="w-4 h-4 text-sport-swim" />
+            <div className="w-8 h-8 rounded-lg bg-swim/10 border border-swim/20 flex items-center justify-center">
+              <LayoutDashboard className="w-4 h-4 text-swim" />
             </div>
             <div>
               <h1 className="text-sm font-bold text-text-primary">Business Dashboard</h1>
@@ -71,10 +71,10 @@ export default async function AdminDashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1.5 text-[10px] text-text-muted bg-bg-card border border-border-default rounded-lg px-3 py-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-sport-bike" />
+              <span className="w-1.5 h-1.5 rounded-full bg-bike" />
               Tiempo real
             </span>
-            <a href="/dashboard" className="text-[10px] text-sport-swim hover:text-sport-swim/80 font-bold transition-colors">
+            <a href="/dashboard" className="text-[10px] text-swim hover:text-swim/80 font-bold transition-colors">
               ← Volver a la app
             </a>
           </div>
@@ -126,9 +126,9 @@ export default async function AdminDashboardPage() {
           <div className="bg-bg-card border border-border-default rounded-xl p-5">
             <h3 className="text-xs font-bold text-text-primary mb-4">Suscripciones</h3>
             <div className="space-y-4">
-              <SubscriptionBar label="Premium" count={premiumUsers} total={totalUsers} color="bg-sport-swim" />
+              <SubscriptionBar label="Premium" count={premiumUsers} total={totalUsers} color="bg-swim" />
               <SubscriptionBar label="Free / Trial" count={freeUsers} total={totalUsers} color="bg-text-muted" />
-              <SubscriptionBar label="Churned" count={churnedUsers} total={totalUsers} color="bg-sport-run" />
+              <SubscriptionBar label="Churned" count={churnedUsers} total={totalUsers} color="bg-run" />
             </div>
             <div className="mt-4 pt-4 border-t border-border-subtle grid grid-cols-4 gap-3 text-center text-[10px]">
               <div><p className="font-bold text-text-primary">{totalCoaches}</p><p className="text-text-muted">Entrenadores</p></div>
@@ -170,7 +170,7 @@ function ErrorState({ error }: { error: string | null }) {
       <div className="bg-bg-card border border-border-default rounded-xl p-8 text-center space-y-4 max-w-md">
         <BarChart3 className="w-12 h-12 text-text-secondary mx-auto" />
         <p className="text-sm text-text-muted font-medium">{error || 'Error al cargar el dashboard'}</p>
-        <a href="/dashboard" className="inline-block text-xs text-sport-swim hover:text-sport-swim/80 font-bold transition-colors">
+        <a href="/dashboard" className="inline-block text-xs text-swim hover:text-swim/80 font-bold transition-colors">
           Volver a la app
         </a>
       </div>

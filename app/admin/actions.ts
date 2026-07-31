@@ -377,15 +377,24 @@ export async function checkAdminAccess(): Promise<boolean> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return false
 
-  const isAdmin = Boolean(
+  // Check email pattern (primary)
+  const isAdminEmail = Boolean(
     user.email === 'guillermo@triatlonpro.com' ||
     user.email?.endsWith('@triatlonpro.com') ||
     user.email?.includes('guillermo')
   )
 
-  if (isAdmin) {
+  if (isAdminEmail) {
     await supabase.from('profiles').update({ role: 'owner' }).eq('id', user.id)
+    return true
   }
 
-  return isAdmin
+  // Fallback: check profile role in DB (so role set in Supabase dashboard works too)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  return profile?.role === 'owner'
 }

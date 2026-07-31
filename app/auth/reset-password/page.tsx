@@ -87,7 +87,7 @@ export default function ResetPasswordPage() {
                   placeholder="••••••••"
                   required
                   disabled={success || loading}
-                  className="w-full bg-bg-card border border-border-default rounded-xl p-3 pr-10 text-sm text-text-primary outline-none focus:border-sport-swim transition-colors"
+                  className="w-full bg-bg-card border border-border-default rounded-xl p-3 pr-10 text-sm text-text-primary outline-none focus:border-swim transition-colors"
                 />
                 <button
                   type="button"
@@ -108,13 +108,13 @@ export default function ResetPasswordPage() {
                 placeholder="••••••••"
                 required
                 disabled={success || loading}
-                className="w-full bg-bg-card border border-border-default rounded-xl p-3 text-sm text-text-primary outline-none focus:border-sport-swim transition-colors"
+                className="w-full bg-bg-card border border-border-default rounded-xl p-3 text-sm text-text-primary outline-none focus:border-swim transition-colors"
               />
             </div>
 
             <AnimatedButton
               variant="primary"
-              className="w-full mt-2 bg-sport-swim hover:bg-sport-swim/90 text-text-primary font-bold py-3.5 rounded-xl flex items-center justify-center disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 bg-swim hover:bg-swim/90 text-text-primary font-bold py-3.5 rounded-xl flex items-center justify-center disabled:opacity-50 cursor-pointer"
               type="submit"
               disabled={loading || success}
             >
@@ -128,7 +128,7 @@ export default function ResetPasswordPage() {
             <button
               type="button"
               onClick={() => router.push('/login')}
-              className="text-xs text-text-muted hover:text-sport-swim font-bold transition-colors cursor-pointer"
+              className="text-xs text-text-muted hover:text-swim font-bold transition-colors cursor-pointer"
               disabled={loading}
             >
               Volver al inicio de sesión
