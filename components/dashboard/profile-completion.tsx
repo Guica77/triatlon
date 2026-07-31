@@ -92,48 +92,48 @@ export function ProfileCompletion({ profile }: ProfileCompletionProps) {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5"
+      className="bg-surface-card border border-border-subtle rounded-2xl p-5"
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 border border-cyan-500/20 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center">
             <User className="w-4 h-4 text-cyan-400" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">Tu Perfil</h3>
-            <p className="text-[10px] text-zinc-500 font-medium">{completed}/{total} completados</p>
+            <h3 className="text-sm font-bold text-text-primary">Tu Perfil</h3>
+            <p className="text-[10px] text-text-secondary font-medium">{completed}/{total} completados</p>
           </div>
         </div>
         <span className="text-2xl font-black text-cyan-400">{percent}%</span>
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden mb-4">
+      <div className="w-full h-2 bg-surface-hover rounded-full overflow-hidden mb-4">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percent}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full"
+          className="h-full bg-cyan-500 rounded-full"
         />
       </div>
 
       {/* Incomplete items */}
       {incomplete.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Completar:</p>
+          <p className="text-[10px] text-text-secondary font-bold uppercase tracking-wider">Completar:</p>
           {incomplete.slice(0, 3).map(item => (
             <Link
               key={item.id}
               href={item.href}
-              className="flex items-center gap-2 p-2 rounded-lg bg-zinc-800/50 border border-zinc-700/50 hover:border-cyan-500/30 transition-colors group"
+              className="flex items-center gap-2 p-2 rounded-lg bg-surface-hover/50 border border-border-subtle/50 hover:border-cyan-500/30 transition-colors group"
             >
-              <div className="w-5 h-5 rounded-full border border-zinc-600 flex items-center justify-center shrink-0">
-                <Check className="w-3 h-3 text-zinc-600" />
+              <div className="w-5 h-5 rounded-full border border-border-default flex items-center justify-center shrink-0">
+                <Check className="w-3 h-3 text-text-muted" />
               </div>
-              <span className="text-xs text-zinc-400 font-medium group-hover:text-white transition-colors flex-1">
+              <span className="text-xs text-text-muted font-medium group-hover:text-text-primary transition-colors flex-1">
                 {item.label}
               </span>
-              <ArrowRight className="w-3 h-3 text-zinc-600 group-hover:text-cyan-400 transition-colors" />
+              <ArrowRight className="w-3 h-3 text-text-muted group-hover:text-cyan-400 transition-colors" />
             </Link>
           ))}
         </div>

@@ -48,7 +48,7 @@ export function DailyFocusCard({ workout, athleteLevel = 'intermedio', sweatRate
   const hydrationNeeded = Math.round((session.duration_min / 60) * (sweatRate || 0.8) * 1000);
 
   return (
-    <Card className="overflow-hidden border-0 shadow-2xl shadow-cyan-900/5 bg-gradient-to-br from-zinc-900 to-zinc-800 text-white relative">
+    <Card className="overflow-hidden border-0 shadow-elevated bg-gradient-to-br from-surface-app to-surface-card text-white relative">
       {/* Decorative Background Elements */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl opacity-50 pointer-events-none" />
       <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl opacity-50 pointer-events-none" />
@@ -59,14 +59,14 @@ export function DailyFocusCard({ workout, athleteLevel = 'intermedio', sweatRate
           <div className="space-y-4 max-w-xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
               <Flame className="w-4 h-4 text-amber-400" />
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-200">Objetivo Principal de Hoy</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-text-primary">Objetivo Principal de Hoy</span>
             </div>
             
             <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-tight">
               {session.title || `Sesión de ${session.sport_type}`}
             </h1>
             
-            <p className="text-lg text-zinc-300 font-medium leading-relaxed">
+            <p className="text-lg text-text-secondary font-medium leading-relaxed">
               {session.description}
             </p>
 
@@ -74,7 +74,7 @@ export function DailyFocusCard({ workout, athleteLevel = 'intermedio', sweatRate
               <div className="flex items-center gap-2 bg-black/30 rounded-xl p-3 border border-white/10">
                 <Sun className="w-6 h-6 text-amber-400" />
                 <div>
-                  <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Nutrición</p>
+                  <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Nutrición</p>
                   <p className="text-sm font-bold text-white">{carbsNeeded}g Carbos</p>
                 </div>
               </div>
@@ -82,7 +82,7 @@ export function DailyFocusCard({ workout, athleteLevel = 'intermedio', sweatRate
               <div className="flex items-center gap-2 bg-black/30 rounded-xl p-3 border border-white/10">
                 <Droplets className="w-6 h-6 text-cyan-400" />
                 <div>
-                  <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Hidratación</p>
+                  <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Hidratación</p>
                   <p className="text-sm font-bold text-white">{hydrationNeeded}ml Líquido</p>
                 </div>
               </div>
@@ -91,7 +91,7 @@ export function DailyFocusCard({ workout, athleteLevel = 'intermedio', sweatRate
                 <div className="flex items-center gap-2 bg-black/30 rounded-xl p-3 border border-white/10">
                   <Cloud className="w-6 h-6 text-emerald-400" />
                   <div>
-                    <p className="text-[10px] text-zinc-400 uppercase font-bold tracking-wider">Clima Actual</p>
+                    <p className="text-[10px] text-text-muted uppercase font-bold tracking-wider">Clima Actual</p>
                     <p className="text-sm font-bold text-white">{weather.temperature}°C • {weather.condition}</p>
                   </div>
                 </div>

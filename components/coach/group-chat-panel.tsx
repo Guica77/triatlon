@@ -127,30 +127,30 @@ export function GroupChatPanel({ groupId, isOpen, onClose }: GroupChatPanelProps
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-white border-l border-zinc-200 shadow-2xl z-[100] flex flex-col transform transition-transform duration-300">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-zinc-50">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-surface-elevated border-l border-border-default shadow-elevated z-[100] flex flex-col transform transition-transform duration-300">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-surface-hover">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center">
-            <MessageSquare className="w-4 h-4 text-cyan-600" />
+          <div className="w-8 h-8 rounded-full bg-swim/15 flex items-center justify-center">
+            <MessageSquare className="w-4 h-4 text-swim" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-zinc-900">Chat de Grupo</h2>
-            <p className="text-[10px] text-zinc-500 font-medium">Comunicación en tiempo real</p>
+            <h2 className="text-sm font-bold text-text-primary">Chat de Grupo</h2>
+            <p className="text-[10px] text-text-secondary font-medium">Comunicación en tiempo real</p>
           </div>
         </div>
-        <AnimatedButton variant="ghost" size="icon" onClick={onClose} className="text-zinc-500 hover:text-zinc-800">
+        <AnimatedButton variant="ghost" size="icon" onClick={onClose} className="text-text-secondary hover:text-text-primary">
           <X className="w-5 h-5" />
         </AnimatedButton>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 bg-zinc-50/50 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 bg-surface-hover/50 space-y-4">
         {loading ? (
           <div className="h-full flex items-center justify-center">
-            <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+            <Loader2 className="w-6 h-6 animate-spin text-text-muted" />
           </div>
         ) : messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center text-zinc-500 space-y-2">
-            <MessageSquare className="w-8 h-8 text-zinc-300" />
+          <div className="h-full flex flex-col items-center justify-center text-center text-text-secondary space-y-2">
+            <MessageSquare className="w-8 h-8 text-text-muted" />
             <p className="text-sm">No hay mensajes aún.</p>
             <p className="text-xs">¡Sé el primero en saludar al grupo!</p>
           </div>
@@ -163,22 +163,22 @@ export function GroupChatPanel({ groupId, isOpen, onClose }: GroupChatPanelProps
             return (
               <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                 {showName && !isMe && (
-                  <span className={`text-[10px] font-bold mb-1 ml-1 ${isCoach ? 'text-amber-600' : 'text-zinc-500'}`}>
+                  <span className={`text-[10px] font-bold mb-1 ml-1 ${isCoach ? 'text-warning' : 'text-text-secondary'}`}>
                     {msg.profiles?.first_name} {isCoach && '⭐'}
                   </span>
                 )}
-                <div 
-                  className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm shadow-sm ${
-                    isMe 
-                      ? 'bg-cyan-600 text-white rounded-tr-sm' 
-                      : isCoach 
-                        ? 'bg-amber-100 text-amber-900 border border-amber-200 rounded-tl-sm'
-                        : 'bg-white text-zinc-800 border border-zinc-200 rounded-tl-sm'
+                <div
+                  className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm shadow-card ${
+                    isMe
+                      ? 'bg-swim text-white rounded-tr-sm'
+                      : isCoach
+                        ? 'bg-warning/15 text-warning border border-warning/25 rounded-tl-sm'
+                        : 'bg-surface-card text-text-primary border border-border-default rounded-tl-sm'
                   }`}
                 >
                   <p className="break-words leading-relaxed">{msg.message}</p>
                 </div>
-                <span className="text-[9px] text-zinc-400 mt-1 font-medium px-1">
+                <span className="text-[9px] text-text-muted mt-1 font-medium px-1">
                   {formatTime(msg.created_at)}
                 </span>
               </div>
@@ -188,19 +188,19 @@ export function GroupChatPanel({ groupId, isOpen, onClose }: GroupChatPanelProps
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="p-4 bg-white border-t border-zinc-100">
+      <div className="p-4 bg-surface-elevated border-t border-border-subtle">
         <form onSubmit={handleSend} className="flex items-center gap-2">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Escribe un mensaje..."
-            className="flex-1 px-4 py-2.5 bg-zinc-100 border-transparent focus:border-cyan-500 focus:bg-white rounded-full text-sm outline-none transition-all"
+            className="flex-1 px-4 py-2.5 bg-surface-hover border-transparent focus:border-swim focus:bg-surface-card rounded-full text-sm outline-none transition-all"
           />
-          <AnimatedButton 
-            type="submit" 
+          <AnimatedButton
+            type="submit"
             disabled={!newMessage.trim() || sending}
-            className="w-10 h-10 rounded-full bg-cyan-600 hover:bg-cyan-700 text-white flex items-center justify-center shrink-0 disabled:opacity-50"
+            className="w-10 h-10 rounded-full bg-swim hover:bg-swim/80 text-white flex items-center justify-center shrink-0 disabled:opacity-50"
           >
             <Send className="w-4 h-4 ml-0.5" />
           </AnimatedButton>

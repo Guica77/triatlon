@@ -37,7 +37,7 @@ export default function PrincipiantesPage() {
   return (
     <div className="min-h-screen bg-bg-elevated/50 pb-16">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-border-subtle transition-all duration-300">
+      <header className="sticky top-0 z-50 bg-surface-elevated/95 backdrop-blur-md border-b border-border-subtle transition-all duration-300">
         <div className="px-6 py-4 flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
             <Link href="/dashboard">
@@ -84,7 +84,7 @@ export default function PrincipiantesPage() {
             <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">Los 3 Pilares del Triatleta Principiante</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-5 rounded-2xl bg-white border border-border-subtle space-y-3">
+              <div className="p-5 rounded-2xl bg-surface-card border border-border-subtle space-y-3">
                 <div className="w-9 h-9 rounded-xl bg-swim border border-swim flex items-center justify-center text-swim">
                   <Activity className="w-4 h-4" />
                 </div>
@@ -94,7 +94,7 @@ export default function PrincipiantesPage() {
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-border-subtle space-y-3">
+              <div className="p-5 rounded-2xl bg-surface-card border border-border-subtle space-y-3">
                 <div className="w-9 h-9 rounded-xl bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-500">
                   <Heart className="w-4 h-4" />
                 </div>
@@ -104,7 +104,7 @@ export default function PrincipiantesPage() {
                 </p>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white border border-border-subtle space-y-3">
+              <div className="p-5 rounded-2xl bg-surface-card border border-border-subtle space-y-3">
                 <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500">
                   <Apple className="w-4 h-4" />
                 </div>
@@ -120,7 +120,7 @@ export default function PrincipiantesPage() {
           <motion.div variants={itemVariants} className="space-y-4">
             <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">Mitos comunes del Triatlón</h3>
             
-            <div className="p-5 rounded-2xl bg-white border border-border-subtle space-y-4">
+            <div className="p-5 rounded-2xl bg-surface-card border border-border-subtle space-y-4">
               <div className="flex gap-4 items-start pb-4 border-b border-border-subtle">
                 <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 shrink-0 mt-0.5">
                   <AlertCircle className="w-4 h-4" />
@@ -185,7 +185,7 @@ export default function PrincipiantesPage() {
             <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">Preguntas Frecuentes</h3>
             
             <div className="space-y-3">
-              <div className="p-4 rounded-2xl bg-white border border-border-subtle">
+              <div className="p-4 rounded-2xl bg-surface-card border border-border-subtle">
                 <h4 className="text-xs font-bold text-text-primary flex items-center gap-2">
                   <HelpCircle className="w-3.5 h-3.5 text-swim" /> ¿Qué distancia me recomiendan para empezar?
                 </h4>
@@ -194,7 +194,7 @@ export default function PrincipiantesPage() {
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white border border-border-subtle">
+              <div className="p-4 rounded-2xl bg-surface-card border border-border-subtle">
                 <h4 className="text-xs font-bold text-text-primary flex items-center gap-2">
                   <HelpCircle className="w-3.5 h-3.5 text-swim" /> ¿Necesito obligatoriamente un traje de neopreno?
                 </h4>

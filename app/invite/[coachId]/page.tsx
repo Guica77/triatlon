@@ -40,7 +40,7 @@ export default async function InviteLandingPage({
       <script dangerouslySetInnerHTML={{ __html: `document.cookie = "invite_coach_id=${coach.id}; path=/; max-age=604800; samesite=lax";` }} />
 
       <div className="relative w-full max-w-md">
-        <div className="bg-white border border-border-subtle rounded-3xl p-8 relative overflow-hidden">
+        <div className="bg-surface-card border border-border-subtle rounded-3xl p-8 relative overflow-hidden">
           
           {/* Top Edge Highlight */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-swim via-blue-500 to-indigo-500"></div>

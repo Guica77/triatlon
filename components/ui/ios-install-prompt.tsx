@@ -30,14 +30,14 @@ export function IosInstallPrompt() {
 
   // AGGRESSIVE MODE: Block entire screen
   return (
-    <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-zinc-950/90 backdrop-blur-xl p-6 text-center animate-in fade-in duration-500">
+    <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-surface-app/90 backdrop-blur-xl p-6 text-center animate-in fade-in duration-500">
       
       {/* Decorative ambient light */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-cyan-500/20 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-swim/20 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-sm space-y-8 bg-zinc-900 border border-zinc-800 p-8 rounded-[2rem] shadow-[0_0_50px_rgba(34,211,238,0.1)]">
+      <div className="relative z-10 w-full max-w-sm space-y-8 bg-surface-card border border-border-subtle p-8 rounded-[2rem] shadow-[0_0_50px_rgba(34,211,238,0.1)]">
         
-        <div className="inline-flex items-center justify-center p-4 rounded-3xl bg-zinc-950 border border-zinc-800 shadow-inner mb-2">
+        <div className="inline-flex items-center justify-center p-4 rounded-3xl bg-surface-app border border-border-subtle shadow-inner mb-2">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#cyan-gradient)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <defs>
               <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -51,52 +51,52 @@ export function IosInstallPrompt() {
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-2xl font-black tracking-tight text-white">
+          <h2 className="text-2xl font-black tracking-tight text-text-primary">
             Instalación Requerida
           </h2>
-          <p className="text-sm text-zinc-400 leading-relaxed font-medium">
+          <p className="text-sm text-text-muted leading-relaxed font-medium">
             Para recibir notificaciones biométricas y chatear con tu entrenador en tiempo real, debes añadir Triatlón Pro a tu pantalla de inicio.
           </p>
         </div>
 
-        <div className="space-y-4 pt-4 border-t border-zinc-800">
+        <div className="space-y-4 pt-4 border-t border-border-subtle">
           {osType === 'ios' ? (
             <>
-              <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
-                <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
+              <div className="flex items-center gap-4 text-left bg-surface-app p-4 rounded-2xl border border-border-subtle/50">
+                <div className="bg-surface-hover p-2 rounded-xl text-text-muted">
                   <Share className="w-5 h-5" />
                 </div>
-                <p className="text-sm text-zinc-300 font-medium">
-                  <strong className="text-white">Paso 1:</strong> Toca el botón de compartir abajo en Safari.
+                <p className="text-sm text-text-muted font-medium">
+                  <strong className="text-text-primary">Paso 1:</strong> Toca el botón de compartir abajo en Safari.
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
-                <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
+              <div className="flex items-center gap-4 text-left bg-surface-app p-4 rounded-2xl border border-border-subtle/50">
+                <div className="bg-surface-hover p-2 rounded-xl text-text-muted">
                   <PlusSquare className="w-5 h-5" />
                 </div>
-                <p className="text-sm text-zinc-300 font-medium">
-                  <strong className="text-white">Paso 2:</strong> Selecciona "Añadir a la pantalla de inicio".
+                <p className="text-sm text-text-muted font-medium">
+                  <strong className="text-text-primary">Paso 2:</strong> Selecciona "Añadir a la pantalla de inicio".
                 </p>
               </div>
             </>
           ) : (
             <>
-              <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
-                <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
+              <div className="flex items-center gap-4 text-left bg-surface-app p-4 rounded-2xl border border-border-subtle/50">
+                <div className="bg-surface-hover p-2 rounded-xl text-text-muted">
                   <MoreVertical className="w-5 h-5" />
                 </div>
-                <p className="text-sm text-zinc-300 font-medium">
-                  <strong className="text-white">Paso 1:</strong> Toca los 3 puntitos arriba a la derecha en Chrome.
+                <p className="text-sm text-text-muted font-medium">
+                  <strong className="text-text-primary">Paso 1:</strong> Toca los 3 puntitos arriba a la derecha en Chrome.
                 </p>
               </div>
 
-              <div className="flex items-center gap-4 text-left bg-zinc-950 p-4 rounded-2xl border border-zinc-800/50">
-                <div className="bg-zinc-800 p-2 rounded-xl text-zinc-300">
+              <div className="flex items-center gap-4 text-left bg-surface-app p-4 rounded-2xl border border-border-subtle/50">
+                <div className="bg-surface-hover p-2 rounded-xl text-text-muted">
                   <Download className="w-5 h-5" />
                 </div>
-                <p className="text-sm text-zinc-300 font-medium">
-                  <strong className="text-white">Paso 2:</strong> Selecciona "Instalar aplicación" o "Añadir a inicio".
+                <p className="text-sm text-text-muted font-medium">
+                  <strong className="text-text-primary">Paso 2:</strong> Selecciona "Instalar aplicación" o "Añadir a inicio".
                 </p>
               </div>
             </>
@@ -106,7 +106,7 @@ export function IosInstallPrompt() {
         <div className="pt-6 text-center">
           <button 
             onClick={() => setIsDismissed(true)}
-            className="text-xs text-zinc-500 hover:text-zinc-300 font-medium underline underline-offset-4 cursor-pointer"
+            className="text-xs text-text-secondary hover:text-text-muted font-medium underline underline-offset-4 cursor-pointer"
           >
             Saltar por ahora (Solo para pruebas)
           </button>
@@ -115,8 +115,8 @@ export function IosInstallPrompt() {
       
       {/* Visual arrow pointing towards the install action area */}
       <div className={`absolute ${osType === 'ios' ? 'bottom-10 left-1/2 -translate-x-1/2' : 'top-24 right-6'} animate-bounce flex flex-col items-center gap-2 opacity-50`}>
-        <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">Instalar Aquí</span>
-        <svg className={`w-6 h-6 text-cyan-400 ${osType === 'android' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <span className="text-xs font-bold uppercase tracking-widest text-swim">Instalar Aquí</span>
+        <svg className={`w-6 h-6 text-swim ${osType === 'android' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>

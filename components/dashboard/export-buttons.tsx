@@ -56,7 +56,7 @@ export function ExportButtons() {
       <button
         onClick={handleCSV}
         disabled={loading !== null}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all disabled:opacity-50"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-text-secondary hover:text-text-primary bg-surface-card hover:bg-surface-hover border border-border-subtle hover:border-border-default transition-all disabled:opacity-50"
       >
         {loading === 'csv' ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -68,7 +68,7 @@ export function ExportButtons() {
       <button
         onClick={handleICS}
         disabled={loading !== null}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-zinc-500 hover:text-zinc-800 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-all disabled:opacity-50"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-text-secondary hover:text-text-primary bg-surface-card hover:bg-surface-hover border border-border-subtle hover:border-border-default transition-all disabled:opacity-50"
       >
         {loading === 'ics' ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin" />

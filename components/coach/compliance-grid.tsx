@@ -47,7 +47,7 @@ export function ComplianceGrid({ athletes }: ComplianceGridProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-border-subtle overflow-hidden">
+    <div className="bg-surface-card rounded-2xl border border-border-subtle overflow-hidden">
       <div className="p-4 border-b border-border-subtle flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">

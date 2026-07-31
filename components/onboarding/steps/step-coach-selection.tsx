@@ -66,20 +66,20 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
   return (
     <motion.div key="step-coach" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
       <ProCard className="space-y-6">
-        <div className="border-b border-zinc-200 pb-4">
-          <h2 className="text-xl font-medium text-zinc-900 flex items-center gap-2"><UserPlus className="w-5 h-5 text-orange-500" /> Elección de Entrenador</h2>
-          <p className="text-sm text-zinc-500 mt-1">Conéctate con tu entrenador o explora nuestro directorio de profesionales.</p>
+        <div className="border-b border-border-default pb-4">
+          <h2 className="text-xl font-medium text-text-primary flex items-center gap-2"><UserPlus className="w-5 h-5 text-coral-500" /> Elección de Entrenador</h2>
+          <p className="text-sm text-text-secondary mt-1">Conéctate con tu entrenador o explora nuestro directorio de profesionales.</p>
         </div>
 
         <div className="flex flex-col gap-6 pt-2">
           
           {/* Option 1: Invite Code (Top area) */}
-          <div className="p-5 rounded-2xl border border-zinc-200 bg-zinc-50 flex flex-col items-center text-center space-y-4 relative overflow-hidden">
+          <div className="p-5 rounded-2xl border border-border-default bg-surface-hover flex flex-col items-center text-center space-y-4 relative overflow-hidden">
             <AnimatePresence mode="wait">
               {!foundCoach ? (
                 <motion.div key="search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4 flex flex-col items-center w-full max-w-md">
-                  <h3 className="text-sm font-bold text-zinc-900">¿Tienes un código privado?</h3>
-                  <p className="text-xs text-zinc-500">Si tu entrenador te ha dado su código de invitación (Ej: GUILLEPRO), introdúcelo aquí.</p>
+                  <h3 className="text-sm font-bold text-text-primary">¿Tienes un código privado?</h3>
+                  <p className="text-xs text-text-secondary">Si tu entrenador te ha dado su código de invitación (Ej: GUILLEPRO), introdúcelo aquí.</p>
                   
                   <div className="flex w-full gap-2">
                     <input 
@@ -90,48 +90,48 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
                         setError(null);
                       }} 
                       placeholder="CÓDIGO DE ENTRENADOR" 
-                      className={`flex-1 bg-white border rounded-xl px-4 py-3 text-sm focus:border-cyan-500 outline-none transition-all text-center font-bold tracking-widest uppercase ${error ? 'border-red-500 text-red-500' : 'border-zinc-300 text-cyan-600'}`} 
+                      className={`flex-1 bg-surface-card border rounded-xl px-4 py-3 text-sm focus:border-swim outline-none transition-all text-center font-bold tracking-widest uppercase ${error ? 'border-danger text-danger' : 'border-border-default text-swim'}`} 
                     />
                     <AnimatedButton 
                       variant="primary" 
                       onClick={() => handleLookup()} 
                       disabled={!props.inviteCode.trim() || localLoading}
-                      className="px-6 py-3 text-xs !bg-cyan-600 hover:!bg-cyan-500 !text-white"
+                      className="px-6 py-3 text-xs !bg-swim hover:!bg-swim/90 !text-white"
                     >
                       {localLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
                     </AnimatedButton>
                   </div>
-                  {error && <p className="text-[10px] text-red-500 font-medium">{error}</p>}
+                  {error && <p className="text-[10px] text-danger font-medium">{error}</p>}
                 </motion.div>
               ) : (
                 <motion.div key="confirm" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-5 flex flex-col items-center w-full max-w-md">
-                  <h3 className="text-sm font-bold text-emerald-600 flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Entrenador Encontrado</h3>
+                  <h3 className="text-sm font-bold text-bike flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4" /> Entrenador Encontrado</h3>
                   
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-16 h-16 rounded-full bg-zinc-100 border-2 border-emerald-500/50 flex items-center justify-center overflow-hidden">
+                    <div className="w-16 h-16 rounded-full bg-surface-hover border-2 border-bike/50 flex items-center justify-center overflow-hidden">
                       {foundCoach.avatar_url ? (
                         <img src={foundCoach.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
-                        <UserPlus className="w-6 h-6 text-zinc-500" />
+                        <UserPlus className="w-6 h-6 text-text-secondary" />
                       )}
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-bold text-zinc-900">{foundCoach.first_name || 'Entrenador'} {foundCoach.last_name || ''}</p>
-                      <p className="text-[10px] text-zinc-500 uppercase tracking-wider">{props.inviteCode}</p>
+                      <p className="text-sm font-bold text-text-primary">{foundCoach.first_name || 'Entrenador'} {foundCoach.last_name || ''}</p>
+                      <p className="text-[10px] text-text-secondary uppercase tracking-wider">{props.inviteCode}</p>
                     </div>
                   </div>
 
-                  <p className="text-xs text-zinc-600 font-medium pt-2">¿Eres atleta de este entrenador?</p>
+                  <p className="text-xs text-text-secondary font-medium pt-2">¿Eres atleta de este entrenador?</p>
 
                   <div className="flex w-full gap-2 mt-2">
-                    <button onClick={() => setFoundCoach(null)} className="flex-1 py-2.5 rounded-xl border border-zinc-200 text-zinc-600 text-xs font-semibold hover:bg-zinc-100 transition">
+                    <button onClick={() => setFoundCoach(null)} className="flex-1 py-2.5 rounded-xl border border-border-default text-text-secondary text-xs font-semibold hover:bg-surface-hover transition">
                       Cancelar
                     </button>
                     <AnimatedButton 
                       variant="primary" 
                       onClick={props.onNext} 
                       disabled={props.loading}
-                      className="flex-1 py-2.5 text-xs !bg-emerald-600 hover:!bg-emerald-500 !text-white"
+                      className="flex-1 py-2.5 text-xs !bg-bike hover:!bg-bike/90 !text-white"
                     >
                       {props.loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : 'Sí, vincular'}
                     </AnimatedButton>
@@ -143,15 +143,15 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
 
           {/* Option 2: Coach Directory Scroll */}
           <div className="space-y-3 pt-2">
-            <h3 className="text-sm font-bold text-zinc-900 px-2 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-text-primary px-2 flex items-center justify-between">
               Entrenadores Disponibles
-              {loadingDirectory && <Loader2 className="w-3 h-3 text-cyan-600 animate-spin" />}
+              {loadingDirectory && <Loader2 className="w-3 h-3 text-swim animate-spin" />}
             </h3>
             
             <div className="flex overflow-x-auto pb-4 gap-4 px-2 snap-x snap-mandatory scrollbar-hide [scrollbar-width:none] [-ms-overflow-style:none]">
               {!loadingDirectory && coaches.length === 0 && (
-                <div className="w-full p-6 text-center border border-zinc-200 rounded-2xl bg-zinc-50">
-                  <p className="text-xs text-zinc-500">No hay entrenadores públicos en este momento.</p>
+                <div className="w-full p-6 text-center border border-border-default rounded-2xl bg-surface-hover">
+                  <p className="text-xs text-text-secondary">No hay entrenadores públicos en este momento.</p>
                 </div>
               )}
               
@@ -159,20 +159,20 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
                 <motion.div 
                   key={coach.id}
                   whileHover={{ scale: 0.98 }}
-                  className="min-w-[280px] w-[280px] flex-shrink-0 snap-center rounded-2xl border border-zinc-200 bg-white p-5 flex flex-col space-y-4 shadow-sm"
+                  className="min-w-[280px] w-[280px] flex-shrink-0 snap-center rounded-2xl border border-border-default bg-surface-card p-5 flex flex-col space-y-4 shadow-card"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-zinc-50 flex items-center justify-center shrink-0 border border-zinc-200">
-                      <UserPlus className="w-5 h-5 text-zinc-400" />
+                    <div className="w-12 h-12 rounded-full bg-surface-hover flex items-center justify-center shrink-0 border border-border-default">
+                      <UserPlus className="w-5 h-5 text-text-muted" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-zinc-900">{coach.first_name} {coach.last_name || ''}</h4>
-                      <p className="text-[10px] text-cyan-600 uppercase tracking-widest font-semibold">{coach.level || 'Entrenador PRO'}</p>
+                      <h4 className="text-sm font-bold text-text-primary">{coach.first_name} {coach.last_name || ''}</h4>
+                      <p className="text-[10px] text-swim uppercase tracking-widest font-semibold">{coach.level || 'Entrenador PRO'}</p>
                     </div>
                   </div>
                   
                   {coach.bio && (
-                    <p className="text-xs text-zinc-500 leading-relaxed line-clamp-3">
+                    <p className="text-xs text-text-secondary leading-relaxed line-clamp-3">
                       {coach.bio}
                     </p>
                   )}
@@ -180,8 +180,8 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
                   {coach.achievements && coach.achievements.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 pt-1">
                       {coach.achievements.slice(0, 3).map((ach: string, i: number) => (
-                        <span key={i} className="text-[9px] px-2 py-1 rounded-md bg-zinc-50 border border-zinc-200 text-zinc-600 flex items-center gap-1">
-                          <Award className="w-2.5 h-2.5 text-orange-500" />
+                        <span key={i} className="text-[9px] px-2 py-1 rounded-md bg-surface-hover border border-border-default text-text-secondary flex items-center gap-1">
+                          <Award className="w-2.5 h-2.5 text-coral-500" />
                           {ach}
                         </span>
                       ))}
@@ -196,7 +196,7 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
                         handleLookup(coach.invite_code);
                       }}
                       disabled={localLoading || props.loading}
-                      className="w-full py-2.5 text-xs bg-zinc-900 hover:bg-zinc-800 text-white flex items-center justify-center gap-2"
+                      className="w-full py-2.5 text-xs bg-surface-card hover:bg-surface-hover text-text-primary flex items-center justify-center gap-2"
                     >
                       Seleccionar <ChevronRight className="w-3.5 h-3.5" />
                     </AnimatedButton>
@@ -208,14 +208,14 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
 
         </div>
 
-        <div className="flex justify-between pt-4 border-t border-zinc-200 mt-4">
-          <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-500 hover:text-zinc-900 transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+        <div className="flex justify-between pt-4 border-t border-border-default mt-4">
+          <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-text-secondary hover:text-text-primary transition flex items-center"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
           
           <AnimatedButton
             variant="secondary"
             onClick={props.onSearchDirectory}
             disabled={props.loading}
-            className="px-6 py-3 text-xs !bg-zinc-850 hover:!bg-zinc-800 !text-white flex items-center gap-1.5 border border-zinc-700/50"
+            className="px-6 py-3 text-xs !bg-surface-card hover:!bg-surface-hover !text-text-primary flex items-center gap-1.5 border border-border-default"
           >
             {props.loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Omitir y continuar'} <ChevronRight className="w-3.5 h-3.5" />
           </AnimatedButton>

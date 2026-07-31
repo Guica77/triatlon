@@ -83,7 +83,7 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
     <ProCard className="relative flex flex-col justify-between space-y-6 md:col-span-1 overflow-hidden">
       {/* Help Overlay */}
       {showHelp && (
-        <div className="absolute inset-0 bg-white/95 border border-border-subtle rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute inset-0 bg-surface-elevated/95 border border-border-subtle rounded-xl p-5 flex flex-col justify-between z-20 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150">
           <div className="space-y-2">
             <h4 className="text-xs font-bold text-swim uppercase tracking-widest">
               {isBeginner ? '¿Qué es el Tiempo Semanal?' : '¿Qué es el Progreso de TSS?'}

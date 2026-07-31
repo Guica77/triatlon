@@ -19,7 +19,7 @@ export function KPICard({ title, value, subtitle, trend, icon: Icon, color, dela
     ? 'text-emerald-400'
     : trend && trend < 0
       ? 'text-red-400'
-      : 'text-zinc-500'
+      : 'text-text-secondary'
 
   const TrendIcon = trend && trend > 0
     ? TrendingUp
@@ -33,8 +33,8 @@ export function KPICard({ title, value, subtitle, trend, icon: Icon, color, dela
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.3 }}
       className={cn(
-        'bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 relative overflow-hidden',
-        'hover:border-zinc-700 transition-colors duration-200'
+        'bg-surface-card/80 border border-border-subtle rounded-2xl p-5 relative overflow-hidden',
+        'hover:border-border-default transition-colors duration-200'
       )}
     >
       {/* Background glow */}
@@ -53,12 +53,12 @@ export function KPICard({ title, value, subtitle, trend, icon: Icon, color, dela
       </div>
 
       <div className="space-y-1">
-        <p className="text-2xl font-black text-white tracking-tight">
+        <p className="text-2xl font-black text-text-primary tracking-tight">
           {typeof value === 'number' ? value.toLocaleString('es-ES') : value}
         </p>
-        <p className="text-xs text-zinc-500 font-medium uppercase tracking-wider">{title}</p>
+        <p className="text-xs text-text-secondary font-medium uppercase tracking-wider">{title}</p>
         {subtitle && (
-          <p className="text-[10px] text-zinc-600 font-medium">{subtitle}</p>
+          <p className="text-[10px] text-text-secondary font-medium">{subtitle}</p>
         )}
       </div>
     </motion.div>

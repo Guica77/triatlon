@@ -75,14 +75,14 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           {/* Modal Card */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-            className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white border border-zinc-200 shadow-2xl p-6 sm:p-8"
+            className="relative w-full max-w-md overflow-hidden rounded-3xl bg-surface-elevated border border-border-default shadow-elevated p-6 sm:p-8"
           >
             {/* Ambient Background Glows */}
             <div className="absolute -left-16 -top-16 w-32 h-32 rounded-full bg-cyan-500/5 blur-3xl pointer-events-none" />
@@ -93,7 +93,7 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
               <button
                 onClick={handleDismiss}
                 title="Cerrar"
-                className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-700 p-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 border border-zinc-200 transition cursor-pointer"
+                className="absolute top-4 right-4 text-text-muted hover:text-text-primary p-1.5 rounded-xl bg-surface-hover hover:bg-border-default border border-border-default transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -105,11 +105,11 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
                 animate={{ opacity: 1 }}
                 className="text-center py-8 space-y-4"
               >
-                <div className="w-16 h-16 rounded-full bg-cyan-50 border border-cyan-200 flex items-center justify-center mx-auto text-cyan-400">
+                <div className="w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto text-cyan-400">
                   <Sparkles className="w-8 h-8 animate-pulse" />
                 </div>
-                <h3 className="text-lg font-bold text-zinc-900">¡Muchas gracias!</h3>
-                <p className="text-xs text-zinc-550 max-w-xs mx-auto">
+                <h3 className="text-lg font-bold text-text-primary">¡Muchas gracias!</h3>
+                <p className="text-xs text-text-secondary max-w-xs mx-auto">
                   Tus comentarios nos ayudan a perfeccionar tus planes y la experiencia autónoma para tu Ironman.
                 </p>
               </motion.div>
@@ -122,16 +122,16 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
                       Feedback de {daysUsed} Días
                     </span>
                   </div>
-                  <h3 className="text-lg font-extrabold text-zinc-900 tracking-tight">
+                  <h3 className="text-lg font-extrabold text-text-primary tracking-tight">
                     ¿Cómo ha sido tu experiencia hasta ahora?
                   </h3>
-                  <p className="text-xs text-zinc-500">
+                  <p className="text-xs text-text-secondary">
                     Llevas una semana entrenando con nuestra IA. Cuéntanos qué tal te sientes con los planes de doble sesión y la intensidad.
                   </p>
                 </div>
 
                 {/* Rating Selector (Stars) */}
-                <div className="space-y-3 bg-zinc-50 border border-zinc-200 rounded-2xl p-4 text-center">
+                <div className="space-y-3 bg-surface-hover border border-border-default rounded-2xl p-4 text-center">
                   <div className="flex justify-center items-center gap-3">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -141,13 +141,13 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
                         title={`Calificar con ${star} estrellas`}
-                        className="text-zinc-300 hover:scale-115 transition duration-150 cursor-pointer"
+                        className="text-text-muted hover:scale-115 transition duration-150 cursor-pointer"
                       >
                         <Star
                           className={`w-8 h-8 stroke-[1.5] ${
                             star <= (hoverRating || rating)
                               ? 'fill-cyan-400 stroke-cyan-400'
-                              : 'stroke-zinc-400'
+                              : 'stroke-text-muted'
                           }`}
                         />
                       </button>
@@ -160,7 +160,7 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
 
                 {/* Text Comments */}
                 <div className="space-y-2">
-                  <label htmlFor="comments" className="text-xs font-bold text-zinc-650">
+                  <label htmlFor="comments" className="text-xs font-bold text-text-secondary">
                     ¿Qué te gustaría añadir o qué podemos mejorar?
                   </label>
                   <textarea
@@ -169,7 +169,7 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
                     value={comments}
                     onChange={(e) => setComments(e.target.value)}
                     placeholder="Ej. Me encantan las sesiones de carrera a pie, pero la natación me gustaría con más volumen..."
-                    className="w-full bg-white border border-zinc-200 focus:border-cyan-500 focus:outline-none rounded-2xl p-4 text-xs text-zinc-800 placeholder-zinc-400 resize-none transition shadow-inner font-medium"
+                    className="w-full bg-surface-card border border-border-default focus:border-cyan-500 focus:outline-none rounded-2xl p-4 text-xs text-text-primary placeholder:text-text-muted resize-none transition font-medium"
                   />
                 </div>
 
@@ -178,14 +178,14 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
                   <button
                     type="button"
                     onClick={handleDismiss}
-                    className="flex-1 py-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 hover:text-zinc-800 text-zinc-600 text-xs font-bold transition cursor-pointer text-center"
+                    className="flex-1 py-3.5 rounded-2xl bg-surface-hover border border-border-default hover:bg-border-default hover:text-text-primary text-text-secondary text-xs font-bold transition cursor-pointer text-center"
                   >
                     Recordar más tarde
                   </button>
                   <button
                     type="submit"
                     disabled={rating === 0 || isSubmitting}
-                    className="flex-1 py-3.5 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-cyan-500/20"
+                    className="flex-1 py-3.5 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                   >
                     <span>{isSubmitting ? 'Enviando...' : 'Enviar'}</span>
                     <Send className="w-3.5 h-3.5" />

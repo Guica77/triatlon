@@ -78,7 +78,7 @@ export function RaceFinder() {
     const total = weeksRemaining;
     if (total < 4) {
       return [
-        { name: 'Puesta a punto exprés', weeks: total, color: 'bg-emerald-500', desc: 'Ajuste directo para competición' }
+        { name: 'Puesta a punto exprés', weeks: total, color: 'bg-bike', desc: 'Ajuste directo para competición' }
       ];
     }
 
@@ -88,10 +88,10 @@ export function RaceFinder() {
     const phase4 = total - phase1 - phase2 - phase3; // Tapering Biométrica
 
     return [
-      { name: 'Acondicionamiento Anatómico', weeks: phase1, color: 'bg-cyan-500', desc: 'Base aeróbica Z1/Z2 y adaptación tendinosa' },
-      { name: 'Sobrecarga Progresiva', weeks: phase2, color: 'bg-amber-500', desc: 'Aumento de TSS, series tempo Z3 y fuerza' },
-      { name: 'Intensidad Máxima', weeks: phase3, color: 'bg-rose-500', desc: 'VO2Max Z4, simulaciones y transiciones brick' },
-      { name: 'Tapering Biométrica', weeks: phase4, color: 'bg-emerald-500', desc: 'Supercompensación y frescura TSB positiva' }
+      { name: 'Acondicionamiento Anatómico', weeks: phase1, color: 'bg-swim', desc: 'Base aeróbica Z1/Z2 y adaptación tendinosa' },
+      { name: 'Sobrecarga Progresiva', weeks: phase2, color: 'bg-warning', desc: 'Aumento de TSS, series tempo Z3 y fuerza' },
+      { name: 'Intensidad Máxima', weeks: phase3, color: 'bg-run', desc: 'VO2Max Z4, simulaciones y transiciones brick' },
+      { name: 'Tapering Biométrica', weeks: phase4, color: 'bg-bike', desc: 'Supercompensación y frescura TSB positiva' }
     ];
   }, [weeksRemaining]);
 
@@ -118,8 +118,8 @@ export function RaceFinder() {
 
   if (!isMounted) {
     return (
-      <div className="w-full max-w-5xl space-y-8 min-h-[400px] flex items-center justify-center bg-zinc-950/50 rounded-2xl animate-pulse">
-        <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+      <div className="w-full max-w-5xl space-y-8 min-h-[400px] flex items-center justify-center bg-surface-app/50 rounded-2xl animate-pulse">
+        <div className="w-8 h-8 rounded-full border-4 border-swim border-t-transparent animate-spin"></div>
       </div>
     );
   }
@@ -127,13 +127,13 @@ export function RaceFinder() {
   return (
     <div className="w-full max-w-5xl space-y-8">
       {/* Pestañas de Navegación */}
-      <div className="flex bg-zinc-900/80 p-1.5 rounded-2xl border border-zinc-800/80 max-w-md mx-auto shadow-2xl">
+      <div className="flex bg-surface-card/80 p-1.5 rounded-2xl border border-border-subtle/80 max-w-md mx-auto shadow-elevated">
         <button
           onClick={() => setActiveTab('catalog')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all ${
             activeTab === 'catalog'
-              ? 'bg-zinc-800 text-cyan-400 shadow-md border border-zinc-700/50'
-              : 'text-zinc-500 hover:text-zinc-300'
+              ? 'bg-surface-hover text-swim  border border-border-default'
+              : 'text-text-secondary hover:text-text-muted'
           }`}
         >
           <Trophy className="w-4 h-4" />
@@ -144,8 +144,8 @@ export function RaceFinder() {
           onClick={() => setActiveTab('custom')}
           className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all ${
             activeTab === 'custom'
-              ? 'bg-zinc-800 text-cyan-400 shadow-md border border-zinc-700/50'
-              : 'text-zinc-500 hover:text-zinc-300'
+              ? 'bg-surface-hover text-swim  border border-border-default'
+              : 'text-text-secondary hover:text-text-muted'
           }`}
         >
           <Zap className="w-4 h-4" />
@@ -160,25 +160,25 @@ export function RaceFinder() {
         <div className="lg:col-span-7 space-y-6">
           {activeTab === 'catalog' ? (
             <ProCard className="space-y-6">
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+              <div className="flex items-center justify-between border-b border-border-subtle/80 pb-4">
                 <div>
-                  <h2 className="text-lg font-medium text-zinc-100">Pruebas Homologadas</h2>
-                  <p className="text-xs text-zinc-400 mt-0.5">Selecciona tu competición en el circuito internacional</p>
+                  <h2 className="text-lg font-medium text-text-primary">Pruebas Homologadas</h2>
+                  <p className="text-xs text-text-muted mt-0.5">Selecciona tu competición en el circuito internacional</p>
                 </div>
-                <span className="text-xs px-2.5 py-1 rounded-full bg-cyan-950/40 text-cyan-400 border border-cyan-500/30 font-medium">
+                <span className="text-xs px-2.5 py-1 rounded-full bg-swim/10 text-swim border border-swim/30 font-medium">
                   {RACES_CATALOG.length} Carreras
                 </span>
               </div>
 
               {/* Barra de Búsqueda */}
               <div className="relative">
-                <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-500" />
+                <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-text-secondary" />
                 <input
                   type="text"
                   placeholder="Buscar por ciudad, país, franquicia, distancia o modalidad (ej. Acuabike)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl pl-10 pr-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                  className="w-full bg-surface-app border border-border-subtle/80 rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-swim/50 transition-colors"
                 />
               </div>
 
@@ -192,31 +192,31 @@ export function RaceFinder() {
                       onClick={() => setSelectedRace(race)}
                       className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-zinc-800/80 border-cyan-500 shadow-lg shadow-cyan-950/20'
-                          : 'bg-zinc-900/40 border-zinc-800/60 hover:border-zinc-700/80'
+                          ? 'bg-surface-hover/80 border-swim'
+                          : 'bg-surface-app/40 border-border-subtle/60 hover:border-border-default'
                       }`}
                     >
                       <div className="flex items-center gap-4">
                         {/* We use tailwind background classes mapped in races-data.ts instead of inline style */}
                         <div
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-zinc-950 text-xs shadow-md shrink-0 ${race.logoBg}`}
+                          className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-zinc-950 text-xs  shrink-0 ${race.logoBg}`}
                         >
                           {race.distance === 'half' ? '70.3' : race.distance === 'full' ? 'FULL' : race.distance.toUpperCase().slice(0, 3)}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-semibold text-zinc-100">{race.name}</h3>
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-cyan-400 font-medium uppercase tracking-wider border border-zinc-700">
+                            <h3 className="text-sm font-semibold text-text-primary">{race.name}</h3>
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-surface-hover text-swim font-medium uppercase tracking-wider border border-border-default">
                               {race.modality}
                             </span>
                           </div>
-                          <p className="text-xs text-zinc-400 mt-0.5">{race.city}, {race.country} • {race.month}</p>
+                          <p className="text-xs text-text-muted mt-0.5">{race.city}, {race.country} • {race.month}</p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="text-xs font-medium text-zinc-500">{race.estimatedDate}</span>
-                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? 'bg-cyan-400 border-cyan-400 text-zinc-950' : 'border-zinc-700'}`}>
+                        <span className="text-xs font-medium text-text-secondary">{race.estimatedDate}</span>
+                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? 'bg-swim border-swim text-white' : 'border-border-default'}`}>
                           {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
                         </div>
                       </div>
@@ -227,15 +227,15 @@ export function RaceFinder() {
             </ProCard>
           ) : (
             <ProCard className="space-y-6">
-              <div className="border-b border-zinc-800/80 pb-4">
-                <h2 className="text-lg font-medium text-zinc-100">Configuración a Medida</h2>
-                <p className="text-xs text-zinc-400 mt-0.5">Define los parámetros de tu propio desafío deportivo</p>
+              <div className="border-b border-border-subtle/80 pb-4">
+                <h2 className="text-lg font-medium text-text-primary">Configuración a Medida</h2>
+                <p className="text-xs text-text-muted mt-0.5">Define los parámetros de tu propio desafío deportivo</p>
               </div>
 
               {/* Formulario */}
               <div className="space-y-5">
                 <div>
-                  <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">
+                  <label className="text-xs font-medium text-text-muted block mb-2 uppercase tracking-wider">
                     Nombre de la Prueba
                   </label>
                   <input
@@ -243,22 +243,22 @@ export function RaceFinder() {
                     placeholder="Ej. Acuabike de mi Ciudad 2027"
                     value={customName}
                     onChange={(e) => setCustomName(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                    className="w-full bg-surface-app border border-border-subtle/80 rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-swim/50 transition-colors"
                   />
                 </div>
 
                 {/* Selector de Modalidad Multisport */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">
+                  <label className="text-xs font-medium text-text-muted block mb-2 uppercase tracking-wider">
                     Modalidad Deportiva (Multisport)
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                     {[
-                      { label: 'Triatlón', val: 'triatlon', desc: '🏊 🚴 🏃', color: 'border-cyan-500 text-cyan-400' },
-                      { label: 'Duatlón', val: 'duatlon', desc: '🏃 🚴 🏃', color: 'border-emerald-500 text-emerald-400' },
-                      { label: 'Acuatlón', val: 'acuatlon', desc: '🏊 🏃', color: 'border-blue-500 text-blue-400' },
-                      { label: 'Acuabike', val: 'acuabike', desc: '🏊 🚴', color: 'border-teal-500 text-teal-400' },
-                      { label: 'Cross', val: 'cross', desc: '🏊 🌲 🏃', color: 'border-lime-500 text-lime-400' },
+                      { label: 'Triatlón', val: 'triatlon', desc: '🏊 🚴 🏃', color: 'border-swim text-swim' },
+                      { label: 'Duatlón', val: 'duatlon', desc: '🏃 🚴 🏃', color: 'border-bike text-bike' },
+                      { label: 'Acuatlón', val: 'acuatlon', desc: '🏊 🏃', color: 'border-swim text-swim' },
+                      { label: 'Acuabike', val: 'acuabike', desc: '🏊 🚴', color: 'border-bike text-bike' },
+                      { label: 'Cross', val: 'cross', desc: '🏊 🌲 🏃', color: 'border-warning text-warning' },
                     ].map((m) => (
                       <button
                         key={m.val}
@@ -266,8 +266,8 @@ export function RaceFinder() {
                         onClick={() => setCustomModality(m.val as any)}
                         className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all ${
                           customModality === m.val
-                            ? `bg-zinc-800 ${m.color} shadow-md`
-                            : 'bg-zinc-950/60 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
+                            ? `bg-surface-hover ${m.color} `
+                            : 'bg-surface-app/60 border-border-subtle/80 text-text-muted hover:border-border-default'
                         }`}
                       >
                         <span className="text-xs font-bold uppercase tracking-wider">{m.label}</span>
@@ -278,7 +278,7 @@ export function RaceFinder() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">
+                  <label className="text-xs font-medium text-text-muted block mb-2 uppercase tracking-wider">
                     Distancia Objetivo
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -294,29 +294,29 @@ export function RaceFinder() {
                         onClick={() => setCustomDistance(d.val as any)}
                         className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
                           customDistance === d.val
-                            ? 'bg-zinc-800 border-cyan-500 text-cyan-400 shadow-md'
-                            : 'bg-zinc-950/60 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
+                            ? 'bg-surface-hover border-swim text-swim '
+                            : 'bg-surface-app/60 border-border-subtle/80 text-text-muted hover:border-border-default'
                         }`}
                       >
                         <span className="text-xs font-bold uppercase tracking-wider">{d.label}</span>
-                        <span className="text-[10px] text-zinc-500 mt-1">{d.desc}</span>
+                        <span className="text-[10px] text-text-secondary mt-1">{d.desc}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="custom-date-input" className="text-xs font-medium text-zinc-400 block mb-2 uppercase tracking-wider">
+                  <label htmlFor="custom-date-input" className="text-xs font-medium text-text-muted block mb-2 uppercase tracking-wider">
                     Fecha de la Competición
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-3.5 top-3.5 h-4 w-4 text-zinc-500" />
+                    <Calendar className="absolute left-3.5 top-3.5 h-4 w-4 text-text-secondary" />
                     <input
                       id="custom-date-input"
                       type="date"
                       value={customDate}
                       onChange={(e) => setCustomDate(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl pl-10 pr-4 py-3 text-sm text-zinc-100 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                      className="w-full bg-surface-app border border-border-subtle/80 rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary focus:outline-none focus:border-swim/50 transition-colors"
                     />
                   </div>
                 </div>
@@ -327,36 +327,36 @@ export function RaceFinder() {
 
         {/* Panel Derecho: Previsualización y Periodización (5 columnas) */}
         <div className="lg:col-span-5 space-y-6 sticky top-24">
-          <ProCard className="space-y-6 border-cyan-500/20 bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 backdrop-blur-xl">
+          <ProCard className="space-y-6 border-swim/20 bg-gradient-to-b from-surface-card to-surface-app backdrop-blur-xl">
             
             {/* Cabecera del Objetivo */}
-            <div className="flex justify-between items-start border-b border-zinc-800/80 pb-6">
+            <div className="flex justify-between items-start border-b border-border-subtle/80 pb-6">
               <div>
                 <div className="flex items-center gap-2">
-                  <Flag className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                  <Flag className="w-4 h-4 text-swim" />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
                     Objetivo de Temporada
                   </span>
                 </div>
-                <h3 className="text-xl font-medium text-zinc-50 mt-2 line-clamp-1">
+                <h3 className="text-xl font-medium text-text-primary mt-2 line-clamp-1">
                   {currentGoal.name}
                 </h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs px-2 py-0.5 rounded bg-zinc-800 text-cyan-400 font-medium uppercase tracking-wider border border-zinc-700">
+                  <span className="text-xs px-2 py-0.5 rounded bg-surface-hover text-swim font-medium uppercase tracking-wider border border-border-default">
                     {currentGoal.modality}
                   </span>
-                  <span className="text-xs text-zinc-400 capitalize">
+                  <span className="text-xs text-text-muted capitalize">
                     • {currentGoal.distance} • {currentGoal.location}
                   </span>
                 </div>
               </div>
 
               {/* Badge de Semanas */}
-              <div className="bg-zinc-950/80 px-4 py-2 rounded-xl border border-zinc-800 text-center shadow-inner">
-                <span className="text-2xl font-light text-cyan-400 block tracking-tight">
+              <div className="bg-surface-app/80 px-4 py-2 rounded-xl border border-border-subtle text-center shadow-inner">
+                <span className="text-2xl font-light text-swim block tracking-tight">
                   {weeksRemaining}
                 </span>
-                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-medium block">
+                <span className="text-[9px] uppercase tracking-wider text-text-secondary font-medium block">
                   Semanas
                 </span>
               </div>
@@ -365,12 +365,12 @@ export function RaceFinder() {
             {/* Barra de Periodización Dinámica */}
             <div className="space-y-4 pt-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-medium text-zinc-300">Periodización Fisiológica</span>
-                <span className="text-zinc-500 font-mono text-[10px]">Opción 2: Tactical / Performance</span>
+                <span className="font-medium text-text-muted">Periodización Fisiológica</span>
+                <span className="text-text-secondary font-mono text-[10px]">Opción 2: Tactical / Performance</span>
               </div>
 
               {/* Barra Visual */}
-              <div className="flex gap-1 h-3 bg-zinc-950 rounded-full overflow-hidden p-0.5 border border-zinc-800/80">
+              <div className="flex gap-1 h-3 bg-surface-app rounded-full overflow-hidden p-0.5 border border-border-subtle/80">
                 {phases.map((p, i) => (
                   <React.Fragment key={i}>
                     <style>{`
@@ -387,15 +387,15 @@ export function RaceFinder() {
               {/* Leyenda de Fases */}
               <div className="space-y-2.5 pt-2">
                 {phases.map((p, i) => (
-                  <div key={i} className="flex items-start justify-between gap-4 bg-zinc-950/40 p-2.5 rounded-xl border border-zinc-800/40">
+                  <div key={i} className="flex items-start justify-between gap-4 bg-surface-app/40 p-2.5 rounded-xl border border-border-subtle/40">
                     <div className="flex items-center gap-3">
                       <span className={`w-2.5 h-2.5 rounded-full ${p.color} shrink-0`} />
                       <div>
-                        <span className="text-xs font-semibold text-zinc-200 block">{p.name}</span>
-                        <span className="text-[10px] text-zinc-500 block leading-tight mt-0.5">{p.desc}</span>
+                        <span className="text-xs font-semibold text-text-muted block">{p.name}</span>
+                        <span className="text-[10px] text-text-secondary block leading-tight mt-0.5">{p.desc}</span>
                       </div>
                     </div>
-                    <span className="text-xs font-mono text-zinc-400 font-medium shrink-0 bg-zinc-900/80 px-2 py-1 rounded-md border border-zinc-800">
+                    <span className="text-xs font-mono text-text-muted font-medium shrink-0 bg-surface-card/80 px-2 py-1 rounded-md border border-border-subtle">
                       {p.weeks} sem
                     </span>
                   </div>
@@ -407,7 +407,7 @@ export function RaceFinder() {
             <div className="pt-4">
               <AnimatedButton
                 variant="primary"
-                className="w-full py-4 text-sm font-semibold tracking-wide shadow-xl shadow-cyan-950/30"
+                className="w-full py-4 text-sm font-semibold tracking-wide shadow-elevated"
                 onClick={handleSave}
                 disabled={loading}
               >

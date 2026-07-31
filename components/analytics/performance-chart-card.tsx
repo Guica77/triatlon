@@ -95,7 +95,7 @@ export function PerformanceChartCard({
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="bg-white/95 border border-border-default rounded-lg p-3 backdrop-blur-md tabular-nums text-xs min-w-[160px]">
+        <div className="bg-surface-elevated/95 border border-border-default rounded-lg p-3 backdrop-blur-md tabular-nums text-xs min-w-[160px]">
           <div className="font-bold text-text-muted border-b border-border-subtle pb-1.5 mb-2 uppercase tracking-wider text-[10px]">
             {data.formattedDate}
           </div>
@@ -142,7 +142,7 @@ export function PerformanceChartCard({
   };
 
   return (
-    <div className="col-span-1 md:col-span-2 bg-white rounded-xl border border-border-subtle overflow-hidden flex flex-col font-sans">
+    <div className="col-span-1 md:col-span-2 bg-surface-card rounded-xl border border-border-subtle overflow-hidden flex flex-col font-sans">
       
       {/* HEADER TÉCNICO */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-5 py-4 border-b border-border-subtle bg-bg-elevated">
@@ -174,7 +174,7 @@ export function PerformanceChartCard({
                 }}
                 className={`px-3 py-1 text-[11px] font-bold rounded-sm transition-all cursor-pointer ${
                   timeRange === tab.value
-                    ? 'bg-white text-text-primary border border-border-subtle/80'
+                    ? 'bg-surface-card text-text-primary border border-border-subtle/80'
                     : 'text-text-muted hover:text-text-primary'
                 }`}
               >
@@ -196,7 +196,7 @@ export function PerformanceChartCard({
 
       {/* MÉTRICAS SUPERIORES (KPIs) */}
       {!isBeginner && (
-        <div className="grid grid-cols-3 divide-x divide-border-subtle bg-white border-b border-border-subtle">
+        <div className="grid grid-cols-3 divide-x divide-border-subtle bg-surface-card border-b border-border-subtle">
           <div className="px-5 py-3 relative group">
             <div className="flex items-center justify-between mb-1">
               <span className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5 text-sky-600">
@@ -250,7 +250,7 @@ export function PerformanceChartCard({
       )}
 
       {/* GRÁFICO RECHARTS DENSE */}
-      <div className="relative w-full pt-4 pb-1 px-2 bg-white cursor-pointer">
+      <div className="relative w-full pt-4 pb-1 px-2 bg-surface-card cursor-pointer">
         
         {/* LEYENDA COMPACTA */}
         <div className="flex flex-wrap items-center justify-end gap-x-4 mb-2 px-4 relative z-10">

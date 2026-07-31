@@ -272,7 +272,7 @@ export default async function DashboardPage() {
         
         {/* Banner de Bienvenida a Principiantes */}
         {profile.level === 'principiante' && (
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 relative overflow-hidden group shadow-md shadow-emerald-950/20">
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 relative overflow-hidden group ">
             {/* Ambient Background Light Glow */}
             <div className="absolute -right-16 -top-16 w-36 h-36 rounded-full bg-emerald-500/10 blur-3xl group-hover:bg-emerald-500/15 transition-all duration-500" />
             

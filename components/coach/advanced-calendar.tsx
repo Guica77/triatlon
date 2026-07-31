@@ -102,7 +102,7 @@ const getSportAccent = (type: string) => {
     case 'ciclismo': return 'bg-[#2ecc71]';
     case 'carrera': return 'bg-[#e74c3c]';
     case 'fuerza': return 'bg-purple-500';
-    default: return 'bg-zinc-300';
+    default: return 'bg-surface-hover';
   }
 };
 
@@ -148,7 +148,7 @@ function getComplianceColor(workout: WorkoutItem, actual: number, planned: numbe
     }
     
     // Si no hay feedback, calcular por ratio de duración
-    if (planned === 0 && actual === 0) return 'bg-zinc-200';
+    if (planned === 0 && actual === 0) return 'bg-border-default';
     if (planned === 0 && actual > 0) return 'bg-green-500';
     
     const ratio = actual / planned;
@@ -176,7 +176,7 @@ function MiniZonesChart({ zonesSummary }: { zonesSummary: Record<string, number>
         .bar-z4 { width: ${getWidth(zonesSummary.z4 || 0)}; background-color: #f59e0b; }
         .bar-z5 { width: ${getWidth(zonesSummary.z5 || 0)}; background-color: #ef4444; }
       `}</style>
-      <div className="flex h-2 w-full rounded-sm overflow-hidden bg-zinc-100 mt-1.5 opacity-80">
+      <div className="flex h-2 w-full rounded-sm overflow-hidden bg-surface-hover mt-1.5 opacity-80">
         <div className="bar-z1" />
         <div className="bar-z2" />
         <div className="bar-z3" />
@@ -210,9 +210,9 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
     return (
       <StyledDiv 
         ref={setNodeRef} styleProps={style} {...attributes} {...listeners}
-        className={`p-2.5 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 flex items-center justify-center gap-2 cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-30' : 'opacity-100'}`}
+        className={`p-2.5 rounded-xl border border-dashed border-border-default bg-surface-hover flex items-center justify-center gap-2 cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-30' : 'opacity-100'}`}
       >
-        <span className="text-[10px] text-zinc-400 font-bold tracking-wider">DESCANSO</span>
+        <span className="text-[10px] text-text-muted font-bold tracking-wider">DESCANSO</span>
       </StyledDiv>
     );
   }
@@ -230,8 +230,8 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
       {...attributes}
       {...listeners}
       onClick={() => onEdit(workout)}
-      className={`relative p-2 rounded-xl border bg-white shadow-sm cursor-grab active:cursor-grabbing group transition-all overflow-hidden ${
-        isDragging ? 'opacity-50 scale-105 shadow-md z-50 border-cyan-500/50' : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+      className={`relative p-2 rounded-xl border bg-surface-card shadow-card cursor-grab active:cursor-grabbing group transition-all overflow-hidden ${
+        isDragging ? 'opacity-50 scale-105 shadow-card-hover z-50 border-swim/50' : 'border-border-default hover:border-border-card hover:bg-surface-hover'
       }`}
     >
       {/* Background Compliance fill (TP style) */}
@@ -244,18 +244,18 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
         <div className="flex items-start justify-between gap-1">
           <div className="flex items-center gap-1 min-w-0">
             <div className={`w-1.5 h-3 rounded-full shrink-0 ${getSportAccent(session?.sport_type || '')}`} />
-            <h4 className="text-[10px] font-bold text-zinc-800 uppercase tracking-tight truncate">
+            <h4 className="text-[10px] font-bold text-text-primary uppercase tracking-tight truncate">
               {displayTitle}
             </h4>
           </div>
-          <span className="text-[9px] font-black text-zinc-500 shrink-0">
+          <span className="text-[9px] font-black text-text-secondary shrink-0">
             {isCompleted ? formatDuration(metrics.actualDuration) : formatDuration(metrics.plannedDuration)}
           </span>
         </div>
 
         {/* Dense Metrics Row */}
         <div className="flex items-center justify-between text-[9px] font-bold">
-          <div className="flex gap-1.5 text-zinc-600">
+          <div className="flex gap-1.5 text-text-secondary">
             {metrics.telemetry?.raw_payload?.average_heartrate && (
               <span className="text-red-500">{Math.round(metrics.telemetry.raw_payload.average_heartrate)}bpm</span>
             )}
@@ -263,13 +263,13 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
               <span className="text-purple-600">{Math.round(metrics.telemetry.raw_payload.average_watts)}w</span>
             )}
             {!isCompleted && metrics.plannedDuration > 0 && (
-              <span className="text-zinc-400 font-medium line-clamp-1">{parsed.main || parsed.warmup || 'Planificado'}</span>
+              <span className="text-text-muted font-medium line-clamp-1">{parsed.main || parsed.warmup || 'Planificado'}</span>
             )}
           </div>
           
           {/* TSS/Load */}
-          <div className="text-zinc-400 shrink-0">
-            L: <span className={`font-black ${isCompleted ? 'text-zinc-700' : ''}`}>{isCompleted ? metrics.actualTss : metrics.plannedTss}</span>
+          <div className="text-text-muted shrink-0">
+            L: <span className={`font-black ${isCompleted ? 'text-text-primary' : ''}`}>{isCompleted ? metrics.actualTss : metrics.plannedTss}</span>
           </div>
         </div>
 
@@ -309,7 +309,7 @@ function DroppableBackground({ id, isEmpty, onAddClick, children }: { id: string
             e.stopPropagation();
             onAddClick(id);
           }}
-          className="absolute inset-2 border-2 border-dashed border-zinc-200 rounded-xl bg-zinc-50/50 text-[10px] text-zinc-450 hover:text-cyan-600 hover:border-cyan-500/30 hover:bg-cyan-50 transition-all font-bold uppercase tracking-wider flex items-center justify-center cursor-pointer z-0"
+          className="absolute inset-2 border-2 border-dashed border-border-default rounded-xl bg-surface-hover/50 text-[10px] text-text-muted hover:text-swim hover:border-swim/30 hover:bg-swim/10 transition-all font-bold uppercase tracking-wider flex items-center justify-center cursor-pointer z-0"
         >
           Crear Aquí ➕
         </div>
@@ -566,35 +566,35 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
           
           <div className="grid grid-cols-1 md:grid-cols-8 gap-2 w-full lg:w-4/5">
             {/* Weekly Summary Column */}
-            <div className="hidden md:flex flex-col bg-zinc-50/50 rounded-2xl overflow-hidden shadow-sm">
-              <div className="p-3 border-b border-zinc-200 bg-zinc-100/60 flex flex-col items-center justify-center">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Semana</span>
-                <span className="text-xl font-black text-zinc-800">Total</span>
+            <div className="hidden md:flex flex-col bg-surface-card/50 rounded-2xl overflow-hidden shadow-card">
+              <div className="p-3 border-b border-border-default bg-surface-hover/60 flex flex-col items-center justify-center">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Semana</span>
+                <span className="text-xl font-black text-text-primary">Total</span>
               </div>
               <div className="p-3 flex flex-col gap-3 text-[10px]">
                 <div className="flex flex-col">
-                  <span className="text-zinc-500 font-bold uppercase tracking-wider mb-1">Duración</span>
-                  <div className="flex justify-between items-end border-b border-zinc-200 pb-1">
-                    <span className="font-medium text-zinc-400">Plan:</span>
-                    <span className="font-bold text-zinc-700">{formatDuration(weeklyMetrics.plannedTotalDur)}</span>
+                  <span className="text-text-secondary font-bold uppercase tracking-wider mb-1">Duración</span>
+                  <div className="flex justify-between items-end border-b border-border-default pb-1">
+                    <span className="font-medium text-text-muted">Plan:</span>
+                    <span className="font-bold text-text-primary">{formatDuration(weeklyMetrics.plannedTotalDur)}</span>
                   </div>
                   <div className="flex justify-between items-end mt-1">
-                    <span className="font-medium text-zinc-400">Real:</span>
-                    <span className={`font-black ${weeklyMetrics.actualTotalDur >= weeklyMetrics.plannedTotalDur * 0.9 ? 'text-green-600' : 'text-zinc-800'}`}>
+                    <span className="font-medium text-text-muted">Real:</span>
+                    <span className={`font-black ${weeklyMetrics.actualTotalDur >= weeklyMetrics.plannedTotalDur * 0.9 ? 'text-bike' : 'text-text-primary'}`}>
                       {formatDuration(weeklyMetrics.actualTotalDur)}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex flex-col mt-2">
-                  <span className="text-zinc-500 font-bold uppercase tracking-wider mb-1">Carga (Load)</span>
-                  <div className="flex justify-between items-end border-b border-zinc-200 pb-1">
-                    <span className="font-medium text-zinc-400">Plan:</span>
-                    <span className="font-bold text-zinc-700">{weeklyMetrics.plannedTotalTss}</span>
+                  <span className="text-text-secondary font-bold uppercase tracking-wider mb-1">Carga (Load)</span>
+                  <div className="flex justify-between items-end border-b border-border-default pb-1">
+                    <span className="font-medium text-text-muted">Plan:</span>
+                    <span className="font-bold text-text-primary">{weeklyMetrics.plannedTotalTss}</span>
                   </div>
                   <div className="flex justify-between items-end mt-1">
-                    <span className="font-medium text-zinc-400">Real:</span>
-                    <span className={`font-black ${weeklyMetrics.actualTotalTss >= weeklyMetrics.plannedTotalTss * 0.9 ? 'text-green-600' : 'text-zinc-800'}`}>
+                    <span className="font-medium text-text-muted">Real:</span>
+                    <span className={`font-black ${weeklyMetrics.actualTotalTss >= weeklyMetrics.plannedTotalTss * 0.9 ? 'text-bike' : 'text-text-primary'}`}>
                       {weeklyMetrics.actualTotalTss}
                     </span>
                   </div>
@@ -606,22 +606,22 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
             {days.map(day => {
               const dm = getDayMetrics(day.id);
               return (
-              <div key={day.id} className="flex flex-col bg-zinc-50 rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
+              <div key={day.id} className="flex flex-col bg-surface-card rounded-2xl border border-border-default overflow-hidden shadow-card">
                 {/* Day Header */}
-                <div className="p-2 border-b border-zinc-200 bg-zinc-100/60 flex flex-col items-center justify-center relative">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+                <div className="p-2 border-b border-border-default bg-surface-hover/60 flex flex-col items-center justify-center relative">
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-text-secondary">
                     {day.name}
                   </span>
-                  <span className={`text-lg font-black ${day.id === format(new Date(), 'yyyy-MM-dd') ? 'text-cyan-600' : 'text-zinc-800'}`}>
+                  <span className={`text-lg font-black ${day.id === format(new Date(), 'yyyy-MM-dd') ? 'text-swim' : 'text-text-primary'}`}>
                     {day.dayNumber}
                   </span>
-                  
+
                   {/* Daily Metric Summary */}
                   <div className="flex w-full justify-between px-1 mt-1 text-[9px] font-semibold">
-                    <div className="flex flex-col items-center text-zinc-500">
+                    <div className="flex flex-col items-center text-text-secondary">
                       <span>⏱ {dm.aDur > 0 ? formatDuration(dm.aDur) : formatDuration(dm.pDur)}</span>
                     </div>
-                    <div className="flex flex-col items-center text-zinc-500">
+                    <div className="flex flex-col items-center text-text-secondary">
                       <span>L: {dm.aTss > 0 ? dm.aTss : dm.pTss}</span>
                     </div>
                   </div>
@@ -648,8 +648,8 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
         <DragOverlay dropAnimation={dropAnimation}>
           {activeWorkout ? <SortableWorkoutCard workout={activeWorkout} onEdit={() => {}} /> : null}
           {activeTemplate ? (
-            <div className="bg-white p-3 rounded-xl border border-cyan-500 shadow-xl scale-105 opacity-90 flex items-center gap-3 w-48">
-              <span className="font-bold text-zinc-800 text-sm truncate">{activeTemplate.name}</span>
+            <div className="bg-surface-elevated p-3 rounded-xl border border-swim/50 shadow-elevated scale-105 opacity-90 flex items-center gap-3 w-48">
+              <span className="font-bold text-text-primary text-sm truncate">{activeTemplate.name}</span>
             </div>
           ) : null}
         </DragOverlay>

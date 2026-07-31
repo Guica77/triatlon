@@ -39,10 +39,10 @@ export function EditGroupRoadmapModal({ groupId, initialEvents, open, onOpenChan
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto bg-surface-elevated">
         <DialogHeader>
-          <DialogTitle className="text-lg font-black text-zinc-900 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-cyan-600" /> Roadmap del Grupo
+          <DialogTitle className="text-lg font-black text-text-primary flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-swim" /> Roadmap del Grupo
           </DialogTitle>
         </DialogHeader>
 
@@ -54,22 +54,22 @@ export function EditGroupRoadmapModal({ groupId, initialEvents, open, onOpenChan
                 value={event.title}
                 onChange={e => updateEvent(event.id, 'title', e.target.value)}
                 placeholder="Nombre del evento"
-                className="flex-1 text-sm p-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="flex-1 text-sm p-2 border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-swim"
               />
               <input
                 type="date"
                 value={event.date}
                 onChange={e => updateEvent(event.id, 'date', e.target.value)}
-                className="text-sm p-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="text-sm p-2 border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-swim"
               />
               <select
                 value={event.type}
                 onChange={e => updateEvent(event.id, 'type', e.target.value)}
-                className="text-sm p-2 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                className="text-sm p-2 border border-border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-swim"
               >
                 {EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
-              <button onClick={() => removeEvent(event.id)} className="p-2 text-zinc-400 hover:text-red-500 transition">
+              <button onClick={() => removeEvent(event.id)} className="p-2 text-text-muted hover:text-danger transition">
                 <Trash2 className="w-4 h-4" />
               </button>
             </div>

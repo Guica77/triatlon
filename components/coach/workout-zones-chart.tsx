@@ -37,10 +37,10 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="bg-white p-2 border border-zinc-200 shadow-sm rounded-lg text-xs z-50">
-        <p className="font-bold text-zinc-800 mb-1">{data.name} ({data.zone})</p>
-        <p className="text-zinc-600">
-          <span className="font-black text-zinc-900">{data.minutes}</span> min
+      <div className="bg-surface-elevated p-2 border border-border-default shadow-card rounded-lg text-xs z-50">
+        <p className="font-bold text-text-primary mb-1">{data.name} ({data.zone})</p>
+        <p className="text-text-secondary">
+          <span className="font-black text-text-primary">{data.minutes}</span> min
         </p>
       </div>
     );
@@ -51,7 +51,7 @@ const CustomTooltip = ({ active, payload }: any) => {
 export function WorkoutZonesChart({ zonesSummary }: WorkoutZonesChartProps) {
   if (!zonesSummary || Object.keys(zonesSummary).length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-4 bg-zinc-50 rounded-xl border border-dashed border-zinc-200 text-zinc-400">
+      <div className="flex flex-col items-center justify-center p-4 bg-surface-elevated rounded-xl border border-dashed border-border-default text-text-muted">
         <Activity className="w-5 h-5 mb-1 opacity-50" />
         <p className="text-[10px] uppercase font-bold tracking-wider">No hay datos de zonas</p>
       </div>
@@ -78,7 +78,7 @@ export function WorkoutZonesChart({ zonesSummary }: WorkoutZonesChartProps) {
 
   return (
     <div className="w-full space-y-2">
-      <h4 className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+      <h4 className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
         Tiempo en Zonas (Frecuencia Cardíaca)
       </h4>
       <div className="h-[120px] w-full">
@@ -92,7 +92,7 @@ export function WorkoutZonesChart({ zonesSummary }: WorkoutZonesChartProps) {
               tickLine={false}
               tick={{ fontSize: 10, fill: '#71717a', fontWeight: 700 }}
             />
-            <Tooltip cursor={{ fill: '#f4f4f5' }} content={<CustomTooltip />} />
+            <Tooltip cursor={{ fill: '#2D3340' }} content={<CustomTooltip />} />
             <Bar dataKey="minutes" radius={[0, 4, 4, 0]} barSize={12}>
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />

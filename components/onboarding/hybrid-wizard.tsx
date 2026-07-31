@@ -224,8 +224,8 @@ export function HybridWizard() {
 
   if (!isMounted) {
     return (
-      <div className="w-full max-w-5xl space-y-8 min-h-[600px] flex items-center justify-center bg-zinc-950/50 rounded-3xl animate-pulse">
-        <div className="w-10 h-10 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+      <div className="w-full max-w-5xl space-y-8 min-h-[600px] flex items-center justify-center bg-surface-app/50 rounded-3xl animate-pulse">
+        <div className="w-10 h-10 rounded-full border-4 border-swim border-t-transparent animate-spin"></div>
       </div>
     );
   }
@@ -234,7 +234,7 @@ export function HybridWizard() {
     <div className="w-full max-w-5xl space-y-8">
       {/* Stepper Header */}
       <div className="flex items-center justify-between relative mb-12 max-w-2xl mx-auto">
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-zinc-200 -z-10" />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border-default -z-10" />
         {Array.from({ length: totalSteps }).map((_, i) => {
           const num = i + 1;
           return (
@@ -246,13 +246,13 @@ export function HybridWizard() {
             >
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all duration-200 ${
                 step >= num 
-                  ? 'bg-cyan-500 border-cyan-400 text-white shadow-[0_0_15px_rgba(229,106,0,0.3)] scale-105' 
-                  : 'bg-white border-zinc-200 text-zinc-400 group-hover:border-zinc-300 group-hover:text-zinc-600'
+                  ? 'bg-swim border-swim text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] scale-105'
+                  : 'bg-surface-card border-border-default text-text-muted group-hover:border-border-default group-hover:text-text-secondary'
               }`}>
                 {step > num ? <Check className="w-5 h-5" /> : num}
               </div>
               <span className={`text-[10px] uppercase tracking-wider font-bold transition-colors duration-200 ${
-                step >= num ? 'text-cyan-600' : 'text-zinc-400 group-hover:text-zinc-600'
+                step >= num ? 'text-swim' : 'text-text-muted group-hover:text-text-secondary'
               }`}>
                 {num === 1 ? 'Fisiología' : num === 2 ? 'Objetivo' : num === 3 ? (wantsCoach ? 'Entrenador' : 'Garaje') : 'Conexión'}
               </span>

@@ -179,41 +179,41 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] pb-24 text-zinc-900 animate-fade-in">
+    <div className="min-h-screen bg-[var(--color-background)] pb-24 text-text-primary animate-fade-in">
       
       {/* Upper Deck Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-sm transition-all duration-300">
-        <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-100">
+      <header className="sticky top-0 z-50 bg-surface-card/95 backdrop-blur-md border-b border-border-default  transition-all duration-300">
+        <div className="px-6 py-4 flex justify-between items-center border-b border-border-subtle">
           <div className="flex items-center gap-3 min-w-0">
             <Link href="/coach/dashboard" className="shrink-0 mr-1">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 border border-zinc-200 rounded-xl text-zinc-450 hover:text-zinc-850 hover:bg-zinc-50">
+              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 border border-border-default rounded-xl text-text-muted hover:text-text-primary hover:bg-surface-hover">
                 <ChevronLeft className="w-4 h-4" />
               </AnimatedButton>
             </Link>
             <div className="min-w-0">
-              <h1 className="text-base font-bold text-zinc-850 truncate tracking-tight">
+              <h1 className="text-base font-bold text-text-primary truncate tracking-tight">
                 Vista de Atleta: {athleteProfile.first_name || 'Triatleta'} {athleteProfile.last_name || ''}
               </h1>
-              <p className="text-xs text-zinc-500 font-semibold capitalize truncate flex items-center gap-1.5 mt-0.5">
+              <p className="text-xs text-text-secondary font-semibold capitalize truncate flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-swim/100 animate-pulse shrink-0"></span>
                 Plan: {activePlan?.name || 'Sin plan activo'} • Nivel {athleteProfile.level}
               </p>
               
               <div className="flex items-center gap-3 mt-2 flex-wrap">
                 <div className="flex items-center gap-2 text-[10px] font-bold">
-                  <span className="px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200" title="Carga Crónica (Fitness)">
+                  <span className="px-2 py-0.5 rounded bg-surface-hover text-text-secondary border border-border-default" title="Carga Crónica (Fitness)">
                     CTL: {Math.round(analyticsData.currentCtl)}
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200" title="Carga Aguda (Fatiga)">
+                  <span className="px-2 py-0.5 rounded bg-surface-hover text-text-secondary border border-border-default" title="Carga Aguda (Fatiga)">
                     ATL: {Math.round(analyticsData.currentAtl)}
                   </span>
-                  <span className={`px-2 py-0.5 rounded border ${analyticsData.currentTsb > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`} title="Balance de Estrés (Estado de Forma)">
+                  <span className={`px-2 py-0.5 rounded border ${analyticsData.currentTsb > 0 ? 'bg-bike/10 text-bike border-bike/30' : 'bg-warning/10 text-warning border-warning/30'}`} title="Balance de Estrés (Estado de Forma)">
                     TSB: {Math.round(analyticsData.currentTsb)}
                   </span>
                 </div>
                 
                 {athleteProfile.previous_injuries && (
-                  <span className="px-2 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 text-[10px] font-bold flex items-center gap-1" title={athleteProfile.previous_injuries}>
+                  <span className="px-2 py-0.5 rounded bg-danger/10 text-danger border border-danger/30 text-[10px] font-bold flex items-center gap-1" title={athleteProfile.previous_injuries}>
                     <Activity className="w-3 h-3" /> Lesiones previas documentadas
                   </span>
                 )}
@@ -223,12 +223,12 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
 
           <div className="flex items-center gap-3">
             <Link href="/settings">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-455 hover:text-zinc-850 hover:bg-zinc-50 border border-zinc-200 rounded-xl">
+              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-text-muted hover:text-text-primary hover:bg-surface-hover border border-border-default rounded-xl">
                 <Settings className="w-4 h-4" />
               </AnimatedButton>
             </Link>
             <form action="/auth/signout" method="post">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-450 hover:text-red-500 hover:bg-red-50 rounded-xl border border-transparent hover:border-red-100">
+              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-text-muted hover:text-danger hover:bg-danger/10 rounded-xl border border-transparent hover:border-danger/20">
                 <LogOut className="w-4 h-4" />
               </AnimatedButton>
             </form>
@@ -236,10 +236,10 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
         </div>
 
         {/* Level 2 Navigation Bar */}
-        <div className="px-6 py-2.5 bg-zinc-50/50 flex items-center justify-between border-t border-zinc-100">
+        <div className="px-6 py-2.5 bg-surface-hover/50 flex items-center justify-between border-t border-border-subtle">
           <div className="flex gap-2 overflow-x-auto scrollbar-none">
             <Link href="/coach/dashboard" className="shrink-0">
-              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-650 hover:text-zinc-850 hover:bg-zinc-50 transition-all flex items-center gap-1.5">
+              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-border-default bg-surface-card text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-all flex items-center gap-1.5">
                 <ChevronLeft className="w-3.5 h-3.5" />
                 <span>Volver al Roster</span>
               </AnimatedButton>
@@ -251,7 +251,7 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
             </Link>
             <SessionPlanner athleteId={athleteId} />
           </div>
-          <span className="px-3 py-1 rounded-full bg-swim/10 border border-swim/20 text-[10px] text-swim font-bold uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+          <span className="px-3 py-1 rounded-full bg-swim/10 border border-swim/20 text-[10px] text-swim font-bold uppercase tracking-wider  flex items-center gap-1.5">
             <Activity className="w-3.5 h-3.5" /> Modo Entrenador Activo
           </span>
         </div>
@@ -262,17 +262,17 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
         
         {/* Connection status header */}
         {isConnected && (
-          <div className="p-4 rounded-2xl bg-swim/10 border border-cyan-100 flex items-center justify-between gap-4 shadow-sm animate-fade-in">
+          <div className="p-4 rounded-2xl bg-swim/10 border border-swim/20 flex items-center justify-between gap-4  animate-fade-in">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-swim/15 flex items-center justify-center text-swim shrink-0">
                 <Activity className="w-4 h-4 animate-pulse" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-zinc-850">Dispositivo Sincronizado</span>
-                  <span className="px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[9px] font-bold border border-green-150">Strava/Garmin Activo</span>
+                  <span className="text-xs font-bold text-text-primary">Dispositivo Sincronizado</span>
+                  <span className="px-2 py-0.5 rounded-full bg-bike/10 text-bike text-[9px] font-bold border border-bike/30">Strava/Garmin Activo</span>
                 </div>
-                <p className="text-[10px] text-zinc-500 mt-0.5">El atleta tiene sincronización automática de actividades activada.</p>
+                <p className="text-[10px] text-text-secondary mt-0.5">El atleta tiene sincronización automática de actividades activada.</p>
               </div>
             </div>
           </div>
@@ -315,17 +315,17 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
         </section>
 
         {/* Advanced Builder */}
-        <section className="space-y-4 pt-4 border-t border-zinc-200">
+        <section className="space-y-4 pt-4 border-t border-border-default">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-zinc-800 flex items-center gap-2">
+            <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
               <Calendar className="w-4 h-4 text-swim" /> 
               Constructor Semanal Inteligente
             </h2>
-            <span className="text-xs text-zinc-500 font-semibold bg-white px-2.5 py-1 rounded-md border border-zinc-200 shadow-sm">
+            <span className="text-xs text-text-secondary font-semibold bg-surface-card px-2.5 py-1 rounded-md border border-border-default ">
               Arrastra y suelta para reprogramar
             </span>
           </div>
-          <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden">
+          <div className="bg-surface-card rounded-2xl shadow-card border border-border-default overflow-hidden">
             <AdvancedCalendarWrapper 
               athleteId={athleteId} 
               initialWorkouts={workouts as any} 
@@ -336,17 +336,17 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
 
         {/* Tabs of Calendar / List View */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            <div className="bg-white rounded-3xl p-6 border border-zinc-200 shadow-sm">
-              <h2 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <div className="bg-surface-card rounded-3xl p-6 border border-border-default shadow-card">
+              <h2 className="text-sm font-black text-text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
                 <Activity className="w-4 h-4 text-swim" />
                 Rendimiento PMC (Fitness / Fatiga)
               </h2>
               <PMCChart data={pmcRes?.data || []} />
             </div>
 
-            <div className="bg-white rounded-3xl p-6 border border-zinc-200 shadow-sm">
-              <h2 className="text-sm font-black text-zinc-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-indigo-500" />
+            <div className="bg-surface-card rounded-3xl p-6 border border-border-default shadow-card">
+              <h2 className="text-sm font-black text-text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
+                <Activity className="w-4 h-4 text-swim" />
                 Tendencia de Salud (30 días)
               </h2>
               <BiometricsTrendChart data={biometricsHistoryRes.data || []} />

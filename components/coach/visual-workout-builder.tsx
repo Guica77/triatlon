@@ -38,11 +38,11 @@ interface VisualWorkoutBuilderProps {
 }
 
 const blockConfig: Record<BlockType, { label: string; icon: React.ReactNode; colorClass: string; bgClass: string }> = {
-  warmup: { label: 'Calentamiento', icon: <Flame className="w-4 h-4" />, colorClass: 'text-amber-500', bgClass: 'bg-amber-50 border-amber-200' },
-  active: { label: 'Principal', icon: <HeartPulse className="w-4 h-4" />, colorClass: 'text-red-500', bgClass: 'bg-red-50 border-red-200' },
-  recovery: { label: 'Recuperación', icon: <Coffee className="w-4 h-4" />, colorClass: 'text-emerald-500', bgClass: 'bg-emerald-50 border-emerald-200' },
-  cooldown: { label: 'Enfriamiento', icon: <Wind className="w-4 h-4" />, colorClass: 'text-sky-500', bgClass: 'bg-sky-50 border-sky-200' },
-  interval: { label: 'Series', icon: <Repeat className="w-4 h-4" />, colorClass: 'text-purple-500', bgClass: 'bg-purple-50 border-purple-200' }
+  warmup: { label: 'Calentamiento', icon: <Flame className="w-4 h-4" />, colorClass: 'text-amber-400', bgClass: 'bg-warning/10 border-warning/25' },
+  active: { label: 'Principal', icon: <HeartPulse className="w-4 h-4" />, colorClass: 'text-danger', bgClass: 'bg-danger/10 border-danger/25' },
+  recovery: { label: 'Recuperación', icon: <Coffee className="w-4 h-4" />, colorClass: 'text-bike', bgClass: 'bg-bike/10 border-bike/25' },
+  cooldown: { label: 'Enfriamiento', icon: <Wind className="w-4 h-4" />, colorClass: 'text-swim', bgClass: 'bg-swim/10 border-swim/25' },
+  interval: { label: 'Series', icon: <Repeat className="w-4 h-4" />, colorClass: 'text-purple-400', bgClass: 'bg-purple-500/10 border-purple-500/25' }
 };
 
 function TargetInput({ 
@@ -58,18 +58,18 @@ function TargetInput({
 }) {
   return (
     <div className="flex gap-1">
-      <select 
+      <select
         value={targetType}
         onChange={(e) => onUpdate(e.target.value as 'time'|'distance', duration, distance)}
-        className="bg-white border border-zinc-200 rounded-l-md px-1 py-1 text-[10px] font-semibold text-zinc-600 focus:outline-none"
+        className="bg-surface-elevated border border-border-default rounded-l-md px-1 py-1 text-[10px] font-semibold text-text-secondary focus:outline-none"
       >
         <option value="time">Min</option>
         <option value="distance">Dist</option>
       </select>
-      <input 
-        type="number" 
-        min="1" 
-        className="w-full bg-white border border-zinc-200 rounded-r-md px-2 py-1 text-sm font-semibold text-zinc-800 focus:outline-none focus:border-cyan-500"
+      <input
+        type="number"
+        min="1"
+        className="w-full bg-surface-elevated border border-border-default rounded-r-md px-2 py-1 text-sm font-semibold text-text-primary focus:outline-none focus:border-swim"
         value={targetType === 'time' ? (duration || '') : (distance || '')}
         placeholder={targetType === 'time' ? 'Min' : 'm/km'}
         onChange={(e) => {
@@ -114,12 +114,12 @@ function VisualGraph({ blocks }: { blocks: WorkoutBlock[] }) {
   if (totalDuration === 0) return null;
 
   return (
-    <div className="w-full h-24 flex items-end gap-[1px] p-2 bg-zinc-50 border border-zinc-200 rounded-xl overflow-hidden mb-4">
+    <div className="w-full h-24 flex items-end gap-[1px] p-2 bg-surface-hover border border-border-default rounded-xl overflow-hidden mb-4">
       {expandedBlocks.map((b, i) => {
         const height = `${Math.max(15, (b.zone / 5) * 100)}%`;
         const width = `${(b.duration / totalDuration) * 100}%`;
-        let color = 'bg-zinc-300';
-        if (b.zone === 1) color = 'bg-zinc-300';
+        let color = 'bg-text-muted';
+        if (b.zone === 1) color = 'bg-text-muted';
         if (b.zone === 2) color = 'bg-sky-400';
         if (b.zone === 3) color = 'bg-emerald-400';
         if (b.zone === 4) color = 'bg-amber-400';
@@ -192,9 +192,9 @@ export function VisualWorkoutBuilder({ blocks, onChange, sportType }: VisualWork
 
       {/* Blocks List */}
       {blocks.length === 0 ? (
-        <div className="p-8 border-2 border-dashed border-zinc-200 rounded-xl flex flex-col items-center justify-center text-zinc-400 bg-zinc-50/50 mb-4">
+        <div className="p-8 border-2 border-dashed border-border-default rounded-xl flex flex-col items-center justify-center text-text-muted bg-surface-hover/50 mb-4">
           <p className="text-sm font-medium mb-2">Aún no hay bloques configurados.</p>
-          <p className="text-xs text-zinc-500">Añade bloques usando los botones de abajo para crear una estructura visual.</p>
+          <p className="text-xs text-text-secondary">Añade bloques usando los botones de abajo para crear una estructura visual.</p>
         </div>
       ) : (
         <Reorder.Group axis="y" values={blocks} onReorder={onChange} className="space-y-2 mb-4">
@@ -210,8 +210,8 @@ export function VisualWorkoutBuilder({ blocks, onChange, sportType }: VisualWork
       )}
 
       {/* Add Controls */}
-      <div className="pt-2 border-t border-zinc-100">
-        <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Añadir Bloque</p>
+      <div className="pt-2 border-t border-border-subtle">
+        <p className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">Añadir Bloque</p>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {(Object.keys(blockConfig) as BlockType[]).map((type) => {
             const config = blockConfig[type];
@@ -220,7 +220,7 @@ export function VisualWorkoutBuilder({ blocks, onChange, sportType }: VisualWork
                 key={type}
                 type="button"
                 onClick={() => addBlock(type)}
-                className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg border transition-all hover:shadow-sm ${config.bgClass} hover:opacity-90`}
+                className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg border transition-all hover:shadow-card ${config.bgClass} hover:opacity-90`}
               >
                 <div className={config.colorClass}>{config.icon}</div>
                 <span className={`text-[10px] font-bold uppercase tracking-wide ${config.colorClass}`}>{config.label}</span>
@@ -243,11 +243,11 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
       value={block}
       dragListener={false}
       dragControls={controls}
-      className={`relative flex items-stretch gap-3 p-3 rounded-xl border bg-white shadow-sm ${config.bgClass.split(' ')[1]}`}
+      className={`relative flex items-stretch gap-3 p-3 rounded-xl border bg-surface-card shadow-card ${config.bgClass.split(' ')[1]}`}
     >
       {/* Drag Handle */}
-      <div 
-        className="cursor-grab active:cursor-grabbing p-1 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded transition-colors flex items-center"
+      <div
+        className="cursor-grab active:cursor-grabbing p-1 text-text-muted hover:text-text-primary hover:bg-surface-hover rounded transition-colors flex items-center"
         onPointerDown={(e) => controls.start(e)}
       >
         <GripVertical className="w-5 h-5" />
@@ -255,7 +255,7 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
 
       {/* Icon */}
       <div className="flex flex-col items-center justify-start py-1">
-        <div className={`p-2 rounded-lg bg-white border shadow-sm ${config.colorClass} ${config.bgClass.split(' ')[1]}`}>
+        <div className={`p-2 rounded-lg bg-surface-elevated border shadow-card ${config.colorClass} ${config.bgClass.split(' ')[1]}`}>
           {config.icon}
         </div>
       </div>
@@ -265,27 +265,27 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
         {block.type === 'interval' ? (
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-zinc-700">Repeticiones:</label>
-              <input 
-                type="number" 
-                min="1" 
-                value={block.repeats || 4} 
-                onChange={e => onUpdate({ repeats: parseInt(e.target.value) || 1 })} 
-                className="w-16 bg-zinc-50 border border-zinc-200 rounded px-2 py-1 text-sm font-semibold focus:outline-none focus:border-cyan-500" 
+              <label className="text-xs font-bold text-text-primary">Repeticiones:</label>
+              <input
+                type="number"
+                min="1"
+                value={block.repeats || 4}
+                onChange={e => onUpdate({ repeats: parseInt(e.target.value) || 1 })}
+                className="w-16 bg-surface-hover border border-border-default rounded px-2 py-1 text-sm font-semibold focus:outline-none focus:border-swim"
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-2">
-              <div className="bg-red-50/50 p-2 rounded-lg border border-red-100">
-                 <label className="text-[10px] font-bold text-red-600 uppercase block mb-1">Trabajo</label>
+              <div className="bg-danger/10 p-2 rounded-lg border border-danger/20">
+                 <label className="text-[10px] font-bold text-danger uppercase block mb-1">Trabajo</label>
                  <div className="space-y-1.5">
-                    <TargetInput 
-                      targetType={block.workTargetType || 'time'} 
-                      duration={block.workDuration} 
-                      distance={block.workDistance} 
-                      onUpdate={(t, dur, dist) => onUpdate({ workTargetType: t, workDuration: dur, workDistance: dist })} 
+                    <TargetInput
+                      targetType={block.workTargetType || 'time'}
+                      duration={block.workDuration}
+                      distance={block.workDistance}
+                      onUpdate={(t, dur, dist) => onUpdate({ workTargetType: t, workDuration: dur, workDistance: dist })}
                     />
-                    <select value={block.workZone || 4} onChange={e => onUpdate({ workZone: parseInt(e.target.value)||4 })} className="w-full bg-white border border-red-200 rounded px-2 py-1 text-xs font-semibold text-zinc-800 focus:outline-none">
+                    <select value={block.workZone || 4} onChange={e => onUpdate({ workZone: parseInt(e.target.value)||4 })} className="w-full bg-surface-elevated border border-danger/30 rounded px-2 py-1 text-xs font-semibold text-text-primary focus:outline-none">
                       <option value="1">Z1 - Suave</option>
                       <option value="2">Z2 - Aeróbico</option>
                       <option value="3">Z3 - Tempo</option>
@@ -294,16 +294,16 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
                     </select>
                  </div>
               </div>
-              <div className="bg-emerald-50/50 p-2 rounded-lg border border-emerald-100">
-                 <label className="text-[10px] font-bold text-emerald-600 uppercase block mb-1">Recuperación</label>
+              <div className="bg-bike/10 p-2 rounded-lg border border-bike/20">
+                 <label className="text-[10px] font-bold text-bike uppercase block mb-1">Recuperación</label>
                  <div className="space-y-1.5">
-                    <TargetInput 
-                      targetType={block.restTargetType || 'time'} 
-                      duration={block.restDuration} 
-                      distance={block.restDistance} 
-                      onUpdate={(t, dur, dist) => onUpdate({ restTargetType: t, restDuration: dur, restDistance: dist })} 
+                    <TargetInput
+                      targetType={block.restTargetType || 'time'}
+                      duration={block.restDuration}
+                      distance={block.restDistance}
+                      onUpdate={(t, dur, dist) => onUpdate({ restTargetType: t, restDuration: dur, restDistance: dist })}
                     />
-                    <select value={block.restZone || 1} onChange={e => onUpdate({ restZone: parseInt(e.target.value)||1 })} className="w-full bg-white border border-emerald-200 rounded px-2 py-1 text-xs font-semibold text-zinc-800 focus:outline-none">
+                    <select value={block.restZone || 1} onChange={e => onUpdate({ restZone: parseInt(e.target.value)||1 })} className="w-full bg-surface-elevated border border-bike/30 rounded px-2 py-1 text-xs font-semibold text-text-primary focus:outline-none">
                       <option value="1">Z1 - Suave</option>
                       <option value="2">Z2 - Aeróbico</option>
                       <option value="3">Z3 - Tempo</option>
@@ -316,19 +316,19 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
         ) : (
           <div className="grid grid-cols-2 gap-3 items-center">
             <div>
-              <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Objetivo</label>
-              <TargetInput 
-                targetType={block.targetType || 'time'} 
-                duration={block.duration} 
-                distance={block.distance} 
-                onUpdate={(t, dur, dist) => onUpdate({ targetType: t, duration: dur, distance: dist })} 
+              <label className="text-[10px] font-bold text-text-secondary uppercase block mb-1">Objetivo</label>
+              <TargetInput
+                targetType={block.targetType || 'time'}
+                duration={block.duration}
+                distance={block.distance}
+                onUpdate={(t, dur, dist) => onUpdate({ targetType: t, duration: dur, distance: dist })}
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-zinc-500 uppercase block mb-1">Zona (1-5)</label>
-              <select 
+              <label className="text-[10px] font-bold text-text-secondary uppercase block mb-1">Zona (1-5)</label>
+              <select
                 title="Zona de entrenamiento"
-                className="w-full bg-zinc-50 border border-zinc-200 rounded-md px-2 py-1 text-sm font-semibold text-zinc-800 focus:outline-none focus:border-cyan-500"
+                className="w-full bg-surface-hover border border-border-default rounded-md px-2 py-1 text-sm font-semibold text-text-primary focus:outline-none focus:border-swim"
                 value={block.zone || 1}
                 onChange={(e) => onUpdate({ zone: parseInt(e.target.value) || 1 })}
               >
@@ -344,11 +344,11 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
 
         {/* Notes Toggle */}
         <div className="flex items-center gap-2 mt-1 px-1">
-          <AlignLeft className="w-3 h-3 text-zinc-400" />
-          <input 
+          <AlignLeft className="w-3 h-3 text-text-muted" />
+          <input
             type="text"
             placeholder="Añadir notas (opcional)..."
-            className="w-full bg-transparent border-none text-[11px] text-zinc-600 focus:ring-0 p-0 placeholder:text-zinc-400 focus:outline-none"
+            className="w-full bg-transparent border-none text-[11px] text-text-secondary focus:ring-0 p-0 placeholder:text-text-muted focus:outline-none"
             value={block.notes || ''}
             onChange={e => onUpdate({ notes: e.target.value })}
           />
@@ -357,10 +357,10 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
 
       {/* Remove */}
       <div className="flex items-start">
-        <button 
+        <button
           type="button"
           onClick={onRemove}
-          className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-1"
+          className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors ml-1"
           title="Eliminar bloque"
         >
           <Trash2 className="w-4 h-4" />

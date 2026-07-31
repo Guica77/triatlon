@@ -189,7 +189,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
               onClick={() => { setActiveTab(tab.id as any); setHoveredIndex(null); }}
               className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-white text-text-primary border border-border-subtle/80'
+                  ? 'bg-surface-card text-text-primary border border-border-subtle/80'
                   : 'text-text-muted hover:text-text-primary'
               }`}
             >

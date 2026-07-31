@@ -83,7 +83,7 @@ export function WorkoutVisualCard({
               {sportNames[sport] || sportType}
             </h4>
             {intensity && (
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-white/10 text-zinc-300">
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-white/10 text-text-secondary">
                 {intensity}
               </span>
             )}

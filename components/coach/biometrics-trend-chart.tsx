@@ -28,7 +28,7 @@ interface BiometricsTrendChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 border border-border-subtle rounded-xl text-xs space-y-1 z-50">
+      <div className="bg-surface-card p-3 border border-border-subtle rounded-xl text-xs space-y-1 z-50">
         <p className="font-bold text-text-primary mb-2 border-b border-border-subtle pb-1">
           {format(parseISO(label), "d MMM yyyy", { locale: es })}
         </p>
@@ -72,7 +72,7 @@ export function BiometricsTrendChart({ data }: BiometricsTrendChartProps) {
 
   return (
     <div className="w-full h-[300px] relative">
-      <div className="absolute top-0 right-4 flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-text-muted z-10 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle">
+      <div className="absolute top-0 right-4 flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-text-muted z-10 bg-surface-elevated/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-subtle">
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-swim" />
           Readiness

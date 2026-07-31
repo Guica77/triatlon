@@ -15,10 +15,10 @@ import { AIWorkoutGenerator, GeneratedWorkout } from './ai-workout-generator';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
 import { DailyFuelCard } from '@/components/dashboard/daily-fuel-card';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
-import { 
-  calculateDailyMacros, 
-  calculateSessionPacing, 
-  calculateWorkoutCalories 
+import {
+  calculateDailyMacros,
+  calculateSessionPacing,
+  calculateWorkoutCalories
 } from '@/lib/nutrition-utility';
 import { cn } from '@/lib/utils';
 
@@ -37,15 +37,15 @@ const sportColors: Record<string, string> = {
   natacion: 'bg-[var(--color-swim)]',
   ciclismo: 'bg-[var(--color-bike)]',
   carrera: 'bg-[var(--color-run)]',
-  fuerza: 'bg-purple-550',
+  fuerza: 'bg-purple-500',
   brick: 'bg-amber-400',
-  descanso: 'bg-zinc-650',
+  descanso: 'bg-text-muted',
 };
 
-export function DashboardViewTabs({ 
-  initialWorkouts = [], 
-  isConnected, 
-  profile, 
+export function DashboardViewTabs({
+  initialWorkouts = [],
+  isConnected,
+  profile,
   readOnly = false,
   initialBiometrics,
   initialBiometricsHistory,
@@ -64,7 +64,7 @@ export function DashboardViewTabs({
   const [isAiModalOpen, setIsAiModalOpen] = React.useState(false);
   const [aiInitialPrompt, setAiInitialPrompt] = React.useState('');
   const [aiWorkouts, setAiWorkouts] = React.useState<GeneratedWorkout[]>([]);
-  
+
   async function handleCreateManualWorkout(formData: FormData) {
     const title = formData.get('title') as string;
     const sport_type = formData.get('sport_type') as string;
@@ -75,7 +75,7 @@ export function DashboardViewTabs({
     await createManualWorkoutAction({ title, sport_type, duration_min, scheduled_date, status });
     setIsManualModalOpen(false);
   }
-  
+
   // Merge initialWorkouts with AI generated ones
   const allWorkouts = React.useMemo(() => {
     const mappedAiWorkouts = aiWorkouts.map((aiw, idx) => ({
@@ -205,10 +205,10 @@ export function DashboardViewTabs({
       setErrorMessage('Por favor, rellena todos los campos obligatorios.');
       return;
     }
-    
+
     setIsSubmitting(true);
     setErrorMessage(null);
-    
+
     try {
       const res = await createManualWorkoutAction({
         title: formTitle,
@@ -236,21 +236,21 @@ export function DashboardViewTabs({
   const getDaysInGrid = (baseDate: Date) => {
     const year = baseDate.getFullYear();
     const month = baseDate.getMonth();
-    
+
     // First day of baseDate month
     const firstDayOfMonth = new Date(year, month, 1);
     // Find the Monday of the week containing firstDayOfMonth
     const firstDayIdx = firstDayOfMonth.getDay() || 7; // 1 Mon ... 7 Sun
     const calendarStart = new Date(firstDayOfMonth);
     calendarStart.setDate(calendarStart.getDate() - firstDayIdx + 1);
-    
+
     // Last day of baseDate month
     const lastDayOfMonth = new Date(year, month + 1, 0);
     // Find the Sunday of the week containing lastDayOfMonth
     const lastDayIdx = lastDayOfMonth.getDay() || 7;
     const calendarEnd = new Date(lastDayOfMonth);
     calendarEnd.setDate(calendarEnd.getDate() + (7 - lastDayIdx));
-    
+
     const days: Date[] = [];
     const curr = new Date(calendarStart);
     while (curr <= calendarEnd) {
@@ -321,19 +321,19 @@ export function DashboardViewTabs({
   }, [allWorkouts]);
 
   if (!isMounted) {
-    return <div className="min-h-screen animate-pulse bg-zinc-50 flex items-center justify-center">
+    return <div className="min-h-screen animate-pulse bg-surface-app flex items-center justify-center">
       <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
     </div>;
   }
 
   return (
     <div className="space-y-6">
-      
+
       {/* Sección Estado de Forma, Biometría y Nutrición Dinámica */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="h-full">
-          <FormStatusWidget 
-            tsb={initialAnalytics?.currentTsb || 0} 
+          <FormStatusWidget
+            tsb={initialAnalytics?.currentTsb || 0}
             ctl={initialAnalytics?.currentCtl || 0}
             atl={initialAnalytics?.currentAtl || 0}
             athleteLevel={profile?.level}
@@ -343,8 +343,8 @@ export function DashboardViewTabs({
         </div>
         {initialBiometrics && (
           <div className="h-full">
-            <BiometricsCard 
-              initialBiometrics={initialBiometrics} 
+            <BiometricsCard
+              initialBiometrics={initialBiometrics}
               initialBiometricsHistory={initialBiometricsHistory}
               readOnly={readOnly}
               isGarminConnected={profile?.garmin_connected === true}
@@ -352,9 +352,9 @@ export function DashboardViewTabs({
           </div>
         )}
         <div className="h-full">
-          <DailyFuelCard 
-            nutritionData={nutritionData} 
-            error={null} 
+          <DailyFuelCard
+            nutritionData={nutritionData}
+            error={null}
             loading={false}
             preferredIngredients={profile?.preferred_ingredients || []}
             workouts={selectedDayWorkouts}
@@ -373,18 +373,18 @@ export function DashboardViewTabs({
 
         <div className="flex items-center gap-2">
           {activeTab === 'semana' && (
-            <a 
-              href="/api/workouts/export-calendar" 
+            <a
+              href="/api/workouts/export-calendar"
               download="calendario_semanal.ics"
-              className="px-3.5 py-2 rounded-xl bg-white border border-zinc-200 hover:border-zinc-350 text-zinc-700 hover:text-zinc-900 text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+              className="px-3.5 py-2 rounded-xl bg-surface-card border border-border-default hover:border-border-default text-text-primary hover:text-text-primary text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-card"
               title="Descargar toda la semana en tu Apple Calendar, Google Calendar o Garmin Calendar"
             >
-              <Calendar className="w-3.5 h-3.5 text-cyan-600" />
+              <Calendar className="w-3.5 h-3.5 text-cyan-500" />
               <span className="hidden sm:inline">Exportar Semana (.ICS)</span>
               <span className="inline sm:hidden">.ICS</span>
             </a>
           )}
-          
+
           {!readOnly && (
             <div className="flex items-center gap-2">
               <AnimatedButton
@@ -393,7 +393,7 @@ export function DashboardViewTabs({
                   setAiInitialPrompt('');
                   setIsAiModalOpen(true);
                 }}
-                className="bg-cyan-50 hover:bg-cyan-100/80 text-cyan-700 border border-cyan-200 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                className="bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 border border-cyan-500/30 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-card"
               >
                 <Bot className="w-4 h-4" />
                 <span className="hidden sm:inline">Generar Plan AI</span>
@@ -401,7 +401,7 @@ export function DashboardViewTabs({
               <AnimatedButton
                 variant="primary"
                 onClick={() => openModalForDate(todayStr)}
-                className="!bg-cyan-650 hover:!bg-cyan-550 !text-white text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                className="!bg-cyan-600 hover:!bg-cyan-500 !text-white text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-card"
               >
                 <Plus className="w-4 h-4" />
                 <span>Añadir Manual</span>
@@ -416,7 +416,7 @@ export function DashboardViewTabs({
         <div className={activeTab === 'semana' ? 'block' : 'hidden'}>
           <div className="space-y-6 animate-fade-in">
             {/* Weekly navigation component */}
-            <WeeklyNav 
+            <WeeklyNav
               workouts={weeklyWorkouts}
               selectedDateStr={selectedDateStr}
               onSelectDate={setSelectedDateStr}
@@ -425,11 +425,11 @@ export function DashboardViewTabs({
             {/* Weekly Workout list */}
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-550 flex items-center gap-1.5">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-text-secondary flex items-center gap-1.5">
                   <Flame className="w-4 h-4 text-amber-500" />
                   {viewMode === 'focus' ? 'Sesión del Día Seleccionado' : 'Entrenamientos Planificados de la Semana'}
                 </h2>
-                
+
           <TabsList className="h-8">
             <TabsTrigger value="focus" onClick={() => setViewMode('focus')} className="text-[10px] px-2.5 h-6">
               <Eye className="w-3 h-3 mr-1" />
@@ -459,13 +459,13 @@ export function DashboardViewTabs({
                     />
                   ))
                 ) : (
-                  <div className="p-8 rounded-2xl bg-white border border-dashed border-zinc-200 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group shadow-sm">
-                    <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                  <div className="p-8 rounded-2xl bg-surface-card border border-dashed border-border-default flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group shadow-card">
+                    <div className="w-12 h-12 rounded-full bg-bike/10 border border-bike/20 flex items-center justify-center text-bike group-hover:scale-110 transition-transform duration-500 shadow-card">
                       <Sparkles className="w-5 h-5 animate-pulse" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-black text-zinc-900">Día de Recuperación Activa</p>
-                      <p className="text-xs text-zinc-500 font-semibold max-w-[250px] mx-auto leading-relaxed">
+                      <p className="text-sm font-black text-text-primary">Día de Recuperación Activa</p>
+                      <p className="text-xs text-text-secondary font-semibold max-w-[250px] mx-auto leading-relaxed">
                         No hay entrenamientos programados. Aprovecha para descansar o realizar estiramientos.
                       </p>
                     </div>
@@ -488,7 +488,7 @@ export function DashboardViewTabs({
                           </div>
                         )}
                         {isTomorrow && (
-                          <div className="px-4 py-1.5 bg-zinc-800 text-zinc-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-zinc-700/30">
+                          <div className="px-4 py-1.5 bg-surface-hover text-text-muted text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-border-subtle/30">
                             Mañana
                           </div>
                         )}
@@ -507,10 +507,10 @@ export function DashboardViewTabs({
                     );
                   })
                 ) : (
-                  <Card className="text-center py-12 bg-zinc-900/30">
+                  <Card className="text-center py-12 bg-surface-app/30">
                     <CardContent>
-                      <Activity className="w-8 h-8 text-zinc-650 mx-auto mb-2" />
-                      <p className="text-sm font-medium text-zinc-350">No hay sesiones planificadas para esta semana</p>
+                      <Activity className="w-8 h-8 text-text-secondary mx-auto mb-2" />
+                      <p className="text-sm font-medium text-text-secondary">No hay sesiones planificadas para esta semana</p>
                     </CardContent>
                   </Card>
                 )
@@ -519,10 +519,10 @@ export function DashboardViewTabs({
 
             {/* AI Feedback Loop */}
             {!readOnly && (
-              <div className="pt-6 border-t border-zinc-200/60 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="pt-6 border-t border-border-default/60 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Bot className="w-4 h-4 text-cyan-500" />
-                  <p className="text-xs text-zinc-600 font-medium">¿Necesitas ajustar la semana?</p>
+                  <p className="text-xs text-text-secondary font-medium">¿Necesitas ajustar la semana?</p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
                   <AnimatedButton
@@ -531,7 +531,7 @@ export function DashboardViewTabs({
                       setAiInitialPrompt('Noto poca carga esta semana. Por favor, añádeme más volumen general, en especial rodajes largos.');
                       setIsAiModalOpen(true);
                     }}
-                    className="flex-1 sm:flex-none border border-zinc-200 text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-zinc-650 hover:bg-zinc-50 hover:text-zinc-900 shadow-sm"
+                    className="flex-1 sm:flex-none border border-border-default text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-text-secondary hover:bg-surface-hover hover:text-text-primary shadow-card"
                   >
                     📈 Poco volumen
                   </AnimatedButton>
@@ -541,7 +541,7 @@ export function DashboardViewTabs({
                       setAiInitialPrompt('Siento demasiada fatiga muscular. Por favor, reduce el volumen general de la semana un 20% y prioriza descansos activos o natación suave.');
                       setIsAiModalOpen(true);
                     }}
-                    className="flex-1 sm:flex-none border border-zinc-200 text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-zinc-650 hover:bg-zinc-50 hover:text-red-600 shadow-sm"
+                    className="flex-1 sm:flex-none border border-border-default text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-text-secondary hover:bg-surface-hover hover:text-danger shadow-card"
                   >
                     📉 Demasiada carga
                   </AnimatedButton>
@@ -555,7 +555,7 @@ export function DashboardViewTabs({
             {/* Monthly Calendar View */}
             <Card>
               <CardContent className="p-5">
-              
+
               {/* Calendar Header */}
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
@@ -610,13 +610,13 @@ export function DashboardViewTabs({
                     const hasCompleted = daySessions.some(w => w.status === 'completed');
                     const hasMissed = daySessions.some(w => w.status === 'missed');
                     const hasPending = daySessions.some(w => w.status === 'pending');
-                    
+
                     if (daySessions.every(w => w.status === 'completed')) {
-                      complianceClass = 'bg-[#e2f9eb] border-[#b2f0c9] text-emerald-800 hover:bg-[#d0f5dc]';
+                      complianceClass = 'bg-bike/15 border-bike/40 text-bike hover:bg-bike/25';
                     } else if (hasMissed) {
-                      complianceClass = 'bg-[#feeef0] border-[#fccad3] text-red-800 hover:bg-[#fddde2]';
+                      complianceClass = 'bg-danger/15 border-danger/40 text-danger hover:bg-danger/25';
                     } else if (hasPending && daySessions.some(w => w.scheduled_date <= todayStr)) {
-                      complianceClass = 'bg-[#fff8e6] border-[#ffe8b3] text-amber-800 hover:bg-[#fff0cc]';
+                      complianceClass = 'bg-warning/15 border-warning/40 text-warning hover:bg-warning/25';
                     } else {
                       complianceClass = 'bg-background border-border text-foreground hover:bg-accent';
                     }
@@ -630,15 +630,15 @@ export function DashboardViewTabs({
                       onClick={() => setSelectedDateStr(dateStr)}
                       className={`relative min-h-[56px] sm:min-h-[72px] p-1.5 rounded-xl border flex flex-col justify-between items-start transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-cyan-50 border-cyan-400 ring-2 ring-cyan-400/20 shadow-xs'
+                          ? 'bg-cyan-500/15 border-cyan-400 ring-2 ring-cyan-400/20'
                           : isToday
-                          ? 'bg-cyan-50/20 border-cyan-300 ring-1 ring-cyan-200'
+                          ? 'bg-cyan-500/10 border-cyan-500/40 ring-1 ring-cyan-500/20'
                           : complianceClass
                       } ${!isCurrentMonth ? 'opacity-35' : ''}`}
                     >
                       {/* Day Number */}
                       <span className={`text-[10px] sm:text-xs font-bold leading-none ${
-                        isToday ? 'text-cyan-600' : isSelected ? 'text-cyan-800' : 'text-muted-foreground'
+                        isToday ? 'text-cyan-400' : isSelected ? 'text-cyan-300' : 'text-muted-foreground'
                       }`}>
                         {d.getDate()}
                       </span>
@@ -651,7 +651,7 @@ export function DashboardViewTabs({
                           return (
                             <span
                               key={wIdx}
-                              className={`w-1.5 h-1.5 rounded-full ${sportColors[sport] || 'bg-zinc-500'}`}
+                              className={`w-1.5 h-1.5 rounded-full ${sportColors[sport] || 'bg-text-muted'}`}
                               title={w.training_sessions?.description || sport}
                             />
                           );
@@ -667,7 +667,7 @@ export function DashboardViewTabs({
             {/* Workouts for Selected Day */}
             <div className="space-y-4 pt-2">
               <div className="flex justify-between items-center">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
                   Sesiones del {new Date(selectedDateStr + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
                 {selectedDayWorkouts.length === 0 && !readOnly && (
@@ -697,13 +697,13 @@ export function DashboardViewTabs({
                   />
                 ))
               ) : (
-                <div className="p-6 rounded-2xl bg-zinc-50 border border-dashed border-zinc-200 flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group shadow-inner">
-                  <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform duration-500">
+                <div className="p-6 rounded-2xl bg-surface-hover border border-dashed border-border-default flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group">
+                  <div className="w-12 h-12 rounded-full bg-bike/10 border border-bike/20 flex items-center justify-center text-bike group-hover:scale-110 transition-transform duration-500">
                     <Sparkles className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-zinc-850">Día de Recuperación Activa</p>
-                    <p className="text-xs text-zinc-500 max-w-[250px] mx-auto leading-relaxed">
+                    <p className="text-sm font-bold text-text-primary">Día de Recuperación Activa</p>
+                    <p className="text-xs text-text-secondary max-w-[250px] mx-auto leading-relaxed">
                       No hay entrenamientos de alta intensidad. Aprovecha para estirar 15 min, caminar o simplemente descansar la musculatura.
                     </p>
                   </div>
@@ -718,7 +718,7 @@ export function DashboardViewTabs({
       <AnimatePresence>
         {isManualModalOpen && !readOnly && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            
+
             {/* Overlay */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -733,13 +733,13 @@ export function DashboardViewTabs({
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-lg rounded-2xl bg-white border border-zinc-200 shadow-2xl p-6 overflow-hidden z-10"
+              className="relative w-full max-w-lg rounded-2xl bg-surface-elevated border border-border-default shadow-elevated p-6 overflow-hidden z-10"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
 
               {/* Modal Header */}
-              <div className="flex justify-between items-center border-b border-zinc-150 pb-4 mb-4">
-                <h3 className="text-base sm:text-lg font-bold text-zinc-900 flex items-center gap-2">
+              <div className="flex justify-between items-center border-b border-border-subtle pb-4 mb-4">
+                <h3 className="text-base sm:text-lg font-bold text-text-primary flex items-center gap-2">
                   <Activity className="w-5 h-5 text-cyan-400 animate-pulse" />
                   Registrar Sesión Manual
                 </h3>
@@ -747,7 +747,7 @@ export function DashboardViewTabs({
                   title="Cerrar"
                   aria-label="Cerrar"
                   onClick={() => setIsManualModalOpen(false)}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition cursor-pointer"
+                  className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover transition cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -760,12 +760,12 @@ export function DashboardViewTabs({
                 <form action={handleCreateManualWorkout} className="space-y-4">
                   <div>
                     <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Título de la Sesión</label>
-                    <input 
+                    <input
                       name="title"
-                      type="text" 
+                      type="text"
                       value={formTitle}
                       onChange={e => setFormTitle(e.target.value)}
-                      placeholder="Ej. Series en pista" 
+                      placeholder="Ej. Series en pista"
                       className="w-full bg-background border border-input rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       required
                     />
@@ -773,7 +773,7 @@ export function DashboardViewTabs({
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Deporte</label>
-                      <select 
+                      <select
                         name="sport_type"
                         value={formSport}
                         onChange={e => setFormSport(e.target.value)}
@@ -789,9 +789,9 @@ export function DashboardViewTabs({
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Duración (min)</label>
-                      <input 
+                      <input
                         name="duration_min"
-                        type="number" 
+                        type="number"
                         value={formDuration}
                         onChange={e => setFormDuration(e.target.value)}
                         title="Duración en minutos"
@@ -804,9 +804,9 @@ export function DashboardViewTabs({
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase">Fecha</label>
-                    <input 
+                    <input
                       name="scheduled_date"
-                      type="date" 
+                      type="date"
                       value={formDate}
                       onChange={(e) => setFormDate(e.target.value)}
                       title="Fecha de la sesión"
@@ -870,9 +870,9 @@ export function DashboardViewTabs({
     </AnimatePresence>
 
       </Tabs>
-      <AIWorkoutGenerator 
-        isOpen={isAiModalOpen} 
-        onClose={() => setIsAiModalOpen(false)} 
+      <AIWorkoutGenerator
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
         onGenerate={(newAiWorkouts) => setAiWorkouts(newAiWorkouts)}
         currentDate={todayStr}
         initialPrompt={aiInitialPrompt}

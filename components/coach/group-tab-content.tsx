@@ -48,7 +48,7 @@ export function GroupTabContent({ groupId }: { groupId: string }) {
 
   if (loading) {
     return (
-      <div className="py-32 flex flex-col items-center justify-center gap-4 bg-white rounded-3xl border border-zinc-200 shadow-sm animate-in fade-in">
+      <div className="py-32 flex flex-col items-center justify-center gap-4 bg-surface-card rounded-3xl border border-zinc-200 shadow-sm animate-in fade-in">
         <Loader2 className="w-8 h-8 animate-spin text-cyan-600" />
         <p className="text-sm font-semibold text-zinc-500">Cargando el dashboard del grupo...</p>
       </div>
@@ -57,7 +57,7 @@ export function GroupTabContent({ groupId }: { groupId: string }) {
 
   if (!data?.group) {
     return (
-      <div className="py-32 flex flex-col items-center justify-center gap-4 bg-white rounded-3xl border border-red-200 shadow-sm animate-in fade-in">
+      <div className="py-32 flex flex-col items-center justify-center gap-4 bg-surface-card rounded-3xl border border-danger/20 shadow-sm animate-in fade-in">
         <p className="text-sm font-semibold text-red-500">Error al cargar la información del grupo.</p>
       </div>
     );

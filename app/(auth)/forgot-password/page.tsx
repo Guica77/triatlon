@@ -39,25 +39,25 @@ export default function ForgotPasswordPage() {
       <div className="space-y-6 relative z-10 overflow-x-hidden w-full pb-24 sm:pb-8">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-750 text-xs text-center font-medium">
+            <div className="p-3.5 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs text-center font-medium">
               {error}
             </div>
           )}
 
           {successMessage && (
-            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-750 text-xs text-center leading-relaxed font-medium">
+            <div className="p-4 rounded-xl bg-bike/10 border border-bike/30 text-bike text-xs text-center leading-relaxed font-medium">
               {successMessage}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Correo Electrónico</label>
+            <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Correo Electrónico</label>
             <input
               name="email"
               type="email"
               placeholder="tu@correo.com"
               required
-              className="w-full bg-white border border-zinc-200 rounded-xl p-3.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-swim focus:bg-white transition-all"
+              className="w-full bg-surface-card border border-border-default rounded-xl p-3.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-swim focus:bg-surface-card transition-all"
             />
           </div>
 

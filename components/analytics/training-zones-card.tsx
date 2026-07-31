@@ -29,7 +29,7 @@ export function TrainingZonesCard({ zones, athleteLevel = 'intermedio' }: Traini
   const totalPercentage = zones.reduce((acc, curr) => acc + curr.percentage, 0);
 
   return (
-    <div className="bg-white rounded-xl border border-border-subtle overflow-hidden flex flex-col font-sans">
+    <div className="bg-surface-card rounded-xl border border-border-subtle overflow-hidden flex flex-col font-sans">
       
       {/* HEADER TÉCNICO */}
       <div className="flex justify-between items-center px-5 py-4 border-b border-border-subtle bg-bg-elevated">
