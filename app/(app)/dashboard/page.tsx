@@ -22,6 +22,8 @@ import { WorkoutAIFeedback } from '@/components/dashboard/workout-ai-feedback';
 import { BadgesGrid } from '@/components/dashboard/badges-grid';
 import { ProfileCompletion } from '@/components/dashboard/profile-completion';
 import { evaluateBadges, getEarnedCount } from '@/lib/badges';
+import { TodayWorkoutHero } from '@/components/dashboard/today-workout-hero';
+import { RecoverySummary } from '@/components/dashboard/recovery-summary';
 
 export const dynamic = 'force-dynamic'
 
@@ -235,6 +237,9 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        {/* HERO: Sesión de hoy */}
+        <TodayWorkoutHero workout={todayWorkout ?? null} />
+
         {/* MAIN: Vista de entrenamiento (semana/mes) */}
         <DashboardViewTabs
           initialWorkouts={workouts || []}
@@ -244,6 +249,14 @@ export default async function DashboardPage() {
           initialBiometricsHistory={biometricsHistory}
           initialNutrition={nutritionData}
           initialAnalytics={analyticsData}
+        />
+
+        {/* Resumen de recuperación */}
+        <RecoverySummary
+          readinessScore={biometrics?.readiness_score}
+          hrv={biometrics?.hrv}
+          sleepHours={biometrics?.sleep_hours}
+          fatigue={biometrics?.fatigue_rating}
         />
 
         {/* Pizarra del Entrenador */}
