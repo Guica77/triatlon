@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen, Dumbbell, Heart } from 'lucide-react';
+import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen, Dumbbell, Heart, Award } from 'lucide-react';
 import { useNotifications } from '@/components/providers/notification-provider';
 
 export function MobileBottomNav() {
@@ -57,6 +57,7 @@ export function MobileBottomNav() {
     { href: '/recuperacion', label: 'Recup.', icon: Heart },
     { href: '/exercises', label: 'Ejercicios', icon: BookOpen },
     { href: '/analytics', label: 'Análisis', icon: BarChart2 },
+    { href: '/resumen', label: 'Resumen', icon: Award },
     { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];

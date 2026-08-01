@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Home, BarChart2, MessageSquare, Settings, Users, BookOpen,
-  PanelLeftClose, PanelLeft, Trophy, Dumbbell, Heart
+  PanelLeftClose, PanelLeft, Trophy, Dumbbell, Heart, Award
 } from 'lucide-react'
 import { useNotifications } from '@/components/providers/notification-provider'
 import { cn } from '@/lib/utils'
@@ -22,6 +22,7 @@ const athleteItems: SidebarItem[] = [
   { href: '/recuperacion', label: 'Recuperación', icon: Heart },
   { href: '/exercises', label: 'Ejercicios', icon: BookOpen },
   { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
+  { href: '/resumen', label: 'Resumen', icon: Award },
   { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
   { href: '/settings', label: 'Ajustes', icon: Settings },
 ]

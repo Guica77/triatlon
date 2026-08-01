@@ -7,11 +7,8 @@ import { Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence } from 'framer-motion';
 
-import { StepPhysiology } from '@/components/onboarding/steps/step-physiology';
-import { StepGarage } from '@/components/onboarding/steps/step-garage';
-import { StepTelemetry } from '@/components/onboarding/steps/step-telemetry';
-import { StepCoachSelection } from '@/components/onboarding/steps/step-coach-selection';
-import { StepAmbition } from '@/components/onboarding/steps/step-ambition';
+import { StepGoal } from '@/components/onboarding/steps/step-goal';
+import { StepPlan } from '@/components/onboarding/steps/step-plan';
 
 export function HybridWizard() {
   const router = useRouter();
@@ -23,46 +20,38 @@ export function HybridWizard() {
     setIsMounted(true);
   }, []);
 
-  // Step 1: Objetivo / Ambición (Race Goal)
+  // Step 1: Objetivo y nivel
   const [athleteLevel, setAthleteLevel] = React.useState('intermedio');
   const [activeTab, setActiveTab] = React.useState<'catalog' | 'custom' | 'none'>('catalog');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedRace, setSelectedRace] = React.useState<RaceCatalogItem | null>(RACES_CATALOG[0]);
-  
+
   const [customName, setCustomName] = React.useState('');
   const [customModality, setCustomModality] = React.useState<MultisportModality>('triatlon');
-  const [customDistance, setCustomDistance] = React.useState<'sprint' | 'olimpico' | 'half' | 'full'>('half');
+  const [customDistance, setCustomDistance] = React.useState('half');
   const [customDate, setCustomDate] = React.useState('2027-10-18');
 
-  const [targetFinishTime, setTargetFinishTime] = React.useState('');
+  // Disponibilidad semanal
   const [baselineHours, setBaselineHours] = React.useState('7-10h');
   const [swimHours, setSwimHours] = React.useState(2);
   const [bikeHours, setBikeHours] = React.useState(4);
   const [runHours, setRunHours] = React.useState(3);
+
+  // Objetivos / tiempos (opcionales)
+  const [targetFinishTime, setTargetFinishTime] = React.useState('');
   const [targetSwimTime, setTargetSwimTime] = React.useState('');
   const [targetBikeTime, setTargetBikeTime] = React.useState('');
   const [targetRunTime, setTargetRunTime] = React.useState('');
-  
   const [currentFinishTime, setCurrentFinishTime] = React.useState('');
   const [currentSwimTime, setCurrentSwimTime] = React.useState('');
   const [currentBikeTime, setCurrentBikeTime] = React.useState('');
   const [currentRunTime, setCurrentRunTime] = React.useState('');
 
-  const filteredCatalog = React.useMemo(() => {
-    if (!searchQuery) return RACES_CATALOG;
-    const q = searchQuery.toLowerCase();
-    return RACES_CATALOG.filter(
-      r => r.name.toLowerCase().includes(q) || 
-           r.city.toLowerCase().includes(q) || 
-           r.country.toLowerCase().includes(q) ||
-           r.distance.toLowerCase().includes(q) ||
-           r.modality.toLowerCase().includes(q)
-    );
-  }, [searchQuery]);
-
-  // Step 2: Physiological & Planning Preference
+  // Entrenador (opcional)
   const [wantsCoach, setWantsCoach] = React.useState<boolean>(false);
   const [inviteCode, setInviteCode] = React.useState('');
+
+  // Fisiología / calibración (opcional)
   const [currentFtp, setCurrentFtp] = React.useState('');
   const [currentSwimPace, setCurrentSwimPace] = React.useState('');
   const [currentRunPace, setCurrentRunPace] = React.useState('');
@@ -73,14 +62,51 @@ export function HybridWizard() {
   const [dailySteps, setDailySteps] = React.useState('');
   const [previousInjuries, setPreviousInjuries] = React.useState('');
 
-  // Step 3: Virtual Garage
+  // Virtual garage (diferido a Ajustes)
   const [virtualGarage, setVirtualGarage] = React.useState<string[]>([]);
 
-  const toggleGear = (id: string) => {
-    setVirtualGarage(prev => 
-      prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]
+  // La IA estima las horas base a partir de la disponibilidad semanal
+  React.useEffect(() => {
+    const total = swimHours + bikeHours + runHours;
+    setBaselineHours(total <= 6 ? '4-6h' : total <= 11 ? '7-10h' : '12+h');
+  }, [swimHours, bikeHours, runHours]);
+
+  const filteredCatalog = React.useMemo(() => {
+    if (!searchQuery) return RACES_CATALOG;
+    const q = searchQuery.toLowerCase();
+    return RACES_CATALOG.filter(
+      r => r.name.toLowerCase().includes(q) ||
+           r.city.toLowerCase().includes(q) ||
+           r.country.toLowerCase().includes(q) ||
+           r.distance.toLowerCase().includes(q) ||
+           r.modality.toLowerCase().includes(q)
     );
-  };
+  }, [searchQuery]);
+
+  const currentGoal = React.useMemo(() => {
+    if (activeTab === 'catalog' && selectedRace) {
+      return {
+        name: selectedRace.name,
+        date: selectedRace.estimatedDate,
+        distance: selectedRace.distance,
+        modality: selectedRace.modality
+      };
+    }
+    if (activeTab === 'none') {
+      return {
+        name: 'Mantenimiento / Off-Season',
+        date: null,
+        distance: 'sprint',
+        modality: 'triatlon'
+      };
+    }
+    return {
+      name: customName || 'Mi Desafío',
+      date: customDate || '2027-10-18',
+      distance: customDistance,
+      modality: customModality
+    };
+  }, [activeTab, selectedRace, customName, customDate, customDistance, customModality]);
 
   const handleSave = async (forceNoCode: boolean = false) => {
     setLoading(true);
@@ -95,89 +121,6 @@ export function HybridWizard() {
           return;
         }
       }
-
-      const currentGoal = activeTab === 'catalog' && selectedRace
-        ? {
-            name: selectedRace.name,
-            date: selectedRace.estimatedDate,
-            distance: selectedRace.distance,
-            modality: selectedRace.modality
-          }
-        : activeTab === 'none'
-        ? {
-            name: 'Mantenimiento / Off-Season',
-            date: null,
-            distance: 'sprint',
-            modality: 'triatlon'
-          }
-        : {
-            name: customName || 'Mi Desafío',
-            date: customDate || '2027-10-18',
-            distance: customDistance,
-            modality: customModality
-          };
-
-      const result = await saveRaceGoalAndPlan({
-        target_race_name: currentGoal.name,
-        target_race_date: currentGoal.date || undefined,
-        target_race_distance: currentGoal.distance as any,
-        target_race_modality: currentGoal.modality,
-        target_finish_time: targetFinishTime || undefined,
-        baseline_training_hours: baselineHours,
-        swim_weekly_hours: swimHours,
-        bike_weekly_hours: bikeHours,
-        run_weekly_hours: runHours,
-        target_swim_time: targetSwimTime || undefined,
-        target_bike_time: targetBikeTime || undefined,
-        target_run_time: targetRunTime || undefined,
-        athlete_level: athleteLevel,
-        current_ftp: currentFtp ? parseInt(currentFtp) : undefined,
-        current_swim_pace: currentSwimPace || undefined,
-        current_run_pace: currentRunPace || undefined,
-        virtual_garage: virtualGarage,
-        wants_coach: wantsCoach,
-        preferred_ingredients: preferredIngredients,
-        allergies,
-        disliked_ingredients: dislikedIngredients,
-        previous_injuries: previousInjuries || undefined,
-      });
-
-      if (result && result.error) {
-        console.error('Error:', result.error);
-        alert(`Error al guardar objetivos: ${result.error}`);
-        setLoading(false);
-      } else {
-        router.push('/dashboard');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setLoading(false);
-    }
-  };
-
-  const handleSaveAndConnect = async (provider: 'strava' | 'garmin' | 'coros' = 'strava') => {
-    setLoading(true);
-    try {
-      const currentGoal = activeTab === 'catalog' && selectedRace
-        ? {
-            name: selectedRace.name,
-            date: selectedRace.estimatedDate,
-            distance: selectedRace.distance,
-            modality: selectedRace.modality
-          }
-        : activeTab === 'none'
-        ? {
-            name: 'Mantenimiento / Off-Season',
-            date: null,
-            distance: 'sprint',
-            modality: 'triatlon'
-          }
-        : {
-            name: customName || 'Mi Desafío',
-            date: customDate || '2027-10-18',
-            distance: customDistance,
-            modality: customModality
-          };
 
       const result = await saveRaceGoalAndPlan({
         target_race_name: currentGoal.name,
@@ -203,6 +146,57 @@ export function HybridWizard() {
         disliked_ingredients: dislikedIngredients,
         current_weight: currentWeight ? parseFloat(currentWeight) : undefined,
         daily_steps: dailySteps ? parseInt(dailySteps) : undefined,
+        current_finish_time: currentFinishTime || undefined,
+        current_swim_time: currentSwimTime || undefined,
+        current_bike_time: currentBikeTime || undefined,
+        current_run_time: currentRunTime || undefined,
+        previous_injuries: previousInjuries || undefined,
+      });
+
+      if (result && result.error) {
+        console.error('Error:', result.error);
+        alert(`Error al guardar objetivos: ${result.error}`);
+        setLoading(false);
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleSaveAndConnect = async (provider: 'strava' | 'garmin' | 'coros' = 'strava') => {
+    setLoading(true);
+    try {
+      const result = await saveRaceGoalAndPlan({
+        target_race_name: currentGoal.name,
+        target_race_date: currentGoal.date || undefined,
+        target_race_distance: currentGoal.distance as any,
+        target_race_modality: currentGoal.modality,
+        target_finish_time: targetFinishTime || undefined,
+        baseline_training_hours: baselineHours,
+        swim_weekly_hours: swimHours,
+        bike_weekly_hours: bikeHours,
+        run_weekly_hours: runHours,
+        target_swim_time: targetSwimTime || undefined,
+        target_bike_time: targetBikeTime || undefined,
+        target_run_time: targetRunTime || undefined,
+        athlete_level: athleteLevel,
+        current_ftp: currentFtp ? parseInt(currentFtp) : undefined,
+        current_swim_pace: currentSwimPace || undefined,
+        current_run_pace: currentRunPace || undefined,
+        virtual_garage: virtualGarage,
+        wants_coach: wantsCoach,
+        preferred_ingredients: preferredIngredients,
+        allergies,
+        disliked_ingredients: dislikedIngredients,
+        current_weight: currentWeight ? parseFloat(currentWeight) : undefined,
+        daily_steps: dailySteps ? parseInt(dailySteps) : undefined,
+        current_finish_time: currentFinishTime || undefined,
+        current_swim_time: currentSwimTime || undefined,
+        current_bike_time: currentBikeTime || undefined,
+        current_run_time: currentRunTime || undefined,
         previous_injuries: previousInjuries || undefined,
       });
 
@@ -219,8 +213,18 @@ export function HybridWizard() {
     }
   };
 
-  // Determine which steps to show
-  const totalSteps = wantsCoach ? 3 : 4;
+  const totalSteps = 2;
+  const totalHours = swimHours + bikeHours + runHours;
+
+  const stepPlanSummary = {
+    raceName: currentGoal.name,
+    raceDate: currentGoal.date,
+    distance: currentGoal.distance as string,
+    modality: currentGoal.modality,
+    level: athleteLevel,
+    totalHours,
+    targetTime: targetFinishTime || '',
+  };
 
   if (!isMounted) {
     return (
@@ -233,7 +237,7 @@ export function HybridWizard() {
   return (
     <div className="w-full max-w-5xl space-y-8">
       {/* Stepper Header */}
-      <div className="flex items-center justify-between relative mb-12 max-w-2xl mx-auto">
+      <div className="flex items-center justify-between relative mb-12 max-w-md mx-auto">
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border-default -z-10" />
         {Array.from({ length: totalSteps }).map((_, i) => {
           const num = i + 1;
@@ -245,7 +249,7 @@ export function HybridWizard() {
               className="flex flex-col items-center gap-2 bg-[var(--color-background)] px-4 cursor-pointer focus:outline-none group"
             >
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all duration-200 ${
-                step >= num 
+                step >= num
                   ? 'bg-swim border-swim text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] scale-105'
                   : 'bg-surface-card border-border-default text-text-muted group-hover:border-border-default group-hover:text-text-secondary'
               }`}>
@@ -254,7 +258,7 @@ export function HybridWizard() {
               <span className={`text-[10px] uppercase tracking-wider font-bold transition-colors duration-200 ${
                 step >= num ? 'text-swim' : 'text-text-muted group-hover:text-text-secondary'
               }`}>
-                {num === 1 ? 'Fisiología' : num === 2 ? 'Objetivo' : num === 3 ? (wantsCoach ? 'Entrenador' : 'Garaje') : 'Conexión'}
+                {num === 1 ? 'Objetivo y nivel' : 'Tu plan'}
               </span>
             </button>
           );
@@ -263,26 +267,9 @@ export function HybridWizard() {
 
       <AnimatePresence mode="wait">
         {step === 1 && (
-          <StepPhysiology
-            wantsCoach={wantsCoach}
-            setWantsCoach={setWantsCoach}
-            inviteCode={inviteCode}
-            setInviteCode={setInviteCode}
-            onPrev={() => setStep(1)}
-            onNext={() => setStep(2)}
-            preferredIngredients={preferredIngredients}
-            setPreferredIngredients={setPreferredIngredients}
-            allergies={allergies}
-            setAllergies={setAllergies}
-            dislikedIngredients={dislikedIngredients}
-            setDislikedIngredients={setDislikedIngredients}
-            isFirstStep={true}
-          />
-        )}
-
-        {step === 2 && (
-          <StepAmbition
-            wantsCoach={wantsCoach}
+          <StepGoal
+            athleteLevel={athleteLevel}
+            setAthleteLevel={setAthleteLevel}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             searchQuery={searchQuery}
@@ -298,26 +285,6 @@ export function HybridWizard() {
             setCustomDistance={setCustomDistance}
             customModality={customModality}
             setCustomModality={setCustomModality}
-            athleteLevel={athleteLevel}
-            setAthleteLevel={setAthleteLevel}
-            baselineHours={baselineHours}
-            setBaselineHours={setBaselineHours}
-            targetFinishTime={targetFinishTime}
-            setTargetFinishTime={setTargetFinishTime}
-            targetSwimTime={targetSwimTime}
-            setTargetSwimTime={setTargetSwimTime}
-            targetBikeTime={targetBikeTime}
-            setTargetBikeTime={setTargetBikeTime}
-            targetRunTime={targetRunTime}
-            setTargetRunTime={setTargetRunTime}
-            currentFinishTime={currentFinishTime}
-            setCurrentFinishTime={setCurrentFinishTime}
-            currentSwimTime={currentSwimTime}
-            setCurrentSwimTime={setCurrentSwimTime}
-            currentBikeTime={currentBikeTime}
-            setCurrentBikeTime={setCurrentBikeTime}
-            currentRunTime={currentRunTime}
-            setCurrentRunTime={setCurrentRunTime}
             swimHours={swimHours}
             setSwimHours={setSwimHours}
             bikeHours={bikeHours}
@@ -336,37 +303,37 @@ export function HybridWizard() {
             setDailySteps={setDailySteps}
             previousInjuries={previousInjuries}
             setPreviousInjuries={setPreviousInjuries}
-            onPrev={() => setStep(1)}
-            onNext={() => setStep(3)}
+            currentFinishTime={currentFinishTime}
+            setCurrentFinishTime={setCurrentFinishTime}
+            currentSwimTime={currentSwimTime}
+            setCurrentSwimTime={setCurrentSwimTime}
+            currentBikeTime={currentBikeTime}
+            setCurrentBikeTime={setCurrentBikeTime}
+            currentRunTime={currentRunTime}
+            setCurrentRunTime={setCurrentRunTime}
+            targetFinishTime={targetFinishTime}
+            setTargetFinishTime={setTargetFinishTime}
+            targetSwimTime={targetSwimTime}
+            setTargetSwimTime={setTargetSwimTime}
+            targetBikeTime={targetBikeTime}
+            setTargetBikeTime={setTargetBikeTime}
+            targetRunTime={targetRunTime}
+            setTargetRunTime={setTargetRunTime}
+            onNext={() => setStep(2)}
           />
         )}
 
-        {step === 3 && wantsCoach && (
-          <StepCoachSelection
+        {step === 2 && (
+          <StepPlan
+            loading={loading}
+            summary={stepPlanSummary}
             inviteCode={inviteCode}
             setInviteCode={setInviteCode}
-            onPrev={() => setStep(2)}
-            onNext={() => handleSave(false)}
-            onSearchDirectory={() => handleSave(true)}
-            loading={loading}
-          />
-        )}
-
-        {step === 3 && !wantsCoach && (
-          <StepGarage
-            virtualGarage={virtualGarage}
-            toggleGear={toggleGear}
-            onPrev={() => setStep(2)}
-            onNext={() => setStep(4)}
-          />
-        )}
-
-        {step === 4 && !wantsCoach && (
-          <StepTelemetry
-            loading={loading}
-            onPrev={() => setStep(3)}
-            handleSave={() => handleSave(false)}
-            handleSaveAndConnect={handleSaveAndConnect}
+            wantsCoach={wantsCoach}
+            setWantsCoach={setWantsCoach}
+            onPrev={() => setStep(1)}
+            onSave={() => handleSave(false)}
+            onConnect={handleSaveAndConnect}
           />
         )}
       </AnimatePresence>

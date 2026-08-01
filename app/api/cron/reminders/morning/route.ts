@@ -57,15 +57,30 @@ export async function GET(request: Request) {
 
       const activeWorkouts = todayWorkouts?.filter(w => w.training_sessions?.sport_type !== 'descanso') || [];
 
+      // Fetch today's biometrics for personalization (readiness, sleep, HRV)
+      const { data: biometrics } = await supabase
+        .from('user_biometrics')
+        .select('readiness_score, sleep_hours, hrv, fatigue_rating')
+        .eq('user_id', profile.id)
+        .eq('date', todayStr)
+        .maybeSingle();
+
+      const readiness = biometrics?.readiness_score;
+
+      const sports = activeWorkouts.map(w => {
+        const type = w.training_sessions?.sport_type;
+        return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'entrenamiento';
+      }).join(' y ');
+
       let bodyText = '';
       if (activeWorkouts.length === 0) {
-        bodyText = '¡Hoy toca descanso! Aprovecha para recuperar. Recuerda registrar tus stats de hoy (sueño, peso, etc) en la app. 💤';
+        bodyText = readiness
+          ? `Tu readiness es ${readiness}. Hoy toca descanso — aprovecha para recuperar. 💤`
+          : '¡Hoy toca descanso! Aprovecha para recuperar. Registra tus stats de hoy en la app. 💤';
       } else {
-        const sports = activeWorkouts.map(w => {
-          const type = w.training_sessions?.sport_type;
-          return type ? type.charAt(0).toUpperCase() + type.slice(1) : 'entrenamiento';
-        }).join(' y ');
-        bodyText = `¡Buenos días! Hoy tienes sesión de ${sports}. No olvides registrar tus stats matutinos (sueño, peso, fatiga) antes de empezar. 🚀`;
+        bodyText = readiness
+          ? `Tu readiness es ${readiness}${biometrics?.sleep_hours ? `, dormiste ${biometrics.sleep_hours}h` : ''}. Perfecto para tu sesión de ${sports}. 💪`
+          : `¡Buenos días! Hoy tienes sesión de ${sports}. No olvides registrar tus stats matutinos antes de empezar. 🚀`;
       }
 
       // Enviar notificación push

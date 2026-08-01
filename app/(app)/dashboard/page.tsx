@@ -10,7 +10,7 @@ import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
-import { Flame, Calendar, Trophy, Activity, BookOpen, ChevronRight, Megaphone, Sparkles, Dumbbell } from 'lucide-react';
+import { Flame, Calendar, Trophy, Activity, BookOpen, ChevronRight, Megaphone, Sparkles, Dumbbell, Award } from 'lucide-react';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
@@ -237,6 +237,26 @@ export default async function DashboardPage() {
             <p className="text-xs text-text-muted font-medium">Plan semanal, sesiones y seguimiento</p>
           </div>
         </div>
+
+        {/* Resumen semanal: banner compacto hacia /resumen */}
+        <Link
+          href="/resumen"
+          className="group flex items-center justify-between gap-3 rounded-2xl border border-coral-500/20 bg-coral-500/5 hover:bg-coral-500/10 px-4 py-3 transition-colors"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-coral-500/10 border border-coral-500/20 flex items-center justify-center shrink-0">
+              <Award className="w-4 h-4 text-coral-500" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-text-primary">Resumen de la semana</p>
+              <p className="text-[11px] text-text-muted truncate">Todo lo que has logrado, en un vistazo</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1 text-coral-500 text-xs font-bold shrink-0">
+            <span>Ver mi resumen semanal</span>
+            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </Link>
 
         {/* HERO: Sesión de hoy */}
         <TodayWorkoutHero workout={todayWorkout ?? null} />

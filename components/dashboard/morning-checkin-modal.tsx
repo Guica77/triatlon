@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Loader2, Sun, Heart, Activity, BrainCircuit, Check } from 'lucide-react';
+import { Loader2, Sun, Heart, Activity, BrainCircuit, Check, Flame } from 'lucide-react';
 import { updateBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
 
 interface MorningCheckInModalProps {
@@ -11,6 +11,7 @@ interface MorningCheckInModalProps {
 }
 
 const STORAGE_KEY = 'triatlonpro_checkin_date';
+const STREAK_KEY = 'triatlonpro_checkin_streak';
 
 function getLastCheckinDate(): string | null {
   try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
@@ -20,8 +21,33 @@ function setLastCheckinDate(date: string) {
   try { localStorage.setItem(STORAGE_KEY, date); } catch { /* noop */ }
 }
 
+function getStoredStreak(): number {
+  try { return parseInt(localStorage.getItem(STREAK_KEY) || '0', 10) || 0; } catch { return 0; }
+}
+
+function setStoredStreak(n: number) {
+  try { localStorage.setItem(STREAK_KEY, String(n)); } catch { /* noop */ }
+}
+
 function getTodayStr(): string {
   return new Date().toISOString().split('T')[0];
+}
+
+function getYesterdayStr(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('T')[0];
+}
+
+/** Compute the new streak after a check-in today. */
+function computeStreak(): number {
+  const last = getLastCheckinDate();
+  const stored = getStoredStreak();
+  const today = getTodayStr();
+  if (!last) return 1; // first check-in ever
+  if (last === today) return stored || 1; // already checked in today
+  if (last === getYesterdayStr()) return stored + 1; // consecutive day
+  return 1; // gap broken
 }
 
 export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: MorningCheckInModalProps) {
@@ -30,12 +56,21 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
 
   const [isOpen, setIsOpen] = React.useState(!alreadyDoneToday);
   const [loading, setLoading] = React.useState(false);
+  const [currentStreak, setCurrentStreak] = React.useState(0);
 
   const [fatigue, setFatigue] = React.useState(3);
   const [stress, setStress] = React.useState(3);
   const [sleepHours, setSleepHours] = React.useState(7.5);
   const [hrv, setHrv] = React.useState(65);
   const [rhr, setRhr] = React.useState(52);
+
+  // Show the streak if we're continuing it (checked in yesterday or already today)
+  React.useEffect(() => {
+    const last = getLastCheckinDate();
+    if (last === getYesterdayStr() || last === today) {
+      setCurrentStreak(getStoredStreak());
+    }
+  }, [today]);
 
   // Prevent closing by clicking outside
   const handleOpenChange = (open: boolean) => {
@@ -53,7 +88,10 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
       ...( !hasGarminSync && { sleep_hours: sleepHours, hrv, rhr })
     });
 
+    const newStreak = computeStreak();
     setLastCheckinDate(today);
+    setStoredStreak(newStreak);
+    setCurrentStreak(newStreak);
     setLoading(false);
     setIsOpen(false);
   };
@@ -96,6 +134,16 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
           <DialogDescription className="text-center text-text-secondary text-sm">
             Completa tu check-in matutino para calcular tu Readiness.
           </DialogDescription>
+
+          {/* Streak badge */}
+          {currentStreak > 0 && (
+            <div className="flex justify-center mt-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-coral-500/10 border border-coral-500/20 text-coral-500 text-xs font-bold">
+                <Flame className="w-3.5 h-3.5" />
+                {currentStreak} {currentStreak === 1 ? 'día' : 'días'} seguidos
+              </span>
+            </div>
+          )}
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5">
