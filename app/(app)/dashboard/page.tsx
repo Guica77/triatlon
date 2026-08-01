@@ -24,6 +24,7 @@ import { ProfileCompletion } from '@/components/dashboard/profile-completion';
 import { evaluateBadges, getEarnedCount } from '@/lib/badges';
 import { TodayWorkoutHero } from '@/components/dashboard/today-workout-hero';
 import { RecoverySummary } from '@/components/dashboard/recovery-summary';
+import { ExpandableSection } from '@/components/dashboard/expandable-section';
 
 export const dynamic = 'force-dynamic'
 
@@ -259,6 +260,9 @@ export default async function DashboardPage() {
           fatigue={biometrics?.fatigue_rating}
         />
 
+        {/* Secciones secundarias detrás del menú desplegable */}
+        <ExpandableSection title="Más secciones" icon={Sparkles}>
+
         {/* Pizarra del Entrenador */}
         {groupAnnouncement && (
           <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 relative overflow-hidden shadow-sm">
@@ -350,6 +354,8 @@ export default async function DashboardPage() {
             <ActivitiesFeed />
           </section>
         )}
+
+        </ExpandableSection>
 
         <PushNotificationManager />
       </main>
