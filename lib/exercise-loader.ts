@@ -32,8 +32,9 @@ export function loadExternalExercises(): ExternalExercise[] {
   if (cache) return cache
 
   try {
+    // Use the trimmed dataset (es-only instructions, ~91% smaller than full JSON)
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const raw = require('../public/exercises-data/exercises.json') as any[]
+    const raw = require('../public/exercises-data/exercises-lite.json') as any[]
 
     cache = raw.map((ex: any) => ({
       id: `ext-${ex.id}`,
@@ -41,7 +42,7 @@ export function loadExternalExercises(): ExternalExercise[] {
       category: ex.category || '',
       bodyPart: ex.body_part || '',
       equipment: ex.equipment || '',
-      instructions: ex.instructions?.es || ex.instructions?.en || ex.instruction_steps?.es?.join('. ') || '',
+      instructions: ex.instructions || '',
       muscleGroup: ex.muscle_group || ex.category || '',
       secondaryMuscles: ex.secondary_muscles || '',
       target: ex.target || '',
