@@ -40,7 +40,14 @@ export default async function AthleteChatPage() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#e5ddd5] flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex flex-col overflow-hidden"
+      style={{
+        backgroundColor: '#e5ddd5',
+        backgroundImage: 'radial-gradient(#cfc8c0 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+      }}
+    >
       
       {/* Top Navbar */}
       <header className="border-b border-border-subtle bg-white/95 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-all duration-300 shrink-0">

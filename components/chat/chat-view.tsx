@@ -312,7 +312,8 @@ export function ChatView({
 
             {/* Main Chat Conversation Viewport */}
             <div className="flex-1 relative bg-[#e5ddd5] overflow-hidden flex flex-col">
-              {/* Fixed Background Pattern */}
+              {/* Background Pattern — the outer chat container repeats the same pattern,
+                  so when the keyboard resizes this area the seams are invisible */}
               <div className="absolute inset-0 bg-[radial-gradient(#cfc8c0_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
               {/* Messages body list */}

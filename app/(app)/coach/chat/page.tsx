@@ -42,7 +42,14 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
   const coachName = profile.first_name || 'Entrenador'
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#e5ddd5] flex flex-col overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex flex-col overflow-hidden"
+      style={{
+        backgroundColor: '#e5ddd5',
+        backgroundImage: 'radial-gradient(#cfc8c0 1px, transparent 1px)',
+        backgroundSize: '24px 24px',
+      }}
+    >
       {/* Upper Deck Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-sm shrink-0 transition-all duration-300">
         <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-200/60">
