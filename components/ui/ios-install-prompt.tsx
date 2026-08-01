@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Share, PlusSquare, MoreVertical, Download } from 'lucide-react';
+import { Share, PlusSquare, MoreVertical, Download, X } from 'lucide-react';
 
 export function IosInstallPrompt() {
   const [osType, setOsType] = React.useState<'ios' | 'android' | null>(null);
@@ -9,118 +9,71 @@ export function IosInstallPrompt() {
   const [isDismissed, setIsDismissed] = React.useState(false);
 
   React.useEffect(() => {
-    // Detect iOS
     const userAgent = window.navigator.userAgent.toLowerCase();
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     const isAndroidDevice = /android/.test(userAgent);
-    
-    // Detect Standalone (installed PWA)
     const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator as any).standalone;
     const isMatchMediaStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
     if (isIosDevice) setOsType('ios');
     else if (isAndroidDevice) setOsType('android');
-    
     setIsStandalone(isInStandaloneMode || isMatchMediaStandalone);
   }, []);
 
   if (!osType || isStandalone || isDismissed) {
-    return null; // Don't show if it's not a mobile device or it's already installed
+    return null;
   }
 
-  // AGGRESSIVE MODE: Block entire screen
   return (
-    <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-surface-app/90 backdrop-blur-xl p-6 text-center animate-in fade-in duration-500">
-      
-      {/* Decorative ambient light */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] bg-swim/20 rounded-full blur-[100px] pointer-events-none" />
+    <div className="fixed bottom-0 inset-x-0 z-[9000] p-3 sm:p-4">
+      <div className="relative max-w-md mx-auto bg-surface-elevated/95 backdrop-blur-md border border-border-default rounded-2xl shadow-elevated p-4">
+        {/* Dismiss */}
+        <button
+          onClick={() => setIsDismissed(true)}
+          title="Cerrar"
+          aria-label="Cerrar"
+          className="absolute top-3 right-3 text-text-muted hover:text-text-primary p-1 rounded-lg hover:bg-surface-hover transition cursor-pointer"
+        >
+          <X className="w-4 h-4" />
+        </button>
 
-      <div className="relative z-10 w-full max-w-sm space-y-8 bg-surface-card border border-border-subtle p-8 rounded-[2rem] shadow-[0_0_50px_rgba(34,211,238,0.1)]">
-        
-        <div className="inline-flex items-center justify-center p-4 rounded-3xl bg-surface-app border border-border-subtle shadow-inner mb-2">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="url(#cyan-gradient)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <defs>
-              <linearGradient id="cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#22d3ee" />
-                <stop offset="100%" stopColor="#818cf8" />
-              </linearGradient>
-            </defs>
-            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-            <line x1="12" y1="18" x2="12.01" y2="18" />
-          </svg>
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-swim/10 border border-swim/20 flex items-center justify-center shrink-0">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+              <line x1="12" y1="18" x2="12.01" y2="18" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-text-primary">Añade Triatlon Pro a tu inicio</p>
+            <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
+              Para recibir notificaciones y usar la app a pantalla completa, añádela a tu pantalla de inicio.
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-3">
-          <h2 className="text-2xl font-black tracking-tight text-text-primary">
-            Instalación Requerida
-          </h2>
-          <p className="text-sm text-text-muted leading-relaxed font-medium">
-            Para recibir notificaciones biométricas y chatear con tu entrenador en tiempo real, debes añadir Triatlón Pro a tu pantalla de inicio.
-          </p>
+        <div className="mt-3 space-y-2">
+          <div className="flex items-center gap-2 text-[11px] text-text-muted">
+            <span className="bg-surface-hover p-1.5 rounded-lg text-text-secondary shrink-0">
+              {osType === 'ios' ? <Share className="w-3 h-3" /> : <MoreVertical className="w-3 h-3" />}
+            </span>
+            <span>{osType === 'ios' ? 'Toca Compartir' : 'Toca los 3 puntos'} → <strong className="text-text-primary">Añadir a pantalla de inicio</strong></span>
+          </div>
+          <div className="flex items-center gap-2 text-[11px] text-text-muted">
+            <span className="bg-surface-hover p-1.5 rounded-lg text-text-secondary shrink-0">
+              {osType === 'ios' ? <PlusSquare className="w-3 h-3" /> : <Download className="w-3 h-3" />}
+            </span>
+            <span><strong className="text-text-primary">Instalar</strong> la aplicación</span>
+          </div>
         </div>
 
-        <div className="space-y-4 pt-4 border-t border-border-subtle">
-          {osType === 'ios' ? (
-            <>
-              <div className="flex items-center gap-4 text-left bg-surface-app p-4 rounded-2xl border border-border-subtle/50">
-                <div className="bg-surface-hover p-2 rounded-xl text-text-muted">
-                  <Share className="w-5 h-5" />
-                </div>
-                <p className="text-sm text-text-muted font-medium">
-                  <strong className="text-text-primary">Paso 1:</strong> Toca el botón de compartir abajo en Safari.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4 text-left bg-surface-app p-4 rounded-2xl border border-border-subtle/50">
-                <div className="bg-surface-hover p-2 rounded-xl text-text-muted">
-                  <PlusSquare className="w-5 h-5" />
-                </div>
-                <p className="text-sm text-text-muted font-medium">
-                  <strong className="text-text-primary">Paso 2:</strong> Selecciona "Añadir a la pantalla de inicio".
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-4 text-left bg-surface-app p-4 rounded-2xl border border-border-subtle/50">
-                <div className="bg-surface-hover p-2 rounded-xl text-text-muted">
-                  <MoreVertical className="w-5 h-5" />
-                </div>
-                <p className="text-sm text-text-muted font-medium">
-                  <strong className="text-text-primary">Paso 1:</strong> Toca los 3 puntitos arriba a la derecha en Chrome.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-4 text-left bg-surface-app p-4 rounded-2xl border border-border-subtle/50">
-                <div className="bg-surface-hover p-2 rounded-xl text-text-muted">
-                  <Download className="w-5 h-5" />
-                </div>
-                <p className="text-sm text-text-muted font-medium">
-                  <strong className="text-text-primary">Paso 2:</strong> Selecciona "Instalar aplicación" o "Añadir a inicio".
-                </p>
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className="pt-6 text-center">
-          <button 
-            onClick={() => setIsDismissed(true)}
-            className="text-xs text-text-secondary hover:text-text-muted font-medium underline underline-offset-4 cursor-pointer"
-          >
-            Saltar por ahora (Solo para pruebas)
-          </button>
-        </div>
+        <button
+          onClick={() => setIsDismissed(true)}
+          className="mt-3 w-full py-2 rounded-xl bg-swim hover:bg-swim/90 text-white text-xs font-bold transition cursor-pointer"
+        >
+          Entendido, ya lo haré
+        </button>
       </div>
-      
-      {/* Visual arrow pointing towards the install action area */}
-      <div className={`absolute ${osType === 'ios' ? 'bottom-10 left-1/2 -translate-x-1/2' : 'top-24 right-6'} animate-bounce flex flex-col items-center gap-2 opacity-50`}>
-        <span className="text-xs font-bold uppercase tracking-widest text-swim">Instalar Aquí</span>
-        <svg className={`w-6 h-6 text-swim ${osType === 'android' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-        </svg>
-      </div>
-
     </div>
   );
 }
