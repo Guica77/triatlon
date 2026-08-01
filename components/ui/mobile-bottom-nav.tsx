@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen } from 'lucide-react';
+import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen, Dumbbell, Heart } from 'lucide-react';
 import { useNotifications } from '@/components/providers/notification-provider';
 
 export function MobileBottomNav() {
@@ -53,9 +53,10 @@ export function MobileBottomNav() {
     { href: '/coach/chat', label: 'Mensajes', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ] : [
-    { href: '/dashboard', label: 'Inicio', icon: Home },
+    { href: '/dashboard', label: 'Entreno', icon: Dumbbell },
+    { href: '/recuperacion', label: 'Recup.', icon: Heart },
     { href: '/exercises', label: 'Ejercicios', icon: BookOpen },
-    { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
+    { href: '/analytics', label: 'Análisis', icon: BarChart2 },
     { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];

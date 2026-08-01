@@ -10,7 +10,7 @@ import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
-import { Flame, Calendar, Trophy, Activity, BookOpen, ChevronRight, Megaphone, Sparkles } from 'lucide-react';
+import { Flame, Calendar, Trophy, Activity, BookOpen, ChevronRight, Megaphone, Sparkles, Dumbbell } from 'lucide-react';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
@@ -21,9 +21,7 @@ import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
 import { WorkoutAIFeedback } from '@/components/dashboard/workout-ai-feedback';
 import { BadgesGrid } from '@/components/dashboard/badges-grid';
 import { ProfileCompletion } from '@/components/dashboard/profile-completion';
-import { RecoveryDashboard } from '@/components/dashboard/recovery-dashboard';
 import { evaluateBadges, getEarnedCount } from '@/lib/badges';
-import { analyzeRecovery } from '@/lib/recovery-analysis';
 
 export const dynamic = 'force-dynamic'
 
@@ -173,33 +171,6 @@ export default async function DashboardPage() {
   // Find today's workout for AI coach feedback
   const todayWorkout = workouts?.find((w: any) => w.scheduled_date === todayStr && w.training_sessions?.sport_type !== 'descanso');
 
-  // Analyze recovery
-  const recoveryData = {
-    date: todayStr,
-    hrv: biometrics?.hrv || null,
-    sleepHours: biometrics?.sleep_hours || null,
-    sleepScore: biometrics?.sleep_score || null,
-    readinessScore: biometrics?.readiness_score || null,
-    fatigueRating: biometrics?.fatigue_rating || null,
-    stressLevel: biometrics?.stress_level || null,
-    rhr: biometrics?.rhr || null,
-    weight: biometrics?.weight || null,
-  }
-
-  const recoveryHistory = (biometricsHistory || []).slice(-7).map((b: any) => ({
-    date: b.date,
-    hrv: b.hrv || null,
-    sleepHours: b.sleep_hours || null,
-    sleepScore: b.sleep_score || null,
-    readinessScore: b.readiness_score || null,
-    fatigueRating: b.fatigue_rating || null,
-    stressLevel: b.stress_level || null,
-    rhr: b.rhr || null,
-    weight: b.weight || null,
-  }))
-
-  const recoveryAnalysis = analyzeRecovery(recoveryData, recoveryHistory)
-
   // Evaluate badges
   const allWorkoutsCompleted = workouts?.filter((w: any) => w.status === 'completed').length || 0
   const totalTss = workouts?.reduce((sum: number, w: any) => sum + (w.actual_tss || 0), 0) || 0
@@ -252,7 +223,29 @@ export default async function DashboardPage() {
       <MorningCheckInModal hasCompletedCheckIn={hasCompletedCheckIn} hasGarminSync={isConnected} />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 sm:pb-8 space-y-6">
-        
+
+        {/* Header: Entrenamiento */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-coral-500/10 border border-coral-500/20 flex items-center justify-center shrink-0">
+            <Dumbbell className="w-4 h-4 text-coral-500" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold text-text-primary tracking-tight">Tu Entrenamiento</h1>
+            <p className="text-xs text-text-muted font-medium">Plan semanal, sesiones y seguimiento</p>
+          </div>
+        </div>
+
+        {/* MAIN: Vista de entrenamiento (semana/mes) */}
+        <DashboardViewTabs
+          initialWorkouts={workouts || []}
+          isConnected={isConnected}
+          profile={profile}
+          initialBiometrics={biometrics}
+          initialBiometricsHistory={biometricsHistory}
+          initialNutrition={nutritionData}
+          initialAnalytics={analyticsData}
+        />
+
         {/* Pizarra del Entrenador */}
         {groupAnnouncement && (
           <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 relative overflow-hidden shadow-sm">
@@ -322,10 +315,7 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Recovery Dashboard */}
-	<RecoveryDashboard analysis={recoveryAnalysis} />
-
-	{/* Coach IA */}
+        {/* Coach IA */}
 	<section className="space-y-4">
 	  <WorkoutAIFeedback
 	    todayWorkout={todayWorkout ?? null}
@@ -340,16 +330,6 @@ export default async function DashboardPage() {
 
 	{/* Profile Completion */}
 	<ProfileCompletion profile={profile} />
-
-	<DashboardViewTabs 
-          initialWorkouts={workouts || []} 
-          isConnected={isConnected} 
-          profile={profile}
-          initialBiometrics={biometrics}
-          initialBiometricsHistory={biometricsHistory}
-          initialNutrition={nutritionData}
-          initialAnalytics={analyticsData}
-        />
 
         {/* Historial de Actividades Recientes de Strava (Sólo si está conectado) */}
         {isConnected && (
