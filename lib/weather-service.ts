@@ -25,10 +25,16 @@ export async function getForecastForLocation(
   const useLng = lng ?? -3.7038;
 
   try {
+    // Timeout rápido para no bloquear la renderización del servidor si la API del clima está lenta
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+
     const res = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${useLat}&longitude=${useLng}&current=temperature_2m,relative_humidity_2m&timezone=auto`,
-      { next: { revalidate: 1800 } } // Cache for 30 minutes
+      { next: { revalidate: 1800 }, signal: controller.signal } // Cache for 30 minutes
     );
+
+    clearTimeout(timer);
 
     if (res.ok) {
       const data = await res.json();

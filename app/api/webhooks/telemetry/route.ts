@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { sendPushNotification } from '@/lib/notifications';
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 /**
  * Strava Webhooks verification handler (GET)
@@ -53,7 +54,7 @@ export async function POST(request: NextRequest) {
 
       if (accessToken) {
         // Fetch activity detail from Strava API
-        const activityResponse = await fetch(`https://www.strava.com/api/v3/activities/${object_id}`, {
+        const activityResponse = await fetchWithTimeout(`https://www.strava.com/api/v3/activities/${object_id}`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },
