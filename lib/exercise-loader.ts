@@ -7,6 +7,9 @@
 
 const GITHUB_RAW = 'https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main'
 
+// Trimmed dataset (es-only instructions, ~91% smaller than the full multi-language JSON)
+import exercisesLite from './exercises-lite.json'
+
 export interface ExternalExercise {
   id: string
   name: string
@@ -32,9 +35,7 @@ export function loadExternalExercises(): ExternalExercise[] {
   if (cache) return cache
 
   try {
-    // Use the trimmed dataset (es-only instructions, ~91% smaller than full JSON)
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const raw = require('../public/exercises-data/exercises-lite.json') as any[]
+    const raw = exercisesLite as any[]
 
     cache = raw.map((ex: any) => ({
       id: `ext-${ex.id}`,
