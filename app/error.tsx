@@ -41,6 +41,15 @@ export default function GlobalError({
           </div>
         )}
 
+        {error.digest && (
+          <div className="p-2.5 bg-bg-app rounded-lg border border-border-default text-left">
+            <span className="text-[10px] text-text-muted uppercase tracking-wider block font-semibold mb-1">Código de error (digest):</span>
+            <code className="text-sm text-amber-300 font-mono font-bold select-all">
+              {error.digest}
+            </code>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={() => window.location.href = '/'}

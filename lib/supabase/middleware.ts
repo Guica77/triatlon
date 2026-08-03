@@ -34,7 +34,14 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANTE: Llamar a getUser() refrescará automáticamente el token
   // si está expirado, usando el setAll() de arriba para persistirlo.
-  await supabase.auth.getUser()
+  try {
+    await supabase.auth.getUser()
+  } catch (err) {
+    // Si Supabase está momentáneamente caído/lento, no tumbamos TODA la app.
+    // Dejamos pasar la request sin sesión; las páginas redirigirán a /login
+    // y el próximo request reintentará.
+    console.error('[proxy] updateSession getUser() failed:', err)
+  }
 
   return supabaseResponse
 }
