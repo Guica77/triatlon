@@ -1,5 +1,7 @@
-'use client'
-
+// Componente presentacional (sin hooks ni APIs de navegador): es un Server
+// Component para poder recibir `icon={Componente}` desde páginas servidor.
+// En Next.js, una función/componente no se puede pasar como prop de un Server
+// Component a un Client Component (error "Functions cannot be passed...").
 import * as React from 'react'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 import { cn } from '@/lib/utils'

@@ -10,7 +10,7 @@ import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
-import { Flame, Calendar, Trophy, Activity, BookOpen, ChevronRight, Megaphone, Sparkles, Dumbbell, Award } from 'lucide-react';
+import { Flame, Calendar, Trophy, Activity, BookOpen, ChevronRight, Megaphone, Dumbbell, Award } from 'lucide-react';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
@@ -281,7 +281,7 @@ export default async function DashboardPage() {
         />
 
         {/* Secciones secundarias detrás del menú desplegable */}
-        <ExpandableSection title="Más secciones" icon={Sparkles}>
+        <ExpandableSection title="Más secciones">
 
         {/* Pizarra del Entrenador */}
         {groupAnnouncement && (
