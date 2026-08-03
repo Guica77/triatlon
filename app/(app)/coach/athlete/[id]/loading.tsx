@@ -10,12 +10,12 @@ export default function CoachAthleteDetailLoading() {
             <div className="w-9 h-9 rounded-xl bg-surface-hover shrink-0" />
             <div className="space-y-2 w-full">
               <div className="h-4 bg-surface-hover rounded w-2/3" />
-              <div className="h-3 bg-zinc-150 rounded w-1/2" />
+              <div className="h-3 bg-zinc-200 rounded w-1/2" />
             </div>
           </div>
           <div className="flex gap-2">
-            <div className="w-9 h-9 rounded-xl bg-zinc-150 shrink-0" />
-            <div className="w-9 h-9 rounded-xl bg-zinc-150 shrink-0" />
+            <div className="w-9 h-9 rounded-xl bg-zinc-200 shrink-0" />
+            <div className="w-9 h-9 rounded-xl bg-zinc-200 shrink-0" />
           </div>
         </div>
 
@@ -57,7 +57,7 @@ export default function CoachAthleteDetailLoading() {
         <div className="space-y-4 pt-4 border-t border-border-default">
           <div className="flex justify-between items-center">
             <div className="h-4 bg-surface-hover rounded w-1/3" />
-            <div className="h-6 bg-zinc-150 rounded w-24" />
+            <div className="h-6 bg-zinc-200 rounded w-24" />
           </div>
           <div className="h-96 bg-surface-card border border-border-default rounded-2xl " />
         </div>

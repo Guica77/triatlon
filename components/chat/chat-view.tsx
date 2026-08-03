@@ -231,7 +231,7 @@ export function ChatView({
                     onClick={() => handleSelectParticipant(p)}
                     className={`w-full p-4 flex items-center justify-between text-left transition-all cursor-pointer ${
                       isSelected 
-                        ? 'bg-cyan-50/40 border-l-2 border-cyan-550' 
+                        ? 'bg-cyan-50/40 border-l-2 border-cyan-600' 
                         : 'hover:bg-zinc-100/40'
                     }`}
                   >
@@ -289,7 +289,7 @@ export function ChatView({
               
               <div className="flex items-center gap-1 sm:gap-3">
                 {/* Realtime badge (hidden on narrow screens to save space for call buttons) */}
-                <div className="hidden xs:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-[8px] sm:text-[9px] text-emerald-700 font-black uppercase tracking-wider shrink-0">
+                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-[8px] sm:text-[9px] text-emerald-700 font-black uppercase tracking-wider shrink-0">
                   <Sparkles className="w-3 h-3 text-emerald-600 animate-pulse" />
                   <span className="hidden sm:inline">Conectado (Realtime)</span>
                   <span className="sm:hidden">Realtime</span>
@@ -328,7 +328,7 @@ export function ChatView({
                   <div className="h-full flex flex-col items-center justify-center text-zinc-500 space-y-2">
                     <MessageSquare className="w-8 h-8 text-zinc-400" />
                     <p className="text-xs font-bold">No hay mensajes previos.</p>
-                    <p className="text-[10px] text-zinc-450 font-semibold">¡Escribe tu primer mensaje!</p>
+                    <p className="text-[10px] text-zinc-500 font-semibold">¡Escribe tu primer mensaje!</p>
                   </div>
                 ) : (
                   <div className="space-y-4 flex-1">
@@ -350,7 +350,7 @@ export function ChatView({
                           >
                             <p className="whitespace-pre-wrap">{m.message}</p>
                             {isOwn ? (
-                              <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-450 float-right ml-3 translate-y-1" suppressHydrationWarning>
+                              <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-500 float-right ml-3 translate-y-1" suppressHydrationWarning>
                                 {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 <span className="text-cyan-600 font-black tracking-normal text-[10px]">✓✓</span>
                               </div>
@@ -401,7 +401,7 @@ export function ChatView({
                 {/* Emoji Icon */}
                 <button 
                   type="button" 
-                  className="p-2 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
+                  className="p-2 text-zinc-400 hover:text-zinc-700 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
                   aria-label="Emojis"
                 >
                   <Smile className="w-5 h-5" />
@@ -419,13 +419,13 @@ export function ChatView({
                   }}
                   placeholder="Mensaje..."
                   rows={1}
-                  className="bg-transparent border-none text-[15px] text-zinc-850 outline-none w-full py-2 px-1 placeholder-zinc-400 resize-none max-h-[120px] min-h-[36px] custom-scrollbar self-center"
+                  className="bg-transparent border-none text-[15px] text-zinc-900 outline-none w-full py-2 px-1 placeholder-zinc-400 resize-none max-h-[120px] min-h-[36px] custom-scrollbar self-center"
                 />
                 
                 {/* Paperclip Icon */}
                 <button 
                   type="button" 
-                  className="p-2 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
+                  className="p-2 text-zinc-400 hover:text-zinc-700 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
                   aria-label="Compartir documento"
                 >
                   <Paperclip className="w-5 h-5" />
@@ -457,7 +457,7 @@ export function ChatView({
           <div className="flex-1 flex flex-col items-center p-6 bg-zinc-50/10">
             {currentUserRole === 'coach' ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-450 shadow-inner">
+                <div className="w-16 h-16 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-500 shadow-inner">
                   <MessageSquare className="w-8 h-8 text-zinc-500" />
                 </div>
                 <div>
@@ -488,13 +488,13 @@ export function ChatView({
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
                       placeholder="Ej: GUILLEPRO"
-                      className="flex-1 bg-white border border-zinc-200 focus:border-cyan-550 rounded-xl px-4 py-3 text-sm text-cyan-700 font-black uppercase tracking-wider outline-none transition-all"
+                      className="flex-1 bg-white border border-zinc-200 focus:border-cyan-600 rounded-xl px-4 py-3 text-sm text-cyan-700 font-black uppercase tracking-wider outline-none transition-all"
                     />
                     <AnimatedButton
                       type="submit"
                       variant="primary"
                       disabled={linkingCoachCode || !inviteCode.trim()}
-                      className="px-6 py-3 text-sm font-black !bg-cyan-650 hover:!bg-cyan-550 !text-white shadow-md cursor-pointer"
+                      className="px-6 py-3 text-sm font-black !bg-cyan-700 hover:!bg-cyan-600 !text-white shadow-md cursor-pointer"
                     >
                       {linkingCoachCode ? '...' : 'Vincular'}
                     </AnimatedButton>
@@ -506,7 +506,7 @@ export function ChatView({
                     <div className="w-full border-t border-zinc-200"></div>
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-white px-4 text-xs font-bold text-zinc-450 uppercase tracking-wide">o elige uno disponible</span>
+                    <span className="bg-white px-4 text-xs font-bold text-zinc-500 uppercase tracking-wide">o elige uno disponible</span>
                   </div>
                 </div>
 
@@ -522,14 +522,14 @@ export function ChatView({
                             <h4 className="text-sm font-bold text-zinc-800 group-hover:text-cyan-600 transition-colors">
                               {coach.first_name} {coach.last_name}
                             </h4>
-                            <span className="text-[10px] uppercase tracking-wider font-black text-emerald-700 bg-emerald-55 border border-emerald-150 px-2 py-0.5 rounded-md mt-1 inline-block">
+                            <span className="text-[10px] uppercase tracking-wider font-black text-emerald-700 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-md mt-1 inline-block">
                               Entrenador Certificado
                             </span>
                           </div>
                         </div>
                         <AnimatedButton
                           variant="primary"
-                          className="w-full text-xs font-black !bg-zinc-50 hover:!bg-zinc-100 !text-zinc-750 border border-zinc-200 shadow-sm cursor-pointer"
+                          className="w-full text-xs font-black !bg-zinc-50 hover:!bg-zinc-100 !text-zinc-800 border border-zinc-200 shadow-sm cursor-pointer"
                           disabled={linkingCoachId === coach.id}
                           onClick={() => handleLinkCoach(coach.id)}
                         >

@@ -43,15 +43,15 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col overflow-hidden"
+      className="fixed inset-x-0 top-0 h-dvh z-50 flex flex-col overflow-hidden"
       style={{
         backgroundColor: '#e5ddd5',
         backgroundImage: 'radial-gradient(#cfc8c0 1px, transparent 1px)',
         backgroundSize: '24px 24px',
       }}
     >
-      {/* Upper Deck Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-sm shrink-0 transition-all duration-300">
+      {/* Upper Deck Header — safe-area top so the status bar never overlaps */}
+      <header className="pt-[env(safe-area-inset-top)] bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-sm shrink-0 transition-all duration-300">
         <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-200/60">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-sm shrink-0 group">
@@ -68,12 +68,12 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
 
           <div className="flex items-center gap-3">
             <Link href="/settings">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-500 hover:text-zinc-800 border border-zinc-200 hover:border-zinc-350 bg-white hover:bg-zinc-50 rounded-xl shadow-sm cursor-pointer">
+              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-500 hover:text-zinc-800 border border-zinc-200 hover:border-zinc-400 bg-white hover:bg-zinc-50 rounded-xl shadow-sm cursor-pointer">
                 <Settings className="w-4 h-4" />
               </AnimatedButton>
             </Link>
             <form action="/auth/signout" method="post">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-550 hover:text-red-650 hover:bg-red-50 rounded-xl border border-zinc-200 hover:border-red-200 shadow-sm bg-white cursor-pointer">
+              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-600 hover:text-red-700 hover:bg-red-50 rounded-xl border border-zinc-200 hover:border-red-200 shadow-sm bg-white cursor-pointer">
                 <LogOut className="w-4 h-4" />
               </AnimatedButton>
             </form>
@@ -84,7 +84,7 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
         <div className="px-6 py-2.5 bg-zinc-50 flex items-center justify-between border-t border-zinc-200/30">
           <div className="flex gap-2 overflow-x-auto scrollbar-none">
             <Link href="/coach/dashboard" className="shrink-0">
-              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-550 hover:text-zinc-800 hover:bg-zinc-100/40 shadow-sm cursor-pointer transition-all">
+              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-600 hover:text-zinc-800 hover:bg-zinc-100/40 shadow-sm cursor-pointer transition-all">
                 Atletas en Roster
               </AnimatedButton>
             </Link>
@@ -99,7 +99,7 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
       </header>
 
       {/* Reusable Chat Interface */}
-      <main className="max-w-6xl mx-auto w-full px-0 sm:px-6 pt-0 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-0">
+      <main className="max-w-6xl mx-auto w-full px-0 sm:px-6 pt-0 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-0 min-h-0">
         <ChatView
           initialParticipants={participants}
           currentUserRole="coach"

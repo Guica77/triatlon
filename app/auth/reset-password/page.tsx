@@ -66,13 +66,13 @@ export default function ResetPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-750 text-xs text-center font-medium">
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs text-center font-medium">
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-750 text-xs text-center leading-relaxed font-medium">
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs text-center leading-relaxed font-medium">
                 ¡Contraseña restablecida con éxito! Redirigiéndote al panel de control...
               </div>
             )}
@@ -92,7 +92,7 @@ export default function ResetPasswordPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-550 hover:text-zinc-800 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-800 transition-colors"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>

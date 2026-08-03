@@ -10,12 +10,12 @@ export default function CoachDashboardLoading() {
             <div className="w-10 h-10 rounded-xl bg-surface-hover shrink-0" />
             <div className="space-y-2 w-full">
               <div className="h-4 bg-surface-hover rounded w-2/3" />
-              <div className="h-3 bg-zinc-150 rounded w-1/2" />
+              <div className="h-3 bg-zinc-200 rounded w-1/2" />
             </div>
           </div>
           <div className="flex gap-2">
-            <div className="w-9 h-9 rounded-xl bg-zinc-150 shrink-0" />
-            <div className="w-9 h-9 rounded-xl bg-zinc-150 shrink-0" />
+            <div className="w-9 h-9 rounded-xl bg-zinc-200 shrink-0" />
+            <div className="w-9 h-9 rounded-xl bg-zinc-200 shrink-0" />
           </div>
         </div>
 
@@ -33,7 +33,7 @@ export default function CoachDashboardLoading() {
         
         {/* Title / Section Roster */}
         <div className="flex justify-between items-center py-2">
-          <div className="h-5 bg-zinc-250 rounded w-48" />
+          <div className="h-5 bg-zinc-300 rounded w-48" />
           <div className="h-8 bg-surface-hover rounded-xl w-32" />
         </div>
 
@@ -45,7 +45,7 @@ export default function CoachDashboardLoading() {
                 <div className="w-12 h-12 rounded-xl bg-surface-hover shrink-0" />
                 <div className="space-y-2 w-full">
                   <div className="h-4 bg-surface-hover rounded w-3/4" />
-                  <div className="h-3 bg-zinc-150 rounded w-1/2" />
+                  <div className="h-3 bg-zinc-200 rounded w-1/2" />
                 </div>
               </div>
               <div className="space-y-2">
@@ -53,7 +53,7 @@ export default function CoachDashboardLoading() {
                 <div className="h-3.5 bg-surface-hover rounded w-5/6" />
               </div>
               <div className="pt-2 border-t border-zinc-100 flex justify-between gap-3">
-                <div className="h-8 bg-zinc-150 rounded-lg w-1/2" />
+                <div className="h-8 bg-zinc-200 rounded-lg w-1/2" />
                 <div className="h-8 bg-surface-hover rounded-lg w-1/2" />
               </div>
             </div>

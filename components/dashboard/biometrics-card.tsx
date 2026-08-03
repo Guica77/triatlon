@@ -394,7 +394,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-hover border border-border-default text-[11px] text-text-secondary font-semibold">
               <Brain className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Carga Mental: <strong className="text-emerald-650">{isRegistered ? `Nivel ${biometrics.stress_level}/5` : 'Pendiente'}</strong></span>
+              <span>Carga Mental: <strong className="text-emerald-700">{isRegistered ? `Nivel ${biometrics.stress_level}/5` : 'Pendiente'}</strong></span>
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-hover border border-border-default text-[11px] text-text-secondary font-semibold">
               <Utensils className="w-3.5 h-3.5 text-text-muted" />

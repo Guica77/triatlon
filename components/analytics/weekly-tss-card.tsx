@@ -67,7 +67,7 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
     } else if (percent <= 110) {
       return {
         label: isBeginner ? 'Volumen Óptimo' : 'Carga Óptima',
-        color: 'text-emerald-700 bg-emerald-50 border-emerald-250',
+        color: 'text-emerald-700 bg-emerald-50 border-emerald-300',
         barColor: 'bg-emerald-500'
       };
     } else {

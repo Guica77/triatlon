@@ -58,9 +58,9 @@ export function FormStatusWidget({
     if (safeTsb > 25) {
       label = 'Pérdida de Forma';
       description = 'Demasiado descanso, perdiendo condición.';
-      color = 'text-zinc-550';
+      color = 'text-zinc-600';
       gradientId = 'formGrayGrad';
-      borderHoverClass = 'hover:border-zinc-350';
+      borderHoverClass = 'hover:border-zinc-400';
     } else if (safeTsb >= 5) {
       label = 'Pico de Forma';
       description = 'Frescura alta. Listo para competir.';

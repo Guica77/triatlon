@@ -4,12 +4,12 @@ export default function CoachChatLoading() {
   return (
     <div className="h-[100dvh] bg-[#f3f4f6] flex flex-col overflow-hidden animate-pulse pb-[env(safe-area-inset-bottom)] sm:pb-0">
       {/* Header Skeleton */}
-      <header className="border-b border-zinc-200 bg-white sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center shrink-0">
+      <header className="border-b border-zinc-200 bg-white px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-3 sm:pb-4 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-3 w-full max-w-xs">
           <div className="w-9 h-9 rounded-xl bg-surface-hover shrink-0" />
           <div className="space-y-2 w-full">
             <div className="h-4 bg-surface-hover rounded w-2/3" />
-            <div className="h-3 bg-zinc-150 rounded w-1/2" />
+            <div className="h-3 bg-zinc-200 rounded w-1/2" />
           </div>
         </div>
         <div className="w-36 h-9 bg-surface-hover rounded-xl shrink-0" />
@@ -34,21 +34,21 @@ export default function CoachChatLoading() {
               <div className="w-9 h-9 rounded-full bg-surface-hover shrink-0" />
               <div className="space-y-1.5 w-full">
                 <div className="h-3.5 bg-surface-hover rounded w-1/2" />
-                <div className="h-3 bg-zinc-150 rounded w-1/3" />
+                <div className="h-3 bg-zinc-200 rounded w-1/3" />
               </div>
             </div>
             <div className="flex items-center gap-3 py-2 border-b border-zinc-100">
               <div className="w-9 h-9 rounded-full bg-surface-hover shrink-0" />
               <div className="space-y-1.5 w-full">
                 <div className="h-3.5 bg-surface-hover rounded w-2/3" />
-                <div className="h-3 bg-zinc-150 rounded w-1/4" />
+                <div className="h-3 bg-zinc-200 rounded w-1/4" />
               </div>
             </div>
             <div className="flex items-center gap-3 py-2 border-b border-zinc-100">
               <div className="w-9 h-9 rounded-full bg-surface-hover shrink-0" />
               <div className="space-y-1.5 w-full">
                 <div className="h-3.5 bg-surface-hover rounded w-1/2" />
-                <div className="h-3 bg-zinc-150 rounded w-1/3" />
+                <div className="h-3 bg-zinc-200 rounded w-1/3" />
               </div>
             </div>
           </div>
@@ -61,7 +61,7 @@ export default function CoachChatLoading() {
               <div className="flex gap-3 items-start max-w-md">
                 <div className="w-8 h-8 rounded-full bg-surface-hover shrink-0" />
                 <div className="space-y-1.5 w-full">
-                  <div className="h-3 bg-zinc-150 rounded w-1/4" />
+                  <div className="h-3 bg-zinc-200 rounded w-1/4" />
                   <div className="p-3.5 bg-white border border-zinc-200 rounded-2xl rounded-tl-none space-y-1">
                     <div className="h-3.5 bg-surface-hover rounded w-11/12" />
                     <div className="h-3.5 bg-surface-hover rounded w-3/4" />
@@ -72,7 +72,7 @@ export default function CoachChatLoading() {
               {/* Bubble 2: Right */}
               <div className="flex gap-3 items-start max-w-md ml-auto justify-end">
                 <div className="space-y-1.5 w-full flex flex-col items-end">
-                  <div className="h-3 bg-zinc-150 rounded w-1/4" />
+                  <div className="h-3 bg-zinc-200 rounded w-1/4" />
                   <div className="p-3.5 bg-[#d7f3ff] border border-cyan-200/50 rounded-2xl rounded-tr-none space-y-1 w-full">
                     <div className="h-3.5 bg-surface-hover rounded w-11/12" />
                     <div className="h-3.5 bg-surface-hover rounded w-1/2" />

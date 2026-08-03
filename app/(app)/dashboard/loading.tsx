@@ -14,7 +14,7 @@ export default function DashboardLoading() {
               <div className="h-3 bg-surface-hover rounded w-1/3" />
             </div>
           </div>
-          <div className="w-9 h-9 rounded-xl bg-zinc-150 shrink-0" />
+          <div className="w-9 h-9 rounded-xl bg-zinc-200 shrink-0" />
         </div>
 
         {/* Nivel 2 */}
@@ -30,7 +30,7 @@ export default function DashboardLoading() {
         {/* Objective Config Card Skeleton */}
         <div className="p-5 bg-surface-card border border-border-default rounded-2xl flex items-center justify-between">
           <div className="space-y-2 w-2/3">
-            <div className="h-3 bg-zinc-150 rounded w-1/4" />
+            <div className="h-3 bg-zinc-200 rounded w-1/4" />
             <div className="h-5 bg-surface-hover rounded w-1/2" />
           </div>
           <div className="w-24 h-9 bg-surface-hover rounded-xl" />
@@ -53,7 +53,7 @@ export default function DashboardLoading() {
         <div className="space-y-4">
           <div className="flex border-b border-border-default gap-6">
             <div className="h-8 bg-surface-hover rounded w-24 pb-2" />
-            <div className="h-8 bg-zinc-150 rounded w-24 pb-2" />
+            <div className="h-8 bg-zinc-200 rounded w-24 pb-2" />
           </div>
 
           {/* Tab content placeholder: Workout card & Weekly Navigation */}
@@ -62,7 +62,7 @@ export default function DashboardLoading() {
               <div className="w-20 h-10 bg-surface-hover rounded" />
               <div className="flex-1 max-w-sm mx-4 space-y-2">
                 <div className="h-4 bg-surface-hover rounded w-3/4" />
-                <div className="h-3 bg-zinc-150 rounded w-1/2" />
+                <div className="h-3 bg-zinc-200 rounded w-1/2" />
               </div>
               <div className="w-8 h-8 rounded-full bg-surface-hover" />
             </div>
