@@ -9,9 +9,9 @@ import { Trophy, ArrowRight, UserPlus, LogIn } from 'lucide-react'
 export default async function InviteLandingPage({
   params,
 }: {
-  params: { coachId: string }
+  params: Promise<{ coachId: string }>
 }) {
-  const coachId = params.coachId
+  const { coachId } = await params
   const supabase = await createClient()
 
   // 1. Fetch coach details
