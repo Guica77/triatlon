@@ -14,8 +14,7 @@ interface PageHeaderProps {
 
 export function PageHeader({
   icon: Icon,
-  iconColor = 'text-swim',
-  iconBg = 'bg-swim/10 border-swim/20',
+  iconColor = 'text-text-secondary',
   title,
   subtitle,
   actions,
@@ -23,17 +22,14 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <div className={cn('flex items-center justify-between', className)}>
-      <div className="flex items-center gap-3">
-        <div className={cn(
-          'w-10 h-10 rounded-xl border flex items-center justify-center shrink-0',
-          iconBg
-        )}>
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-9 h-9 rounded-lg bg-surface-hover border border-border-subtle flex items-center justify-center shrink-0">
           <Icon className={cn('w-4 h-4', iconColor)} />
         </div>
         <div className="min-w-0">
-          <h1 className="text-base font-bold text-text-primary truncate tracking-tight">{title}</h1>
+          <h1 className="font-display text-xl font-bold tracking-tight text-text-primary truncate leading-tight">{title}</h1>
           {subtitle && (
-            <p className="text-xs text-text-muted font-semibold truncate">{subtitle}</p>
+            <p className="text-xs text-text-muted font-medium truncate">{subtitle}</p>
           )}
         </div>
       </div>

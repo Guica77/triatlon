@@ -16,9 +16,6 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-6 overflow-hidden font-sans bg-surface-app selection:bg-accent/30">
-      {/* Subtle coral gradient at bottom */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[70%] h-[35%] bg-gradient-to-t from-coral-500/[0.04] to-transparent pointer-events-none" />
-
       {/* Thin discipline bars — swim / bike / run */}
       <div className="absolute top-0 left-0 right-0 flex h-[3px]">
         <div className="flex-1 bg-swim/70" />
@@ -39,15 +36,15 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.4 }}
-              className="flex items-center justify-center gap-1.5"
+              className="flex items-center justify-center gap-2"
             >
-              <span className="text-xl font-black tracking-tight text-text-primary">
-                <span className="text-swim">T</span>
-                <span className="text-bike">R</span>
-                <span className="text-run">I</span>
+              <span className="flex items-center gap-[3px]" aria-hidden="true">
+                <span className="w-1.5 h-3.5 rounded-full bg-swim" />
+                <span className="w-1.5 h-3.5 rounded-full bg-bike" />
+                <span className="w-1.5 h-3.5 rounded-full bg-run" />
               </span>
-              <span className="text-[10px] font-bold text-text-muted tracking-[0.2em] uppercase mt-1">
-                Pro
+              <span className="font-display text-2xl font-black tracking-tight text-text-primary leading-none">
+                TRIATLON&nbsp;<span className="text-accent">PRO</span>
               </span>
             </motion.div>
 
@@ -56,7 +53,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.4 }}
-                className="text-2xl font-bold tracking-tight text-text-primary"
+                className="font-display text-2xl font-bold tracking-tight text-text-primary"
               >
                 {title}
               </motion.h1>
@@ -76,7 +73,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
             initial={{ opacity: 0, y: 12, scale: 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.35, duration: 0.4, ease: 'easeOut' }}
-            className="p-6 sm:p-7 rounded-xl bg-surface-card shadow-card border border-border-card/50"
+            className="p-6 sm:p-7 rounded-xl bg-surface-card border border-border-default"
           >
             {children}
           </motion.div>

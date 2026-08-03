@@ -101,22 +101,22 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
 
   const getFatigueLabel = (val: number) => {
     switch (val) {
-      case 1: return 'Destrozado 🥵';
-      case 2: return 'Muy cansado 😩';
-      case 3: return 'Normal 😐';
-      case 4: return 'Fresco 🙂';
-      case 5: return 'A tope 🚀';
+      case 1: return 'Destrozado';
+      case 2: return 'Muy cansado';
+      case 3: return 'Normal';
+      case 4: return 'Fresco';
+      case 5: return 'A tope';
       default: return '';
     }
   };
 
   const getStressLabel = (val: number) => {
     switch (val) {
-      case 1: return 'Muy alto 🤯';
-      case 2: return 'Alto 😰';
-      case 3: return 'Normal 😐';
-      case 4: return 'Bajo 🙂';
-      case 5: return 'Zen 🧘‍♂️';
+      case 1: return 'Muy alto';
+      case 2: return 'Alto';
+      case 3: return 'Normal';
+      case 4: return 'Bajo';
+      case 5: return 'Zen';
       default: return '';
     }
   };

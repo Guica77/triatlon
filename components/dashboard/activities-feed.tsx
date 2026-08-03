@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Watch, Flame, Waves, Footprints, ExternalLink, RefreshCw, Zap } from 'lucide-react';
+import { Watch, Flame, Waves, Footprints, Bike, ExternalLink, RefreshCw, Zap } from 'lucide-react';
 import { getRecentStravaActivities } from '@/app/telemetry/telemetry-actions';
 
 interface StravaActivity {
@@ -172,17 +172,17 @@ export function ActivitiesFeed() {
               const linkedName = isRun ? 'Series Umbral 10k' : isRide ? 'Fondo Largo Z2' : 'Entrenamiento Programado';
 
               let iconBg = 'bg-surface-hover text-text-secondary';
-              let emoji = '🏃';
+              let Icon = Footprints;
 
               if (isRun) {
                 iconBg = 'bg-run/10 text-run border border-run/20';
-                emoji = '🏃';
+                Icon = Footprints;
               } else if (isSwim) {
                 iconBg = 'bg-swim/10 text-swim border border-swim/20';
-                emoji = '🏊';
+                Icon = Waves;
               } else if (isRide) {
                 iconBg = 'bg-bike/10 text-bike border border-bike/20';
-                emoji = '🚴';
+                Icon = Bike;
               }
 
               return (
@@ -191,8 +191,8 @@ export function ActivitiesFeed() {
                   className={`bg-surface-hover border border-border-default p-3 px-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 transition-all hover:border-border-default shadow-card ${!isLinked ? 'opacity-70' : ''}`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0 text-base`}>
-                      {emoji}
+                    <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>
+                      <Icon className="w-4 h-4" />
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-text-primary line-clamp-1 flex items-center gap-2">

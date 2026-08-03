@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Barlow_Condensed, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { CookieBanner } from "@/components/ui/cookie-banner";
 import { IosInstallPrompt } from "@/components/ui/ios-install-prompt";
@@ -12,13 +12,27 @@ const inter = Inter({
   weight: ["400", "500", "600", "700", "800", "900"],
 });
 
+/* Timing-board display face — condensed, used for numerals + eyebrows */
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-barlow",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800", "900"],
+});
+
+/* Tabular data readout — TSS, HR, splits, timestamps */
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0F1419",
+  themeColor: "#0B1016",
 };
 
 export const metadata: Metadata = {
@@ -66,7 +80,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${inter.variable} h-full antialiased dark overflow-x-hidden`}
+      className={`${inter.variable} ${barlowCondensed.variable} ${jetbrainsMono.variable} h-full antialiased dark overflow-x-hidden`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-surface-app text-text-primary flex flex-col font-sans selection:bg-accent/30 overflow-x-hidden w-full" suppressHydrationWarning>

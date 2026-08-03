@@ -69,7 +69,7 @@ export function IosInstallPrompt() {
 
         <button
           onClick={() => setIsDismissed(true)}
-          className="mt-3 w-full py-2 rounded-xl bg-swim hover:bg-swim/90 text-white text-xs font-bold transition cursor-pointer"
+          className="mt-3 w-full py-2 rounded-xl bg-swim hover:bg-swim/90 text-text-inverse text-xs font-bold transition cursor-pointer"
         >
           Entendido, ya lo haré
         </button>

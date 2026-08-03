@@ -96,15 +96,15 @@ export function ProfileCompletion({ profile }: ProfileCompletionProps) {
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-cyan-500/15 border border-cyan-500/20 flex items-center justify-center">
-            <User className="w-4 h-4 text-cyan-400" />
+          <div className="w-9 h-9 rounded-xl bg-accent/15 border border-accent/20 flex items-center justify-center">
+            <User className="w-4 h-4 text-accent" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-text-primary">Tu Perfil</h3>
             <p className="text-[10px] text-text-secondary font-medium">{completed}/{total} completados</p>
           </div>
         </div>
-        <span className="text-2xl font-black text-cyan-400">{percent}%</span>
+        <span className="text-2xl font-black text-accent">{percent}%</span>
       </div>
 
       {/* Progress bar */}
@@ -113,7 +113,7 @@ export function ProfileCompletion({ profile }: ProfileCompletionProps) {
           initial={{ width: 0 }}
           animate={{ width: `${percent}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="h-full bg-cyan-500 rounded-full"
+          className="h-full bg-accent rounded-full"
         />
       </div>
 
@@ -125,7 +125,7 @@ export function ProfileCompletion({ profile }: ProfileCompletionProps) {
             <Link
               key={item.id}
               href={item.href}
-              className="flex items-center gap-2 p-2 rounded-lg bg-surface-hover/50 border border-border-subtle/50 hover:border-cyan-500/30 transition-colors group"
+              className="flex items-center gap-2 p-2 rounded-lg bg-surface-hover/50 border border-border-subtle/50 hover:border-accent/30 transition-colors group"
             >
               <div className="w-5 h-5 rounded-full border border-border-default flex items-center justify-center shrink-0">
                 <Check className="w-3 h-3 text-text-muted" />
@@ -133,7 +133,7 @@ export function ProfileCompletion({ profile }: ProfileCompletionProps) {
               <span className="text-xs text-text-muted font-medium group-hover:text-text-primary transition-colors flex-1">
                 {item.label}
               </span>
-              <ArrowRight className="w-3 h-3 text-text-muted group-hover:text-cyan-400 transition-colors" />
+              <ArrowRight className="w-3 h-3 text-text-muted group-hover:text-accent transition-colors" />
             </Link>
           ))}
         </div>

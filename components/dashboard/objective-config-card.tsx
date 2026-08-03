@@ -19,16 +19,14 @@ export function ObjectiveConfigCard({ targetRaceName }: ObjectiveConfigCardProps
   return (
     <>
       {isPending ? (
-        <div className="p-5 rounded-2xl bg-bg-card border border-swim/20 relative overflow-hidden group mb-6">
-          <div className="absolute -right-16 -top-16 w-36 h-36 rounded-full bg-swim/10 blur-3xl group-hover:bg-swim/15 transition-all duration-500" />
-          
+        <div className="p-5 rounded-2xl bg-bg-card border border-swim/20 relative overflow-hidden mb-6">
           <div className="flex gap-4 items-start relative z-10">
             <div className="w-10 h-10 rounded-xl bg-swim/15 border border-swim/20 flex items-center justify-center text-swim shrink-0 mt-0.5">
               <Target className="w-5 h-5" />
             </div>
             <div className="space-y-1.5 w-full">
               <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-                ¡Falta tu Objetivo Principal! 🎯
+                ¡Falta tu Objetivo Principal!
               </h3>
               <p className="text-xs text-text-secondary leading-relaxed max-w-2xl">
                 Has completado tu perfil fisiológico, pero aún no has definido la carrera que estás preparando. 

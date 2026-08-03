@@ -154,12 +154,12 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
             {/* Header */}
             <div className="px-6 py-4 flex justify-between items-center border-b border-border-subtle bg-surface-hover">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-accent/20 text-accent flex items-center justify-center">
                   <Bot className="w-4 h-4" />
                 </div>
                 <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
                   Generador AI
-                  <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">Beta</span>
+                  <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-accent/20 text-accent border border-accent/30">Beta</span>
                 </h3>
               </div>
               {!isGenerating && (
@@ -177,13 +177,12 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
               {isGenerating ? (
                 <div className="py-8 flex flex-col items-center justify-center space-y-6">
                   <div className="relative">
-                    <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-xl animate-pulse" />
                     <div className="w-16 h-16 bg-surface-hover border border-border-default rounded-full flex items-center justify-center relative z-10">
-                      <BrainCircuit className="w-8 h-8 text-cyan-400 animate-pulse" />
+                      <BrainCircuit className="w-8 h-8 text-accent animate-pulse" />
                     </div>
-                    {/* Orbiting dots */}
-                    <div className="absolute inset-[-10px] border border-cyan-500/20 rounded-full animate-[spin_3s_linear_infinite]" />
-                    <div className="absolute inset-[-20px] border border-cyan-500/10 rounded-full animate-[spin_4s_linear_infinite_reverse]" />
+                    {/* Orbiting rings */}
+                    <div className="absolute inset-[-10px] border border-accent/25 rounded-full animate-[spin_3s_linear_infinite]" />
+                    <div className="absolute inset-[-20px] border border-accent/15 rounded-full animate-[spin_4s_linear_infinite_reverse]" />
                   </div>
 
                   <div className="text-center space-y-2">
@@ -194,7 +193,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -5 }}
-                        className="text-sm text-cyan-400 font-semibold"
+                        className="text-sm text-accent font-semibold"
                       >
                         {steps[generationStep]}
                       </motion.p>
@@ -212,7 +211,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
                       value={prompt}
                       onChange={e => setPrompt(e.target.value)}
                       placeholder="Ej: Quiero una semana enfocada en el sector de ciclismo con unos 1000m de desnivel acumulado, y un rodaje largo de carrera a pie el domingo. El viernes necesito descansar."
-                      className="w-full h-32 px-4 py-3 bg-surface-card border border-border-default focus:border-cyan-500 rounded-xl text-sm text-text-primary placeholder:text-text-muted outline-none resize-none custom-scrollbar"
+                      className="w-full h-32 px-4 py-3 bg-surface-card border border-border-default focus:border-accent rounded-xl text-sm text-text-primary placeholder:text-text-muted outline-none resize-none custom-scrollbar"
                       autoFocus
                     />
 
@@ -228,7 +227,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
                     type="submit"
                     variant="primary"
                     disabled={!prompt.trim()}
-                    className="w-full py-3.5 !bg-cyan-500 hover:!bg-cyan-400 !text-white font-extrabold rounded-xl flex items-center justify-center gap-2"
+                    className="w-full py-3.5 !bg-accent hover:!bg-coral-400 !text-white font-extrabold rounded-xl flex items-center justify-center gap-2"
                   >
                     <Sparkles className="w-4 h-4" />
                     Generar Calendario AI

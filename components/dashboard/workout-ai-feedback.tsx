@@ -214,7 +214,7 @@ export function WorkoutAIFeedback({
  * Fallback rule-based analysis when AI is unavailable
  */
 function getFallbackAnalysis(): string {
-  return `📊 **Resumen Automático**
+  return `**Resumen Automático**
 
 No se pudo conectar con el asistente IA. Aquí tienes un análisis basado en reglas:
 

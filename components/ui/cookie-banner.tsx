@@ -56,7 +56,7 @@ export function CookieBanner() {
       <div className="flex gap-2">
         <button 
           onClick={handleAccept}
-          className="flex-1 py-2.5 text-xs font-black bg-swim hover:bg-swim/90 text-white rounded-xl transition-all  cursor-pointer text-center"
+          className="flex-1 py-2.5 text-xs font-black bg-swim hover:bg-swim/90 text-text-inverse rounded-xl transition-all  cursor-pointer text-center"
         >
           Aceptar Todas
         </button>

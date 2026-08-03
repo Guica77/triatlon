@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Watch, Check, RefreshCw } from 'lucide-react'
+import { X, Watch, Check, RefreshCw, Bike, Footprints, Waves, Dumbbell } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
@@ -85,7 +85,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
   if (!isOpen) return null
 
   const session = workout.training_sessions
-  const sportEmoji = session.sport_type === 'ciclismo' ? '🚴‍♂️' : session.sport_type === 'carrera' ? '🏃‍♂️' : session.sport_type === 'natacion' ? '🏊‍♂️' : '🏋️‍♂️'
+  const SportIcon = session.sport_type === 'ciclismo' ? Bike : session.sport_type === 'carrera' ? Footprints : session.sport_type === 'natacion' ? Waves : Dumbbell
 
   const getStateText = () => {
     switch (syncState) {
@@ -125,9 +125,9 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
 
           {/* Sync Animation Widget */}
           <div className="relative w-40 h-40 flex items-center justify-center">
-            {/* Pulsing glow behind watch */}
-            <div className={`absolute inset-4 rounded-full blur-xl transition-colors duration-500 -z-10 ${
-              syncState === 'success' ? 'bg-emerald-500/10' : 'bg-orange-500/5'
+            {/* State tint behind watch */}
+            <div className={`absolute inset-4 rounded-full transition-colors duration-500 -z-10 ${
+              syncState === 'success' ? 'bg-bike/10' : 'bg-accent/5'
             }`} />
 
             {/* Smartwatch Outer Case Mockup */}
@@ -159,19 +159,19 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                       className="flex flex-col items-center justify-center space-y-1.5"
                     >
                       <div className="relative">
-                        <Watch className="w-10 h-10 text-orange-500" />
+                        <Watch className="w-10 h-10 text-accent" />
                         <motion.div 
                           animate={{ rotate: 360 }}
                           transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
                           className="absolute -top-1 -right-1"
                         >
-                          <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+                          <RefreshCw className="w-3.5 h-3.5 text-accent" />
                         </motion.div>
                       </div>
                       <span className="text-[11px] font-black text-text-primary">{progress}%</span>
                       <div className="w-16 h-1 bg-border-default rounded-full overflow-hidden">
                         <div 
-                          className={`h-full bg-orange-500 transition-all duration-100 ${getProgressWidthClass(progress)}`}
+                          className={`h-full bg-accent transition-all duration-100 ${getProgressWidthClass(progress)}`}
                         />
                       </div>
                     </motion.div>
@@ -212,7 +212,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                 <span className="text-bike">Sincronización Completada</span>
               ) : (
                 <>
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
                   <span>Enviando al Reloj</span>
                 </>
               )}
@@ -226,7 +226,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
           <div className="w-full bg-surface-hover border border-border-default rounded-xl p-3 text-left space-y-2">
             <div className="flex justify-between items-center text-[10px] text-text-secondary">
               <span className="font-bold uppercase tracking-wider">Bloques Estructurados</span>
-              <span className="font-semibold">{sportEmoji} {session.sport_type.toUpperCase()}</span>
+              <span className="font-semibold flex items-center gap-1.5"><SportIcon className="w-3.5 h-3.5" /> {session.sport_type.toUpperCase()}</span>
             </div>
 
             <div className="space-y-1.5">
@@ -236,7 +236,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
               </div>
               <div className="flex items-center justify-between text-[11px] border-b border-border-subtle pb-1">
                 <span className="text-text-secondary">2. Intervalo Principal:</span>
-                <span className="text-orange-600 font-bold">5x Repeticiones</span>
+                <span className="text-accent font-bold">5x Repeticiones</span>
               </div>
               <div className="flex items-center justify-between text-[11px] pb-0.5">
                 <span className="text-text-secondary">3. Enfriamiento:</span>

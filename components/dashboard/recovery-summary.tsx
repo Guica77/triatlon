@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Heart, Activity, Moon, Zap, ChevronRight } from 'lucide-react'
+import { Heart, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -25,14 +25,14 @@ export function RecoverySummary({ readinessScore, hrv, sleepHours, fatigue }: Re
   return (
     <Link
       href="/recuperacion"
-      className="block bg-surface-card rounded-2xl border border-border-default shadow-card p-4 transition-colors hover:border-border-default/80 group"
+      className="block bg-surface-card rounded-2xl border border-border-default p-4 transition-colors hover:border-border-default/80 group"
     >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-bike/15 flex items-center justify-center shrink-0">
             <Heart className="w-4 h-4 text-bike" />
           </div>
-          <span className="text-xs font-bold text-text-primary">Recuperación</span>
+          <span className="font-display text-sm font-semibold tracking-tight text-text-primary">Recuperación</span>
         </div>
         <span className="flex items-center gap-0.5 text-[10px] text-text-muted group-hover:text-text-secondary transition-colors">
           Ver detalle <ChevronRight className="w-3 h-3" />
@@ -41,27 +41,27 @@ export function RecoverySummary({ readinessScore, hrv, sleepHours, fatigue }: Re
 
       <div className="grid grid-cols-4 gap-2">
         {/* Readiness */}
-        <div className={cn('rounded-xl p-2.5 text-center border', rc.bg, 'border-transparent')}>
-          <p className={cn('text-xl font-black', rc.text)}>{readiness || '--'}</p>
-          <p className="text-[8px] text-text-muted font-bold uppercase tracking-wider mt-0.5">Readiness</p>
+        <div className={cn('rounded-lg p-2.5 text-center border', rc.bg, 'border-transparent')}>
+          <p className={cn('font-display text-2xl font-black leading-none', rc.text)}>{readiness || '--'}</p>
+          <p className="text-[8px] text-text-muted font-bold uppercase tracking-wider mt-1">Readiness</p>
         </div>
 
         {/* HRV */}
-        <div className="bg-surface-hover rounded-xl p-2.5 text-center">
-          <p className="text-xl font-black text-swim">{hrv ?? '--'}</p>
-          <p className="text-[8px] text-text-muted font-bold uppercase tracking-wider mt-0.5">HRV</p>
+        <div className="bg-surface-hover border border-border-subtle rounded-lg p-2.5 text-center">
+          <p className="font-display text-2xl font-black leading-none text-swim">{hrv ?? '--'}</p>
+          <p className="text-[8px] text-text-muted font-bold uppercase tracking-wider mt-1">HRV</p>
         </div>
 
         {/* Sleep */}
-        <div className="bg-surface-hover rounded-xl p-2.5 text-center">
-          <p className="text-xl font-black text-text-primary">{sleepHours ?? '--'}h</p>
-          <p className="text-[8px] text-text-muted font-bold uppercase tracking-wider mt-0.5">Sueño</p>
+        <div className="bg-surface-hover border border-border-subtle rounded-lg p-2.5 text-center">
+          <p className="font-display text-2xl font-black leading-none text-text-primary">{sleepHours ?? '--'}h</p>
+          <p className="text-[8px] text-text-muted font-bold uppercase tracking-wider mt-1">Sueño</p>
         </div>
 
         {/* Fatigue */}
-        <div className="bg-surface-hover rounded-xl p-2.5 text-center">
-          <p className="text-xl font-black text-warning">{fatigue ?? '--'}</p>
-          <p className="text-[8px] text-text-muted font-bold uppercase tracking-wider mt-0.5">Fatiga</p>
+        <div className="bg-surface-hover border border-border-subtle rounded-lg p-2.5 text-center">
+          <p className="font-display text-2xl font-black leading-none text-warning">{fatigue ?? '--'}</p>
+          <p className="text-[8px] text-text-muted font-bold uppercase tracking-wider mt-1">Fatiga</p>
         </div>
       </div>
     </Link>

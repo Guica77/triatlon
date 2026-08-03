@@ -57,11 +57,11 @@ export function AppFeedbackModal({ daysUsed }: AppFeedbackModalProps) {
   };
 
   const getSatisfactionLabel = (score: number) => {
-    if (score === 1) return 'Insatisfecho 😠';
-    if (score === 2) return 'Regular 😕';
-    if (score === 3) return 'Satisfecho 😐';
-    if (score === 4) return 'Muy contento 🙂';
-    if (score === 5) return '¡Me encanta! 😍';
+    if (score === 1) return 'Insatisfecho';
+    if (score === 2) return 'Regular';
+    if (score === 3) return 'Satisfecho';
+    if (score === 4) return 'Muy contento';
+    if (score === 5) return '¡Me encanta!';
     return 'Selecciona tu valoración';
   };
 

@@ -61,11 +61,11 @@ function parseWorkoutDescription(desc: string, sportType: string) {
   let main = desc || 'Sesión de entrenamiento aeróbico de construcción base.';
   let warmup = '15 mins de calentamiento progresivo de Z1 a Z2 con movilidad articular.';
   let cooldown = '10 mins de vuelta a la calma en Z1 y estiramientos suaves descontracturantes.';
-  const gear = sportType === 'natacion' 
-    ? '🩱 Palas, aletas cortas y pullbuoy.' 
-    : sportType === 'ciclismo' 
-    ? '🚴‍♂️ Potenciómetro calibrado, bidones de sales y geles de carbohidratos.' 
-    : '🏃‍♂️ Zapatillas mixtas y banda pectoral de frecuencia cardíaca.';
+  const gear = sportType === 'natacion'
+    ? 'Palas, aletas cortas y pullbuoy.'
+    : sportType === 'ciclismo'
+    ? 'Potenciómetro calibrado, bidones de sales y geles de carbohidratos.'
+    : 'Zapatillas mixtas y banda pectoral de frecuencia cardíaca.';
 
   if (desc.includes('Calentamiento:') || desc.includes('Parte principal:') || desc.includes('Enfriamiento:')) {
     const warmupMatch = desc.match(/Calentamiento:\s*([^\n]+)/i);
@@ -314,11 +314,11 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     }
     if (athleteLevel === 'principiante') {
       if (session.sport_type === 'natacion') {
-        p.gear = '🩱 Bañador y gafas de natación (palas o aletas opcionales).';
+        p.gear = 'Bañador y gafas de natación (palas o aletas opcionales).';
       } else if (session.sport_type === 'ciclismo') {
-        p.gear = '🚴‍♂️ Cualquier bicicleta (de carretera, híbrida o montaña) y casco obligatorio.';
+        p.gear = 'Cualquier bicicleta (de carretera, híbrida o montaña) y casco obligatorio.';
       } else if (session.sport_type === 'carrera') {
-        p.gear = '🏃‍♂️ Zapatillas de running normales y ropa cómoda.';
+        p.gear = 'Zapatillas de running normales y ropa cómoda.';
       }
     }
     return p;
@@ -652,8 +652,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               <span className="text-[10px] text-text-muted uppercase tracking-wider block font-bold">Completado</span>
               {isCompleted ? (
                 <>
-                  <div className="text-sm font-bold text-emerald-600 mt-0.5">{durationMin - 3} <span className="text-[10px] font-normal text-emerald-500">min</span></div>
-                  <div className="text-[11px] text-emerald-600 mt-0.5">{(workout as any).actual_tss || (telemetry as any)?.actual_tss || 85} <span className="text-[9px] font-normal text-emerald-500">TSS</span></div>
+                  <div className="text-sm font-bold text-bike mt-0.5">{durationMin - 3} <span className="text-[10px] font-normal text-bike/80">min</span></div>
+                  <div className="text-[11px] text-bike mt-0.5">{(workout as any).actual_tss || (telemetry as any)?.actual_tss || 85} <span className="text-[9px] font-normal text-bike/80">TSS</span></div>
                 </>
               ) : isMissed ? (
                 <>
@@ -925,7 +925,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                               </div>
                               {/* Simple macro distribution micro-bar */}
                               <div className="h-1.5 w-full rounded-full bg-bg-hover overflow-hidden flex">
-                                <div className={`bg-cyan-500 h-full ${durationMin >= 60 ? 'w-[55%]' : 'w-[15%]'}`} />
+                                <div className={`bg-accent h-full ${durationMin >= 60 ? 'w-[55%]' : 'w-[15%]'}`} />
                                 <div className={`bg-purple-500 h-full ${durationMin >= 60 ? 'w-[30%]' : 'w-[60%]'}`} />
                                 <div className={`bg-amber-500 h-full ${durationMin >= 60 ? 'w-[15%]' : 'w-[25%]'}`} />
                               </div>
@@ -984,19 +984,19 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                               onClick={() => { setWeatherCondition('frio'); setHumidityLevel(40); }}
                               className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'frio' ? 'bg-bg-elevated text-swim' : 'text-text-muted hover:text-text-primary'}`}
                             >
-                              ❄️ Frío
+                              Frío
                             </button>
                             <button
                               onClick={() => { setWeatherCondition('templado'); setHumidityLevel(50); }}
                               className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'templado' ? 'bg-bg-elevated text-bike' : 'text-text-muted hover:text-text-primary'}`}
                             >
-                              🌤️ Templado
+                              Templado
                             </button>
                             <button
                               onClick={() => { setWeatherCondition('calor'); setHumidityLevel(85); }}
                               className={`px-2 py-1 rounded text-[10px] font-bold uppercase transition ${weatherCondition === 'calor' ? 'bg-bg-elevated text-warning' : 'text-text-muted hover:text-text-primary'}`}
                             >
-                              🔥 Calor (85% Hum)
+                              Calor (85% Hum)
                             </button>
                           </div>
                         )}
@@ -1062,8 +1062,8 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                 Ajustar por Clima y Vestimenta (Tiempo Real)
                               </span>
                               {(weatherCondition !== 'templado' || clothing !== 'normal') && (
-                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-swim font-extrabold uppercase">
-                                  ⚡ Valores Ajustados
+                                <span className="text-[9px] px-2 py-0.5 rounded-full bg-accent/10 text-swim font-extrabold uppercase">
+                                  Valores Ajustados
                                 </span>
                               )}
                             </div>
@@ -1084,7 +1084,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                           : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
                                       }`}
                                     >
-                                      {temp === 'frio' ? '❄️ Frío' : temp === 'templado' ? '🍃 Temp' : temp === 'calor' ? '🔥 Calor' : '🥵 Extr.'}
+                                      {temp === 'frio' ? 'Frío' : temp === 'templado' ? 'Temp' : temp === 'calor' ? 'Calor' : 'Extr.'}
                                     </button>
                                   ))}
                                 </div>
@@ -1112,7 +1112,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                             : 'text-text-muted hover:text-text-primary hover:bg-bg-hover'
                                         }`}
                                       >
-                                        {clot === 'ligera' ? '🎽 Lig' : clot === 'normal' ? '👕 Norm' : clot === 'abrigada' ? '🧥 Abr' : '🏊‍♂️ Neo'}
+                                        {clot === 'ligera' ? 'Lig' : clot === 'normal' ? 'Norm' : clot === 'abrigada' ? 'Abr' : 'Neo'}
                                       </button>
                                     );
                                   })}
@@ -1209,7 +1209,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           {/* Guía Práctica de Suplementación */}
                           <div className="p-3.5 rounded-xl bg-bike/10 border border-bike/20">
                             <span className="text-[10px] text-bike font-bold uppercase tracking-wider flex items-center gap-1">
-                              💼 Pack del Entrenamiento
+                              Pack del Entrenamiento
                             </span>
                             <div className="mt-2 text-xs">
                               {renderAsBulletList(pacing.practicalGuide)}
@@ -1249,12 +1249,12 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                 </span>
                               </div>
                               <div className="h-2 w-full rounded-full bg-bg-hover overflow-hidden flex border border-border-default">
-                                <div className={`bg-cyan-500 h-full transition-all ${durationMin >= 60 ? 'w-[55%]' : 'w-[15%]'}`} />
+                                <div className={`bg-accent h-full transition-all ${durationMin >= 60 ? 'w-[55%]' : 'w-[15%]'}`} />
                                 <div className={`bg-purple-500 h-full transition-all ${durationMin >= 60 ? 'w-[30%]' : 'w-[60%]'}`} />
                                 <div className={`bg-amber-500 h-full transition-all ${durationMin >= 60 ? 'w-[15%]' : 'w-[25%]'}`} />
                               </div>
                               <div className="flex gap-4 text-[9px] text-text-muted font-medium">
-                                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> Carbohidratos</span>
+                                <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-accent" /> Carbohidratos</span>
                                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-purple-500" /> Proteínas</span>
                                 <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Grasas</span>
                               </div>
@@ -1485,7 +1485,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                       window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
                     }}
                   >
-                    <Download className="w-4 h-4 text-orange-500" />
+                    <Download className="w-4 h-4 text-accent" />
                     <span>Enviar al Reloj</span>
                   </AnimatedButton>
 
@@ -1536,7 +1536,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                       }`}
                       onClick={() => setIsFeedbackOpen(true)}
                     >
-                      <MessageSquarePlus className={`w-5 h-5 ${!hasFeedback ? 'text-orange-400' : 'text-swim'}`} />
+                      <MessageSquarePlus className={`w-5 h-5 ${!hasFeedback ? 'text-accent' : 'text-swim'}`} />
                       <span>{hasFeedback ? 'Editar Valoración' : 'Evaluar Sesión'}</span>
                     </AnimatedButton>
 
@@ -1548,7 +1548,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                         window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
                       }}
                     >
-                      <Download className="w-4 h-4 text-orange-500" />
+                      <Download className="w-4 h-4 text-accent" />
                       <span>Enviar al Reloj</span>
                     </AnimatedButton>
                   </div>

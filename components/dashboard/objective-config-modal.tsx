@@ -119,8 +119,8 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6 scrollbar-none">
         <DialogHeader className="mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
-              <Target className="w-5 h-5 text-cyan-500" />
+            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
+              <Target className="w-5 h-5 text-accent" />
             </div>
             <div className="text-left">
               <DialogTitle className="text-xl font-bold tracking-tight">Define tu Objetivo</DialogTitle>
@@ -189,7 +189,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
           </div>
 
           {error && (
-            <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-650">
+            <div className="mt-4 p-4 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center gap-3 text-red-300">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <p className="text-sm font-medium">{error}</p>
             </div>

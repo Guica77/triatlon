@@ -34,11 +34,11 @@ interface DashboardViewTabsProps {
 }
 
 const sportColors: Record<string, string> = {
-  natacion: 'bg-[var(--color-swim)]',
-  ciclismo: 'bg-[var(--color-bike)]',
-  carrera: 'bg-[var(--color-run)]',
-  fuerza: 'bg-purple-500',
-  brick: 'bg-amber-400',
+  natacion: 'bg-swim',
+  ciclismo: 'bg-bike',
+  carrera: 'bg-run',
+  fuerza: 'bg-accent',
+  brick: 'bg-warning',
   descanso: 'bg-text-muted',
 };
 
@@ -322,7 +322,7 @@ export function DashboardViewTabs({
 
   if (!isMounted) {
     return <div className="min-h-screen animate-pulse bg-surface-app flex items-center justify-center">
-      <div className="w-8 h-8 rounded-full border-4 border-cyan-500 border-t-transparent animate-spin"></div>
+      <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin"></div>
     </div>;
   }
 
@@ -379,7 +379,7 @@ export function DashboardViewTabs({
               className="px-3.5 py-2 rounded-xl bg-surface-card border border-border-default hover:border-border-default text-text-primary hover:text-text-primary text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-card"
               title="Descargar toda la semana en tu Apple Calendar, Google Calendar o Garmin Calendar"
             >
-              <Calendar className="w-3.5 h-3.5 text-cyan-500" />
+              <Calendar className="w-3.5 h-3.5 text-accent" />
               <span className="hidden sm:inline">Exportar Semana (.ICS)</span>
               <span className="inline sm:hidden">.ICS</span>
             </a>
@@ -393,7 +393,7 @@ export function DashboardViewTabs({
                   setAiInitialPrompt('');
                   setIsAiModalOpen(true);
                 }}
-                className="bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 border border-cyan-500/30 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-card"
+                className="bg-accent/15 hover:bg-accent/25 text-accent border border-accent/30 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-card"
               >
                 <Bot className="w-4 h-4" />
                 <span className="hidden sm:inline">Generar Plan AI</span>
@@ -401,7 +401,7 @@ export function DashboardViewTabs({
               <AnimatedButton
                 variant="primary"
                 onClick={() => openModalForDate(todayStr)}
-                className="!bg-cyan-600 hover:!bg-cyan-500 !text-white text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-card"
+                className="!bg-accent hover:!bg-coral-400 !text-white text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-card"
               >
                 <Plus className="w-4 h-4" />
                 <span>Añadir Manual</span>
@@ -481,9 +481,9 @@ export function DashboardViewTabs({
                     const isTomorrow = w.scheduled_date === tomorrowStr;
 
                     return (
-                      <div key={w.id} className={isToday ? "ring-2 ring-cyan-500/30 rounded-2xl p-0.5" : ""}>
+                      <div key={w.id} className={isToday ? "ring-2 ring-accent/30 rounded-2xl p-0.5" : ""}>
                         {isToday && (
-                          <div className="px-4 py-1.5 bg-cyan-500/10 text-cyan-400 text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-cyan-500/20">
+                          <div className="px-4 py-1.5 bg-accent/10 text-accent text-[10px] font-bold uppercase tracking-wider rounded-t-xl border-x border-t border-accent/20">
                             Hoy
                           </div>
                         )}
@@ -521,7 +521,7 @@ export function DashboardViewTabs({
             {!readOnly && (
               <div className="pt-6 border-t border-border-default/60 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <Bot className="w-4 h-4 text-cyan-500" />
+                  <Bot className="w-4 h-4 text-accent" />
                   <p className="text-xs text-text-secondary font-medium">¿Necesitas ajustar la semana?</p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
@@ -533,7 +533,7 @@ export function DashboardViewTabs({
                     }}
                     className="flex-1 sm:flex-none border border-border-default text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-text-secondary hover:bg-surface-hover hover:text-text-primary shadow-card"
                   >
-                    📈 Poco volumen
+                    Poco volumen
                   </AnimatedButton>
                   <AnimatedButton
                     variant="ghost"
@@ -543,7 +543,7 @@ export function DashboardViewTabs({
                     }}
                     className="flex-1 sm:flex-none border border-border-default text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-text-secondary hover:bg-surface-hover hover:text-danger shadow-card"
                   >
-                    📉 Demasiada carga
+                    Demasiada carga
                   </AnimatedButton>
                 </div>
               </div>
@@ -559,7 +559,7 @@ export function DashboardViewTabs({
               {/* Calendar Header */}
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-cyan-400" />
+                  <Calendar className="w-4 h-4 text-accent" />
                   <span>{monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}</span>
                 </h3>
                 <div className="flex items-center gap-1.5">
@@ -630,15 +630,15 @@ export function DashboardViewTabs({
                       onClick={() => setSelectedDateStr(dateStr)}
                       className={`relative min-h-[56px] sm:min-h-[72px] p-1.5 rounded-xl border flex flex-col justify-between items-start transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-cyan-500/15 border-cyan-400 ring-2 ring-cyan-400/20'
+                          ? 'bg-accent/15 border-accent ring-2 ring-accent/20'
                           : isToday
-                          ? 'bg-cyan-500/10 border-cyan-500/40 ring-1 ring-cyan-500/20'
+                          ? 'bg-accent/10 border-accent/40 ring-1 ring-accent/20'
                           : complianceClass
                       } ${!isCurrentMonth ? 'opacity-35' : ''}`}
                     >
                       {/* Day Number */}
                       <span className={`text-[10px] sm:text-xs font-bold leading-none ${
-                        isToday ? 'text-cyan-400' : isSelected ? 'text-cyan-300' : 'text-muted-foreground'
+                        isToday ? 'text-accent' : isSelected ? 'text-accent' : 'text-muted-foreground'
                       }`}>
                         {d.getDate()}
                       </span>
@@ -673,7 +673,7 @@ export function DashboardViewTabs({
                 {selectedDayWorkouts.length === 0 && !readOnly && (
                   <button
                     onClick={() => openModalForDate(selectedDateStr)}
-                    className="text-[11px] font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-bold text-accent hover:text-coral-300 flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Programar aquí
@@ -735,12 +735,10 @@ export function DashboardViewTabs({
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               className="relative w-full max-w-lg rounded-2xl bg-surface-elevated border border-border-default shadow-elevated p-6 overflow-hidden z-10"
             >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-
               {/* Modal Header */}
               <div className="flex justify-between items-center border-b border-border-subtle pb-4 mb-4">
                 <h3 className="text-base sm:text-lg font-bold text-text-primary flex items-center gap-2">
-                  <Activity className="w-5 h-5 text-cyan-400 animate-pulse" />
+                  <Activity className="w-5 h-5 text-accent animate-pulse" />
                   Registrar Sesión Manual
                 </h3>
                 <button

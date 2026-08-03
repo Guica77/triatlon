@@ -12,7 +12,7 @@ interface ShareBadgeProps {
 export function ShareBadge({ badge }: ShareBadgeProps) {
   const [isOpen, setIsOpen] = React.useState(false)
 
-  const shareText = `🏆 ¡Desbloqueé el logro "${badge.name}" en Triatlon Pro! ${badge.icon}\n\n${badge.description}\n\n#TriatlonPro #Triathlon #Training`
+  const shareText = `¡Desbloqueé el logro "${badge.name}" en Triatlon Pro!\n\n${badge.description}\n\n#TriatlonPro #Triathlon #Training`
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -46,7 +46,7 @@ export function ShareBadge({ badge }: ShareBadgeProps) {
     <>
       <button
         onClick={handleShare}
-        className="p-1.5 rounded-lg text-text-secondary hover:text-cyan-400 hover:bg-cyan-500/10 transition-all"
+        className="p-1.5 rounded-lg text-text-secondary hover:text-accent hover:bg-accent/10 transition-all"
         title="Compartir logro"
       >
         <Share2 className="w-3.5 h-3.5" />
@@ -91,9 +91,9 @@ export function ShareBadge({ badge }: ShareBadgeProps) {
                 </button>
                 <button
                   onClick={handleCopy}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-surface-hover border border-border-subtle hover:border-cyan-500/30 transition-colors text-sm text-text-primary font-medium"
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-surface-hover border border-border-subtle hover:border-accent/30 transition-colors text-sm text-text-primary font-medium"
                 >
-                  <Download className="w-4 h-4 text-cyan-400" />
+                  <Download className="w-4 h-4 text-accent" />
                   Copiar texto
                 </button>
               </div>

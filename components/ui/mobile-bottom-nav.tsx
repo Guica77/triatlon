@@ -77,7 +77,7 @@ export function MobileBottomNav() {
               aria-label={item.label}
             >
               <div className="relative">
-                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-coral-500' : 'text-text-muted group-hover:text-text-secondary'}`} />
+                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-accent' : 'text-text-muted group-hover:text-text-secondary'}`} />
                 {item.showBadge && unreadCount > 0 && (
                   <span className="absolute -top-2 -right-2 w-4 h-4 bg-run rounded-full flex items-center justify-center border-2 border-surface-elevated">
                     <span className="text-[9px] font-bold text-white leading-none">
@@ -87,7 +87,7 @@ export function MobileBottomNav() {
                 )}
               </div>
 
-              <span className={`text-[10px] font-semibold tracking-wide ${isActive ? 'text-coral-500' : 'text-text-muted'}`}>
+              <span className={`text-[10px] font-semibold tracking-wide ${isActive ? 'text-accent' : 'text-text-muted'}`}>
                 {item.label}
               </span>
             </Link>

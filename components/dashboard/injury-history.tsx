@@ -54,7 +54,7 @@ export function InjuryHistory({ injuries: initialInjuries, onSave }: InjuryHisto
 
       {injuries.length === 0 && !isEditing ? (
         <div className="text-center py-4">
-          <p className="text-xs text-text-secondary font-medium">Sin lesiones registradas 🎉</p>
+          <p className="text-xs text-text-secondary font-medium">Sin lesiones registradas</p>
         </div>
       ) : (
         <div className="space-y-2">

@@ -72,7 +72,7 @@ export function BadgesGrid({ badges }: BadgesGridProps) {
                   ? item.badge.bgColor
                   : 'bg-surface-hover/50 border-border-subtle/50 opacity-50'
               )}
-              title={item.earned ? `${item.badge.name}: ${item.badge.description}` : `🔒 ${item.badge.name}`}
+              title={item.earned ? `${item.badge.name}: ${item.badge.description}` : item.badge.name}
             >
               {/* Badge icon */}
               <div className="text-2xl">{item.badge.icon}</div>
@@ -130,7 +130,7 @@ export function BadgesGrid({ badges }: BadgesGridProps) {
       {earnedCount === 0 && (
         <div className="text-center py-4">
           <p className="text-xs text-text-secondary font-medium">
-            ¡Empieza a entrenar para desbloquear tus primeros logros! 🏆
+            ¡Empieza a entrenar para desbloquear tus primeros logros!
           </p>
         </div>
       )}

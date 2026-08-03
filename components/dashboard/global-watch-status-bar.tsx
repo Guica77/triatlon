@@ -40,7 +40,7 @@ export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyn
     return (
       <div className="mb-6 p-4 rounded-2xl bg-surface-card border border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-border-default">
         <div className="flex items-center gap-3 text-center sm:text-left">
-          <div className="w-10 h-10 rounded-xl bg-surface-hover flex items-center justify-center text-orange-500">
+          <div className="w-10 h-10 rounded-xl bg-surface-hover flex items-center justify-center text-accent">
             <Watch className="w-5 h-5" />
           </div>
           <div>
@@ -50,7 +50,7 @@ export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyn
         </div>
         <a
           href="/api/auth/telemetry/connect?provider=strava"
-          className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-xs font-bold transition-all whitespace-nowrap"
+          className="px-4 py-2 rounded-xl bg-accent hover:bg-coral-400 text-white text-xs font-bold transition-all whitespace-nowrap"
         >
           Conectar Strava
         </a>
@@ -59,19 +59,19 @@ export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyn
   }
 
   return (
-    <div className="mb-6 p-4 rounded-2xl bg-orange-500/5 border border-orange-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-orange-500/30 relative overflow-hidden">
+    <div className="mb-6 p-4 rounded-2xl bg-accent/5 border border-accent/20 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-accent/30 relative overflow-hidden">
       <div className="flex items-center gap-3 text-center sm:text-left w-full sm:w-auto">
-        <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 relative">
+        <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent relative">
           <Watch className="w-5 h-5 animate-pulse" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-orange-500 animate-ping" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-orange-500" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-accent animate-ping" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-accent" />
         </div>
         <div className="flex-grow">
           <div className="flex items-center gap-2 justify-center sm:justify-start">
             <h4 className="text-sm font-semibold text-text-primary capitalize">
               {provider === 'strava' ? 'Strava Telemetría Activa' : 'Strava Telemetría Activa'}
             </h4>
-            <span className="px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-400 text-[10px] font-bold border border-orange-500/30">
+            <span className="px-2 py-0.5 rounded-full bg-accent/20 text-accent text-[10px] font-bold border border-accent/30">
               Auto 24/7
             </span>
           </div>

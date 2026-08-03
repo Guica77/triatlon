@@ -65,16 +65,16 @@ export function DetailedBiometricsModal({ isOpen, onClose, rawGarminData }: Deta
             {/* Actividad */}
             <section>
               <h4 className="flex items-center gap-2 text-sm font-bold text-text-primary mb-3 uppercase tracking-wider">
-                <Flame className="w-4 h-4 text-orange-500" /> Actividad Diaria
+                <Flame className="w-4 h-4 text-accent" /> Actividad Diaria
               </h4>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4">
-                  <span className="text-[10px] font-bold text-orange-400/80 uppercase tracking-wider block mb-1">Pasos Totales</span>
-                  <span className="text-2xl font-black text-orange-400">{steps.toLocaleString('es-ES')}</span>
+                <div className="bg-accent/10 border border-accent/20 rounded-2xl p-4">
+                  <span className="text-[10px] font-bold text-accent/80 uppercase tracking-wider block mb-1">Pasos Totales</span>
+                  <span className="text-2xl font-black text-accent">{steps.toLocaleString('es-ES')}</span>
                 </div>
-                <div className="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4">
-                  <span className="text-[10px] font-bold text-orange-400/80 uppercase tracking-wider block mb-1">Calorías Activas</span>
-                  <span className="text-2xl font-black text-orange-400">{activeCals} <span className="text-sm">kcal</span></span>
+                <div className="bg-accent/10 border border-accent/20 rounded-2xl p-4">
+                  <span className="text-[10px] font-bold text-accent/80 uppercase tracking-wider block mb-1">Calorías Activas</span>
+                  <span className="text-2xl font-black text-accent">{activeCals} <span className="text-sm">kcal</span></span>
                 </div>
               </div>
             </section>

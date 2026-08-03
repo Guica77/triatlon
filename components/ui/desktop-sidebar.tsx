@@ -78,21 +78,24 @@ export function DesktopSidebar() {
   return (
     <div
       className={cn(
-        'hidden sm:flex flex-col bg-surface-elevated shrink-0 transition-all duration-300 z-40',
+        'hidden sm:flex flex-col bg-surface-elevated shrink-0 transition-all duration-300 z-40 border-r border-border-subtle',
         isCollapsed ? 'w-[68px]' : 'w-56'
       )}
-      style={{ boxShadow: '2px 0 8px rgba(0,0,0,0.2)' }}
     >
-      {/* Logo */}
+      {/* Logo — the three lanes as a start-line mark */}
       <div className={cn(
         'flex items-center gap-3 shrink-0 transition-all duration-300',
         isCollapsed ? 'px-3.5 py-5 justify-center' : 'px-5 py-5'
       )}>
-        <div className="w-8 h-8 rounded-lg bg-surface-hover flex items-center justify-center shrink-0 shadow-button">
-          <span className="text-xs font-black text-coral-500">T3</span>
+        <div className="w-9 h-9 rounded-lg bg-surface-hover border border-border-subtle flex flex-col items-center justify-center gap-[3px] shrink-0">
+          <span className="w-4 h-[3px] rounded-full bg-swim" />
+          <span className="w-4 h-[3px] rounded-full bg-bike" />
+          <span className="w-4 h-[3px] rounded-full bg-run" />
         </div>
         {!isCollapsed && (
-          <span className="text-sm font-bold text-text-primary tracking-tight whitespace-nowrap">Triatlon Pro</span>
+          <span className="font-display text-lg font-bold tracking-wide text-text-primary leading-none whitespace-nowrap">
+            TRIATLON&nbsp;<span className="text-accent">PRO</span>
+          </span>
         )}
       </div>
 
@@ -110,13 +113,16 @@ export function DesktopSidebar() {
                 'relative flex items-center gap-3 rounded-lg text-sm font-medium transition-all',
                 isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5',
                 isActive
-                  ? 'bg-surface-card text-text-primary shadow-card'
-                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover'
+                  ? 'bg-surface-hover/70 text-text-primary'
+                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover/50'
               )}
               title={isCollapsed ? item.label : undefined}
             >
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-accent" aria-hidden="true" />
+              )}
               <div className="relative shrink-0">
-                <Icon className={cn('w-4.5 h-4.5', isActive ? 'text-coral-500' : '')} />
+                <Icon className={cn('w-4.5 h-4.5', isActive ? 'text-accent' : '')} />
                 {item.showBadge && unreadCount > 0 && (
                   <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-run rounded-full flex items-center justify-center border-2 border-surface-elevated">
                     <span className="text-[9px] font-bold text-white leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
@@ -130,11 +136,11 @@ export function DesktopSidebar() {
       </nav>
 
       {/* Collapse Toggle */}
-      <div className="p-2.5 shrink-0 border-t border-border-subtle/50">
+      <div className="p-2.5 shrink-0 border-t border-border-subtle">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            'flex items-center gap-3 rounded-lg text-sm font-medium transition-all w-full text-text-muted hover:text-text-secondary hover:bg-surface-hover',
+            'flex items-center gap-3 rounded-lg text-sm font-medium transition-all w-full text-text-muted hover:text-text-secondary hover:bg-surface-hover/50',
             isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5'
           )}
           title={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}

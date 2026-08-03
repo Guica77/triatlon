@@ -4,8 +4,8 @@
   "description": "Plataforma de entrenamiento inteligente para triatletas",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#09090b",
+  "background_color": "#0B1016",
+  "theme_color": "#0B1016",
   "orientation": "portrait",
   "icons": [
     {
