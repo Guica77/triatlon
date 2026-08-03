@@ -196,7 +196,7 @@ export function ChatView({
   }
 
   return (
-    <div className="flex bg-white border-0 sm:border border-zinc-200 rounded-none sm:rounded-2xl overflow-hidden h-full sm:h-[calc(100vh-180px)] sm:min-h-[500px] shadow-none sm:shadow-sm">
+    <div className="flex bg-white border-0 sm:border border-zinc-200 rounded-none sm:rounded-2xl overflow-hidden flex-1 min-h-0 shadow-none sm:shadow-sm">
       
       {/* Left Sidebar */}
       {hasSidebar ? (
@@ -258,7 +258,7 @@ export function ChatView({
       ) : null}
 
       {/* Main Chat Conversation Viewport */}
-      <div className={`flex-1 flex flex-col justify-between bg-zinc-50/10 ${hasSidebar && !selectedPart ? 'hidden sm:flex' : 'flex'}`}>
+      <div className={`flex-1 flex flex-col justify-between bg-zinc-50/10 min-w-0 ${hasSidebar && !selectedPart ? 'hidden sm:flex' : 'flex'}`}>
         {selectedPart ? (
           <>
             {/* Active chat header */}
@@ -311,7 +311,7 @@ export function ChatView({
             </div>
 
             {/* Main Chat Conversation Viewport */}
-            <div className="flex-1 relative bg-[#e5ddd5] overflow-hidden flex flex-col">
+            <div className="flex-1 relative bg-[#e5ddd5] overflow-hidden flex flex-col min-h-0">
               {/* Background Pattern — the outer chat container repeats the same pattern,
                   so when the keyboard resizes this area the seams are invisible */}
               <div className="absolute inset-0 bg-[radial-gradient(#cfc8c0_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />

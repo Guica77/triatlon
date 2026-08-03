@@ -41,38 +41,39 @@ export default async function AthleteChatPage() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col overflow-hidden"
+      className="fixed inset-x-0 top-0 h-dvh z-50 flex flex-col overflow-hidden"
       style={{
         backgroundColor: '#e5ddd5',
         backgroundImage: 'radial-gradient(#cfc8c0 1px, transparent 1px)',
         backgroundSize: '24px 24px',
       }}
     >
-      
-      {/* Top Navbar */}
-      <header className="border-b border-border-subtle bg-white/95 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 transition-all duration-300 shrink-0">
-        <div className="flex items-center gap-3">
+
+      {/* Top Navbar — safe-area top so the system status bar never overlaps the title */}
+      <header className="border-b border-border-subtle bg-white/95 backdrop-blur-md px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-3 sm:pb-4 flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-xl bg-swim border border-swim flex items-center justify-center shrink-0">
             <MessageSquare className="w-4 h-4 text-swim" />
           </div>
-          <div>
-            <h1 className="text-sm sm:text-base font-bold text-text-primary tracking-tight">Chat con Entrenador</h1>
-            <p className="text-[11px] sm:text-xs text-text-muted font-semibold">
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base font-bold text-text-primary tracking-tight truncate">Chat con Entrenador</h1>
+            <p className="text-[11px] sm:text-xs text-text-muted font-semibold truncate">
               Comunicación directa y resolución de dudas
             </p>
           </div>
         </div>
 
-        <Link href="/dashboard" className="w-full sm:w-auto">
-          <AnimatedButton variant="ghost" className="w-full sm:w-auto border border-border-subtle flex items-center justify-center gap-2 px-4 py-2 text-xs sm:text-sm bg-white hover:bg-bg-elevated text-text-secondary hover:text-text-primary cursor-pointer">
+        {/* Compact back control — arrow + small label, keeps the header to one row */}
+        <Link href="/dashboard" className="shrink-0" aria-label="Volver al Dashboard">
+          <AnimatedButton variant="ghost" className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-semibold text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 border border-transparent cursor-pointer transition-colors">
             <ArrowLeft className="w-4 h-4" />
-            <span className="font-semibold">Volver al Dashboard</span>
+            <span className="hidden min-[380px]:inline">Dashboard</span>
           </AnimatedButton>
         </Link>
       </header>
 
       {/* Main chat viewport */}
-      <main className="max-w-4xl mx-auto w-full px-0 sm:px-6 pt-2 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-0">
+      <main className="max-w-4xl mx-auto w-full px-0 sm:px-6 pt-2 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-0 min-h-0">
         <ChatView
           initialParticipants={participants}
           availableCoaches={availableCoaches}
