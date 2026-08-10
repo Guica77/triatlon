@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toggleWorkoutStatus, updateWorkoutStatus, completeWorkoutWithFeedback } from '@/app/(app)/dashboard/actions';
+import { toggleWorkoutStatus, updateWorkoutStatus, completeWorkoutWithFeedback, applyRefocusProposal } from '@/app/(app)/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { adaptWorkoutDescription } from '@/lib/zones-utility';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -50,6 +50,9 @@ interface WorkoutDetailClientProps {
     status: string;
     auto_adjusted?: boolean | null;
     adjustment_reason?: string | null;
+    ai_feedback?: string | null;
+    refocus_proposal?: { action: string; message: string } | null;
+    refocus_applied?: boolean | null;
     training_sessions: {
       sport_type: string;
       duration_min: number;
@@ -99,6 +102,28 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
   const [loading, setLoading] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
 
+  // Propuesta de reajuste de la IA (propose & confirm) pendiente de aplicar.
+  const [refocusApplying, setRefocusApplying] = React.useState(false);
+  const [refocusApplied, setRefocusApplied] = React.useState(!!workout.refocus_applied);
+
+  const handleApplyRefocus = async () => {
+    if (refocusApplying) return;
+    setRefocusApplying(true);
+    try {
+      await applyRefocusProposal(workout.id);
+      setRefocusApplied(true);
+      setToastMsg('✅ Propuesta aplicada al plan.');
+      setTimeout(() => setToastMsg(null), 5000);
+      router.refresh();
+    } catch (err: any) {
+      console.error('Error aplicando propuesta:', err);
+      setToastMsg('⚠️ No se pudo aplicar la propuesta.');
+      setTimeout(() => setToastMsg(null), 5000);
+    } finally {
+      setRefocusApplying(false);
+    }
+  };
+
   const session = workout.training_sessions;
 
   const durationMin = React.useMemo(() => {
@@ -108,6 +133,8 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
         dur = Math.round(dur * 0.5);
       } else if (workout.adjustment_reason === 'adherencia') {
         dur = Math.round(dur * 0.85);
+      } else if (workout.adjustment_reason === 'recuperacion') {
+        dur = Math.round(dur * 0.8);
       } else {
         dur = Math.round(dur * 0.75);
       }
@@ -122,6 +149,8 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
         desc = `[AJUSTE DE IA: PREVENCIÓN DE LESIONES] Sesión reducida al 50%. Entrena estrictamente en Zona 1 (recuperación activa) y detén la sesión inmediatamente si sientes cualquier molestia o pinchazo. Objetivo original:\n${desc}`;
       } else if (workout.adjustment_reason === 'adherencia') {
         desc = `[AJUSTE DE IA: ADHERENCIA] Carga reducida un 15% para consolidar ritmos. Prioriza terminar la sesión cómodamente en lugar de forzar zonas altas. Objetivo original:\n${desc}`;
+      } else if (workout.adjustment_reason === 'recuperacion') {
+        desc = `[AJUSTE DE IA: RECUPERACIÓN] Sesión suavizada un 20% tras un día de actividad extra. Prioriza sensaciones y mantén el esfuerzo en Zona 1-2. Objetivo original:\n${desc}`;
       } else {
         desc = `[AJUSTE DE IA: AJUSTE POR FATIGA] Duración principal reducida un 25%. Mantén un esfuerzo moderado y cómodo en Zona 1-2. Objetivo original:\n${desc}`;
       }
@@ -376,6 +405,11 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                   <ShieldCheck className="w-2.5 h-2.5 text-swim" />
                   <span>IA: Ajuste de Carga</span>
                 </span>
+              ) : workout.adjustment_reason === 'recuperacion' ? (
+                <span className="px-2 py-0.5 rounded bg-bike/40 border border-bike/30 text-bike text-[9px] font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-2.5 h-2.5 text-bike" />
+                  <span>IA: Recuperación</span>
+                </span>
               ) : (
                 <span className="px-2 py-0.5 rounded bg-warning/40 border border-warning/30 text-warning text-[9px] font-bold flex items-center gap-1">
                   <Flame className="w-2.5 h-2.5 text-warning" />
@@ -408,6 +442,58 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
             </div>
           </div>
         </div>
+
+        {/* Panel de Inteligencia Artificial: felicitación honesta + propuesta de reajuste */}
+        {(workout.ai_feedback || workout.refocus_proposal) && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <ProCard className="p-5 space-y-3 relative overflow-hidden bg-surface-app/90">
+              <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none bg-coral-500/5" />
+              <div className="flex items-center gap-2 border-b border-border-subtle pb-2">
+                <Sparkles className="w-4 h-4 text-coral-500" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-text-primary">Análisis de la IA</h3>
+              </div>
+
+              {workout.ai_feedback && (
+                <p className="text-sm text-foreground leading-relaxed font-normal whitespace-pre-line">
+                  {workout.ai_feedback}
+                </p>
+              )}
+
+              {workout.refocus_proposal && workout.refocus_proposal.action !== 'none' && (
+                <div className="pt-2 border-t border-border-subtle space-y-3">
+                  <div className="flex items-start gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-coral-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Propuesta de reajuste</p>
+                      <p className="text-sm text-foreground leading-relaxed font-normal mt-1">
+                        {workout.refocus_proposal.message}
+                      </p>
+                    </div>
+                  </div>
+
+                  {!refocusApplied ? (
+                    <AnimatedButton
+                      variant="primary"
+                      onClick={handleApplyRefocus}
+                      disabled={refocusApplying}
+                      className="w-full justify-center py-3 text-xs font-bold"
+                    >
+                      <span>{refocusApplying ? 'Aplicando…' : 'Aplicar propuesta al plan'}</span>
+                    </AnimatedButton>
+                  ) : (
+                    <p className="text-xs text-bike font-semibold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Propuesta aplicada al plan.
+                    </p>
+                  )}
+                </div>
+              )}
+            </ProCard>
+          </motion.div>
+        )}
 
         {/* Cuestionario de Feedback Adaptativo */}
         <AnimatePresence mode="wait">
