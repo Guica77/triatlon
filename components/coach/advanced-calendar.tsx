@@ -23,7 +23,7 @@ import {
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDroppable } from '@dnd-kit/core';
-import { Calendar, GripVertical, Activity, Flame, Droplets, Dumbbell } from 'lucide-react';
+import { Calendar, GripVertical, Activity, Flame, Droplets, Dumbbell, Clock3 } from 'lucide-react';
 import { format, parseISO, addDays, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EditWorkoutModal, EditWorkoutData } from './edit-workout-modal';
@@ -188,7 +188,7 @@ function MiniZonesChart({ zonesSummary }: { zonesSummary: Record<string, number>
 }
 
 // --- Sortable Item Component ---
-function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit: (w: WorkoutItem) => void }) {
+function SortableWorkoutCard({ workout, onEdit, moveOptions = [], onMove }: { workout: WorkoutItem, onEdit: (w: WorkoutItem) => void, moveOptions?: { id: string, label: string }[], onMove?: (workout: WorkoutItem, date: string) => void }) {
   const {
     attributes,
     listeners,
@@ -209,10 +209,10 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
   if (isRest) {
     return (
       <StyledDiv 
-        ref={setNodeRef} styleProps={style} {...attributes} {...listeners}
-        className={`p-2.5 rounded-xl border border-dashed border-border-default bg-surface-hover flex items-center justify-center gap-2 cursor-grab active:cursor-grabbing ${isDragging ? 'opacity-30' : 'opacity-100'}`}
+        ref={setNodeRef} styleProps={style} {...attributes}
+        className={`rounded-xl border border-dashed border-border-default bg-surface-hover p-3 ${isDragging ? 'opacity-30' : 'opacity-100'}`}
       >
-        <span className="text-[10px] text-text-muted font-bold tracking-wider">DESCANSO</span>
+        <div className="flex items-center justify-between gap-2"><span className="text-xs font-bold text-text-muted">Descanso</span><button type="button" {...listeners} className="flex h-11 w-11 items-center justify-center rounded-lg text-text-muted hover:bg-surface-card" aria-label="Arrastrar descanso"><GripVertical className="h-5 w-5" /></button></div>
       </StyledDiv>
     );
   }
@@ -228,9 +228,7 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
       ref={setNodeRef}
       styleProps={style}
       {...attributes}
-      {...listeners}
-      onClick={() => onEdit(workout)}
-      className={`relative p-2 rounded-xl border bg-surface-card shadow-card cursor-grab active:cursor-grabbing group transition-all overflow-hidden ${
+      className={`relative overflow-hidden rounded-xl border bg-surface-card p-3 shadow-card transition-all ${
         isDragging ? 'opacity-50 scale-105 shadow-card-hover z-50 border-swim/50' : 'border-border-default hover:border-border-card hover:bg-surface-hover'
       }`}
     >
@@ -241,20 +239,22 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
 
       {/* Header Info: Title, Sport, Duration */}
       <div className="flex flex-col gap-1">
-        <div className="flex items-start justify-between gap-1">
-          <div className="flex items-center gap-1 min-w-0">
-            <div className={`w-1.5 h-3 rounded-full shrink-0 ${getSportAccent(session?.sport_type || '')}`} />
-            <h4 className="text-[10px] font-bold text-text-primary uppercase tracking-tight truncate">
+        <div className="flex items-start justify-between gap-2">
+          <button type="button" onClick={() => onEdit(workout)} className="min-w-0 flex-1 text-left">
+            <div className="flex items-center gap-2">
+            <div className={`h-4 w-1.5 shrink-0 rounded-full ${getSportAccent(session?.sport_type || '')}`} />
+            <h4 className="truncate text-sm font-bold text-text-primary">
               {displayTitle}
             </h4>
-          </div>
-          <span className="text-[9px] font-black text-text-secondary shrink-0">
+            </div>
+          </button>
+          <span className="shrink-0 font-mono text-sm font-bold tabular-nums text-text-secondary">
             {isCompleted ? formatDuration(metrics.actualDuration) : formatDuration(metrics.plannedDuration)}
           </span>
         </div>
 
         {/* Dense Metrics Row */}
-        <div className="flex items-center justify-between text-[9px] font-bold">
+        <div className="flex items-center justify-between text-xs font-semibold">
           <div className="flex gap-1.5 text-text-secondary">
             {metrics.telemetry?.raw_payload?.average_heartrate && (
               <span className="text-red-500">{Math.round(metrics.telemetry.raw_payload.average_heartrate)}bpm</span>
@@ -277,6 +277,12 @@ function SortableWorkoutCard({ workout, onEdit }: { workout: WorkoutItem, onEdit
         {isCompleted && metrics.telemetry?.hr_zones_summary && (
           <MiniZonesChart zonesSummary={metrics.telemetry.hr_zones_summary} />
         )}
+
+        <div className="mt-2 flex items-center gap-2 border-t border-border-subtle pt-2">
+          <button type="button" {...listeners} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-text-muted hover:bg-surface-hover hover:text-text-primary" aria-label={`Arrastrar ${displayTitle}`}><GripVertical className="h-5 w-5" /></button>
+          <button type="button" onClick={() => onEdit(workout)} className="min-h-11 flex-1 rounded-lg px-3 text-left text-sm font-semibold text-text-secondary hover:bg-surface-hover hover:text-text-primary">Editar sesión</button>
+          {onMove && moveOptions.length > 0 && <select aria-label={`Mover ${displayTitle} a otro día`} value={workout.scheduled_date} onChange={(event) => onMove(workout, event.target.value)} className="min-h-11 max-w-36 rounded-lg border border-border-default bg-surface-elevated px-2 text-sm text-text-secondary"><option value={workout.scheduled_date}>Mover a…</option>{moveOptions.filter((day) => day.id !== workout.scheduled_date).map((day) => <option key={day.id} value={day.id}>{day.label}</option>)}</select>}
+        </div>
       </div>
     </StyledDiv>
   );
@@ -309,9 +315,9 @@ function DroppableBackground({ id, isEmpty, onAddClick, children }: { id: string
             e.stopPropagation();
             onAddClick(id);
           }}
-          className="absolute inset-2 border-2 border-dashed border-border-default rounded-xl bg-surface-hover/50 text-[10px] text-text-muted hover:text-swim hover:border-swim/30 hover:bg-swim/10 transition-all font-bold uppercase tracking-wider flex items-center justify-center cursor-pointer z-0"
+          className="absolute inset-2 z-0 flex cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-border-default bg-surface-hover/50 text-sm font-bold text-text-muted transition-all hover:border-swim/30 hover:bg-swim/10 hover:text-swim"
         >
-          Crear Aquí ➕
+          Crear sesión
         </div>
       )}
       <div className="z-10 flex flex-col gap-2 relative pointer-events-none">
@@ -394,6 +400,26 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
       structured_blocks: session.structured_blocks || []
     });
     setIsEditModalOpen(true);
+  };
+
+  const handleAccessibleMove = async (workout: WorkoutItem, newDate: string) => {
+    if (newDate === workout.scheduled_date) return;
+    const previousColumns = columns;
+    const movedWorkout = { ...workout, scheduled_date: newDate };
+    setColumns((current) => ({
+      ...current,
+      [workout.scheduled_date]: (current[workout.scheduled_date] || []).filter((item) => item.id !== workout.id),
+      [newDate]: [...(current[newDate] || []), movedWorkout],
+    }));
+    setIsUpdating(true);
+    try {
+      await onWorkoutMove(workout.id, newDate);
+    } catch (error) {
+      console.error('Failed to move workout', error);
+      setColumns(previousColumns);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleCreateClick = (dateStr?: string) => {
@@ -609,7 +635,7 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
               <div key={day.id} className="flex flex-col bg-surface-card rounded-2xl border border-border-default overflow-hidden shadow-card">
                 {/* Day Header */}
                 <div className="p-2 border-b border-border-default bg-surface-hover/60 flex flex-col items-center justify-center relative">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-text-secondary">
+                  <span className="text-xs font-bold capitalize text-text-secondary">
                     {day.name}
                   </span>
                   <span className={`text-lg font-black ${day.id === format(new Date(), 'yyyy-MM-dd') ? 'text-swim' : 'text-text-primary'}`}>
@@ -617,9 +643,9 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
                   </span>
 
                   {/* Daily Metric Summary */}
-                  <div className="flex w-full justify-between px-1 mt-1 text-[9px] font-semibold">
+                  <div className="mt-1 flex w-full justify-between px-1 text-xs font-semibold">
                     <div className="flex flex-col items-center text-text-secondary">
-                      <span>⏱ {dm.aDur > 0 ? formatDuration(dm.aDur) : formatDuration(dm.pDur)}</span>
+                      <span className="flex items-center gap-1"><Clock3 className="h-3.5 w-3.5" /> {dm.aDur > 0 ? formatDuration(dm.aDur) : formatDuration(dm.pDur)}</span>
                     </div>
                     <div className="flex flex-col items-center text-text-secondary">
                       <span>L: {dm.aTss > 0 ? dm.aTss : dm.pTss}</span>
@@ -635,7 +661,7 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
                 >
                   <DroppableBackground id={day.id} onAddClick={handleCreateClick} isEmpty={(!columns[day.id] || columns[day.id].length === 0)}>
                     {columns[day.id]?.map(workout => (
-                      <SortableWorkoutCard key={workout.id} workout={workout} onEdit={handleEditClick} />
+                      <SortableWorkoutCard key={workout.id} workout={workout} onEdit={handleEditClick} onMove={handleAccessibleMove} moveOptions={days.map((option) => ({ id: option.id, label: `${option.name} ${option.dayNumber}` }))} />
                     ))}
                   </DroppableBackground>
                 </SortableContext>

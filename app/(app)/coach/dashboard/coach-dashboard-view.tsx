@@ -1,11 +1,12 @@
 'use client'
 
 import * as React from 'react'
+import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users, Activity, AlertTriangle, MessageSquare,
   Trash2, UserPlus, Search, Settings,
-  LogOut, Zap, UserCheck, Heart,
+  LogOut, Zap, UserCheck, Heart, ChevronRight, ShieldCheck,
 } from 'lucide-react'
 import { LeaderboardCard } from '@/components/coach/leaderboard-card'
 import { GroupTabContent } from '@/components/coach/group-tab-content'
@@ -61,6 +62,16 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
   const avgReadiness = roster.length > 0
     ? Math.round(roster.reduce((sum, a) => sum + (a.today_biometrics?.readiness_score || 75), 0) / roster.length)
     : 0
+
+  const attentionItems = roster.flatMap((athlete) => {
+    const name = `${athlete.first_name || ''} ${athlete.last_name || ''}`.trim() || athlete.email || 'Atleta'
+    const items: { key: string; athleteId: string; name: string; reason: string; detail: string; severity: 'high' | 'medium' }[] = []
+    if (athlete.alerts.high_fatigue) items.push({ key: `${athlete.id}-fatigue`, athleteId: athlete.id, name, reason: 'Fatiga elevada', detail: 'Revisa la carga antes de la próxima sesión.', severity: 'high' })
+    if (athlete.alerts.low_hrv) items.push({ key: `${athlete.id}-hrv`, athleteId: athlete.id, name, reason: 'Recuperación baja', detail: `Readiness ${athlete.today_biometrics?.readiness_score ?? 'sin dato'}% · HRV ${athlete.today_biometrics?.hrv ?? 'sin dato'}`, severity: 'high' })
+    if (athlete.alerts.high_tss) items.push({ key: `${athlete.id}-load`, athleteId: athlete.id, name, reason: 'Carga semanal superada', detail: `${athlete.weekly_stats.actual_tss} de ${athlete.weekly_stats.target_tss} TSS`, severity: 'medium' })
+    if (athlete.today_workout?.status === 'missed') items.push({ key: `${athlete.id}-missed`, athleteId: athlete.id, name, reason: 'Sesión omitida', detail: 'Comprueba el motivo y reajusta la semana.', severity: 'medium' })
+    return items
+  })
 
   const handleCopyLink = async () => {
     setInviteLoading(true)
@@ -154,67 +165,30 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
           </div>
         </div>
 
-        {/* ── Stats row: Bento cards with consistent typography ── */}
-        <section className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 mb-8">
-          {/* Atletas en Grupo */}
-          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
-            <div className="w-12 h-12 rounded-lg bg-coral-500/15 flex items-center justify-center shrink-0">
-              <Users className="w-5 h-5 text-coral-500" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Atletas en Grupo</p>
-              <p className="text-3xl font-black text-text-primary mt-0.5">{totalAthletes}</p>
-              <p className="text-[10px] text-text-muted">{selectedGroupId === 'all' ? 'En todos los grupos' : 'En este grupo'}</p>
-            </div>
+        <section aria-labelledby="attention-title" className="mb-6 rounded-2xl border border-border-default bg-surface-card p-4 shadow-card sm:p-5">
+          <div className="mb-4 flex items-start justify-between gap-4">
+            <div><p className="text-sm font-semibold text-coral-500">Prioridad de hoy</p><h2 id="attention-title" className="text-xl font-bold text-text-primary">Atletas que necesitan atención</h2></div>
+            <span className="rounded-full bg-surface-elevated px-3 py-1 font-mono text-sm font-bold tabular-nums text-text-secondary">{attentionItems.length}</span>
           </div>
+          {attentionItems.length === 0 ? (
+            <div className="flex items-center gap-3 rounded-xl border border-bike/20 bg-bike/5 p-4"><ShieldCheck className="h-5 w-5 text-bike" /><div><p className="text-sm font-bold text-text-primary">Todo bajo control</p><p className="text-sm text-text-secondary">No hay señales que requieran intervención inmediata.</p></div></div>
+          ) : (
+            <div className="grid gap-3 lg:grid-cols-2">
+              {attentionItems.map((item) => <Link key={item.key} href={`/coach/athlete/${item.athleteId}`} className={`group flex min-h-20 items-center gap-3 rounded-xl border p-3 transition-colors hover:bg-surface-hover ${item.severity === 'high' ? 'border-danger/30 bg-danger/5' : 'border-warning/30 bg-warning/5'}`}>
+                <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${item.severity === 'high' ? 'bg-danger/15 text-danger' : 'bg-warning/15 text-warning'}`}><AlertTriangle className="h-5 w-5" /></div>
+                <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-x-2"><p className="font-bold text-text-primary">{item.name}</p><span className={`text-xs font-semibold ${item.severity === 'high' ? 'text-danger' : 'text-warning'}`}>{item.reason}</span></div><p className="mt-1 text-sm text-text-secondary">{item.detail}</p></div><ChevronRight className="h-5 w-5 text-text-muted transition-transform group-hover:translate-x-1" />
+              </Link>)}
+            </div>
+          )}
+        </section>
 
-          {/* Sesiones Ejecutadas */}
-          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
-            <div className="w-12 h-12 rounded-lg bg-bike/15 flex items-center justify-center shrink-0">
-              <Activity className="w-5 h-5 text-bike" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Sesiones Ejecutadas</p>
-              <p className="text-3xl font-black text-text-primary mt-0.5">{completionRate}%</p>
-              <p className="text-[10px] text-text-muted">{completedToday.length} de {activeToday.length} atletas</p>
-            </div>
-          </div>
-
-          {/* TSS Semanal */}
-          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
-            <div className="w-12 h-12 rounded-lg bg-swim/15 flex items-center justify-center shrink-0">
-              <Zap className="w-5 h-5 text-swim" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">TSS Semanal</p>
-              <p className="text-3xl font-black text-text-primary mt-0.5">{weeklyTSS}</p>
-              <p className="text-[10px] text-text-muted">Total del grupo</p>
-            </div>
-          </div>
-
-          {/* Readiness */}
-          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
-            <div className="w-12 h-12 rounded-lg bg-run/15 flex items-center justify-center shrink-0">
-              <Heart className="w-5 h-5 text-run" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Readiness Medio</p>
-              <p className="text-3xl font-black text-text-primary mt-0.5">{avgReadiness}%</p>
-              <p className="text-[10px] text-text-muted">{activeAlerts > 0 ? `${activeAlerts} alertas` : 'Sin alertas'}</p>
-            </div>
-          </div>
-
-          {/* Señales de Fatiga */}
-          <div className="bg-surface-card rounded-xl p-5 flex items-center gap-4 shadow-card transition-shadow hover:shadow-card-hover">
-            <div className="w-12 h-12 rounded-lg bg-warning/15 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-5 h-5 text-warning" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Señales de Fatiga</p>
-              <p className="text-3xl font-black text-text-primary mt-0.5">{activeAlerts}</p>
-              <p className="text-[10px] text-text-muted">{activeAlerts > 0 ? 'Requieren atención' : 'Todo en orden'}</p>
-            </div>
-          </div>
+        <section aria-label="Resumen del grupo" className="mb-8 grid grid-cols-2 overflow-hidden rounded-2xl border border-border-default bg-surface-card md:grid-cols-4">
+          {[
+            { icon: Users, label: 'Atletas', value: totalAthletes, note: 'en seguimiento' },
+            { icon: Activity, label: 'Cumplimiento hoy', value: `${completionRate}%`, note: `${completedToday.length} de ${activeToday.length}` },
+            { icon: Zap, label: 'Carga semanal', value: weeklyTSS, note: 'TSS del grupo' },
+            { icon: Heart, label: 'Readiness medio', value: `${avgReadiness}%`, note: activeAlerts ? `${activeAlerts} con alertas` : 'sin alertas' },
+          ].map((metric) => { const Icon = metric.icon; return <div key={metric.label} className="border-b border-r border-border-subtle p-4 last:border-r-0 md:border-b-0"><div className="flex items-center gap-2 text-text-secondary"><Icon className="h-4 w-4" /><p className="text-xs font-semibold">{metric.label}</p></div><p className="mt-2 font-mono text-2xl font-bold tabular-nums text-text-primary">{metric.value}</p><p className="text-xs text-text-muted">{metric.note}</p></div> })}
         </section>
 
         {/* ── Filters ── */}
