@@ -30,6 +30,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
+import { WorkoutPreview } from '@/components/workouts/workout-preview';
+import { WorkoutBlock, workoutTitleFromDescription } from '@/lib/workout-structure';
 
 interface WorkoutStep {
   type: 'Warmup' | 'Interval' | 'Rest' | 'Repeat' | 'Cooldown';
@@ -59,6 +61,7 @@ interface WorkoutDetailClientProps {
       description: string;
       day_name: string;
       gear_needed?: string[] | null;
+      structured_blocks?: WorkoutBlock[] | null;
     };
     workout_feedback?: any[] | null;
   };
@@ -359,6 +362,8 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
   };
 
   const stepsList = structured?.workoutSegments?.[0]?.workoutSteps || [];
+  const coachBlocks = session.structured_blocks || [];
+  const workoutTitle = workoutTitleFromDescription(session.description, session.sport_type);
   const gearNeeded = session.gear_needed || [];
   const virtualGarage = profile?.virtual_garage || [];
   const missingGear = gearNeeded.filter(g => !virtualGarage.includes(g));
@@ -379,6 +384,20 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           </motion.div>
         )}
       </AnimatePresence>
+
+      {!isCompleted && !isMissed && !showFeedbackForm && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border-default bg-surface-elevated/95 p-3 pb-[max(.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+          <button
+            type="button"
+            onClick={handleToggle}
+            disabled={loading}
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-coral-500 px-5 text-sm font-bold text-bg-deep shadow-button disabled:opacity-50"
+          >
+            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+            Completar entrenamiento
+          </button>
+        </div>
+      )}
 
       {/* Left Column (Main steps and details) */}
       <div className="lg:col-span-2 space-y-6">
@@ -749,34 +768,23 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           )}
         </AnimatePresence>
 
-        {/* Coaching Notes / Description */}
-        <ProCard className="p-5 space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Info className="w-4 h-4 text-swim" />
-            Notas del Entrenador
-          </h3>
-          <p className="text-sm text-foreground leading-relaxed font-normal whitespace-pre-line">
-            {adaptWorkoutDescription(adaptedDescription, session.sport_type, profile) || 'Sin notas descriptivas para este entrenamiento.'}
-          </p>
-        </ProCard>
-
-        {/* Structured steps checklist */}
-        <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Desglose Estructurado del Bloque
-          </h3>
-          
-          <div className="space-y-3">
-            {stepsList.length > 0 ? (
-              stepsList.map((step, index) => renderStepCard(step, index))
-            ) : (
-              <ProCard className="p-6 text-center bg-surface-hover">
-                <p className="text-sm text-text-secondary">Esta sesión no dispone de bloques de intervalos estructurados.</p>
-                <p className="text-xs text-text-muted mt-1">Completa la sesión de forma continua basándote en la descripción.</p>
-              </ProCard>
-            )}
-          </div>
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-text-primary">Tu entrenamiento, paso a paso</h3>
+          <WorkoutPreview
+            title={workoutTitle}
+            sportType={session.sport_type}
+            blocks={coachBlocks}
+            durationMin={durationMin}
+            description={adaptWorkoutDescription(adaptedDescription, session.sport_type, profile)}
+          />
         </div>
+
+        {coachBlocks.length === 0 && stepsList.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-text-primary">Intervalos del dispositivo</h3>
+            {stepsList.map((step, index) => renderStepCard(step, index))}
+          </div>
+        )}
 
       </div>
 

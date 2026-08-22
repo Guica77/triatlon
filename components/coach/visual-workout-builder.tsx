@@ -2,34 +2,11 @@
 
 import * as React from 'react';
 import { Reorder, useDragControls } from 'framer-motion';
-import { GripVertical, Trash2, Plus, Flame, HeartPulse, Coffee, Wind, Repeat, AlignLeft } from 'lucide-react';
+import { ArrowDown, ArrowUp, GripVertical, Trash2, Flame, HeartPulse, Coffee, Wind, Repeat, AlignLeft } from 'lucide-react';
+import { WorkoutBlock, WorkoutBlockType } from '@/lib/workout-structure';
 
-export type BlockType = 'warmup' | 'active' | 'recovery' | 'cooldown' | 'interval';
-
-export interface WorkoutBlock {
-  id: string;
-  type: BlockType;
-  
-  notes?: string;
-
-  // For regular blocks
-  targetType?: 'time' | 'distance';
-  duration?: number; // minutes
-  distance?: number; // meters/km
-  zone?: number;
-
-  // For interval blocks
-  repeats?: number;
-  workTargetType?: 'time' | 'distance';
-  workDuration?: number;
-  workDistance?: number;
-  workZone?: number;
-  
-  restTargetType?: 'time' | 'distance';
-  restDuration?: number;
-  restDistance?: number;
-  restZone?: number;
-}
+export type { WorkoutBlock } from '@/lib/workout-structure';
+type BlockType = WorkoutBlockType;
 
 interface VisualWorkoutBuilderProps {
   blocks: WorkoutBlock[];
@@ -198,13 +175,17 @@ export function VisualWorkoutBuilder({ blocks, onChange, sportType }: VisualWork
         </div>
       ) : (
         <Reorder.Group axis="y" values={blocks} onReorder={onChange} className="space-y-2 mb-4">
-          {blocks.map((block) => (
-            <BlockItem 
-              key={block.id} 
-              block={block} 
-              onUpdate={(updates) => updateBlock(block.id, updates)} 
-              onRemove={() => removeBlock(block.id)} 
-            />
+          {blocks.map((block, index) => (
+              <BlockItem
+                key={block.id}
+                block={block}
+                onUpdate={(updates) => updateBlock(block.id, updates)}
+                onRemove={() => removeBlock(block.id)}
+                onMoveUp={() => index > 0 && onChange(blocks.toSpliced(index - 1, 2, block, blocks[index - 1]))}
+                onMoveDown={() => index < blocks.length - 1 && onChange(blocks.toSpliced(index, 2, blocks[index + 1], block))}
+                canMoveUp={index > 0}
+                canMoveDown={index < blocks.length - 1}
+              />
           ))}
         </Reorder.Group>
       )}
@@ -220,10 +201,10 @@ export function VisualWorkoutBuilder({ blocks, onChange, sportType }: VisualWork
                 key={type}
                 type="button"
                 onClick={() => addBlock(type)}
-                className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-lg border transition-all hover:shadow-card ${config.bgClass} hover:opacity-90`}
+                className={`flex min-h-14 items-center justify-center gap-2 rounded-xl border p-3 transition-all hover:shadow-card sm:flex-col ${config.bgClass} hover:opacity-90`}
               >
                 <div className={config.colorClass}>{config.icon}</div>
-                <span className={`text-[10px] font-bold uppercase tracking-wide ${config.colorClass}`}>{config.label}</span>
+                <span className={`text-xs font-bold ${config.colorClass}`}>{config.label}</span>
               </button>
             )
           })}
@@ -234,7 +215,15 @@ export function VisualWorkoutBuilder({ blocks, onChange, sportType }: VisualWork
   );
 }
 
-function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdate: (u: Partial<WorkoutBlock>) => void, onRemove: () => void }) {
+function BlockItem({ block, onUpdate, onRemove, onMoveUp, onMoveDown, canMoveUp, canMoveDown }: {
+  block: WorkoutBlock,
+  onUpdate: (u: Partial<WorkoutBlock>) => void,
+  onRemove: () => void,
+  onMoveUp: () => void,
+  onMoveDown: () => void,
+  canMoveUp: boolean,
+  canMoveDown: boolean,
+}) {
   const controls = useDragControls();
   const config = blockConfig[block.type];
 
@@ -247,7 +236,7 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
     >
       {/* Drag Handle */}
       <div
-        className="cursor-grab active:cursor-grabbing p-1 text-text-muted hover:text-text-primary hover:bg-surface-hover rounded transition-colors flex items-center"
+        className="hidden cursor-grab items-center rounded p-2 text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary sm:flex"
         onPointerDown={(e) => controls.start(e)}
       >
         <GripVertical className="w-5 h-5" />
@@ -277,7 +266,7 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
 
             <div className="grid grid-cols-2 gap-2">
               <div className="bg-danger/10 p-2 rounded-lg border border-danger/20">
-                 <label className="text-[10px] font-bold text-danger uppercase block mb-1">Trabajo</label>
+                 <label className="mb-1 block text-xs font-bold text-danger">Trabajo</label>
                  <div className="space-y-1.5">
                     <TargetInput
                       targetType={block.workTargetType || 'time'}
@@ -295,7 +284,7 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
                  </div>
               </div>
               <div className="bg-bike/10 p-2 rounded-lg border border-bike/20">
-                 <label className="text-[10px] font-bold text-bike uppercase block mb-1">Recuperación</label>
+                 <label className="mb-1 block text-xs font-bold text-bike">Recuperación</label>
                  <div className="space-y-1.5">
                     <TargetInput
                       targetType={block.restTargetType || 'time'}
@@ -316,7 +305,7 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
         ) : (
           <div className="grid grid-cols-2 gap-3 items-center">
             <div>
-              <label className="text-[10px] font-bold text-text-secondary uppercase block mb-1">Objetivo</label>
+              <label className="mb-1 block text-xs font-bold text-text-secondary">Objetivo</label>
               <TargetInput
                 targetType={block.targetType || 'time'}
                 duration={block.duration}
@@ -325,7 +314,7 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-text-secondary uppercase block mb-1">Zona (1-5)</label>
+              <label className="mb-1 block text-xs font-bold text-text-secondary">Zona (1-5)</label>
               <select
                 title="Zona de entrenamiento"
                 className="w-full bg-surface-hover border border-border-default rounded-md px-2 py-1 text-sm font-semibold text-text-primary focus:outline-none focus:border-swim"
@@ -348,7 +337,7 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
           <input
             type="text"
             placeholder="Añadir notas (opcional)..."
-            className="w-full bg-transparent border-none text-[11px] text-text-secondary focus:ring-0 p-0 placeholder:text-text-muted focus:outline-none"
+            className="min-h-11 w-full border-none bg-transparent p-0 text-sm text-text-secondary placeholder:text-text-muted focus:outline-none focus:ring-0"
             value={block.notes || ''}
             onChange={e => onUpdate({ notes: e.target.value })}
           />
@@ -356,12 +345,19 @@ function BlockItem({ block, onUpdate, onRemove }: { block: WorkoutBlock, onUpdat
       </div>
 
       {/* Remove */}
-      <div className="flex items-start">
+      <div className="flex flex-col items-start gap-1">
+        <button type="button" onClick={onMoveUp} disabled={!canMoveUp} className="flex h-11 w-11 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary disabled:opacity-25" aria-label="Subir bloque">
+          <ArrowUp className="h-4 w-4" />
+        </button>
+        <button type="button" onClick={onMoveDown} disabled={!canMoveDown} className="flex h-11 w-11 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-surface-hover hover:text-text-primary disabled:opacity-25" aria-label="Bajar bloque">
+          <ArrowDown className="h-4 w-4" />
+        </button>
         <button
           type="button"
           onClick={onRemove}
-          className="p-2 text-text-muted hover:text-danger hover:bg-danger/10 rounded-lg transition-colors ml-1"
+          className="flex h-11 w-11 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-danger/10 hover:text-danger"
           title="Eliminar bloque"
+          aria-label="Eliminar bloque"
         >
           <Trash2 className="w-4 h-4" />
         </button>
