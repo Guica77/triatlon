@@ -253,29 +253,33 @@ export default async function DashboardPage() {
       )}
       <MorningCheckInModal hasCompletedCheckIn={hasCompletedCheckIn} hasGarminSync={isConnected} />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-24 sm:pb-8">
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pb-8 lg:px-8">
 
-        {/* Cabecera — identidad del día, sin acciones */}
         <div className="mb-6">
-          <p className="font-display text-[10px] font-semibold uppercase tracking-[0.25em] text-accent">
+          <p className="text-xs font-semibold capitalize text-accent">
             {now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-text-primary leading-tight mt-0.5">
-            Tu Entrenamiento
+          <h1 className="mt-1 font-display text-3xl font-bold leading-tight tracking-tight text-text-primary">
+            {now.getHours() < 12 ? 'Buenos días' : now.getHours() < 19 ? 'Buenas tardes' : 'Buenas noches'}, {profile.first_name || 'triatleta'}
           </h1>
-          <p className="text-xs text-text-muted font-medium mt-0.5">Plan semanal, sesiones y seguimiento</p>
+          <p className="mt-1 text-sm text-text-secondary">Tu estado y la prioridad de hoy, en un solo vistazo.</p>
         </div>
 
-        {/* HOY — la sesión del día, lo primero que se ve */}
-        <section className="mb-8">
-          <h2 className="font-display text-[11px] font-semibold uppercase tracking-[0.25em] text-text-muted px-0.5 mb-3">Hoy</h2>
-          <TodayWorkoutHero workout={todayWorkout ?? null} />
-        </section>
+        <div className="mb-8 grid items-start gap-4 lg:grid-cols-[.9fr_1.1fr]">
+          <section>
+            <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Tu recuperación</h2>
+            <RecoverySummary readinessScore={biometrics?.readiness_score} hrv={biometrics?.hrv} sleepHours={biometrics?.sleep_hours} fatigue={biometrics?.fatigue_rating} />
+          </section>
+          <section>
+            <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Entrenamiento de hoy</h2>
+            <TodayWorkoutHero workout={todayWorkout ?? null} />
+          </section>
+        </div>
 
         {/* LA SEMANA — volumen por disciplina + calendario de planificación */}
         <section className="mb-8">
           <div className="flex items-center justify-between gap-3 px-0.5 mb-3">
-            <h2 className="font-display text-[11px] font-semibold uppercase tracking-[0.25em] text-text-muted">La semana</h2>
+            <h2 className="text-xs font-semibold text-text-muted">Tu semana</h2>
             <Link
               href="/resumen"
               className="group flex items-center gap-1.5 text-xs font-bold text-text-secondary hover:text-text-primary transition-colors"
@@ -299,19 +303,8 @@ export default async function DashboardPage() {
           </div>
         </section>
 
-        {/* RECUPERACIÓN — preparación del cuerpo */}
-        <section className="mb-8">
-          <h2 className="font-display text-[11px] font-semibold uppercase tracking-[0.25em] text-text-muted px-0.5 mb-3">Recuperación</h2>
-          <RecoverySummary
-            readinessScore={biometrics?.readiness_score}
-            hrv={biometrics?.hrv}
-            sleepHours={biometrics?.sleep_hours}
-            fatigue={biometrics?.fatigue_rating}
-          />
-        </section>
-
         {/* Secciones secundarias detrás del menú desplegable */}
-        <ExpandableSection title="Más secciones">
+        <ExpandableSection title="Nutrición, actividad, logros y ajustes">
 
           {/* ── Tu entrenador ── */}
           <div className="space-y-3">

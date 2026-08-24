@@ -3,6 +3,7 @@
 import * as React from 'react'
 import { Clock, CheckCircle2, Circle, Waves, Bike, Footprints, Activity, Dumbbell } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 interface TodayWorkoutHeroProps {
   workout?: any | null
@@ -37,7 +38,7 @@ export function TodayWorkoutHero({ workout }: TodayWorkoutHeroProps) {
           </div>
           <div>
             <p className="font-display text-lg font-bold tracking-tight text-text-primary leading-none">Día de descanso</p>
-            <p className="text-[11px] text-text-muted mt-1">No hay entrenamiento programado para hoy</p>
+            <p className="mt-1 text-sm text-text-muted">No hay entrenamiento programado. Prioriza descanso, movilidad y recuperación.</p>
           </div>
         </div>
       </div>
@@ -57,7 +58,7 @@ export function TodayWorkoutHero({ workout }: TodayWorkoutHeroProps) {
               <Icon className={cn('w-5 h-5', cfg.color)} />
             </div>
             <div className="min-w-0">
-              <p className={cn('font-display text-[11px] font-semibold uppercase tracking-[0.2em]', cfg.color)}>
+              <p className={cn('font-display text-xs font-semibold', cfg.color)}>
                 Sesión de hoy · {cfg.label}
               </p>
               <h2 className="font-display text-xl font-bold tracking-tight text-text-primary leading-tight truncate">
@@ -67,11 +68,11 @@ export function TodayWorkoutHero({ workout }: TodayWorkoutHeroProps) {
           </div>
 
           {isCompleted ? (
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bike/10 text-bike text-[10px] font-bold border border-bike/30 shrink-0">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bike/10 text-bike text-xs font-bold border border-bike/30 shrink-0">
               <CheckCircle2 className="w-3 h-3" /> Completado
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-warning/10 text-warning text-[10px] font-bold border border-warning/30 shrink-0">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-warning/10 text-warning text-xs font-bold border border-warning/30 shrink-0">
               <Circle className="w-3 h-3" /> Pendiente
             </span>
           )}
@@ -82,28 +83,28 @@ export function TodayWorkoutHero({ workout }: TodayWorkoutHeroProps) {
           {durationMin > 0 && (
             <div>
               <p className={cn('font-display text-5xl font-black leading-none tracking-tight', cfg.color)}>{durationMin}</p>
-              <p className="text-[10px] text-text-muted font-medium uppercase tracking-wider mt-1">minutos</p>
+              <p className="mt-1 text-xs font-medium text-text-muted">minutos</p>
             </div>
           )}
           {workout?.target_distance && (
             <div>
               <p className="font-display text-5xl font-black leading-none tracking-tight text-text-primary">{workout.target_distance}</p>
-              <p className="text-[10px] text-text-muted font-medium uppercase tracking-wider mt-1">km</p>
+              <p className="mt-1 text-xs font-medium text-text-muted">kilómetros</p>
             </div>
           )}
           {workout?.actual_tss ? (
             <div>
               <p className="font-display text-5xl font-black leading-none tracking-tight text-text-primary">{workout.actual_tss}</p>
-              <p className="text-[10px] text-text-muted font-medium uppercase tracking-wider mt-1">TSS</p>
+              <p className="mt-1 text-xs font-medium text-text-muted">TSS</p>
             </div>
           ) : workout?.target_tss ? (
             <div>
               <p className="font-display text-5xl font-black leading-none tracking-tight text-text-primary">{workout.target_tss}</p>
-              <p className="text-[10px] text-text-muted font-medium uppercase tracking-wider mt-1">TSS objetivo</p>
+              <p className="mt-1 text-xs font-medium text-text-muted">TSS objetivo</p>
             </div>
           ) : null}
           {durationMin > 0 && (
-            <div className="ml-auto hidden sm:flex items-center gap-1.5 text-[10px] text-text-muted">
+            <div className="ml-auto hidden items-center gap-1.5 text-xs text-text-muted sm:flex">
               <Clock className="w-3.5 h-3.5" />
               <span className="font-mono">{durationMin}:00</span>
             </div>
@@ -112,8 +113,9 @@ export function TodayWorkoutHero({ workout }: TodayWorkoutHeroProps) {
 
         {/* Description */}
         {session?.description && (
-          <p className="text-xs text-text-secondary leading-relaxed max-w-2xl">{session.description}</p>
+          <p className="max-w-2xl text-sm leading-relaxed text-text-secondary line-clamp-3">{session.description}</p>
         )}
+        {workout?.id && <Link href={`/dashboard/workout/${workout.id}`} className="flex min-h-12 w-full items-center justify-center rounded-xl bg-coral-500 px-5 text-sm font-bold text-bg-deep transition-colors hover:bg-coral-400">{isCompleted ? 'Consultar entrenamiento' : 'Abrir entrenamiento'}</Link>}
       </div>
     </div>
   )
