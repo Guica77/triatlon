@@ -68,7 +68,7 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="max-w-7xl mx-auto space-y-8 pb-12 animate-fade-in">
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

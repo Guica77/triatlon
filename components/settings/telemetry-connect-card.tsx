@@ -184,10 +184,10 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
             return (
               <div 
                 key={prov.id} 
-                className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
-                  isConnected 
-                    ? 'bg-bike/10 border-bike/30' 
-                    : 'bg-surface-hover border-border-subtle/80 hover:border-border-default'
+                className={`p-2.5 rounded-xl border flex items-center justify-between transition-[background-color,border-color,color,opacity,box-shadow] duration-150 ease-out ${
+                  isConnected
+                    ? 'bg-bike/10 border-bike/30'
+                    : 'bg-surface-hover border-border-subtle/80 fine-hover:border-border-default'
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -225,7 +225,7 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
                     <button
                       onClick={() => handleDisconnect(prov.id)}
                       disabled={!!isDisconnecting}
-                      className="p-1.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger/10 border border-border-default hover:border-danger/30 transition-all cursor-pointer disabled:opacity-50"
+                      className="min-h-10 min-w-10 p-1.5 rounded-lg text-text-muted fine-hover:text-danger fine-hover:bg-danger/10 border border-border-default fine-hover:border-danger/30 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/50 disabled:opacity-50"
                       title="Desconectar"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -233,25 +233,20 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
                   ) : prov.id === 'garmin' ? (
                       <button
                         onClick={() => setShowGarminModal(true)}
-                        className="p-1.5 rounded-lg bg-surface-card hover:bg-swim/10 text-text-secondary hover:text-swim border border-border-default hover:border-swim/30 transition-all cursor-pointer"
+                        className="min-h-10 min-w-10 p-1.5 rounded-lg bg-surface-card fine-hover:bg-swim/10 text-text-secondary fine-hover:text-swim border border-border-default fine-hover:border-swim/30 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                         title={`Conectar con ${prov.name}`}
                         aria-label={`Conectar con ${prov.name}`}
                       >
                         <LinkIcon className="w-3.5 h-3.5" />
                       </button>
                     ) : (
-                      <a 
+                      <a
                         href={`/api/auth/telemetry/connect?provider=${prov.id}`}
                         title={`Conectar con ${prov.name}`}
                         aria-label={`Conectar con ${prov.name}`}
+                        className="inline-flex min-h-10 min-w-10 items-center justify-center p-1.5 rounded-lg bg-surface-card fine-hover:bg-swim/10 text-text-secondary fine-hover:text-swim border border-border-default fine-hover:border-swim/30 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                       >
-                        <button
-                          className="p-1.5 rounded-lg bg-surface-card hover:bg-swim/10 text-text-secondary hover:text-swim border border-border-default hover:border-swim/30 transition-all cursor-pointer"
-                          title={`Conectar con ${prov.name}`}
-                          aria-label={`Conectar con ${prov.name}`}
-                        >
-                          <LinkIcon className="w-3.5 h-3.5" />
-                        </button>
+                        <LinkIcon className="w-3.5 h-3.5" />
                       </a>
                     )}
                 </div>
@@ -269,7 +264,7 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
               <button
                 onClick={handlePushWorkouts}
                 disabled={isPushingWorkouts || isSyncing || !!isDisconnecting || isTestingGarmin}
-                className="w-full py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-swim hover:bg-swim/90 text-white flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer "
+                className="w-full min-h-11 py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-swim fine-hover:bg-swim/90 text-white flex items-center justify-center gap-1.5 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 disabled:opacity-50 cursor-pointer "
               >
                 <UploadCloud className={`w-3.5 h-3.5 ${isPushingWorkouts ? 'animate-bounce' : ''}`} />
                 {isPushingWorkouts ? 'Enviando...' : 'Enviar Entrenos a Garmin'}
@@ -278,7 +273,7 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
               <button
                 onClick={handleTestGarmin}
                 disabled={isPushingWorkouts || isSyncing || !!isDisconnecting || isTestingGarmin}
-                className="w-full py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-surface-hover hover:bg-surface-card text-text-primary flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer "
+                className="w-full min-h-11 py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-surface-hover fine-hover:bg-surface-card text-text-primary flex items-center justify-center gap-1.5 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 disabled:opacity-50 cursor-pointer "
               >
                 <Heart className={`w-3.5 h-3.5 ${isTestingGarmin ? 'animate-pulse' : ''}`} />
                 {isTestingGarmin ? 'Extrayendo...' : 'Probar Extracción VFC (Local)'}
@@ -290,7 +285,7 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
             <button
               onClick={handleSyncPaces}
               disabled={isSyncing || isPushingWorkouts || !!isDisconnecting || isTestingGarmin}
-              className="w-full py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-[#FC4C02] hover:bg-[#e34402] text-white flex items-center justify-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer "
+              className="w-full min-h-11 py-2.5 text-[10px] sm:text-xs font-black rounded-xl bg-[#FC4C02] fine-hover:bg-[#e34402] text-white flex items-center justify-center gap-1.5 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FC4C02]/50 disabled:opacity-50 cursor-pointer "
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
               {isSyncing ? 'Recalculando...' : 'Recalcular Ritmos Strava'}
@@ -310,7 +305,7 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
               </div>
               <button 
                 onClick={() => setShowGarminModal(false)}
-                className="p-1.5 rounded-lg text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-colors"
+                className="min-h-10 min-w-10 p-1.5 rounded-lg text-text-muted fine-hover:text-text-secondary fine-hover:bg-surface-hover transition-[background-color,color,opacity,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                 title="Cerrar modal"
                 aria-label="Cerrar modal"
               >
@@ -327,7 +322,7 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
                     required
                     value={garminEmail}
                     onChange={(e) => setGarminEmail(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-border-default rounded-lg focus:outline-none focus:border-swim focus:ring-1 focus:ring-swim transition-all bg-surface-hover focus:bg-surface-card"
+                    className="w-full px-3 py-2 text-sm border border-border-default rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-swim/40 focus:border-swim transition-[background-color,border-color,box-shadow,color] duration-150 ease-out bg-surface-hover focus:bg-surface-card"
                     placeholder="tu-email@ejemplo.com"
                   />
                 </div>
@@ -338,7 +333,7 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
                     required
                     value={garminPassword}
                     onChange={(e) => setGarminPassword(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-border-default rounded-lg focus:outline-none focus:border-swim focus:ring-1 focus:ring-swim transition-all bg-surface-hover focus:bg-surface-card"
+                    className="w-full px-3 py-2 text-sm border border-border-default rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-swim/40 focus:border-swim transition-[background-color,border-color,box-shadow,color] duration-150 ease-out bg-surface-hover focus:bg-surface-card"
                     placeholder="••••••••"
                   />
                 </div>
@@ -351,7 +346,7 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
               <button
                 type="submit"
                 disabled={isConnectingGarmin || !garminEmail || !garminPassword}
-                className="w-full py-2.5 font-bold rounded-xl bg-swim hover:bg-swim/90 text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="w-full min-h-11 py-2.5 font-bold rounded-xl bg-swim fine-hover:bg-swim/90 text-white flex items-center justify-center gap-2 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 disabled:opacity-50"
               >
                 {isConnectingGarmin ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

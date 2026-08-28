@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Watch, Flame, Waves, Footprints, Bike, ExternalLink, RefreshCw, Zap } from 'lucide-react';
 import { getRecentStravaActivities } from '@/app/telemetry/telemetry-actions';
 
@@ -20,6 +20,7 @@ export function ActivitiesFeed() {
   const [activities, setActivities] = React.useState<StravaActivity[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const reduceMotion = useReducedMotion();
 
   const fetchActivities = async () => {
     setLoading(true);
@@ -99,7 +100,7 @@ export function ActivitiesFeed() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       className="p-5 rounded-2xl bg-surface-card border border-border-subtle shadow-card relative overflow-hidden group w-full"
     >
@@ -117,9 +118,9 @@ export function ActivitiesFeed() {
         {loading ? (
           <motion.div
             key="loading"
-            initial={{ opacity: 0 }}
+            initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={reduceMotion ? undefined : { opacity: 0 }}
             className="flex flex-col gap-3"
           >
             {[1, 2, 3].map((i) => (
@@ -132,14 +133,14 @@ export function ActivitiesFeed() {
         ) : error ? (
           <motion.div
             key="error"
-            initial={{ opacity: 0 }}
+            initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             className="p-4 rounded-xl bg-danger/10 border border-danger/20 text-center"
           >
             <p className="text-xs text-danger">{error}</p>
             <button
               onClick={fetchActivities}
-              className="mt-2 text-[10px] font-bold text-danger hover:underline"
+              className="mt-2 min-h-10 inline-flex items-center text-[10px] font-bold text-danger fine-hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/50 rounded-sm"
             >
               Intentar de nuevo
             </button>
@@ -147,7 +148,7 @@ export function ActivitiesFeed() {
         ) : activities.length === 0 ? (
           <motion.div
             key="empty"
-            initial={{ opacity: 0 }}
+            initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             className="p-6 rounded-xl bg-surface-hover border border-border-default text-center"
           >
@@ -157,7 +158,7 @@ export function ActivitiesFeed() {
         ) : (
           <motion.div
             key="list"
-            initial={{ opacity: 0 }}
+            initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             className="flex flex-col gap-3"
           >
@@ -188,7 +189,7 @@ export function ActivitiesFeed() {
               return (
                 <div
                   key={act.id}
-                  className={`bg-surface-hover border border-border-default p-3 px-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 transition-all hover:border-border-default shadow-card ${!isLinked ? 'opacity-70' : ''}`}
+                  className={`bg-surface-hover border border-border-default p-3 px-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 shadow-card ${!isLinked ? 'opacity-70' : ''}`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>
@@ -224,7 +225,7 @@ export function ActivitiesFeed() {
                       target="_blank"
                       rel="noopener noreferrer"
                       title="Ver actividad en Strava"
-                      className="w-7 h-7 rounded-md bg-surface-hover hover:bg-border-default flex items-center justify-center text-text-secondary hover:text-text-primary border border-border-default transition-colors"
+                      className="min-h-10 min-w-10 rounded-md bg-surface-hover fine-hover:bg-border-default flex items-center justify-center text-text-secondary fine-hover:text-text-primary border border-border-default transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                     >
                       <ExternalLink className="w-3 h-3" />
                     </a>
@@ -239,7 +240,7 @@ export function ActivitiesFeed() {
       <div className="text-center mt-5">
         <button
           onClick={fetchActivities}
-          className="bg-surface-hover border border-border-default text-text-secondary hover:text-text-primary hover:bg-border-default px-4 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer transition-all inline-flex items-center gap-2"
+          className="bg-surface-hover border border-border-default text-text-secondary fine-hover:text-text-primary fine-hover:bg-border-default px-4 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] inline-flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 items-center gap-2"
         >
           <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
           Ver Historial Completo

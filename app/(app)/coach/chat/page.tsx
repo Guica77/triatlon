@@ -51,7 +51,7 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
       }}
     >
       {/* Upper Deck Header — safe-area top so the status bar never overlaps */}
-      <header className="pt-[env(safe-area-inset-top)] bg-white/95 backdrop-blur-md border-b border-zinc-200 shadow-sm shrink-0 transition-all duration-300">
+      <header className="shrink-0 border-b border-zinc-200 bg-white/95 pt-[env(safe-area-inset-top)] shadow-sm backdrop-blur-md transition-[background-color,border-color,box-shadow,opacity] duration-200 ease-out">
         <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-200/60">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-sm shrink-0 group">
@@ -60,7 +60,7 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
             <div>
               <h1 className="text-base font-bold text-zinc-900 tracking-tight">Centro de Mensajería</h1>
               <p className="text-xs text-zinc-500 font-semibold truncate flex items-center gap-1.5 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-600 animate-pulse"></span>
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-600" aria-hidden="true"></span>
                 Coach: {coachName} • Plan B2B Premium
               </p>
             </div>
@@ -68,12 +68,12 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
 
           <div className="flex items-center gap-3">
             <Link href="/settings">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-500 hover:text-zinc-800 border border-zinc-200 hover:border-zinc-400 bg-white hover:bg-zinc-50 rounded-xl shadow-sm cursor-pointer">
+              <AnimatedButton variant="ghost" size="icon" aria-label="Abrir ajustes" className="h-9 w-9 rounded-xl border border-zinc-200 bg-white text-zinc-500 shadow-sm hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-800 cursor-pointer">
                 <Settings className="w-4 h-4" />
               </AnimatedButton>
             </Link>
             <form action="/auth/signout" method="post">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-zinc-600 hover:text-red-700 hover:bg-red-50 rounded-xl border border-zinc-200 hover:border-red-200 shadow-sm bg-white cursor-pointer">
+              <AnimatedButton variant="ghost" size="icon" aria-label="Cerrar sesión" className="h-9 w-9 rounded-xl border border-zinc-200 bg-white text-zinc-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-700 cursor-pointer">
                 <LogOut className="w-4 h-4" />
               </AnimatedButton>
             </form>
@@ -84,13 +84,13 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
         <div className="px-6 py-2.5 bg-zinc-50 flex items-center justify-between border-t border-zinc-200/30">
           <div className="flex gap-2 overflow-x-auto scrollbar-none">
             <Link href="/coach/dashboard" className="shrink-0">
-              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 border border-zinc-200 bg-white text-zinc-600 hover:text-zinc-800 hover:bg-zinc-100/40 shadow-sm cursor-pointer transition-all">
+              <AnimatedButton variant="ghost" size="sm" className="rounded-full border border-zinc-200 bg-white px-3.5 py-1.5 text-xs text-zinc-600 shadow-sm transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out hover:bg-zinc-100/40 hover:text-zinc-800 active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100">
                 Atletas en Roster
               </AnimatedButton>
             </Link>
             <Link href="/coach/chat" className="shrink-0">
               <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 bg-cyan-50 border border-cyan-200 text-cyan-700 font-black shadow-sm flex items-center gap-1.5 cursor-pointer">
-                <MessageSquare className="w-3.5 h-3.5 text-cyan-600 animate-pulse" />
+                <MessageSquare className="w-3.5 h-3.5 text-cyan-600" aria-hidden="true" />
                 <span>Mensajería Directa</span>
               </AnimatedButton>
             </Link>

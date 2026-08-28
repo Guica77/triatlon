@@ -89,17 +89,18 @@ export default function AthleteLoginPage() {
               </AnimatePresence>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Correo Electrónico</label>
+                <label htmlFor="athlete-login-email" className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Correo Electrónico</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                   <input
+                    id="athlete-login-email"
                     name="email"
                     type="email"
                     value={email}
                     onChange={e => { setEmail(e.target.value); validateEmail(e.target.value); }}
                     placeholder="atleta@triatlonpro.com"
                     required
-                    className={`w-full bg-bg-hover border rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none transition-all ${
+                    className={`w-full rounded-xl border py-3 pl-10 pr-3.5 text-sm text-text-primary placeholder-zinc-600 outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out motion-reduce:transition-opacity ${
                       emailError ? 'border-red-500/50 focus:border-red-500' : 'border-border-subtle focus:border-swim'
                     }`}
                   />
@@ -117,7 +118,7 @@ export default function AthleteLoginPage() {
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Contraseña</label>
+                  <label htmlFor="athlete-login-password" className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Contraseña</label>
                   <button
                     type="button"
                     onClick={() => router.push('/forgot-password')}
@@ -128,17 +129,19 @@ export default function AthleteLoginPage() {
                 </div>
                 <div className="relative">
                   <input
+                    id="athlete-login-password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-3.5 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-swim transition-all font-mono"
+                    className="w-full rounded-xl border border-border-subtle bg-bg-hover py-3 pl-3.5 pr-10 text-sm font-mono text-text-primary placeholder-zinc-600 outline-none transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out focus:border-swim focus:ring-1 focus:ring-swim/40 active:scale-[0.99] motion-reduce:transition-opacity motion-reduce:active:scale-100"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors"
-                    tabIndex={-1}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    aria-pressed={showPassword}
+                    className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out hover:bg-surface-hover hover:text-text-secondary active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -146,8 +149,7 @@ export default function AthleteLoginPage() {
               </div>
 
               <motion.button
-                whileTap={{ scale: 0.98 }}
-                className="w-full mt-4 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-swim hover:bg-swim/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="mt-4 flex min-h-11 w-full items-center justify-center rounded-xl bg-swim py-3.5 text-sm font-bold text-text-primary transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out hover:bg-swim/90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
                 type="submit"
                 disabled={loading || !!emailError}
               >

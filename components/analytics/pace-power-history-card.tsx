@@ -167,7 +167,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-swim animate-pulse" />
+            <span className="h-2 w-2 rounded-full bg-swim" aria-hidden="true" />
             <h2 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               Historial de Rendimiento
             </h2>
@@ -187,7 +187,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id as any); setHoveredIndex(null); }}
-              className={`flex-1 sm:flex-initial px-3 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
+              className={`flex min-h-9 flex-1 sm:flex-initial px-3 py-1.5 text-xs font-medium rounded-md transition-[color,background-color,border-color,opacity] duration-150 ease-out cursor-pointer motion-reduce:transition-opacity ${
                 activeTab === tab.id
                   ? 'bg-surface-card text-text-primary border border-border-subtle/80'
                   : 'text-text-muted hover:text-text-primary'
@@ -205,7 +205,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
           <p className="text-[10px] text-text-secondary uppercase tracking-widest font-bold">
             {hoveredIndex !== null && activePoint ? `Semana del ${formatDate(activePoint.date)}` : 'Nivel Actual / Último Registro'}
           </p>
-          <p className="text-3xl font-light text-text-primary mt-1 transition-all">
+          <p className="text-3xl font-light text-text-primary mt-1">
             {renderCurrentValue()}
           </p>
         </div>
@@ -236,7 +236,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
             <path
               d={`${linePoints} L ${(width).toFixed(1)} ${height} L 0 ${height} Z`}
               fill="url(#gradFtp)"
-              className="opacity-20 transition-all duration-500"
+              className="opacity-20 transition-opacity duration-200 ease-out motion-reduce:transition-opacity"
             />
           )}
 
@@ -248,7 +248,7 @@ export function PacePowerHistoryCard({ history }: PacePowerHistoryCardProps) {
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="transition-all duration-500"
+            className="transition-[stroke,opacity] duration-200 ease-out motion-reduce:transition-opacity"
           />
 
           {/* Degradados */}

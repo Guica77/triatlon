@@ -59,7 +59,7 @@ export function WorkoutExerciseSuggestions({ sportType }: WorkoutExerciseSuggest
                 <a
                   key={ex.id}
                   href={`/exercises`}
-                  className="flex items-center gap-3 p-2.5 rounded-lg bg-surface-hover border border-border-subtle hover:bg-surface-hover/80 transition-all group"
+                  className="flex items-center gap-3 p-2.5 rounded-lg bg-surface-hover border border-border-subtle fine-hover:bg-surface-hover/80 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                 >
                   <div className="w-9 h-9 rounded-lg bg-surface-card flex items-center justify-center shrink-0 overflow-hidden">
                     <img

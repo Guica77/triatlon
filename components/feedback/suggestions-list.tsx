@@ -41,7 +41,7 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
       case 'reviewed':
         return (
           <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-swim/10 text-swim border border-swim/30 flex items-center gap-1">
-            <Activity className="w-3 h-3 animate-pulse" />
+            <Activity className="w-3 h-3" aria-hidden="true" />
             En Revisión
           </span>
         );
@@ -89,7 +89,7 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
         <div className="flex flex-wrap gap-1.5 p-1 bg-surface-app/60 rounded-xl border border-border-subtle/60">
           <button
             onClick={() => setFilter('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`min-h-9 px-3 py-1.5 rounded-lg text-xs font-medium transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
               filter === 'all'
                 ? 'bg-surface-hover text-text-primary font-semibold '
                 : 'text-text-muted hover:text-text-muted'
@@ -99,7 +99,7 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
           </button>
           <button
             onClick={() => setFilter('pending')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`min-h-9 px-3 py-1.5 rounded-lg text-xs font-medium transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex items-center gap-1.5 ${
               filter === 'pending'
                 ? 'bg-warning/20 text-warning font-semibold border border-warning/30'
                 : 'text-text-muted hover:text-text-muted'
@@ -109,7 +109,7 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
           </button>
           <button
             onClick={() => setFilter('reviewed')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`min-h-9 px-3 py-1.5 rounded-lg text-xs font-medium transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex items-center gap-1.5 ${
               filter === 'reviewed'
                 ? 'bg-swim/20 text-swim font-semibold border border-swim/30'
                 : 'text-text-muted hover:text-text-muted'
@@ -119,7 +119,7 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
           </button>
           <button
             onClick={() => setFilter('implemented')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`min-h-9 px-3 py-1.5 rounded-lg text-xs font-medium transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex items-center gap-1.5 ${
               filter === 'implemented'
                 ? 'bg-bike/20 text-bike font-semibold border border-bike/30'
                 : 'text-text-muted hover:text-text-muted'

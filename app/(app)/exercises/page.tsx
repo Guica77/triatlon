@@ -70,11 +70,16 @@ export default function ExercisesPage() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Buscar ejercicios..."
-            className="w-full pl-10 pr-10 py-2.5 bg-surface-hover border border-border-default rounded-lg text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-coral-500/40 transition-colors"
+            className="w-full min-h-11 pl-10 pr-10 py-2.5 bg-surface-hover border border-border-default rounded-lg text-sm text-text-primary placeholder:text-text-muted outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus:border-coral-500/40 focus:ring-1 focus:ring-coral-500/30 motion-reduce:transition-opacity"
           />
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary cursor-pointer">
-              <X className="w-4 h-4" />
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="Limpiar búsqueda"
+              className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-text-muted outline-none transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out hover:bg-surface-card hover:text-text-secondary active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-coral-500/40 motion-reduce:transition-opacity motion-reduce:active:scale-100"
+            >
+              <X className="w-4 h-4" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -82,9 +87,14 @@ export default function ExercisesPage() {
         {/* Filter toggle + results count */}
         <div className="flex items-center justify-between">
           <p className="text-xs text-text-muted font-medium">{filtered.length} ejercicio{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}</p>
-          <button onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-text-muted hover:text-text-secondary bg-surface-hover border border-border-default hover:border-border-default/80 transition-colors cursor-pointer">
-            <Filter className="w-3.5 h-3.5" />
+          <button
+            type="button"
+            onClick={() => setShowFilters(!showFilters)}
+            aria-expanded={showFilters}
+            aria-controls="exercise-filters"
+            className="flex min-h-11 items-center gap-1.5 rounded-lg border border-border-default bg-surface-hover px-3 text-xs font-bold text-text-muted outline-none transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out hover:border-border-default/80 hover:text-text-secondary active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-coral-500/40 motion-reduce:transition-opacity motion-reduce:active:scale-100"
+          >
+            <Filter className="w-3.5 h-3.5" aria-hidden="true" />
             Filtros
             {(category !== 'todos' || equipment !== 'todos') && <span className="w-1.5 h-1.5 rounded-full bg-coral-500" />}
           </button>
@@ -92,14 +102,14 @@ export default function ExercisesPage() {
 
         {/* Filters panel */}
         {showFilters && (
-          <div className="space-y-3 p-4 bg-surface-card border border-border-default rounded-xl">
+          <div id="exercise-filters" className="space-y-3 p-4 bg-surface-card border border-border-default rounded-xl">
             <div>
               <p className="text-[9px] font-bold text-text-muted uppercase tracking-wider mb-2">Categoría</p>
               <div className="flex flex-wrap gap-1.5">
                 {CATEGORIES.map(c => (
                   <button key={c.key} onClick={() => setCategory(c.key)}
                     className={cn(
-                      'px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border',
+                      'min-h-11 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 border',
                       category === c.key
                         ? 'bg-coral-500/10 text-coral-500 border-coral-500/30'
                         : 'bg-surface-hover text-text-muted border-border-default hover:border-border-default/80'
@@ -113,14 +123,14 @@ export default function ExercisesPage() {
               <p className="text-[9px] font-bold text-text-muted uppercase tracking-wider mb-2">Equipamiento</p>
               <div className="flex flex-wrap gap-1.5">
                 <button onClick={() => setEquipment('todos')}
-                  className={cn('px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border',
+                  className={cn('min-h-11 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 border',
                     equipment === 'todos' ? 'bg-coral-500/10 text-coral-500 border-coral-500/30'
                     : 'bg-surface-hover text-text-muted border-border-default hover:border-border-default/80')}>
                   Todos
                 </button>
                 {EQUIPMENT_OPTIONS.map(eq => (
                   <button key={eq} onClick={() => setEquipment(eq)}
-                    className={cn('px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border',
+                    className={cn('min-h-11 px-2.5 py-1 rounded-lg text-[10px] font-bold transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 border',
                       equipment === eq ? 'bg-coral-500/10 text-coral-500 border-coral-500/30'
                       : 'bg-surface-hover text-text-muted border-border-default hover:border-border-default/80')}>
                     {eq}
@@ -150,9 +160,14 @@ export default function ExercisesPage() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex items-center justify-center gap-2 pt-4">
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-card border border-border-default text-text-muted hover:text-text-secondary disabled:opacity-30 transition-all cursor-pointer">
-              <ChevronLeft className="w-4 h-4" />
+            <button
+              type="button"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              aria-label="Página anterior"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-border-default bg-surface-card text-text-muted outline-none transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out hover:text-text-secondary active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-coral-500/40 disabled:pointer-events-none disabled:opacity-30 motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             </button>
 
             {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -160,8 +175,9 @@ export default function ExercisesPage() {
               const p = start + i
               if (p > totalPages) return null
               return (
-                <button key={p} onClick={() => setPage(p)}
-                  className={cn('w-8 h-8 rounded-lg text-xs font-bold transition-all cursor-pointer',
+                    <button key={p} onClick={() => setPage(p)}
+                  aria-current={p === currentPage ? 'page' : undefined}
+                  className={cn('flex min-h-11 min-w-11 items-center justify-center rounded-lg text-xs font-bold transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer',
                     p === currentPage
                       ? 'bg-coral-500 text-white shadow-button'
                       : 'bg-surface-card border border-border-default text-text-muted hover:text-text-secondary')}>
@@ -170,9 +186,14 @@ export default function ExercisesPage() {
               )
             })}
 
-            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-card border border-border-default text-text-muted hover:text-text-secondary disabled:opacity-30 transition-all cursor-pointer">
-              <ChevronRight className="w-4 h-4" />
+            <button
+              type="button"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="Página siguiente"
+              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-border-default bg-surface-card text-text-muted outline-none transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out hover:text-text-secondary active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-coral-500/40 disabled:pointer-events-none disabled:opacity-30 motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         )}

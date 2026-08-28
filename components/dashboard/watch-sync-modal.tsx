@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { X, Watch, Check, RefreshCw, Bike, Footprints, Waves, Dumbbell } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
@@ -47,6 +47,7 @@ function getProgressWidthClass(progress: number): string {
 export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps) {
   const [progress, setProgress] = React.useState(0)
   const [syncState, setSyncState] = React.useState<'connecting' | 'syncing' | 'verifying' | 'success'>('connecting')
+  const reduceMotion = useReducedMotion()
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -117,7 +118,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
           <button 
             onClick={onClose}
             title="Cerrar"
-            className="absolute top-4 right-4 w-7 h-7 rounded-lg border border-border-default flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors"
+            className="absolute top-4 right-4 min-h-10 min-w-10 rounded-lg border border-border-default flex items-center justify-center text-text-muted fine-hover:text-text-primary fine-hover:bg-surface-hover transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -126,7 +127,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
           {/* Sync Animation Widget */}
           <div className="relative w-40 h-40 flex items-center justify-center">
             {/* State tint behind watch */}
-            <div className={`absolute inset-4 rounded-full transition-colors duration-500 -z-10 ${
+            <div className={`absolute inset-4 rounded-full transition-[background-color] duration-500 ease-out -z-10 ${
               syncState === 'success' ? 'bg-bike/10' : 'bg-accent/5'
             }`} />
 
@@ -141,8 +142,9 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                   {syncState === 'success' ? (
                     <motion.div 
                       key="success"
-                      initial={{ scale: 0.8, opacity: 0 }}
+                      initial={reduceMotion ? false : { scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
+                      transition={reduceMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
                       className="flex flex-col items-center justify-center space-y-1"
                     >
                       <div className="w-11 h-11 rounded-full bg-bike/10 border border-bike/25 flex items-center justify-center text-bike">
@@ -152,17 +154,18 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                       <span className="text-[8px] text-text-muted font-semibold truncate max-w-[110px]">Ver en tu reloj</span>
                     </motion.div>
                   ) : (
-                    <motion.div 
+                    <motion.div
                       key="syncing"
-                      initial={{ opacity: 0 }}
+                      initial={reduceMotion ? false : { opacity: 0 }}
                       animate={{ opacity: 1 }}
+                      transition={reduceMotion ? { duration: 0 } : { duration: 0.18, ease: 'easeOut' }}
                       className="flex flex-col items-center justify-center space-y-1.5"
                     >
                       <div className="relative">
                         <Watch className="w-10 h-10 text-accent" />
                         <motion.div 
-                          animate={{ rotate: 360 }}
-                          transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
+                          animate={reduceMotion ? undefined : { rotate: 360 }}
+                          transition={reduceMotion ? { duration: 0 } : { repeat: Infinity, duration: 2, ease: 'linear' }}
                           className="absolute -top-1 -right-1"
                         >
                           <RefreshCw className="w-3.5 h-3.5 text-accent" />
@@ -171,7 +174,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
                       <span className="text-[11px] font-black text-text-primary">{progress}%</span>
                       <div className="w-16 h-1 bg-border-default rounded-full overflow-hidden">
                         <div 
-                          className={`h-full bg-accent transition-all duration-100 ${getProgressWidthClass(progress)}`}
+                          className={`h-full bg-accent transition-[width] duration-100 ease-out ${getProgressWidthClass(progress)}`}
                         />
                       </div>
                     </motion.div>
@@ -251,7 +254,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
             <AnimatedButton
               onClick={onClose}
               variant="primary"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 rounded-xl"
+              className="w-full min-h-11 bg-emerald-600 fine-hover:bg-emerald-700 text-white font-bold rounded-xl transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 motion-reduce:transition-opacity motion-reduce:active:scale-100"
             >
               Continuar
             </AnimatedButton>

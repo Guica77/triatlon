@@ -82,9 +82,9 @@ export function StepPlan(props: StepPlanProps) {
       {/* Celebratory header */}
       <div className="text-center space-y-4 py-2">
         <motion.div
-          initial={{ scale: 0, rotate: -30 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.05 }}
+          initial={{ opacity: 0, scale: 0.9, rotate: -8 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', duration: 0.5, bounce: 0.2, delay: 0.05 }}
           className="w-20 h-20 rounded-full bg-coral-500/15 border-2 border-coral-500/40 flex items-center justify-center mx-auto"
         >
           <CheckCircle2 className="w-10 h-10 text-coral-500" />
@@ -127,10 +127,10 @@ export function StepPlan(props: StepPlanProps) {
                   key={provider.id}
                   onClick={() => props.onConnect(provider.id)}
                   disabled={props.loading}
-                  className={`flex flex-col items-center justify-center p-4 rounded-2xl border border-border-default bg-surface-card transition-all group cursor-pointer ${provider.hover}`}
+                  className={`flex min-h-11 flex-col items-center justify-center rounded-2xl border border-border-default bg-surface-card p-4 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] group cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100 ${provider.hover}`}
                 >
                   <span className="text-2xl mb-2 block">{provider.icon}</span>
-                  <span className="text-xs font-bold text-text-primary group-hover:text-swim transition-colors">{provider.label}</span>
+                  <span className="text-xs font-bold text-text-primary group-hover:text-swim transition-[color] duration-150 ease-out motion-reduce:transition-opacity">{provider.label}</span>
                 </button>
               ))}
             </div>
@@ -150,7 +150,7 @@ export function StepPlan(props: StepPlanProps) {
                 props.setWantsCoach(v.trim().length > 0);
               }}
               placeholder="CÓDIGO DE ENTRENADOR (opcional)"
-              className="mt-3 w-full bg-surface-card border border-border-default rounded-xl px-4 py-3 text-sm text-swim placeholder-text-muted focus:bg-surface-card focus:border-bike focus:ring-1 focus:ring-bike outline-none transition-all font-bold tracking-widest uppercase"
+              className="mt-3 w-full rounded-xl border border-border-default bg-surface-card px-4 py-3 text-sm font-bold uppercase tracking-widest text-swim outline-none transition-[background-color,color,border-color,box-shadow,opacity] duration-150 ease-out placeholder-text-muted focus:bg-surface-card focus:border-bike focus:ring-1 focus:ring-bike motion-reduce:transition-opacity"
             />
             <p className="text-xs text-text-muted mt-1.5">Si tu entrenador te dio un código, introdúcelo aquí y te vincularemos al guardar.</p>
           </div>
@@ -159,7 +159,7 @@ export function StepPlan(props: StepPlanProps) {
 
       {/* Footer */}
       <div className="flex justify-between items-center pt-4 border-t border-border-default">
-        <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-text-secondary hover:text-text-primary transition flex items-center cursor-pointer">
+        <button onClick={props.onPrev} className="flex min-h-11 items-center px-6 py-3 text-sm font-semibold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100">
           <ChevronLeft className="w-4 h-4 mr-1" /> Atrás
         </button>
         <div className="flex flex-col items-end gap-1.5">
@@ -167,7 +167,7 @@ export function StepPlan(props: StepPlanProps) {
             {props.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
             {props.loading ? 'Generando plan...' : 'Crear mi plan'}
           </AnimatedButton>
-          <button onClick={props.onSave} disabled={props.loading} className="text-xs font-semibold text-text-secondary hover:text-text-primary transition cursor-pointer disabled:opacity-50">
+          <button onClick={props.onSave} disabled={props.loading} className="min-h-9 text-xs font-semibold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer disabled:opacity-50 motion-reduce:transition-opacity motion-reduce:active:scale-100">
             Conectar más tarde
           </button>
         </div>

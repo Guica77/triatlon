@@ -1,8 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { 
   BookOpen, 
   ArrowLeft, 
@@ -33,16 +32,28 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 100 } }
 } as const;
 
+const reducedContainerVariants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1 }
+} as const;
+
+const reducedItemVariants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.15, ease: 'easeOut' } }
+} as const;
+
 export default function PrincipiantesPage() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="min-h-screen bg-bg-elevated/50 pb-16">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-surface-elevated/95 backdrop-blur-md border-b border-border-subtle transition-all duration-300">
+      <header className="sticky top-0 z-50 bg-surface-elevated/95 backdrop-blur-md border-b border-border-subtle transition-[background-color,border-color,box-shadow] duration-200 ease-out motion-reduce:transition-opacity">
         <div className="px-6 py-4 flex items-center justify-between max-w-4xl mx-auto">
           <div className="flex items-center gap-3">
             <Link href="/dashboard">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-text-muted hover:text-swim hover:bg-swim rounded-xl transition-all duration-200 border border-transparent hover:border-swim">
-                <ArrowLeft className="w-4 h-4" />
+              <AnimatedButton variant="ghost" size="icon" aria-label="Volver al dashboard" className="w-9 h-9 text-text-muted hover:text-swim hover:bg-swim rounded-xl transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] border border-transparent hover:border-swim motion-reduce:transition-opacity motion-reduce:active:scale-100">
+                <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               </AnimatedButton>
             </Link>
             <div className="flex items-center gap-2">
@@ -61,14 +72,14 @@ export default function PrincipiantesPage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-6 pt-8">
         <motion.div 
-          variants={containerVariants}
+          variants={reduceMotion ? reducedContainerVariants : containerVariants}
           initial="hidden"
           animate="show"
           className="space-y-8"
         >
           {/* Bienvenida Banner */}
           <motion.div 
-            variants={itemVariants}
+            variants={reduceMotion ? reducedItemVariants : itemVariants}
             className="p-6 rounded-2xl bg-bg-card border border-emerald-500/20 relative overflow-hidden group"
           >
             <h2 className="text-base font-bold text-text-primary flex items-center gap-2 mb-2">
@@ -80,7 +91,7 @@ export default function PrincipiantesPage() {
           </motion.div>
 
           {/* Tres Pilares */}
-          <motion.div variants={itemVariants} className="space-y-4">
+          <motion.div variants={reduceMotion ? reducedItemVariants : itemVariants} className="space-y-4">
             <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">Los 3 Pilares del Triatleta Principiante</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -117,7 +128,7 @@ export default function PrincipiantesPage() {
           </motion.div>
 
           {/* Mitos vs Realidad */}
-          <motion.div variants={itemVariants} className="space-y-4">
+          <motion.div variants={reduceMotion ? reducedItemVariants : itemVariants} className="space-y-4">
             <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">Mitos comunes del Triatlón</h3>
             
             <div className="p-5 rounded-2xl bg-surface-card border border-border-subtle space-y-4">
@@ -160,7 +171,7 @@ export default function PrincipiantesPage() {
           </motion.div>
 
           {/* Consejos Prácticos por Disciplina */}
-          <motion.div variants={itemVariants} className="space-y-4">
+          <motion.div variants={reduceMotion ? reducedItemVariants : itemVariants} className="space-y-4">
             <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">Consejos Rápidos</h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -181,7 +192,7 @@ export default function PrincipiantesPage() {
           </motion.div>
 
           {/* FAQ */}
-          <motion.div variants={itemVariants} className="space-y-4">
+          <motion.div variants={reduceMotion ? reducedItemVariants : itemVariants} className="space-y-4">
             <h3 className="text-xs font-bold text-text-muted uppercase tracking-wider">Preguntas Frecuentes</h3>
             
             <div className="space-y-3">
@@ -206,7 +217,7 @@ export default function PrincipiantesPage() {
           </motion.div>
 
           {/* Action Call */}
-          <motion.div variants={itemVariants} className="text-center pt-4">
+          <motion.div variants={reduceMotion ? reducedItemVariants : itemVariants} className="text-center pt-4">
             <Link href="/dashboard">
               <AnimatedButton variant="primary" className="!bg-bg-card hover:!bg-bg-card text-white font-bold px-6 py-2.5 rounded-xl cursor-pointer text-xs">
                 Volver al Inicio

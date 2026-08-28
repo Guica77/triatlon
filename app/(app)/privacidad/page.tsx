@@ -2,20 +2,22 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Shield, ArrowLeft, Lock, FileText, CheckCircle2 } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
 export default function PrivacidadPage() {
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="min-h-screen bg-surface-app pb-16">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-surface-card/95 backdrop-blur-md border-b border-border-default  transition-all duration-300">
+      <header className="sticky top-0 z-50 bg-surface-card/95 backdrop-blur-md border-b border-border-default  transition-[background-color,border-color,box-shadow] duration-200 ease-out motion-reduce:transition-opacity">
         <div className="px-6 py-4 flex items-center justify-between max-w-3xl mx-auto">
           <div className="flex items-center gap-3">
             <Link href="/dashboard">
-              <AnimatedButton variant="ghost" size="icon" className="w-9 h-9 text-text-muted hover:text-swim hover:bg-swim/10 rounded-xl transition-all duration-200 border border-transparent hover:border-swim/20">
-                <ArrowLeft className="w-4 h-4" />
+              <AnimatedButton variant="ghost" size="icon" aria-label="Volver al dashboard" className="w-9 h-9 text-text-muted hover:text-swim hover:bg-swim/10 rounded-xl transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] border border-transparent hover:border-swim/20 motion-reduce:transition-opacity motion-reduce:active:scale-100">
+                <ArrowLeft className="w-4 h-4" aria-hidden="true" />
               </AnimatedButton>
             </Link>
             <div className="flex items-center gap-2">
@@ -34,9 +36,9 @@ export default function PrivacidadPage() {
       {/* Main Content */}
       <main className="max-w-3xl mx-auto px-6 pt-8">
         <motion.div 
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 100 }}
+          transition={{ duration: reduceMotion ? 0.15 : 0.24, ease: 'easeOut' }}
           className="bg-surface-card border border-border-default rounded-2xl p-6 md:p-8 shadow-card space-y-6 text-text-primary"
         >
           <div className="flex items-center gap-3 pb-4 border-b border-border-subtle">

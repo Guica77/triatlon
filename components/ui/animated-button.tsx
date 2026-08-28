@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react"
-import { motion, HTMLMotionProps } from "framer-motion"
+import { motion, HTMLMotionProps, useReducedMotion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 interface AnimatedButtonProps extends HTMLMotionProps<"button"> {
@@ -9,14 +9,33 @@ interface AnimatedButtonProps extends HTMLMotionProps<"button"> {
   size?: "sm" | "md" | "lg" | "icon";
 }
 
+function useFinePointer() {
+  const [canHover, setCanHover] = React.useState(false);
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const update = () => setCanHover(mediaQuery.matches);
+
+    update();
+    mediaQuery.addEventListener('change', update);
+    return () => mediaQuery.removeEventListener('change', update);
+  }, []);
+
+  return canHover;
+}
+
 const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButtonProps>(
-  ({ className, variant = "primary", size = "md", children, ...props }, ref) => {
-    
+  ({ className, variant = "primary", size = "md", children, whileHover, whileTap, ...props }, ref) => {
+    const canHover = useFinePointer();
+    const reduceMotion = useReducedMotion();
+    const hoverAnimation = whileHover ?? { scale: 1.01 };
+    const tapAnimation = whileTap ?? { scale: 0.97 };
+
     const variants = {
-      primary: "bg-primary text-primary-foreground hover:opacity-90 font-medium",
-      secondary: "bg-secondary text-secondary-foreground border border-border hover:opacity-90",
-      danger: "bg-destructive text-destructive-foreground font-medium hover:opacity-90",
-      ghost: "bg-transparent text-muted-foreground hover:text-foreground hover:bg-accent",
+      primary: "bg-primary text-primary-foreground fine-hover:opacity-90 font-medium",
+      secondary: "bg-secondary text-secondary-foreground border border-border fine-hover:opacity-90",
+      danger: "bg-destructive text-destructive-foreground font-medium fine-hover:opacity-90",
+      ghost: "bg-transparent text-muted-foreground fine-hover:text-foreground fine-hover:bg-accent",
     }
 
     const sizes = {
@@ -29,11 +48,11 @@ const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButtonProps>(
     return (
       <motion.button
         ref={ref}
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        whileHover={canHover && !reduceMotion ? hoverAnimation : undefined}
+        whileTap={reduceMotion ? undefined : tapAnimation}
+        transition={{ duration: reduceMotion ? 0.15 : 0.16, ease: "easeOut" }}
         className={cn(
-          "rounded-xl transition-opacity flex items-center justify-center gap-2",
+          "min-h-9 rounded-xl transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out flex items-center justify-center gap-2 disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-opacity",
           variants[variant],
           sizes[size],
           className
