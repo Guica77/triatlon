@@ -13,8 +13,6 @@ import {
   Smile,
   Paperclip,
   Mic,
-  Phone,
-  Video,
   MoreVertical
 } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
@@ -297,14 +295,7 @@ export function ChatView({
                   <span className="sm:hidden">Realtime</span>
                 </div>
                 
-                {/* Call Icons */}
-                <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
-                  <button type="button" className="min-h-10 min-w-10 rounded-xl p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-swim cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" aria-label="Llamar">
-                    <Phone className="w-4 h-4" />
-                  </button>
-                  <button type="button" className="min-h-10 min-w-10 rounded-xl p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-swim cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" aria-label="Videollamada">
-                    <Video className="w-4 h-4" />
-                  </button>
+                <div className="flex shrink-0 items-center">
                   <button type="button" className="min-h-10 min-w-10 rounded-xl p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-swim cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" aria-label="Opciones">
                     <MoreVertical className="w-4 h-4" />
                   </button>

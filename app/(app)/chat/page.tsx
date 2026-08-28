@@ -42,7 +42,7 @@ export default async function AthleteChatPage() {
   return (
     <div className="relative isolate flex h-dvh min-h-0 flex-col overflow-hidden bg-bg-deep">
 
-      {/* Top navigation keeps the chat identity and return action in the product shell */
+      {/* Top navigation keeps the chat identity and return action in the product shell */}
       <header className="shrink-0 border-b border-border-subtle bg-surface-elevated px-4 sm:px-6 pb-3 sm:pb-4 pt-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-swim/40 bg-swim-subtle">
@@ -56,7 +56,7 @@ export default async function AthleteChatPage() {
           </div>
         </div>
 
-        {/* Compact back control — arrow + small label, keeps the header to one row */}
+        {/* Compact back control - arrow + small label, keeps the header to one row */}
         <Link href="/dashboard" className="shrink-0" aria-label="Volver al Dashboard">
           <AnimatedButton variant="ghost" className="flex items-center gap-1.5 rounded-lg border border-transparent px-2.5 py-2 text-xs font-semibold text-text-secondary fine-hover:bg-surface-hover fine-hover:text-text-primary">
             <ArrowLeft className="w-4 h-4" />
