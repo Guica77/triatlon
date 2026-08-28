@@ -40,20 +40,13 @@ export default async function AthleteChatPage() {
   }
 
   return (
-    <div
-      className="fixed inset-x-0 top-0 h-dvh z-50 flex flex-col overflow-hidden"
-      style={{
-        backgroundColor: '#e5ddd5',
-        backgroundImage: 'radial-gradient(#cfc8c0 1px, transparent 1px)',
-        backgroundSize: '24px 24px',
-      }}
-    >
+    <div className="relative isolate flex h-dvh min-h-0 flex-col overflow-hidden bg-bg-deep">
 
-      {/* Top Navbar — safe-area top so the system status bar never overlaps the title */}
-      <header className="border-b border-border-subtle bg-white/95 backdrop-blur-md px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-3 sm:pb-4 flex items-center justify-between gap-3 shrink-0">
+      {/* Top navigation keeps the chat identity and return action in the product shell */
+      <header className="shrink-0 border-b border-border-subtle bg-surface-elevated px-4 sm:px-6 pb-3 sm:pb-4 pt-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-swim border border-swim flex items-center justify-center shrink-0">
-            <MessageSquare className="w-4 h-4 text-swim" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-swim/40 bg-swim-subtle">
+            <MessageSquare className="h-4 w-4 text-swim" />
           </div>
           <div className="min-w-0">
             <h1 className="text-sm sm:text-base font-bold text-text-primary tracking-tight truncate">Chat con Entrenador</h1>
@@ -65,7 +58,7 @@ export default async function AthleteChatPage() {
 
         {/* Compact back control — arrow + small label, keeps the header to one row */}
         <Link href="/dashboard" className="shrink-0" aria-label="Volver al Dashboard">
-          <AnimatedButton variant="ghost" className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-semibold text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 border border-transparent cursor-pointer transition-colors">
+          <AnimatedButton variant="ghost" className="flex items-center gap-1.5 rounded-lg border border-transparent px-2.5 py-2 text-xs font-semibold text-text-secondary fine-hover:bg-surface-hover fine-hover:text-text-primary">
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden min-[380px]:inline">Dashboard</span>
           </AnimatedButton>
@@ -73,7 +66,7 @@ export default async function AthleteChatPage() {
       </header>
 
       {/* Main chat viewport */}
-      <main className="max-w-4xl mx-auto w-full px-0 sm:px-6 pt-2 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-0 min-h-0">
+      <main className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col overflow-hidden bg-bg-deep px-0 pb-0 pt-0 sm:px-6 sm:pt-6">
         <ChatView
           initialParticipants={participants}
           availableCoaches={availableCoaches}

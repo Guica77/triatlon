@@ -42,55 +42,48 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
   const coachName = profile.first_name || 'Entrenador'
 
   return (
-    <div
-      className="fixed inset-x-0 top-0 h-dvh z-50 flex flex-col overflow-hidden"
-      style={{
-        backgroundColor: '#e5ddd5',
-        backgroundImage: 'radial-gradient(#cfc8c0 1px, transparent 1px)',
-        backgroundSize: '24px 24px',
-      }}
-    >
-      {/* Upper Deck Header — safe-area top so the status bar never overlaps */}
-      <header className="shrink-0 border-b border-zinc-200 bg-white/95 pt-[env(safe-area-inset-top)] shadow-sm backdrop-blur-md transition-[background-color,border-color,box-shadow,opacity] duration-200 ease-out">
-        <div className="px-6 py-4 flex justify-between items-center border-b border-zinc-200/60">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center shadow-sm shrink-0 group">
-              <Trophy className="w-4 h-4 text-cyan-600 group-hover:scale-110 transition-transform" />
+    <div className="relative isolate flex h-dvh min-h-0 flex-col overflow-hidden bg-bg-deep">
+      {/* Upper Deck Header — the product shell owns the safe-area inset */
+      <header className="shrink-0 border-b border-border-subtle bg-surface-elevated transition-[background-color,border-color,box-shadow,opacity] duration-200 ease-out">
+        <div className="flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="group flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-coral-500/40 bg-run-subtle">
+              <Trophy className="h-4 w-4 text-coral-400 transition-transform group-hover:scale-110" />
             </div>
-            <div>
-              <h1 className="text-base font-bold text-zinc-900 tracking-tight">Centro de Mensajería</h1>
-              <p className="text-xs text-zinc-500 font-semibold truncate flex items-center gap-1.5 mt-0.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-600" aria-hidden="true"></span>
-                Coach: {coachName} • Plan B2B Premium
+            <div className="min-w-0">
+              <h1 className="truncate text-base font-bold tracking-tight text-text-primary">Centro de Mensajería</h1>
+              <p className="mt-0.5 flex truncate items-center gap-1.5 text-xs font-semibold text-text-muted">
+                <span className="h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>
+                Coach: {coachName} · Plan B2B Premium
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             <Link href="/settings">
-              <AnimatedButton variant="ghost" size="icon" aria-label="Abrir ajustes" className="h-9 w-9 rounded-xl border border-zinc-200 bg-white text-zinc-500 shadow-sm hover:border-zinc-400 hover:bg-zinc-50 hover:text-zinc-800 cursor-pointer">
-                <Settings className="w-4 h-4" />
+              <AnimatedButton variant="ghost" size="icon" aria-label="Abrir ajustes" className="h-10 w-10 rounded-xl border border-border-default bg-surface-card text-text-secondary fine-hover:border-text-muted fine-hover:bg-surface-hover fine-hover:text-text-primary">
+                <Settings className="h-4 w-4" />
               </AnimatedButton>
             </Link>
             <form action="/auth/signout" method="post">
-              <AnimatedButton variant="ghost" size="icon" aria-label="Cerrar sesión" className="h-9 w-9 rounded-xl border border-zinc-200 bg-white text-zinc-600 shadow-sm hover:border-red-200 hover:bg-red-50 hover:text-red-700 cursor-pointer">
-                <LogOut className="w-4 h-4" />
+              <AnimatedButton variant="ghost" size="icon" aria-label="Cerrar sesión" className="h-10 w-10 rounded-xl border border-border-default bg-surface-card text-text-secondary fine-hover:border-danger/50 fine-hover:bg-surface-hover fine-hover:text-danger">
+                <LogOut className="h-4 w-4" />
               </AnimatedButton>
             </form>
           </div>
         </div>
 
         {/* Level 2 Navigation Bar */}
-        <div className="px-6 py-2.5 bg-zinc-50 flex items-center justify-between border-t border-zinc-200/30">
+        <div className="flex items-center justify-between border-t border-border-subtle bg-surface-app px-4 py-2.5 sm:px-6">
           <div className="flex gap-2 overflow-x-auto scrollbar-none">
             <Link href="/coach/dashboard" className="shrink-0">
-              <AnimatedButton variant="ghost" size="sm" className="rounded-full border border-zinc-200 bg-white px-3.5 py-1.5 text-xs text-zinc-600 shadow-sm transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out hover:bg-zinc-100/40 hover:text-zinc-800 active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100">
+              <AnimatedButton variant="ghost" size="sm" className="rounded-full border border-border-default bg-surface-card px-3.5 py-1.5 text-xs text-text-secondary shadow-card fine-hover:bg-surface-hover fine-hover:text-text-primary">
                 Atletas en Roster
               </AnimatedButton>
             </Link>
             <Link href="/coach/chat" className="shrink-0">
-              <AnimatedButton variant="ghost" size="sm" className="rounded-full text-xs py-1.5 px-3.5 bg-cyan-50 border border-cyan-200 text-cyan-700 font-black shadow-sm flex items-center gap-1.5 cursor-pointer">
-                <MessageSquare className="w-3.5 h-3.5 text-cyan-600" aria-hidden="true" />
+              <AnimatedButton variant="ghost" size="sm" className="flex items-center gap-1.5 rounded-full border border-coral-500/40 bg-run-subtle px-3.5 py-1.5 text-xs font-bold text-coral-300 shadow-card">
+                <MessageSquare className="h-3.5 w-3.5 text-coral-400" aria-hidden="true" />
                 <span>Mensajería Directa</span>
               </AnimatedButton>
             </Link>
@@ -99,7 +92,7 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
       </header>
 
       {/* Reusable Chat Interface */}
-      <main className="max-w-6xl mx-auto w-full px-0 sm:px-6 pt-0 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-0 min-h-0">
+      <main className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col overflow-hidden bg-bg-deep px-0 pb-0 pt-0 sm:px-6 sm:pt-6">
         <ChatView
           initialParticipants={participants}
           currentUserRole="coach"
