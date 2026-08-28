@@ -1032,6 +1032,290 @@ export type Database = {
           },
         ]
       }
+      athlete_ai_memories: {
+        Row: {
+          id: string
+          athlete_id: string
+          memory_type: string
+          content: string
+          sport_type: string | null
+          source: string
+          confidence: number
+          active: boolean
+          review_at: string | null
+          expires_at: string | null
+          embedding: number[] | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          athlete_id: string
+          memory_type: string
+          content: string
+          sport_type?: string | null
+          source?: string
+          confidence?: number
+          active?: boolean
+          review_at?: string | null
+          expires_at?: string | null
+          embedding?: number[] | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          athlete_id?: string
+          memory_type?: string
+          content?: string
+          sport_type?: string | null
+          source?: string
+          confidence?: number
+          active?: boolean
+          review_at?: string | null
+          expires_at?: string | null
+          embedding?: number[] | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_ai_memories_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_knowledge_documents: {
+        Row: {
+          id: string
+          title: string
+          category: string
+          sport_type: string | null
+          source: string
+          active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          category: string
+          sport_type?: string | null
+          source: string
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          category?: string
+          sport_type?: string | null
+          source?: string
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_knowledge_chunks: {
+        Row: {
+          id: string
+          document_id: string
+          content: string
+          chunk_index: number
+          embedding: number[] | null
+          active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          document_id: string
+          content: string
+          chunk_index: number
+          embedding?: number[] | null
+          active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          document_id?: string
+          content?: string
+          chunk_index?: number
+          embedding?: number[] | null
+          active?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_knowledge_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "ai_knowledge_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_recommendations: {
+        Row: {
+          id: string
+          athlete_id: string
+          created_by: string | null
+          recommendation_type: string
+          title: string
+          explanation: string
+          payload: Json
+          status: string
+          proposed_at: string
+          decided_at: string | null
+          decided_by: string | null
+          applied_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          athlete_id: string
+          created_by?: string | null
+          recommendation_type: string
+          title: string
+          explanation: string
+          payload?: Json
+          status?: string
+          proposed_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          applied_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          athlete_id?: string
+          created_by?: string | null
+          recommendation_type?: string
+          title?: string
+          explanation?: string
+          payload?: Json
+          status?: string
+          proposed_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          applied_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_recommendations_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_recommendations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_recommendations_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_recommendation_events: {
+        Row: {
+          id: string
+          recommendation_id: string
+          actor_id: string | null
+          event_type: string
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          recommendation_id: string
+          actor_id?: string | null
+          event_type: string
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          recommendation_id?: string
+          actor_id?: string | null
+          event_type?: string
+          metadata?: Json
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_recommendation_events_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_recommendations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_recommendation_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_recommendation_results: {
+        Row: {
+          id: string
+          recommendation_id: string
+          outcome: string
+          notes: string | null
+          observed_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          recommendation_id: string
+          outcome: string
+          notes?: string | null
+          observed_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          recommendation_id?: string
+          outcome?: string
+          notes?: string | null
+          observed_at?: string
+          created_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_recommendation_results_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: true
+            referencedRelation: "ai_recommendations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_recommendation_results_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
