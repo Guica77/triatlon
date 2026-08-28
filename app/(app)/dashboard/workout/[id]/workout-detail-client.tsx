@@ -140,28 +140,6 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
     }
   };
 
-  // Propuesta de reajuste de la IA (propose & confirm) pendiente de aplicar.
-  const [refocusApplying, setRefocusApplying] = React.useState(false);
-  const [refocusApplied, setRefocusApplied] = React.useState(!!workout.refocus_applied);
-
-  const handleApplyRefocus = async () => {
-    if (refocusApplying) return;
-    setRefocusApplying(true);
-    try {
-      await applyRefocusProposal(workout.id);
-      setRefocusApplied(true);
-      setToastMsg('✅ Propuesta aplicada al plan.');
-      setTimeout(() => setToastMsg(null), 5000);
-      router.refresh();
-    } catch (err: any) {
-      console.error('Error aplicando propuesta:', err);
-      setToastMsg('⚠️ No se pudo aplicar la propuesta.');
-      setTimeout(() => setToastMsg(null), 5000);
-    } finally {
-      setRefocusApplying(false);
-    }
-  };
-
   const session = workout.training_sessions;
 
   const durationMin = React.useMemo(() => {
