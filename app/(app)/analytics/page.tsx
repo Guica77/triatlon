@@ -35,8 +35,8 @@ export default async function AnalyticsPage() {
   const subtitle = `${activePlan?.name || 'Plan de Periodización'} • ${profile?.first_name || 'Triatleta'}`;
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-8 space-y-8">
+    <div className="min-h-screen bg-bg-app w-full overflow-x-hidden">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-24 sm:pb-8 space-y-6">
         <PageHeader icon={BarChart2} title={title} subtitle={subtitle} />
 
         {/* Encabezado de Sección */}

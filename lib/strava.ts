@@ -30,11 +30,17 @@ export interface StravaActivity {
 
 export async function getStravaActivities(accessToken: string): Promise<StravaActivity[]> {
   try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+
     const response = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=30', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
+      signal: controller.signal,
     });
+
+    clearTimeout(timer);
 
     if (!response.ok) {
       throw new Error(`Strava API error: ${response.statusText}`);

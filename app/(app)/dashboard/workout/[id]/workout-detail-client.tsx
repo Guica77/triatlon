@@ -2,8 +2,8 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { toggleWorkoutStatus, updateWorkoutStatus, completeWorkoutWithFeedback } from '@/app/(app)/dashboard/actions';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { toggleWorkoutStatus, updateWorkoutStatus, completeWorkoutWithFeedback, applyRefocusProposal } from '@/app/(app)/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { adaptWorkoutDescription } from '@/lib/zones-utility';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -30,6 +30,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import Link from 'next/link';
+import { WorkoutPreview } from '@/components/workouts/workout-preview';
+import { WorkoutBlock, workoutTitleFromDescription } from '@/lib/workout-structure';
 
 interface WorkoutStep {
   type: 'Warmup' | 'Interval' | 'Rest' | 'Repeat' | 'Cooldown';
@@ -50,12 +52,16 @@ interface WorkoutDetailClientProps {
     status: string;
     auto_adjusted?: boolean | null;
     adjustment_reason?: string | null;
+    ai_feedback?: string | null;
+    refocus_proposal?: { action: string; message: string } | null;
+    refocus_applied?: boolean | null;
     training_sessions: {
       sport_type: string;
       duration_min: number;
       description: string;
       day_name: string;
       gear_needed?: string[] | null;
+      structured_blocks?: WorkoutBlock[] | null;
     };
     workout_feedback?: any[] | null;
   };
@@ -98,6 +104,41 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
   const [status, setStatus] = React.useState(workout.status);
   const [loading, setLoading] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
+  const reduceMotion = useReducedMotion();
+
+  const entryMotion = {
+    initial: { opacity: 0, y: reduceMotion ? 0 : 12 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: reduceMotion ? 0.15 : 0.22, ease: 'easeOut' as const },
+  };
+
+  const exitMotion = {
+    opacity: 0,
+    y: reduceMotion ? 0 : -12,
+    transition: { duration: reduceMotion ? 0.15 : 0.18, ease: 'easeOut' as const },
+  };
+
+  // Propuesta de reajuste de la IA (propose & confirm) pendiente de aplicar.
+  const [refocusApplying, setRefocusApplying] = React.useState(false);
+  const [refocusApplied, setRefocusApplied] = React.useState(!!workout.refocus_applied);
+
+  const handleApplyRefocus = async () => {
+    if (refocusApplying) return;
+    setRefocusApplying(true);
+    try {
+      await applyRefocusProposal(workout.id);
+      setRefocusApplied(true);
+      setToastMsg('✅ Propuesta aplicada al plan.');
+      setTimeout(() => setToastMsg(null), 5000);
+      router.refresh();
+    } catch (err: any) {
+      console.error('Error aplicando propuesta:', err);
+      setToastMsg('⚠️ No se pudo aplicar la propuesta.');
+      setTimeout(() => setToastMsg(null), 5000);
+    } finally {
+      setRefocusApplying(false);
+    }
+  };
 
   const session = workout.training_sessions;
 
@@ -108,6 +149,8 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
         dur = Math.round(dur * 0.5);
       } else if (workout.adjustment_reason === 'adherencia') {
         dur = Math.round(dur * 0.85);
+      } else if (workout.adjustment_reason === 'recuperacion') {
+        dur = Math.round(dur * 0.8);
       } else {
         dur = Math.round(dur * 0.75);
       }
@@ -122,6 +165,8 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
         desc = `[AJUSTE DE IA: PREVENCIÓN DE LESIONES] Sesión reducida al 50%. Entrena estrictamente en Zona 1 (recuperación activa) y detén la sesión inmediatamente si sientes cualquier molestia o pinchazo. Objetivo original:\n${desc}`;
       } else if (workout.adjustment_reason === 'adherencia') {
         desc = `[AJUSTE DE IA: ADHERENCIA] Carga reducida un 15% para consolidar ritmos. Prioriza terminar la sesión cómodamente en lugar de forzar zonas altas. Objetivo original:\n${desc}`;
+      } else if (workout.adjustment_reason === 'recuperacion') {
+        desc = `[AJUSTE DE IA: RECUPERACIÓN] Sesión suavizada un 20% tras un día de actividad extra. Prioriza sensaciones y mantén el esfuerzo en Zona 1-2. Objetivo original:\n${desc}`;
       } else {
         desc = `[AJUSTE DE IA: AJUSTE POR FATIGA] Duración principal reducida un 25%. Mantén un esfuerzo moderado y cómodo en Zona 1-2. Objetivo original:\n${desc}`;
       }
@@ -259,17 +304,17 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
   const renderStepIcon = (type: string) => {
     switch (type) {
       case 'Warmup':
-        return <Flame className="w-4 h-4 text-amber-400" />;
+        return <Flame className="w-4 h-4 text-warning" />;
       case 'Interval':
-        return <Target className="w-4 h-4 text-cyan-400" />;
+        return <Target className="w-4 h-4 text-swim" />;
       case 'Rest':
-        return <Info className="w-4 h-4 text-emerald-400" />;
+        return <Info className="w-4 h-4 text-bike" />;
       case 'Repeat':
         return <RefreshCw className="w-4 h-4 text-purple-400" />;
       case 'Cooldown':
-        return <Wind className="w-4 h-4 text-blue-400" />;
+        return <Wind className="w-4 h-4 text-swim" />;
       default:
-        return <Activity className="w-4 h-4 text-zinc-400" />;
+        return <Activity className="w-4 h-4 text-text-muted" />;
     }
   };
 
@@ -285,16 +330,16 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           </div>
           <div className="space-y-3 pl-4 border-l border-purple-500/10">
             {step.workoutSteps?.map((subStep, subIdx) => (
-              <div key={subIdx} className="p-3 rounded-lg bg-zinc-950/40 border border-zinc-850 flex items-center justify-between flex-wrap gap-2 text-xs">
+              <div key={subIdx} className="p-3 rounded-lg bg-bg-app/40 border border-border-subtle flex items-center justify-between flex-wrap gap-2 text-xs">
                 <div className="flex items-center gap-2">
                   {renderStepIcon(subStep.type)}
                   <div>
-                    <p className="font-semibold text-white capitalize">{subStep.type === 'Interval' ? 'Intervalo de Carga' : 'Recuperación'}</p>
-                    <p className="text-[10px] text-zinc-500">{formatCondition(subStep.endCondition, subStep.endConditionValue)}</p>
+                    <p className="font-semibold text-text-primary capitalize">{subStep.type === 'Interval' ? 'Intervalo de Carga' : 'Recuperación'}</p>
+                    <p className="text-[10px] text-text-secondary">{formatCondition(subStep.endCondition, subStep.endConditionValue)}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="px-2.5 py-1 rounded bg-zinc-900 text-zinc-300 font-bold border border-zinc-800">
+                  <span className="px-2.5 py-1 rounded bg-surface-card text-text-muted font-bold border border-border-subtle">
                     Objetivo: {formatTarget(subStep.targetType, subStep.targetValueOne, subStep.targetValueTwo)}
                   </span>
                 </div>
@@ -308,7 +353,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
     return (
       <div key={index} className="p-3.5 rounded-xl bg-card border border-border flex items-center justify-between flex-wrap gap-3 text-xs sm:text-sm">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-zinc-100 flex items-center justify-center border border-zinc-200">
+          <div className="w-8 h-8 rounded-lg bg-surface-hover flex items-center justify-center border border-border-default">
             {renderStepIcon(step.type)}
           </div>
           <div>
@@ -321,7 +366,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           </div>
         </div>
         <div>
-          <span className="px-3 py-1 rounded-lg bg-zinc-100 text-foreground font-bold border border-zinc-200 text-xs">
+          <span className="px-3 py-1 rounded-lg bg-surface-hover text-foreground font-bold border border-border-default text-xs">
             {formatTarget(step.targetType, step.targetValueOne, step.targetValueTwo)}
           </span>
         </div>
@@ -330,6 +375,8 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
   };
 
   const stepsList = structured?.workoutSegments?.[0]?.workoutSteps || [];
+  const coachBlocks = session.structured_blocks || [];
+  const workoutTitle = workoutTitleFromDescription(session.description, session.sport_type);
   const gearNeeded = session.gear_needed || [];
   const virtualGarage = profile?.virtual_garage || [];
   const missingGear = gearNeeded.filter(g => !virtualGarage.includes(g));
@@ -341,25 +388,42 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
       <AnimatePresence>
         {toastMsg && (
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs font-semibold shadow-lg shadow-orange-950/20 max-w-sm"
+            exit={{ opacity: 0, y: reduceMotion ? 0 : -12 }}
+            transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
+            role="status"
+            aria-live="polite"
+            className="fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border border-coral-500/30 bg-coral-500/10 p-4 text-xs font-semibold text-coral-500"
           >
             {toastMsg}
           </motion.div>
         )}
       </AnimatePresence>
 
+      {!isCompleted && !isMissed && !showFeedbackForm && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border-default bg-surface-elevated/95 p-3 pb-[max(.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
+          <button
+            type="button"
+            onClick={handleToggle}
+            disabled={loading}
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-coral-500 px-5 text-sm font-bold text-bg-deep shadow-button disabled:opacity-50"
+          >
+            <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+            Completar entrenamiento
+          </button>
+        </div>
+      )}
+
       {/* Left Column (Main steps and details) */}
       <div className="lg:col-span-2 space-y-6">
         
         {/* Hero Card */}
-        <div className={`p-6 rounded-2xl bg-gradient-to-br border shadow-sm relative overflow-hidden ${sportBgColors[session.sport_type] || 'from-zinc-50 to-white border-zinc-200'}`}>
+        <div className={`p-6 rounded-2xl bg-gradient-to-br border  relative overflow-hidden ${sportBgColors[session.sport_type] || 'from-surface-hover to-surface-card border-border-default'}`}>
           <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none ${sportGlows[session.sport_type] || 'bg-transparent'}`} />
           
           <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="px-2 py-0.5 rounded bg-zinc-500/10 text-[9px] font-bold uppercase tracking-widest text-zinc-600 border border-zinc-200">
+            <span className="px-2 py-0.5 rounded bg-surface-hover/10 text-[9px] font-bold uppercase tracking-widest text-text-secondary border border-border-default">
               {session.day_name}
             </span>
             <span className={`text-[10px] font-extrabold uppercase tracking-widest ${sportTextColors[session.sport_type] || 'text-foreground'}`}>
@@ -367,18 +431,23 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
             </span>
             {workout.auto_adjusted && (
               workout.adjustment_reason === 'lesion' ? (
-                <span className="px-2 py-0.5 rounded bg-red-950/40 border border-red-550/30 text-red-400 text-[9px] font-bold flex items-center gap-1">
-                  <AlertTriangle className="w-2.5 h-2.5 text-red-400" />
+                <span className="px-2 py-0.5 rounded bg-danger/40 border border-danger/30 text-danger text-[9px] font-bold flex items-center gap-1">
+                  <AlertTriangle className="w-2.5 h-2.5 text-danger" />
                   <span>IA: Prevención de Lesión</span>
                 </span>
               ) : workout.adjustment_reason === 'adherencia' ? (
-                <span className="px-2 py-0.5 rounded bg-blue-950/40 border border-blue-550/30 text-blue-400 text-[9px] font-bold flex items-center gap-1">
-                  <ShieldCheck className="w-2.5 h-2.5 text-blue-400" />
+                <span className="px-2 py-0.5 rounded bg-swim/40 border border-swim/30 text-swim text-[9px] font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-2.5 h-2.5 text-swim" />
                   <span>IA: Ajuste de Carga</span>
                 </span>
+              ) : workout.adjustment_reason === 'recuperacion' ? (
+                <span className="px-2 py-0.5 rounded bg-bike/40 border border-bike/30 text-bike text-[9px] font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-2.5 h-2.5 text-bike" />
+                  <span>IA: Recuperación</span>
+                </span>
               ) : (
-                <span className="px-2 py-0.5 rounded bg-amber-950/40 border border-amber-550/30 text-amber-400 text-[9px] font-bold flex items-center gap-1">
-                  <Flame className="w-2.5 h-2.5 text-amber-400" />
+                <span className="px-2 py-0.5 rounded bg-warning/40 border border-warning/30 text-warning text-[9px] font-bold flex items-center gap-1">
+                  <Flame className="w-2.5 h-2.5 text-warning" />
                   <span>IA: Ajuste por Fatiga</span>
                 </span>
               )
@@ -389,19 +458,19 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
             {session.sport_type === 'fuerza' ? 'Fuerza y Acondicionamiento' : `Sesión de ${session.sport_type}`}
           </h2>
 
-          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-black/5">
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border-subtle">
             <div>
-              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Duración</p>
+              <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">Duración</p>
               <p className="text-base font-bold text-foreground mt-0.5">{durationMin} min</p>
             </div>
             <div>
-              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Tipo</p>
+              <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">Tipo</p>
               <p className="text-base font-bold text-foreground mt-0.5 capitalize">{session.sport_type}</p>
             </div>
             <div>
-              <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Estado</p>
+              <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">Estado</p>
               <p className={`text-base font-bold mt-0.5 flex items-center gap-1 capitalize ${
-                isCompleted ? 'text-green-400' : isMissed ? 'text-red-400' : 'text-amber-400'
+                isCompleted ? 'text-bike' : isMissed ? 'text-danger' : 'text-warning'
               }`}>
                 {isCompleted ? 'Completado' : isMissed ? 'Saltado' : 'Pendiente'}
               </p>
@@ -409,20 +478,71 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           </div>
         </div>
 
+        {/* Panel de Inteligencia Artificial: felicitación honesta + propuesta de reajuste */}
+        {(workout.ai_feedback || workout.refocus_proposal) && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <ProCard className="p-5 space-y-3 relative overflow-hidden bg-surface-app/90">
+              <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none bg-coral-500/5" />
+              <div className="flex items-center gap-2 border-b border-border-subtle pb-2">
+                <Sparkles className="w-4 h-4 text-coral-500" />
+                <h3 className="text-xs font-bold uppercase tracking-wider text-text-primary">Análisis de la IA</h3>
+              </div>
+
+              {workout.ai_feedback && (
+                <p className="text-sm text-foreground leading-relaxed font-normal whitespace-pre-line">
+                  {workout.ai_feedback}
+                </p>
+              )}
+
+              {workout.refocus_proposal && workout.refocus_proposal.action !== 'none' && (
+                <div className="pt-2 border-t border-border-subtle space-y-3">
+                  <div className="flex items-start gap-2.5">
+                    <ShieldCheck className="w-4 h-4 text-coral-500 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Propuesta de reajuste</p>
+                      <p className="text-sm text-foreground leading-relaxed font-normal mt-1">
+                        {workout.refocus_proposal.message}
+                      </p>
+                    </div>
+                  </div>
+
+                  {!refocusApplied ? (
+                    <AnimatedButton
+                      variant="primary"
+                      onClick={handleApplyRefocus}
+                      disabled={refocusApplying}
+                      className="w-full justify-center py-3 text-xs font-bold"
+                    >
+                      <span>{refocusApplying ? 'Aplicando…' : 'Aplicar propuesta al plan'}</span>
+                    </AnimatedButton>
+                  ) : (
+                    <p className="text-xs text-bike font-semibold flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Propuesta aplicada al plan.
+                    </p>
+                  )}
+                </div>
+              )}
+            </ProCard>
+          </motion.div>
+        )}
+
         {/* Cuestionario de Feedback Adaptativo */}
         <AnimatePresence mode="wait">
           {showFeedbackForm && (
             <motion.div
               key="feedback-form"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
+              {...entryMotion}
+              exit={exitMotion}
             >
-              <ProCard className="p-6 border-cyan-500/30 bg-zinc-900/90 shadow-xl space-y-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none bg-cyan-500/5" />
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-cyan-400" />
+              <ProCard className="p-6 border-swim/30 bg-surface-app/90 shadow-elevated space-y-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none bg-swim/5" />
+                <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+                  <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-swim" />
                     Valoración del Entrenamiento
                   </h3>
                   <button 
@@ -430,7 +550,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                     onClick={() => {
                       setShowFeedbackForm(false);
                     }}
-                    className="text-xs text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                    className="text-xs text-text-muted hover:text-text-primary cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -439,25 +559,25 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                 <form onSubmit={handleFeedbackSubmit} className="space-y-6">
                   {/* 1. RPE Slider / Buttons */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
-                      Esfuerzo Percibido (RPE): <span className="text-white text-sm font-bold ml-1">{rpe}/10</span>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted">
+                      Esfuerzo Percibido (RPE): <span className="text-text-primary text-sm font-bold ml-1">{rpe}/10</span>
                     </label>
                     
                     {/* RPE Buttons Grid */}
                     <div className="grid grid-cols-5 sm:grid-cols-10 gap-1.5 pt-1">
                       {Array.from({ length: 10 }, (_, i) => i + 1).map((val) => {
-                        let btnClass = "bg-zinc-950 border-zinc-800 text-zinc-400 hover:bg-zinc-850";
+                        let btnClass = "bg-bg-app border-border-subtle text-text-muted hover:bg-surface-hover";
                         if (rpe === val) {
-                          if (val <= 3) btnClass = "bg-green-500/25 border-green-400 text-green-300 scale-105 font-bold shadow-lg shadow-green-950/20";
-                          else if (val <= 7) btnClass = "bg-yellow-500/25 border-yellow-400 text-yellow-300 scale-105 font-bold shadow-lg shadow-yellow-950/20";
-                          else btnClass = "bg-red-500/25 border-red-400 text-red-300 scale-105 font-bold shadow-lg shadow-red-950/20";
+                          if (val <= 3) btnClass = "bg-bike/25 border-bike text-bike scale-105 font-bold";
+                          else if (val <= 7) btnClass = "bg-warning/25 border-warning text-warning scale-105 font-bold";
+                          else btnClass = "bg-danger/25 border-danger text-danger scale-105 font-bold";
                         }
                         return (
                           <button
                             key={val}
                             type="button"
                             onClick={() => setRpe(val)}
-                            className={`py-2 px-1 text-xs border rounded-lg text-center transition-all cursor-pointer duration-150 ${btnClass}`}
+                            className={`min-h-11 py-2 px-1 text-xs border rounded-lg text-center transition-[background-color,color,border-color,box-shadow,transform] ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer duration-150 ${btnClass}`}
                           >
                             {val}
                           </button>
@@ -465,7 +585,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                       })}
                     </div>
                     
-                    <p className="text-[10px] text-zinc-500 italic mt-1.5">
+                    <p className="text-[10px] text-text-secondary italic mt-1.5">
                       {rpe <= 2 && "Suave: Conversación fluida y muy cómodo."}
                       {rpe >= 3 && rpe <= 4 && "Moderado: Nivel de esfuerzo bajo, respiración controlada."}
                       {rpe >= 5 && rpe <= 6 && "Algo Duro: Comienza la fatiga, requiere concentración."}
@@ -476,15 +596,15 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
 
                   {/* 2. Sensaciones (Feeling) */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted">
                       ¿Cómo te has sentido en general?
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                       {[
-                        { id: 'excelente', label: 'Excelente', emoji: '😃', color: 'border-green-500 text-green-300 bg-green-500/5' },
-                        { id: 'buena', label: 'Bueno', emoji: '🙂', color: 'border-cyan-500 text-cyan-300 bg-cyan-500/5' },
-                        { id: 'fatigado', label: 'Fatigado', emoji: '🥱', color: 'border-yellow-500 text-yellow-300 bg-yellow-500/5' },
-                        { id: 'lesionado', label: 'Lesión / Dolor', emoji: '🤕', color: 'border-red-500 text-red-300 bg-red-500/5' }
+                        { id: 'excelente', label: 'Excelente', emoji: '😃', color: 'border-bike text-bike bg-bike/5' },
+                        { id: 'buena', label: 'Bueno', emoji: '🙂', color: 'border-swim text-swim bg-swim/5' },
+                        { id: 'fatigado', label: 'Fatigado', emoji: '🥱', color: 'border-warning text-warning bg-warning/5' },
+                        { id: 'lesionado', label: 'Lesión / Dolor', emoji: '🤕', color: 'border-danger text-danger bg-danger/5' }
                       ].map((item) => {
                         const isSelected = feeling === item.id;
                         return (
@@ -492,10 +612,10 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                             key={item.id}
                             type="button"
                             onClick={() => setFeeling(item.id)}
-                            className={`py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
+                            className={`min-h-11 py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer ${
                               isSelected 
                                 ? `${item.color} font-bold scale-102` 
-                                : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300"
+                                : "border-border-subtle bg-bg-app text-text-muted hover:bg-surface-hover hover:text-text-primary"
                             }`}
                           >
                             <span className="text-base">{item.emoji}</span>
@@ -508,7 +628,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
 
                   {/* 3. Adherencia a la Intensidad */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted">
                       ¿Cumpliste las zonas de intensidad indicadas?
                     </label>
                     <div className="grid grid-cols-3 gap-2 pt-1">
@@ -523,10 +643,10 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                             key={item.id}
                             type="button"
                             onClick={() => setIntensityAdherence(item.id)}
-                            className={`py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
+                            className={`min-h-11 py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer ${
                               isSelected 
-                                ? "border-cyan-500 text-cyan-300 bg-cyan-500/5 font-bold scale-102" 
-                                : "border-zinc-800 bg-zinc-950 text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300"
+                                ? "border-swim text-swim bg-swim/5 font-bold scale-102" 
+                                : "border-border-subtle bg-bg-app text-text-muted hover:bg-surface-hover hover:text-text-primary"
                             }`}
                           >
                             <span>{item.emoji}</span>
@@ -538,13 +658,13 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                   </div>
 
                   {/* 4. Dolor Localizado */}
-                  <div className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-950 flex flex-col space-y-2">
+                  <div className="p-3.5 rounded-xl border border-border-subtle bg-bg-app flex flex-col space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <AlertTriangle className={`w-4 h-4 ${painLocalized ? 'text-red-400' : 'text-zinc-500'}`} />
+                        <AlertTriangle className={`w-4 h-4 ${painLocalized ? 'text-danger' : 'text-text-secondary'}`} />
                         <div>
-                          <p className="text-xs font-bold text-white">¿Dolor o molestia localizada inusual?</p>
-                          <p className="text-[10px] text-zinc-500">Excluye la fatiga muscular común.</p>
+                          <p className="text-xs font-bold text-text-primary">¿Dolor o molestia localizada inusual?</p>
+                          <p className="text-[10px] text-text-secondary">Excluye la fatiga muscular común.</p>
                         </div>
                       </div>
                       <button
@@ -552,18 +672,19 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                         aria-label="Alternar dolor localizado"
                         title="Alternar dolor localizado"
                         onClick={() => setPainLocalized(!painLocalized)}
-                        className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 cursor-pointer ${
-                          painLocalized ? 'bg-red-500/80' : 'bg-zinc-800'
+                        aria-pressed={painLocalized}
+                        className={`flex h-7 w-12 items-center rounded-full p-1 transition-[background-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer ${
+                          painLocalized ? 'bg-danger/80' : 'bg-surface-hover'
                         }`}
                       >
-                        <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                        <div className={`w-4 h-4 rounded-full bg-surface-card transition-transform duration-200 ${
                           painLocalized ? 'translate-x-6' : 'translate-x-0'
                         }`} />
                       </button>
                     </div>
 
                     {painLocalized && (
-                      <div className="pt-2 border-t border-red-500/10 text-[10px] text-red-300 leading-relaxed">
+                      <div className="pt-2 border-t border-danger/10 text-[10px] text-danger leading-relaxed">
                         ⚠️ **Alerta activa:** Esto avisará a tu entrenador y activará la reducción preventora de carga de la IA.
                       </div>
                     )}
@@ -571,16 +692,16 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
 
                   {/* 5. Comentarios */}
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-zinc-400 flex justify-between">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-text-muted flex justify-between">
                       <span>Comentarios y notas (opcional)</span>
-                      <span className="text-[10px] text-zinc-550 font-normal">{notes.length}/1000</span>
+                      <span className="text-[10px] text-text-secondary font-normal">{notes.length}/1000</span>
                     </label>
                     <textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value.slice(0, 1000))}
                       placeholder="¿Cómo fue el viento, la temperatura? ¿Tuviste problemas mecánicos o de nutrición? Cuéntaselo al entrenador..."
                       rows={3}
-                      className="w-full rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 p-3 text-xs focus:outline-none focus:border-cyan-500/50 resize-none font-normal"
+                      className="w-full rounded-xl bg-bg-app border border-border-subtle text-text-primary p-3 text-xs focus:outline-none focus:border-swim/50 resize-none font-normal"
                     />
                   </div>
 
@@ -589,7 +710,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                     variant="primary"
                     type="submit"
                     disabled={loading}
-                    className="w-full justify-center py-5 text-xs font-bold shadow-lg shadow-cyan-500/10"
+                    className="w-full justify-center py-5 text-xs font-bold"
                   >
                     <span>Guardar Valoración y Completar</span>
                   </AnimatedButton>
@@ -608,13 +729,13 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
               <ProCard className="p-5 space-y-4">
                 <div className="flex items-center justify-between border-b border-border pb-2">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-green-400" />
+                    <CheckCircle2 className="w-4 h-4 text-bike" />
                     Valoración de la Sesión
                   </h3>
                   <button 
                     type="button" 
                     onClick={() => setShowFeedbackForm(true)}
-                    className="text-[10px] font-bold text-cyan-400 hover:text-cyan-300 cursor-pointer"
+                    className="text-[10px] font-bold text-swim hover:text-swim cursor-pointer"
                   >
                     Editar Valoración
                   </button>
@@ -622,11 +743,11 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div>
-                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Esfuerzo (RPE)</p>
+                    <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">Esfuerzo (RPE)</p>
                     <p className="text-sm font-bold text-foreground mt-0.5">{rpe}/10</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Sensación</p>
+                    <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">Sensación</p>
                     <p className="text-sm font-bold text-foreground mt-0.5 capitalize flex items-center gap-1">
                       {feeling === 'excelente' && '😃 Excelente'}
                       {feeling === 'buena' && '🙂 Bueno'}
@@ -635,7 +756,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Adherencia</p>
+                    <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">Adherencia</p>
                     <p className="text-sm font-bold text-foreground mt-0.5 capitalize">
                       {intensityAdherence === 'suave' && '📉 Más suave'}
                       {intensityAdherence === 'clavado' && '🎯 Clavado'}
@@ -643,17 +764,17 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Dolor muscular</p>
-                    <p className={`text-sm font-bold mt-0.5 ${painLocalized ? 'text-red-400' : 'text-green-400'}`}>
+                    <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider">Dolor muscular</p>
+                    <p className={`text-sm font-bold mt-0.5 ${painLocalized ? 'text-danger' : 'text-bike'}`}>
                       {painLocalized ? 'Sí 🔴' : 'No 🟢'}
                     </p>
                   </div>
                 </div>
 
                 {notes && (
-                  <div className="pt-2 border-t border-zinc-850">
-                    <p className="text-[10px] text-zinc-550 uppercase font-bold tracking-wider mb-1">Notas registradas</p>
-                    <p className="text-xs text-zinc-300 italic bg-zinc-950/20 p-2.5 rounded-lg border border-zinc-850/50 leading-relaxed font-normal">
+                  <div className="pt-2 border-t border-border-subtle">
+                    <p className="text-[10px] text-text-secondary uppercase font-bold tracking-wider mb-1">Notas registradas</p>
+                    <p className="text-xs text-text-muted italic bg-bg-app/20 p-2.5 rounded-lg border border-border-subtle/50 leading-relaxed font-normal">
                       {notes}
                     </p>
                   </div>
@@ -663,34 +784,23 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           )}
         </AnimatePresence>
 
-        {/* Coaching Notes / Description */}
-        <ProCard className="p-5 space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Info className="w-4 h-4 text-cyan-400" />
-            Notas del Entrenador
-          </h3>
-          <p className="text-sm text-foreground leading-relaxed font-normal whitespace-pre-line">
-            {adaptWorkoutDescription(adaptedDescription, session.sport_type, profile) || 'Sin notas descriptivas para este entrenamiento.'}
-          </p>
-        </ProCard>
-
-        {/* Structured steps checklist */}
-        <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-            Desglose Estructurado del Bloque
-          </h3>
-          
-          <div className="space-y-3">
-            {stepsList.length > 0 ? (
-              stepsList.map((step, index) => renderStepCard(step, index))
-            ) : (
-              <ProCard className="p-6 text-center bg-zinc-50">
-                <p className="text-sm text-zinc-500">Esta sesión no dispone de bloques de intervalos estructurados.</p>
-                <p className="text-xs text-zinc-400 mt-1">Completa la sesión de forma continua basándote en la descripción.</p>
-              </ProCard>
-            )}
-          </div>
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-text-primary">Tu entrenamiento, paso a paso</h3>
+          <WorkoutPreview
+            title={workoutTitle}
+            sportType={session.sport_type}
+            blocks={coachBlocks}
+            durationMin={durationMin}
+            description={adaptWorkoutDescription(adaptedDescription, session.sport_type, profile)}
+          />
         </div>
+
+        {coachBlocks.length === 0 && stepsList.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-text-primary">Intervalos del dispositivo</h3>
+            {stepsList.map((step, index) => renderStepCard(step, index))}
+          </div>
+        )}
 
       </div>
 
@@ -706,7 +816,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
               <>
                 <AnimatedButton 
                   variant="primary" 
-                  className="w-full justify-center py-6 text-sm font-semibold shadow-lg shadow-primary/10"
+                  className="w-full justify-center py-6 text-sm font-semibold  "
                   onClick={handleToggle}
                   disabled={loading}
                 >
@@ -733,33 +843,34 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                 onClick={handleToggle}
                 disabled={loading}
               >
-                <CheckCircle2 className="w-4 h-4 text-green-400" />
-                <span className="text-zinc-250">Completado (Desmarcar)</span>
+                <CheckCircle2 className="w-4 h-4 text-bike" />
+                <span className="text-text-muted">Completado (Desmarcar)</span>
               </AnimatedButton>
             )}
 
             {isMissed && (
               <AnimatedButton 
                 variant="secondary" 
-                className="w-full justify-center py-6 text-sm font-semibold border-red-500/20 bg-red-950/10 hover:bg-red-950/20 text-red-400"
+                className="w-full justify-center py-6 text-sm font-semibold border-danger/20 bg-danger/10 hover:bg-danger/20 text-danger"
                 onClick={handleToggleMissed}
                 disabled={loading}
               >
-                <XCircle className="w-4 h-4 text-red-500" />
+                <XCircle className="w-4 h-4 text-danger" />
                 <span>Restaurar sesión saltada</span>
               </AnimatedButton>
             )}
 
             {!isMissed && (
               <button
-                className="w-full py-3.5 border border-orange-500/30 bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 hover:border-orange-500/50 flex items-center justify-center gap-2 rounded-xl text-xs font-bold shadow-lg shadow-orange-500/10 transition cursor-pointer"
+                aria-label="Descargar archivo TCX"
+                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-coral-500/30 bg-coral-500/10 py-3.5 text-xs font-bold text-coral-500 outline-none transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out hover:border-coral-500/50 hover:bg-coral-500/20 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-coral-500/40 motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer"
                 onClick={() => {
                   setToastMsg('📥 Descargando archivo .TCX para Garmin/Coros...');
                   window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
                   setTimeout(() => setToastMsg(null), 5000);
                 }}
               >
-                <Download className="w-4 h-4 text-orange-400 animate-bounce" />
+                <Download className="w-4 h-4 text-coral-500" aria-hidden="true" />
                 <span>Descargar archivo (.TCX)</span>
               </button>
             )}
@@ -768,7 +879,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
 
         {/* Gear Checklist */}
         <ProCard className="p-5 space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Material de Entrenamiento</h3>
+          <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">Material de Entrenamiento</h3>
           {gearNeeded.length > 0 ? (
             <div className="space-y-2 pt-1">
               {gearNeeded.map((gear, idx) => {
@@ -777,9 +888,9 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                   <div key={idx} className="flex items-center justify-between text-xs py-1">
                     <span className="text-foreground font-medium">{gear}</span>
                     {hasGear ? (
-                      <span className="text-[10px] text-green-600 font-semibold bg-green-500/10 border border-green-500/20 px-2 py-0.5 rounded-full">✓ En Garaje</span>
+                      <span className="text-[10px] text-bike font-semibold bg-bike/10 border border-bike/20 px-2 py-0.5 rounded-full">✓ En Garaje</span>
                     ) : (
-                      <span className="text-[10px] text-orange-600 font-semibold bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">⚠️ Falta</span>
+                      <span className="text-[10px] text-coral-500 font-semibold bg-coral-500/10 border border-coral-500/20 px-2 py-0.5 rounded-full">⚠️ Falta</span>
                     )}
                   </div>
                 );
@@ -803,28 +914,28 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Zonas de Intensidad</h3>
           <div className="space-y-3 pt-1 text-xs">
             <div className="flex items-start gap-2.5">
-              <span className="px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-700 font-bold border border-border text-[10px]">Z1</span>
+              <span className="px-1.5 py-0.5 rounded bg-surface-hover text-text-primary font-bold border border-border text-[10px]">Z1</span>
               <div>
                 <p className="font-semibold text-foreground">Recuperación Pasiva</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">Fácil, conversación fluida. Ritmo regenerativo post-intervalos.</p>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <span className="px-1.5 py-0.5 rounded bg-green-500/10 text-green-600 font-bold border border-green-500/20 text-[10px]">Z2</span>
+              <span className="px-1.5 py-0.5 rounded bg-bike/10 text-bike font-bold border border-bike/20 text-[10px]">Z2</span>
               <div>
                 <p className="font-semibold text-foreground">Resistencia Aeróbica Base</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">Esfuerzo moderado y sostenible. Base de la carga de volumen.</p>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <span className="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-600 font-bold border border-cyan-500/20 text-[10px]">Z3</span>
+              <span className="px-1.5 py-0.5 rounded bg-swim/10 text-swim font-bold border border-swim/20 text-[10px]">Z3</span>
               <div>
                 <p className="font-semibold text-foreground">Tempo / Ritmo Medio</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">Exigente pero aeróbico. Ritmo de competición media distancia.</p>
               </div>
             </div>
             <div className="flex items-start gap-2.5">
-              <span className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-600 font-bold border border-red-500/20 text-[10px]">Z4</span>
+              <span className="px-1.5 py-0.5 rounded bg-danger/10 text-danger font-bold border border-danger/20 text-[10px]">Z4</span>
               <div>
                 <p className="font-semibold text-foreground">Umbral Lactato / Series</p>
                 <p className="text-[10px] text-muted-foreground mt-0.5">Zonas de series intensas. Mejora del VO2Máx y tolerancia al lactato.</p>

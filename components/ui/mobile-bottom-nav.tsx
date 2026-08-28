@@ -3,8 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen, Dumbbell, Heart, Award } from 'lucide-react';
 import { useNotifications } from '@/components/providers/notification-provider';
 
 export function MobileBottomNav() {
@@ -35,18 +34,18 @@ export function MobileBottomNav() {
     fetchRole();
   }, []);
 
-  // Ocultar en login, callback y chats para dejar todo el espacio de pantalla al chat y teclado móvil
+  // Ocultar en login, callback y chats
   if (
-    pathname.includes('/login') || 
-    pathname.includes('/auth') || 
-    pathname.startsWith('/chat') || 
+    pathname.includes('/login') ||
+    pathname.includes('/auth') ||
+    pathname.startsWith('/chat') ||
     pathname.startsWith('/coach/chat')
   ) {
     return null;
   }
 
   const navItems = role === 'owner' ? [
-    { href: '/owner', label: 'Negocio', icon: Trophy },
+    { href: '/admin', label: 'Business', icon: Trophy },
     { href: '/coach/dashboard', label: 'Roster', icon: Home },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ] : role === 'coach' ? [
@@ -54,54 +53,42 @@ export function MobileBottomNav() {
     { href: '/coach/chat', label: 'Mensajes', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ] : [
-    { href: '/dashboard', label: 'Inicio', icon: Home },
+    { href: '/dashboard', label: 'Entreno', icon: Dumbbell },
+    { href: '/recuperacion', label: 'Recup.', icon: Heart },
     { href: '/exercises', label: 'Ejercicios', icon: BookOpen },
-    { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
+    { href: '/analytics', label: 'Análisis', icon: BarChart2 },
+    { href: '/resumen', label: 'Resumen', icon: Award },
     { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ];
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[max(env(safe-area-inset-bottom),24px)] pt-2 bg-white/95 backdrop-blur-md border-t border-zinc-200 shadow-[0_-4px_12px_-4px_rgba(0,0,0,0.08)] motion-safe:transition-all">
-      <div className="flex items-center justify-around max-w-md mx-auto relative">
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom, 16px)] pt-2 bg-surface-elevated/90 backdrop-blur-lg border-t border-border-default">
+      <div className="flex items-center justify-evenly max-w-md mx-auto w-full">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           const Icon = item.icon;
 
           return (
-            <Link 
-              key={item.href} 
+            <Link
+              key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 py-1.5 px-3 relative group"
+              className="flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 px-3 py-1.5 relative group"
               aria-label={item.label}
+              aria-current={isActive ? 'page' : undefined}
             >
-              {isActive && (
-                <motion.div 
-                  layoutId="mobile-nav-bubble" 
-                  className="absolute inset-0 bg-cyan-50 border border-cyan-100/50 rounded-xl -z-10"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              
               <div className="relative">
-                <Icon className={`w-5 h-5 transition-colors duration-200 ${isActive ? 'text-cyan-500' : 'text-zinc-400 group-hover:text-zinc-800'}`} />
-                <AnimatePresence>
-                  {item.showBadge && unreadCount > 0 && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                      className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
-                    >
-                      <span className="text-[9px] font-bold text-white leading-none">
-                        {unreadCount > 9 ? '9+' : unreadCount}
-                      </span>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-accent' : 'text-text-muted group-hover:text-text-secondary'}`} />
+                {item.showBadge && unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 w-4 h-4 bg-run rounded-full flex items-center justify-center border-2 border-surface-elevated">
+                    <span className="text-[9px] font-bold text-white leading-none">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  </span>
+                )}
               </div>
 
-              <span className={`text-[10px] font-semibold tracking-wide transition-colors duration-200 ${isActive ? 'text-cyan-500' : 'text-zinc-400 group-hover:text-zinc-800'}`}>
+              <span className={`text-[10px] font-semibold tracking-wide ${isActive ? 'text-accent' : 'text-text-muted'}`}>
                 {item.label}
               </span>
             </Link>

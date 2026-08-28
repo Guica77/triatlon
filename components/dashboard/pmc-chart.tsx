@@ -36,14 +36,14 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
   }, [data]);
 
   if (!chartData || chartData.length === 0) {
-    return <div className="w-full h-[400px] flex items-center justify-center text-zinc-500">No hay datos suficientes para el PMC</div>;
+    return <div className="w-full h-[400px] flex items-center justify-center text-text-secondary">No hay datos suficientes para el PMC</div>;
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg shadow-xl backdrop-blur-md">
-          <p className="text-zinc-300 text-sm font-medium mb-2">{label}</p>
+        <div className="bg-surface-app border border-border-subtle p-3 rounded-lg shadow-elevated backdrop-blur-md">
+          <p className="text-text-secondary text-sm font-medium mb-2">{label}</p>
           {payload.map((entry: any, index: number) => {
             let name = entry.name;
             const color = entry.color;
@@ -54,16 +54,16 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
             return (
               <div key={index} className="flex items-center gap-2 text-xs mb-1">
                 <div className={`w-2 h-2 rounded-full ${entry.dataKey === 'ctl' ? 'bg-[#3b82f6]' : entry.dataKey === 'atl' ? 'bg-[#ef4444]' : 'bg-[#10b981]'}`} />
-                <span className="text-zinc-400 w-24">{name}:</span>
-                <span className="text-white font-bold">{entry.value}</span>
+                <span className="text-text-muted w-24">{name}:</span>
+                <span className="text-text-primary font-bold">{entry.value}</span>
               </div>
             );
           })}
           {payload[0] && payload[0].payload.tss > 0 && (
-            <div className="flex items-center gap-2 text-xs mt-2 pt-2 border-t border-zinc-800/50">
+            <div className="flex items-center gap-2 text-xs mt-2 pt-2 border-t border-border-subtle/50">
               <div className="w-2 h-2 rounded-full bg-zinc-600" />
-              <span className="text-zinc-400 w-24">TSS Diario:</span>
-              <span className="text-zinc-300 font-bold">{payload[0].payload.tss}</span>
+              <span className="text-text-muted w-24">TSS Diario:</span>
+              <span className="text-text-secondary font-bold">{payload[0].payload.tss}</span>
             </div>
           )}
         </div>
@@ -73,26 +73,26 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
   };
 
   return (
-    <div className="w-full flex flex-col bg-zinc-950 rounded-2xl border border-zinc-800/60 p-4 sm:p-6">
+    <div className="w-full flex flex-col bg-surface-app rounded-2xl border border-border-subtle/60 p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <div>
-          <h3 className="text-lg font-bold text-white tracking-tight">Performance Management Chart</h3>
-          <p className="text-xs text-zinc-400 mt-1">
+          <h3 className="text-lg font-bold text-text-primary tracking-tight">Performance Management Chart</h3>
+          <p className="text-xs text-text-muted mt-1">
             Basado en datos de Garmin/Strava (TSS, CTL, ATL, TSB)
           </p>
         </div>
         <div className="flex items-center gap-4 mt-4 sm:mt-0 text-xs font-medium">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 bg-[#3b82f6]" />
-            <span className="text-zinc-300">CTL</span>
+            <span className="text-text-secondary">CTL</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 bg-[#ef4444]" />
-            <span className="text-zinc-300">ATL</span>
+            <span className="text-text-secondary">ATL</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-sm bg-[#10b981]/20 border border-[#10b981]/50" />
-            <span className="text-zinc-300">TSB</span>
+            <span className="text-text-secondary">TSB</span>
           </div>
         </div>
       </div>
@@ -114,10 +114,10 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#2D3340" vertical={false} />
             <XAxis 
-              dataKey="formattedDate" 
-              stroke="#52525b" 
+              dataKey="formattedDate"
+              stroke="#9CA3AF"
               fontSize={10}
               tickLine={false}
               axisLine={false}
@@ -125,7 +125,7 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
             />
             <YAxis 
               yAxisId="left"
-              stroke="#52525b" 
+              stroke="#9CA3AF"
               fontSize={10}
               tickLine={false}
               axisLine={false}
@@ -134,7 +134,7 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
             <YAxis 
               yAxisId="right"
               orientation="right"
-              stroke="#52525b" 
+              stroke="#9CA3AF"
               fontSize={10}
               tickLine={false}
               axisLine={false}
@@ -143,7 +143,7 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
             />
             <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#3f3f46', strokeWidth: 1, strokeDasharray: '5 5' }} />
             
-            <ReferenceLine yAxisId="right" y={0} stroke="#52525b" strokeDasharray="3 3" />
+            <ReferenceLine yAxisId="right" y={0} stroke="#6B7280" strokeDasharray="3 3" />
             
             {/* TSB - Forma (Area Chart) */}
             <Area 
@@ -185,19 +185,19 @@ export function PMCChart({ data, height = 400 }: PMCChartProps) {
         </ResponsiveContainer>
       </div>
       
-      <div className="mt-4 pt-4 border-t border-zinc-800/60 grid grid-cols-3 gap-4">
+      <div className="mt-4 pt-4 border-t border-border-subtle/60 grid grid-cols-3 gap-4">
         {chartData.length > 0 && (
           <>
             <div className="flex flex-col">
-              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1">Fitness (CTL)</span>
-              <span className="text-white font-black text-2xl">{chartData[chartData.length - 1].ctl}</span>
+              <span className="text-text-muted text-xs font-medium uppercase tracking-wider mb-1">Fitness (CTL)</span>
+              <span className="text-text-primary font-black text-2xl">{chartData[chartData.length - 1].ctl}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1">Fatiga (ATL)</span>
-              <span className="text-white font-black text-2xl">{chartData[chartData.length - 1].atl}</span>
+              <span className="text-text-muted text-xs font-medium uppercase tracking-wider mb-1">Fatiga (ATL)</span>
+              <span className="text-text-primary font-black text-2xl">{chartData[chartData.length - 1].atl}</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-zinc-500 text-xs font-medium uppercase tracking-wider mb-1">Forma (TSB)</span>
+              <span className="text-text-muted text-xs font-medium uppercase tracking-wider mb-1">Forma (TSB)</span>
               <span className={`font-black text-2xl ${chartData[chartData.length - 1].tsb >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
                 {chartData[chartData.length - 1].tsb > 0 ? '+' : ''}{chartData[chartData.length - 1].tsb}
               </span>

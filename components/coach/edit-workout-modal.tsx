@@ -1,355 +1,123 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Clock, Check, Activity, Edit3 } from 'lucide-react'
-import { AnimatedButton } from '@/components/ui/animated-button'
-import { updateCoachWorkoutDetails, saveCoachWorkout } from '@/app/(app)/coach/athlete/[id]/actions'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ArrowLeft, ArrowRight, Check, Cloud, Edit3, Eye, Layers3, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { saveCoachWorkout, updateCoachWorkoutDetails, getWorkoutComments } from '@/app/(app)/coach/athlete/[id]/actions'
+import { createClient } from '@/lib/supabase/client'
+import { WorkoutComments, WorkoutComment } from './workout-comments'
+import { VisualWorkoutBuilder } from './visual-workout-builder'
+import { WorkoutPreview } from '@/components/workouts/workout-preview'
+import { getWorkoutDuration, validateWorkoutBlocks, WorkoutBlock } from '@/lib/workout-structure'
 
 export interface EditWorkoutData {
-  id: string
-  session_id: string
-  sport_type: string
-  duration_min: number
-  title: string
-  warmup: string
-  main: string
-  cooldown: string
-  scheduled_date?: string
-  status?: string | null
-  telemetry?: any | null
+  id: string; session_id: string; sport_type: string; duration_min: number; title: string
+  warmup: string; main: string; cooldown: string; scheduled_date?: string; status?: string | null
+  telemetry?: any | null; structured_blocks?: WorkoutBlock[]
 }
 
-import { WorkoutZonesChart } from './workout-zones-chart';
-import { WorkoutComments, WorkoutComment } from './workout-comments';
-import { getWorkoutComments } from '@/app/(app)/coach/athlete/[id]/actions';
-import { createClient } from '@/lib/supabase/client';
+const steps = [{ label: 'Datos', icon: Edit3 }, { label: 'Bloques', icon: Layers3 }, { label: 'Revisar', icon: Eye }]
 
-interface EditWorkoutModalProps {
-  athleteId: string
-  workout: EditWorkoutData | null
-  isOpen: boolean
-  onClose: () => void
+function legacyBlocks(workout: EditWorkoutData): WorkoutBlock[] {
+  if (workout.structured_blocks?.length) return workout.structured_blocks
+  const duration = Math.max(15, workout.duration_min || 60)
+  return [
+    { id: crypto.randomUUID(), type: 'warmup', targetType: 'time', duration: Math.max(5, Math.round(duration * .15)), zone: 2, notes: workout.warmup },
+    { id: crypto.randomUUID(), type: 'active', targetType: 'time', duration: Math.max(5, Math.round(duration * .7)), zone: 3, notes: workout.main },
+    { id: crypto.randomUUID(), type: 'cooldown', targetType: 'time', duration: Math.max(5, Math.round(duration * .15)), zone: 1, notes: workout.cooldown },
+  ]
 }
 
-export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: EditWorkoutModalProps) {
+export function EditWorkoutModal({ athleteId, workout, isOpen, onClose }: { athleteId: string; workout: EditWorkoutData | null; isOpen: boolean; onClose: () => void }) {
   const router = useRouter()
-  const [user, setUser] = React.useState<any>(null)
+  const [userId, setUserId] = React.useState<string | null>(null)
+  const [step, setStep] = React.useState(0)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [success, setSuccess] = React.useState(false)
-  
   const [comments, setComments] = React.useState<WorkoutComment[]>([])
-  const [loadingComments, setLoadingComments] = React.useState(false)
+  const [formData, setFormData] = React.useState({ sportType: 'ciclismo', scheduledDate: new Date().toISOString().slice(0, 10), title: '', objective: '', blocks: [] as WorkoutBlock[] })
 
-  const [formData, setFormData] = React.useState({
-    sportType: 'ciclismo',
-    durationMin: 60,
-    title: '',
-    warmup: '',
-    main: '',
-    cooldown: ''
-  })
-
+  React.useEffect(() => { createClient().auth.getUser().then(({ data }) => setUserId(data.user?.id || null)) }, [])
   React.useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
-  }, [])
-
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      if (workout && isOpen) {
-        setFormData({
-          sportType: workout.sport_type || 'ciclismo',
-          durationMin: workout.duration_min || 60,
-          title: workout.title || '',
-          warmup: workout.warmup || '',
-          main: workout.main || '',
-          cooldown: workout.cooldown || ''
-        })
-        setError(null)
-        setSuccess(false)
-        
-        // Fetch comments if existing workout
-        if (workout.id !== 'new') {
-          setLoadingComments(true)
-          getWorkoutComments(workout.id).then(res => {
-            if (res.data) setComments(res.data)
-            setLoadingComments(false)
-          })
-        } else {
-          setComments([])
-        }
-      }
-    }, 0);
-    return () => clearTimeout(timer);
+    if (!workout || !isOpen) return
+    setStep(0); setError(null); setSuccess(false)
+    setFormData({ sportType: workout.sport_type || 'ciclismo', scheduledDate: workout.scheduled_date || new Date().toISOString().slice(0, 10), title: workout.title || '', objective: workout.main || '', blocks: legacyBlocks(workout) })
+    if (workout.id !== 'new') getWorkoutComments(workout.id).then((result) => setComments(result.data || []))
+    else setComments([])
   }, [workout, isOpen])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'durationMin' ? parseInt(value) || 0 : value
-    }))
+  if (!workout) return null
+  const durationMin = getWorkoutDuration(formData.blocks)
+  const basicsError = !formData.title.trim() ? 'Escribe un título claro para el entrenamiento.' : !formData.scheduledDate ? 'Selecciona una fecha.' : null
+  const blocksError = validateWorkoutBlocks(formData.blocks)
+
+  function goNext() {
+    const nextError = step === 0 ? basicsError : step === 1 ? blocksError : null
+    if (nextError) return setError(nextError)
+    setError(null); setStep((current) => Math.min(2, current + 1))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!workout) return
-
-    setLoading(true)
-    setError(null)
-
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault()
+    const currentWorkout = workout
+    if (!currentWorkout) return
+    const validationError = basicsError || blocksError
+    if (validationError) return setError(validationError)
+    setLoading(true); setError(null)
+    const payload = { sportType: formData.sportType, durationMin, title: formData.title.trim(), warmup: '', main: formData.objective.trim(), cooldown: '', structured_blocks: formData.blocks }
     try {
-      const isNew = workout.id === 'new'
-      
-      let res;
-      if (isNew) {
-        res = await saveCoachWorkout(athleteId, {
-          scheduledDate: workout.scheduled_date || new Date().toISOString().split('T')[0],
-          sportType: formData.sportType,
-          durationMin: formData.durationMin,
-          title: formData.title,
-          warmup: formData.warmup,
-          main: formData.main,
-          cooldown: formData.cooldown
-        })
-      } else {
-        res = await updateCoachWorkoutDetails(athleteId, workout.id, workout.session_id, formData)
-      }
-
-      if (res.error) {
-        setError(res.error)
-        setLoading(false)
-      } else {
-        setSuccess(true)
-        setTimeout(() => {
-          onClose()
-          setLoading(false)
-          router.refresh()
-        }, 1500)
-      }
-    } catch (err) {
-      setError('Ocurrió un error inesperado al procesar la solicitud.')
-      setLoading(false)
-    }
+      const result = currentWorkout.id === 'new' ? await saveCoachWorkout(athleteId, { ...payload, scheduledDate: formData.scheduledDate }) : await updateCoachWorkoutDetails(athleteId, currentWorkout.id, currentWorkout.session_id, payload)
+      if (result.error) return setError(result.error)
+      setSuccess(true)
+      window.setTimeout(() => { router.refresh(); onClose() }, 900)
+    } catch { setError('No se pudo guardar. Tus cambios siguen en pantalla para que puedas reintentarlo.') }
+    finally { setLoading(false) }
   }
 
-  return (
-    <AnimatePresence>
-      {isOpen && workout && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          {/* Backdrop */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => !loading && onClose()}
-            className="absolute inset-0 bg-black/80 backdrop-blur-md"
-          />
-          {/* Modal Body */}
-          <motion.div 
-            initial={{ scale: 0.95, opacity: 0, y: 15 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 15 }}
-            transition={{ type: 'spring', duration: 0.4 }}
-            className="relative w-full max-w-lg bg-white border border-zinc-200 rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh] text-zinc-900"
-          >
-            
-            {/* Header */}
-            <div className="p-5 border-b border-zinc-150 flex justify-between items-center bg-zinc-50">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-500">
-                  <Edit3 className="w-4.5 h-4.5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-zinc-850">{workout.id === 'new' ? 'Crear Nuevo Entrenamiento' : 'Editar Entrenamiento'}</h3>
-                  <p className="text-[10px] text-zinc-500 font-semibold">{workout.id === 'new' ? 'Configura el bloque para tu atleta.' : 'Modifica los detalles del bloque seleccionado.'}</p>
-                </div>
+  return <AnimatePresence>{isOpen && (
+    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center sm:p-4">
+      <motion.button type="button" aria-label="Cerrar editor" className="absolute inset-0 cursor-default bg-black/75 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !loading && onClose()} />
+      <motion.div role="dialog" aria-modal="true" aria-labelledby="workout-editor-title" initial={{ opacity: 0, y: 24, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 18, scale: .98 }} className="relative z-10 flex h-[96dvh] w-full max-w-6xl flex-col overflow-hidden rounded-t-2xl border border-border-default bg-bg-app shadow-elevated sm:h-[92dvh] sm:rounded-2xl">
+        <header className="flex items-center justify-between gap-4 border-b border-border-subtle bg-surface-elevated px-4 py-3 sm:px-6">
+          <div className="min-w-0"><div className="flex items-center gap-2 text-xs font-semibold text-bike"><Cloud className="h-4 w-4" /> Cambios protegidos</div><h2 id="workout-editor-title" className="truncate text-lg font-bold">{workout.id === 'new' ? 'Crear entrenamiento' : 'Editar entrenamiento'}</h2></div>
+          <button type="button" onClick={onClose} disabled={loading} className="flex h-11 w-11 items-center justify-center rounded-xl border border-border-default text-text-secondary hover:bg-surface-hover hover:text-text-primary" aria-label="Cerrar"><X className="h-5 w-5" /></button>
+        </header>
+        <nav aria-label="Progreso" className="border-b border-border-subtle bg-surface-card px-4 py-3 sm:px-6"><ol className="mx-auto flex max-w-xl items-center justify-between gap-2">{steps.map((item, index) => { const Icon = item.icon; return <li key={item.label} className="flex flex-1"><button type="button" onClick={() => index <= step && setStep(index)} className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl px-3 text-sm font-semibold ${index === step ? 'bg-coral-500 text-bg-deep' : index < step ? 'bg-bike/10 text-bike' : 'text-text-muted'}`}><Icon className="h-4 w-4" />{item.label}</button></li> })}</ol></nav>
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto p-4 pb-28 sm:p-6 sm:pb-6">
+            {error && <div role="alert" className="mx-auto mb-4 max-w-3xl rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm font-semibold text-danger">{error}</div>}
+            {success ? <SuccessState /> : step === 0 ? <BasicsStep formData={formData} setFormData={setFormData} /> : step === 1 ? (
+              <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,.75fr)]">
+                <div className="space-y-4"><StepHeading title="Construye los bloques" subtitle="Ordena la sesión tal como debe ejecutarse." /><VisualWorkoutBuilder blocks={formData.blocks} sportType={formData.sportType} onChange={(blocks) => setFormData((data) => ({ ...data, blocks }))} /></div>
+                <aside className="lg:sticky lg:top-0 lg:self-start"><p className="mb-3 text-sm font-semibold text-text-secondary">Vista del deportista</p><WorkoutPreview title={formData.title} sportType={formData.sportType} blocks={formData.blocks} durationMin={durationMin} compact /></aside>
               </div>
-              <button 
-                title="Cerrar Modal"
-                aria-label="Cerrar Modal"
-                onClick={onClose}
-                disabled={loading}
-                className="w-8 h-8 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+            ) : <div className="mx-auto max-w-3xl space-y-4"><StepHeading title="Revisa antes de publicar" subtitle="Esta es exactamente la lectura que tendrá el deportista." /><WorkoutPreview title={formData.title} sportType={formData.sportType} blocks={formData.blocks} durationMin={durationMin} description={formData.objective} /></div>}
+            {step === 2 && workout.id !== 'new' && userId && <div className="mx-auto mt-8 max-w-3xl border-t border-border-subtle pt-6"><WorkoutComments workoutId={workout.id} athleteId={athleteId} currentUserId={userId} initialComments={comments} /></div>}
+          </div>
+          {!success && <footer className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between gap-3 border-t border-border-default bg-surface-elevated/95 p-3 pb-[max(.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:static sm:px-6 sm:py-4">
+            <button type="button" onClick={() => step === 0 ? onClose() : setStep((current) => current - 1)} className="flex min-h-12 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-text-secondary hover:bg-surface-hover"><ArrowLeft className="h-4 w-4" />{step === 0 ? 'Cancelar' : 'Atrás'}</button>
+            {step < 2 ? <button type="button" onClick={goNext} className="flex min-h-12 items-center gap-2 rounded-xl bg-coral-500 px-5 text-sm font-bold text-bg-deep hover:bg-coral-400">Continuar<ArrowRight className="h-4 w-4" /></button> : <button type="submit" disabled={loading} className="min-h-12 rounded-xl bg-coral-500 px-6 text-sm font-bold text-bg-deep hover:bg-coral-400 disabled:opacity-50">{loading ? 'Publicando…' : workout.id === 'new' ? 'Publicar entrenamiento' : 'Guardar y publicar'}</button>}
+          </footer>}
+        </form>
+      </motion.div>
+    </div>
+  )}</AnimatePresence>
+}
 
-            {/* Form container */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin">
-              
-              {error && (
-                <div className="p-3.5 rounded-xl bg-red-50 border border-red-155 text-red-750 text-xs leading-relaxed text-center font-semibold">
-                  {error}
-                </div>
-              )}
+function StepHeading({ title, subtitle }: { title: string; subtitle: string }) { return <div><h3 className="text-2xl font-bold">{title}</h3><p className="mt-1 text-sm text-text-secondary">{subtitle}</p></div> }
 
-              {success ? (
-                <motion.div 
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="py-12 flex flex-col items-center justify-center space-y-3"
-                >
-                  <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-150 flex items-center justify-center text-emerald-600 shadow-sm">
-                    <Check className="w-8 h-8" />
-                  </div>
-                  <p className="text-xs font-black text-emerald-600 uppercase tracking-widest">¡Actualizado!</p>
-                  <p className="text-[10px] text-zinc-500 font-semibold">Recalculando carga en el calendario...</p>
-                </motion.div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-1.5 col-span-2">
-                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Tipo de Deporte</label>
-                      <select 
-                        title="Tipo de Deporte"
-                        aria-label="Tipo de Deporte"
-                        name="sportType"
-                        value={formData.sportType}
-                        onChange={handleInputChange}
-                        className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors cursor-pointer"
-                      >
-                        <option value="ciclismo">🚴‍♂️ Ciclismo</option>
-                        <option value="carrera">🏃‍♂️ Carrera</option>
-                        <option value="natacion">🏊‍♂️ Natación</option>
-                        <option value="fuerza">🏋️‍♂️ Fuerza</option>
-                      </select>
-                    </div>
+function SuccessState() { return <div className="flex min-h-80 flex-col items-center justify-center gap-3 text-center"><div className="flex h-16 w-16 items-center justify-center rounded-full bg-bike/15 text-bike"><Check className="h-8 w-8" /></div><h3 className="text-xl font-bold">Entrenamiento publicado</h3><p className="text-sm text-text-secondary">El deportista ya puede consultar la sesión.</p></div> }
 
-                    <div className="space-y-1.5 col-span-1">
-                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Duración (min)</label>
-                      <div className="relative flex items-center">
-                        <input 
-                          title="Duración"
-                          aria-label="Duración"
-                          placeholder="60"
-                          type="number"
-                          name="durationMin"
-                          required
-                          min={5}
-                          max={600}
-                          value={formData.durationMin}
-                          onChange={handleInputChange}
-                          className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 pr-8 text-xs text-zinc-900 outline-none transition-colors"
-                        />
-                        <Clock className="w-3.5 h-3.5 text-zinc-400 absolute right-3" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Título del Bloque</label>
-                    <input 
-                      title="Título"
-                      aria-label="Título"
-                      type="text"
-                      name="title"
-                      placeholder="Ej: Intervals VO2Max"
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors"
-                    />
-                  </div>
-
-                  <div className="border-t border-zinc-150 my-2" />
-
-                  {/* Warmup */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">1. Calentamiento (Warmup)</label>
-                    </div>
-                    <textarea 
-                      title="Calentamiento"
-                      aria-label="Calentamiento"
-                      placeholder="Detalles del calentamiento"
-                      name="warmup"
-                      rows={2}
-                      value={formData.warmup}
-                      onChange={handleInputChange}
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
-                    />
-                  </div>
-
-                  {/* Main */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] text-cyan-650 uppercase tracking-wider font-bold">2. Parte Principal</label>
-                    </div>
-                    <textarea 
-                      title="Parte Principal"
-                      aria-label="Parte Principal"
-                      placeholder="Detalles de la parte principal"
-                      name="main"
-                      rows={3}
-                      required
-                      value={formData.main}
-                      onChange={handleInputChange}
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
-                    />
-                  </div>
-
-                  {/* Cooldown */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">3. Enfriamiento (Cooldown)</label>
-                    </div>
-                    <textarea 
-                      title="Enfriamiento"
-                      aria-label="Enfriamiento"
-                      placeholder="Detalles del enfriamiento"
-                      name="cooldown"
-                      rows={2}
-                      value={formData.cooldown}
-                      onChange={handleInputChange}
-                      className="w-full bg-white border border-zinc-200 focus:border-cyan-500 rounded-xl p-3 text-xs text-zinc-900 outline-none transition-colors resize-none placeholder-zinc-450"
-                    />
-                  </div>
-
-                  {/* Submit Button */}
-                  <div className="pt-2">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="w-full px-5 py-3.5 bg-zinc-900 text-white rounded-xl text-xs font-bold shadow-md hover:bg-zinc-800 transition-colors disabled:opacity-50"
-                    >
-                      {loading ? 'Guardando...' : workout.id === 'new' ? 'Crear Entrenamiento' : 'Guardar Cambios'}
-                    </button>
-                  </div>
-                </>
-              )}
-
-            </form>
-
-            {/* Zones Chart for Completed Workouts */}
-            {workout.status === 'completed' && workout.telemetry?.hr_zones_summary && (
-              <div className="px-5 pb-5 bg-zinc-50 border-t border-zinc-150">
-                <WorkoutZonesChart zonesSummary={workout.telemetry.hr_zones_summary} />
-              </div>
-            )}
-
-            {/* Comments Thread */}
-            {workout.id !== 'new' && user && (
-              <div className="px-5 pb-5 bg-zinc-50 border-t border-zinc-150 pt-5">
-                {loadingComments ? (
-                  <p className="text-xs text-center text-zinc-500 py-4">Cargando comentarios...</p>
-                ) : (
-                  <WorkoutComments 
-                    workoutId={workout.id} 
-                    athleteId={athleteId}
-                    currentUserId={user.id}
-                    initialComments={comments}
-                  />
-                )}
-              </div>
-            )}
-
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
+type FormState = { sportType: string; scheduledDate: string; title: string; objective: string; blocks: WorkoutBlock[] }
+function BasicsStep({ formData, setFormData }: { formData: FormState; setFormData: React.Dispatch<React.SetStateAction<FormState>> }) {
+  return <div className="mx-auto max-w-3xl space-y-6"><StepHeading title="Define la sesión" subtitle="Lo esencial primero. Después construirás cada bloque." />
+    <div className="grid gap-4 sm:grid-cols-2">
+      <label className="space-y-2 text-sm font-semibold">Deporte<select value={formData.sportType} onChange={(e) => setFormData((data) => ({ ...data, sportType: e.target.value }))} className="min-h-12 w-full rounded-xl border border-border-default bg-surface-elevated px-4 text-base"><option value="ciclismo">Ciclismo</option><option value="carrera">Carrera</option><option value="natacion">Natación</option><option value="fuerza">Fuerza</option></select></label>
+      <label className="space-y-2 text-sm font-semibold">Fecha<input type="date" value={formData.scheduledDate} onChange={(e) => setFormData((data) => ({ ...data, scheduledDate: e.target.value }))} className="min-h-12 w-full rounded-xl border border-border-default bg-surface-elevated px-4 text-base" /></label>
+    </div>
+    <label className="block space-y-2 text-sm font-semibold">Título<input autoFocus value={formData.title} onChange={(e) => setFormData((data) => ({ ...data, title: e.target.value }))} placeholder="Ej. Series de umbral en bicicleta" className="min-h-12 w-full rounded-xl border border-border-default bg-surface-elevated px-4 text-base" /></label>
+    <label className="block space-y-2 text-sm font-semibold">Objetivo de la sesión<textarea value={formData.objective} onChange={(e) => setFormData((data) => ({ ...data, objective: e.target.value }))} placeholder="Qué debe conseguir el deportista y cómo debe sentirse" rows={4} className="w-full rounded-xl border border-border-default bg-surface-elevated p-4 text-base leading-relaxed" /></label>
+  </div>
 }

@@ -16,7 +16,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
 
   // State for StepAmbition
   const [athleteLevel, setAthleteLevel] = React.useState('intermedio');
-  const [activeTab, setActiveTab] = React.useState<'catalog' | 'custom'>('catalog');
+  const [activeTab, setActiveTab] = React.useState<'catalog' | 'custom' | 'none'>('catalog');
   const [searchQuery, setSearchQuery] = React.useState('');
   const [selectedRace, setSelectedRace] = React.useState<RaceCatalogItem | null>(RACES_CATALOG[0]);
   
@@ -62,6 +62,13 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
         distance: selectedRace.distance,
         modality: selectedRace.modality
       };
+    } else if (activeTab === 'none') {
+      return {
+        name: 'Mantenimiento / Off-Season',
+        date: null,
+        distance: 'sprint',
+        modality: 'triatlon'
+      };
     } else {
       return {
         name: customName || 'Mi Desafío',
@@ -78,7 +85,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
     try {
       const result = await saveRaceGoalAndPlan({
         target_race_name: currentGoal.name,
-        target_race_date: currentGoal.date,
+        target_race_date: currentGoal.date || undefined,
         target_race_distance: currentGoal.distance as any,
         target_race_modality: currentGoal.modality,
         target_finish_time: targetFinishTime,
@@ -112,8 +119,8 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6 scrollbar-none">
         <DialogHeader className="mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
-              <Target className="w-5 h-5 text-cyan-500" />
+            <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center shrink-0">
+              <Target className="w-5 h-5 text-accent" />
             </div>
             <div className="text-left">
               <DialogTitle className="text-xl font-bold tracking-tight">Define tu Objetivo</DialogTitle>
@@ -122,7 +129,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
           </div>
         </DialogHeader>
 
-          <div className="bg-zinc-50 p-4 sm:p-6 rounded-xl border border-zinc-200">
+          <div className="bg-surface-hover p-4 sm:p-6 rounded-xl border border-zinc-200">
             <StepAmbition
               activeTab={activeTab}
               setActiveTab={setActiveTab}
@@ -182,7 +189,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
           </div>
 
           {error && (
-            <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-650">
+            <div className="mt-4 p-4 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center gap-3 text-red-300">
               <AlertCircle className="w-5 h-5 shrink-0" />
               <p className="text-sm font-medium">{error}</p>
             </div>

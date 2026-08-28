@@ -215,6 +215,7 @@ export type Database = {
           main: string | null
           cooldown: string | null
           intensity_type: string | null
+          structured_blocks: Json | null
           created_at: string
         }
         Insert: {
@@ -227,6 +228,7 @@ export type Database = {
           main?: string | null
           cooldown?: string | null
           intensity_type?: string | null
+          structured_blocks?: Json | null
           created_at?: string
         }
         Update: {
@@ -239,6 +241,7 @@ export type Database = {
           main?: string | null
           cooldown?: string | null
           intensity_type?: string | null
+          structured_blocks?: Json | null
           created_at?: string
         }
         Relationships: [
@@ -357,6 +360,7 @@ export type Database = {
           coach_id: string | null
           created_at: string
           current_ftp: number | null
+          max_hr: number | null
           current_run_pace: string | null
           current_swim_pace: string | null
           external_athlete_id: string | null
@@ -414,6 +418,7 @@ export type Database = {
           coach_id?: string | null
           created_at?: string
           current_ftp?: number | null
+          max_hr?: number | null
           current_run_pace?: string | null
           current_swim_pace?: string | null
           external_athlete_id?: string | null
@@ -471,6 +476,7 @@ export type Database = {
           coach_id?: string | null
           created_at?: string
           current_ftp?: number | null
+          max_hr?: number | null
           current_run_pace?: string | null
           current_swim_pace?: string | null
           external_athlete_id?: string | null
@@ -580,6 +586,7 @@ export type Database = {
           plan_id: string | null
           sport_type: string
           week_number: number
+          structured_blocks: Json | null
         }
         Insert: {
           created_at?: string
@@ -591,6 +598,7 @@ export type Database = {
           plan_id?: string | null
           sport_type: string
           week_number: number
+          structured_blocks?: Json | null
         }
         Update: {
           created_at?: string
@@ -602,6 +610,7 @@ export type Database = {
           plan_id?: string | null
           sport_type?: string
           week_number?: number
+          structured_blocks?: Json | null
         }
         Relationships: [
           {
@@ -618,6 +627,7 @@ export type Database = {
           actual_distance_km: number
           actual_duration_min: number
           actual_tss: number
+          ai_comment: string | null
           avg_cadence: number | null
           avg_hr: number | null
           avg_power: number | null
@@ -634,12 +644,15 @@ export type Database = {
           training_effect_aerobic: number | null
           training_effect_anaerobic: number | null
           user_id: string
-          workout_id: string
+          outcome_kind: string | null
+          sport_label: string | null
+          workout_id: string | null
         }
         Insert: {
           actual_distance_km: number
           actual_duration_min: number
           actual_tss: number
+          ai_comment?: string | null
           avg_cadence?: number | null
           avg_hr?: number | null
           avg_power?: number | null
@@ -656,12 +669,15 @@ export type Database = {
           training_effect_aerobic?: number | null
           training_effect_anaerobic?: number | null
           user_id: string
-          workout_id: string
+          outcome_kind?: string | null
+          sport_label?: string | null
+          workout_id?: string | null
         }
         Update: {
           actual_distance_km?: number
           actual_duration_min?: number
           actual_tss?: number
+          ai_comment?: string | null
           avg_cadence?: number | null
           avg_hr?: number | null
           avg_power?: number | null
@@ -678,7 +694,9 @@ export type Database = {
           training_effect_aerobic?: number | null
           training_effect_anaerobic?: number | null
           user_id?: string
-          workout_id?: string
+          outcome_kind?: string | null
+          sport_label?: string | null
+          workout_id?: string | null
         }
         Relationships: [
           {
@@ -794,8 +812,10 @@ export type Database = {
       }
       user_workouts: {
         Row: {
+          actual_discipline: string | null
           actual_tss: number | null
           adjustment_reason: string | null
+          ai_feedback: string | null
           auto_adjusted: boolean | null
           completed_at: string | null
           created_at: string
@@ -807,10 +827,14 @@ export type Database = {
           user_id: string
           rpe: number | null
           feelings: string | null
+          refocus_applied: boolean | null
+          refocus_proposal: Json | null
         }
         Insert: {
+          actual_discipline?: string | null
           actual_tss?: number | null
           adjustment_reason?: string | null
+          ai_feedback?: string | null
           auto_adjusted?: boolean | null
           completed_at?: string | null
           created_at?: string
@@ -822,10 +846,14 @@ export type Database = {
           user_id: string
           rpe?: number | null
           feelings?: string | null
+          refocus_applied?: boolean | null
+          refocus_proposal?: Json | null
         }
         Update: {
+          actual_discipline?: string | null
           actual_tss?: number | null
           adjustment_reason?: string | null
+          ai_feedback?: string | null
           auto_adjusted?: boolean | null
           completed_at?: string | null
           created_at?: string
@@ -837,6 +865,8 @@ export type Database = {
           user_id?: string
           rpe?: number | null
           feelings?: string | null
+          refocus_applied?: boolean | null
+          refocus_proposal?: Json | null
         }
         Relationships: [
           {

@@ -23,7 +23,7 @@ const ZoneBadge = React.forwardRef<HTMLDivElement, ZoneBadgeProps>(
         className={cn("inline-flex items-center gap-2", className)}
         {...props}
       >
-        <span className="text-xs font-medium text-zinc-400 tracking-wide uppercase">
+        <span className="text-xs font-medium text-text-muted tracking-wide uppercase">
           {label || `Z${zone}`}
         </span>
         <div className={cn("w-2 h-2 rounded-full", dotColors[zone])} />

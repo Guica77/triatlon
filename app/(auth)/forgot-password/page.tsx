@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
     const formData = new FormData(event.currentTarget);
 
     const result = await sendResetPasswordEmail(formData);
-    
+
     if (result.error) {
       setError(result.error);
     } else {
@@ -31,39 +31,40 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <AuthLayout 
-      title="Recuperar Acceso" 
+    <AuthLayout
+      title="Recuperar Acceso"
       subtitle="Te enviaremos un enlace de recuperación"
       isAthlete={true}
     >
-      <div className="space-y-6 relative z-10">
+      <div className="space-y-6 relative z-10 overflow-x-hidden w-full pb-24 sm:pb-8">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-750 text-xs text-center font-medium shadow-xs">
+            <div className="p-3.5 rounded-xl bg-danger/10 border border-danger/30 text-danger text-xs text-center font-medium">
               {error}
             </div>
           )}
 
           {successMessage && (
-            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-750 text-xs text-center leading-relaxed font-medium shadow-xs">
+            <div className="p-4 rounded-xl bg-bike/10 border border-bike/30 text-bike text-xs text-center leading-relaxed font-medium">
               {successMessage}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">Correo Electrónico</label>
-            <input 
-              name="email" 
-              type="email" 
-              placeholder="tu@correo.com" 
-              required 
-              className="w-full bg-white border border-zinc-200 rounded-xl p-3.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-cyan-500 focus:bg-white transition-all"
+            <label htmlFor="forgot-password-email" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Correo Electrónico</label>
+            <input
+              id="forgot-password-email"
+              name="email"
+              type="email"
+              placeholder="tu@correo.com"
+              required
+              className="w-full rounded-xl border border-border-default bg-surface-card p-3.5 text-sm text-text-primary placeholder-text-muted outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus:border-swim focus:ring-1 focus:ring-swim/40 motion-reduce:transition-opacity"
             />
           </div>
 
-          <button 
-            className="w-full mt-4 py-4 rounded-xl text-sm font-bold text-white bg-cyan-600 hover:bg-cyan-700 transition-colors shadow-xs flex items-center justify-center disabled:opacity-50 cursor-pointer" 
-            type="submit" 
+          <button
+            className="mt-4 flex min-h-11 w-full items-center justify-center rounded-xl bg-swim py-4 text-sm font-bold text-text-primary transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out hover:bg-swim/90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+            type="submit"
             disabled={loading}
           >
             {loading ? 'Procesando...' : 'Enviar Enlace de Recuperación'}
@@ -71,10 +72,10 @@ export default function ForgotPasswordPage() {
         </form>
 
         <div className="text-center pt-4">
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={() => router.push('/login')}
-            className="text-xs text-zinc-500 hover:text-cyan-600 transition-colors font-bold"
+            className="min-h-11 rounded-lg px-2 text-xs font-bold text-text-muted transition-[color,opacity,transform] duration-150 ease-out hover:text-swim active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100"
           >
             ← Volver a Iniciar Sesión
           </button>

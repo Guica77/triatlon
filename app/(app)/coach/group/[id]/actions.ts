@@ -10,6 +10,12 @@ export interface GroupAthleteItem {
   last_name: string | null;
   email: string | null;
   today_workout: any | null;
+  today_biometrics: {
+    readiness_score: number | null;
+    hrv: number | null;
+    fatigue_rating: number | null;
+    stress_level: number | null;
+  } | null;
   week_workouts: any[];
   readiness_score: number | null;
   hrv: number | null;
@@ -77,7 +83,7 @@ export async function getGroupData(groupId: string) {
   // Fetch recent biometrics for alerts
   const { data: biometricsData } = await supabase
     .from('user_biometrics')
-    .select('user_id, date, hrv, readiness_score')
+    .select('user_id, date, hrv, readiness_score, fatigue_rating, stress_level')
     .in('user_id', athleteIds)
     .order('date', { ascending: false });
 
@@ -103,6 +109,12 @@ export async function getGroupData(groupId: string) {
       last_name: profile.last_name,
       email: profile.email,
       today_workout: todayWorkout?.training_sessions || null,
+      today_biometrics: {
+        readiness_score: latestBiometrics?.readiness_score || null,
+        hrv: latestBiometrics?.hrv || null,
+        fatigue_rating: latestBiometrics?.fatigue_rating || null,
+        stress_level: latestBiometrics?.stress_level || null,
+      },
       week_workouts: athleteWorkouts,
       readiness_score: latestBiometrics?.readiness_score || null,
       hrv: latestBiometrics?.hrv || null,
@@ -204,7 +216,8 @@ export async function assignTemplateToGroupDay(groupId: string, templateId: stri
           duration_min: template.duration_min,
           description: description,
           day_name: 'Custom',
-          week_number: 0
+          week_number: 0,
+          structured_blocks: template.structured_blocks
         })
         .select('id')
         .single();
@@ -332,7 +345,7 @@ export async function cloneGroupWeek(groupId: string, sourceWeekStartStr: string
   // Calculate dates
   const sourceStart = parseISO(sourceWeekStartStr);
   const targetStart = parseISO(targetWeekStartStr);
-  
+
   // Calculate the exact difference in days
   const diffTime = Math.abs(targetStart.getTime() - sourceStart.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -356,7 +369,7 @@ export async function cloneGroupWeek(groupId: string, sourceWeekStartStr: string
   const newWorkouts = sourceWorkouts.map(w => {
     const originalDate = parseISO(w.scheduled_date);
     const newDate = addDays(originalDate, daysToShift);
-    
+
     return {
       user_id: w.user_id,
       session_id: w.session_id, // Links to the same template

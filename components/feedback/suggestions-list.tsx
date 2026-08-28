@@ -33,21 +33,21 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
     switch (status) {
       case 'implemented':
         return (
-          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-bike/10 text-bike border border-bike/30 flex items-center gap-1">
             <CheckCircle2 className="w-3 h-3" />
             Implementado
           </span>
         );
       case 'reviewed':
         return (
-          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 flex items-center gap-1">
-            <Activity className="w-3 h-3 animate-pulse" />
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-swim/10 text-swim border border-swim/30 flex items-center gap-1">
+            <Activity className="w-3 h-3" aria-hidden="true" />
             En Revisión
           </span>
         );
       default:
         return (
-          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-warning/10 text-warning border border-warning/30 flex items-center gap-1">
             <Clock className="w-3 h-3" />
             Pendiente
           </span>
@@ -69,7 +69,7 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
         break;
     }
     return (
-      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800/80 border border-zinc-700/80 text-zinc-300">
+      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-hover/80 border border-border-default text-text-muted">
         {label}
       </span>
     );
@@ -80,49 +80,49 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
       {/* Filtros */}
       <div className="flex flex-col gap-2.5">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-            <ListFilter className="w-3.5 h-3.5 text-cyan-400" /> Tus Sugerencias Enviadas
+          <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+            <ListFilter className="w-3.5 h-3.5 text-swim" /> Tus Sugerencias Enviadas
           </h3>
-          <span className="text-[10px] font-mono text-zinc-500">{filteredSuggestions.length} mostradas</span>
+          <span className="text-[10px] font-mono text-text-secondary">{filteredSuggestions.length} mostradas</span>
         </div>
 
-        <div className="flex flex-wrap gap-1.5 p-1 bg-zinc-950/60 rounded-xl border border-zinc-800/60">
+        <div className="flex flex-wrap gap-1.5 p-1 bg-surface-app/60 rounded-xl border border-border-subtle/60">
           <button
             onClick={() => setFilter('all')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`min-h-9 px-3 py-1.5 rounded-lg text-xs font-medium transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
               filter === 'all'
-                ? 'bg-zinc-800 text-white font-semibold shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-surface-hover text-text-primary font-semibold '
+                : 'text-text-muted hover:text-text-muted'
             }`}
           >
             Todas ({initialSuggestions.length})
           </button>
           <button
             onClick={() => setFilter('pending')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`min-h-9 px-3 py-1.5 rounded-lg text-xs font-medium transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex items-center gap-1.5 ${
               filter === 'pending'
-                ? 'bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-warning/20 text-warning font-semibold border border-warning/30'
+                : 'text-text-muted hover:text-text-muted'
             }`}
           >
             Pendientes ({pendingCount})
           </button>
           <button
             onClick={() => setFilter('reviewed')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`min-h-9 px-3 py-1.5 rounded-lg text-xs font-medium transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex items-center gap-1.5 ${
               filter === 'reviewed'
-                ? 'bg-blue-500/20 text-blue-300 font-semibold border border-blue-500/30'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-swim/20 text-swim font-semibold border border-swim/30'
+                : 'text-text-muted hover:text-text-muted'
             }`}
           >
             En Revisión ({reviewedCount})
           </button>
           <button
             onClick={() => setFilter('implemented')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+            className={`min-h-9 px-3 py-1.5 rounded-lg text-xs font-medium transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex items-center gap-1.5 ${
               filter === 'implemented'
-                ? 'bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-bike/20 text-bike font-semibold border border-bike/30'
+                : 'text-text-muted hover:text-text-muted'
             }`}
           >
             Implementadas ({implementedCount})
@@ -143,16 +143,16 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
                 exit={{ opacity: 0, y: -12, scale: 0.98 }}
                 transition={{ duration: 0.25, ease: 'easeInOut' }}
               >
-                <ProCard className="p-4 bg-zinc-900/30 border-zinc-800/60 hover:border-zinc-700/60 transition-colors space-y-3">
+                <ProCard className="p-4 bg-surface-card/30 border-border-subtle/60 hover:border-border-default transition-colors space-y-3">
                   <div className="flex items-center justify-between gap-2">
                     {getFeedbackTypeBadge(s.feedback_type)}
                     {getStatusBadge(s.status)}
                   </div>
-                  <p className="text-xs text-zinc-300 leading-relaxed break-words whitespace-pre-wrap">
+                  <p className="text-xs text-text-muted leading-relaxed break-words whitespace-pre-wrap">
                     {s.content}
                   </p>
-                  <p className="text-[10px] text-zinc-500 font-mono flex justify-between items-center">
-                    <span>Enviado el {new Date(s.created_at).toLocaleDateString()}</span>
+                  <p className="text-[10px] text-text-secondary font-mono flex justify-between items-center">
+                    <span suppressHydrationWarning>Enviado el {new Date(s.created_at).toLocaleDateString()}</span>
                     <span>ID: #{s.id.substring(0, 6)}</span>
                   </p>
                 </ProCard>
@@ -163,7 +163,7 @@ export function SuggestionsList({ initialSuggestions }: SuggestionsListProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="text-xs text-zinc-500 italic text-center py-8 bg-zinc-900/20 rounded-2xl border border-zinc-800/40 flex flex-col items-center justify-center gap-2"
+              className="text-xs text-text-secondary italic text-center py-8 bg-surface-card/20 rounded-2xl border border-border-subtle/40 flex flex-col items-center justify-center gap-2"
             >
               <span className="text-base">📬</span>
               <span>No hay sugerencias en esta categoría.</span>

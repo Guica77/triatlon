@@ -137,6 +137,91 @@ export async function updateWorkoutStatus(workoutId: string, newStatus: 'pending
   return { status: newStatus }
 }
 
+/**
+ * Aplica la propuesta de reajuste guardada por la IA del webhook (propose & confirm).
+ *
+ * La acción mecánica se lee de la columna `refocus_proposal` (JSONB) persistida en la
+ * sesión — la BD es la fuente de la verdad, nunca se confía en el cliente. La IA solo
+ * escribió el texto; la acción (`reschedule-missed` / `ease-next` / `none`) la decidió
+ * `buildRulesProposal`, así que aplicar es siempre seguro y acotado.
+ */
+export async function applyRefocusProposal(workoutId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    throw new Error("No autenticado")
+  }
+
+  const { data: workout } = await supabase
+    .from('user_workouts')
+    .select('id, scheduled_date, refocus_proposal, refocus_applied')
+    .eq('id', workoutId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!workout) throw new Error('Sesión no encontrada')
+  if (workout.refocus_applied || !workout.refocus_proposal) {
+    return { success: false, reason: 'already-applied' }
+  }
+
+  const proposal = workout.refocus_proposal as { action: string }
+  const action = proposal.action
+
+  if (action === 'reschedule-missed') {
+    // Reprogramar la sesión perdida en el próximo día libre dentro de 14 días.
+    const { findNextFreeDay, todayISO } = await import('@/lib/strava/classify')
+    const { data: occupiedRows } = await supabase
+      .from('user_workouts')
+      .select('scheduled_date')
+      .eq('user_id', user.id)
+      .gte('scheduled_date', todayISO())
+
+    const occupied = occupiedRows?.map(r => r.scheduled_date) ?? []
+    const nextDay = findNextFreeDay(todayISO(), occupied)
+    if (!nextDay) throw new Error('No hay día libre en los próximos 14 días')
+
+    await supabase
+      .from('user_workouts')
+      .update({ scheduled_date: nextDay, status: 'pending', refocus_applied: true })
+      .eq('id', workoutId)
+  } else if (action === 'ease-next') {
+    // Suavizar la siguiente sesión pendiente del plan tras un día exigente/parcial.
+    const { data: nextWorkout } = await supabase
+      .from('user_workouts')
+      .select('id, scheduled_date')
+      .eq('user_id', user.id)
+      .eq('status', 'pending')
+      .gt('scheduled_date', workout.scheduled_date)
+      .order('scheduled_date', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+
+    if (nextWorkout) {
+      await supabase
+        .from('user_workouts')
+        .update({ auto_adjusted: true, adjustment_reason: 'recuperacion', refocus_applied: true })
+        .eq('id', nextWorkout.id)
+    } else {
+      await supabase
+        .from('user_workouts')
+        .update({ refocus_applied: true })
+        .eq('id', workoutId)
+    }
+  } else if (action === 'none') {
+    await supabase
+      .from('user_workouts')
+      .update({ refocus_applied: true })
+      .eq('id', workoutId)
+  } else {
+    throw new Error('Acción de propuesta desconocida')
+  }
+
+  revalidatePath(`/dashboard/workout/${workoutId}`)
+  revalidatePath('/dashboard')
+  return { success: true, action }
+}
+
 export async function toggleWorkoutStatus(workoutId: string, currentStatus: string) {
   const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
   return updateWorkoutStatus(workoutId, newStatus);

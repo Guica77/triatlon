@@ -1,9 +1,9 @@
+import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // @ts-expect-error eslint is a valid config option but types might be outdated
-  eslint: {
-    ignoreDuringBuilds: true,
+  turbopack: {
+    root: path.resolve(__dirname),
   },
   typescript: {
     ignoreBuildErrors: true,

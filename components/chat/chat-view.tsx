@@ -21,6 +21,7 @@ import { AnimatedButton } from '@/components/ui/animated-button'
 import { ChatParticipant, ChatMessageItem, sendMessage, getMessages, linkCoachByAthlete, linkCoachByCode, markMessagesAsRead } from '@/app/(app)/chat/actions'
 import { createClient } from '@/lib/supabase/client'
 import { useNotifications } from '@/components/providers/notification-provider'
+import { useReducedMotion } from 'framer-motion'
 
 interface ChatViewProps {
   initialParticipants: ChatParticipant[]
@@ -51,6 +52,7 @@ export function ChatView({
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
   const { refreshUnreadCount } = useNotifications()
+  const reduceMotion = useReducedMotion()
   const hasSidebar = currentUserRole === 'coach' || participants.length > 1
 
   // Filtered sidebar items
@@ -96,7 +98,7 @@ export function ChatView({
 
   // Scroll to bottom helper
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    messagesEndRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' })
   }
 
   React.useEffect(() => {
@@ -196,7 +198,7 @@ export function ChatView({
   }
 
   return (
-    <div className="flex bg-white border-0 sm:border border-zinc-200 rounded-none sm:rounded-2xl overflow-hidden h-full sm:h-[calc(100vh-180px)] sm:min-h-[500px] shadow-none sm:shadow-sm">
+    <div className="flex bg-white border-0 sm:border border-zinc-200 rounded-none sm:rounded-2xl overflow-hidden flex-1 min-h-0 shadow-none sm:shadow-sm">
       
       {/* Left Sidebar */}
       {hasSidebar ? (
@@ -229,10 +231,10 @@ export function ChatView({
                   <button
                     key={p.id}
                     onClick={() => handleSelectParticipant(p)}
-                    className={`w-full p-4 flex items-center justify-between text-left transition-all cursor-pointer ${
-                      isSelected 
-                        ? 'bg-cyan-50/40 border-l-2 border-cyan-550' 
-                        : 'hover:bg-zinc-100/40'
+                    className={`w-full min-h-11 p-4 flex items-center justify-between text-left transition-[background-color,border-color,color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600/50 focus-visible:ring-inset motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                      isSelected
+                        ? 'bg-cyan-50/40 border-l-2 border-cyan-600'
+                        : 'fine-hover:bg-zinc-100/40'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -258,7 +260,7 @@ export function ChatView({
       ) : null}
 
       {/* Main Chat Conversation Viewport */}
-      <div className={`flex-1 flex flex-col justify-between bg-zinc-50/10 ${hasSidebar && !selectedPart ? 'hidden sm:flex' : 'flex'}`}>
+      <div className={`flex-1 flex flex-col justify-between bg-zinc-50/10 min-w-0 ${hasSidebar && !selectedPart ? 'hidden sm:flex' : 'flex'}`}>
         {selectedPart ? (
           <>
             {/* Active chat header */}
@@ -267,7 +269,7 @@ export function ChatView({
                 {hasSidebar && (
                   <button 
                     onClick={() => setSelectedPart(null)}
-                    className="sm:hidden p-1 -ml-1 text-zinc-500 hover:text-zinc-800 transition-colors shrink-0"
+                    className="sm:hidden min-h-10 min-w-10 -ml-1 text-zinc-500 fine-hover:text-zinc-800 transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600/50 rounded-lg shrink-0"
                     aria-label="Volver"
                   >
                     <ArrowLeft className="w-5 h-5" />
@@ -289,7 +291,7 @@ export function ChatView({
               
               <div className="flex items-center gap-1 sm:gap-3">
                 {/* Realtime badge (hidden on narrow screens to save space for call buttons) */}
-                <div className="hidden xs:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-[8px] sm:text-[9px] text-emerald-700 font-black uppercase tracking-wider shrink-0">
+                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-[8px] sm:text-[9px] text-emerald-700 font-black uppercase tracking-wider shrink-0">
                   <Sparkles className="w-3 h-3 text-emerald-600 animate-pulse" />
                   <span className="hidden sm:inline">Conectado (Realtime)</span>
                   <span className="sm:hidden">Realtime</span>
@@ -297,82 +299,90 @@ export function ChatView({
                 
                 {/* Call Icons */}
                 <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
-                  <button type="button" className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors rounded-full hover:bg-zinc-100 cursor-pointer" aria-label="Llamar">
+                  <button type="button" className="min-h-10 min-w-10 p-2 text-zinc-500 fine-hover:text-cyan-600 fine-hover:bg-zinc-100 transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600/50" aria-label="Llamar">
                     <Phone className="w-4 h-4" />
                   </button>
-                  <button type="button" className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors rounded-full hover:bg-zinc-100 cursor-pointer" aria-label="Videollamada">
+                  <button type="button" className="min-h-10 min-w-10 p-2 text-zinc-500 fine-hover:text-cyan-600 fine-hover:bg-zinc-100 transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600/50" aria-label="Videollamada">
                     <Video className="w-4 h-4" />
                   </button>
-                  <button type="button" className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors rounded-full hover:bg-zinc-100 cursor-pointer" aria-label="Opciones">
+                  <button type="button" className="min-h-10 min-w-10 p-2 text-zinc-500 fine-hover:text-cyan-600 fine-hover:bg-zinc-100 transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600/50" aria-label="Opciones">
                     <MoreVertical className="w-4 h-4" />
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Messages body list */}
-            <div 
-              className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 custom-scrollbar relative bg-[#e5ddd5] bg-[radial-gradient(#cfc8c0_1px,transparent_1px)] bg-[size:24px_24px]"
-            >
-              {loadingMessages ? (
-                <div className="h-full flex items-center justify-center text-xs text-zinc-500 font-semibold">
-                  Cargando conversación...
-                </div>
-              ) : messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-500 space-y-2">
-                  <MessageSquare className="w-8 h-8 text-zinc-400" />
-                  <p className="text-xs font-bold">No hay mensajes previos.</p>
-                  <p className="text-[10px] text-zinc-450 font-semibold">¡Escribe tu primer mensaje!</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {messages.map(m => {
-                    const isOwn = m.sender_id === currentUserId
-                    return (
-                      <div 
-                        key={m.id}
-                        className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-1`}
-                      >
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          className={`max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl text-[13px] leading-relaxed shadow-sm relative ${
-                            isOwn 
-                              ? 'bg-[#d9fdd3] text-zinc-900 font-medium rounded-tr-sm border border-[#c6ecc0]' 
-                              : 'bg-white text-zinc-900 rounded-tl-sm border border-zinc-200/50 font-medium'
-                          }`}
+            {/* Main Chat Conversation Viewport */}
+            <div className="flex-1 relative bg-[#e5ddd5] overflow-hidden flex flex-col min-h-0">
+              {/* Background Pattern — the outer chat container repeats the same pattern,
+                  so when the keyboard resizes this area the seams are invisible */}
+              <div className="absolute inset-0 bg-[radial-gradient(#cfc8c0_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
+              {/* Messages body list */}
+              <div 
+                className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar relative z-10 flex flex-col"
+              >
+                {loadingMessages ? (
+                  <div className="h-full flex items-center justify-center text-xs text-zinc-500 font-semibold">
+                    Cargando conversación...
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-zinc-500 space-y-2">
+                    <MessageSquare className="w-8 h-8 text-zinc-400" />
+                    <p className="text-xs font-bold">No hay mensajes previos.</p>
+                    <p className="text-[10px] text-zinc-500 font-semibold">¡Escribe tu primer mensaje!</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4 flex-1">
+                    {messages.map(m => {
+                      const isOwn = m.sender_id === currentUserId
+                      return (
+                        <div 
+                          key={m.id}
+                          className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-1`}
                         >
-                          <p className="whitespace-pre-wrap">{m.message}</p>
-                          {isOwn ? (
-                            <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-450 float-right ml-3 translate-y-1">
-                              {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              <span className="text-cyan-600 font-black tracking-normal text-[10px]">✓✓</span>
-                            </div>
-                          ) : (
-                            <div className="text-[9px] mt-0.5 text-right font-bold text-zinc-400 float-right ml-3 translate-y-1">
-                              {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
-                          )}
-                          <div className="clear-both"></div>
-                        </motion.div>
-                      </div>
-                    )
-                  })}
+                          <motion.div
+                            initial={reduceMotion ? false : { opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+                            className={`max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl text-[13px] leading-relaxed shadow-sm relative ${
+                              isOwn 
+                                ? 'bg-[#d9fdd3] text-zinc-900 font-medium rounded-tr-sm border border-[#c6ecc0]' 
+                                : 'bg-white text-zinc-900 rounded-tl-sm border border-zinc-200/50 font-medium'
+                            }`}
+                          >
+                            <p className="whitespace-pre-wrap">{m.message}</p>
+                            {isOwn ? (
+                              <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-500 float-right ml-3 translate-y-1" suppressHydrationWarning>
+                                {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                <span className="text-cyan-600 font-black tracking-normal text-[10px]">✓✓</span>
+                              </div>
+                            ) : (
+                              <div className="text-[9px] mt-0.5 text-right font-bold text-zinc-400 float-right ml-3 translate-y-1" suppressHydrationWarning>
+                                {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            )}
+                            <div className="clear-both"></div>
+                          </motion.div>
+                        </div>
+                      )
+                    })}
 
-                  {/* Typing Indicator */}
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="bg-zinc-100 border border-zinc-200 text-zinc-500 p-3.5 rounded-2xl rounded-tl-none flex items-center gap-1.5 shadow-sm">
-                        <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                        <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                        <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                    {/* Typing Indicator */}
+                    {isTyping && (
+                      <div className="flex justify-start">
+                        <div className="bg-zinc-100 border border-zinc-200 text-zinc-500 p-3.5 rounded-2xl rounded-tl-none flex items-center gap-1.5 shadow-sm">
+                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
+                    <div ref={messagesEndRef} className="h-2" />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Input form */}
@@ -383,7 +393,7 @@ export function ChatView({
               {/* Attachment Icon */}
               <button 
                 type="button" 
-                className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors shrink-0 rounded-full hover:bg-zinc-200/50 cursor-pointer"
+                className="min-h-10 min-w-10 p-2 text-zinc-500 fine-hover:text-cyan-600 fine-hover:bg-zinc-200/50 transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] shrink-0 rounded-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600/50"
                 aria-label="Adjuntar archivo"
               >
                 <Plus className="w-5 h-5" />
@@ -394,7 +404,7 @@ export function ChatView({
                 {/* Emoji Icon */}
                 <button 
                   type="button" 
-                  className="p-2 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
+                  className="min-h-10 min-w-10 p-2 text-zinc-400 fine-hover:text-zinc-700 transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] shrink-0 cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600/50"
                   aria-label="Emojis"
                 >
                   <Smile className="w-5 h-5" />
@@ -412,13 +422,13 @@ export function ChatView({
                   }}
                   placeholder="Mensaje..."
                   rows={1}
-                  className="bg-transparent border-none text-[15px] text-zinc-850 outline-none w-full py-2 px-1 placeholder-zinc-400 resize-none max-h-[120px] min-h-[36px] custom-scrollbar self-center"
+                  className="bg-transparent border-none text-[15px] text-zinc-900 outline-none w-full py-2 px-1 placeholder-zinc-400 resize-none max-h-[120px] min-h-[36px] custom-scrollbar self-center"
                 />
                 
                 {/* Paperclip Icon */}
                 <button 
                   type="button" 
-                  className="p-2 text-zinc-400 hover:text-zinc-650 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
+                  className="min-h-10 min-w-10 p-2 text-zinc-400 fine-hover:text-zinc-700 transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] shrink-0 cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600/50"
                   aria-label="Compartir documento"
                 >
                   <Paperclip className="w-5 h-5" />
@@ -431,14 +441,14 @@ export function ChatView({
                   type="submit"
                   variant="primary"
                   size="icon"
-                  className="w-10 h-10 shrink-0 !bg-emerald-500 hover:!bg-emerald-600 !text-white rounded-full shadow-sm flex items-center justify-center cursor-pointer transition-all duration-200 self-end mb-0.5"
+                  className="w-10 h-10 shrink-0 !bg-emerald-500 fine-hover:!bg-emerald-600 !text-white rounded-full shadow-sm flex items-center justify-center cursor-pointer transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
                 >
                   <Send className="w-4 h-4 text-white ml-0.5" />
                 </AnimatedButton>
               ) : (
                 <button
                   type="button"
-                  className="w-10 h-10 shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-sm flex items-center justify-center transition-all duration-200 cursor-pointer self-end mb-0.5"
+                  className="w-10 h-10 shrink-0 bg-emerald-500 fine-hover:bg-emerald-600 text-white rounded-full shadow-sm flex items-center justify-center transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
                   aria-label="Grabar audio"
                 >
                   <Mic className="w-5 h-5" />
@@ -450,7 +460,7 @@ export function ChatView({
           <div className="flex-1 flex flex-col items-center p-6 bg-zinc-50/10">
             {currentUserRole === 'coach' ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-450 shadow-inner">
+                <div className="w-16 h-16 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-500 shadow-inner">
                   <MessageSquare className="w-8 h-8 text-zinc-500" />
                 </div>
                 <div>
@@ -481,13 +491,13 @@ export function ChatView({
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
                       placeholder="Ej: GUILLEPRO"
-                      className="flex-1 bg-white border border-zinc-200 focus:border-cyan-550 rounded-xl px-4 py-3 text-sm text-cyan-700 font-black uppercase tracking-wider outline-none transition-all"
+                      className="flex-1 bg-white border border-zinc-200 focus:border-cyan-600 focus-visible:ring-2 focus-visible:ring-cyan-600/30 rounded-xl px-4 py-3 text-sm text-cyan-700 font-black uppercase tracking-wider outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out"
                     />
                     <AnimatedButton
                       type="submit"
                       variant="primary"
                       disabled={linkingCoachCode || !inviteCode.trim()}
-                      className="px-6 py-3 text-sm font-black !bg-cyan-650 hover:!bg-cyan-550 !text-white shadow-md cursor-pointer"
+                      className="min-h-10 px-6 py-3 text-sm font-black !bg-cyan-700 fine-hover:!bg-cyan-600 !text-white shadow-md cursor-pointer active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-700/50"
                     >
                       {linkingCoachCode ? '...' : 'Vincular'}
                     </AnimatedButton>
@@ -499,30 +509,30 @@ export function ChatView({
                     <div className="w-full border-t border-zinc-200"></div>
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-white px-4 text-xs font-bold text-zinc-450 uppercase tracking-wide">o elige uno disponible</span>
+                    <span className="bg-white px-4 text-xs font-bold text-zinc-500 uppercase tracking-wide">o elige uno disponible</span>
                   </div>
                 </div>
 
                 {availableCoaches.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12 text-left">
                     {availableCoaches.map(coach => (
-                      <div key={coach.id} className="bg-white border border-zinc-200 rounded-2xl p-5 flex flex-col justify-between hover:border-cyan-500/40 transition-all group shadow-sm">
+                      <div key={coach.id} className="bg-white border border-zinc-200 rounded-2xl p-5 flex flex-col justify-between fine-hover:border-cyan-500/40 transition-[border-color,box-shadow] duration-150 ease-out group shadow-sm">
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center font-bold text-lg text-zinc-700 shadow-sm shrink-0">
                             {(coach.first_name || 'E')[0].toUpperCase()}
                           </div>
                           <div>
-                            <h4 className="text-sm font-bold text-zinc-800 group-hover:text-cyan-600 transition-colors">
+                            <h4 className="text-sm font-bold text-zinc-800 fine-hover:group-hover:text-cyan-600 transition-colors">
                               {coach.first_name} {coach.last_name}
                             </h4>
-                            <span className="text-[10px] uppercase tracking-wider font-black text-emerald-700 bg-emerald-55 border border-emerald-150 px-2 py-0.5 rounded-md mt-1 inline-block">
+                            <span className="text-[10px] uppercase tracking-wider font-black text-emerald-700 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-md mt-1 inline-block">
                               Entrenador Certificado
                             </span>
                           </div>
                         </div>
                         <AnimatedButton
                           variant="primary"
-                          className="w-full text-xs font-black !bg-zinc-50 hover:!bg-zinc-100 !text-zinc-750 border border-zinc-200 shadow-sm cursor-pointer"
+                          className="w-full text-xs font-black !bg-zinc-50 fine-hover:!bg-zinc-100 !text-zinc-800 border border-zinc-200 shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600/50"
                           disabled={linkingCoachId === coach.id}
                           onClick={() => handleLinkCoach(coach.id)}
                         >

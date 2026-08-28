@@ -13,22 +13,22 @@ interface WorkoutFeedbackModalProps {
 }
 
 const FEELINGS = [
-  { id: 'excelente', label: 'Excelente', icon: Smile, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' },
-  { id: 'buena', label: 'Buena', icon: ThumbsUp, color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30' },
-  { id: 'fatigado', label: 'Fatigado', icon: AlertTriangle, color: 'text-amber-400 bg-amber-500/10 border-amber-500/30' },
-  { id: 'lesionado', label: 'Lesionado', icon: Frown, color: 'text-rose-400 bg-rose-500/10 border-rose-500/30' }
+  { id: 'excelente', label: 'Excelente', icon: Smile, color: 'text-bike bg-bike/10 border-bike/30' },
+  { id: 'buena', label: 'Buena', icon: ThumbsUp, color: 'text-swim bg-swim/10 border-swim/30' },
+  { id: 'fatigado', label: 'Fatigado', icon: AlertTriangle, color: 'text-warning bg-warning/10 border-warning/30' },
+  { id: 'lesionado', label: 'Lesionado', icon: Frown, color: 'text-run bg-run/10 border-run/30' }
 ];
 
 const SLEEP_QUALITY = [
-  { id: 'mala', label: 'Mala ( <6h )', color: 'text-rose-400 border-rose-500/30 hover:bg-rose-500/10' },
-  { id: 'regular', label: 'Regular ( 6-7h )', color: 'text-amber-400 border-amber-500/30 hover:bg-amber-500/10' },
-  { id: 'buena', label: 'Buena ( 7-8h )', color: 'text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10' },
+  { id: 'mala', label: 'Mala ( <6h )', color: 'text-run border-run/30 hover:bg-run/10' },
+  { id: 'regular', label: 'Regular ( 6-7h )', color: 'text-warning border-warning/30 hover:bg-warning/10' },
+  { id: 'buena', label: 'Buena ( 7-8h )', color: 'text-bike border-bike/30 hover:bg-bike/10' },
 ];
 
 const PAIN_LEVELS = [
-  { id: 'ninguno', label: 'Ninguno', color: 'text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10' },
-  { id: 'ligero', label: 'Ligera molestia', color: 'text-amber-400 border-amber-500/30 hover:bg-amber-500/10' },
-  { id: 'fuerte', label: 'Dolor fuerte', color: 'text-rose-400 border-rose-500/30 hover:bg-rose-500/10' },
+  { id: 'ninguno', label: 'Ninguno', color: 'text-bike border-bike/30 hover:bg-bike/10' },
+  { id: 'ligero', label: 'Ligera molestia', color: 'text-warning border-warning/30 hover:bg-warning/10' },
+  { id: 'fuerte', label: 'Dolor fuerte', color: 'text-run border-run/30 hover:bg-run/10' },
 ];
 
 export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle }: WorkoutFeedbackModalProps) {
@@ -80,10 +80,10 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
   };
 
   const getRpeColor = (score: number) => {
-    if (score <= 3) return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
-    if (score <= 6) return 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40';
-    if (score <= 8) return 'bg-amber-500/20 text-amber-400 border-amber-500/40';
-    return 'bg-rose-500/20 text-rose-400 border-rose-500/40';
+    if (score <= 3) return 'bg-bike/20 text-bike border-bike/40';
+    if (score <= 6) return 'bg-swim/20 text-swim border-swim/40';
+    if (score <= 8) return 'bg-warning/20 text-warning border-warning/40';
+    return 'bg-run/20 text-run border-run/40';
   };
 
   const getRpeLabel = (score: number) => {
@@ -101,17 +101,17 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-lg overflow-hidden border rounded-3xl bg-zinc-900/90 border-zinc-800 shadow-2xl backdrop-blur-xl max-h-[90vh] overflow-y-auto"
+          className="relative w-full max-w-lg overflow-hidden border rounded-3xl bg-surface-app/90 border-border-subtle shadow-elevated backdrop-blur-xl max-h-[90vh] overflow-y-auto"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-zinc-800/80 sticky top-0 bg-zinc-900/90 backdrop-blur-xl z-10">
+          <div className="flex items-center justify-between p-6 border-b border-border-subtle/80 sticky top-0 bg-surface-app/90 backdrop-blur-xl z-10">
             <div>
-              <h3 className="text-xl font-bold tracking-tight text-white">Evaluación Post-Entrenamiento</h3>
-              <p className="text-sm text-zinc-400 mt-1">{workoutTitle}</p>
+              <h3 className="text-xl font-bold tracking-tight text-text-primary">Evaluación Post-Entrenamiento</h3>
+              <p className="text-sm text-text-muted mt-1">{workoutTitle}</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 transition-colors rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800"
+              className="min-h-9 min-w-9 rounded-full p-2 text-text-muted transition-[background-color,color,opacity,transform] duration-150 ease-out hover:text-text-primary hover:bg-surface-hover active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100"
               aria-label="Cerrar modal"
             >
               <X className="w-5 h-5" />
@@ -126,13 +126,13 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center justify-center py-8 text-center"
               >
-                <CheckCircle className="w-16 h-16 text-emerald-400 mb-4 animate-bounce" />
-                <p className="text-lg font-semibold text-white">{successMessage}</p>
+                <CheckCircle className="w-16 h-16 text-bike mb-4" aria-hidden="true" />
+                <p className="text-lg font-semibold text-text-primary">{successMessage}</p>
               </motion.div>
             ) : (
               <>
                 {errorMessage && (
-                  <div className="p-4 text-sm border rounded-2xl bg-rose-500/10 border-rose-500/30 text-rose-400">
+                  <div className="p-4 text-sm border rounded-2xl bg-run/10 border-run/30 text-run">
                     {errorMessage}
                   </div>
                 )}
@@ -140,8 +140,8 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                 {/* RPE Selector */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-semibold text-zinc-300">Esfuerzo Percibido (RPE 1-10)</label>
-                    <span className="text-xs font-medium text-cyan-400">{getRpeLabel(rpe)}</span>
+                    <label className="text-sm font-semibold text-text-muted">Esfuerzo Percibido (RPE 1-10)</label>
+                    <span className="text-xs font-medium text-swim">{getRpeLabel(rpe)}</span>
                   </div>
                   <div className="grid grid-cols-10 gap-1.5 mb-2">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => {
@@ -151,10 +151,10 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={num}
                           type="button"
                           onClick={() => setRpe(num)}
-                          className={`h-11 rounded-xl font-bold text-sm transition-all flex items-center justify-center border ${
+                          className={`h-11 rounded-xl font-bold text-sm transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] flex items-center justify-center border motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
                             isSelected
-                              ? getRpeColor(num) + ' scale-105 shadow-lg shadow-cyan-500/20 ring-2 ring-cyan-400'
-                              : 'bg-zinc-800/50 border-zinc-700/50 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
+                              ? getRpeColor(num) + ' scale-105 ring-2 ring-swim'
+                              : 'bg-surface-hover/50 border-border-default text-text-muted hover:border-border-default hover:text-text-muted'
                           }`}
                         >
                           {num}
@@ -162,7 +162,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                       );
                     })}
                   </div>
-                  <div className="flex justify-between text-[11px] text-zinc-500 font-medium px-1">
+                  <div className="flex justify-between text-[11px] text-text-secondary font-medium px-1">
                     <span>1 - Muy Suave</span>
                     <span>5 - Moderado</span>
                     <span>10 - Extremo</span>
@@ -171,7 +171,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
 
                 {/* Feeling Selector */}
                 <div>
-                  <label className="block text-sm font-semibold text-zinc-300 mb-3">¿Cómo te has sentido hoy?</label>
+                  <label className="block text-sm font-semibold text-text-muted mb-3">¿Cómo te has sentido hoy?</label>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     {FEELINGS.map((f) => {
                       const Icon = f.icon;
@@ -181,10 +181,10 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={f.id}
                           type="button"
                           onClick={() => setFeeling(f.id)}
-                          className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border transition-all ${
+                          className={`flex min-h-11 flex-col items-center justify-center p-3.5 rounded-2xl border transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
                             isSelected
-                              ? f.color + ' ring-2 ring-cyan-400 shadow-md shadow-cyan-500/10'
-                              : 'bg-zinc-800/40 border-zinc-700/50 text-zinc-400 hover:bg-zinc-800/80 hover:text-zinc-200'
+                              ? f.color + ' ring-2 ring-swim'
+                              : 'bg-surface-hover/40 border-border-default text-text-muted hover:bg-surface-hover/80 hover:text-text-muted'
                           }`}
                         >
                           <Icon className="w-6 h-6 mb-2" />
@@ -198,8 +198,8 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-2">
                   {/* Sleep Selector */}
                   <div>
-                    <label className="text-sm font-semibold text-zinc-300 mb-3 flex items-center gap-2">
-                      <Moon className="w-4 h-4 text-cyan-400" /> Descanso Previo
+                    <label className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
+                      <Moon className="w-4 h-4 text-swim" /> Descanso Previo
                     </label>
                     <div className="flex flex-col gap-2">
                       {SLEEP_QUALITY.map((s) => (
@@ -207,8 +207,8 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={s.id}
                           type="button"
                           onClick={() => setSleep(s.id)}
-                          className={`text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-all ${
-                            sleep === s.id ? s.color + ' ring-1 ring-current bg-zinc-800/80' : 'text-zinc-500 border-zinc-800 hover:border-zinc-700'
+                          className={`min-h-11 text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                            sleep === s.id ? s.color + ' ring-1 ring-current bg-surface-hover/80' : 'text-text-secondary border-border-subtle hover:border-border-default'
                           }`}
                         >
                           {s.label}
@@ -219,8 +219,8 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
 
                   {/* Pain Selector */}
                   <div>
-                    <label className="text-sm font-semibold text-zinc-300 mb-3 flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-rose-400" /> Molestias / Dolor
+                    <label className="text-sm font-semibold text-text-muted mb-3 flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-run" /> Molestias / Dolor
                     </label>
                     <div className="flex flex-col gap-2">
                       {PAIN_LEVELS.map((p) => (
@@ -228,8 +228,8 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={p.id}
                           type="button"
                           onClick={() => setPain(p.id)}
-                          className={`text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-all ${
-                            pain === p.id ? p.color + ' ring-1 ring-current bg-zinc-800/80' : 'text-zinc-500 border-zinc-800 hover:border-zinc-700'
+                          className={`min-h-11 text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                            pain === p.id ? p.color + ' ring-1 ring-current bg-surface-hover/80' : 'text-text-secondary border-border-subtle hover:border-border-default'
                           }`}
                         >
                           {p.label}
@@ -241,7 +241,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
 
                 {/* Intensity Adherence Selector */}
                 <div>
-                  <label className="block text-sm font-semibold text-zinc-300 mb-3">¿Cumpliste las zonas de intensidad?</label>
+                  <label className="block text-sm font-semibold text-text-muted mb-3">¿Cumpliste las zonas de intensidad?</label>
                   <div className="grid grid-cols-3 gap-2">
                     {[
                       { id: 'suave', label: 'Más suave', emoji: '📉' },
@@ -254,10 +254,10 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={item.id}
                           type="button"
                           onClick={() => setIntensityAdherence(item.id)}
-                          className={`py-2.5 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
+                          className={`min-h-11 py-2.5 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
                             isSelected 
-                              ? 'border-cyan-500 text-cyan-400 bg-cyan-500/10 font-bold scale-102 ring-2 ring-cyan-400' 
-                              : 'bg-zinc-800/40 border-zinc-700/50 text-zinc-400 hover:bg-zinc-850 hover:text-zinc-300'
+                              ? 'border-swim text-swim bg-swim/10 font-bold scale-102 ring-2 ring-swim' 
+                              : 'bg-surface-hover/40 border-border-default text-text-muted hover:bg-surface-hover hover:text-text-muted'
                           }`}
                         >
                           <span>{item.emoji}</span>
@@ -270,19 +270,19 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
 
                 {/* AI Week Adjustment (Added per user request to be in every training) */}
                 <div className="pt-2">
-                  <label className="block text-sm font-semibold text-zinc-300 mb-2">¿Necesitas ajustar el resto de la semana?</label>
+                  <label className="block text-sm font-semibold text-text-muted mb-2">¿Necesitas ajustar el resto de la semana?</label>
                   <div className="grid grid-cols-2 gap-2 mb-4">
                     <button
                       type="button"
                       onClick={() => setNotes(prev => (prev ? prev + '\n' : '') + 'Noto poca carga. Por favor, añádeme más volumen general.')}
-                      className="border border-zinc-700/50 bg-zinc-800/40 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-center gap-1.5 transition-colors text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                      className="min-h-11 border border-border-default bg-surface-hover/40 px-3 py-2.5 text-xs font-medium text-text-muted transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out hover:bg-surface-hover hover:text-text-muted active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 rounded-xl flex items-center justify-center gap-1.5"
                     >
                       📈 Poco volumen
                     </button>
                     <button
                       type="button"
                       onClick={() => setNotes(prev => (prev ? prev + '\n' : '') + 'Siento demasiada fatiga. Por favor, reduce el volumen general de la semana.')}
-                      className="border border-zinc-700/50 bg-zinc-800/40 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-center gap-1.5 transition-colors text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                      className="min-h-11 border border-border-default bg-surface-hover/40 px-3 py-2.5 text-xs font-medium text-text-muted transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out hover:bg-surface-hover hover:text-text-muted active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 rounded-xl flex items-center justify-center gap-1.5"
                     >
                       📉 Demasiada carga
                     </button>
@@ -291,7 +291,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
 
                 {/* Notes Input */}
                 <div>
-                  <label htmlFor="feedback-notes" className="block text-sm font-semibold text-zinc-300 mb-2">
+                  <label htmlFor="feedback-notes" className="block text-sm font-semibold text-text-muted mb-2">
                     Notas adicionales / Instrucciones para la IA
                   </label>
                   <textarea
@@ -300,13 +300,13 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                     onChange={(e) => setNotes(e.target.value)}
                     rows={2}
                     placeholder="Ej: Sensaciones espectaculares en las series..."
-                    className="w-full p-3 text-sm text-white placeholder-zinc-500 border rounded-2xl bg-zinc-800/50 border-zinc-700/80 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all resize-none"
+                    className="w-full p-3 text-sm text-text-primary placeholder-text-muted border rounded-2xl bg-surface-hover/50 border-border-default focus:outline-none focus:ring-2 focus:ring-swim/50 focus:border-swim transition-[background-color,color,border-color,box-shadow] duration-150 ease-out resize-none motion-reduce:transition-opacity"
                   />
                 </div>
 
                 {/* Nutrition Reminder */}
-                <div className="p-3 text-xs border rounded-xl bg-cyan-500/10 border-cyan-500/30 text-cyan-300 flex items-center gap-2 mt-2">
-                  <CheckCircle className="w-4 h-4 shrink-0 text-cyan-400" />
+                <div className="p-3 text-xs border rounded-xl bg-swim/10 border-swim/30 text-swim flex items-center gap-2 mt-2">
+                  <CheckCircle className="w-4 h-4 shrink-0 text-swim" />
                   <p><strong>Nutrición Post-Entreno:</strong> Recuerda revisar tus macros y recuperar líquidos en la pestaña de Nutrición.</p>
                 </div>
 
@@ -314,10 +314,10 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 text-sm font-bold text-black transition-all rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 shadow-lg shadow-cyan-500/20 flex items-center justify-center disabled:opacity-50 mt-4"
+                  className="w-full min-h-11 py-4 text-sm font-bold text-white transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.97] rounded-2xl bg-swim hover:bg-swim/90 flex items-center justify-center disabled:opacity-50 mt-4 motion-reduce:transition-opacity motion-reduce:active:scale-100"
                 >
                   {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
                     'Enviar Evaluación a mi py-entrenador'
                   )}

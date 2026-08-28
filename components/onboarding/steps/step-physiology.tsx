@@ -132,41 +132,41 @@ const DISLIKED_OPTIONS = [
 export function StepPhysiology(props: StepPhysiologyProps) {
   return (
     <motion.div key="step2" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
-      <ProCard className="space-y-6 bg-white border border-zinc-200">
-        <div className="border-b border-zinc-200 pb-4">
-          <h2 className="text-xl font-bold text-zinc-900 flex items-center gap-2"><Activity className="w-5 h-5 text-cyan-400" /> Calibración Fisiológica</h2>
-          <p className="text-sm text-zinc-500 mt-1">Introduce tus zonas actuales. Si no las sabes, las estimaremos automáticamente por IA.</p>
+      <ProCard className="space-y-6 bg-surface-card border border-border-default shadow-card">
+        <div className="border-b border-border-default pb-4">
+          <h2 className="text-xl font-bold text-text-primary flex items-center gap-2"><Activity className="w-5 h-5 text-swim" /> Calibración Fisiológica</h2>
+          <p className="text-sm text-text-secondary mt-1">Introduce tus zonas actuales. Si no las sabes, las estimaremos automáticamente por IA.</p>
         </div>
 
         <div className="space-y-4">
-          <label className="text-xs font-bold text-zinc-400 block uppercase tracking-wider">Modalidad de Entrenamiento</label>
+          <label className="text-xs font-bold text-text-muted block uppercase tracking-wider">Modalidad de Entrenamiento</label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={() => props.setWantsCoach(false)}
-              className={`p-4 rounded-xl border text-left transition-all flex flex-col gap-1.5 cursor-pointer ${
+              className={`p-4 rounded-xl border text-left transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex flex-col gap-1.5 cursor-pointer ${
                 !props.wantsCoach 
-                  ? 'bg-cyan-50/50 border-cyan-500 text-cyan-600 ring-1 ring-cyan-500 shadow-xs' 
-                  : 'bg-zinc-50/30 border-zinc-200 text-zinc-500 hover:border-zinc-300'
+                  ? 'bg-swim/10 border-swim text-swim ring-1 ring-swim ' 
+                  : 'bg-surface-hover/30 border-border-default text-text-secondary hover:border-border-default'
               }`}
             >
               <div className="flex justify-between items-center w-full">
                 <span className="font-bold text-sm">IA Autónoma</span>
-                {!props.wantsCoach && <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />}
+                {!props.wantsCoach && <div className="h-2 w-2 rounded-full bg-swim" aria-hidden="true" />}
               </div>
               <span className="text-[10px] opacity-80 font-semibold">Planificación 100% generada por IA</span>
             </button>
             
             <button
               onClick={() => props.setWantsCoach(true)}
-              className={`p-4 rounded-xl border text-left transition-all flex flex-col gap-1.5 cursor-pointer ${
+              className={`p-4 rounded-xl border text-left transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex flex-col gap-1.5 cursor-pointer ${
                 props.wantsCoach 
-                  ? 'bg-orange-50/50 border-orange-500 text-orange-600 ring-1 ring-orange-500 shadow-xs' 
-                  : 'bg-zinc-50/30 border-zinc-200 text-zinc-500 hover:border-zinc-300'
+                  ? 'bg-coral-500/10 border-coral-500 text-coral-500 ring-1 ring-coral-500 ' 
+                  : 'bg-surface-hover/30 border-border-default text-text-secondary hover:border-border-default'
               }`}
             >
               <div className="flex justify-between items-center w-full">
                 <span className="font-bold text-sm">Entrenador Humano</span>
-                {props.wantsCoach && <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />}
+                {props.wantsCoach && <div className="h-2 w-2 rounded-full bg-coral-500" aria-hidden="true" />}
               </div>
               <span className="text-[10px] opacity-80 font-semibold">Solicitar conexión con un Coach (Recomendado)</span>
             </button>
@@ -179,23 +179,23 @@ export function StepPhysiology(props: StepPhysiologyProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="pt-4 border-t border-zinc-200 text-center space-y-2"
+              className="pt-4 border-t border-border-default text-center space-y-2"
             >
-              <p className="text-sm text-zinc-750 font-medium">Has elegido entrenar con un profesional.</p>
-              <p className="text-xs text-zinc-500">Saltaremos la calibración automática y el garaje. En el siguiente paso podrás usar tu código o buscar uno.</p>
+              <p className="text-sm text-text-primary font-medium">Has elegido entrenar con un profesional.</p>
+              <p className="text-xs text-text-secondary">Saltaremos la calibración automática y el garaje. En el siguiente paso podrás usar tu código o buscar uno.</p>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Sección de Preferencias de Alimentos para Nutrición */}
-        <div className="pt-6 border-t border-zinc-200 space-y-6">
+        <div className="pt-6 border-t border-border-default space-y-6">
           {/* 1. Ingredientes Preferidos */}
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-zinc-650 block uppercase tracking-wider">
+              <label className="text-xs font-bold text-text-secondary block uppercase tracking-wider">
                 Ingredientes Preferidos para Recuperación
               </label>
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-text-secondary mt-1">
                 Selecciona tus alimentos favoritos. La IA los priorizará al sugerir tus comidas post-entrenamiento.
               </p>
             </div>
@@ -214,14 +214,14 @@ export function StepPhysiology(props: StepPhysiologyProps) {
                         props.setPreferredIngredients([...props.preferredIngredients, ing.id]);
                       }
                     }}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
+                    className={`p-3 rounded-xl border text-center transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer flex flex-col justify-between items-center ${
                       isSelected
-                        ? 'bg-emerald-50 border-emerald-500 text-emerald-700 ring-1 ring-emerald-500 shadow-xs font-semibold'
-                        : 'bg-zinc-50/50 border-zinc-200 text-zinc-650 hover:bg-zinc-50 hover:border-zinc-300'
+                        ? 'bg-bike/10 border-bike text-bike ring-1 ring-bike  font-semibold'
+                        : 'bg-surface-hover/50 border-border-default text-text-secondary hover:bg-surface-hover hover:border-border-default'
                     }`}
                   >
                     <span className="text-xs font-bold">{ing.label}</span>
-                    <span className="text-[9px] text-zinc-400 uppercase font-bold mt-1 tracking-wider">{ing.category}</span>
+                    <span className="text-[9px] text-text-muted uppercase font-bold mt-1 tracking-wider">{ing.category}</span>
                   </button>
                 );
               })}
@@ -229,12 +229,12 @@ export function StepPhysiology(props: StepPhysiologyProps) {
           </div>
 
           {/* 2. Alergias Alimentarias */}
-          <div className="space-y-4 pt-4 border-t border-zinc-200">
+          <div className="space-y-4 pt-4 border-t border-border-default">
             <div>
-              <label className="text-xs font-bold text-red-500/90 block uppercase tracking-wider">
+              <label className="text-xs font-bold text-danger/90 block uppercase tracking-wider">
                 Alergias o Intolerancias Alimentarias
               </label>
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-text-secondary mt-1">
                 Indica si sufres de alguna intolerancia. Excluiremos automáticamente cualquier ingrediente relacionado de tus sugerencias de combustible.
               </p>
             </div>
@@ -253,14 +253,14 @@ export function StepPhysiology(props: StepPhysiologyProps) {
                         props.setAllergies([...props.allergies, alg.id]);
                       }
                     }}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
+                    className={`p-3 rounded-xl border text-center transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer flex flex-col justify-between items-center ${
                       isSelected
-                        ? 'bg-red-50 border-red-500/40 text-red-700 ring-1 ring-red-500/40 shadow-xs font-semibold'
-                        : 'bg-zinc-50/50 border-zinc-200 text-zinc-650 hover:bg-zinc-50 hover:border-zinc-300'
+                        ? 'bg-danger/10 border-danger/40 text-danger ring-1 ring-danger/40  font-semibold'
+                        : 'bg-surface-hover/50 border-border-default text-text-secondary hover:bg-surface-hover hover:border-border-default'
                     }`}
                   >
                     <span className="text-xs font-bold">{alg.label}</span>
-                    <span className="text-[9px] text-red-500/50 uppercase font-bold mt-1 tracking-wider">{alg.category}</span>
+                    <span className="text-[9px] text-danger/50 uppercase font-bold mt-1 tracking-wider">{alg.category}</span>
                   </button>
                 );
               })}
@@ -268,12 +268,12 @@ export function StepPhysiology(props: StepPhysiologyProps) {
           </div>
 
           {/* 3. Ingredientes a Evitar */}
-          <div className="space-y-4 pt-4 border-t border-zinc-200">
+          <div className="space-y-4 pt-4 border-t border-border-default">
             <div>
-              <label className="text-xs font-bold text-amber-600/90 block uppercase tracking-wider">
+              <label className="text-xs font-bold text-warning/90 block uppercase tracking-wider">
                 Ingredientes que prefieres evitar
               </label>
-              <p className="text-xs text-zinc-500 mt-1">
+              <p className="text-xs text-text-secondary mt-1">
                 Alimentos que no te gustan o prefieres no incluir en tu plan de nutrición.
               </p>
             </div>
@@ -292,14 +292,14 @@ export function StepPhysiology(props: StepPhysiologyProps) {
                         props.setDislikedIngredients([...props.dislikedIngredients, dis.id]);
                       }
                     }}
-                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
+                    className={`p-3 rounded-xl border text-center transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer flex flex-col justify-between items-center ${
                       isSelected
-                        ? 'bg-amber-50 border-amber-500/40 text-amber-700 ring-1 ring-amber-500/40 shadow-xs font-semibold'
-                        : 'bg-zinc-50/50 border-zinc-200 text-zinc-650 hover:bg-zinc-50 hover:border-zinc-300'
+                        ? 'bg-warning/10 border-warning/40 text-warning ring-1 ring-warning/40  font-semibold'
+                        : 'bg-surface-hover/50 border-border-default text-text-secondary hover:bg-surface-hover hover:border-border-default'
                     }`}
                   >
                     <span className="text-xs font-bold">{dis.label}</span>
-                    <span className="text-[9px] text-amber-600/50 uppercase font-bold mt-1 tracking-wider">{dis.category}</span>
+                    <span className="text-[9px] text-warning/50 uppercase font-bold mt-1 tracking-wider">{dis.category}</span>
                   </button>
                 );
               })}
@@ -307,9 +307,9 @@ export function StepPhysiology(props: StepPhysiologyProps) {
           </div>
         </div>
         
-        <div className="flex justify-between pt-4 border-t border-zinc-200">
+        <div className="flex justify-between pt-4 border-t border-border-default">
           {!props.isFirstStep ? (
-            <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-zinc-500 hover:text-zinc-800 transition flex items-center cursor-pointer"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+            <button onClick={props.onPrev} className="flex min-h-11 items-center px-6 py-3 text-sm font-semibold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"><ChevronLeft className="mr-1 h-4 w-4" /> Atrás</button>
           ) : (
             <div />
           )}
@@ -319,7 +319,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
               return;
             }
             props.onNext();
-          }} className="px-8 py-3 text-sm !bg-cyan-400 hover:!bg-cyan-500 !text-white shadow-cyan-500/10">
+          }} className="px-8 py-3 text-sm !bg-swim hover:!bg-swim/90 !text-white">
             {props.wantsCoach ? 'Siguiente' : 'Continuar'} <ChevronRight className="w-4 h-4 ml-1" />
           </AnimatedButton>
         </div>

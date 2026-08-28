@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { syncPhysiologyFromStrava } from '@/lib/telemetry/strava-sync';
 
 function getBaseUrl(request: NextRequest) {
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // Exchange authorization code for token
-    const tokenResponse = await fetch('https://www.strava.com/oauth/token', {
+    const tokenResponse = await fetchWithTimeout('https://www.strava.com/oauth/token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -10,7 +10,7 @@ import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
-import { Flame, Calendar, Trophy, Activity, BookOpen, ChevronRight, Megaphone, Sparkles } from 'lucide-react';
+import { Activity, BookOpen, ChevronRight, Megaphone, Award } from 'lucide-react';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
@@ -21,9 +21,11 @@ import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
 import { WorkoutAIFeedback } from '@/components/dashboard/workout-ai-feedback';
 import { BadgesGrid } from '@/components/dashboard/badges-grid';
 import { ProfileCompletion } from '@/components/dashboard/profile-completion';
-import { RecoveryDashboard } from '@/components/dashboard/recovery-dashboard';
 import { evaluateBadges, getEarnedCount } from '@/lib/badges';
-import { analyzeRecovery } from '@/lib/recovery-analysis';
+import { TodayWorkoutHero } from '@/components/dashboard/today-workout-hero';
+import { RecoverySummary } from '@/components/dashboard/recovery-summary';
+import { ExpandableSection } from '@/components/dashboard/expandable-section';
+import { StartLine, type StartLane } from '@/components/dashboard/start-line';
 
 export const dynamic = 'force-dynamic'
 
@@ -148,6 +150,33 @@ export default async function DashboardPage() {
   const sunStr = sunday.toISOString().split('T')[0];
 
   const weeklyWorkouts = workouts?.filter(w => w.scheduled_date >= monStr && w.scheduled_date <= sunStr) || [];
+
+  // Per-discipline stats for the Start Line. Brick sessions count on the bike lane.
+  const emptyLane = { minutes: 0, completedMinutes: 0, sessions: 0, completedSessions: 0 };
+  const startLaneInit: Record<StartLane['sport'], typeof emptyLane> = {
+    natacion: { ...emptyLane },
+    ciclismo: { ...emptyLane },
+    carrera: { ...emptyLane },
+  };
+  for (const w of weeklyWorkouts) {
+    const st = w.training_sessions?.sport_type;
+    const lane = st === 'brick' ? 'ciclismo' : st;
+    if (!(lane in startLaneInit)) continue;
+    const dur = w.training_sessions?.duration_min || 0;
+    const acc = startLaneInit[lane as StartLane['sport']];
+    acc.minutes += dur;
+    acc.sessions += 1;
+    if (w.status === 'completed') {
+      acc.completedMinutes += dur;
+      acc.completedSessions += 1;
+    }
+  }
+  const startLanes: StartLane[] = (['natacion', 'ciclismo', 'carrera'] as const).map((sport) => ({
+    sport,
+    ...startLaneInit[sport],
+  }));
+  const weekLabel = `Semana del ${monday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}`;
+
   const completedCount = weeklyWorkouts.filter(w => w.status === 'completed').length || 0;
   const totalCount = weeklyWorkouts.filter(w => w.training_sessions?.sport_type !== 'descanso').length || 0;
   const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -172,33 +201,6 @@ export default async function DashboardPage() {
 
   // Find today's workout for AI coach feedback
   const todayWorkout = workouts?.find((w: any) => w.scheduled_date === todayStr && w.training_sessions?.sport_type !== 'descanso');
-
-  // Analyze recovery
-  const recoveryData = {
-    date: todayStr,
-    hrv: biometrics?.hrv || null,
-    sleepHours: biometrics?.sleep_hours || null,
-    sleepScore: biometrics?.sleep_score || null,
-    readinessScore: biometrics?.readiness_score || null,
-    fatigueRating: biometrics?.fatigue_rating || null,
-    stressLevel: biometrics?.stress_level || null,
-    rhr: biometrics?.rhr || null,
-    weight: biometrics?.weight || null,
-  }
-
-  const recoveryHistory = (biometricsHistory || []).slice(-7).map((b: any) => ({
-    date: b.date,
-    hrv: b.hrv || null,
-    sleepHours: b.sleep_hours || null,
-    sleepScore: b.sleep_score || null,
-    readinessScore: b.readiness_score || null,
-    fatigueRating: b.fatigue_rating || null,
-    stressLevel: b.stress_level || null,
-    rhr: b.rhr || null,
-    weight: b.weight || null,
-  }))
-
-  const recoveryAnalysis = analyzeRecovery(recoveryData, recoveryHistory)
 
   // Evaluate badges
   const allWorkoutsCompleted = workouts?.filter((w: any) => w.status === 'completed').length || 0
@@ -245,118 +247,165 @@ export default async function DashboardPage() {
   })
 
   return (
-    <div className="min-h-screen bg-zinc-950">
+    <div className="min-h-screen bg-bg-app w-full overflow-x-hidden">
       {activeFeedbackDays !== null && (
         <AppFeedbackModal daysUsed={activeFeedbackDays} />
       )}
       <MorningCheckInModal hasCompletedCheckIn={hasCompletedCheckIn} hasGarminSync={isConnected} />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-6 pb-8 space-y-8">
-        
-        {/* Pizarra del Entrenador */}
-        {groupAnnouncement && (
-          <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 relative overflow-hidden shadow-sm">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-400" />
-            <div className="flex items-start gap-3 pl-2">
-              <Megaphone className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
-              <div>
-                <h3 className="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-1">Nota de tu Entrenador</h3>
-                <p className="text-sm text-amber-900 whitespace-pre-wrap leading-relaxed">{groupAnnouncement}</p>
-              </div>
-            </div>
-          </div>
-        )}
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pb-8 lg:px-8">
 
-        {/* Objective Configuration Card (If pending or to edit) */}
-        <ObjectiveConfigCard targetRaceName={profile.target_race_name} />
-        
-        {/* Banner de Bienvenida a Principiantes */}
-        {profile.level === 'principiante' && (
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 relative overflow-hidden group shadow-md shadow-emerald-950/20">
-            {/* Ambient Background Light Glow */}
-            <div className="absolute -right-16 -top-16 w-36 h-36 rounded-full bg-emerald-500/10 blur-3xl group-hover:bg-emerald-500/15 transition-all duration-500" />
-            
-            <div className="flex gap-4 items-start relative z-10">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5 shadow-inner">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <div className="space-y-1.5">
-                <h3 className="text-sm font-semibold text-zinc-100 flex items-center gap-2">
-                  ¡Bienvenido a tu viaje de triatlón, {profile.first_name || 'Triatleta'}! 🏁
-                </h3>
-                <p className="text-xs text-zinc-300 leading-relaxed max-w-2xl">
-                  Estás siguiendo un plan estructurado para principiantes. Recuerda que no necesitas relojes caros, potenciómetros ni bicicletas de miles de euros para empezar. Tu constancia y disfrutar del camino es lo único que importa.
-                </p>
-                <div className="pt-1.5 flex gap-3">
-                  <Link href="/principiantes">
-                    <AnimatedButton size="sm" className="!bg-emerald-500 hover:!bg-emerald-400 !text-black text-[11px] font-semibold py-1.5 px-3 rounded-lg shadow-sm shadow-emerald-950/25 flex items-center gap-1">
-                      <span>Explorar Zona Principiantes</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </AnimatedButton>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <div className="mb-6">
+          <p className="text-xs font-semibold capitalize text-accent">
+            {now.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+          </p>
+          <h1 className="mt-1 font-display text-3xl font-bold leading-tight tracking-tight text-text-primary">
+            {now.getHours() < 12 ? 'Buenos días' : now.getHours() < 19 ? 'Buenas tardes' : 'Buenas noches'}, {profile.first_name || 'triatleta'}
+          </h1>
+          <p className="mt-1 text-sm text-text-secondary">Tu estado y la prioridad de hoy, en un solo vistazo.</p>
+        </div>
 
-        {/* Barra de Telemetría Activa (Sólo si está conectado, sin botón manual de forzado) */}
-        {isConnected && (
-          <div className="p-4 rounded-2xl bg-cyan-50/50 border border-cyan-100 flex items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-cyan-100 flex items-center justify-center text-cyan-600 shrink-0">
-                <Activity className="w-4 h-4 animate-pulse" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-zinc-850">Telemetría Activa (Auto 24/7)</span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[9px] font-bold border border-emerald-150">Sincronización Pasiva</span>
-                </div>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Tus actividades se marcan como hechas y se sincronizan al instante en cuanto se detectan en Strava.</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 shrink-0 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-150 text-[10px] text-emerald-700 font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Conexión Activa
-            </div>
-          </div>
-        )}
-
-        {/* Recovery Dashboard */}
-	<RecoveryDashboard analysis={recoveryAnalysis} />
-
-	{/* Coach IA */}
-	<section className="space-y-4">
-	  <WorkoutAIFeedback
-	    todayWorkout={todayWorkout ?? null}
-	    hrv={biometrics?.hrv}
-	    readiness={biometrics?.readiness_score}
-	    fatigue={biometrics?.fatigue_rating}
-	  />
-	</section>
-
-	{/* Badges / Logros */}
-	<BadgesGrid badges={badgeChecks} />
-
-	{/* Profile Completion */}
-	<ProfileCompletion profile={profile} />
-
-	<DashboardViewTabs 
-          initialWorkouts={workouts || []} 
-          isConnected={isConnected} 
-          profile={profile}
-          initialBiometrics={biometrics}
-          initialBiometricsHistory={biometricsHistory}
-          initialNutrition={nutritionData}
-          initialAnalytics={analyticsData}
-        />
-
-        {/* Historial de Actividades Recientes de Strava (Sólo si está conectado) */}
-        {isConnected && (
-          <section className="space-y-4 pt-6 border-t border-zinc-900/50">
-            <ActivitiesFeed />
+        <div className="mb-8 grid items-start gap-4 lg:grid-cols-[.9fr_1.1fr]">
+          <section>
+            <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Tu recuperación</h2>
+            <RecoverySummary readinessScore={biometrics?.readiness_score} hrv={biometrics?.hrv} sleepHours={biometrics?.sleep_hours} fatigue={biometrics?.fatigue_rating} />
           </section>
-        )}
+          <section>
+            <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Entrenamiento de hoy</h2>
+            <TodayWorkoutHero workout={todayWorkout ?? null} />
+          </section>
+        </div>
+
+        {/* LA SEMANA — volumen por disciplina + calendario de planificación */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between gap-3 px-0.5 mb-3">
+            <h2 className="text-xs font-semibold text-text-muted">Tu semana</h2>
+            <Link
+              href="/resumen"
+              className="group flex items-center gap-1.5 text-xs font-bold text-text-secondary hover:text-text-primary transition-colors"
+            >
+              <Award className="w-3.5 h-3.5 text-accent" />
+              <span>Resumen semanal</span>
+              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </div>
+          <div className="space-y-3">
+            <StartLine lanes={startLanes} weekLabel={weekLabel} />
+            <DashboardViewTabs
+              initialWorkouts={workouts || []}
+              isConnected={isConnected}
+              profile={profile}
+              initialBiometrics={biometrics}
+              initialBiometricsHistory={biometricsHistory}
+              initialNutrition={nutritionData}
+              initialAnalytics={analyticsData}
+            />
+          </div>
+        </section>
+
+        {/* Secciones secundarias detrás del menú desplegable */}
+        <ExpandableSection title="Nutrición, actividad, logros y ajustes">
+
+          {/* ── Tu entrenador ── */}
+          <div className="space-y-3">
+            <p className="font-display text-[10px] font-semibold uppercase tracking-[0.25em] text-text-muted px-0.5">Tu entrenador</p>
+
+            {/* Pizarra del Entrenador */}
+            {groupAnnouncement && (
+              <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/25 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-400" />
+                <div className="flex items-start gap-3 pl-2">
+                  <Megaphone className="w-5 h-5 text-amber-300 mt-0.5 shrink-0" />
+                  <div>
+                    <h3 className="text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-1">Nota de tu Entrenador</h3>
+                    <p className="text-sm text-amber-100/90 whitespace-pre-wrap leading-relaxed">{groupAnnouncement}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Objective Configuration Card (If pending or to edit) */}
+            <ObjectiveConfigCard targetRaceName={profile.target_race_name} />
+
+            {/* Banner de Bienvenida a Principiantes */}
+            {profile.level === 'principiante' && (
+              <div className="p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/25">
+                <div className="flex gap-4 items-start">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-300 shrink-0 mt-0.5">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+                      ¡Bienvenido a tu viaje de triatlón, {profile.first_name || 'Triatleta'}!
+                    </h3>
+                    <p className="text-xs text-text-secondary leading-relaxed max-w-2xl">
+                      Estás siguiendo un plan estructurado para principiantes. Recuerda que no necesitas relojes caros, potenciómetros ni bicicletas de miles de euros para empezar. Tu constancia y disfrutar del camino es lo único que importa.
+                    </p>
+                    <div className="pt-1.5 flex gap-3">
+                      <Link href="/principiantes">
+                        <AnimatedButton size="sm" className="!bg-emerald-500 hover:!bg-emerald-400 !text-black text-[11px] font-semibold py-1.5 px-3 rounded-lg flex items-center gap-1">
+                          <span>Explorar Zona Principiantes</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </AnimatedButton>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Conexión y análisis ── */}
+          <div className="space-y-3">
+            <p className="font-display text-[10px] font-semibold uppercase tracking-[0.25em] text-text-muted px-0.5">Conexión y análisis</p>
+
+            {/* Barra de Telemetría Activa (Sólo si está conectado) */}
+            {isConnected && (
+              <div className="p-4 rounded-2xl bg-swim/10 border border-swim/20 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-swim/15 flex items-center justify-center text-swim shrink-0">
+                    <Activity className="w-4 h-4 animate-pulse" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-text-primary">Telemetría Activa (Auto 24/7)</span>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[9px] font-bold border border-emerald-500/30">Sincronización Pasiva</span>
+                    </div>
+                    <p className="text-[10px] text-text-muted mt-0.5">Tus actividades se marcan como hechas y se sincronizan al instante en cuanto se detectan en Strava.</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0 bg-emerald-500/15 px-3 py-1.5 rounded-xl border border-emerald-500/30 text-[10px] text-emerald-300 font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Conexión Activa
+                </div>
+              </div>
+            )}
+
+            {/* Coach IA */}
+            <WorkoutAIFeedback
+              todayWorkout={todayWorkout ?? null}
+              hrv={biometrics?.hrv}
+              readiness={biometrics?.readiness_score}
+              fatigue={biometrics?.fatigue_rating}
+            />
+          </div>
+
+          {/* ── Logros y progreso ── */}
+          <div className="space-y-3">
+            <p className="font-display text-[10px] font-semibold uppercase tracking-[0.25em] text-text-muted px-0.5">Logros y progreso</p>
+            <BadgesGrid badges={badgeChecks} />
+            <ProfileCompletion profile={profile} />
+          </div>
+
+          {/* ── Actividad reciente ── */}
+          {isConnected && (
+            <div className="space-y-3">
+              <p className="font-display text-[10px] font-semibold uppercase tracking-[0.25em] text-text-muted px-0.5">Actividad reciente</p>
+              <ActivitiesFeed />
+            </div>
+          )}
+
+        </ExpandableSection>
 
         <PushNotificationManager />
       </main>

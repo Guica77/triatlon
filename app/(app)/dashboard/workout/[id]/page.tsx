@@ -46,14 +46,14 @@ export default async function WorkoutDetailPage({ params }: WorkoutPageProps) {
   return (
     <div className="min-h-screen bg-[var(--color-background)] pb-24">
       {/* Header navbar */}
-      <header className="border-b border-border bg-background/85 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+      <header className="border-b border-border bg-background/85 backdrop-blur-md sticky top-0 z-50 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-600 shrink-0">
             <Watch className="w-4 h-4" />
           </div>
           <div>
             <h1 className="text-sm sm:text-base font-bold text-foreground leading-tight">Sesión Estructurada</h1>
-            <p className="text-[10px] sm:text-xs text-muted-foreground capitalize">
+            <p className="text-xs text-muted-foreground capitalize">
               Entrenamiento Analizado por IA
             </p>
           </div>
@@ -62,13 +62,13 @@ export default async function WorkoutDetailPage({ params }: WorkoutPageProps) {
         <Link href="/dashboard">
           <AnimatedButton variant="secondary" className="flex items-center gap-2 px-3 py-1.5 text-xs shadow-sm">
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Volver al Dashboard</span>
+            <span className="hidden sm:inline">Volver al panel</span>
           </AnimatedButton>
         </Link>
       </header>
 
       {/* Main Client Shell */}
-      <main className="max-w-4xl mx-auto px-6 pt-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-5 sm:pt-8">
         <WorkoutDetailClient 
           workout={workout as any} 
           structured={structuredWorkout} 

@@ -31,24 +31,24 @@ interface PMCChartProps {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-3 border border-zinc-200 shadow-lg rounded-xl text-xs space-y-1 z-50">
-        <p className="font-bold text-zinc-800 mb-2 border-b border-zinc-100 pb-1">
+      <div className="bg-surface-elevated p-3 border border-border-default shadow-elevated rounded-xl text-xs space-y-1 z-50">
+        <p className="font-bold text-text-primary mb-2 border-b border-border-subtle pb-1">
           {format(parseISO(label), "d MMM yyyy", { locale: es })}
         </p>
         {payload.map((entry: any, index: number) => {
           const getBgClass = (color: string) => {
-            if (color === '#06b6d4') return 'bg-cyan-500';
-            if (color === '#f43f5e') return 'bg-rose-500';
+            if (color === '#06b6d4') return 'bg-swim';
+            if (color === '#f43f5e') return 'bg-run';
             if (color === '#f59e0b') return 'bg-amber-500';
-            return 'bg-zinc-500';
+            return 'bg-border-default';
           };
           return (
             <div key={`item-${index}`} className="flex items-center gap-2">
-              <span 
+              <span
                 className={`w-2 h-2 rounded-full ${getBgClass(entry.color)}`}
               />
-              <span className="font-medium text-zinc-500 uppercase tracking-wider">{entry.name}:</span>
-              <span className="font-black text-zinc-900 ml-auto">{entry.value}</span>
+              <span className="font-medium text-text-secondary uppercase tracking-wider">{entry.name}:</span>
+              <span className="font-black text-text-primary ml-auto">{entry.value}</span>
             </div>
           );
         })}
@@ -61,8 +61,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 export function PMCChart({ data }: PMCChartProps) {
   if (!data || data.length === 0) {
     return (
-      <div className="h-[300px] flex items-center justify-center bg-zinc-50 rounded-2xl border border-zinc-200 border-dashed">
-        <div className="text-center text-zinc-400 space-y-2">
+      <div className="h-[300px] flex items-center justify-center bg-surface-elevated rounded-2xl border border-border-default border-dashed">
+        <div className="text-center text-text-muted space-y-2">
           <Activity className="w-8 h-8 mx-auto opacity-50" />
           <p className="text-sm font-medium">No hay datos suficientes para calcular el PMC.</p>
         </div>
@@ -77,7 +77,7 @@ export function PMCChart({ data }: PMCChartProps) {
   return (
     <div className="w-full h-[400px] relative">
       {/* Legend inside the chart frame */}
-      <div className="absolute top-0 right-4 flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-zinc-500 z-10 bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-zinc-200">
+      <div className="absolute top-0 right-4 flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider text-text-secondary z-10 bg-surface-elevated/80 backdrop-blur-sm px-3 py-1.5 rounded-full border border-border-default">
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-cyan-500" />
           CTL (Fitness)
@@ -97,7 +97,7 @@ export function PMCChart({ data }: PMCChartProps) {
           data={data}
           margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2D3340" />
           
           <XAxis 
             dataKey="date" 
@@ -128,7 +128,7 @@ export function PMCChart({ data }: PMCChartProps) {
           
           <Tooltip content={<CustomTooltip />} />
           
-          <ReferenceLine yAxisId="right" y={0} stroke="#e4e4e7" strokeDasharray="3 3" />
+          <ReferenceLine yAxisId="right" y={0} stroke="#6B7280" strokeDasharray="3 3" />
           
           {/* TSB - Form (Area on secondary axis) */}
           <Area 

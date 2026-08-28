@@ -46,4 +46,3 @@ next-env.d.ts
 # scratch/temporary files
 /scratch/
 
-lib/external-exercises.json

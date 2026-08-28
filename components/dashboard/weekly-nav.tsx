@@ -4,7 +4,6 @@ import * as React from 'react';
 import { ProCard } from '@/components/ui/pro-card';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface WeeklyNavProps {
   workouts: Array<{
@@ -21,6 +20,12 @@ interface WeeklyNavProps {
 }
 
 export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNavProps) {
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Generar los 7 días de la semana actual
   const now = new Date();
   const currentDay = now.getDay() || 7; // 1 Lunes ... 7 Domingo
@@ -58,8 +63,16 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
     descanso: 'bg-zinc-600',
   };
 
+  if (!isMounted) {
+    return (
+      <ProCard className="p-4 py-6 relative z-10 border-border-default bg-bg-card h-32 flex items-center justify-center" aria-busy="true">
+        <div className="w-8 h-8 rounded-full border-4 border-swim border-t-transparent animate-spin"></div>
+      </ProCard>
+    );
+  }
+
   return (
-    <ProCard className="p-4 py-6 relative z-10 border-zinc-200 bg-white shadow-sm">
+    <ProCard className="p-4 py-6 relative z-10 border-border-default bg-bg-card">
       <div className="flex justify-between items-center gap-2 max-w-2xl mx-auto">
         {days.map((d, i) => {
           let complianceClass = '';
@@ -72,22 +85,22 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
             const hasPending = d.workouts.some(w => w.status === 'pending');
  
             if (d.workouts.every(w => w.status === 'completed')) {
-              complianceClass = 'bg-emerald-50 border border-emerald-300 text-emerald-700';
+              complianceClass = 'bg-bike/10 border border-bike/30 text-bike';
             } else if (hasMissed) {
-              complianceClass = 'bg-red-50 border border-red-300 text-red-700';
+              complianceClass = 'bg-danger/10 border border-danger/30 text-danger';
             } else if (hasPending && d.workouts.some(w => w.scheduled_date <= todayStr)) {
-              complianceClass = 'bg-amber-50 border border-amber-300 text-amber-700';
+              complianceClass = 'bg-warning/10 border border-warning/30 text-warning';
             } else {
-              complianceClass = 'bg-zinc-50 border border-zinc-200 text-zinc-650 hover:bg-zinc-100';
+              complianceClass = 'bg-bg-hover border border-border-default text-text-secondary hover:bg-bg-hover';
             }
           } else {
             complianceClass = d.isToday 
-              ? 'bg-zinc-100 border border-zinc-300 text-zinc-800 shadow-sm' 
-              : 'border border-transparent hover:bg-zinc-100/60 text-zinc-500';
+              ? 'bg-bg-hover border border-border-default text-text-primary' 
+              : 'border border-transparent hover:bg-bg-hover text-text-muted';
           }
  
           const activeClass = isSelected
-            ? 'bg-white border-cyan-500 ring-1 ring-cyan-500 text-cyan-400'
+            ? 'bg-bg-elevated border-swim ring-1 ring-swim text-swim'
             : complianceClass;
  
           return (
@@ -95,24 +108,17 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
               key={i} 
               onClick={() => onSelectDate(d.dateStr)}
               className={cn(
-                "relative flex flex-col items-center justify-center p-3 rounded-2xl w-16 transition-all border cursor-pointer select-none",
+                "relative flex min-h-11 w-16 shrink-0 flex-col items-center justify-center rounded-2xl border p-3 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] cursor-pointer select-none motion-reduce:transition-opacity motion-reduce:active:scale-100",
                 activeClass,
-                d.isToday && !isSelected && "bg-zinc-150 border-zinc-300 shadow-sm text-zinc-800"
+                d.isToday && !isSelected && "bg-bg-hover border-border-default text-text-primary"
               )}
             >
-              {isSelected && (
-                <motion.div
-                  layoutId="activeWeeklyDay"
-                  className="absolute inset-0 bg-white border border-cyan-500 rounded-2xl -z-10 shadow-sm"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-              <span className="text-[10px] sm:text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1 z-10">
+              <span className="text-[10px] sm:text-xs font-semibold text-text-muted uppercase tracking-wider mb-1 z-10">
                 {d.dayName}
               </span>
               <span className={cn(
                 "text-lg font-bold mb-2 z-10", 
-                isSelected ? "text-cyan-400" : d.isToday ? "text-zinc-900" : "text-zinc-700"
+                isSelected ? "text-swim" : d.isToday ? "text-text-primary" : "text-text-secondary"
               )}>
                 {d.dayNum}
               </span>
@@ -131,7 +137,7 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
                     />
                   ))
                 ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-zinc-200" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-surface-hover" />
                 )}
               </div>
             </button>

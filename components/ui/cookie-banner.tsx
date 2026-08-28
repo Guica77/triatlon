@@ -27,42 +27,44 @@ export function CookieBanner() {
   if (!isOpen) return null;
  
   return (
-    <div className="fixed bottom-20 sm:bottom-6 left-6 right-6 md:left-auto md:right-6 md:max-w-md bg-white/95 border border-zinc-200 p-5 rounded-2xl shadow-xl backdrop-blur-md z-[100] animate-fade-in flex flex-col gap-4 text-left">
-      <div className="flex justify-between items-start gap-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-600 shrink-0 shadow-sm">
+    <div className="fixed bottom-20 left-3 right-3 z-[100] flex max-h-[calc(100dvh-1.5rem)] flex-col gap-4 overflow-y-auto rounded-2xl border border-border-default bg-surface-card/95 p-4 text-left shadow-elevated backdrop-blur-md animate-fade-in sm:bottom-6 sm:left-6 sm:right-6 sm:p-5 md:left-auto md:right-6 md:max-w-md">
+      <div className="flex min-w-0 items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-swim/10 border border-swim/20 flex items-center justify-center text-swim shrink-0 ">
             <ShieldCheck className="w-4.5 h-4.5" />
           </div>
-          <h4 className="text-sm font-bold text-zinc-900 leading-tight">Privacidad y Cookies</h4>
+          <h4 className="min-w-0 text-sm font-bold leading-tight text-text-primary">Privacidad y Cookies</h4>
         </div>
         <button 
           onClick={handleDecline} 
           title="Cerrar aviso de cookies"
           aria-label="Cerrar aviso de cookies"
-          className="text-zinc-400 hover:text-zinc-700 transition-colors cursor-pointer"
+          className="text-text-muted hover:text-text-primary transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
  
-      <p className="text-xs text-zinc-550 leading-relaxed font-semibold">
+      <p className="text-xs text-text-secondary leading-relaxed font-semibold">
         Utilizamos cookies para optimizar tus entrenamientos, analizar tu rendimiento y sincronizar la telemetría de tus dispositivos. Puedes aceptar o configurar tus opciones. Consulta nuestra{' '}
-        <Link href="/privacidad" className="text-cyan-600 hover:text-cyan-700 underline font-bold">
+        <Link href="/privacidad" className="text-swim hover:text-swim underline font-bold">
           Política de Privacidad
         </Link>{' '}
         para más información.
       </p>
  
-      <div className="flex gap-2">
-        <button 
+      <div className="flex min-w-0 gap-2">
+        <button
+          type="button"
           onClick={handleAccept}
-          className="flex-1 py-2.5 text-xs font-black bg-cyan-400 hover:bg-cyan-500 text-white rounded-xl transition-all shadow-md cursor-pointer text-center"
+          className="min-h-10 min-w-0 flex-1 rounded-xl bg-swim py-2.5 text-center text-xs font-black text-text-inverse transition-[background-color,color,opacity] duration-150 hover:bg-swim/90 cursor-pointer"
         >
           Aceptar Todas
         </button>
-        <button 
+        <button
+          type="button"
           onClick={handleDecline}
-          className="px-4 py-2.5 text-xs font-bold bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 text-zinc-650 hover:text-zinc-800 rounded-xl transition-all cursor-pointer text-center shadow-sm"
+          className="min-h-10 shrink-0 rounded-xl border border-border-default bg-surface-hover px-4 py-2.5 text-center text-xs font-bold text-text-secondary transition-[background-color,color,opacity] duration-150 hover:bg-surface-card hover:text-text-primary cursor-pointer"
         >
           Rechazar
         </button>

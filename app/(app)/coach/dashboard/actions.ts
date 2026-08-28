@@ -558,3 +558,67 @@ export async function assignAthleteToGroup(athleteId: string, groupId: string | 
   return { success: true }
 }
 
+// --- WORKOUT LIBRARY ACTIONS ---
+
+export async function fetchCoachLibrary() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  const { data, error } = await supabase
+    .from('coach_workout_library')
+    .select('*')
+    .eq('coach_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error) return { error: error.message }
+  return { data }
+}
+
+export async function createLibraryTemplate(template: {
+  name: string
+  sport_type: string
+  duration_min: number
+  warmup?: string
+  main?: string
+  cooldown?: string
+  intensity_type?: string
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  const { data, error } = await supabase
+    .from('coach_workout_library')
+    .insert({
+      coach_id: user.id,
+      ...template
+    })
+    .select()
+    .single()
+
+  if (error) return { error: error.message }
+  
+  revalidatePath('/coach/dashboard')
+  return { data }
+}
+
+export async function deleteLibraryTemplate(templateId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'No autorizado' }
+
+  const { error } = await supabase
+    .from('coach_workout_library')
+    .delete()
+    .eq('id', templateId)
+    .eq('coach_id', user.id)
+
+  if (error) return { error: error.message }
+  
+  revalidatePath('/coach/dashboard')
+  return { success: true }
+}

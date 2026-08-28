@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 
 export type ToastVariant = 'success' | 'error' | 'info'
 
@@ -22,8 +23,15 @@ export function useToast() {
 
 let toastId = 0
 
+const variantStyles: Record<ToastVariant, string> = {
+  success: 'bg-success/12 text-success border-success/30',
+  error: 'bg-danger/12 text-danger border-danger/30',
+  info: 'bg-info/12 text-info border-info/30',
+}
+
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToastItem[]>([])
+  const reduceMotion = useReducedMotion()
 
   const showToast = React.useCallback((message: string, variant: ToastVariant = 'success') => {
     const id = ++toastId
@@ -37,62 +45,46 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
       {/* Toast Container */}
-      <div className="fixed top-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none sm:max-w-sm">
-        {toasts.map(toast => (
-          <div
-            key={toast.id}
-            className={`
-              pointer-events-auto
-              flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg
-              text-sm font-medium
-              animate-slide-down
-              ${
-                toast.variant === 'success'
-                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                  : toast.variant === 'error'
-                  ? 'bg-red-50 text-red-800 border-red-200'
-                  : 'bg-cyan-50 text-cyan-800 border-cyan-200'
-              }
-            `}
-          >
-            <span className="shrink-0">
-              {toast.variant === 'success' && <CheckCircleIcon />}
-              {toast.variant === 'error' && <ErrorCircleIcon />}
-              {toast.variant === 'info' && <InfoCircleIcon />}
-            </span>
-            <span className="leading-snug">{toast.message}</span>
-          </div>
-        ))}
+      <div className="fixed top-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none sm:max-w-sm" role="status" aria-live="polite">
+        <AnimatePresence initial={false}>
+          {toasts.map(toast => (
+            <motion.div
+              key={toast.id}
+              initial={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+              transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
+              className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-elevated backdrop-blur-sm font-medium text-sm ${variantStyles[toast.variant]} bg-surface-elevated/95`}
+            >
+              <span className="shrink-0">{toastIcons[toast.variant]}</span>
+              <span className="leading-snug text-text-primary">{toast.message}</span>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </ToastContext.Provider>
   )
 }
 
-function CheckCircleIcon() {
-  return (
-    <svg className="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const toastIcons: Record<ToastVariant, React.ReactNode> = {
+  success: (
+    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
       <polyline points="22 4 12 14.01 9 11.01" />
     </svg>
-  )
-}
-
-function ErrorCircleIcon() {
-  return (
-    <svg className="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  ),
+  error: (
+    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <line x1="15" y1="9" x2="9" y2="15" />
       <line x1="9" y1="9" x2="15" y2="15" />
     </svg>
-  )
-}
-
-function InfoCircleIcon() {
-  return (
-    <svg className="w-5 h-5 text-cyan-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  ),
+  info: (
+    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <line x1="12" y1="16" x2="12" y2="12" />
       <line x1="12" y1="8" x2="12.01" y2="8" />
     </svg>
-  )
+  ),
 }

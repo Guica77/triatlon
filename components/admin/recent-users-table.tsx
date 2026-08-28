@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { User, Shield, Crown } from 'lucide-react'
 
 interface RecentUser {
@@ -19,9 +18,9 @@ interface RecentUsersTableProps {
 
 export function RecentUsersTable({ users }: RecentUsersTableProps) {
   const getRoleIcon = (role: string | null) => {
-    if (role === 'coach') return <Shield className="w-3.5 h-3.5 text-amber-400" />
-    if (role === 'owner') return <Crown className="w-3.5 h-3.5 text-purple-400" />
-    return <User className="w-3.5 h-3.5 text-cyan-400" />
+    if (role === 'coach') return <Shield className="w-3.5 h-3.5 text-bike" />
+    if (role === 'owner') return <Crown className="w-3.5 h-3.5 text-coral-500" />
+    return <User className="w-3.5 h-3.5 text-swim" />
   }
 
   const getRoleLabel = (role: string | null) => {
@@ -31,9 +30,9 @@ export function RecentUsersTable({ users }: RecentUsersTableProps) {
   }
 
   const getSubStatusColor = (status: string | null) => {
-    if (status === 'premium' || status === 'active') return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-    if (status === 'cancelled' || status === 'inactive') return 'bg-red-500/10 text-red-400 border-red-500/20'
-    return 'bg-zinc-800 text-zinc-400 border-zinc-700'
+    if (status === 'premium' || status === 'active') return 'bg-bike/10 text-bike border-bike/20'
+    if (status === 'cancelled' || status === 'inactive') return 'bg-run/10 text-run border-run/20'
+    return 'bg-surface-hover text-text-muted border-border-default'
   }
 
   const getSubStatusLabel = (status: string | null) => {
@@ -48,73 +47,48 @@ export function RecentUsersTable({ users }: RecentUsersTableProps) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4 }}
-      className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="text-sm font-bold text-white">Usuarios Recientes</h3>
-          <p className="text-[10px] text-zinc-500 font-medium mt-0.5">Últimos 10 registros</p>
-        </div>
-        <span className="px-2.5 py-1 rounded-full bg-zinc-800 text-[10px] text-zinc-400 font-bold border border-zinc-700">
-          {users.length}
-        </span>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-zinc-800">
-              <th className="pb-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Usuario</th>
-              <th className="pb-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Rol</th>
-              <th className="pb-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Plan</th>
-              <th className="pb-3 text-[10px] font-bold uppercase tracking-wider text-zinc-500">Registro</th>
+    <div className="overflow-x-auto">
+      <table className="w-full text-left min-w-[500px]">
+        <thead>
+          <tr className="border-b border-border-subtle">
+            <th className="pb-3 text-[10px] font-bold uppercase tracking-wider text-text-muted">Usuario</th>
+            <th className="pb-3 text-[10px] font-bold uppercase tracking-wider text-text-muted">Rol</th>
+            <th className="pb-3 text-[10px] font-bold uppercase tracking-wider text-text-muted">Plan</th>
+            <th className="pb-3 text-[10px] font-bold uppercase tracking-wider text-text-muted">Registro</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id} className="border-b border-border-subtle/50 last:border-0 hover:bg-surface-hover transition-colors">
+              <td className="py-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-surface-hover flex items-center justify-center text-xs font-bold text-coral-500 shrink-0 border border-border-subtle">
+                    {(user.first_name?.[0] || user.email?.[0] || '?').toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-text-primary truncate">{user.first_name} {user.last_name}</p>
+                    <p className="text-[10px] text-text-muted truncate max-w-[160px]">{user.email}</p>
+                  </div>
+                </div>
+              </td>
+              <td className="py-3">
+                <div className="flex items-center gap-1.5">
+                  {getRoleIcon(user.role)}
+                  <span className="text-xs text-text-secondary font-medium">{getRoleLabel(user.role)}</span>
+                </div>
+              </td>
+              <td className="py-3">
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border whitespace-nowrap ${getSubStatusColor(user.subscription_status)}`}>
+                  {getSubStatusLabel(user.subscription_status)}
+                </span>
+              </td>
+              <td className="py-3">
+                <span className="text-xs text-text-muted font-medium whitespace-nowrap">{formatDate(user.created_at)}</span>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {users.map((user, i) => (
-              <motion.tr
-                key={user.id}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.05 * i }}
-                className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30 transition-colors"
-              >
-                <td className="py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                      {(user.first_name?.[0] || user.email?.[0] || '?').toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-white">
-                        {user.first_name} {user.last_name}
-                      </p>
-                      <p className="text-[10px] text-zinc-500 truncate max-w-[160px]">{user.email}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-3">
-                  <div className="flex items-center gap-1.5">
-                    {getRoleIcon(user.role)}
-                    <span className="text-xs text-zinc-300 font-medium">{getRoleLabel(user.role)}</span>
-                  </div>
-                </td>
-                <td className="py-3">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getSubStatusColor(user.subscription_status)}`}>
-                    {getSubStatusLabel(user.subscription_status)}
-                  </span>
-                </td>
-                <td className="py-3">
-                  <span className="text-xs text-zinc-400 font-medium">{formatDate(user.created_at)}</span>
-                </td>
-              </motion.tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </motion.div>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }

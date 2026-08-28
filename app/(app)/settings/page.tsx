@@ -50,8 +50,8 @@ export default async function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-8 space-y-6">
+    <div className="min-h-screen bg-bg-app w-full overflow-x-hidden">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-24 sm:pb-8 space-y-6">
 
         <PageHeader
           icon={Settings}
@@ -126,9 +126,9 @@ export default async function SettingsPage() {
             />
 
             {/* Export Data */}
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5">
-              <h3 className="text-sm font-bold text-white mb-3">Exportar Datos</h3>
-              <p className="text-[10px] text-zinc-500 font-medium mb-4">Descarga tu historial de entrenamientos en formato CSV o exporta tu calendario a tu app favorita.</p>
+            <div className="bg-bg-card border border-border-default rounded-xl p-5">
+              <h3 className="text-sm font-bold text-text-primary mb-3">Exportar Datos</h3>
+              <p className="text-[10px] text-text-muted font-medium mb-4">Descarga tu historial de entrenamientos en formato CSV o exporta tu calendario a tu app favorita.</p>
               <ExportButtons />
             </div>
           </div>

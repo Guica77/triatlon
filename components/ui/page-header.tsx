@@ -14,30 +14,27 @@ interface PageHeaderProps {
 
 export function PageHeader({
   icon: Icon,
-  iconColor = 'text-cyan-500',
-  iconBg = 'bg-cyan-50 border-cyan-100',
+  iconColor = 'text-text-secondary',
+  iconBg,
   title,
   subtitle,
   actions,
   className,
 }: PageHeaderProps) {
   return (
-    <div className={cn('flex items-center justify-between', className)}>
-      <div className="flex items-center gap-3">
-        <div className={cn(
-          'w-10 h-10 rounded-xl border flex items-center justify-center shadow-sm shrink-0',
-          iconBg
-        )}>
-          <Icon className={cn('w-4 h-4', iconColor)} />
+    <div className={cn('flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
+      <div className="flex min-w-0 items-center gap-3">
+        <div className={cn('flex size-10 shrink-0 items-center justify-center rounded-lg border border-border-subtle bg-surface-hover', iconBg)}>
+          <Icon className={cn('size-4', iconColor)} />
         </div>
         <div className="min-w-0">
-          <h1 className="text-base font-bold text-zinc-850 truncate tracking-tight">{title}</h1>
+          <h1 className="truncate font-display text-xl font-bold leading-tight tracking-tight text-text-primary sm:text-2xl">{title}</h1>
           {subtitle && (
-            <p className="text-xs text-zinc-500 font-semibold truncate">{subtitle}</p>
+            <p className="truncate text-xs font-medium text-text-muted sm:text-sm">{subtitle}</p>
           )}
         </div>
       </div>
-      {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>}
     </div>
   )
 }

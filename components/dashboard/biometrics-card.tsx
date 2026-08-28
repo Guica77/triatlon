@@ -60,6 +60,18 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
     loadStatus()
   }, [biometrics?.hrv, biometrics?.rhr, biometrics?.sleep_hours, biometrics?.fatigue_rating, biometrics?.stress_level, biometrics?.readiness_score])
  
+  // Auto-sync on mount if not registered
+  const hasAttemptedAutoSync = React.useRef(false)
+  
+  React.useEffect(() => {
+    if (!biometrics) return;
+    const hasGarminData = !!biometrics.raw_garmin_data && Object.keys(biometrics.raw_garmin_data).length > 0
+    if (!readOnly && isGarminConnected && !hasAttemptedAutoSync.current && (!isRegistered || !hasGarminData)) {
+      hasAttemptedAutoSync.current = true
+      handleSyncGarmin()
+    }
+  }, [readOnly, isGarminConnected, isRegistered, biometrics?.raw_garmin_data, biometrics])
+
   if (!biometrics) return null
  
   async function handleSaveBiometrics(formData: Partial<DailyBiometrics>) {
@@ -108,16 +120,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
     }
   }
   
-  // Auto-sync on mount if not registered
-  const hasAttemptedAutoSync = React.useRef(false)
-  
-  React.useEffect(() => {
-    const hasGarminData = !!biometrics.raw_garmin_data && Object.keys(biometrics.raw_garmin_data).length > 0
-    if (!readOnly && isGarminConnected && !hasAttemptedAutoSync.current && (!isRegistered || !hasGarminData)) {
-      hasAttemptedAutoSync.current = true
-      handleSyncGarmin()
-    }
-  }, [readOnly, isGarminConnected, isRegistered, biometrics.raw_garmin_data])
+
  
   const score = biometrics.readiness_score || 85
   const isOptimal = score >= 80
@@ -169,16 +172,16 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
  
   return (
     <>
-      <Card className="relative overflow-hidden border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col justify-between">
+      <Card className="relative overflow-hidden border-border-default bg-bg-card h-full flex flex-col justify-between">
         <CardContent className="p-4 sm:p-6 space-y-6">
         
         {/* Cabecera */}
-        <div className="flex justify-between items-center border-b border-zinc-100 pb-4 relative z-10">
+        <div className="flex justify-between items-center border-b border-border-subtle pb-4 relative z-10">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm">
-              <Activity className="w-4 h-4 text-emerald-600 animate-pulse" />
+            <div className="w-8 h-8 rounded-lg bg-bg-hover border-border-subtle flex items-center justify-center">
+              <Activity className="w-4 h-4 text-bike" />
             </div>
-            <span className="text-xs font-bold tracking-widest text-zinc-450 uppercase">Biometría y Preparación</span>
+            <span className="text-xs font-bold tracking-widest text-text-secondary uppercase">Biometría y Preparación</span>
           </div>
           <div className="flex items-center gap-2">
           {!readOnly && isGarminConnected && !isRegistered && (
@@ -187,7 +190,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
               size="sm"
               onClick={handleSyncGarmin}
               disabled={isSyncing}
-              className="flex items-center gap-1.5 text-[10px] font-bold text-sky-600 bg-sky-50 hover:bg-sky-100 border border-sky-200 py-1.5 px-2.5 rounded-lg transition-all"
+              className="flex items-center gap-1.5 text-[10px] font-bold text-swim bg-bg-hover hover:bg-bg-hover border border-border-default py-1.5 px-2.5 rounded-lg transition-all"
             >
               {isSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Watch className="w-3.5 h-3.5" />}
               <span className="hidden sm:inline">{isSyncing ? 'Conectando...' : 'Sincronizar Reloj'}</span>
@@ -201,9 +204,9 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
                 variant="secondary"
                 size="sm"
                 onClick={() => setIsModalOpen(true)}
-                className={`flex items-center gap-1.5 text-xs py-1.5 px-3 transition-all duration-300 cursor-pointer shadow-sm border-zinc-200 hover:border-zinc-300 text-zinc-700 bg-white hover:bg-zinc-50`}
+                className={`flex items-center gap-1.5 text-xs py-1.5 px-3 transition-all duration-300 cursor-pointer border-border-default hover:border-border-default text-text-primary bg-bg-card hover:bg-bg-hover`}
               >
-                <Settings className={`w-3.5 h-3.5 text-zinc-500`} />
+                <Settings className={`w-3.5 h-3.5 text-text-muted`} />
                 <span className="hidden sm:inline">Ajuste Manual</span>
               </AnimatedButton>
             </div>
@@ -239,7 +242,7 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
                 cx="50"
                 cy="50"
                 r="42"
-                className={!isRegistered ? "stroke-zinc-200/80" : "stroke-zinc-100"}
+                className={!isRegistered ? "stroke-border-default/80" : "stroke-border-subtle"}
                 strokeWidth={!isRegistered ? "4" : "6"}
                 strokeDasharray={!isRegistered ? "5 4" : "none"}
                 fill="transparent"
@@ -265,11 +268,11 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
             
             {/* Contenido Central */}
             <div className={`absolute inset-0 flex flex-col items-center justify-center transition-transform duration-300 ${!isRegistered && !readOnly ? 'group-hover:scale-105' : ''}`}>
-              <span className="text-3xl font-black tracking-tight text-zinc-900 relative z-10 leading-none">
+              <span className="text-3xl font-black tracking-tight text-text-primary relative z-10 leading-none">
                 {isRegistered ? score : '--'}
               </span>
               {!isRegistered && !readOnly && (
-                <span className="text-[8px] text-emerald-600 font-extrabold uppercase tracking-widest mt-1.5 animate-pulse text-center leading-none">
+                <span className="text-[8px] text-bike font-extrabold uppercase tracking-widest mt-1.5 text-center leading-none">
                   REGISTRAR
                 </span>
               )}
@@ -277,12 +280,12 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
           </div>
           <div className="text-center sm:text-left space-y-1">
             <div className="flex items-center justify-center sm:justify-start gap-2">
-              <h3 className="text-base font-bold text-zinc-800 tracking-tight leading-tight">
+              <h3 className="text-base font-bold text-text-primary tracking-tight leading-tight">
                 {!isRegistered ? 'Métricas Pendientes' : isOptimal ? 'Readiness Óptimo' : isModerate ? 'Readiness Moderado' : 'Descanso Recomendado'}
               </h3>
-              <span className={`w-2 h-2 rounded-full ${!isRegistered ? 'bg-zinc-300 animate-pulse' : isOptimal ? 'bg-emerald-500 animate-ping' : isModerate ? 'bg-amber-500' : 'bg-rose-500'}`} />
+              <span className={`w-2 h-2 rounded-full ${!isRegistered ? 'bg-text-muted' : isOptimal ? 'bg-bike' : isModerate ? 'bg-amber-500' : 'bg-rose-500'}`} />
             </div>
-            <p className="text-xs text-zinc-500 leading-relaxed font-semibold">
+            <p className="text-xs text-text-muted leading-relaxed font-semibold">
               {statusText}
             </p>
           </div>
@@ -291,17 +294,16 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
         {/* Grid de Desglose de Factores Objetivos */}
         <div className="grid grid-cols-3 gap-2.5 relative z-10">
           {/* Sueño */}
-          <motion.div 
-            whileHover={{ y: -2 }}
-            className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 hover:border-violet-300 flex flex-col justify-between space-y-1.5 transition-all duration-300 shadow-sm"
+          <motion.div
+            className="p-3.5 rounded-xl bg-bg-card border border-border-default hover:border-violet-300 flex flex-col justify-between space-y-1.5 transition-all duration-300"
           >
-            <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-500">SUEÑO</span>
+            <div className="flex items-center justify-between text-text-muted">
+              <span className="text-[9px] font-black uppercase tracking-wider text-text-muted">SUEÑO</span>
               <Moon className="w-3.5 h-3.5 text-violet-500" />
             </div>
             <div className="flex items-baseline gap-0.5">
-              <span className="text-lg font-black text-zinc-900 leading-none">{isRegistered ? biometrics.sleep_hours : '--'}</span>
-              {isRegistered && <span className="text-[10px] text-zinc-450 font-bold">h</span>}
+              <span className="text-lg font-black text-text-primary leading-none">{isRegistered ? biometrics.sleep_hours : '--'}</span>
+              {isRegistered && <span className="text-[10px] text-text-muted font-bold">h</span>}
             </div>
             {/* Sparkline de Sueño */}
             {isRegistered && getSparklinePath('sleep_hours') && (
@@ -318,21 +320,20 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
                 </svg>
               </div>
             )}
-            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-violet-600' : 'text-zinc-400'}`}>{statusLabels.sleepStatus}</span>
+            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-swim' : 'text-text-muted'}`}>{statusLabels.sleepStatus}</span>
           </motion.div>
   
           {/* HRV */}
-          <motion.div 
-            whileHover={{ y: -2 }}
-            className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 hover:border-rose-300 flex flex-col justify-between space-y-1.5 transition-all duration-300 shadow-sm"
+          <motion.div
+            className="p-3.5 rounded-xl bg-bg-card border border-border-default hover:border-rose-300 flex flex-col justify-between space-y-1.5 transition-all duration-300"
           >
-            <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-500 cursor-help" title="Variabilidad del Ritmo Cardíaco (HRV). Un valor alto indica recuperación.">HRV</span>
-              <Heart className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
+            <div className="flex items-center justify-between text-text-muted">
+              <span className="text-[9px] font-black uppercase tracking-wider text-text-muted cursor-help" title="Variabilidad del Ritmo Cardíaco (HRV). Un valor alto indica recuperación.">HRV</span>
+              <Heart className="w-3.5 h-3.5 text-rose-500" />
             </div>
             <div className="flex items-baseline gap-0.5">
-              <span className="text-lg font-black text-zinc-900 leading-none">{isRegistered ? biometrics.hrv : '--'}</span>
-              {isRegistered && <span className="text-[10px] text-zinc-455 font-bold">ms</span>}
+              <span className="text-lg font-black text-text-primary leading-none">{isRegistered ? biometrics.hrv : '--'}</span>
+              {isRegistered && <span className="text-[10px] text-text-muted font-bold">ms</span>}
             </div>
             {/* Sparkline de HRV */}
             {isRegistered && getSparklinePath('hrv') && (
@@ -349,21 +350,20 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
                 </svg>
               </div>
             )}
-            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-rose-600' : 'text-zinc-400'}`}>{statusLabels.hrvStatus}</span>
+            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-run' : 'text-text-muted'}`}>{statusLabels.hrvStatus}</span>
           </motion.div>
   
           {/* RHR */}
-          <motion.div 
-            whileHover={{ y: -2 }}
-            className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200/80 hover:border-emerald-300 flex flex-col justify-between space-y-1.5 transition-all duration-300 shadow-sm"
+          <motion.div
+            className="p-3.5 rounded-xl bg-bg-card border border-border-default hover:border-emerald-300 flex flex-col justify-between space-y-1.5 transition-all duration-300"
           >
-            <div className="flex items-center justify-between text-zinc-400">
-              <span className="text-[9px] font-black uppercase tracking-wider text-zinc-500 cursor-help" title="Pulsaciones en Reposo (RHR). Un valor más bajo indica descanso.">RHR</span>
+            <div className="flex items-center justify-between text-text-muted">
+              <span className="text-[9px] font-black uppercase tracking-wider text-text-muted cursor-help" title="Pulsaciones en Reposo (RHR). Un valor más bajo indica descanso.">RHR</span>
               <Activity className="w-3.5 h-3.5 text-emerald-500" />
             </div>
             <div className="flex items-baseline gap-0.5">
-              <span className="text-lg font-black text-zinc-900 leading-none">{isRegistered ? biometrics.rhr : '--'}</span>
-              {isRegistered && <span className="text-[10px] text-zinc-450 font-bold">bpm</span>}
+              <span className="text-lg font-black text-text-primary leading-none">{isRegistered ? biometrics.rhr : '--'}</span>
+              {isRegistered && <span className="text-[10px] text-text-muted font-bold">bpm</span>}
             </div>
             {/* Sparkline de RHR */}
             {isRegistered && getSparklinePath('rhr') && (
@@ -380,45 +380,45 @@ export function BiometricsCard({ initialBiometrics, initialBiometricsHistory = [
                 </svg>
               </div>
             )}
-            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-emerald-600' : 'text-zinc-400'}`}>{statusLabels.rhrStatus}</span>
+            <span className={`text-[10px] font-black truncate ${isRegistered ? 'text-bike' : 'text-text-muted'}`}>{statusLabels.rhrStatus}</span>
           </motion.div>
  
         </div>
  
         {/* Factores Subjetivos y Extras de Garmin */}
-        <div className="flex flex-col gap-3 pt-3 relative z-10 border-t border-zinc-100">
+        <div className="flex flex-col gap-3 pt-3 relative z-10 border-t border-border-subtle">
           <div className="flex flex-wrap gap-2.5">
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-hover border border-border-default text-[11px] text-text-secondary font-semibold">
               <Flame className="w-3.5 h-3.5 text-amber-500" />
               <span>Fatiga Muscular: <strong className="text-amber-600">{isRegistered ? `Nivel ${biometrics.fatigue_rating}/5` : 'Pendiente'}</strong></span>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-hover border border-border-default text-[11px] text-text-secondary font-semibold">
               <Brain className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Carga Mental: <strong className="text-emerald-650">{isRegistered ? `Nivel ${biometrics.stress_level}/5` : 'Pendiente'}</strong></span>
+              <span>Carga Mental: <strong className="text-emerald-700">{isRegistered ? `Nivel ${biometrics.stress_level}/5` : 'Pendiente'}</strong></span>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-650 font-semibold shadow-sm">
-              <Utensils className="w-3.5 h-3.5 text-cyan-500" />
-              <span>Nutrición: <strong className="text-cyan-650">{biometrics.nutrition_adherence ? `${biometrics.nutrition_adherence}/10` : 'Pendiente'}</strong></span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-bg-hover border border-border-default text-[11px] text-text-secondary font-semibold">
+              <Utensils className="w-3.5 h-3.5 text-text-muted" />
+              <span>Nutrición: <strong className="text-text-secondary">{biometrics.nutrition_adherence ? `${biometrics.nutrition_adherence}/10` : 'Pendiente'}</strong></span>
             </div>
           </div>
           
           {biometrics.raw_garmin_data && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
-              <div className="bg-sky-50/50 border border-sky-100 rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
-                <span className="text-[8px] sm:text-[9px] font-bold text-sky-600/80 uppercase tracking-wider block mb-0.5 truncate">Batería</span>
-                <span className="text-sm sm:text-base font-black text-sky-700 truncate block">{bodyBattery}</span>
+              <div className="bg-bg-hover border border-border-default rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
+                <span className="text-[8px] sm:text-[9px] font-bold text-swim uppercase tracking-wider block mb-0.5 truncate">Batería</span>
+                <span className="text-sm sm:text-base font-black text-swim truncate block">{bodyBattery}</span>
               </div>
-              <div className="bg-orange-50/50 border border-orange-100 rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
-                <span className="text-[8px] sm:text-[9px] font-bold text-orange-600/80 uppercase tracking-wider block mb-0.5 truncate">Calorías</span>
-                <span className="text-sm sm:text-base font-black text-orange-700 truncate block">{activeCals}</span>
+              <div className="bg-bg-hover border border-border-default rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
+                <span className="text-[8px] sm:text-[9px] font-bold text-text-secondary uppercase tracking-wider block mb-0.5 truncate">Calorías</span>
+                <span className="text-sm sm:text-base font-black text-text-primary truncate block">{activeCals}</span>
               </div>
-              <div className="bg-teal-50/50 border border-teal-100 rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
-                <span className="text-[8px] sm:text-[9px] font-bold text-teal-600/80 uppercase tracking-wider block mb-0.5 truncate">Pasos</span>
-                <span className="text-sm sm:text-base font-black text-teal-700 truncate block">{steps}</span>
+              <div className="bg-bg-hover border border-border-default rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
+                <span className="text-[8px] sm:text-[9px] font-bold text-text-secondary uppercase tracking-wider block mb-0.5 truncate">Pasos</span>
+                <span className="text-sm sm:text-base font-black text-text-primary truncate block">{steps}</span>
               </div>
-              <div className="bg-violet-50/50 border border-violet-100 rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
-                <span className="text-[8px] sm:text-[9px] font-bold text-violet-600/80 uppercase tracking-wider block mb-0.5 truncate">VO2 Max</span>
-                <span className="text-sm sm:text-base font-black text-violet-700 truncate block">{vo2Max}</span>
+              <div className="bg-bg-hover border border-border-default rounded-xl p-2 sm:p-2.5 text-center overflow-hidden">
+                <span className="text-[8px] sm:text-[9px] font-bold text-text-secondary uppercase tracking-wider block mb-0.5 truncate">VO2 Max</span>
+                <span className="text-sm sm:text-base font-black text-text-primary truncate block">{vo2Max}</span>
               </div>
             </div>
           )}

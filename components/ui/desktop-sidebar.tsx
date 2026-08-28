@@ -3,10 +3,9 @@
 import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
 import {
   Home, BarChart2, MessageSquare, Settings, Users, BookOpen,
-  PanelLeftClose, PanelLeft, Trophy
+  PanelLeftClose, PanelLeft, Trophy, Dumbbell, Heart, Award
 } from 'lucide-react'
 import { useNotifications } from '@/components/providers/notification-provider'
 import { cn } from '@/lib/utils'
@@ -19,9 +18,11 @@ interface SidebarItem {
 }
 
 const athleteItems: SidebarItem[] = [
-  { href: '/dashboard', label: 'Inicio', icon: Home },
+  { href: '/dashboard', label: 'Entrenamiento', icon: Dumbbell },
+  { href: '/recuperacion', label: 'Recuperación', icon: Heart },
   { href: '/exercises', label: 'Ejercicios', icon: BookOpen },
   { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
+  { href: '/resumen', label: 'Resumen', icon: Award },
   { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
   { href: '/settings', label: 'Ajustes', icon: Settings },
 ]
@@ -33,7 +34,7 @@ const coachItems: SidebarItem[] = [
 ]
 
 const ownerItems: SidebarItem[] = [
-  { href: '/owner', label: 'Panel Owner', icon: Trophy },
+  { href: '/admin', label: 'Business', icon: Trophy },
   { href: '/coach/dashboard', label: 'Roster', icon: Users },
   { href: '/settings', label: 'Ajustes', icon: Settings },
 ]
@@ -77,25 +78,29 @@ export function DesktopSidebar() {
   return (
     <div
       className={cn(
-        'hidden sm:flex flex-col border-r border-zinc-200 bg-white shrink-0 transition-all duration-300 ease-in-out',
+        'hidden sm:flex flex-col bg-surface-elevated shrink-0 transition-[width,background-color,border-color] duration-200 ease-out z-40 border-r border-border-subtle',
         isCollapsed ? 'w-[68px]' : 'w-56'
       )}
     >
-      {/* Logo */}
+      {/* Logo — the three lanes as a start-line mark */}
       <div className={cn(
-        'flex items-center gap-3 border-b border-zinc-100 shrink-0 transition-all duration-300',
-        isCollapsed ? 'px-3.5 py-4 justify-center' : 'px-5 py-4'
+        'flex items-center gap-3 shrink-0 transition-[padding,justify-content] duration-200 ease-out',
+        isCollapsed ? 'px-3.5 py-5 justify-center' : 'px-5 py-5'
       )}>
-        <div className="w-8 h-8 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center justify-center shrink-0">
-          <Trophy className="w-4 h-4 text-cyan-500" />
+        <div className="w-9 h-9 rounded-lg bg-surface-hover border border-border-subtle flex flex-col items-center justify-center gap-[3px] shrink-0">
+          <span className="w-4 h-[3px] rounded-full bg-swim" />
+          <span className="w-4 h-[3px] rounded-full bg-bike" />
+          <span className="w-4 h-[3px] rounded-full bg-run" />
         </div>
         {!isCollapsed && (
-          <span className="text-sm font-bold text-zinc-800 tracking-tight whitespace-nowrap">Triatlon Pro</span>
+          <span className="font-display text-lg font-bold tracking-wide text-text-primary leading-none whitespace-nowrap">
+            TRIATLON&nbsp;<span className="text-accent">PRO</span>
+          </span>
         )}
       </div>
 
       {/* Nav Items */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 py-2 px-2.5 space-y-0.5 overflow-y-auto">
         {items.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && item.href !== '/coach/dashboard' && pathname.startsWith(item.href))
           const Icon = item.icon
@@ -105,33 +110,26 @@ export function DesktopSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'relative flex items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-150',
+                'relative flex min-h-11 items-center gap-3 rounded-lg text-sm font-medium transition-[background-color,color,opacity] duration-150 ease-out',
                 isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5',
                 isActive
-                  ? 'bg-cyan-50 text-cyan-600 border border-cyan-100'
-                  : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 border border-transparent'
+                  ? 'bg-surface-hover/70 text-text-primary'
+                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover/50'
               )}
               title={isCollapsed ? item.label : undefined}
+              aria-current={isActive ? 'page' : undefined}
             >
               {isActive && (
-                <motion.div
-                  layoutId="sidebar-active"
-                  className="absolute inset-0 bg-cyan-50 rounded-xl border border-cyan-100 -z-10"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-                />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-accent" aria-hidden="true" />
               )}
-
               <div className="relative shrink-0">
-                <Icon className={cn('w-4.5 h-4.5', isActive ? 'text-cyan-500' : '')} />
+                <Icon className={cn('w-4.5 h-4.5', isActive ? 'text-accent' : '')} />
                 {item.showBadge && unreadCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center border-2 border-white">
-                    <span className="text-[9px] font-bold text-white leading-none">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-run rounded-full flex items-center justify-center border-2 border-surface-elevated">
+                    <span className="text-[9px] font-bold text-white leading-none">{unreadCount > 9 ? '9+' : unreadCount}</span>
                   </span>
                 )}
               </div>
-
               {!isCollapsed && <span className="truncate">{item.label}</span>}
             </Link>
           )
@@ -139,23 +137,18 @@ export function DesktopSidebar() {
       </nav>
 
       {/* Collapse Toggle */}
-      <div className="border-t border-zinc-100 p-2 shrink-0">
+      <div className="p-2.5 shrink-0 border-t border-border-subtle">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            'flex items-center gap-3 rounded-xl text-sm font-medium transition-colors duration-150 w-full text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50 border border-transparent',
+            'flex min-h-11 items-center gap-3 rounded-lg text-sm font-medium transition-[background-color,color,opacity] duration-150 ease-out w-full text-text-muted hover:text-text-secondary hover:bg-surface-hover/50',
             isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5'
           )}
           title={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+          aria-label={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+          aria-expanded={!isCollapsed}
         >
-          {isCollapsed ? (
-            <PanelLeft className="w-4 h-4" />
-          ) : (
-            <>
-              <PanelLeftClose className="w-4 h-4" />
-              <span>Colapsar</span>
-            </>
-          )}
+          {isCollapsed ? <PanelLeft className="w-4 h-4" /> : <><PanelLeftClose className="w-4 h-4" /><span>Colapsar</span></>}
         </button>
       </div>
     </div>

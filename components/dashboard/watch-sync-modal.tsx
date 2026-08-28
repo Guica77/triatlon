@@ -1,8 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Watch, Check, RefreshCw } from 'lucide-react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { X, Watch, Check, RefreshCw, Bike, Footprints, Waves, Dumbbell } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
@@ -47,6 +47,7 @@ function getProgressWidthClass(progress: number): string {
 export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps) {
   const [progress, setProgress] = React.useState(0)
   const [syncState, setSyncState] = React.useState<'connecting' | 'syncing' | 'verifying' | 'success'>('connecting')
+  const reduceMotion = useReducedMotion()
 
   React.useEffect(() => {
     if (!isOpen) {
@@ -85,7 +86,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
   if (!isOpen) return null
 
   const session = workout.training_sessions
-  const sportEmoji = session.sport_type === 'ciclismo' ? '🚴‍♂️' : session.sport_type === 'carrera' ? '🏃‍♂️' : session.sport_type === 'natacion' ? '🏊‍♂️' : '🏋️‍♂️'
+  const SportIcon = session.sport_type === 'ciclismo' ? Bike : session.sport_type === 'carrera' ? Footprints : session.sport_type === 'natacion' ? Waves : Dumbbell
 
   const getStateText = () => {
     switch (syncState) {
@@ -106,7 +107,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
         showCloseButton={false}
         onInteractOutside={(e) => { if (syncState !== 'success') e.preventDefault() }}
         onEscapeKeyDown={(e) => { if (syncState !== 'success') e.preventDefault() }}
-        className="max-w-sm p-6 sm:rounded-2xl flex flex-col items-center text-center space-y-6 overflow-hidden border-zinc-200"
+        className="max-w-sm p-6 sm:rounded-2xl flex flex-col items-center text-center space-y-6 overflow-hidden border-border-default bg-surface-elevated"
       >
         <VisuallyHidden>
           <DialogTitle>Sincronización con el reloj</DialogTitle>
@@ -117,7 +118,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
           <button 
             onClick={onClose}
             title="Cerrar"
-            className="absolute top-4 right-4 w-7 h-7 rounded-lg border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-650 hover:bg-zinc-100 transition-colors"
+            className="absolute top-4 right-4 min-h-10 min-w-10 rounded-lg border border-border-default flex items-center justify-center text-text-muted fine-hover:text-text-primary fine-hover:bg-surface-hover transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -125,53 +126,55 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
 
           {/* Sync Animation Widget */}
           <div className="relative w-40 h-40 flex items-center justify-center">
-            {/* Pulsing glow behind watch */}
-            <div className={`absolute inset-4 rounded-full blur-xl transition-colors duration-500 -z-10 ${
-              syncState === 'success' ? 'bg-emerald-500/10' : 'bg-orange-500/5'
+            {/* State tint behind watch */}
+            <div className={`absolute inset-4 rounded-full transition-[background-color] duration-500 ease-out -z-10 ${
+              syncState === 'success' ? 'bg-bike/10' : 'bg-accent/5'
             }`} />
 
             {/* Smartwatch Outer Case Mockup */}
-            <div className="absolute inset-0 rounded-full border-4 border-zinc-250 bg-zinc-50 shadow-inner flex items-center justify-center">
-              
+            <div className="absolute inset-0 rounded-full border-4 border-border-subtle bg-surface-hover flex items-center justify-center">
+
               {/* Screen Rim */}
-              <div className="w-[144px] h-[144px] rounded-full border border-zinc-200 bg-white overflow-hidden flex flex-col items-center justify-center p-4 relative">
+              <div className="w-[144px] h-[144px] rounded-full border border-border-default bg-surface-card overflow-hidden flex flex-col items-center justify-center p-4 relative">
                 
                 {/* Watch Content: Success State vs Syncing State */}
                 <AnimatePresence mode="wait">
                   {syncState === 'success' ? (
                     <motion.div 
                       key="success"
-                      initial={{ scale: 0.8, opacity: 0 }}
+                      initial={reduceMotion ? false : { scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
+                      transition={reduceMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
                       className="flex flex-col items-center justify-center space-y-1"
                     >
-                      <div className="w-11 h-11 rounded-full bg-emerald-50 border border-emerald-250 flex items-center justify-center text-emerald-600">
+                      <div className="w-11 h-11 rounded-full bg-bike/10 border border-bike/25 flex items-center justify-center text-bike">
                         <Check className="w-6 h-6 stroke-[3]" />
                       </div>
-                      <span className="text-[10px] font-black text-emerald-600 tracking-wider uppercase">¡LISTO!</span>
-                      <span className="text-[8px] text-zinc-500 font-semibold truncate max-w-[110px]">Ver en tu reloj</span>
+                      <span className="text-[10px] font-black text-bike tracking-wider uppercase">¡LISTO!</span>
+                      <span className="text-[8px] text-text-muted font-semibold truncate max-w-[110px]">Ver en tu reloj</span>
                     </motion.div>
                   ) : (
-                    <motion.div 
+                    <motion.div
                       key="syncing"
-                      initial={{ opacity: 0 }}
+                      initial={reduceMotion ? false : { opacity: 0 }}
                       animate={{ opacity: 1 }}
+                      transition={reduceMotion ? { duration: 0 } : { duration: 0.18, ease: 'easeOut' }}
                       className="flex flex-col items-center justify-center space-y-1.5"
                     >
                       <div className="relative">
-                        <Watch className="w-10 h-10 text-orange-500" />
+                        <Watch className="w-10 h-10 text-accent" />
                         <motion.div 
-                          animate={{ rotate: 360 }}
-                          transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
+                          animate={reduceMotion ? undefined : { rotate: 360 }}
+                          transition={reduceMotion ? { duration: 0 } : { repeat: Infinity, duration: 2, ease: 'linear' }}
                           className="absolute -top-1 -right-1"
                         >
-                          <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+                          <RefreshCw className="w-3.5 h-3.5 text-accent" />
                         </motion.div>
                       </div>
-                      <span className="text-[11px] font-black text-zinc-800">{progress}%</span>
-                      <div className="w-16 h-1 bg-zinc-200 rounded-full overflow-hidden">
+                      <span className="text-[11px] font-black text-text-primary">{progress}%</span>
+                      <div className="w-16 h-1 bg-border-default rounded-full overflow-hidden">
                         <div 
-                          className={`h-full bg-orange-500 transition-all duration-100 ${getProgressWidthClass(progress)}`}
+                          className={`h-full bg-accent transition-[width] duration-100 ease-out ${getProgressWidthClass(progress)}`}
                         />
                       </div>
                     </motion.div>
@@ -207,40 +210,40 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
 
           {/* Sync status labels */}
           <div className="space-y-1.5 w-full">
-            <h4 className="text-sm font-bold text-zinc-850 flex items-center justify-center gap-1.5">
+            <h4 className="text-sm font-bold text-text-primary flex items-center justify-center gap-1.5">
               {syncState === 'success' ? (
-                <span className="text-emerald-600">Sincronización Completada</span>
+                <span className="text-bike">Sincronización Completada</span>
               ) : (
                 <>
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
                   <span>Enviando al Reloj</span>
                 </>
               )}
             </h4>
-            <p className="text-[11px] text-zinc-500 min-h-[16px] max-w-[240px] mx-auto leading-relaxed">
+            <p className="text-[11px] text-text-secondary min-h-[16px] max-w-[240px] mx-auto leading-relaxed">
               {getStateText()}
             </p>
           </div>
 
           {/* Structured block visualization preview */}
-          <div className="w-full bg-zinc-50 border border-zinc-200 rounded-xl p-3 text-left space-y-2">
-            <div className="flex justify-between items-center text-[10px] text-zinc-500">
+          <div className="w-full bg-surface-hover border border-border-default rounded-xl p-3 text-left space-y-2">
+            <div className="flex justify-between items-center text-[10px] text-text-secondary">
               <span className="font-bold uppercase tracking-wider">Bloques Estructurados</span>
-              <span className="font-semibold">{sportEmoji} {session.sport_type.toUpperCase()}</span>
+              <span className="font-semibold flex items-center gap-1.5"><SportIcon className="w-3.5 h-3.5" /> {session.sport_type.toUpperCase()}</span>
             </div>
-            
+
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] border-b border-zinc-150 pb-1">
-                <span className="text-zinc-500">1. Calentamiento:</span>
-                <span className="text-zinc-750 font-medium">Hasta Lap (abierto)</span>
+              <div className="flex items-center justify-between text-[11px] border-b border-border-subtle pb-1">
+                <span className="text-text-secondary">1. Calentamiento:</span>
+                <span className="text-text-secondary font-medium">Hasta Lap (abierto)</span>
               </div>
-              <div className="flex items-center justify-between text-[11px] border-b border-zinc-150 pb-1">
-                <span className="text-zinc-500">2. Intervalo Principal:</span>
-                <span className="text-orange-600 font-bold">5x Repeticiones</span>
+              <div className="flex items-center justify-between text-[11px] border-b border-border-subtle pb-1">
+                <span className="text-text-secondary">2. Intervalo Principal:</span>
+                <span className="text-accent font-bold">5x Repeticiones</span>
               </div>
               <div className="flex items-center justify-between text-[11px] pb-0.5">
-                <span className="text-zinc-500">3. Enfriamiento:</span>
-                <span className="text-zinc-750 font-medium">10 min Z1</span>
+                <span className="text-text-secondary">3. Enfriamiento:</span>
+                <span className="text-text-secondary font-medium">10 min Z1</span>
               </div>
             </div>
           </div>
@@ -251,7 +254,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
             <AnimatedButton
               onClick={onClose}
               variant="primary"
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12 rounded-xl shadow-lg shadow-emerald-500/20"
+              className="w-full min-h-11 bg-emerald-600 fine-hover:bg-emerald-700 text-white font-bold rounded-xl transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 motion-reduce:transition-opacity motion-reduce:active:scale-100"
             >
               Continuar
             </AnimatedButton>
@@ -259,7 +262,7 @@ export function WatchSyncModal({ isOpen, onClose, workout }: WatchSyncModalProps
             <AnimatedButton
               disabled
               variant="secondary"
-              className="w-full bg-zinc-50 border-zinc-200 text-zinc-400 font-bold h-12 rounded-xl opacity-75"
+              className="w-full bg-surface-hover border-border-default text-text-muted font-bold h-12 rounded-xl opacity-75"
             >
               Cancelando...
             </AnimatedButton>

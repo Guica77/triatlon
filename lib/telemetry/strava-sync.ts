@@ -1,3 +1,4 @@
+import { fetchWithTimeout } from '../fetch-with-timeout';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function getOrRefreshStravaToken(userId: string): Promise<string | null> {
@@ -29,7 +30,7 @@ export async function getOrRefreshStravaToken(userId: string): Promise<string | 
   }
 
   try {
-    const refreshResponse = await fetch('https://www.strava.com/oauth/token', {
+    const refreshResponse = await fetchWithTimeout('https://www.strava.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -85,7 +86,7 @@ export async function syncPhysiologyFromStrava(userId: string, accessToken: stri
 
   try {
     // 1. Fetch detailed athlete profile to read FTP if set
-    const athleteResponse = await fetch('https://www.strava.com/api/v3/athlete', {
+    const athleteResponse = await fetchWithTimeout('https://www.strava.com/api/v3/athlete', {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
@@ -100,7 +101,7 @@ export async function syncPhysiologyFromStrava(userId: string, accessToken: stri
     }
 
     // 2. Fetch last 15 activities to extract actual paces
-    const activitiesResponse = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=15', {
+    const activitiesResponse = await fetchWithTimeout('https://www.strava.com/api/v3/athlete/activities?per_page=15', {
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }

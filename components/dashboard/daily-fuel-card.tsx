@@ -37,10 +37,10 @@ export function DailyFuelCard({
 
   if (loading) {
     return (
-      <Card className="h-[320px] border-zinc-200 bg-white shadow-sm">
+      <Card className="h-[320px] border-border-default bg-bg-card">
         <CardContent className="p-4 sm:p-6 h-[320px] flex flex-col justify-center items-center space-y-3">
           <div className="w-8 h-8 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin" />
-          <span className="text-xs text-zinc-500 font-medium">Calculando combustible diario...</span>
+          <span className="text-xs text-text-muted font-medium">Calculando combustible diario...</span>
         </CardContent>
       </Card>
     )
@@ -48,11 +48,11 @@ export function DailyFuelCard({
 
   if (error || !nutritionData) {
     return (
-      <Card className="h-[320px] border-zinc-200 bg-white shadow-sm">
+      <Card className="h-[320px] border-border-default bg-bg-card">
         <CardContent className="p-4 sm:p-6 flex flex-col justify-center items-center text-center p-6 h-full">
-          <Flame className="w-8 h-8 text-zinc-300 mb-2" />
-          <h4 className="text-sm font-semibold text-zinc-700">Servicio de Nutrición Inactivo</h4>
-          <p className="text-xs text-zinc-500 mt-1 max-w-[240px]">
+          <Flame className="w-8 h-8 text-text-secondary mb-2" />
+          <h4 className="text-sm font-semibold text-text-secondary">Servicio de Nutrición Inactivo</h4>
+          <p className="text-xs text-text-muted mt-1 max-w-[240px]">
             No pudimos calcular tus necesidades calóricas hoy. Asegúrate de configurar tu peso en Ajustes.
           </p>
         </CardContent>
@@ -150,27 +150,24 @@ export function DailyFuelCard({
   }
 
   return (
-    <Card className="relative overflow-hidden border-zinc-200 bg-gradient-to-br from-white to-zinc-50/30 shadow-sm hover:shadow-md transition-all duration-300 h-full flex flex-col justify-between min-h-[320px]">
+    <Card className="relative overflow-hidden border-border-default bg-bg-card h-full flex flex-col justify-between min-h-[320px]">
       <CardContent className="p-4 sm:p-6 space-y-4 flex flex-col justify-between h-full">
       
       {/* Cabecera Premium con Tabs */}
-      <div className="flex justify-between items-center border-b border-zinc-100 pb-3 relative z-10 shrink-0 gap-2">
+      <div className="flex justify-between items-center border-b border-border-subtle pb-3 relative z-10 shrink-0 gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center shadow-sm shrink-0">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
+          <div className="w-7 h-7 rounded-lg bg-bg-hover border border-border-subtle flex items-center justify-center shrink-0">
+            <span className="w-2 h-2 rounded-full bg-bike"></span>
           </div>
-          <span className="text-[11px] sm:text-xs font-bold tracking-wider text-zinc-455 uppercase whitespace-nowrap overflow-hidden text-ellipsis">Combustible</span>
+          <span className="text-[11px] sm:text-xs font-bold tracking-wider text-text-secondary uppercase whitespace-nowrap overflow-hidden text-ellipsis">Combustible</span>
         </div>
 
         {/* Selector de Pestañas */}
-        <div className="flex bg-zinc-100 p-0.5 rounded-lg border border-zinc-200/80 text-[9.5px] sm:text-[10px] font-bold shrink-0">
+        <div className="flex bg-bg-hover p-0.5 rounded-lg border border-border-subtle text-[9.5px] sm:text-[10px] font-bold shrink-0">
           <button
             onClick={() => setActiveTab('macros')}
             className={`px-1.5 sm:px-2.5 py-1 rounded cursor-pointer transition-colors ${
-              activeTab === 'macros' ? 'bg-white text-emerald-600 shadow-xs border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'
+              activeTab === 'macros' ? 'bg-bg-elevated text-bike border border-border-default' : 'text-text-muted hover:text-text-primary'
             }`}
           >
             Macros
@@ -178,7 +175,7 @@ export function DailyFuelCard({
           <button
             onClick={() => setActiveTab('platos')}
             className={`px-1.5 sm:px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-0.5 ${
-              activeTab === 'platos' ? 'bg-white text-emerald-600 shadow-xs border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-800'
+              activeTab === 'platos' ? 'bg-bg-elevated text-bike border border-border-default' : 'text-text-muted hover:text-text-primary'
             }`}
           >
             Platos/IA ✨
@@ -221,23 +218,23 @@ export function DailyFuelCard({
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center select-none">
-                <span className="text-xl font-black tracking-tight text-zinc-900 leading-none">{consumedCalories}</span>
-                <span className="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">/ {targetCalories} kcal</span>
+                <span className="text-xl font-black tracking-tight text-text-primary leading-none">{consumedCalories}</span>
+                <span className="text-[8px] text-text-muted font-bold uppercase mt-0.5">/ {targetCalories} kcal</span>
               </div>
             </div>
       
             <div className="space-y-0.5 min-w-0">
-              <h4 className="text-xs font-bold text-zinc-800 tracking-tight leading-tight">
+              <h4 className="text-xs font-bold text-text-primary tracking-tight leading-tight">
                 Balance Energético
               </h4>
-              <p className="text-[10px] text-zinc-500 leading-relaxed font-semibold">
-                Base metabólica: <strong className="text-zinc-700">{bmr} kcal</strong>. Gasto activo: <strong className="text-emerald-600">+{activeExpenditure} kcal</strong>.
+              <p className="text-[10px] text-text-muted leading-relaxed font-semibold">
+                Base metabólica: <strong className="text-text-primary">{bmr} kcal</strong>. Gasto activo: <strong className="text-bike">+{activeExpenditure} kcal</strong>.
               </p>
             </div>
           </div>
       
           {/* Desglose de Macronutrientes (Donut e Info Lateral) */}
-          <div className="flex items-center gap-4 pt-3 border-t border-zinc-100 flex-1 justify-between shrink-0">
+          <div className="flex items-center gap-4 pt-3 border-t border-border-subtle flex-1 justify-between shrink-0">
             {/* Donut SVG */}
             <div className="relative w-18 h-18 flex items-center justify-center shrink-0">
               <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
@@ -246,9 +243,9 @@ export function DailyFuelCard({
                 <circle cx="18" cy="18" r="15.915" fill="none" stroke="#84cc16" strokeWidth="4.5" strokeDasharray={`${fatPercentage} ${100 - fatPercentage}`} strokeDashoffset={100 - carbsPercentage} />
                 <circle cx="18" cy="18" r="15.915" fill="none" stroke="#3b82f6" strokeWidth="4.5" strokeDasharray={`${proteinPercentage} ${100 - proteinPercentage}`} strokeDashoffset={100 - carbsPercentage - fatPercentage} />
               </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center select-none text-[8px] font-black text-zinc-800 leading-none">
+              <div className="absolute inset-0 flex flex-col items-center justify-center select-none text-[8px] font-black text-text-primary leading-none">
                 <span>{carbsPercentage}%</span>
-                <span className="text-[5px] text-zinc-450 uppercase font-bold mt-0.5">HC</span>
+                <span className="text-[5px] text-text-muted uppercase font-bold mt-0.5">HC</span>
               </div>
             </div>
 
@@ -257,45 +254,45 @@ export function DailyFuelCard({
               {/* CHO */}
               <div className="space-y-0.5">
                 <div className="flex justify-between text-[10px] font-semibold">
-                  <span className="text-zinc-700 flex items-center gap-1">
+                  <span className="text-text-primary flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> Carbohidratos ({carbsPercentage}%)
                   </span>
-                  <span className="text-zinc-550 font-bold font-mono">
-                    <strong className="text-rose-600">{Math.round(macros.carbs.grams * 0.74)}g</strong> / {macros.carbs.grams}g
+                  <span className="text-text-muted font-bold font-mono">
+                    <strong className="text-run">{Math.round(macros.carbs.grams * 0.74)}g</strong> / {macros.carbs.grams}g
                   </span>
                 </div>
-                <div className="w-full h-1 bg-zinc-100 rounded-full overflow-hidden border border-zinc-200/50">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '74%' }} transition={{ duration: 1.2, ease: 'easeOut' }} className="h-full bg-gradient-to-r from-rose-400 to-rose-600 rounded-full" />
+                <div className="w-full h-1 bg-bg-hover rounded-full overflow-hidden border border-border-subtle">
+                  <motion.div initial={{ width: 0 }} animate={{ width: '74%' }} transition={{ duration: 1.2, ease: 'easeOut' }} className="h-full rounded-full" style={{backgroundColor: 'var(--color-run)'}} />
                 </div>
               </div>
               
               {/* PRO */}
               <div className="space-y-0.5">
                 <div className="flex justify-between text-[10px] font-semibold">
-                  <span className="text-zinc-700 flex items-center gap-1">
+                  <span className="text-text-primary flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Proteínas ({proteinPercentage}%)
                   </span>
-                  <span className="text-zinc-550 font-bold font-mono">
-                    <strong className="text-blue-600">{Math.round(macros.protein.grams * 0.7)}g</strong> / {macros.protein.grams}g
+                  <span className="text-text-muted font-bold font-mono">
+                    <strong className="text-swim">{Math.round(macros.protein.grams * 0.7)}g</strong> / {macros.protein.grams}g
                   </span>
                 </div>
-                <div className="w-full h-1 bg-zinc-100 rounded-full overflow-hidden border border-zinc-200/50">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '70%' }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.1 }} className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" />
+                <div className="w-full h-1 bg-bg-hover rounded-full overflow-hidden border border-border-subtle">
+                  <motion.div initial={{ width: 0 }} animate={{ width: '70%' }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.1 }} className="h-full rounded-full" style={{backgroundColor: 'var(--color-swim)'}} />
                 </div>
               </div>
 
               {/* FAT */}
               <div className="space-y-0.5">
                 <div className="flex justify-between text-[10px] font-semibold">
-                  <span className="text-zinc-700 flex items-center gap-1">
+                  <span className="text-text-primary flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-lime-500" /> Grasas ({fatPercentage}%)
                   </span>
-                  <span className="text-zinc-550 font-bold font-mono">
-                    <strong className="text-lime-600">{Math.round(macros.fat.grams * 0.74)}g</strong> / {macros.fat.grams}g
+                  <span className="text-text-muted font-bold font-mono">
+                    <strong className="text-bike">{Math.round(macros.fat.grams * 0.74)}g</strong> / {macros.fat.grams}g
                   </span>
                 </div>
-                <div className="w-full h-1 bg-zinc-100 rounded-full overflow-hidden border border-zinc-200/50">
-                  <motion.div initial={{ width: 0 }} animate={{ width: '74%' }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }} className="h-full bg-gradient-to-r from-lime-400 to-lime-600 rounded-full" />
+                <div className="w-full h-1 bg-bg-hover rounded-full overflow-hidden border border-border-subtle">
+                  <motion.div initial={{ width: 0 }} animate={{ width: '74%' }} transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }} className="h-full rounded-full" style={{backgroundColor: 'var(--color-bike)'}} />
                 </div>
               </div>
             </div>
@@ -307,17 +304,17 @@ export function DailyFuelCard({
           <div className="flex-1 overflow-y-auto pr-1 space-y-2.5 max-h-[170px] custom-scrollbar">
             
             {/* Pre-Entreno */}
-            <div className="border-l-2 border-emerald-500 pl-2 py-0.5 relative group">
-              <span className="text-[8px] text-emerald-600 font-bold uppercase tracking-wider block">Combustible Pre-Entreno</span>
+            <div className="border-l-2 border-bike pl-2 py-0.5 relative group">
+              <span className="text-[8px] text-bike font-bold uppercase tracking-wider block">Combustible Pre-Entreno</span>
               <div className="flex justify-between items-start gap-2">
                 <div>
-                  <h5 className="text-[10px] font-black text-zinc-900 leading-tight mt-0.5">{preWorkoutMeal.mealName}</h5>
-                  <p className="text-[9px] text-zinc-500 leading-relaxed mt-0.5 font-medium">{preWorkoutMeal.recipeDescription}</p>
+                  <h5 className="text-[10px] font-black text-text-primary leading-tight mt-0.5">{preWorkoutMeal.mealName}</h5>
+                  <p className="text-[9px] text-text-muted leading-relaxed mt-0.5 font-medium">{preWorkoutMeal.recipeDescription}</p>
                 </div>
-                <button 
+                <button
                   onClick={() => handleRejectMeal(preWorkoutMeal, true)}
                   disabled={isRejecting}
-                  className="shrink-0 p-1 rounded-md text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100"
+                  className="shrink-0 p-1 rounded-md text-text-muted hover:text-text-muted hover:bg-bg-hover transition-colors opacity-0 group-hover:opacity-100"
                   title="No me gusta este plato"
                 >
                   <ThumbsDown className="w-3.5 h-3.5" />
@@ -327,17 +324,17 @@ export function DailyFuelCard({
 
             {/* Post-Entreno (Sólo si entrenó hoy) */}
             {sportType !== 'descanso' ? (
-              <div className="border-l-2 border-cyan-500 pl-2 py-0.5 relative group">
-                <span className="text-[8px] text-cyan-600 font-bold uppercase tracking-wider block">Recuperación Post-Entreno</span>
+              <div className="border-l-2 border-swim pl-2 py-0.5 relative group">
+                <span className="text-[8px] text-swim font-bold uppercase tracking-wider block">Recuperación Post-Entreno</span>
                 <div className="flex justify-between items-start gap-2">
                   <div>
-                    <h5 className="text-[10px] font-black text-zinc-900 leading-tight mt-0.5">{recoveryMeal.mealName}</h5>
-                    <p className="text-[9px] text-zinc-500 leading-relaxed mt-0.5 font-medium">{recoveryMeal.recipeDescription}</p>
+                    <h5 className="text-[10px] font-black text-text-primary leading-tight mt-0.5">{recoveryMeal.mealName}</h5>
+                    <p className="text-[9px] text-text-muted leading-relaxed mt-0.5 font-medium">{recoveryMeal.recipeDescription}</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => handleRejectMeal(recoveryMeal, false)}
                     disabled={isRejecting}
-                    className="shrink-0 p-1 rounded-md text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100"
+                    className="shrink-0 p-1 rounded-md text-text-muted hover:text-text-muted hover:bg-bg-hover transition-colors opacity-0 group-hover:opacity-100"
                     title="No me gusta este plato"
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
@@ -345,17 +342,17 @@ export function DailyFuelCard({
                 </div>
               </div>
             ) : (
-              <div className="border-l-2 border-zinc-400 pl-2 py-0.5 relative group">
-                <span className="text-[8px] text-zinc-500 font-bold uppercase tracking-wider block">Nutrición de Base (Día Libre)</span>
+              <div className="border-l-2 border-border-default pl-2 py-0.5 relative group">
+                <span className="text-[8px] text-text-muted font-bold uppercase tracking-wider block">Nutrición de Base (Día Libre)</span>
                 <div className="flex justify-between items-start gap-2">
                   <div>
-                    <h5 className="text-[10px] font-black text-zinc-900 leading-tight mt-0.5">{recoveryMeal.mealName}</h5>
-                    <p className="text-[9px] text-zinc-500 leading-relaxed mt-0.5 font-medium">{recoveryMeal.recipeDescription}</p>
+                    <h5 className="text-[10px] font-black text-text-primary leading-tight mt-0.5">{recoveryMeal.mealName}</h5>
+                    <p className="text-[9px] text-text-muted leading-relaxed mt-0.5 font-medium">{recoveryMeal.recipeDescription}</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => handleRejectMeal(recoveryMeal, false)}
                     disabled={isRejecting}
-                    className="shrink-0 p-1 rounded-md text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-colors opacity-0 group-hover:opacity-100"
+                    className="shrink-0 p-1 rounded-md text-text-muted hover:text-text-muted hover:bg-bg-hover transition-colors opacity-0 group-hover:opacity-100"
                     title="No me gusta este plato"
                   >
                     <ThumbsDown className="w-3.5 h-3.5" />
@@ -366,10 +363,10 @@ export function DailyFuelCard({
 
             {/* Preferencias alimentarias */}
             {preferredIngredients && preferredIngredients.length > 0 && (
-              <div className="flex items-center gap-1 flex-wrap pt-1.5 border-t border-zinc-100">
-                <span className="text-[8px] text-zinc-400 font-bold uppercase tracking-wider">Tus favoritos:</span>
+              <div className="flex items-center gap-1 flex-wrap pt-1.5 border-t border-border-subtle">
+                <span className="text-[8px] text-text-muted font-bold uppercase tracking-wider">Tus favoritos:</span>
                 {preferredIngredients.map((ing) => (
-                  <span key={ing} className="px-1.5 py-0.5 rounded bg-zinc-50 border border-zinc-200 text-zinc-650 text-[8px] capitalize font-semibold shadow-2xs">
+                  <span key={ing} className="px-1.5 py-0.5 rounded bg-bg-hover border border-border-default text-text-secondary text-[8px] capitalize font-semibold">
                     {ing}
                   </span>
                 ))}
@@ -425,7 +422,7 @@ export function DailyFuelCard({
           {!aiAnswer && (
             <form 
               onSubmit={(e) => { e.preventDefault(); handleAskAI(aiQuestion); }} 
-              className="flex items-center gap-1.5 pt-1.5 border-t border-zinc-150 shrink-0"
+              className="flex items-center gap-1.5 pt-1.5 border-t border-border-subtle shrink-0"
             >
               <input
                 title="Preguntar a la IA de Nutrición"
@@ -435,12 +432,12 @@ export function DailyFuelCard({
                 onChange={(e) => setAiQuestion(e.target.value)}
                 placeholder="Pregunta algo sobre tu comida o sustitutos..."
                 disabled={isAiThinking}
-                className="flex-1 bg-white border border-zinc-200 focus:border-emerald-500/50 rounded-lg px-2.5 py-1.5 text-[10px] text-zinc-900 outline-none transition-colors"
+                className="flex-1 bg-bg-card border border-border-default focus:border-emerald-500/50 rounded-lg px-2.5 py-1.5 text-[10px] text-text-primary outline-none transition-colors"
               />
               <button
                 type="submit"
                 disabled={isAiThinking || !aiQuestion.trim()}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg p-1.5 transition disabled:opacity-40 cursor-pointer shadow-sm flex items-center justify-center"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg p-1.5 transition disabled:opacity-40 cursor-pointer flex items-center justify-center"
               >
                 {isAiThinking ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />

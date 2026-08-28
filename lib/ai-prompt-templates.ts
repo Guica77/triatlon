@@ -223,6 +223,86 @@ ${daysToRace !== null ? `- Días hasta carrera: ${daysToRace}` : ''}
 // Meal Alternative Generator Prompt
 // ============================================================
 
+// ============================================================
+// Activity Intelligence — Felicitación honesta + reajuste
+// ============================================================
+
+export interface ActivityCongratsPromptInput {
+  athleteName: string;
+  /** Sustantivo con artículo de lo REALMENTE hecho («carrera», «pádel»). */
+  activityPhrase: string;
+  article: 'el' | 'la';
+  actualKm?: number | null;
+  actualDurationMin: number;
+  avgPaceMinKm?: string | null;
+  /** ok | partial | substitute | extra */
+  kind: string;
+  reasons?: string[];
+  /** Descripción de la sesión planificada («correr 10 km»), si la hay. */
+  plannedLabel?: string | null;
+  /** Proporción de plan cumplido (0-1), si es medible. */
+  plannedPct?: number | null;
+  /** Acción mecánica que se aplicará (la IA no decide esto). */
+  applySummary?: string | null;
+}
+
+/**
+ * Sistema para la felicitación de una actividad de Strava (o cualquier fuente).
+ * SIEMPRE celebra lo que el atleta realmente hizo (incl. «otra»: pádel, caminata),
+ * es honesto si el plan no se cumplió y no inventa datos.
+ */
+export function buildActivityCongratsPrompt(ctx: ActivityCongratsPromptInput): string {
+  const actual = `${ctx.article} ${ctx.activityPhrase}`;
+  const metrics = [
+    ctx.actualDurationMin ? `${ctx.actualDurationMin} min` : null,
+    ctx.actualKm ? `${formatNum(ctx.actualKm)} km` : null,
+    ctx.avgPaceMinKm ? `ritmo ${ctx.avgPaceMinKm}/km` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  return `Eres el sistema de celebraciones del club de triatlón «Día de Carrera». Suenas como un amigo que entrena contigo: cercano, con energía, sin sermonear. Respondes SOLO en español, en 2ª persona (tú), en un máximo de 3 frases, sin markdown ni listas.
+
+## POR QUÉ FELICITAS HOY
+- El atleta realizó: ${actual}${metrics ? ` (${metrics})` : ''}.
+- Debes celebrar SIEMPRE la actividad realmente hecha, aunque no sea la del plan${ctx.kind === 'extra' ? ' y aunque no hubiera nada planificado' : ''}.
+${ctx.plannedLabel ? `- Lo planificado era: ${ctx.plannedLabel}.` : '- No había sesión planificada.'}
+- Tipo de cumplimiento: ${{ ok: 'sesión completada según el plan', partial: 'sesión cubierta SOLO PARCIALMENTE (p. ej. distancia o ritmo por debajo)', substitute: 'se hizo OTRA actividad en lugar de la planificada', extra: 'actividad extra no planificada' }[ctx.kind] ?? ctx.kind}${ctx.plannedPct !== null && ctx.plannedPct !== undefined ? ` (≈${Math.round(ctx.plannedPct * 100)}% del plan)` : ''}.
+${ctx.avgPaceMinKm ? `- Ritmo real: ${ctx.avgPaceMinKm}/km.` : ''}
+
+## INSTRUCCIONES
+1. Dirígete a ${ctx.athleteName || 'la atleta'} por su nombre, con naturalidad.
+2. Celebra de forma específica lo que hizo (menciona ${actual} y, si tienes, los datos reales de arriba). No inventes números que no aparezcan.
+3. Si el plan no se cumplió (partial o substitute), hazlo constar SIN culpa ni dramatismo: reconoce el esfuerzo real, menciona brevemente lo pendiente y que lo reprogramaremos / ajustaremos. No uses la palabra «fallo».
+4. Cierra con una línea de ánimo. Máximo 3 frases.`;
+}
+
+/**
+ * Sistema para la propuesta de reajuste del plan. La ACCIÓN mecánica ya está
+ * decidida por reglas deterministas; la IA solo redacta el mensaje, 2 frases.
+ */
+export function buildRefocusPrompt(ctx: ActivityCongratsPromptInput): string {
+  return `Eres el analista de planificación del club «Día de Carrera». Redactas, en español y tuteo, una propuesta de ajuste del plan de entrenamiento en un máximo de 2 frases cortas, sin markdown y sin preguntas retóricas.
+
+## SITUACIÓN
+- Atleta: ${ctx.athleteName || 'la atleta'}.
+- Hizo: ${ctx.article} ${ctx.activityPhrase}${ctx.actualDurationMin ? ` (${ctx.actualDurationMin} min)` : ''}.
+${ctx.plannedLabel ? `- Lo planificado era: ${ctx.plannedLabel}.` : '- No había sesión planificada.'}
+- Tipo de cumplimiento: ${{ ok: 'completo', partial: 'parcial', substitute: 'otra actividad en vez de la planificada', extra: 'actividad extra' }[ctx.kind] ?? ctx.kind}.
+
+## ACCIÓN YA DECIDIDA (no la cambies, solo explícala con cercanía)
+- ${ctx.applySummary || 'No se aplicarán cambios al plan.'}
+
+## INSTRUCCIONES
+1. Explica en «proponemos…» lo que se hará, siempre en positivo y concreto (días, disciplinas si aplica).
+2. No pidas confirmación ni des alternativas: la propuesta es única y accionable.
+3. Máximo 2 frases.`;
+}
+
+function formatNum(n: number): string {
+  return String(Math.round(n * 10) / 10).replace('.', ',');
+}
+
 export function buildMealAlternativePrompt(
   mealName: string,
   isPreWorkout: boolean,

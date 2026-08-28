@@ -69,7 +69,7 @@ export default function AthleteRegisterPage() {
       subtitle="Elige tu plan para empezar a entrenar"
       isAthlete={true}
     >
-      <div className="space-y-5 relative z-10">
+      <div className="space-y-5 relative z-10 overflow-x-hidden w-full pb-24 sm:pb-8">
         <AnimatePresence mode="wait">
           {successMessage ? (
             <motion.div
@@ -81,7 +81,7 @@ export default function AthleteRegisterPage() {
               <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
                 <CheckCircle className="w-8 h-8 text-emerald-400" />
               </div>
-              <p className="text-sm text-zinc-300 font-medium text-center leading-relaxed max-w-xs">{successMessage}</p>
+              <p className="text-sm text-text-secondary font-medium text-center leading-relaxed max-w-xs">{successMessage}</p>
             </motion.div>
           ) : (
             <motion.form
@@ -107,62 +107,68 @@ export default function AthleteRegisterPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Nombre</label>
+                  <label htmlFor="athlete-register-first-name" className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Nombre</label>
                   <div className="relative">
-                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                     <input
+                      id="athlete-register-first-name"
                       name="firstName"
                       type="text"
                       required
                       placeholder="Nombre"
-                      className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl pl-10 pr-3.5 py-3 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 transition-all"
+                      className="w-full rounded-xl border border-border-subtle bg-bg-hover py-3 pl-10 pr-3.5 text-sm text-text-primary placeholder-zinc-600 outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus:border-swim focus:ring-1 focus:ring-swim/40 motion-reduce:transition-opacity"
                     />
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Apellidos</label>
+                  <label htmlFor="athlete-register-last-name" className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Apellidos</label>
                   <input
+                    id="athlete-register-last-name"
                     name="lastName"
                     type="text"
                     required
                     placeholder="Apellidos"
-                    className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-3.5 py-3 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 transition-all"
+                    className="w-full rounded-xl border border-border-subtle bg-bg-hover px-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out focus:border-swim focus:ring-1 focus:ring-swim/40 active:scale-[0.99] motion-reduce:transition-opacity motion-reduce:active:scale-100"
                   />
+
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Correo Electrónico</label>
+                <label htmlFor="athlete-register-email" className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Correo Electrónico</label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                   <input
+                    id="athlete-register-email"
                     name="email"
                     type="email"
                     placeholder="atleta@triatlonpro.com"
                     required
-                    className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl pl-10 pr-3.5 py-3 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 transition-all"
+                    className="w-full rounded-xl border border-border-subtle bg-bg-hover py-3 pl-10 pr-3.5 text-sm text-text-primary placeholder-zinc-600 outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus:border-swim focus:ring-1 focus:ring-swim/40 motion-reduce:transition-opacity"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Contraseña</label>
+                <label htmlFor="athlete-register-password" className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Contraseña</label>
                 <div className="relative">
-                  <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
+                  <ShieldCheck className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                   <input
+                    id="athlete-register-password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl pl-10 pr-10 py-3 text-sm text-white placeholder-zinc-600 outline-none focus:border-cyan-500/50 transition-all font-mono"
+                    className="w-full rounded-xl border border-border-subtle bg-bg-hover py-3 pl-10 pr-12 text-sm font-mono text-text-primary placeholder-zinc-600 outline-none transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out focus:border-swim focus:ring-1 focus:ring-swim/40 active:scale-[0.99] motion-reduce:transition-opacity motion-reduce:active:scale-100"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400 transition-colors"
-                    tabIndex={-1}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    aria-pressed={showPassword}
+                    className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out hover:bg-surface-hover hover:text-text-secondary active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -172,7 +178,7 @@ export default function AthleteRegisterPage() {
                   <div className="space-y-1.5 mt-2">
                     <div className="flex gap-1">
                       {[1, 2, 3, 4, 5].map(i => (
-                        <div key={i} className={`h-1 flex-1 rounded-full transition-all ${i <= strength.score ? strength.color : 'bg-zinc-700'}`} />
+                        <div key={i} className={`h-1 flex-1 rounded-full transition-[background-color,opacity] duration-150 ease-out motion-reduce:transition-opacity ${i <= strength.score ? strength.color : 'bg-bg-hover'}`} />
                       ))}
                     </div>
                     <p className={`text-[10px] font-bold ${strength.score <= 1 ? 'text-red-400' : strength.score <= 3 ? 'text-amber-400' : 'text-emerald-400'}`}>
@@ -183,17 +189,18 @@ export default function AthleteRegisterPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Confirmar Contraseña</label>
+                <label htmlFor="athlete-register-confirm-password" className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Confirmar Contraseña</label>
                 <div className="relative">
                   <input
+                    id="athlete-register-confirm-password"
                     name="confirmPassword"
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className={`w-full bg-zinc-800/50 border rounded-xl pl-3.5 pr-3.5 py-3 text-sm text-white placeholder-zinc-600 outline-none transition-all font-mono ${
-                      confirmError ? 'border-red-500/50' : 'border-zinc-700/50 focus:border-cyan-500/50'
+                    className={`w-full rounded-xl border py-3 pl-3.5 pr-3.5 text-sm font-mono text-text-primary placeholder-zinc-600 outline-none transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out focus:ring-1 focus:ring-swim/40 active:scale-[0.99] motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                      confirmError ? 'border-red-500/50' : 'border-border-subtle focus:border-swim'
                     }`}
                   />
                 </div>
@@ -209,8 +216,7 @@ export default function AthleteRegisterPage() {
               </div>
 
               <motion.button
-                whileTap={{ scale: 0.98 }}
-                className="w-full mt-2 py-3.5 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 transition-all shadow-lg shadow-cyan-500/20 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="mt-2 flex min-h-11 w-full items-center justify-center rounded-xl bg-swim py-3.5 text-sm font-bold text-text-primary transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out hover:bg-swim/90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
                 type="submit"
                 disabled={loading || !!confirmError || strength.score <= 1}
               >
@@ -230,10 +236,10 @@ export default function AthleteRegisterPage() {
         <div className="text-center pt-2">
           <button
             type="button"
-            onClick={() => router.push('/athlete/login')}
-            className="text-xs text-zinc-500 hover:text-cyan-400 transition-colors font-medium"
+            onClick={() => router.push('/login?role=athlete')}
+            className="text-xs text-text-muted hover:text-swim transition-colors font-medium"
           >
-            ¿Ya eres miembro? <span className="text-cyan-500 font-bold">Inicia sesión</span>
+            ¿Ya eres miembro? <span className="text-swim font-bold">Inicia sesión</span>
           </button>
         </div>
       </div>

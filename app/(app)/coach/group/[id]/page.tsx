@@ -9,18 +9,17 @@ import { startOfWeek, addDays, format } from 'date-fns';
 export const dynamic = 'force-dynamic';
 
 interface GroupPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export default async function CoachGroupPage({ params }: GroupPageProps) {
+  const { id: groupId } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
     redirect('/login');
   }
-
-  const groupId = params.id;
 
   // Compute date range for the calendar (Monday to Sunday of the current week)
   const today = new Date();
@@ -41,7 +40,7 @@ export default async function CoachGroupPage({ params }: GroupPageProps) {
   }
 
   return (
-    <div className="flex-1 bg-zinc-950 p-4 md:p-8 overflow-y-auto">
+    <div className="flex-1 bg-bg-app p-4 md:p-8 overflow-y-auto">
       <GroupDashboardView 
         group={groupDataRes.group}
         athletes={groupDataRes.athletes || []}
