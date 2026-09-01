@@ -1,6 +1,20 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { aiChatStreamToResponse, isAIAvailable, getAIStatus } from '@/lib/ai-service';
+import {
+  aiChatStreamToResponse,
+  generateAIEmbedding,
+  getAIStatus,
+  isAIAvailable,
+} from '@/lib/ai-service';
+import {
+  appendAIContextToPrompt,
+  buildAIContext,
+  resolveAthleteTarget,
+  validateAthleteId,
+  validateAIChatMessages,
+  validateDurationMinutes,
+  validateSportType,
+} from '@/lib/ai-context';
 
 export const runtime = 'nodejs';
 
@@ -17,18 +31,99 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. Parse request
-    const body = await request.json();
-    const { messages, contextType = 'general', sportType, durationMin } = body;
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    // 2. Parse and validate the request before loading any private context.
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
       return Response.json(
-        { error: 'Se requiere al menos un mensaje.' },
+        { error: 'El cuerpo de la solicitud no es un JSON válido.' },
         { status: 400 }
       );
     }
 
-    // 3. Check AI availability
+    if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      return Response.json(
+        { error: 'El cuerpo de la solicitud debe ser un objeto JSON.' },
+        { status: 400 }
+      );
+    }
+
+    const payload = body as Record<string, unknown>;
+    const contextType = payload.contextType === undefined ? 'general' : payload.contextType;
+    const sportType = validateSportType(payload.sportType);
+    const durationMin = validateDurationMinutes(payload.durationMin);
+    const requestedAthleteId = validateAthleteId(payload.athleteId);
+    const validatedMessages = validateAIChatMessages(payload.messages);
+
+    if (!['general', 'nutrition', 'coach'].includes(String(contextType))) {
+      return Response.json(
+        { error: 'El tipo de contexto no es válido.' },
+        { status: 400 }
+      );
+    }
+    if (sportType === undefined) {
+      return Response.json(
+        { error: 'El deporte indicado no es válido.' },
+        { status: 400 }
+      );
+    }
+    if (durationMin === undefined) {
+      return Response.json(
+        { error: 'La duración debe estar entre 1 y 1440 minutos.' },
+        { status: 400 }
+      );
+    }
+    if (requestedAthleteId === undefined) {
+      return Response.json(
+        { error: 'El identificador del atleta no es válido.' },
+        { status: 400 }
+      );
+    }
+    if (!validatedMessages.ok) {
+      return Response.json(
+        { error: validatedMessages.error },
+        { status: 400 }
+      );
+    }
+
+    const { data: requesterProfile, error: requesterProfileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (requesterProfileError || !requesterProfile) {
+      return Response.json(
+        { error: 'No se pudo verificar el perfil del usuario.' },
+        { status: 403 }
+      );
+    }
+
+    // Resolve the target only from the authenticated role and active relationships.
+    const targetResult = await resolveAthleteTarget(
+      supabase,
+      user.id,
+      requesterProfile.role,
+      requestedAthleteId,
+    );
+    if (!targetResult.target) {
+      return Response.json(
+        { error: targetResult.error || 'No autorizado para consultar este contexto.' },
+        { status: 403 }
+      );
+    }
+
+    const messages = validatedMessages.messages;
+    const lastUserMessage = [...messages].reverse().find(message => message.role === 'user');
+    if (!lastUserMessage) {
+      return Response.json(
+        { error: 'Se requiere al menos un mensaje del atleta o entrenador.' },
+        { status: 400 }
+      );
+    }
+
+    // Check provider availability only after complete request validation and authorization.
     if (!isAIAvailable()) {
       const status = getAIStatus();
       return Response.json(
@@ -42,45 +137,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Build system prompt based on context
+    // 3. Build system prompt based on context
+    const queryEmbedding = await generateAIEmbedding(lastUserMessage.content);
+    const athleteContext = await buildAIContext(supabase, {
+      athleteId: targetResult.target.athleteId,
+      query: lastUserMessage.content,
+      sportType,
+      queryEmbedding,
+    });
+
     let systemPrompt = 'Eres un asistente experto en triatlón y entrenamiento deportivo. Respondes en español de forma clara y concisa.';
 
     if (contextType === 'nutrition') {
-      // Fetch nutrition context
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, current_weight, preferred_ingredients, disliked_ingredients, allergies')
-        .eq('id', user.id)
-        .single();
-
-      const name = profile?.first_name || 'Atleta';
-      const weight = profile?.current_weight || 72;
-      const preferredIngredients = profile?.preferred_ingredients || [];
-      const dislikedIngredients = profile?.disliked_ingredients || [];
-      const allergies = profile?.allergies || [];
-
       systemPrompt = `Eres un nutricionista deportivo experto en triatlón. Respondes en español.
 
-## CONTEXTO DEL ATLETA
-- Atleta: ${name}
-- Peso: ${weight} kg
-- Ingredientes preferidos: ${preferredIngredients.join(', ') || 'Sin preferencias'}
-- Ingredientes a evitar: ${dislikedIngredients.join(', ') || 'Ninguno'}
-${allergies.length > 0 ? `- Alergias: ${allergies.join(', ')}` : ''}
-
 ## INSTRUCCIONES
-1. Proporciona consejos específicos y prácticos.
-2. Si preguntan por comidas, sugiere opciones realistas.
+1. Proporciona consejos específicos y prácticos basados en los datos autorizados del atleta.
+2. Si preguntan por comidas, sugiere opciones realistas y respeta alergias y preferencias registradas.
 3. Incluye timing nutricional si aplica.
 4. Sé conciso: máximo 3-4 párrafos.`;
     } else if (contextType === 'coach') {
-      // Fetch athlete context for coaching
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('first_name, last_name')
-        .eq('id', user.id)
-        .single();
-
       systemPrompt = `Eres un entrenador de triatlón experto. Respondes en español.
 
 ## INSTRUCCIONES
@@ -89,6 +165,12 @@ ${allergies.length > 0 ? `- Alergias: ${allergies.join(', ')}` : ''}
 3. Si no tienes suficientes datos, dilo explícitamente.
 4. Máximo 3 párrafos.`;
     }
+
+    if (durationMin !== null) {
+      systemPrompt += `\n\n## DATO DE LA CONSULTA\nLa duración relevante indicada por el usuario es de ${durationMin} minutos.`;
+    }
+
+    systemPrompt = appendAIContextToPrompt(systemPrompt, athleteContext);
 
     // 5. Stream response
     const stream = await aiChatStreamToResponse(systemPrompt, messages, {
