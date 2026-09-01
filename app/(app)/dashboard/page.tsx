@@ -53,39 +53,35 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // 1. Check profile early to avoid fetching all data if user needs onboarding
-  const { data: earlyProfile } = await supabase
+  // Load the profile once: it is needed both for routing decisions and the dashboard.
+  const { data: profileData } = await supabase
     .from('profiles')
-    .select('role, active_plan_id, coach_id')
+    .select('*, training_plans(*)')
     .eq('id', user.id)
     .single();
 
-  if (!earlyProfile) {
+  if (!profileData) {
     redirect('/onboarding');
   }
 
-  if (earlyProfile.role === 'coach') {
+  if (profileData.role === 'coach') {
     redirect('/coach/dashboard');
   }
 
-  if (!earlyProfile.active_plan_id && !earlyProfile.coach_id) {
+  if (!profileData.active_plan_id && !profileData.coach_id) {
     redirect('/onboarding');
   }
 
+  const profile = profileData as any;
+
   // 2. Fetch all other data in parallel
   const [
-    profileRes,
     biometricsRes,
     nutritionRes,
     analyticsData,
     devicesRes,
     workoutsRes
   ] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('*, training_plans(*)')
-      .eq('id', user.id)
-      .single(),
     getDailyBiometrics(),
     getDailyNutrition(todayStr),
     getAnalyticsDashboardData(),
@@ -102,26 +98,16 @@ export default async function DashboardPage() {
       .order('scheduled_date', { ascending: true })
   ]);
 
-  const profileData = profileRes.data;
-  const profile = profileData as any;
-  const activePlan = profile.training_plans;
-
-  let coachProfile = null;
   let groupAnnouncement = null;
-  let athleteGroupId = null;
   if (profile.coach_id) {
-    const { data } = await supabase.from('profiles').select('first_name, last_name').eq('id', profile.coach_id).single();
-    coachProfile = data;
-
     const { data: athleteGroup } = await supabase
       .from('coach_athletes')
-      .select('group_id, coach_groups(announcement)')
+      .select('coach_groups(announcement)')
       .eq('athlete_id', user.id)
       .eq('coach_id', profile.coach_id)
       .single();
     
     if (athleteGroup && athleteGroup.coach_groups) {
-      athleteGroupId = athleteGroup.group_id;
       groupAnnouncement = (athleteGroup.coach_groups as any).announcement;
     }
   }

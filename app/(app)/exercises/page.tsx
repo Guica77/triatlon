@@ -2,11 +2,24 @@
 
 import * as React from 'react'
 import { Search, Filter, BookOpen, X, ChevronLeft, ChevronRight } from 'lucide-react'
-import { getAllExercises, searchExercises, getExercisesByCategory, ExternalExercise, CATEGORIES, EQUIPMENT_OPTIONS } from '@/lib/exercise-loader'
+import type { ExercisePage } from '@/lib/exercise-types'
 import { ExerciseCard } from '@/components/exercises/exercise-card'
 import { cn } from '@/lib/utils'
 
 const PER_PAGE = 24
+const CATEGORIES = [
+  { key: 'todos', label: 'Todos' }, { key: 'chest', label: 'Pecho' },
+  { key: 'back', label: 'Espalda' }, { key: 'shoulders', label: 'Hombros' },
+  { key: 'upper arms', label: 'Bíceps / Tríceps' }, { key: 'lower arms', label: 'Antebrazos' },
+  { key: 'upper legs', label: 'Cuádriceps / Femorales' }, { key: 'lower legs', label: 'Gemelos' },
+  { key: 'waist', label: 'Core / Abdomen' }, { key: 'neck', label: 'Cuello / Trapecio' },
+  { key: 'cardio', label: 'Cardio' },
+] as const
+const EQUIPMENT_OPTIONS = [
+  'body weight', 'dumbbell', 'barbell', 'kettlebell', 'cable', 'band',
+  'resistance band', 'medicine ball', 'stability ball', 'machine',
+  'smith machine', 'roller', 'rope', 'other',
+]
 
 export default function ExercisesPage() {
   const [category, setCategory] = React.useState('todos')
@@ -15,37 +28,43 @@ export default function ExercisesPage() {
   const [showFilters, setShowFilters] = React.useState(false)
   const [page, setPage] = React.useState(1)
 
-  const all = React.useMemo(() => getAllExercises(), [])
+  const [result, setResult] = React.useState<ExercisePage | null>(null)
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [retryKey, setRetryKey] = React.useState(0)
 
-  const filtered = React.useMemo(() => {
-    let results: ExternalExercise[] = all
+  React.useEffect(() => {
+    const controller = new AbortController()
+    const timer = window.setTimeout(async () => {
+      setIsLoading(true)
+      setError(null)
+      const params = new URLSearchParams({ page: String(page), pageSize: String(PER_PAGE), category, equipment })
+      if (searchQuery.trim()) params.set('q', searchQuery.trim())
 
-    if (searchQuery) results = searchExercises(searchQuery)
-    else if (category !== 'todos') results = getExercisesByCategory(category)
+      try {
+        const response = await fetch(`/api/exercises?${params}`, { signal: controller.signal })
+        if (!response.ok) throw new Error('exercise_request_failed')
+        const nextResult = await response.json() as ExercisePage
+        setResult(nextResult)
+        if (nextResult.page !== page) setPage(nextResult.page)
+      } catch (requestError) {
+        if ((requestError as Error).name !== 'AbortError') setError('No se pudo cargar la biblioteca. Inténtalo de nuevo.')
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false)
+      }
+    }, searchQuery ? 250 : 0)
 
-    if (equipment !== 'todos') {
-      results = results.filter(e => e.equipment.toLowerCase().includes(equipment))
-    }
+    return () => { window.clearTimeout(timer); controller.abort() }
+  }, [category, equipment, page, retryKey, searchQuery])
 
-    return results
-  }, [category, equipment, searchQuery, all])
-
-  const totalPages = Math.ceil(filtered.length / PER_PAGE)
-  const currentPage = Math.min(page, Math.max(totalPages, 1))
-  const paginated = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
+  const totalPages = result?.totalPages || 1
+  const currentPage = result?.page || page
+  const paginated = result?.items || []
 
   // Reset page when filters change
   React.useEffect(() => setPage(1), [category, equipment, searchQuery])
 
-  // Category counts
-  const catCounts = React.useMemo(() => {
-    const m: Record<string, number> = { todos: all.length }
-    for (const c of CATEGORIES) {
-      if (c.key === 'todos') continue
-      m[c.key] = all.filter(e => e.muscleGroup.toLowerCase() === c.key || e.category === c.key).length
-    }
-    return m
-  }, [all])
+  const catCounts = result?.categoryCounts || {}
 
   return (
     <div className="min-h-screen bg-surface-app w-full overflow-x-hidden">
@@ -58,7 +77,7 @@ export default function ExercisesPage() {
           </div>
           <div>
             <h1 className="text-base font-bold text-text-primary tracking-tight">Librería de Ejercicios</h1>
-            <p className="text-xs text-text-muted font-medium">{all.length} ejercicios con GIF animado</p>
+            <p className="text-xs text-text-muted font-medium">1324 ejercicios con GIF animado</p>
           </div>
         </div>
 
@@ -86,7 +105,7 @@ export default function ExercisesPage() {
 
         {/* Filter toggle + results count */}
         <div className="flex items-center justify-between">
-          <p className="text-xs text-text-muted font-medium">{filtered.length} ejercicio{filtered.length !== 1 ? 's' : ''} encontrado{filtered.length !== 1 ? 's' : ''}</p>
+          <p className="text-xs text-text-muted font-medium">{result?.total || 0} ejercicio{result?.total !== 1 ? 's' : ''} encontrado{result?.total !== 1 ? 's' : ''}</p>
           <button
             type="button"
             onClick={() => setShowFilters(!showFilters)}
@@ -142,14 +161,27 @@ export default function ExercisesPage() {
         )}
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className={cn('grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity', isLoading && result ? 'opacity-60' : 'opacity-100')} aria-busy={isLoading}>
           {paginated.map((exercise, i) => (
             <ExerciseCard key={exercise.id} exercise={exercise} index={i} />
           ))}
         </div>
 
+        {isLoading && !result && (
+          <div className="text-center py-12 text-sm font-medium text-text-muted">Cargando ejercicios…</div>
+        )}
+
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-sm font-bold text-text-secondary">{error}</p>
+            <button type="button" onClick={() => setRetryKey(key => key + 1)} className="mt-3 min-h-11 rounded-lg bg-coral-500 px-4 text-xs font-bold text-white">
+              Reintentar
+            </button>
+          </div>
+        )}
+
         {/* Empty state */}
-        {filtered.length === 0 && (
+        {!isLoading && !error && result?.total === 0 && (
           <div className="text-center py-12">
             <BookOpen className="w-12 h-12 text-text-muted mx-auto mb-3" />
             <p className="text-sm font-bold text-text-secondary">No se encontraron ejercicios</p>

@@ -9,21 +9,9 @@ const GITHUB_RAW = 'https://raw.githubusercontent.com/hasaneyldrm/exercises-data
 
 // Trimmed dataset (es-only instructions, ~91% smaller than the full multi-language JSON)
 import exercisesLite from './exercises-lite.json'
+import type { ExercisePage, ExternalExercise } from './exercise-types'
 
-export interface ExternalExercise {
-  id: string
-  name: string
-  category: string
-  bodyPart: string
-  equipment: string
-  instructions: string
-  muscleGroup: string
-  secondaryMuscles: string
-  target: string
-  thumbnailUrl: string
-  gifUrl: string
-  attribution: string
-}
+export type { ExercisePage, ExternalExercise } from './exercise-types'
 
 let cache: ExternalExercise[] | null = null
 
@@ -113,3 +101,66 @@ export const EQUIPMENT_OPTIONS = [
   'band', 'resistance band', 'medicine ball', 'stability ball',
   'machine', 'smith machine', 'roller', 'rope', 'other',
 ]
+
+export const EXERCISE_PAGE_SIZE = 24
+export const MAX_EXERCISE_PAGE_SIZE = 48
+
+export interface ExerciseQuery {
+  query?: string
+  category?: string
+  equipment?: string
+  page?: number
+  pageSize?: number
+}
+
+export function queryExercises({
+  query = '',
+  category = 'todos',
+  equipment = 'todos',
+  page = 1,
+  pageSize = EXERCISE_PAGE_SIZE,
+}: ExerciseQuery = {}): ExercisePage {
+  const normalizedQuery = query.trim().toLowerCase().slice(0, 100)
+  const normalizedCategory = category.trim().toLowerCase().slice(0, 40) || 'todos'
+  const normalizedEquipment = equipment.trim().toLowerCase().slice(0, 60) || 'todos'
+  const safePageSize = Math.min(MAX_EXERCISE_PAGE_SIZE, Math.max(1, Math.trunc(pageSize) || EXERCISE_PAGE_SIZE))
+  const all = loadExternalExercises()
+
+  const categoryCounts: Record<string, number> = { todos: all.length }
+  for (const categoryInfo of CATEGORIES) {
+    if (categoryInfo.key === 'todos') continue
+    categoryCounts[categoryInfo.key] = all.filter(exercise =>
+      exercise.category === categoryInfo.key || exercise.muscleGroup.toLowerCase() === categoryInfo.key
+    ).length
+  }
+
+  const filtered = all.filter(exercise => {
+    const matchesQuery = !normalizedQuery || [
+      exercise.name,
+      exercise.muscleGroup,
+      exercise.equipment,
+      exercise.instructions,
+    ].some(value => value.toLowerCase().includes(normalizedQuery))
+    const matchesCategory = normalizedCategory === 'todos'
+      || exercise.category === normalizedCategory
+      || exercise.muscleGroup.toLowerCase() === normalizedCategory
+    const matchesEquipment = normalizedEquipment === 'todos'
+      || exercise.equipment.toLowerCase().includes(normalizedEquipment)
+
+    return matchesQuery && matchesCategory && matchesEquipment
+  })
+
+  const total = filtered.length
+  const totalPages = Math.max(1, Math.ceil(total / safePageSize))
+  const safePage = Math.min(totalPages, Math.max(1, Math.trunc(page) || 1))
+  const start = (safePage - 1) * safePageSize
+
+  return {
+    items: filtered.slice(start, start + safePageSize),
+    page: safePage,
+    pageSize: safePageSize,
+    total,
+    totalPages,
+    categoryCounts,
+  }
+}
