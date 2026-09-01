@@ -9,7 +9,7 @@ import {
   Eye, EyeOff, Loader2, CheckCircle, AlertCircle, Mail,
   Waves, Bike, ArrowRight,
 } from 'lucide-react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type Role = 'athlete' | 'coach';
 
@@ -42,16 +42,6 @@ function UnifiedLoginForm() {
   const [showPassword, setShowPassword] = React.useState(false);
   const [email, setEmail] = React.useState('');
   const [emailError, setEmailError] = React.useState<string | null>(null);
-  const reduceMotion = useReducedMotion();
-  const canHover = React.useSyncExternalStore(
-    React.useCallback((onStoreChange) => {
-      const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
-      mediaQuery.addEventListener('change', onStoreChange);
-      return () => mediaQuery.removeEventListener('change', onStoreChange);
-    }, []),
-    React.useCallback(() => window.matchMedia('(hover: hover) and (pointer: fine)').matches, []),
-    () => false,
-  );
 
   const cfg = ROLE_CONFIG[role];
 
@@ -106,7 +96,7 @@ function UnifiedLoginForm() {
                 key={r}
                 type="button"
                 onClick={() => { setRole(r); setError(null); }}
-                className={`relative flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-md text-sm font-semibold transition-[color,background-color,box-shadow] cursor-pointer select-none ${
+                className={`relative flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-md text-sm font-semibold transition-all cursor-pointer select-none ${
                   isActive ? 'text-white' : 'text-text-muted hover:text-text-secondary'
                 }`}
               >
@@ -131,9 +121,9 @@ function UnifiedLoginForm() {
           {success ? (
             <motion.div
               key="success"
-              initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.95 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.95 }}
+              exit={{ opacity: 0 }}
               className="flex flex-col items-center justify-center py-10 space-y-3"
             >
               <div className="w-14 h-14 rounded-full bg-coral-500/15 flex items-center justify-center">
@@ -224,7 +214,7 @@ function UnifiedLoginForm() {
 
               {/* Submit */}
               <motion.button
-                whileHover={canHover ? { scale: 1.01 } : undefined}
+                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 className="w-full py-2.5 rounded-lg text-sm font-bold text-white bg-coral-500 hover:bg-coral-600 transition-colors shadow-button flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-1"
                 type="submit"

@@ -143,7 +143,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={() => props.setWantsCoach(false)}
-              className={`p-4 rounded-xl border text-left transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex flex-col gap-1.5 cursor-pointer ${
+              className={`p-4 rounded-xl border text-left transition-all flex flex-col gap-1.5 cursor-pointer ${
                 !props.wantsCoach 
                   ? 'bg-swim/10 border-swim text-swim ring-1 ring-swim ' 
                   : 'bg-surface-hover/30 border-border-default text-text-secondary hover:border-border-default'
@@ -151,14 +151,14 @@ export function StepPhysiology(props: StepPhysiologyProps) {
             >
               <div className="flex justify-between items-center w-full">
                 <span className="font-bold text-sm">IA Autónoma</span>
-                {!props.wantsCoach && <div className="h-2 w-2 rounded-full bg-swim" aria-hidden="true" />}
+                {!props.wantsCoach && <div className="w-2 h-2 rounded-full bg-swim animate-pulse" />}
               </div>
               <span className="text-[10px] opacity-80 font-semibold">Planificación 100% generada por IA</span>
             </button>
             
             <button
               onClick={() => props.setWantsCoach(true)}
-              className={`p-4 rounded-xl border text-left transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 flex flex-col gap-1.5 cursor-pointer ${
+              className={`p-4 rounded-xl border text-left transition-all flex flex-col gap-1.5 cursor-pointer ${
                 props.wantsCoach 
                   ? 'bg-coral-500/10 border-coral-500 text-coral-500 ring-1 ring-coral-500 ' 
                   : 'bg-surface-hover/30 border-border-default text-text-secondary hover:border-border-default'
@@ -166,7 +166,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
             >
               <div className="flex justify-between items-center w-full">
                 <span className="font-bold text-sm">Entrenador Humano</span>
-                {props.wantsCoach && <div className="h-2 w-2 rounded-full bg-coral-500" aria-hidden="true" />}
+                {props.wantsCoach && <div className="w-2 h-2 rounded-full bg-coral-500 animate-pulse" />}
               </div>
               <span className="text-[10px] opacity-80 font-semibold">Solicitar conexión con un Coach (Recomendado)</span>
             </button>
@@ -214,7 +214,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
                         props.setPreferredIngredients([...props.preferredIngredients, ing.id]);
                       }
                     }}
-                    className={`p-3 rounded-xl border text-center transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer flex flex-col justify-between items-center ${
+                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
                       isSelected
                         ? 'bg-bike/10 border-bike text-bike ring-1 ring-bike  font-semibold'
                         : 'bg-surface-hover/50 border-border-default text-text-secondary hover:bg-surface-hover hover:border-border-default'
@@ -253,7 +253,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
                         props.setAllergies([...props.allergies, alg.id]);
                       }
                     }}
-                    className={`p-3 rounded-xl border text-center transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer flex flex-col justify-between items-center ${
+                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
                       isSelected
                         ? 'bg-danger/10 border-danger/40 text-danger ring-1 ring-danger/40  font-semibold'
                         : 'bg-surface-hover/50 border-border-default text-text-secondary hover:bg-surface-hover hover:border-border-default'
@@ -292,7 +292,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
                         props.setDislikedIngredients([...props.dislikedIngredients, dis.id]);
                       }
                     }}
-                    className={`p-3 rounded-xl border text-center transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer flex flex-col justify-between items-center ${
+                    className={`p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col justify-between items-center ${
                       isSelected
                         ? 'bg-warning/10 border-warning/40 text-warning ring-1 ring-warning/40  font-semibold'
                         : 'bg-surface-hover/50 border-border-default text-text-secondary hover:bg-surface-hover hover:border-border-default'
@@ -309,7 +309,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
         
         <div className="flex justify-between pt-4 border-t border-border-default">
           {!props.isFirstStep ? (
-            <button onClick={props.onPrev} className="flex min-h-11 items-center px-6 py-3 text-sm font-semibold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"><ChevronLeft className="mr-1 h-4 w-4" /> Atrás</button>
+            <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-text-secondary hover:text-text-primary transition flex items-center cursor-pointer"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
           ) : (
             <div />
           )}

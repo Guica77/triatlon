@@ -46,7 +46,7 @@ export function ShareBadge({ badge }: ShareBadgeProps) {
     <>
       <button
         onClick={handleShare}
-        className="p-1.5 rounded-lg text-text-secondary fine-hover:text-accent fine-hover:bg-accent/10 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+        className="p-1.5 rounded-lg text-text-secondary hover:text-accent hover:bg-accent/10 transition-all"
         title="Compartir logro"
       >
         <Share2 className="w-3.5 h-3.5" />

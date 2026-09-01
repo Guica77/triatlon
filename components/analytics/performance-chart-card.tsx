@@ -49,10 +49,10 @@ export function PerformanceChartCard({
     run: true,
   });
 
-  // Keep chart colors aligned with the shared discipline and semantic tokens.
-  const COLOR_CTL = 'var(--color-swim)';
-  const COLOR_ATL = 'var(--color-run)';
-  const COLOR_TSB = 'var(--color-accent)';
+  // BRAND COLORS
+  const COLOR_CTL = "#00a2e8"; // Fitness (CTL) - Olympian Blue
+  const COLOR_ATL = "#fb7185"; // Fatigue (ATL) - Pink/Rose
+  const COLOR_TSB = "#ff7e00"; // Form (TSB) - Brand Yellow/Orange
 
   const toggleLine = (lineKey: keyof typeof visibleLines) => {
     setVisibleLines((prev) => ({
@@ -172,7 +172,7 @@ export function PerformanceChartCard({
                   setTimeRange(tab.value);
                   setSelectedDateData(null); // reset selection on zoom change
                 }}
-                className={`px-3 py-1 text-[11px] font-bold rounded-sm transition-[color,background-color,border-color,opacity] duration-150 ease-out cursor-pointer ${
+                className={`px-3 py-1 text-[11px] font-bold rounded-sm transition-all cursor-pointer ${
                   timeRange === tab.value
                     ? 'bg-surface-card text-text-primary border border-border-subtle/80'
                     : 'text-text-muted hover:text-text-primary'
@@ -255,13 +255,13 @@ export function PerformanceChartCard({
         {/* LEYENDA COMPACTA */}
         <div className="flex flex-wrap items-center justify-end gap-x-4 mb-2 px-4 relative z-10">
           <div className="flex items-center gap-3 text-[10px] font-medium text-text-muted">
-            <button onClick={() => toggleLine('ctl')} className={`flex items-center gap-1.5 transition-[color,background-color,border-color,opacity] duration-150 ease-out cursor-pointer ${visibleLines.ctl ? 'opacity-100 text-text-primary font-bold' : 'opacity-40 line-through text-text-muted'}`}>
+            <button onClick={() => toggleLine('ctl')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.ctl ? 'opacity-100 text-text-primary font-bold' : 'opacity-40 line-through text-text-muted'}`}>
               <span className="w-3 h-0.5 bg-[#38bdf8]" /> CTL
             </button>
-            <button onClick={() => toggleLine('atl')} className={`flex items-center gap-1.5 transition-[color,background-color,border-color,opacity] duration-150 ease-out cursor-pointer ${visibleLines.atl ? 'opacity-100 text-text-primary font-bold' : 'opacity-40 line-through text-text-muted'}`}>
+            <button onClick={() => toggleLine('atl')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.atl ? 'opacity-100 text-text-primary font-bold' : 'opacity-40 line-through text-text-muted'}`}>
               <span className="w-3 h-0.5 border border-dashed border-[#fb7185]" /> ATL
             </button>
-            <button onClick={() => toggleLine('tsb')} className={`flex items-center gap-1.5 transition-[color,background-color,border-color,opacity] duration-150 ease-out cursor-pointer ${visibleLines.tsb ? 'opacity-100 text-text-primary font-bold' : 'opacity-40 line-through text-text-muted'}`}>
+            <button onClick={() => toggleLine('tsb')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.tsb ? 'opacity-100 text-text-primary font-bold' : 'opacity-40 line-through text-text-muted'}`}>
               <span className="w-2.5 h-2.5 border bg-[#a3e635]/20 border-[#a3e635]/50" /> TSB
             </button>
             <div className="w-px h-3 bg-bg-hover mx-1"></div>
@@ -271,13 +271,13 @@ export function PerformanceChartCard({
             {showVolume && (
               <>
                 <div className="w-px h-3 bg-bg-hover mx-1"></div>
-                <button onClick={() => toggleLine('swim')} className={`flex items-center gap-1.5 transition-[color,background-color,border-color,opacity] duration-150 ease-out cursor-pointer ${visibleLines.swim ? 'opacity-100 text-sky-600 font-bold' : 'opacity-40 line-through text-text-muted'}`}>
+                <button onClick={() => toggleLine('swim')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.swim ? 'opacity-100 text-sky-600 font-bold' : 'opacity-40 line-through text-text-muted'}`}>
                   Vol S
                 </button>
-                <button onClick={() => toggleLine('bike')} className={`flex items-center gap-1.5 transition-[color,background-color,border-color,opacity] duration-150 ease-out cursor-pointer ${visibleLines.bike ? 'opacity-100 text-emerald-600 font-bold' : 'opacity-40 line-through text-text-muted'}`}>
+                <button onClick={() => toggleLine('bike')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.bike ? 'opacity-100 text-emerald-600 font-bold' : 'opacity-40 line-through text-text-muted'}`}>
                   Vol B
                 </button>
-                <button onClick={() => toggleLine('run')} className={`flex items-center gap-1.5 transition-[color,background-color,border-color,opacity] duration-150 ease-out cursor-pointer ${visibleLines.run ? 'opacity-100 text-rose-600 font-bold' : 'opacity-40 line-through text-text-muted'}`}>
+                <button onClick={() => toggleLine('run')} className={`flex items-center gap-1.5 transition-all cursor-pointer ${visibleLines.run ? 'opacity-100 text-rose-600 font-bold' : 'opacity-40 line-through text-text-muted'}`}>
                   Vol R
                 </button>
               </>

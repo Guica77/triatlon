@@ -49,7 +49,7 @@ export default async function InviteLandingPage({
             
             {/* Icon */}
             <div className="w-20 h-20 rounded-2xl bg-swim border border-swim flex items-center justify-center mt-2 shrink-0">
-              <Trophy className="w-10 h-10 text-swim" />
+              <Trophy className="w-10 h-10 text-swim animate-pulse" />
             </div>
 
             {/* Typography */}
@@ -68,7 +68,7 @@ export default async function InviteLandingPage({
             {/* Actions */}
             <div className="w-full space-y-3 pt-4">
               <Link href="/register" className="block w-full">
-                <AnimatedButton variant="primary" className="w-full py-3.5 text-sm font-black bg-swim hover:bg-swim text-white rounded-xl flex items-center justify-center gap-2 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100">
+                <AnimatedButton variant="primary" className="w-full py-3.5 text-sm font-black bg-swim hover:bg-swim text-white rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer">
                   <UserPlus className="w-4 h-4" />
                   Soy nuevo, Registrarme
                   <ArrowRight className="w-4 h-4 ml-1" />
@@ -76,7 +76,7 @@ export default async function InviteLandingPage({
               </Link>
               
               <Link href="/login" className="block w-full">
-                <AnimatedButton variant="ghost" className="w-full py-3.5 text-sm font-black text-text-secondary hover:text-text-primary bg-bg-elevated hover:bg-bg-hover border border-border-subtle rounded-xl flex items-center justify-center gap-2 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100">
+                <AnimatedButton variant="ghost" className="w-full py-3.5 text-sm font-black text-text-secondary hover:text-text-primary bg-bg-elevated hover:bg-bg-hover border border-border-subtle rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer">
                   <LogIn className="w-4 h-4 text-text-muted" />
                   Ya tengo cuenta, Iniciar Sesión
                 </AnimatedButton>

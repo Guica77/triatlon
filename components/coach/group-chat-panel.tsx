@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client';
 import { GroupMessageItem, sendGroupMessage, getGroupMessages } from '@/app/(app)/coach/group/[id]/group-chat-actions';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { Send, X, MessageSquare, Loader2 } from 'lucide-react';
-import { useReducedMotion } from 'framer-motion';
 
 interface GroupChatPanelProps {
   groupId: string;
@@ -20,7 +19,6 @@ export function GroupChatPanel({ groupId, isOpen, onClose }: GroupChatPanelProps
   const [loading, setLoading] = React.useState(true);
   const [sending, setSending] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
 
   // Fetch initial messages & current user
   React.useEffect(() => {
@@ -87,8 +85,8 @@ export function GroupChatPanel({ groupId, isOpen, onClose }: GroupChatPanelProps
 
   // Scroll to bottom
   React.useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
-  }, [messages, reduceMotion]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,7 +127,7 @@ export function GroupChatPanel({ groupId, isOpen, onClose }: GroupChatPanelProps
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-surface-elevated border-l border-border-default shadow-elevated z-[100] flex flex-col">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[400px] bg-surface-elevated border-l border-border-default shadow-elevated z-[100] flex flex-col transform transition-transform duration-300">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle bg-surface-hover">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-swim/15 flex items-center justify-center">
@@ -140,13 +138,7 @@ export function GroupChatPanel({ groupId, isOpen, onClose }: GroupChatPanelProps
             <p className="text-[10px] text-text-secondary font-medium">Comunicación en tiempo real</p>
           </div>
         </div>
-        <AnimatedButton
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          aria-label="Cerrar chat de grupo"
-          className="min-h-10 min-w-10 text-text-secondary fine-hover:text-text-primary fine-hover:bg-surface-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
-        >
+        <AnimatedButton variant="ghost" size="icon" onClick={onClose} className="text-text-secondary hover:text-text-primary">
           <X className="w-5 h-5" />
         </AnimatedButton>
       </div>
@@ -203,12 +195,12 @@ export function GroupChatPanel({ groupId, isOpen, onClose }: GroupChatPanelProps
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Escribe un mensaje..."
-            className="min-h-10 flex-1 px-4 py-2.5 bg-surface-hover border border-transparent focus:border-swim focus:bg-surface-card rounded-full text-sm outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-swim/50"
+            className="flex-1 px-4 py-2.5 bg-surface-hover border-transparent focus:border-swim focus:bg-surface-card rounded-full text-sm outline-none transition-all"
           />
           <AnimatedButton
             type="submit"
             disabled={!newMessage.trim() || sending}
-            className="min-h-10 min-w-10 rounded-full bg-swim fine-hover:bg-swim/80 text-white flex items-center justify-center shrink-0 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
+            className="w-10 h-10 rounded-full bg-swim hover:bg-swim/80 text-white flex items-center justify-center shrink-0 disabled:opacity-50"
           >
             <Send className="w-4 h-4 ml-0.5" />
           </AnimatedButton>

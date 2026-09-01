@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Wrench, Edit2, X, Check } from 'lucide-react';
 import { updateVirtualGarage } from '@/app/(app)/settings/actions';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -21,7 +21,6 @@ export function VirtualGarageCard({ initialGarage = [] }: { initialGarage: strin
   const [isEditing, setIsEditing] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [garage, setGarage] = React.useState<string[]>(initialGarage);
-  const reduceMotion = useReducedMotion();
 
   const toggleGear = (id: string) => {
     setGarage(prev => prev.includes(id) ? prev.filter(g => g !== id) : [...prev, id]);
@@ -48,7 +47,7 @@ export function VirtualGarageCard({ initialGarage = [] }: { initialGarage: strin
             onClick={() => setIsEditing(true)}
             title="Editar garaje"
             aria-label="Editar garaje"
-            className="min-h-10 min-w-10 rounded-full bg-surface-hover border border-border-default flex items-center justify-center text-text-secondary fine-hover:text-swim fine-hover:border-swim fine-hover:bg-swim/10 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 cursor-pointer"
+            className="w-8 h-8 rounded-full bg-surface-hover border border-border-default flex items-center justify-center text-text-secondary hover:text-swim hover:border-swim hover:bg-swim/10 transition-colors cursor-pointer"
           >
             <Edit2 className="w-3.5 h-3.5" />
           </button>
@@ -78,25 +77,23 @@ export function VirtualGarageCard({ initialGarage = [] }: { initialGarage: strin
 
       <AnimatePresence>
         {isEditing && (
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0 }}
+          <motion.div 
+            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={reduceMotion ? undefined : { opacity: 0 }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+            exit={{ opacity: 0 }}
             className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-surface-app/70 backdrop-blur-sm rounded-2xl"
           >
-            <motion.div
-              initial={reduceMotion ? false : { scale: 0.95, y: 10, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={reduceMotion ? undefined : { scale: 0.95, y: 10, opacity: 0 }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+            <motion.div 
+              initial={{ scale: 0.95, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 10 }}
               className="w-full bg-surface-card border border-border-default rounded-2xl p-5 shadow-elevated relative flex flex-col text-left"
             >
               <button 
                 onClick={() => { setGarage(initialGarage); setIsEditing(false); }} 
                 title="Cerrar modal"
                 aria-label="Cerrar modal"
-                className="absolute top-4 right-4 min-h-10 min-w-10 inline-flex items-center justify-center rounded-lg text-text-muted fine-hover:text-text-primary fine-hover:bg-surface-hover transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 cursor-pointer"
+                className="absolute top-4 right-4 text-text-muted hover:text-text-primary cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -110,10 +107,10 @@ export function VirtualGarageCard({ initialGarage = [] }: { initialGarage: strin
                     <button
                       key={item.id}
                       onClick={() => toggleGear(item.id)}
-                      className={`flex min-h-11 items-center gap-2 p-2.5 rounded-xl border transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.98] text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-warning/50 ${
+                      className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all text-left cursor-pointer ${
                         isSelected 
                           ? 'bg-warning/10 border-warning/30 text-warning' 
-                          : 'bg-surface-hover border-border-default text-text-secondary fine-hover:border-border-default fine-hover:bg-surface-hover/50'
+                          : 'bg-surface-hover border-border-default text-text-secondary hover:border-border-default hover:bg-surface-hover/50'
                       }`}
                     >
                       <span className="text-sm">{item.icon}</span>
@@ -128,7 +125,7 @@ export function VirtualGarageCard({ initialGarage = [] }: { initialGarage: strin
                 variant="primary" 
                 onClick={handleSave} 
                 disabled={loading} 
-                className="w-full min-h-11 mt-auto py-2.5 text-xs font-black !bg-swim fine-hover:!bg-swim/90 !text-white flex justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
+                className="w-full mt-auto py-2.5 text-xs font-black !bg-swim hover:!bg-swim/90 !text-white flex justify-center  cursor-pointer"
               >
                 {loading ? 'Guardando...' : 'Confirmar Garaje'}
               </AnimatedButton>

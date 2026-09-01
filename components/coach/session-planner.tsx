@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, X, Clock, Check, PlusCircle, Activity } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { saveCoachWorkout } from '@/app/(app)/coach/athlete/[id]/actions'
@@ -17,7 +17,6 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [success, setSuccess] = React.useState(false)
-  const reduceMotion = useReducedMotion()
 
   // Default date as YYYY-MM-DD in local timezone
   const getTodayString = () => {
@@ -87,7 +86,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
         variant="ghost" 
         size="sm" 
         onClick={() => setIsOpen(true)}
-        className="rounded-full text-xs py-1.5 px-3.5 border border-swim/20 bg-swim/10 text-swim fine-hover:bg-swim/20 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] flex items-center gap-1.5 shrink-0"
+        className="rounded-full text-xs py-1.5 px-3.5 border border-swim/20 bg-swim/10 text-swim hover:bg-swim/20 transition-all flex items-center gap-1.5 shrink-0"
       >
         <Calendar className="w-3.5 h-3.5" />
         <span>Planificar Sesión</span>
@@ -107,10 +106,10 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
 
             {/* Modal Body */}
             <motion.div 
-              initial={reduceMotion ? false : { scale: 0.95, opacity: 0, y: 15 }}
+              initial={{ scale: 0.95, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={reduceMotion ? undefined : { scale: 0.95, opacity: 0, y: 15 }}
-              transition={reduceMotion ? { duration: 0 } : { type: 'spring', duration: 0.4, bounce: 0.15 }}
+              exit={{ scale: 0.95, opacity: 0, y: 15 }}
+              transition={{ type: 'spring', duration: 0.4 }}
               className="relative w-full max-w-lg bg-surface-elevated border border-border-default rounded-2xl shadow-elevated overflow-hidden z-10 flex flex-col max-h-[90vh] text-text-primary"
             >
 
@@ -130,7 +129,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                   disabled={loading}
                   title="Cerrar modal"
                   aria-label="Cerrar modal"
-                  className="min-h-10 min-w-10 rounded-lg border border-border-default flex items-center justify-center text-text-muted fine-hover:text-text-primary fine-hover:bg-surface-hover transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 cursor-pointer"
+                  className="w-8 h-8 rounded-lg border border-border-default flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -171,7 +170,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                           required
                           value={formData.scheduledDate}
                           onChange={handleInputChange}
-                          className="w-full bg-surface-elevated border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out cursor-pointer"
+                          className="w-full bg-surface-elevated border border-border-default focus:border-swim rounded-xl p-3 text-xs text-text-primary outline-none transition-colors cursor-pointer"
                         />
                       </div>
 
@@ -183,7 +182,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                           title="Tipo de deporte"
                           value={formData.sportType}
                           onChange={handleInputChange}
-                          className="w-full bg-surface-elevated border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out cursor-pointer"
+                          className="w-full bg-surface-elevated border border-border-default focus:border-swim rounded-xl p-3 text-xs text-text-primary outline-none transition-colors cursor-pointer"
                         >
                           <option value="ciclismo">🚴‍♂️ Ciclismo</option>
                           <option value="carrera">🏃‍♂️ Carrera</option>
@@ -224,7 +223,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                           placeholder="Ej: Intervals VO2Max"
                           value={formData.title}
                           onChange={handleInputChange}
-                          className="w-full bg-surface-elevated border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out"
+                          className="w-full bg-surface-elevated border border-border-default focus:border-swim rounded-xl p-3 text-xs text-text-primary outline-none transition-colors"
                         />
                       </div>
                     </div>
@@ -245,7 +244,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                         value={formData.warmup}
                         onChange={handleInputChange}
                         placeholder="Ej: 15 min Z1 a Z2..."
-                        className="w-full bg-surface-elevated border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out resize-none placeholder-text-muted"
+                        className="w-full bg-surface-elevated border border-border-default focus:border-swim rounded-xl p-3 text-xs text-text-primary outline-none transition-colors resize-none placeholder-text-muted"
                       />
                     </div>
 
@@ -264,7 +263,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                         value={formData.main}
                         onChange={handleInputChange}
                         placeholder="Ej: 5x (3 min a 220W-250W + Recup: 1 min)..."
-                        className="w-full bg-surface-elevated border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out resize-none placeholder-text-muted"
+                        className="w-full bg-surface-elevated border border-border-default focus:border-swim rounded-xl p-3 text-xs text-text-primary outline-none transition-colors resize-none placeholder-text-muted"
                       />
                     </div>
 
@@ -282,7 +281,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                         value={formData.cooldown}
                         onChange={handleInputChange}
                         placeholder="Ej: 10 min suaves Z1..."
-                        className="w-full bg-surface-elevated border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out resize-none placeholder-text-muted"
+                        className="w-full bg-surface-elevated border border-border-default focus:border-swim rounded-xl p-3 text-xs text-text-primary outline-none transition-colors resize-none placeholder-text-muted"
                       />
                     </div>
 
@@ -291,7 +290,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                       variant="primary"
                       type="submit"
                       disabled={loading}
-                      className="w-full min-h-11 py-3.5 !bg-swim fine-hover:!bg-swim/90 !text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-button"
+                      className="w-full py-3.5 !bg-swim hover:!bg-swim/90 !text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-button"
                     >
                       {loading ? 'Programando...' : (
                         <>

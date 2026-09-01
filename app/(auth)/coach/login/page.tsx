@@ -75,23 +75,22 @@ export default function CoachLoginPage() {
               </AnimatePresence>
 
               <div className="space-y-1.5">
-                <label htmlFor="coach-login-email" className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Correo Electrónico</label>
+                <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Correo Electrónico</label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                   <input
-                    id="coach-login-email"
                     name="email"
                     type="email"
                     placeholder="coach@triatlonpro.com"
                     required
-                    className="w-full rounded-xl border border-border-subtle bg-bg-hover py-3 pl-10 pr-3.5 text-sm text-text-primary placeholder-zinc-600 outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus:border-bike focus:ring-1 focus:ring-bike/40 motion-reduce:transition-opacity"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-bike transition-all"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label htmlFor="coach-login-password" className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Contraseña</label>
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-text-muted">Contraseña</label>
                   <button
                     type="button"
                     onClick={() => router.push('/forgot-password')}
@@ -102,19 +101,17 @@ export default function CoachLoginPage() {
                 </div>
                 <div className="relative">
                   <input
-                    id="coach-login-password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     required
-                    className="w-full rounded-xl border border-border-subtle bg-bg-hover py-3 pl-3.5 pr-10 text-sm font-mono text-text-primary placeholder-zinc-600 outline-none transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out focus:border-bike focus:ring-1 focus:ring-bike/40 active:scale-[0.99] motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                    className="w-full bg-bg-hover border border-border-subtle rounded-xl pl-3.5 pr-10 py-3 text-sm text-text-primary placeholder-zinc-600 outline-none focus:border-bike transition-all font-mono"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    aria-pressed={showPassword}
-                    className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out hover:bg-surface-hover hover:text-text-secondary active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary transition-colors"
+                    tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -122,7 +119,8 @@ export default function CoachLoginPage() {
               </div>
 
               <motion.button
-                className="mt-4 flex min-h-11 w-full items-center justify-center rounded-xl bg-bike py-3.5 text-sm font-bold text-text-primary transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out hover:bg-bike/90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                whileTap={{ scale: 0.98 }}
+                className="w-full mt-4 py-3.5 rounded-xl text-sm font-bold text-text-primary bg-bike hover:bg-bike/90 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 type="submit"
                 disabled={loading}
               >

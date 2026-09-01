@@ -105,9 +105,8 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
             </p>
           </div>
           <button
-            type="button"
             onClick={() => setShowHelp(false)}
-            className="min-h-11 text-[10px] font-bold text-text-muted hover:text-text-primary uppercase tracking-wider text-right w-full pt-4 cursor-pointer outline-none transition-[color,background-color,border-color] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-swim/40 motion-reduce:transition-opacity"
+            className="text-[10px] font-bold text-text-muted hover:text-text-primary uppercase tracking-wider text-right w-full pt-4 cursor-pointer"
           >
             Entendido
           </button>
@@ -125,11 +124,9 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
               {isBeginner ? 'Horas de Entrenamiento' : 'Progreso de TSS'}
             </h3>
             <button
-              type="button"
               onClick={() => setShowHelp(true)}
-              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-text-muted hover:text-swim transition-[color,background-color,border-color,box-shadow] duration-150 ease-out p-0.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-swim/40 motion-reduce:transition-opacity"
+              className="text-text-muted hover:text-swim transition-colors p-0.5 cursor-pointer"
               title="¿Qué es esto?"
-              aria-label="Ayuda sobre el progreso semanal"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
@@ -163,7 +160,7 @@ export function WeeklyTssCard({ actualTss, targetTss, athleteLevel = 'intermedio
       <div className="space-y-2 pt-4">
         <div className="h-4 w-full bg-bg-hover rounded-full overflow-hidden p-0.5 border border-border-subtle">
           <div
-            className={`h-full rounded-full transition-[width] duration-1000 ease-out motion-reduce:transition-none ${statusInfo.barColor} ${getProgressWidthClass(Math.min(percent, 100))}`}
+            className={`h-full rounded-full transition-all duration-1000 ${statusInfo.barColor} ${getProgressWidthClass(Math.min(percent, 100))}`}
           />
         </div>
         <div className="flex justify-between text-xs text-text-muted font-medium px-1 uppercase tracking-wider">

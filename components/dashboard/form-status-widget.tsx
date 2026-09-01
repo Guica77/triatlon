@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Zap, ArrowRight, Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
  
 interface FormStatusWidgetProps {
@@ -24,8 +24,7 @@ export function FormStatusWidget({
   pmcHistory = [] 
 }: FormStatusWidgetProps) {
   const isBeginner = athleteLevel === 'principiante';
-  const reduceMotion = useReducedMotion();
-
+ 
   const safeTsb = typeof tsb === 'number' && !isNaN(tsb) ? tsb : 0;
   const safeProgressPercent = typeof progressPercent === 'number' && !isNaN(progressPercent) ? progressPercent : 0;
   
@@ -41,19 +40,19 @@ export function FormStatusWidget({
       description = 'Sigue sumando, cada sesión cuenta para crear el hábito.';
       color = 'text-blue-500';
       gradientId = 'formBlueGrad';
-      borderHoverClass = 'fine-hover:border-blue-300';
+      borderHoverClass = 'hover:border-blue-300';
     } else if (safeProgressPercent < 70) {
       label = 'Buen camino';
       description = 'Constancia sólida esta semana. ¡Mantén el ritmo!';
       color = 'text-emerald-500';
       gradientId = 'formOptimalGrad';
-      borderHoverClass = 'fine-hover:border-emerald-300';
+      borderHoverClass = 'hover:border-emerald-300';
     } else {
       label = '¡Constancia Impecable!';
       description = 'Excelente adherencia al plan. Estás construyendo una gran base.';
       color = 'text-amber-500';
       gradientId = 'formOverloadGrad';
-      borderHoverClass = 'fine-hover:border-amber-300';
+      borderHoverClass = 'hover:border-amber-300';
     }
   } else {
     if (safeTsb > 25) {
@@ -61,31 +60,31 @@ export function FormStatusWidget({
       description = 'Demasiado descanso, perdiendo condición.';
       color = 'text-zinc-600';
       gradientId = 'formGrayGrad';
-      borderHoverClass = 'fine-hover:border-zinc-400';
+      borderHoverClass = 'hover:border-zinc-400';
     } else if (safeTsb >= 5) {
       label = 'Pico de Forma';
       description = 'Frescura alta. Listo para competir.';
       color = 'text-emerald-600';
       gradientId = 'formOptimalGrad';
-      borderHoverClass = 'fine-hover:border-emerald-300';
+      borderHoverClass = 'hover:border-emerald-300';
     } else if (safeTsb >= -10) {
       label = 'Entrenamiento Óptimo';
       description = 'Asimilando cargas correctamente.';
       color = 'text-blue-600';
       gradientId = 'formBlueGrad';
-      borderHoverClass = 'fine-hover:border-blue-300';
+      borderHoverClass = 'hover:border-blue-300';
     } else if (safeTsb >= -25) {
       label = 'Sobrecarga Controlada';
       description = 'Semana de impacto. La fatiga es alta.';
       color = 'text-amber-600';
       gradientId = 'formOverloadGrad';
-      borderHoverClass = 'fine-hover:border-amber-300';
+      borderHoverClass = 'hover:border-amber-300';
     } else {
       label = 'Alerta de Fatiga';
       description = 'Riesgo de lesión. Considera descansar.';
       color = 'text-rose-600';
       gradientId = 'formRedGrad';
-      borderHoverClass = 'fine-hover:border-rose-300';
+      borderHoverClass = 'hover:border-rose-300';
     }
   }
  
@@ -145,8 +144,8 @@ export function FormStatusWidget({
   const tsbAreaPath = historyPoints.length >= 2 ? `M ${getX(0, historyPoints.length).toFixed(1)},${getY_T(0).toFixed(1)} L ${tsbValues.map((val, i) => `${getX(i, historyPoints.length).toFixed(1)},${getY_T(val).toFixed(1)}`).join(' L ')} L ${getX(historyPoints.length - 1, historyPoints.length).toFixed(1)},${getY_T(0).toFixed(1)} Z` : '';
  
   return (
-    <Link href="/analytics" className="block group w-full h-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded-2xl">
-      <Card className={`rounded-2xl border-border-default bg-bg-card ${borderHoverClass} transition-[border-color,box-shadow,background-color] duration-150 ease-out h-full min-h-[320px] relative overflow-hidden`}>
+    <Link href="/analytics" className="block group w-full h-full cursor-pointer hover:scale-[1.01] transition-transform duration-300">
+      <Card className={`rounded-2xl border-border-default bg-bg-card ${borderHoverClass} transition-all duration-300 h-full min-h-[320px] relative overflow-hidden`}>
         <CardContent className="p-5 sm:p-6 flex flex-col justify-between h-full">
         
         {/* Encabezado */}
@@ -163,11 +162,11 @@ export function FormStatusWidget({
               {isBeginner ? 'Constancia Semanal' : 'Estado de Forma'}
             </h3>
           </div>
-          <div className="flex items-center gap-1.5 opacity-60 fine-hover:opacity-100 transition-opacity duration-150 ease-out">
+          <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
             <span className="text-[10px] text-text-muted font-bold uppercase tracking-wide">
               {isBeginner ? 'Ver guía' : 'Análisis'}
             </span>
-            <ArrowRight className="w-3 h-3 text-text-muted transition-transform duration-150 ease-out fine-hover:translate-x-0.5" />
+            <ArrowRight className="w-3 h-3 text-text-muted transition-transform group-hover:translate-x-0.5" />
           </div>
         </div>
         
@@ -219,9 +218,9 @@ export function FormStatusWidget({
                 strokeWidth="6"
                 fill="transparent"
                 strokeDasharray={circumference}
-                initial={reduceMotion ? false : { strokeDashoffset: circumference }}
+                initial={{ strokeDashoffset: circumference }}
                 animate={{ strokeDashoffset }}
-                transition={reduceMotion ? { duration: 0 } : { duration: 1.2, ease: 'easeOut' }}
+                transition={{ duration: 1.2, ease: 'easeOut' }}
                 strokeLinecap="round"
               />
             </svg>

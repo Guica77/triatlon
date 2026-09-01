@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { createManualWorkoutAction, toggleWorkoutStatus } from '@/app/(app)/dashboard/actions';
 import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
 import { DailyFocusCard } from '@/components/dashboard/daily-focus-card';
@@ -53,7 +53,6 @@ export function DashboardViewTabs({
   initialAnalytics
 }: DashboardViewTabsProps) {
   const [isMounted, setIsMounted] = React.useState(false);
-  const reduceMotion = useReducedMotion();
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -322,8 +321,8 @@ export function DashboardViewTabs({
   }, [allWorkouts]);
 
   if (!isMounted) {
-    return <div className="min-h-screen bg-surface-app flex items-center justify-center">
-      <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin motion-reduce:animate-none" role="status" aria-label="Cargando dashboard"></div>
+    return <div className="min-h-screen animate-pulse bg-surface-app flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-4 border-accent border-t-transparent animate-spin"></div>
     </div>;
   }
 
@@ -377,7 +376,7 @@ export function DashboardViewTabs({
             <a
               href="/api/workouts/export-calendar"
               download="calendario_semanal.ics"
-              className="min-h-11 px-3.5 py-2 rounded-xl bg-surface-card border border-border-default fine-hover:border-border-default text-text-primary fine-hover:text-text-primary text-xs font-bold transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 flex items-center gap-1.5 cursor-pointer shadow-card motion-reduce:transition-opacity motion-reduce:active:scale-100"
+              className="px-3.5 py-2 rounded-xl bg-surface-card border border-border-default hover:border-border-default text-text-primary hover:text-text-primary text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-card"
               title="Descargar toda la semana en tu Apple Calendar, Google Calendar o Garmin Calendar"
             >
               <Calendar className="w-3.5 h-3.5 text-accent" />
@@ -394,7 +393,7 @@ export function DashboardViewTabs({
                   setAiInitialPrompt('');
                   setIsAiModalOpen(true);
                 }}
-                className="min-h-11 bg-accent/15 fine-hover:bg-accent/25 text-accent border border-accent/30 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 cursor-pointer shadow-card motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                className="bg-accent/15 hover:bg-accent/25 text-accent border border-accent/30 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-card"
               >
                 <Bot className="w-4 h-4" />
                 <span className="hidden sm:inline">Generar Plan AI</span>
@@ -402,7 +401,7 @@ export function DashboardViewTabs({
               <AnimatedButton
                 variant="primary"
                 onClick={() => openModalForDate(todayStr)}
-                className="min-h-11 !bg-accent fine-hover:!bg-coral-400 !text-white text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 cursor-pointer shadow-card motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                className="!bg-accent hover:!bg-coral-400 !text-white text-xs py-2 px-4 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer shadow-card"
               >
                 <Plus className="w-4 h-4" />
                 <span>Añadir Manual</span>
@@ -415,7 +414,7 @@ export function DashboardViewTabs({
       {/* Main View Area */}
       <div>
         <div className={activeTab === 'semana' ? 'block' : 'hidden'}>
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in">
             {/* Weekly navigation component */}
             <WeeklyNav
               workouts={weeklyWorkouts}
@@ -461,8 +460,8 @@ export function DashboardViewTabs({
                   ))
                 ) : (
                   <div className="p-8 rounded-2xl bg-surface-card border border-dashed border-border-default flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group shadow-card">
-                    <div className="w-12 h-12 rounded-full bg-bike/10 border border-bike/20 flex items-center justify-center text-bike shadow-card">
-                      <Sparkles className="w-5 h-5" />
+                    <div className="w-12 h-12 rounded-full bg-bike/10 border border-bike/20 flex items-center justify-center text-bike group-hover:scale-110 transition-transform duration-500 shadow-card">
+                      <Sparkles className="w-5 h-5 animate-pulse" />
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-black text-text-primary">Día de Recuperación Activa</p>
@@ -532,7 +531,7 @@ export function DashboardViewTabs({
                       setAiInitialPrompt('Noto poca carga esta semana. Por favor, añádeme más volumen general, en especial rodajes largos.');
                       setIsAiModalOpen(true);
                     }}
-                    className="min-h-11 flex-1 sm:flex-none border border-border-default text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer text-text-secondary fine-hover:bg-surface-hover fine-hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 shadow-card motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                    className="flex-1 sm:flex-none border border-border-default text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-text-secondary hover:bg-surface-hover hover:text-text-primary shadow-card"
                   >
                     Poco volumen
                   </AnimatedButton>
@@ -542,7 +541,7 @@ export function DashboardViewTabs({
                       setAiInitialPrompt('Siento demasiada fatiga muscular. Por favor, reduce el volumen general de la semana un 20% y prioriza descansos activos o natación suave.');
                       setIsAiModalOpen(true);
                     }}
-                    className="min-h-11 flex-1 sm:flex-none border border-border-default text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer text-text-secondary fine-hover:bg-surface-hover fine-hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/50 shadow-card motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                    className="flex-1 sm:flex-none border border-border-default text-xs py-2 px-4 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-text-secondary hover:bg-surface-hover hover:text-danger shadow-card"
                   >
                     Demasiada carga
                   </AnimatedButton>
@@ -552,7 +551,7 @@ export function DashboardViewTabs({
           </div>
         </div>
         <div className={activeTab === 'mes' ? 'block' : 'hidden'}>
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fade-in">
             {/* Monthly Calendar View */}
             <Card>
               <CardContent className="p-5">
@@ -722,20 +721,18 @@ export function DashboardViewTabs({
 
             {/* Overlay */}
             <motion.div
-              initial={reduceMotion ? false : { opacity: 0 }}
+              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={reduceMotion ? undefined : { opacity: 0 }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+              exit={{ opacity: 0 }}
               onClick={() => setIsManualModalOpen(false)}
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             />
 
             {/* Modal Box */}
             <motion.div
-              initial={reduceMotion ? false : { opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={reduceMotion ? undefined : { opacity: 0, scale: 0.95, y: 10 }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.2, ease: 'easeOut' }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
               className="relative w-full max-w-lg rounded-2xl bg-surface-elevated border border-border-default shadow-elevated p-6 overflow-hidden z-10"
             >
               {/* Modal Header */}

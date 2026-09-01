@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
               <span className="w-1.5 h-1.5 rounded-full bg-bike" />
               Tiempo real
             </span>
-            <a href="/dashboard" className="min-h-11 inline-flex items-center text-[10px] text-swim hover:text-swim/80 font-bold transition-[color,background-color,border-color,opacity] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-swim/40 motion-reduce:transition-opacity">
+            <a href="/dashboard" className="text-[10px] text-swim hover:text-swim/80 font-bold transition-colors">
               ← Volver a la app
             </a>
           </div>
@@ -158,7 +158,7 @@ function SubscriptionBar({ label, count, total, color }: { label: string; count:
         <span className="font-medium text-text-secondary">{count} ({pct}%)</span>
       </div>
       <div className="h-2 bg-bg-hover rounded-full overflow-hidden">
-        <div className={`h-full ${color} rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none`} style={{ width: `${pct}%` }} />
+        <div className={`h-full ${color} rounded-full transition-all`} style={{ width: `${pct}%` }} />
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { UserPlus, ChevronLeft, Search, Loader2, CheckCircle2, Award, ChevronRight } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -22,16 +22,6 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
   const [foundCoach, setFoundCoach] = React.useState<any | null>(null);
   const [coaches, setCoaches] = React.useState<any[]>([]);
   const [loadingDirectory, setLoadingDirectory] = React.useState(true);
-  const reduceMotion = useReducedMotion();
-  const canHover = React.useSyncExternalStore(
-    React.useCallback((onStoreChange) => {
-      const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
-      mediaQuery.addEventListener('change', onStoreChange);
-      return () => mediaQuery.removeEventListener('change', onStoreChange);
-    }, []),
-    React.useCallback(() => window.matchMedia('(hover: hover) and (pointer: fine)').matches, []),
-    () => false,
-  );
 
   React.useEffect(() => {
     async function fetchCoaches() {
@@ -74,13 +64,7 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
   };
 
   return (
-    <motion.div
-      key="step-coach"
-      initial={{ opacity: 0, x: reduceMotion ? 0 : -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: reduceMotion ? 0 : 20 }}
-      className="space-y-6"
-    >
+    <motion.div key="step-coach" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
       <ProCard className="space-y-6">
         <div className="border-b border-border-default pb-4">
           <h2 className="text-xl font-medium text-text-primary flex items-center gap-2"><UserPlus className="w-5 h-5 text-coral-500" /> Elección de Entrenador</h2>
@@ -106,7 +90,7 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
                         setError(null);
                       }} 
                       placeholder="CÓDIGO DE ENTRENADOR" 
-                      className={`flex-1 bg-surface-card border rounded-xl px-4 py-3 text-sm focus:border-swim outline-none transition-[border-color,color] text-center font-bold tracking-widest uppercase ${error ? 'border-danger text-danger' : 'border-border-default text-swim'}`}
+                      className={`flex-1 bg-surface-card border rounded-xl px-4 py-3 text-sm focus:border-swim outline-none transition-all text-center font-bold tracking-widest uppercase ${error ? 'border-danger text-danger' : 'border-border-default text-swim'}`} 
                     />
                     <AnimatedButton 
                       variant="primary" 
@@ -174,7 +158,7 @@ export function StepCoachSelection(props: StepCoachSelectionProps) {
               {coaches.map((coach) => (
                 <motion.div 
                   key={coach.id}
-                  whileHover={canHover ? { scale: 0.98 } : undefined}
+                  whileHover={{ scale: 0.98 }}
                   className="min-w-[280px] w-[280px] flex-shrink-0 snap-center rounded-2xl border border-border-default bg-surface-card p-5 flex flex-col space-y-4 shadow-card"
                 >
                   <div className="flex items-center gap-3">

@@ -56,7 +56,7 @@ export function ExportButtons() {
       <button
         onClick={handleCSV}
         disabled={loading !== null}
-        className="flex min-h-10 items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-text-secondary hover:text-text-primary bg-surface-card hover:bg-surface-hover border border-border-subtle hover:border-border-default transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] disabled:opacity-50 motion-reduce:transition-opacity motion-reduce:active:scale-100"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-text-secondary hover:text-text-primary bg-surface-card hover:bg-surface-hover border border-border-subtle hover:border-border-default transition-all disabled:opacity-50"
       >
         {loading === 'csv' ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -68,7 +68,7 @@ export function ExportButtons() {
       <button
         onClick={handleICS}
         disabled={loading !== null}
-        className="flex min-h-10 items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-text-secondary hover:text-text-primary bg-surface-card hover:bg-surface-hover border border-border-subtle hover:border-border-default transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] disabled:opacity-50 motion-reduce:transition-opacity motion-reduce:active:scale-100"
+        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-text-secondary hover:text-text-primary bg-surface-card hover:bg-surface-hover border border-border-subtle hover:border-border-default transition-all disabled:opacity-50"
       >
         {loading === 'ics' ? (
           <Loader2 className="w-3.5 h-3.5 animate-spin" />

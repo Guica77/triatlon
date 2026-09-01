@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Timer, Minus, Plus, Dumbbell, ShieldAlert, Zap, Activity, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { getStrengthExercisesForUser, logStrengthSet } from '@/app/(app)/dashboard/strength-actions';
@@ -22,8 +22,7 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
   const [exercises, setExercises] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSaving, setIsSaving] = React.useState(false);
-  const reduceMotion = useReducedMotion();
-
+  
   const [currentExercise, setCurrentExercise] = React.useState(0);
   const [weight, setWeight] = React.useState(20);
   const [reps, setReps] = React.useState(10);
@@ -98,9 +97,9 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/90 backdrop-blur-md">
         <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 100, scale: 0.95 }}
+          initial={{ opacity: 0, y: 100, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={reduceMotion ? undefined : { opacity: 0, y: 100, scale: 0.95 }}
+          exit={{ opacity: 0, y: 100, scale: 0.95 }}
           className="w-full max-w-md bg-[#121214] sm:rounded-[2rem] border-t sm:border border-border-subtle shadow-elevated h-[95vh] sm:h-auto flex flex-col overflow-hidden"
         >
           {/* Header */}
@@ -111,7 +110,7 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
               </p>
               <h3 className="text-base font-bold text-text-primary truncate max-w-[250px]">{workoutTitle}</h3>
             </div>
-            <button title="Cerrar" aria-label="Cerrar" onClick={onClose} className="min-h-10 min-w-10 inline-flex items-center justify-center p-2 bg-surface-hover/80 rounded-full text-text-muted fine-hover:text-text-primary transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50">
+            <button title="Cerrar" aria-label="Cerrar" onClick={onClose} className="p-2 bg-surface-hover/80 rounded-full text-text-muted hover:text-text-primary transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -132,7 +131,7 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
               {/* Progress Bar */}
               <div className="w-full bg-surface-card h-1">
                 <StyledDiv 
-                  className="bg-purple-500 h-1 transition-[width] duration-500 ease-out shadow-[0_0_10px_rgba(168,85,247,0.8)]" 
+                  className="bg-purple-500 h-1 transition-all duration-500 shadow-[0_0_10px_rgba(168,85,247,0.8)]" 
                   styleProps={{ width: `${((currentExercise + (currentSet - 1) / exercise.targetSets) / exercises.length) * 100}%` }} 
                 />
               </div>
@@ -170,11 +169,11 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
                         <Dumbbell className="w-3 h-3" /> Peso (kg)
                       </p>
                       <div className="flex items-center justify-between w-full">
-                        <button title="Reducir peso" aria-label="Reducir peso" onClick={() => setWeight(w => Math.max(0, w - 2.5))} className="min-h-10 min-w-10 flex items-center justify-center bg-surface-hover rounded-full fine-hover:bg-surface-card text-text-muted transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 shrink-0">
+                        <button title="Reducir peso" aria-label="Reducir peso" onClick={() => setWeight(w => Math.max(0, w - 2.5))} className="w-10 h-10 flex items-center justify-center bg-surface-hover rounded-full hover:bg-surface-card text-text-muted transition-colors shrink-0">
                           <Minus className="w-5 h-5" />
                         </button>
                         <span className="text-3xl font-black text-text-primary tabular-nums tracking-tighter">{weight}</span>
-                        <button title="Aumentar peso" aria-label="Aumentar peso" onClick={() => setWeight(w => w + 2.5)} className="min-h-10 min-w-10 flex items-center justify-center bg-surface-hover rounded-full fine-hover:bg-surface-card text-text-muted transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 shrink-0">
+                        <button title="Aumentar peso" aria-label="Aumentar peso" onClick={() => setWeight(w => w + 2.5)} className="w-10 h-10 flex items-center justify-center bg-surface-hover rounded-full hover:bg-surface-card text-text-muted transition-colors shrink-0">
                           <Plus className="w-5 h-5" />
                         </button>
                       </div>
@@ -191,11 +190,11 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
                         <Activity className="w-3 h-3" /> Repeticiones
                       </p>
                       <div className="flex items-center justify-between w-full">
-                        <button title="Reducir repeticiones" aria-label="Reducir repeticiones" onClick={() => setReps(r => Math.max(1, r - 1))} className="min-h-10 min-w-10 flex items-center justify-center bg-surface-hover rounded-full fine-hover:bg-surface-card text-text-muted transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 shrink-0">
+                        <button title="Reducir repeticiones" aria-label="Reducir repeticiones" onClick={() => setReps(r => Math.max(1, r - 1))} className="w-10 h-10 flex items-center justify-center bg-surface-hover rounded-full hover:bg-surface-card text-text-muted transition-colors shrink-0">
                           <Minus className="w-5 h-5" />
                         </button>
                         <span className="text-3xl font-black text-text-primary tabular-nums tracking-tighter">{reps}</span>
-                        <button title="Aumentar repeticiones" aria-label="Aumentar repeticiones" onClick={() => setReps(r => r + 1)} className="min-h-10 min-w-10 flex items-center justify-center bg-surface-hover rounded-full fine-hover:bg-surface-card text-text-muted transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 shrink-0">
+                        <button title="Aumentar repeticiones" aria-label="Aumentar repeticiones" onClick={() => setReps(r => r + 1)} className="w-10 h-10 flex items-center justify-center bg-surface-hover rounded-full hover:bg-surface-card text-text-muted transition-colors shrink-0">
                           <Plus className="w-5 h-5" />
                         </button>
                       </div>
@@ -219,12 +218,12 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
                         <button
                           key={num}
                           onClick={() => setRir(num)}
-                          className={`flex-1 min-h-10 py-2.5 rounded-xl text-sm font-bold transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 border ${
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all border ${
                             rir === num 
                               ? num <= 1 ? 'bg-run/20 text-run border-run/40 ring-1 ring-run/50' 
                                 : num === 2 ? 'bg-warning/20 text-warning border-warning/40 ring-1 ring-warning/50'
                                 : 'bg-bike/20 text-bike border-bike/40 ring-1 ring-bike/50'
-                              : 'bg-surface-hover/50 text-text-secondary border-border-default fine-hover:bg-surface-hover'
+                              : 'bg-surface-hover/50 text-text-secondary border-border-default hover:bg-surface-hover'
                           }`}
                         >
                           {num}
@@ -244,9 +243,9 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
                 <AnimatePresence>
                   {isResting && (
                     <motion.div 
-                      initial={reduceMotion ? false : { opacity: 0, scale: 0.95 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={reduceMotion ? undefined : { opacity: 0, scale: 0.95 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
                       className="absolute inset-0 bg-black/80 backdrop-blur-lg flex flex-col items-center justify-center z-30"
                     >
                       <div className="relative">
@@ -275,7 +274,7 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
                       
                       <button 
                         onClick={() => setIsResting(false)}
-                        className="min-h-11 px-8 py-3.5 bg-surface-hover text-text-primary rounded-full font-bold fine-hover:bg-surface-card transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 text-sm border border-border-default"
+                        className="px-8 py-3.5 bg-surface-hover text-text-primary rounded-full font-bold hover:bg-surface-card transition-all text-sm  border border-border-default"
                       >
                         Saltar Descanso
                       </button>
@@ -290,7 +289,7 @@ export function GymTrackerModal({ isOpen, onClose, workoutTitle, workoutId }: Gy
                 <button 
                   onClick={handleCompleteSet}
                   disabled={isSaving}
-                  className="w-full min-h-12 py-4.5 bg-purple-600 fine-hover:bg-purple-500 disabled:opacity-50 text-white font-black text-base rounded-2xl shadow-[0_0_20px_rgba(147,51,234,0.3)] transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 flex items-center justify-center gap-2"
+                  className="w-full py-4.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-black text-base rounded-2xl shadow-[0_0_20px_rgba(147,51,234,0.3)] transition-all flex items-center justify-center gap-2"
                 >
                   {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />} 
                   {currentSet < exercise.targetSets ? `Completar Serie ${currentSet}` : 'Completar Ejercicio'}

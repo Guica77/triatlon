@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Eye, MessageSquare, Trash2, Activity, AlertTriangle, Clock } from 'lucide-react';
 import { AthleteRosterItem } from '@/app/(app)/coach/dashboard/actions';
@@ -20,7 +20,6 @@ export function AthleteRosterCard({
   athlete, plans, groups, assigningId, removingId, onAssignPlan, onRemove
 }: AthleteRosterCardProps) {
   const [isAssigningGroup, setIsAssigningGroup] = React.useState(false);
-  const reduceMotion = useReducedMotion();
 
   const handleGroupChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newGroupId = e.target.value === 'none' ? null : e.target.value;
@@ -41,10 +40,10 @@ export function AthleteRosterCard({
 
   return (
     <motion.div
-      layout={!reduceMotion}
-      initial={reduceMotion ? false : { opacity: 0, scale: 0.95 }}
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={reduceMotion ? undefined : { opacity: 0, scale: 0.95 }}
+      exit={{ opacity: 0, scale: 0.95 }}
       className={`relative bg-surface-card rounded-xl shadow-card border ${
         hasAlert ? 'border-run/30' : 'border-border-card'
       }`}
@@ -54,14 +53,14 @@ export function AthleteRosterCard({
       <div className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-start justify-between">
-          <Link href={`/coach/athlete/${athlete.id}`} className="flex min-h-11 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50">
+          <Link href={`/coach/athlete/${athlete.id}`} className="flex items-center gap-2.5 group">
             <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 ${
               hasAlert ? 'bg-run shadow-button' : 'bg-surface-hover text-coral-500'
             }`}>
               {(athlete.first_name || 'T')[0].toUpperCase()}
             </div>
             <div>
-              <p className="text-sm font-bold text-text-primary fine-hover:text-coral-500 transition-[color] duration-150 ease-out leading-tight">
+              <p className="text-sm font-bold text-text-primary group-hover:text-coral-500 transition-colors leading-tight">
                 {athlete.first_name || 'Triatleta'} {athlete.last_name || ''}
               </p>
               <p className="text-[10px] text-text-muted">{athlete.email}</p>
@@ -69,13 +68,13 @@ export function AthleteRosterCard({
           </Link>
 
           <div className="flex items-center gap-1">
-            <Link href={`/coach/chat?athlete=${athlete.id}`} className="min-h-10 min-w-10 flex items-center justify-center rounded-md text-text-muted fine-hover:text-text-secondary fine-hover:bg-surface-hover transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50">
+            <Link href={`/coach/chat?athlete=${athlete.id}`} className="w-7 h-7 flex items-center justify-center rounded-md text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-all">
               <MessageSquare className="w-3.5 h-3.5" />
             </Link>
             <button
               onClick={() => onRemove(athlete.id)}
               disabled={removingId === athlete.id}
-              className="w-7 h-7 flex items-center justify-center rounded-md text-text-muted fine-hover:text-run fine-hover:bg-run/10 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-run/50 disabled:opacity-40"
+              className="w-7 h-7 flex items-center justify-center rounded-md text-text-muted hover:text-run hover:bg-run/10 transition-all cursor-pointer disabled:opacity-40"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -165,7 +164,7 @@ export function AthleteRosterCard({
           </div>
           <div className="w-full h-1.5 bg-surface-hover rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-[width,background-color] duration-700 ease-out ${alerts.high_tss ? 'bg-run' : 'bg-coral-500'}`}
+              className={`h-full rounded-full transition-all duration-700 ${alerts.high_tss ? 'bg-run' : 'bg-coral-500'}`}
               style={{ width: `${tssPct}%` }}
             />
           </div>
@@ -173,7 +172,7 @@ export function AthleteRosterCard({
       </div>
 
       {/* Footer: View Dashboard */}
-      <Link href={`/coach/athlete/${athlete.id}`} className="block min-h-11 border-t border-border-subtle/50 p-3 text-center text-[10px] font-semibold text-text-muted fine-hover:text-coral-500 fine-hover:bg-surface-hover transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.99] rounded-b-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50">
+      <Link href={`/coach/athlete/${athlete.id}`} className="block border-t border-border-subtle/50 p-3 text-center text-[10px] font-semibold text-text-muted hover:text-coral-500 hover:bg-surface-hover transition-all rounded-b-xl">
         <span className="flex items-center justify-center gap-1">
           <Eye className="w-3 h-3" />
           Ver Dashboard Completo

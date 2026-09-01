@@ -73,9 +73,8 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 px-3 py-1.5 relative group"
+              className="flex flex-col items-center gap-1 py-1.5 px-3 min-w-0 relative group"
               aria-label={item.label}
-              aria-current={isActive ? 'page' : undefined}
             >
               <div className="relative">
                 <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-accent' : 'text-text-muted group-hover:text-text-secondary'}`} />

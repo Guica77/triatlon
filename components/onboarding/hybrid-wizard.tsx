@@ -228,7 +228,7 @@ export function HybridWizard() {
 
   if (!isMounted) {
     return (
-      <div className="flex min-h-[600px] w-full max-w-5xl items-center justify-center space-y-8 rounded-3xl bg-surface-app/50">
+      <div className="w-full max-w-5xl space-y-8 min-h-[600px] flex items-center justify-center bg-surface-app/50 rounded-3xl animate-pulse">
         <div className="w-10 h-10 rounded-full border-4 border-swim border-t-transparent animate-spin"></div>
       </div>
     );
@@ -248,7 +248,7 @@ export function HybridWizard() {
               onClick={() => setStep(num)}
               className="flex flex-col items-center gap-2 bg-[var(--color-background)] px-4 cursor-pointer focus:outline-none group"
             >
-              <div className={`flex size-10 items-center justify-center rounded-full border-2 font-bold transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-200 ease-out motion-reduce:transition-opacity ${
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold border-2 transition-all duration-200 ${
                 step >= num
                   ? 'bg-swim border-swim text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] scale-105'
                   : 'bg-surface-card border-border-default text-text-muted group-hover:border-border-default group-hover:text-text-secondary'

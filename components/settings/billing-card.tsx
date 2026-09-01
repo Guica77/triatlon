@@ -96,20 +96,20 @@ export function BillingCard({ status }: BillingCardProps) {
               <div className="grid grid-cols-2 gap-1 p-1 bg-surface-hover rounded-xl border border-border-default ">
                 <button
                   onClick={() => setActiveTab('pro')}
-                  className={`py-1.5 text-xs font-bold rounded-lg transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 ${
+                  className={`py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     activeTab === 'pro' 
                       ? 'bg-surface-card text-text-primary  border border-border-default/50' 
-                      : 'text-text-secondary fine-hover:text-text-primary'
+                      : 'text-text-secondary hover:text-text-primary'
                   }`}
                 >
                   Atleta
                 </button>
                 <button
                   onClick={() => setActiveTab('coach')}
-                  className={`py-1.5 text-xs font-bold rounded-lg transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 ${
+                  className={`py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                     activeTab === 'coach' 
                       ? 'bg-surface-card text-text-primary  border border-border-default/50' 
-                      : 'text-text-secondary fine-hover:text-text-primary'
+                      : 'text-text-secondary hover:text-text-primary'
                   }`}
                 >
                   Entrenador
@@ -122,7 +122,7 @@ export function BillingCard({ status }: BillingCardProps) {
                 <span className="text-[11px] text-text-secondary font-semibold">¿Eres entrenador?</span>
                 <button
                   onClick={() => setActiveTab('coach')}
-                  className="min-h-10 px-2.5 py-1 bg-swim/15 text-swim fine-hover:bg-swim/25 rounded-lg text-[10px] font-black border border-swim/30 transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
+                  className="px-2.5 py-1 bg-swim/15 text-swim hover:bg-swim/25 rounded-lg text-[10px] font-black border border-swim/30 transition-colors cursor-pointer"
                 >
                   Subir a Entrenador
                 </button>
@@ -170,8 +170,8 @@ export function BillingCard({ status }: BillingCardProps) {
             disabled={loading}
             className={`w-full py-3 text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer ${
               currentPlanActive 
-                ? 'border-border-default text-text-secondary fine-hover:bg-run/10 fine-hover:border-danger/30 fine-hover:text-danger transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out '
-                : '!bg-swim fine-hover:!bg-swim/90 !text-white '
+                ? 'border-border-default text-text-secondary hover:bg-run/10 hover:border-danger/30 hover:text-danger transition-all '
+                : '!bg-swim hover:!bg-swim/90 !text-white '
             }`}
           >
             {currentPlanActive ? (
@@ -195,7 +195,7 @@ export function BillingCard({ status }: BillingCardProps) {
               onClick={() => { if (!loading && !paymentSuccess) setShowPayModal(false); }}
               title="Cerrar modal"
               aria-label="Cerrar modal"
-              className="absolute top-4 right-4 min-h-10 min-w-10 inline-flex items-center justify-center rounded-lg text-text-muted fine-hover:text-text-primary fine-hover:bg-surface-hover transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 cursor-pointer"
+              className="absolute top-4 right-4 text-text-muted hover:text-text-primary transition-colors cursor-pointer"
               disabled={loading || paymentSuccess}
             >
               <X className="w-5 h-5" />
@@ -278,7 +278,7 @@ export function BillingCard({ status }: BillingCardProps) {
                       value={nameOnCard}
                       onChange={(e) => setNameOnCard(e.target.value)}
                       required
-                      className="w-full bg-surface-card border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out"
+                      className="w-full bg-surface-card border border-border-default focus:border-swim focus:ring-1 focus:ring-swim rounded-xl p-3 text-xs text-text-primary outline-none transition-colors"
                       placeholder="Nombre y Apellidos"
                     />
                   </div>
@@ -290,7 +290,7 @@ export function BillingCard({ status }: BillingCardProps) {
                       onChange={(e) => setCardNumber(e.target.value)}
                       maxLength={19}
                       required
-                      className="w-full bg-surface-card border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary font-mono outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out"
+                      className="w-full bg-surface-card border border-border-default focus:border-swim focus:ring-1 focus:ring-swim rounded-xl p-3 text-xs text-text-primary font-mono outline-none transition-colors"
                       placeholder="4242 4242 4242 4242"
                     />
                   </div>
@@ -303,7 +303,7 @@ export function BillingCard({ status }: BillingCardProps) {
                         onChange={(e) => setExpiry(e.target.value)}
                         maxLength={5}
                         required
-                        className="w-full bg-surface-card border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary font-mono outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out"
+                        className="w-full bg-surface-card border border-border-default focus:border-swim focus:ring-1 focus:ring-swim rounded-xl p-3 text-xs text-text-primary font-mono outline-none transition-colors"
                         placeholder="MM/AA"
                       />
                     </div>
@@ -315,7 +315,7 @@ export function BillingCard({ status }: BillingCardProps) {
                         onChange={(e) => setCvc(e.target.value)}
                         maxLength={4}
                         required
-                        className="w-full bg-surface-card border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary font-mono outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out"
+                        className="w-full bg-surface-card border border-border-default focus:border-swim focus:ring-1 focus:ring-swim rounded-xl p-3 text-xs text-text-primary font-mono outline-none transition-colors"
                         placeholder="•••"
                       />
                     </div>
@@ -326,7 +326,7 @@ export function BillingCard({ status }: BillingCardProps) {
                   variant="primary"
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 text-xs font-black !bg-swim fine-hover:!bg-swim/90 !text-white flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-3.5 text-xs font-black !bg-swim hover:!bg-swim/90 !text-white  flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -336,7 +336,7 @@ export function BillingCard({ status }: BillingCardProps) {
                   ) : (
                     <>
                       <Lock className="w-3.5 h-3.5" />
-                      Completar Pago Simulado, Gratis
+                      Completar Pago Simulado — Gratis
                     </>
                   )}
                 </AnimatedButton>
@@ -377,7 +377,7 @@ export function BillingCard({ status }: BillingCardProps) {
                   }
                 }}
                 disabled={loading}
-                className="w-full min-h-11 py-3 text-xs font-black bg-surface-card border border-danger/30 text-danger fine-hover:bg-run/10 fine-hover:border-danger/50 fine-hover:text-danger transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/50 cursor-pointer"
+                className="w-full py-3 text-xs font-black bg-surface-card border border-danger/30 text-danger hover:bg-run/10 hover:border-danger/50 hover:text-danger cursor-pointer "
               >
                 {loading ? 'Cancelando...' : 'Confirmar Cancelación'}
               </AnimatedButton>
@@ -385,7 +385,7 @@ export function BillingCard({ status }: BillingCardProps) {
                 variant="primary"
                 onClick={() => setShowCancelModal(false)}
                 disabled={loading}
-                className="w-full min-h-11 py-3 text-xs font-black !bg-surface-hover fine-hover:!bg-surface-card !text-text-primary transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 cursor-pointer"
+                className="w-full py-3 text-xs font-black !bg-surface-hover hover:!bg-surface-card !text-text-primary cursor-pointer"
               >
                 Mantener Mi Plan
               </AnimatedButton>

@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Trophy, ArrowRight, Calendar, Target } from 'lucide-react';
 import Link from 'next/link';
 
@@ -24,15 +24,13 @@ export function RaceGoalCard({
   targetBikeTime,
   targetRunTime
 }: RaceGoalCardProps) {
-  const reduceMotion = useReducedMotion();
-
   return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6 rounded-2xl bg-surface-card border border-border-default shadow-card relative overflow-hidden h-full flex flex-col"
+      className="p-6 rounded-2xl bg-surface-card border border-border-default shadow-card relative overflow-hidden group h-full flex flex-col"
     >
-      <div className="absolute top-0 right-0 w-48 h-48 bg-swim/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-48 h-48 bg-swim/5 rounded-full blur-3xl pointer-events-none group-hover:bg-swim/10 transition-all duration-500" />
       
       <div className="relative z-10 flex flex-col h-full justify-between gap-6">
         <div>
@@ -86,12 +84,11 @@ export function RaceGoalCard({
         </div>
 
         <div className="pt-4 mt-auto">
-          <Link
-            href="/onboarding"
-            className="w-full min-h-11 py-3 rounded-xl bg-swim fine-hover:bg-swim/90 text-white text-xs font-extrabold transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
-          >
-            <Trophy className="w-4 h-4" />
-            Reconfigurar Plan y Objetivo
+          <Link href="/onboarding">
+            <button className="w-full py-3 rounded-xl bg-swim hover:bg-swim/90 text-white text-xs font-extrabold transition-all flex items-center justify-center gap-2 cursor-pointer ">
+              <Trophy className="w-4 h-4" />
+              Reconfigurar Plan y Objetivo
+            </button>
           </Link>
         </div>
       </div>

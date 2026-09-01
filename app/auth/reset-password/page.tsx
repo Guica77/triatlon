@@ -66,53 +66,49 @@ export default function ResetPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
 
             {error && (
-              <div role="alert" aria-live="assertive" className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs text-center font-medium">
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs text-center font-medium">
                 {error}
               </div>
             )}
 
             {success && (
-              <div role="status" aria-live="polite" className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs text-center leading-relaxed font-medium">
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs text-center leading-relaxed font-medium">
                 ¡Contraseña restablecida con éxito! Redirigiéndote al panel de control...
               </div>
             )}
 
             <div className="space-y-1">
-              <label htmlFor="reset-password-new" className="text-xs text-zinc-600 font-bold uppercase tracking-wider text-[10px]">Nueva Contraseña</label>
+              <label className="text-xs text-zinc-600 font-bold uppercase tracking-wider text-[10px]">Nueva Contraseña</label>
               <div className="relative">
                 <input
-                  id="reset-password-new"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
                   disabled={success || loading}
-                  className="w-full rounded-xl border border-border-default bg-bg-card p-3 pr-12 text-sm font-mono text-text-primary outline-none transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out focus:border-swim focus:ring-1 focus:ring-swim/40 motion-reduce:transition-opacity"
+                  className="w-full bg-bg-card border border-border-default rounded-xl p-3 pr-10 text-sm text-text-primary outline-none focus:border-swim transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                  aria-pressed={showPassword}
-                  className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out hover:bg-surface-hover hover:text-text-secondary active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-800 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="reset-password-confirm" className="text-xs text-zinc-600 font-bold uppercase tracking-wider text-[10px]">Confirmar Contraseña</label>
+              <label className="text-xs text-zinc-600 font-bold uppercase tracking-wider text-[10px]">Confirmar Contraseña</label>
               <input
-                id="reset-password-confirm"
                 type={showPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 disabled={success || loading}
-                className="w-full rounded-xl border border-border-default bg-bg-card p-3 text-sm font-mono text-text-primary outline-none transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out focus:border-swim focus:ring-1 focus:ring-swim/40 motion-reduce:transition-opacity"
+                className="w-full bg-bg-card border border-border-default rounded-xl p-3 text-sm text-text-primary outline-none focus:border-swim transition-colors"
               />
             </div>
 

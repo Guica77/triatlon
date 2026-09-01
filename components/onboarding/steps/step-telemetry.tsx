@@ -42,7 +42,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
       <ProCard className="space-y-6 bg-surface-card border border-border-default shadow-card">
         <div className="border-b border-border-default pb-4">
           <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
-            <Activity className="w-5 h-5 text-coral-500" aria-hidden="true" /> Conectar Reloj y Telemetría
+            <Activity className="w-5 h-5 text-coral-500 animate-pulse" /> Conectar Reloj y Telemetría
           </h2>
           <p className="text-sm text-text-secondary mt-1">
             Sincroniza tus entrenamientos reales automáticamente. La Inteligencia Artificial necesita leer tu pulso, ritmos y fatiga para ajustar tu periodización diaria.
@@ -98,10 +98,10 @@ export function StepTelemetry(props: StepTelemetryProps) {
             <button
               onClick={() => handleConnectClick('garmin')}
               disabled={props.loading}
-              className="flex min-h-11 flex-col items-center justify-center p-5 rounded-2xl border border-border-default bg-surface-hover/30 hover:bg-swim/10 hover:border-swim/50 hover:ring-1 hover:ring-swim/50 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] group relative overflow-hidden text-center cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-border-default bg-surface-hover/30 hover:bg-swim/10 hover:border-swim/50 hover:ring-1 hover:ring-swim/50 transition-all group relative overflow-hidden text-center cursor-pointer"
             >
               <span className="text-3xl mb-3 block">⌚</span>
-              <span className="text-sm font-bold text-text-primary transition-[color] duration-150 ease-out group-hover:text-swim motion-reduce:transition-opacity">Conectar Garmin</span>
+              <span className="text-sm font-bold text-text-primary group-hover:text-swim transition-colors">Conectar Garmin</span>
               <span className="text-[10px] text-text-muted mt-1 uppercase tracking-wider font-semibold">Directo / Oficial</span>
             </button>
 
@@ -109,21 +109,21 @@ export function StepTelemetry(props: StepTelemetryProps) {
             <button
               onClick={() => handleConnectClick('strava')}
               disabled={props.loading}
-              className="flex min-h-11 flex-col items-center justify-center p-5 rounded-2xl border border-border-default bg-surface-hover/30 hover:bg-coral-500/10 hover:border-coral-500/50 hover:ring-1 hover:ring-coral-500/50 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] group relative overflow-hidden text-center cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+              className="flex flex-col items-center justify-center p-5 rounded-2xl border border-border-default bg-surface-hover/30 hover:bg-coral-500/10 hover:border-coral-500/50 hover:ring-1 hover:ring-coral-500/50 transition-all group relative overflow-hidden text-center cursor-pointer"
             >
               <span className="text-3xl mb-3 block">🔄</span>
-              <span className="text-sm font-bold text-text-primary transition-[color] duration-150 ease-out group-hover:text-coral-500 motion-reduce:transition-opacity">Conectar Strava</span>
+              <span className="text-sm font-bold text-text-primary group-hover:text-coral-500 transition-colors">Conectar Strava</span>
               <span className="text-[10px] text-text-muted mt-1 uppercase tracking-wider font-semibold">Vía Strava Bridge</span>
             </button>
           </div>
         </div>
         
         <div className="flex justify-between pt-4 border-t border-border-default">
-          <button onClick={props.onPrev} className="flex min-h-11 items-center px-6 py-3 text-sm font-semibold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+          <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-text-secondary hover:text-text-primary transition flex items-center cursor-pointer"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
           <button
             onClick={props.handleSave}
             disabled={props.loading}
-            className="min-h-11 px-6 py-3 text-sm font-bold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+            className="px-6 py-3 text-sm font-bold text-text-secondary hover:text-text-primary transition-all cursor-pointer"
           >
             {props.loading ? 'Generando IA Plan...' : 'Saltar y finalizar'}
           </button>
@@ -153,13 +153,13 @@ export function StepTelemetry(props: StepTelemetryProps) {
                       setActiveModal(null);
                     }}
                     disabled={isConnecting}
-                    className="min-h-11 w-full rounded-xl bg-coral-500 py-3 text-sm font-bold text-white transition-[background-color,color,opacity,transform] duration-150 ease-out hover:bg-coral-600 active:scale-[0.98] disabled:opacity-50 cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                    className="w-full py-3 text-sm font-bold text-white bg-coral-500 rounded-xl hover:bg-coral-600 transition-colors disabled:opacity-50 cursor-pointer"
                   >
                     {isConnecting ? 'Generando Plan...' : 'Ya me he conectado (Continuar)'}
                   </button>
                   <button 
                     onClick={() => setActiveModal(null)} 
-                    className="min-h-9 w-full mt-3 py-2 text-xs font-semibold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                    className="w-full mt-3 py-2 text-xs font-semibold text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -171,24 +171,22 @@ export function StepTelemetry(props: StepTelemetryProps) {
                   
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="telemetry-username" className="text-xs font-bold text-text-primary block mb-1">Email / Usuario</label>
+                      <label className="text-xs font-bold text-text-primary block mb-1">Email / Usuario</label>
                       <input 
-                        id="telemetry-username"
-                        type="text"
+                        type="text" 
                         value={username}
                         onChange={e => setUsername(e.target.value)}
-                        className="w-full rounded-lg border border-border-default bg-surface-hover px-3 py-2 text-sm outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus:border-coral-500 focus:ring-1 focus:ring-coral-500/40 motion-reduce:transition-opacity"
+                        className="w-full bg-surface-hover border border-border-default rounded-lg px-3 py-2 text-sm focus:border-coral-500 outline-none" 
                         placeholder="tu@email.com"
                       />
                     </div>
                     <div>
-                      <label htmlFor="telemetry-password" className="text-xs font-bold text-text-primary block mb-1">Contraseña / API Key</label>
+                      <label className="text-xs font-bold text-text-primary block mb-1">Contraseña / API Key</label>
                       <input 
-                        id="telemetry-password"
-                        type="password"
+                        type="password" 
                         value={password}
                         onChange={e => setPassword(e.target.value)}
-                        className="w-full rounded-lg border border-border-default bg-surface-hover px-3 py-2 text-sm outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus:border-coral-500 focus:ring-1 focus:ring-coral-500/40 motion-reduce:transition-opacity"
+                        className="w-full bg-surface-hover border border-border-default rounded-lg px-3 py-2 text-sm focus:border-coral-500 outline-none" 
                         placeholder="••••••••"
                       />
                     </div>
@@ -197,14 +195,14 @@ export function StepTelemetry(props: StepTelemetryProps) {
                   <div className="flex gap-3 mt-8">
                     <button 
                       onClick={() => setActiveModal(null)} 
-                      className="min-h-11 flex-1 rounded-xl bg-surface-hover py-2.5 text-sm font-semibold text-text-secondary transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out hover:bg-border-default active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                      className="flex-1 py-2.5 text-sm font-semibold text-text-secondary bg-surface-hover rounded-xl hover:bg-border-default transition-colors cursor-pointer"
                     >
                       Cancelar
                     </button>
                     <button 
                       onClick={handleConfirmConnect}
                       disabled={isConnecting || !username || !password}
-                      className="min-h-11 flex-1 rounded-xl bg-coral-500 py-2.5 text-sm font-bold text-white transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out hover:bg-coral-600 active:scale-[0.98] disabled:opacity-50 cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                      className="flex-1 py-2.5 text-sm font-bold text-white bg-coral-500 rounded-xl hover:bg-coral-600 transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {isConnecting ? 'Conectando...' : 'Autorizar'}
                     </button>

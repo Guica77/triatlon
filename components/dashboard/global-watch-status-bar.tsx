@@ -38,7 +38,7 @@ export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyn
 
   if (!isConnected) {
     return (
-      <div className="mb-6 p-4 rounded-2xl bg-surface-card border border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="mb-6 p-4 rounded-2xl bg-surface-card border border-border-subtle flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-border-default">
         <div className="flex items-center gap-3 text-center sm:text-left">
           <div className="w-10 h-10 rounded-xl bg-surface-hover flex items-center justify-center text-accent">
             <Watch className="w-5 h-5" />
@@ -50,7 +50,7 @@ export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyn
         </div>
         <a
           href="/api/auth/telemetry/connect?provider=strava"
-          className="inline-flex min-h-11 items-center justify-center px-4 py-2 rounded-xl bg-accent fine-hover:bg-coral-400 text-white text-xs font-bold transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 whitespace-nowrap"
+          className="px-4 py-2 rounded-xl bg-accent hover:bg-coral-400 text-white text-xs font-bold transition-all whitespace-nowrap"
         >
           Conectar Strava
         </a>
@@ -59,7 +59,7 @@ export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyn
   }
 
   return (
-    <div className="mb-6 p-4 rounded-2xl bg-accent/5 border border-accent/20 flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
+    <div className="mb-6 p-4 rounded-2xl bg-accent/5 border border-accent/20 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-accent/30 relative overflow-hidden">
       <div className="flex items-center gap-3 text-center sm:text-left w-full sm:w-auto">
         <div className="w-10 h-10 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent relative">
           <Watch className="w-5 h-5 animate-pulse" />
@@ -90,7 +90,7 @@ export function GlobalWatchStatusBar({ isConnected, provider = 'garmin', lastSyn
         <button
           onClick={handleForceSync}
           disabled={syncing}
-          className="w-full sm:w-auto min-h-11 px-4 py-2 rounded-xl bg-surface-hover fine-hover:bg-border-default text-text-secondary fine-hover:text-text-primary text-xs font-semibold transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 flex items-center justify-center gap-2 border border-border-subtle/50 disabled:opacity-50 shrink-0"
+          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-surface-hover hover:bg-border-default text-text-secondary hover:text-text-primary text-xs font-semibold transition-all flex items-center justify-center gap-2 border border-border-subtle/50 disabled:opacity-50 shrink-0"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin text-green-400' : ''}`} />
           {syncing ? 'Sincronizando...' : 'Forzar Sincronización'}

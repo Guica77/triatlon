@@ -56,9 +56,8 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
             </p>
           </div>
           <button
-            type="button"
             onClick={() => setShowHelp(false)}
-            className="min-h-11 text-[10px] font-bold text-text-muted hover:text-text-primary uppercase tracking-wider text-right w-full pt-4 cursor-pointer outline-none transition-[color,background-color,border-color,box-shadow] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-swim/40 motion-reduce:transition-opacity"
+            className="text-[10px] font-bold text-text-muted hover:text-text-primary uppercase tracking-wider text-right w-full pt-4 cursor-pointer"
           >
             Entendido
           </button>
@@ -76,11 +75,9 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
               Distribución de Esfuerzo
             </h3>
             <button
-              type="button"
               onClick={() => setShowHelp(true)}
-              className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-text-muted hover:text-swim transition-[color,background-color,border-color,box-shadow] duration-150 ease-out p-0.5 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-swim/40 motion-reduce:transition-opacity"
+              className="text-text-muted hover:text-swim transition-colors p-0.5 cursor-pointer"
               title="¿Qué es esto?"
-              aria-label="Ayuda sobre la distribución de esfuerzo"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
@@ -117,7 +114,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
               strokeDasharray={circumference}
               strokeDashoffset={swimOffset}
               strokeLinecap="round"
-              className="transition-[stroke-dashoffset] duration-1000 ease-out motion-reduce:transition-none"
+              className="transition-all duration-1000"
             />
 
             {/* Segmento Ciclismo (Verde) */}
@@ -131,7 +128,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
               strokeDasharray={circumference}
               strokeDashoffset={bikeOffset}
               strokeLinecap="round"
-              className="transition-[stroke-dashoffset] duration-1000 ease-out motion-reduce:transition-none"
+              className="transition-all duration-1000"
             />
 
             {/* Segmento Carrera (Rojo) */}
@@ -145,7 +142,7 @@ export function SportDistributionCard({ distribution, weeklyDistance }: SportDis
               strokeDasharray={circumference}
               strokeDashoffset={runOffset}
               strokeLinecap="round"
-              className="transition-[stroke-dashoffset] duration-1000 ease-out motion-reduce:transition-none"
+              className="transition-all duration-1000"
             />
           </svg>
 

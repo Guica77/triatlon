@@ -111,7 +111,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
             </div>
             <button
               onClick={onClose}
-              className="min-h-9 min-w-9 rounded-full p-2 text-text-muted transition-[background-color,color,opacity,transform] duration-150 ease-out hover:text-text-primary hover:bg-surface-hover active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100"
+              className="p-2 transition-colors rounded-full text-text-muted hover:text-text-primary hover:bg-surface-hover"
               aria-label="Cerrar modal"
             >
               <X className="w-5 h-5" />
@@ -126,7 +126,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center justify-center py-8 text-center"
               >
-                <CheckCircle className="w-16 h-16 text-bike mb-4" aria-hidden="true" />
+                <CheckCircle className="w-16 h-16 text-bike mb-4 animate-bounce" />
                 <p className="text-lg font-semibold text-text-primary">{successMessage}</p>
               </motion.div>
             ) : (
@@ -151,7 +151,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={num}
                           type="button"
                           onClick={() => setRpe(num)}
-                          className={`h-11 rounded-xl font-bold text-sm transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] flex items-center justify-center border motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                          className={`h-11 rounded-xl font-bold text-sm transition-all flex items-center justify-center border ${
                             isSelected
                               ? getRpeColor(num) + ' scale-105 ring-2 ring-swim'
                               : 'bg-surface-hover/50 border-border-default text-text-muted hover:border-border-default hover:text-text-muted'
@@ -181,7 +181,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={f.id}
                           type="button"
                           onClick={() => setFeeling(f.id)}
-                          className={`flex min-h-11 flex-col items-center justify-center p-3.5 rounded-2xl border transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                          className={`flex flex-col items-center justify-center p-3.5 rounded-2xl border transition-all ${
                             isSelected
                               ? f.color + ' ring-2 ring-swim'
                               : 'bg-surface-hover/40 border-border-default text-text-muted hover:bg-surface-hover/80 hover:text-text-muted'
@@ -207,7 +207,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={s.id}
                           type="button"
                           onClick={() => setSleep(s.id)}
-                          className={`min-h-11 text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                          className={`text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-all ${
                             sleep === s.id ? s.color + ' ring-1 ring-current bg-surface-hover/80' : 'text-text-secondary border-border-subtle hover:border-border-default'
                           }`}
                         >
@@ -228,7 +228,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={p.id}
                           type="button"
                           onClick={() => setPain(p.id)}
-                          className={`min-h-11 text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                          className={`text-xs font-semibold py-2 px-3 rounded-xl border text-left transition-all ${
                             pain === p.id ? p.color + ' ring-1 ring-current bg-surface-hover/80' : 'text-text-secondary border-border-subtle hover:border-border-default'
                           }`}
                         >
@@ -254,7 +254,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                           key={item.id}
                           type="button"
                           onClick={() => setIntensityAdherence(item.id)}
-                          className={`min-h-11 py-2.5 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                          className={`py-2.5 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
                             isSelected 
                               ? 'border-swim text-swim bg-swim/10 font-bold scale-102 ring-2 ring-swim' 
                               : 'bg-surface-hover/40 border-border-default text-text-muted hover:bg-surface-hover hover:text-text-muted'
@@ -275,14 +275,14 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                     <button
                       type="button"
                       onClick={() => setNotes(prev => (prev ? prev + '\n' : '') + 'Noto poca carga. Por favor, añádeme más volumen general.')}
-                      className="min-h-11 border border-border-default bg-surface-hover/40 px-3 py-2.5 text-xs font-medium text-text-muted transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out hover:bg-surface-hover hover:text-text-muted active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 rounded-xl flex items-center justify-center gap-1.5"
+                      className="border border-border-default bg-surface-hover/40 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-center gap-1.5 transition-colors text-text-muted hover:bg-surface-hover hover:text-text-muted"
                     >
                       📈 Poco volumen
                     </button>
                     <button
                       type="button"
                       onClick={() => setNotes(prev => (prev ? prev + '\n' : '') + 'Siento demasiada fatiga. Por favor, reduce el volumen general de la semana.')}
-                      className="min-h-11 border border-border-default bg-surface-hover/40 px-3 py-2.5 text-xs font-medium text-text-muted transition-[background-color,color,border-color,opacity,transform] duration-150 ease-out hover:bg-surface-hover hover:text-text-muted active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100 rounded-xl flex items-center justify-center gap-1.5"
+                      className="border border-border-default bg-surface-hover/40 text-xs py-2.5 px-3 rounded-xl font-medium flex items-center justify-center gap-1.5 transition-colors text-text-muted hover:bg-surface-hover hover:text-text-muted"
                     >
                       📉 Demasiada carga
                     </button>
@@ -300,7 +300,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                     onChange={(e) => setNotes(e.target.value)}
                     rows={2}
                     placeholder="Ej: Sensaciones espectaculares en las series..."
-                    className="w-full p-3 text-sm text-text-primary placeholder-text-muted border rounded-2xl bg-surface-hover/50 border-border-default focus:outline-none focus:ring-2 focus:ring-swim/50 focus:border-swim transition-[background-color,color,border-color,box-shadow] duration-150 ease-out resize-none motion-reduce:transition-opacity"
+                    className="w-full p-3 text-sm text-text-primary placeholder-text-muted border rounded-2xl bg-surface-hover/50 border-border-default focus:outline-none focus:ring-2 focus:ring-swim/50 focus:border-swim transition-all resize-none"
                   />
                 </div>
 
@@ -314,7 +314,7 @@ export function WorkoutFeedbackModal({ isOpen, onClose, workoutId, workoutTitle 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full min-h-11 py-4 text-sm font-bold text-white transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.97] rounded-2xl bg-swim hover:bg-swim/90 flex items-center justify-center disabled:opacity-50 mt-4 motion-reduce:transition-opacity motion-reduce:active:scale-100"
+                  className="w-full py-4 text-sm font-bold text-white transition-all rounded-2xl bg-swim hover:bg-swim/90 flex items-center justify-center disabled:opacity-50 mt-4"
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

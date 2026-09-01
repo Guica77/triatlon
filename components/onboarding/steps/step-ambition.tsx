@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Trophy, Search, Clock, Timer, ChevronRight, ChevronLeft, Activity } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -67,8 +67,6 @@ interface StepAmbitionProps {
 }
 
 export function StepAmbition(props: StepAmbitionProps) {
-  const reduceMotion = useReducedMotion();
-
   React.useEffect(() => {
     const total = props.swimHours + props.bikeHours + props.runHours;
     const computed = total <= 6 ? '4-6h' : total <= 11 ? '7-10h' : '12+h';
@@ -76,7 +74,7 @@ export function StepAmbition(props: StepAmbitionProps) {
   }, [props.swimHours, props.bikeHours, props.runHours, props.setBaselineHours]);
 
   return (
-    <motion.div key="step1" initial={reduceMotion ? false : { opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={reduceMotion ? undefined : { opacity: 0, x: 20 }} className="space-y-6">
+    <motion.div key="step1" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
       <ProCard className="space-y-4 bg-surface-card border border-border-default shadow-card">
         <div className="border-b border-border-default pb-3">
           <h2 className="text-xl font-bold text-text-primary flex items-center gap-2"><Trophy className="w-5 h-5 text-swim" /> Objetivo & Disponibilidad</h2>
@@ -89,23 +87,23 @@ export function StepAmbition(props: StepAmbitionProps) {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="text-[10px] font-bold text-text-secondary block mb-1.5 uppercase tracking-wider">FTP Ciclismo (W)</label>
-                <input type="number" placeholder="Ej. 250" value={props.currentFtp} onChange={e => props.setCurrentFtp(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 " />
+                <input type="number" placeholder="Ej. 250" value={props.currentFtp} onChange={e => props.setCurrentFtp(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all " />
               </div>
               <div>
                 <label className="text-[10px] font-bold text-text-secondary block mb-1.5 uppercase tracking-wider">Ritmo Natación (/100m)</label>
-                <input type="text" placeholder="Ej. 01:45" value={props.currentSwimPace} onChange={e => props.setCurrentSwimPace(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 " />
+                <input type="text" placeholder="Ej. 01:45" value={props.currentSwimPace} onChange={e => props.setCurrentSwimPace(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all " />
               </div>
               <div>
                 <label className="text-[10px] font-bold text-text-secondary block mb-1.5 uppercase tracking-wider">Ritmo Carrera (/km)</label>
-                <input type="text" placeholder="Ej. 04:30" value={props.currentRunPace} onChange={e => props.setCurrentRunPace(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 " />
+                <input type="text" placeholder="Ej. 04:30" value={props.currentRunPace} onChange={e => props.setCurrentRunPace(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all " />
               </div>
               <div>
                 <label className="text-[10px] font-bold text-text-secondary block mb-1.5 uppercase tracking-wider">Peso Actual (kg)</label>
-                <input type="number" step="0.1" placeholder="Ej. 75.5" value={props.currentWeight} onChange={e => props.setCurrentWeight(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 " />
+                <input type="number" step="0.1" placeholder="Ej. 75.5" value={props.currentWeight} onChange={e => props.setCurrentWeight(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all " />
               </div>
               <div>
                 <label className="text-[10px] font-bold text-text-secondary block mb-1.5 uppercase tracking-wider">Pasos Diarios (Media)</label>
-                <input type="number" placeholder="Ej. 8000" value={props.dailySteps} onChange={e => props.setDailySteps(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 " />
+                <input type="number" placeholder="Ej. 8000" value={props.dailySteps} onChange={e => props.setDailySteps(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-3 py-2.5 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all " />
               </div>
             </div>
             <div className="mt-4">
@@ -114,7 +112,7 @@ export function StepAmbition(props: StepAmbitionProps) {
                 placeholder="Ej. Condromalacia rotuliana, operación de menisco hace 2 años..." 
                 value={props.previousInjuries} 
                 onChange={e => props.setPreviousInjuries(e.target.value)} 
-                className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50  min-h-[80px]" 
+                className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all  min-h-[80px]" 
               />
             </div>
             <p className="text-[10px] text-text-muted mt-2">Si no conoces tus zonas, déjalo en blanco y la IA las estimará según tu experiencia.</p>
@@ -132,7 +130,7 @@ export function StepAmbition(props: StepAmbitionProps) {
               <div className="space-y-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-3.5 h-4 w-4 text-text-muted" />
-                  <input type="text" placeholder="Buscar carrera..." value={props.searchQuery} onChange={e => props.setSearchQuery(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl pl-9 pr-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
+                  <input type="text" placeholder="Buscar carrera..." value={props.searchQuery} onChange={e => props.setSearchQuery(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl pl-9 pr-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
                 </div>
                 <select title="Seleccionar Carrera" aria-label="Seleccionar Carrera" onChange={e => props.setSelectedRace(RACES_CATALOG.find(r => r.id === e.target.value) || null)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none appearance-none cursor-pointer transition-all">
                   {props.filteredCatalog.map(r => <option key={r.id} value={r.id}>{r.name} - {r.estimatedDate}</option>)}
@@ -142,9 +140,9 @@ export function StepAmbition(props: StepAmbitionProps) {
 
             {props.activeTab === 'custom' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input type="text" placeholder="Nombre de la prueba" value={props.customName} onChange={e => props.setCustomName(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
-                <input title="Fecha" aria-label="Fecha" type="date" value={props.customDate} onChange={e => props.setCustomDate(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
-                <select title="Distancia" aria-label="Distancia" value={props.customDistance} onChange={e => props.setCustomDistance(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50">
+                <input type="text" placeholder="Nombre de la prueba" value={props.customName} onChange={e => props.setCustomName(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
+                <input title="Fecha" aria-label="Fecha" type="date" value={props.customDate} onChange={e => props.setCustomDate(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
+                <select title="Distancia" aria-label="Distancia" value={props.customDistance} onChange={e => props.setCustomDistance(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all">
                   {props.customModality === 'carrera' ? (
                     <>
                       <option value="5k">5K</option>
@@ -168,7 +166,7 @@ export function StepAmbition(props: StepAmbitionProps) {
                   // Reset distance based on modality
                   if (newMod === 'carrera') props.setCustomDistance('maraton');
                   else props.setCustomDistance('half');
-                }} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50">
+                }} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all">
                   <option value="triatlon">Triatlón</option>
                   <option value="duatlon">Duatlón</option>
                   <option value="acuatlon">Acuatlón</option>
@@ -196,10 +194,10 @@ export function StepAmbition(props: StepAmbitionProps) {
                   key={lvl.id}
                   type="button"
                   onClick={() => props.setAthleteLevel(lvl.id)}
-                  className={`py-3 px-1.5 rounded-xl border text-sm font-semibold transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] flex flex-col items-center justify-center text-center gap-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 ${
+                  className={`py-3 px-1.5 rounded-xl border text-sm font-semibold transition-all flex flex-col items-center justify-center text-center gap-0.5 cursor-pointer ${
                     props.athleteLevel === lvl.id
                       ? 'bg-swim/10 border-swim text-swim ring-1 ring-swim '
-                      : 'bg-surface-hover/30 border-border-default text-text-secondary fine-hover:border-border-default fine-hover:bg-surface-hover'
+                      : 'bg-surface-hover/30 border-border-default text-text-secondary hover:border-border-default hover:bg-surface-hover'
                   }`}
                 >
                   <span>{lvl.label}</span>
@@ -217,7 +215,7 @@ export function StepAmbition(props: StepAmbitionProps) {
               
               <div className="space-y-1.5 mb-4">
                 <label className="text-[10px] text-text-muted block uppercase tracking-wider font-semibold">Tu Tiempo Total Ahora</label>
-                <input type="text" placeholder="Ej. 5h 30m, o déjalo vacío si es tu primera vez" value={props.currentFinishTime} onChange={e => props.setCurrentFinishTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
+                <input type="text" placeholder="Ej. 5h 30m, o déjalo vacío si es tu primera vez" value={props.currentFinishTime} onChange={e => props.setCurrentFinishTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
               </div>
 
               <div className={`grid grid-cols-1 gap-4 ${props.customModality === 'carrera' ? 'sm:grid-cols-2' : 'sm:grid-cols-3'}`}>
@@ -225,17 +223,17 @@ export function StepAmbition(props: StepAmbitionProps) {
                   <>
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-text-muted block uppercase tracking-wider font-semibold">Natación (Ahora)</label>
-                      <input type="text" placeholder="Ej. 40 min o 0:40" value={props.currentSwimTime} onChange={e => props.setCurrentSwimTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
+                      <input type="text" placeholder="Ej. 40 min o 0:40" value={props.currentSwimTime} onChange={e => props.setCurrentSwimTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-text-muted block uppercase tracking-wider font-semibold">Ciclismo (Ahora)</label>
-                      <input type="text" placeholder="Ej. 3h 00m o 3:00" value={props.currentBikeTime} onChange={e => props.setCurrentBikeTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
+                      <input type="text" placeholder="Ej. 3h 00m o 3:00" value={props.currentBikeTime} onChange={e => props.setCurrentBikeTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
                     </div>
                   </>
                 )}
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-text-muted block uppercase tracking-wider font-semibold">Carrera (Ahora)</label>
-                  <input type="text" placeholder={props.customModality === 'carrera' ? "Ej. 3h 45m" : "Ej. 1h 45m"} value={props.currentRunTime} onChange={e => props.setCurrentRunTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
+                  <input type="text" placeholder={props.customModality === 'carrera' ? "Ej. 3h 45m" : "Ej. 1h 45m"} value={props.currentRunTime} onChange={e => props.setCurrentRunTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
                 </div>
               </div>
             </div>
@@ -249,7 +247,7 @@ export function StepAmbition(props: StepAmbitionProps) {
               
               <div className="space-y-1.5 mb-4">
                 <label className="text-[10px] text-text-muted block uppercase tracking-wider font-semibold">Tiempo Final Total</label>
-                <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={props.targetFinishTime} onChange={e => props.setTargetFinishTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
+                <input type="text" placeholder="Ej. Sub-5h o 'Terminar'" value={props.targetFinishTime} onChange={e => props.setTargetFinishTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
               </div>
 
               <label className="text-xs font-bold text-text-muted block uppercase tracking-wider flex items-center gap-1.5">
@@ -261,17 +259,17 @@ export function StepAmbition(props: StepAmbitionProps) {
                   <>
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-text-muted block uppercase tracking-wider font-semibold">Natación Final</label>
-                      <input type="text" placeholder="Ej. 35 min o 0:35" value={props.targetSwimTime} onChange={e => props.setTargetSwimTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
+                      <input type="text" placeholder="Ej. 35 min o 0:35" value={props.targetSwimTime} onChange={e => props.setTargetSwimTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
                     </div>
                     <div className="space-y-1.5">
                       <label className="text-[10px] text-text-muted block uppercase tracking-wider font-semibold">Ciclismo Final</label>
-                      <input type="text" placeholder="Ej. 2h 45m o 2:45" value={props.targetBikeTime} onChange={e => props.setTargetBikeTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
+                      <input type="text" placeholder="Ej. 2h 45m o 2:45" value={props.targetBikeTime} onChange={e => props.setTargetBikeTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
                     </div>
                   </>
                 )}
                 <div className="space-y-1.5">
                   <label className="text-[10px] text-text-muted block uppercase tracking-wider font-semibold">Carrera Final {props.customModality !== 'carrera' && 'split'}</label>
-                  <input type="text" placeholder={props.customModality === 'carrera' ? "Ej. 3h 15m (Maratón)" : "Ej. 1h 30m o 1:30"} value={props.targetRunTime} onChange={e => props.setTargetRunTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" />
+                  <input type="text" placeholder={props.customModality === 'carrera' ? "Ej. 3h 15m (Maratón)" : "Ej. 1h 30m o 1:30"} value={props.targetRunTime} onChange={e => props.setTargetRunTime(e.target.value)} className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-2.5 text-xs text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-all" />
                 </div>
               </div>
             </div>

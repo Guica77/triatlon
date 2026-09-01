@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toggleWorkoutStatus, updateWorkoutStatus, completeWorkoutWithFeedback, applyRefocusProposal } from '@/app/(app)/dashboard/actions';
 import { ProCard } from '@/components/ui/pro-card';
 import { adaptWorkoutDescription } from '@/lib/zones-utility';
@@ -104,19 +104,6 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
   const [status, setStatus] = React.useState(workout.status);
   const [loading, setLoading] = React.useState(false);
   const [toastMsg, setToastMsg] = React.useState<string | null>(null);
-  const reduceMotion = useReducedMotion();
-
-  const entryMotion = {
-    initial: { opacity: 0, y: reduceMotion ? 0 : 12 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: reduceMotion ? 0.15 : 0.22, ease: 'easeOut' as const },
-  };
-
-  const exitMotion = {
-    opacity: 0,
-    y: reduceMotion ? 0 : -12,
-    transition: { duration: reduceMotion ? 0.15 : 0.18, ease: 'easeOut' as const },
-  };
 
   // Propuesta de reajuste de la IA (propose & confirm) pendiente de aplicar.
   const [refocusApplying, setRefocusApplying] = React.useState(false);
@@ -388,13 +375,10 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
       <AnimatePresence>
         {toastMsg && (
           <motion.div
-            initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: reduceMotion ? 0 : -12 }}
-            transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
-            role="status"
-            aria-live="polite"
-            className="fixed bottom-6 right-6 z-50 max-w-sm rounded-xl border border-coral-500/30 bg-coral-500/10 p-4 text-xs font-semibold text-coral-500"
+            exit={{ opacity: 0, y: -15 }}
+            className="fixed bottom-6 right-6 z-50 p-4 rounded-xl bg-coral-500/10 border border-coral-500/30 text-coral-500 text-xs font-semibold   max-w-sm"
           >
             {toastMsg}
           </motion.div>
@@ -535,8 +519,9 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           {showFeedbackForm && (
             <motion.div
               key="feedback-form"
-              {...entryMotion}
-              exit={exitMotion}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
             >
               <ProCard className="p-6 border-swim/30 bg-surface-app/90 shadow-elevated space-y-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none bg-swim/5" />
@@ -577,7 +562,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                             key={val}
                             type="button"
                             onClick={() => setRpe(val)}
-                            className={`min-h-11 py-2 px-1 text-xs border rounded-lg text-center transition-[background-color,color,border-color,box-shadow,transform] ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer duration-150 ${btnClass}`}
+                            className={`py-2 px-1 text-xs border rounded-lg text-center transition-all cursor-pointer duration-150 ${btnClass}`}
                           >
                             {val}
                           </button>
@@ -612,7 +597,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                             key={item.id}
                             type="button"
                             onClick={() => setFeeling(item.id)}
-                            className={`min-h-11 py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer ${
+                            className={`py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
                               isSelected 
                                 ? `${item.color} font-bold scale-102` 
                                 : "border-border-subtle bg-bg-app text-text-muted hover:bg-surface-hover hover:text-text-primary"
@@ -643,7 +628,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                             key={item.id}
                             type="button"
                             onClick={() => setIntensityAdherence(item.id)}
-                            className={`min-h-11 py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer ${
+                            className={`py-2 px-3 border rounded-xl flex items-center justify-center gap-1.5 text-xs transition-all cursor-pointer ${
                               isSelected 
                                 ? "border-swim text-swim bg-swim/5 font-bold scale-102" 
                                 : "border-border-subtle bg-bg-app text-text-muted hover:bg-surface-hover hover:text-text-primary"
@@ -672,8 +657,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
                         aria-label="Alternar dolor localizado"
                         title="Alternar dolor localizado"
                         onClick={() => setPainLocalized(!painLocalized)}
-                        aria-pressed={painLocalized}
-                        className={`flex h-7 w-12 items-center rounded-full p-1 transition-[background-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer ${
+                        className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 cursor-pointer ${
                           painLocalized ? 'bg-danger/80' : 'bg-surface-hover'
                         }`}
                       >
@@ -862,15 +846,14 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
 
             {!isMissed && (
               <button
-                aria-label="Descargar archivo TCX"
-                className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-coral-500/30 bg-coral-500/10 py-3.5 text-xs font-bold text-coral-500 outline-none transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out hover:border-coral-500/50 hover:bg-coral-500/20 active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-coral-500/40 motion-reduce:transition-opacity motion-reduce:active:scale-100 cursor-pointer"
+                className="w-full py-3.5 border border-coral-500/30 bg-coral-500/10 text-coral-500 hover:bg-coral-500/20 hover:border-coral-500/50 flex items-center justify-center gap-2 rounded-xl text-xs font-bold   transition cursor-pointer"
                 onClick={() => {
                   setToastMsg('📥 Descargando archivo .TCX para Garmin/Coros...');
                   window.open(`/api/workouts/export?workoutId=${workout.id}`, '_blank');
                   setTimeout(() => setToastMsg(null), 5000);
                 }}
               >
-                <Download className="w-4 h-4 text-coral-500" aria-hidden="true" />
+                <Download className="w-4 h-4 text-coral-500 animate-bounce" />
                 <span>Descargar archivo (.TCX)</span>
               </button>
             )}

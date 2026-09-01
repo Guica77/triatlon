@@ -1,7 +1,6 @@
 'use client'
 
 import * as React from 'react'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 
 export type ToastVariant = 'success' | 'error' | 'info'
 
@@ -31,7 +30,6 @@ const variantStyles: Record<ToastVariant, string> = {
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<ToastItem[]>([])
-  const reduceMotion = useReducedMotion()
 
   const showToast = React.useCallback((message: string, variant: ToastVariant = 'success') => {
     const id = ++toastId
@@ -46,21 +44,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       {/* Toast Container */}
       <div className="fixed top-4 right-4 z-[200] flex flex-col gap-2 pointer-events-none sm:max-w-sm" role="status" aria-live="polite">
-        <AnimatePresence initial={false}>
-          {toasts.map(toast => (
-            <motion.div
-              key={toast.id}
-              initial={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
-              transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
-              className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-elevated backdrop-blur-sm font-medium text-sm ${variantStyles[toast.variant]} bg-surface-elevated/95`}
-            >
-              <span className="shrink-0">{toastIcons[toast.variant]}</span>
-              <span className="leading-snug text-text-primary">{toast.message}</span>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+        {toasts.map(toast => (
+          <div
+            key={toast.id}
+            className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-elevated backdrop-blur-sm font-medium text-sm animate-slide-down ${variantStyles[toast.variant]} bg-surface-elevated/95`}
+          >
+            <span className="shrink-0">{toastIcons[toast.variant]}</span>
+            <span className="leading-snug text-text-primary">{toast.message}</span>
+          </div>
+        ))}
       </div>
     </ToastContext.Provider>
   )

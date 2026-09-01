@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users, Activity, AlertTriangle, MessageSquare,
   Trash2, UserPlus, Search, Settings,
@@ -41,7 +41,6 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
   const [inviteMessage, setInviteMessage] = React.useState<{ text: string; type: 'success' | 'error' } | null>(null)
   const [assigningId, setAssigningId] = React.useState<string | null>(null)
   const [removingId, setRemovingId] = React.useState<string | null>(null)
-  const reduceMotion = useReducedMotion()
 
   const filteredRoster = roster.filter(item => {
     const name = `${item.first_name || ''} ${item.last_name || ''}`.toLowerCase()
@@ -159,11 +158,7 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
               Business
             </a>
             <form action="/auth/signout" method="post">
-              <button
-                type="submit"
-                aria-label="Cerrar sesión"
-                className="flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-transparent text-text-muted transition-[background-color,border-color,color,opacity,transform] duration-150 ease-out hover:border-run/20 hover:bg-run/10 hover:text-run active:scale-[0.97] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
-              >
+              <button type="submit" className="w-9 h-9 flex items-center justify-center rounded-lg text-text-muted hover:text-run hover:bg-run/10 border border-transparent hover:border-run/20 transition-all cursor-pointer">
                 <LogOut className="w-4 h-4" />
               </button>
             </form>
@@ -201,7 +196,7 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
           <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => setSelectedGroupId('all')}
-              className={`min-h-11 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-[background-color,border-color,color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] border motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border ${
                 selectedGroupId === 'all'
                   ? 'bg-surface-card border-border-default text-text-primary shadow-card'
                   : 'border-border-default/50 text-text-muted hover:text-text-secondary hover:bg-surface-hover'
@@ -213,7 +208,7 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
               <button
                 key={g.id}
                 onClick={() => setSelectedGroupId(g.id)}
-                className={`min-h-11 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-[background-color,border-color,color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] border motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all border ${
                   selectedGroupId === g.id
                     ? 'bg-surface-card border-border-default text-text-primary shadow-card'
                     : 'border-border-default/50 text-text-muted hover:text-text-secondary hover:bg-surface-hover'
@@ -224,7 +219,7 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
             ))}
             <button
               onClick={() => setIsGroupManagerOpen(true)}
-              className="min-h-11 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap border border-border-default/50 text-text-muted hover:text-text-secondary hover:bg-surface-hover flex items-center gap-1.5 transition-[background-color,border-color,color,opacity,transform] duration-150 ease-out active:scale-[0.98] motion-reduce:transition-opacity motion-reduce:active:scale-100"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap border border-border-default/50 text-text-muted hover:text-text-secondary hover:bg-surface-hover flex items-center gap-1.5 transition-all"
             >
               <Settings className="w-3 h-3" />
               Grupos
@@ -244,11 +239,7 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
         </div>
 
         {/* ── Main content: responsive grid ── */}
-        <motion.div
-          initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
-        >
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           {selectedGroupId !== 'all' ? (
             <section className="mt-4">
               <GroupTabContent groupId={selectedGroupId} />
@@ -326,10 +317,9 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
                   <AnimatePresence>
                     {inviteMessage && (
                       <motion.div
-                        initial={{ opacity: 0, y: reduceMotion ? 0 : -4 }}
+                        initial={{ opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: reduceMotion ? 0 : -4 }}
-                        transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
+                        exit={{ opacity: 0 }}
                         className={`p-2.5 rounded-lg text-xs border ${
                           inviteMessage.type === 'success'
                             ? 'bg-bike/10 text-bike border-bike/20'
