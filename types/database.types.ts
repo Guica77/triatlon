@@ -1321,7 +1321,44 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      match_athlete_ai_memories: {
+        Args: {
+          query_embedding: number[]
+          match_athlete_id: string
+          match_sport_type?: string | null
+          match_threshold?: number
+          match_count?: number
+        }
+        Returns: {
+          id: string
+          athlete_id: string
+          memory_type: string
+          content: string
+          sport_type: string | null
+          source: string
+          confidence: number
+          created_at: string
+          similarity: number
+        }[]
+      }
+      match_ai_knowledge_chunks: {
+        Args: {
+          query_embedding: number[]
+          match_sport_type?: string | null
+          match_threshold?: number
+          match_count?: number
+        }
+        Returns: {
+          id: string
+          document_id: string
+          title: string
+          category: string
+          sport_type: string | null
+          source: string
+          content: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

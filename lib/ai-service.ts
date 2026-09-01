@@ -76,6 +76,27 @@ export function isAIAvailable(): boolean {
   return getGeminiClient() !== null || getAnthropicClient() !== null;
 }
 
+export async function generateAIEmbedding(value: string): Promise<number[] | null> {
+  const text = value.trim().slice(0, 4000)
+  if (!text) return null
+
+  const gemini = getGeminiClient()
+  if (!gemini) return null
+
+  try {
+    const model = gemini.getGenerativeModel({
+      model: process.env.GEMINI_EMBEDDING_MODEL || 'text-embedding-004',
+    })
+    const result = await model.embedContent(text)
+    const embedding = result.embedding.values
+    if (embedding.length !== 768 || embedding.some(value => !Number.isFinite(value))) return null
+    return embedding
+  } catch (error: any) {
+    console.error('[ai-service] Embedding error:', error?.message)
+    return null
+  }
+}
+
 export function getAIStatus(): { available: boolean; reason: string | null; provider: string } {
   if (getGeminiClient()) {
     return { available: true, reason: null, provider: 'gemini' };
@@ -258,47 +279,103 @@ export async function aiChatStreamToResponse(
 ): Promise<ReadableStream> {
   const encoder = new TextEncoder();
   const gemini = getGeminiClient();
-
-  if (!gemini) {
-    return new ReadableStream({
-      start(controller) {
-        controller.enqueue(encoder.encode(JSON.stringify({ error: 'IA no disponible. Configura GEMINI_API_KEY en .env.local para activarla.', fallback: true })));
-        controller.close();
-      },
-    });
-  }
+  const anthropic = getAnthropicClient();
 
   return new ReadableStream({
     async start(controller) {
-      try {
-        const model = gemini!.getGenerativeModel({
-          model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
-          systemInstruction: systemPrompt,
-          generationConfig: {
+      let closed = false;
+      let emittedToken = false;
+
+      const close = () => {
+        if (!closed) {
+          closed = true;
+          controller.close();
+        }
+      };
+
+      const sendError = (message: string, fallback = false) => {
+        if (closed) return;
+        controller.enqueue(encoder.encode(JSON.stringify({ error: message, ...(fallback ? { fallback: true } : {}) })));
+        close();
+      };
+
+      const streamAnthropic = async (): Promise<boolean> => {
+        if (!anthropic) return false;
+
+        try {
+          const stream = await anthropic.messages.create({
+            model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-20250601',
+            max_tokens: options?.maxTokens || 2048,
             temperature: options?.temperature ?? 0.7,
-            maxOutputTokens: options?.maxTokens || 2048,
-          },
-        });
+            system: systemPrompt,
+            messages: messages.map(m => ({ role: m.role, content: m.content })),
+            stream: true,
+          });
 
-        const stream = await model.generateContentStream({
-          contents: messages.map(m => ({
-            role: m.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: m.content }],
-          })),
-        });
+          for await (const event of stream) {
+            if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+              emittedToken = true;
+              controller.enqueue(encoder.encode(event.delta.text));
+            }
+          }
 
-        for await (const chunk of stream.stream) {
-          const text = chunk.text();
-          if (text) {
-            controller.enqueue(encoder.encode(text));
+          return true;
+        } catch (error: any) {
+          console.error('[ai-service] Anthropic streaming error:', error?.message);
+          return false;
+        }
+      };
+
+      if (gemini) {
+        try {
+          const model = gemini.getGenerativeModel({
+            model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+            systemInstruction: systemPrompt,
+            generationConfig: {
+              temperature: options?.temperature ?? 0.7,
+              maxOutputTokens: options?.maxTokens || 2048,
+            },
+          });
+
+          const stream = await model.generateContentStream({
+            contents: messages.map(m => ({
+              role: m.role === 'assistant' ? 'model' : 'user',
+              parts: [{ text: m.content }],
+            })),
+          });
+
+          for await (const chunk of stream.stream) {
+            const text = chunk.text();
+            if (text) {
+              emittedToken = true;
+              controller.enqueue(encoder.encode(text));
+            }
+          }
+
+          close();
+          return;
+        } catch (error: any) {
+          console.error('[ai-service] Gemini streaming error:', error?.message);
+          // Do not append a second answer after partial Gemini output. Retry with
+          // Anthropic only when Gemini failed before emitting any user-visible text.
+          if (emittedToken) {
+            sendError('La IA interrumpió la respuesta. Inténtalo de nuevo.');
+            return;
           }
         }
-
-        controller.close();
-      } catch (error: any) {
-        controller.enqueue(encoder.encode(JSON.stringify({ error: error?.message || 'Error de streaming' })));
-        controller.close();
       }
+
+      if (await streamAnthropic()) {
+        close();
+        return;
+      }
+
+      sendError(
+        gemini || anthropic
+          ? 'No se pudo completar la respuesta de la IA.'
+          : 'No hay API de IA configurada. Usando modo offline.',
+        !gemini && !anthropic,
+      );
     },
   });
 }
