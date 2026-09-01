@@ -2,9 +2,6 @@
 -- desde tareas server-side con la service role. El cliente autenticado no recibe
 -- permisos para enviar ni modificar vectores.
 
-REVOKE ALL ON FUNCTION public.set_athlete_ai_memory_embedding(UUID, extensions.vector(768))
-FROM PUBLIC, anon, authenticated, service_role;
-
 DROP FUNCTION IF EXISTS public.set_athlete_ai_memory_embedding(UUID, extensions.vector(768));
 
 CREATE OR REPLACE FUNCTION public.set_athlete_ai_memory_embedding_internal(
