@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Hover is an enhancement for precise pointers, never a requirement for touch. */
+@custom-variant fine-hover (@media (hover: hover) and (pointer: fine));
+
 @theme {
   /* ── Typography ──
      Inter = body/UI · Barlow Condensed = display/timing-board
@@ -65,6 +68,11 @@
   --shadow-card-hover: 0 2px 10px rgba(0, 0, 0, 0.4);
   --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.45);
   --shadow-button: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  /* ── Motion vocabulary ── */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
   /* ── Radius ── */
   --radius-sm: 6px;
@@ -134,6 +142,19 @@
     outline-offset: 2px;
   }
 
+  /* Every native button gets the same short, interruptible press feedback.
+     Keep this here so direct buttons share the Button primitive's interaction model. */
+  button {
+    -webkit-tap-highlight-color: transparent;
+    transition-property: background-color, color, border-color, opacity, box-shadow, transform;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 3px; }
@@ -162,6 +183,35 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
   .animate-slide-down {
-    animation: none;
+    animation: fade-in 0.15s var(--ease-out) both;
+  }
+
+  button {
+    transition-property: opacity;
+  }
+
+  button:not(:disabled):active {
+    transform: none;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    color: #FFFFFF;
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button:not(:disabled) {
+    cursor: pointer;
   }
 }

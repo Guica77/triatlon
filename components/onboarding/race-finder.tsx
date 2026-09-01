@@ -130,10 +130,10 @@ export function RaceFinder() {
       <div className="flex bg-surface-card/80 p-1.5 rounded-2xl border border-border-subtle/80 max-w-md mx-auto shadow-elevated">
         <button
           onClick={() => setActiveTab('catalog')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-semibold tracking-wider uppercase transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 ${
             activeTab === 'catalog'
-              ? 'bg-surface-hover text-swim  border border-border-default'
-              : 'text-text-secondary hover:text-text-muted'
+              ? 'bg-surface-hover text-swim border border-border-default'
+              : 'text-text-secondary fine-hover:text-text-muted'
           }`}
         >
           <Trophy className="w-4 h-4" />
@@ -142,10 +142,10 @@ export function RaceFinder() {
 
         <button
           onClick={() => setActiveTab('custom')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-semibold tracking-wider uppercase transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-semibold tracking-wider uppercase transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 ${
             activeTab === 'custom'
-              ? 'bg-surface-hover text-swim  border border-border-default'
-              : 'text-text-secondary hover:text-text-muted'
+              ? 'bg-surface-hover text-swim border border-border-default'
+              : 'text-text-secondary fine-hover:text-text-muted'
           }`}
         >
           <Zap className="w-4 h-4" />
@@ -178,7 +178,7 @@ export function RaceFinder() {
                   placeholder="Buscar por ciudad, país, franquicia, distancia o modalidad (ej. Acuabike)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-surface-app border border-border-subtle/80 rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus:border-swim/50 transition-colors"
+                  className="w-full bg-surface-app border border-border-subtle/80 rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary placeholder-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-swim/40 focus:border-swim/50 transition-[background-color,border-color,box-shadow,color] duration-150 ease-out"
                 />
               </div>
 
@@ -190,10 +190,10 @@ export function RaceFinder() {
                     <div
                       key={race.id}
                       onClick={() => setSelectedRace(race)}
-                      className={`flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer ${
+                      className={`flex items-center justify-between p-4 rounded-xl border transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 ${
                         isSelected
                           ? 'bg-surface-hover/80 border-swim'
-                          : 'bg-surface-app/40 border-border-subtle/60 hover:border-border-default'
+                          : 'bg-surface-app/40 border-border-subtle/60 fine-hover:border-border-default'
                       }`}
                     >
                       <div className="flex items-center gap-4">
@@ -264,10 +264,10 @@ export function RaceFinder() {
                         key={m.val}
                         type="button"
                         onClick={() => setCustomModality(m.val as any)}
-                        className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all ${
+                        className={`flex min-h-16 flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 ${
                           customModality === m.val
                             ? `bg-surface-hover ${m.color} `
-                            : 'bg-surface-app/60 border-border-subtle/80 text-text-muted hover:border-border-default'
+                            : 'bg-surface-app/60 border-border-subtle/80 text-text-muted fine-hover:border-border-default'
                         }`}
                       >
                         <span className="text-xs font-bold uppercase tracking-wider">{m.label}</span>
@@ -292,10 +292,10 @@ export function RaceFinder() {
                         key={d.val}
                         type="button"
                         onClick={() => setCustomDistance(d.val as any)}
-                        className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                        className={`flex min-h-16 flex-col items-center justify-center p-3 rounded-xl border text-center transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 ${
                           customDistance === d.val
                             ? 'bg-surface-hover border-swim text-swim '
-                            : 'bg-surface-app/60 border-border-subtle/80 text-text-muted hover:border-border-default'
+                            : 'bg-surface-app/60 border-border-subtle/80 text-text-muted fine-hover:border-border-default'
                         }`}
                       >
                         <span className="text-xs font-bold uppercase tracking-wider">{d.label}</span>
@@ -316,7 +316,7 @@ export function RaceFinder() {
                       type="date"
                       value={customDate}
                       onChange={(e) => setCustomDate(e.target.value)}
-                      className="w-full bg-surface-app border border-border-subtle/80 rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary focus:outline-none focus:border-swim/50 transition-colors"
+                      className="w-full bg-surface-app border border-border-subtle/80 rounded-xl pl-10 pr-4 py-3 text-sm text-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-swim/40 focus:border-swim/50 transition-[background-color,border-color,box-shadow,color] duration-150 ease-out"
                     />
                   </div>
                 </div>
@@ -377,7 +377,7 @@ export function RaceFinder() {
                       .phase-bar-${i} { width: ${Math.max(5, (p.weeks / weeksRemaining) * 100)}%; }
                     `}</style>
                     <div
-                      className={`h-full first:rounded-l-full last:rounded-r-full transition-all duration-500 ${p.color} phase-bar-${i}`}
+                      className={`h-full first:rounded-l-full last:rounded-r-full transition-[width] duration-500 ease-out ${p.color} phase-bar-${i}`}
                       title={`${p.name}: ${p.weeks} semanas`}
                     />
                   </React.Fragment>

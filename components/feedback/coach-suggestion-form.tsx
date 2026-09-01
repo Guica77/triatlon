@@ -107,10 +107,10 @@ export function CoachSuggestionForm() {
                   key={t.id}
                   type="button"
                   onClick={() => setFeedbackType(t.id)}
-                  className={`py-3 px-3 rounded-xl text-xs font-bold transition-all border flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer select-none ${
+                  className={`py-3 px-3 rounded-xl text-xs font-bold transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.97] border flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 ${
                     isSelected
                       ? 'bg-swim/15 border-swim/70 text-swim'
-                      : 'bg-surface-hover/40 border-border-subtle/80 text-text-muted hover:border-border-default hover:text-text-muted'
+                      : 'bg-surface-hover/40 border-border-subtle/80 text-text-muted fine-hover:border-border-default fine-hover:text-text-muted'
                   }`}
                 >
                   <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-swim' : 'text-text-secondary'}`} />
@@ -143,7 +143,7 @@ export function CoachSuggestionForm() {
                 ? 'Ej: Ajustar el volumen aeróbico general para asimilar la carga de entrenamiento...'
                 : 'Ej: Evaluar el rendimiento del atleta en la transición de carrera...'
             }
-            className="w-full p-4 text-sm text-text-primary placeholder-text-muted border rounded-2xl bg-surface-hover/30 border-border-subtle/80 focus:outline-none focus:ring-2 focus:ring-swim/40 focus:border-swim/60 transition-all resize-none min-height-[100px] overflow-hidden leading-relaxed"
+            className="w-full p-4 text-sm text-text-primary placeholder-text-muted border rounded-2xl bg-surface-hover/30 border-border-subtle/80 focus:outline-none focus:ring-2 focus:ring-swim/40 focus:border-swim/60 transition-[background-color,border-color,box-shadow,color] duration-150 ease-out resize-none min-height-[100px] overflow-hidden leading-relaxed"
           />
           <p className="text-[10px] text-text-secondary italic">
             Escribe sin límites de espacio. La caja de texto se expandirá de forma automática.
@@ -154,7 +154,7 @@ export function CoachSuggestionForm() {
         <button
           type="submit"
           disabled={isSubmitting || !content.trim()}
-          className="w-full py-4 text-sm font-bold text-white transition-all rounded-2xl bg-swim hover:bg-swim/90 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed select-none cursor-pointer"
+          className="w-full py-4 text-sm font-bold text-white transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] rounded-2xl bg-swim fine-hover:bg-swim/90 flex items-center justify-center gap-2 disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 disabled:cursor-not-allowed select-none cursor-pointer"
         >
           {isSubmitting ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

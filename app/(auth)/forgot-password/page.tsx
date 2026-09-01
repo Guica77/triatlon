@@ -51,18 +51,19 @@ export default function ForgotPasswordPage() {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Correo Electrónico</label>
+            <label htmlFor="forgot-password-email" className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Correo Electrónico</label>
             <input
+              id="forgot-password-email"
               name="email"
               type="email"
               placeholder="tu@correo.com"
               required
-              className="w-full bg-surface-card border border-border-default rounded-xl p-3.5 text-sm text-text-primary placeholder-text-muted outline-none focus:border-swim focus:bg-surface-card transition-all"
+              className="w-full rounded-xl border border-border-default bg-surface-card p-3.5 text-sm text-text-primary placeholder-text-muted outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus:border-swim focus:ring-1 focus:ring-swim/40 motion-reduce:transition-opacity"
             />
           </div>
 
           <button
-            className="w-full mt-4 py-4 rounded-xl text-sm font-bold text-text-primary bg-swim hover:bg-swim/90 transition-all flex items-center justify-center disabled:opacity-50 cursor-pointer"
+            className="mt-4 flex min-h-11 w-full items-center justify-center rounded-xl bg-swim py-4 text-sm font-bold text-text-primary transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out hover:bg-swim/90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
             type="submit"
             disabled={loading}
           >
@@ -74,7 +75,7 @@ export default function ForgotPasswordPage() {
           <button
             type="button"
             onClick={() => router.push('/login')}
-            className="text-xs text-text-muted hover:text-swim transition-colors font-bold"
+            className="min-h-11 rounded-lg px-2 text-xs font-bold text-text-muted transition-[color,opacity,transform] duration-150 ease-out hover:text-swim active:scale-[0.97] motion-reduce:transition-opacity motion-reduce:active:scale-100"
           >
             ← Volver a Iniciar Sesión
           </button>

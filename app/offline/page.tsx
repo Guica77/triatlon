@@ -26,7 +26,7 @@ export default function OfflinePage() {
     <div className="min-h-screen bg-[#09090b] text-text-primary flex flex-col items-center justify-center p-4 selection:bg-swim/20">
       
       <ProCard className="w-full max-w-md p-8 text-center space-y-6 bg-bg-app/40 border-border-default/80 backdrop-blur-md">
-        <div className="mx-auto w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center animate-pulse">
+        <div className="mx-auto w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
           <WifiOff className="w-8 h-8 text-rose-400" />
         </div>
 

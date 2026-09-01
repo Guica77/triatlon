@@ -168,7 +168,7 @@ function DisciplineBar({
       </div>
       <div className="h-2.5 rounded-full bg-surface-hover border border-border-subtle overflow-hidden">
         <div
-          className={cn('h-full rounded-full transition-all duration-700', fillClass)}
+          className={cn('h-full rounded-full', fillClass)}
           style={{ width: `${percentage}%` }}
         />
       </div>
@@ -418,7 +418,6 @@ export default async function ResumenPage() {
                       strokeLinecap="round"
                       strokeDasharray={ringCircumference}
                       strokeDashoffset={ringOffset}
-                      className="transition-all duration-1000"
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">

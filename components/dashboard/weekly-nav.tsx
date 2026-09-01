@@ -65,7 +65,7 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
 
   if (!isMounted) {
     return (
-      <ProCard className="p-4 py-6 relative z-10 border-border-default bg-bg-card h-32 animate-pulse flex items-center justify-center">
+      <ProCard className="p-4 py-6 relative z-10 border-border-default bg-bg-card h-32 flex items-center justify-center" aria-busy="true">
         <div className="w-8 h-8 rounded-full border-4 border-swim border-t-transparent animate-spin"></div>
       </ProCard>
     );
@@ -108,7 +108,7 @@ export function WeeklyNav({ workouts, selectedDateStr, onSelectDate }: WeeklyNav
               key={i} 
               onClick={() => onSelectDate(d.dateStr)}
               className={cn(
-                "relative flex flex-col items-center justify-center p-3 rounded-2xl w-16 transition-all border cursor-pointer select-none",
+                "relative flex min-h-11 w-16 shrink-0 flex-col items-center justify-center rounded-2xl border p-3 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] cursor-pointer select-none motion-reduce:transition-opacity motion-reduce:active:scale-100",
                 activeClass,
                 d.isToday && !isSelected && "bg-bg-hover border-border-default text-text-primary"
               )}

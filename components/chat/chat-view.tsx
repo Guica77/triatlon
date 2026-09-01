@@ -13,14 +13,13 @@ import {
   Smile,
   Paperclip,
   Mic,
-  Phone,
-  Video,
   MoreVertical
 } from 'lucide-react'
 import { AnimatedButton } from '@/components/ui/animated-button'
 import { ChatParticipant, ChatMessageItem, sendMessage, getMessages, linkCoachByAthlete, linkCoachByCode, markMessagesAsRead } from '@/app/(app)/chat/actions'
 import { createClient } from '@/lib/supabase/client'
 import { useNotifications } from '@/components/providers/notification-provider'
+import { useReducedMotion } from 'framer-motion'
 
 interface ChatViewProps {
   initialParticipants: ChatParticipant[]
@@ -51,6 +50,7 @@ export function ChatView({
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
   const { refreshUnreadCount } = useNotifications()
+  const reduceMotion = useReducedMotion()
   const hasSidebar = currentUserRole === 'coach' || participants.length > 1
 
   // Filtered sidebar items
@@ -96,7 +96,7 @@ export function ChatView({
 
   // Scroll to bottom helper
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    messagesEndRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' })
   }
 
   React.useEffect(() => {
@@ -196,30 +196,30 @@ export function ChatView({
   }
 
   return (
-    <div className="flex bg-white border-0 sm:border border-zinc-200 rounded-none sm:rounded-2xl overflow-hidden flex-1 min-h-0 shadow-none sm:shadow-sm">
+    <div className="flex min-h-0 flex-1 overflow-hidden rounded-none border border-border-subtle bg-surface-elevated shadow-card sm:rounded-2xl">
       
       {/* Left Sidebar */}
       {hasSidebar ? (
-        <div className={`w-full sm:w-80 border-r border-zinc-200 flex flex-col shrink-0 bg-zinc-50/50 ${selectedPart ? 'hidden sm:flex' : 'flex'}`}>
-          
+        <div className={`w-full shrink-0 border-border-default bg-surface-app sm:w-80 sm:border-r ${selectedPart ? 'hidden sm:flex' : 'flex'} flex-col`}>
+
           {/* Search bar */}
-          <div className="p-4 border-b border-zinc-200 flex items-center gap-2 bg-zinc-50">
-            <div className="flex items-center gap-2 bg-white border border-zinc-200 px-3 py-1.5 rounded-xl w-full shadow-sm">
-              <Search className="w-4 h-4 text-zinc-400 shrink-0" />
+          <div className="flex items-center gap-2 border-b border-border-subtle bg-surface-elevated p-3 sm:p-4">
+            <div className="flex w-full items-center gap-2 rounded-xl border border-border-default bg-surface-card px-3 py-2 shadow-card">
+              <Search className="h-4 w-4 shrink-0 text-text-muted" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar conversación..."
-                className="bg-transparent border-none text-xs text-zinc-800 outline-none w-full placeholder-zinc-400"
+                className="w-full border-none bg-transparent text-xs text-text-primary outline-none placeholder:text-text-muted"
               />
             </div>
           </div>
 
           {/* List */}
-          <div className="flex-1 overflow-y-auto divide-y divide-zinc-200/60 custom-scrollbar">
+          <div className="custom-scrollbar flex-1 divide-y divide-border-subtle overflow-y-auto">
             {filteredParticipants.length === 0 ? (
-              <div className="p-6 text-center text-xs text-zinc-500 font-semibold">
+              <div className="p-6 text-center text-xs font-semibold text-text-muted">
                 No hay contactos disponibles
               </div>
             ) : (
@@ -229,26 +229,26 @@ export function ChatView({
                   <button
                     key={p.id}
                     onClick={() => handleSelectParticipant(p)}
-                    className={`w-full p-4 flex items-center justify-between text-left transition-all cursor-pointer ${
-                      isSelected 
-                        ? 'bg-cyan-50/40 border-l-2 border-cyan-600' 
-                        : 'hover:bg-zinc-100/40'
+                    className={`flex min-h-11 w-full items-center justify-between p-4 text-left transition-[background-color,border-color,color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 focus-visible:ring-inset motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
+                      isSelected
+                        ? 'bg-swim-subtle/70 border-l-2 border-swim'
+                        : 'fine-hover:bg-surface-hover'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center font-bold text-xs text-zinc-700 shadow-sm shrink-0">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border-default bg-surface-card text-xs font-bold text-text-secondary">
                         {(p.first_name || 'T')[0].toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <span className="text-xs font-bold text-zinc-900 block truncate">
+                        <span className="block truncate text-xs font-bold text-text-primary">
                           {p.first_name || 'Triatleta'} {p.last_name || ''}
                         </span>
-                        <span className="text-[10px] text-zinc-500 block truncate font-medium">
+                        <span className="block truncate text-[10px] font-medium text-text-muted">
                           {p.role === 'coach' ? 'Entrenador Personal' : 'Atleta de Roster'}
                         </span>
                       </div>
                     </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-text-muted" />
                   </button>
                 )
               })
@@ -258,52 +258,45 @@ export function ChatView({
       ) : null}
 
       {/* Main Chat Conversation Viewport */}
-      <div className={`flex-1 flex flex-col justify-between bg-zinc-50/10 min-w-0 ${hasSidebar && !selectedPart ? 'hidden sm:flex' : 'flex'}`}>
+      <div className={`flex min-w-0 flex-1 flex-col justify-between bg-surface-elevated ${hasSidebar && !selectedPart ? 'hidden sm:flex' : 'flex'}`}>
         {selectedPart ? (
           <>
             {/* Active chat header */}
-            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-200 bg-white flex items-center justify-between shrink-0 shadow-sm">
+            <div className="flex shrink-0 items-center justify-between border-b border-border-default bg-surface-card px-4 py-3 sm:px-6 sm:py-4">
               <div className="flex items-center gap-3">
                 {hasSidebar && (
                   <button 
                     onClick={() => setSelectedPart(null)}
-                    className="sm:hidden p-1 -ml-1 text-zinc-500 hover:text-zinc-800 transition-colors shrink-0"
+                    className="sm:hidden min-h-10 min-w-10 -ml-1 shrink-0 rounded-lg text-text-secondary transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                     aria-label="Volver"
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </button>
                 )}
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-500 to-indigo-500 flex items-center justify-center font-bold text-xs text-white shadow-sm shrink-0">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-swim/40 bg-swim-subtle text-xs font-bold text-swim">
                   {(selectedPart.first_name || 'T')[0].toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-zinc-900">
+                  <h3 className="text-xs font-bold text-text-primary">
                     {selectedPart.first_name || 'Triatleta'} {selectedPart.last_name || ''}
                   </h3>
-                  <p className="text-[9px] text-zinc-500 flex items-center gap-1 mt-0.5 font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
-                    Chat Activo
+                  <p className="mt-0.5 flex items-center gap-1 text-[9px] font-medium text-text-muted">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" />
+                    Chat activo
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-1 sm:gap-3">
                 {/* Realtime badge (hidden on narrow screens to save space for call buttons) */}
-                <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-[8px] sm:text-[9px] text-emerald-700 font-black uppercase tracking-wider shrink-0">
-                  <Sparkles className="w-3 h-3 text-emerald-600 animate-pulse" />
+                <div className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-success/30 bg-bike-subtle px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-bike sm:flex sm:text-[9px]">
+                  <Sparkles className="h-3 w-3 animate-pulse text-bike" />
                   <span className="hidden sm:inline">Conectado (Realtime)</span>
                   <span className="sm:hidden">Realtime</span>
                 </div>
                 
-                {/* Call Icons */}
-                <div className="flex items-center gap-0.5 sm:gap-1.5 shrink-0">
-                  <button type="button" className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors rounded-full hover:bg-zinc-100 cursor-pointer" aria-label="Llamar">
-                    <Phone className="w-4 h-4" />
-                  </button>
-                  <button type="button" className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors rounded-full hover:bg-zinc-100 cursor-pointer" aria-label="Videollamada">
-                    <Video className="w-4 h-4" />
-                  </button>
-                  <button type="button" className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors rounded-full hover:bg-zinc-100 cursor-pointer" aria-label="Opciones">
+                <div className="flex shrink-0 items-center">
+                  <button type="button" className="min-h-10 min-w-10 rounded-xl p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-swim cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" aria-label="Opciones">
                     <MoreVertical className="w-4 h-4" />
                   </button>
                 </div>
@@ -311,24 +304,18 @@ export function ChatView({
             </div>
 
             {/* Main Chat Conversation Viewport */}
-            <div className="flex-1 relative bg-[#e5ddd5] overflow-hidden flex flex-col min-h-0">
-              {/* Background Pattern — the outer chat container repeats the same pattern,
-                  so when the keyboard resizes this area the seams are invisible */}
-              <div className="absolute inset-0 bg-[radial-gradient(#cfc8c0_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
-
+            <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-bg-deep">
               {/* Messages body list */}
-              <div 
-                className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar relative z-10 flex flex-col"
-              >
+              <div className="custom-scrollbar relative z-10 flex flex-1 flex-col overflow-y-auto p-4 sm:p-6">
                 {loadingMessages ? (
-                  <div className="h-full flex items-center justify-center text-xs text-zinc-500 font-semibold">
+                  <div className="flex h-full items-center justify-center text-xs font-semibold text-text-muted">
                     Cargando conversación...
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-zinc-500 space-y-2">
-                    <MessageSquare className="w-8 h-8 text-zinc-400" />
-                    <p className="text-xs font-bold">No hay mensajes previos.</p>
-                    <p className="text-[10px] text-zinc-500 font-semibold">¡Escribe tu primer mensaje!</p>
+                  <div className="flex h-full flex-col items-center justify-center space-y-2 text-text-muted">
+                    <MessageSquare className="h-8 w-8 text-swim" />
+                    <p className="text-xs font-bold text-text-secondary">No hay mensajes previos.</p>
+                    <p className="text-[10px] font-semibold text-text-muted">¡Escribe tu primer mensaje!</p>
                   </div>
                 ) : (
                   <div className="space-y-4 flex-1">
@@ -340,22 +327,23 @@ export function ChatView({
                           className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-1`}
                         >
                           <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            initial={reduceMotion ? false : { opacity: 0, scale: 0.95, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
                             className={`max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl text-[13px] leading-relaxed shadow-sm relative ${
-                              isOwn 
-                                ? 'bg-[#d9fdd3] text-zinc-900 font-medium rounded-tr-sm border border-[#c6ecc0]' 
-                                : 'bg-white text-zinc-900 rounded-tl-sm border border-zinc-200/50 font-medium'
+                              isOwn
+                                ? 'bg-coral-500 text-text-inverse font-medium rounded-tr-sm border border-coral-400 shadow-button'
+                                : 'bg-surface-card text-text-primary rounded-tl-sm border border-border-default font-medium'
                             }`}
                           >
                             <p className="whitespace-pre-wrap">{m.message}</p>
                             {isOwn ? (
-                              <div className="text-[9px] mt-0.5 flex items-center justify-end gap-1 font-bold text-zinc-500 float-right ml-3 translate-y-1" suppressHydrationWarning>
+                              <div className="float-right ml-3 mt-0.5 flex translate-y-1 items-center justify-end gap-1 text-[9px] font-bold text-text-inverse/70" suppressHydrationWarning>
                                 {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                <span className="text-cyan-600 font-black tracking-normal text-[10px]">✓✓</span>
+                                <span className="text-text-inverse/80 font-black tracking-normal text-[10px]">✓✓</span>
                               </div>
                             ) : (
-                              <div className="text-[9px] mt-0.5 text-right font-bold text-zinc-400 float-right ml-3 translate-y-1" suppressHydrationWarning>
+                              <div className="float-right ml-3 mt-0.5 translate-y-1 text-right text-[9px] font-bold text-text-muted" suppressHydrationWarning>
                                 {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </div>
                             )}
@@ -368,10 +356,10 @@ export function ChatView({
                     {/* Typing Indicator */}
                     {isTyping && (
                       <div className="flex justify-start">
-                        <div className="bg-zinc-100 border border-zinc-200 text-zinc-500 p-3.5 rounded-2xl rounded-tl-none flex items-center gap-1.5 shadow-sm">
-                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:0ms]" />
-                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:150ms]" />
-                          <span className="w-1.5 h-1.5 bg-zinc-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                        <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-none border border-border-default bg-surface-card p-3.5 text-text-muted shadow-card">
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-swim [animation-delay:0ms]" />
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-swim [animation-delay:150ms]" />
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-swim [animation-delay:300ms]" />
                         </div>
                       </div>
                     )}
@@ -385,23 +373,23 @@ export function ChatView({
             {/* Input form */}
             <form 
               onSubmit={handleSendMessage}
-              className="p-2 sm:p-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] border-t border-zinc-200/60 bg-[#f0f2f5] flex items-end gap-2 shrink-0 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] z-10"
+              className="z-10 flex shrink-0 items-end gap-2 border-t border-border-default bg-surface-elevated p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_-6px_18px_rgba(0,0,0,0.18)] sm:p-3"
             >
               {/* Attachment Icon */}
               <button 
                 type="button" 
-                className="p-2 text-zinc-500 hover:text-cyan-600 transition-colors shrink-0 rounded-full hover:bg-zinc-200/50 cursor-pointer"
+                className="min-h-10 min-w-10 shrink-0 rounded-xl p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-coral-400 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50"
                 aria-label="Adjuntar archivo"
               >
                 <Plus className="w-5 h-5" />
               </button>
               
               {/* Input container wrapper */}
-              <div className="flex-1 flex items-end bg-white rounded-3xl px-1.5 py-1 shadow-sm min-h-[40px]">
+              <div className="flex min-h-[40px] flex-1 items-end rounded-2xl border border-border-default bg-surface-card px-1.5 py-1 shadow-card">
                 {/* Emoji Icon */}
                 <button 
                   type="button" 
-                  className="p-2 text-zinc-400 hover:text-zinc-700 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
+                  className="min-h-10 min-w-10 shrink-0 p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:text-text-secondary cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                   aria-label="Emojis"
                 >
                   <Smile className="w-5 h-5" />
@@ -419,13 +407,13 @@ export function ChatView({
                   }}
                   placeholder="Mensaje..."
                   rows={1}
-                  className="bg-transparent border-none text-[15px] text-zinc-900 outline-none w-full py-2 px-1 placeholder-zinc-400 resize-none max-h-[120px] min-h-[36px] custom-scrollbar self-center"
+                  className="min-h-[36px] max-h-[120px] w-full resize-none self-center border-none bg-transparent px-1 py-2 text-[15px] text-text-primary outline-none placeholder:text-text-muted custom-scrollbar"
                 />
                 
                 {/* Paperclip Icon */}
                 <button 
                   type="button" 
-                  className="p-2 text-zinc-400 hover:text-zinc-700 transition-colors shrink-0 cursor-pointer self-end mb-0.5"
+                  className="min-h-10 min-w-10 shrink-0 p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:text-text-secondary cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                   aria-label="Compartir documento"
                 >
                   <Paperclip className="w-5 h-5" />
@@ -438,14 +426,14 @@ export function ChatView({
                   type="submit"
                   variant="primary"
                   size="icon"
-                  className="w-10 h-10 shrink-0 !bg-emerald-500 hover:!bg-emerald-600 !text-white rounded-full shadow-sm flex items-center justify-center cursor-pointer transition-all duration-200 self-end mb-0.5"
+                  className="h-10 w-10 shrink-0 rounded-xl !bg-primary !text-primary-foreground shadow-button transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50"
                 >
-                  <Send className="w-4 h-4 text-white ml-0.5" />
+                  <Send className="ml-0.5 h-4 w-4 text-primary-foreground" />
                 </AnimatedButton>
               ) : (
                 <button
                   type="button"
-                  className="w-10 h-10 shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-sm flex items-center justify-center transition-all duration-200 cursor-pointer self-end mb-0.5"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl !bg-secondary !text-secondary-foreground shadow-button transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                   aria-label="Grabar audio"
                 >
                   <Mic className="w-5 h-5" />
@@ -454,47 +442,47 @@ export function ChatView({
             </form>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center p-6 bg-zinc-50/10">
+          <div className="flex min-h-0 flex-1 flex-col items-center bg-bg-deep p-6">
             {currentUserRole === 'coach' ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-500 shadow-inner">
-                  <MessageSquare className="w-8 h-8 text-zinc-500" />
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-swim/40 bg-swim-subtle text-swim shadow-card">
+                  <MessageSquare className="h-8 w-8 text-swim" />
                 </div>
                 <div>
-                  <h3 className="text-zinc-800 font-black text-lg tracking-tight">Centro de Mensajería</h3>
-                  <p className="text-sm text-zinc-500 font-medium max-w-sm mt-2 leading-relaxed">
+                  <h3 className="text-lg font-black tracking-tight text-text-primary">Centro de Mensajería</h3>
+                  <p className="mt-2 max-w-sm text-sm font-medium leading-relaxed text-text-muted">
                     Selecciona un atleta del roster en el panel izquierdo para ver su historial y comenzar a conversar.
                   </p>
                 </div>
               </div>
             ) : (
               <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-[100%] pr-2 custom-scrollbar">
-                <div className="text-center space-y-2 mb-8 mt-4">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-cyan-50 border border-cyan-100 text-cyan-600 mb-4 shadow-sm">
-                    <Sparkles className="w-6 h-6 animate-pulse" />
+                <div className="mb-8 mt-4 space-y-2 text-center">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-coral-500/40 bg-run-subtle text-coral-300 shadow-card">
+                    <Sparkles className="h-6 w-6 animate-pulse" />
                   </div>
-                  <h3 className="text-xl font-black text-zinc-900 tracking-tight">Directorio de Entrenadores</h3>
-                  <p className="text-sm text-zinc-500 font-medium max-w-md mx-auto leading-relaxed">
+                  <h3 className="text-xl font-black tracking-tight text-text-primary">Directorio de Entrenadores</h3>
+                  <p className="mx-auto max-w-md text-sm font-medium leading-relaxed text-text-muted">
                     Aún no tienes un entrenador asignado. Vincula tu cuenta mediante un código de invitación o elige un coach certificado.
                   </p>
                 </div>
                 
                 {/* Código de invitación */}
-                <form onSubmit={handleLinkByCode} className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3 max-w-sm mx-auto text-left">
-                  <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider text-center">¿Tienes un código de entrenador?</label>
+                <form onSubmit={handleLinkByCode} className="mx-auto flex max-w-sm flex-col gap-3 rounded-2xl border border-border-default bg-surface-card p-5 text-left shadow-card">
+                  <label className="text-center text-[10px] font-black uppercase tracking-wider text-text-muted">¿Tienes un código de entrenador?</label>
                   <div className="flex gap-2">
                     <input 
                       type="text" 
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
                       placeholder="Ej: GUILLEPRO"
-                      className="flex-1 bg-white border border-zinc-200 focus:border-cyan-600 rounded-xl px-4 py-3 text-sm text-cyan-700 font-black uppercase tracking-wider outline-none transition-all"
+                      className="flex-1 rounded-xl border border-border-default bg-surface-elevated px-4 py-3 text-sm font-black uppercase tracking-wider text-text-primary outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out placeholder:text-text-muted focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/30"
                     />
                     <AnimatedButton
                       type="submit"
                       variant="primary"
                       disabled={linkingCoachCode || !inviteCode.trim()}
-                      className="px-6 py-3 text-sm font-black !bg-cyan-700 hover:!bg-cyan-600 !text-white shadow-md cursor-pointer"
+                      className="min-h-10 cursor-pointer px-6 py-3 text-sm font-black !bg-primary !text-primary-foreground shadow-button transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {linkingCoachCode ? '...' : 'Vincular'}
                     </AnimatedButton>
@@ -503,33 +491,33 @@ export function ChatView({
  
                 <div className="relative py-4 max-w-sm mx-auto">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-zinc-200"></div>
+                    <div className="w-full border-t border-border-subtle"></div>
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-white px-4 text-xs font-bold text-zinc-500 uppercase tracking-wide">o elige uno disponible</span>
+                    <span className="bg-bg-deep px-4 text-xs font-bold uppercase tracking-wide text-text-muted">o elige uno disponible</span>
                   </div>
                 </div>
 
                 {availableCoaches.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12 text-left">
                     {availableCoaches.map(coach => (
-                      <div key={coach.id} className="bg-white border border-zinc-200 rounded-2xl p-5 flex flex-col justify-between hover:border-cyan-500/40 transition-all group shadow-sm">
+                      <div key={coach.id} className="group flex flex-col justify-between rounded-2xl border border-border-default bg-surface-card p-5 shadow-card transition-[border-color,box-shadow,background-color] duration-150 ease-out fine-hover:border-swim/50">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="w-12 h-12 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center font-bold text-lg text-zinc-700 shadow-sm shrink-0">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border-default bg-surface-elevated text-lg font-bold text-text-secondary shadow-card">
                             {(coach.first_name || 'E')[0].toUpperCase()}
                           </div>
                           <div>
-                            <h4 className="text-sm font-bold text-zinc-800 group-hover:text-cyan-600 transition-colors">
+                            <h4 className="text-sm font-bold text-text-primary transition-colors fine-hover:group-hover:text-swim">
                               {coach.first_name} {coach.last_name}
                             </h4>
-                            <span className="text-[10px] uppercase tracking-wider font-black text-emerald-700 bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded-md mt-1 inline-block">
+                            <span className="mt-1 inline-block rounded-md border border-success/30 bg-bike-subtle px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-bike">
                               Entrenador Certificado
                             </span>
                           </div>
                         </div>
                         <AnimatedButton
                           variant="primary"
-                          className="w-full text-xs font-black !bg-zinc-50 hover:!bg-zinc-100 !text-zinc-800 border border-zinc-200 shadow-sm cursor-pointer"
+                          className="w-full cursor-pointer border border-border-default !bg-surface-elevated text-xs font-black !text-text-primary shadow-card transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out fine-hover:!bg-surface-hover fine-hover:border-swim/50 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                           disabled={linkingCoachId === coach.id}
                           onClick={() => handleLinkCoach(coach.id)}
                         >
@@ -539,8 +527,8 @@ export function ChatView({
                     ))}
                   </div>
                 ) : (
-                  <div className="p-8 text-center bg-zinc-50 border border-zinc-200 rounded-2xl pb-12 font-medium">
-                    <p className="text-sm text-zinc-500">No hay entrenadores disponibles en este momento.</p>
+                  <div className="rounded-2xl border border-border-default bg-surface-card p-8 pb-12 text-center font-medium shadow-card">
+                    <p className="text-sm text-text-muted">No hay entrenadores disponibles en este momento.</p>
                   </div>
                 )}
               </div>

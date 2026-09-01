@@ -40,7 +40,7 @@ export function StepGarage(props: StepGarageProps) {
               <button
                 key={item.id}
                 onClick={() => props.toggleGear(item.id)}
-                className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all cursor-pointer relative ${
+                className={`flex min-h-11 flex-col items-center justify-center p-4 rounded-2xl border transition-[background-color,color,border-color,box-shadow,transform] duration-150 ease-out active:scale-[0.98] cursor-pointer relative motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
                   isSelected 
                     ? 'bg-coral-500/10 border-coral-500 text-coral-500 ring-1 ring-coral-500  scale-105 font-semibold' 
                     : 'bg-surface-hover/30 border-border-default text-text-secondary hover:border-border-default hover:bg-surface-hover'
@@ -56,7 +56,7 @@ export function StepGarage(props: StepGarageProps) {
         </div>
         
         <div className="flex justify-between pt-4 border-t border-border-default">
-          <button onClick={props.onPrev} className="px-6 py-3 text-sm font-semibold text-text-secondary hover:text-text-primary transition flex items-center cursor-pointer"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
+          <button onClick={props.onPrev} className="flex min-h-11 items-center px-6 py-3 text-sm font-semibold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"><ChevronLeft className="w-4 h-4 mr-1" /> Atrás</button>
           <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm !bg-coral-500 hover:!bg-coral-600 !text-white ">
             Continuar <ChevronRight className="w-4 h-4 ml-1" />
           </AnimatedButton>

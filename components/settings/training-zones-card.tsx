@@ -21,7 +21,7 @@ export function TrainingZonesCard({ ftp, swimPace, runPace }: TrainingZonesCardP
   ] : null;
 
   return (
-    <Card className="border-border-default bg-surface-card shadow-card hover:shadow-card-hover transition-all duration-300 h-full">
+    <Card className="border-border-default bg-surface-card shadow-card hover:shadow-card-hover transition-[box-shadow] duration-200 ease-out motion-reduce:transition-opacity h-full">
       <CardContent className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 rounded-lg bg-swim/10 border border-swim/20 flex items-center justify-center ">

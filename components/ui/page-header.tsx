@@ -15,25 +15,26 @@ interface PageHeaderProps {
 export function PageHeader({
   icon: Icon,
   iconColor = 'text-text-secondary',
+  iconBg,
   title,
   subtitle,
   actions,
   className,
 }: PageHeaderProps) {
   return (
-    <div className={cn('flex items-center justify-between', className)}>
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="w-9 h-9 rounded-lg bg-surface-hover border border-border-subtle flex items-center justify-center shrink-0">
-          <Icon className={cn('w-4 h-4', iconColor)} />
+    <div className={cn('flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
+      <div className="flex min-w-0 items-center gap-3">
+        <div className={cn('flex size-10 shrink-0 items-center justify-center rounded-lg border border-border-subtle bg-surface-hover', iconBg)}>
+          <Icon className={cn('size-4', iconColor)} />
         </div>
         <div className="min-w-0">
-          <h1 className="font-display text-xl font-bold tracking-tight text-text-primary truncate leading-tight">{title}</h1>
+          <h1 className="truncate font-display text-xl font-bold leading-tight tracking-tight text-text-primary sm:text-2xl">{title}</h1>
           {subtitle && (
-            <p className="text-xs text-text-muted font-medium truncate">{subtitle}</p>
+            <p className="truncate text-xs font-medium text-text-muted sm:text-sm">{subtitle}</p>
           )}
         </div>
       </div>
-      {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">{actions}</div>}
     </div>
   )
 }

@@ -78,13 +78,13 @@ export function DesktopSidebar() {
   return (
     <div
       className={cn(
-        'hidden sm:flex flex-col bg-surface-elevated shrink-0 transition-all duration-300 z-40 border-r border-border-subtle',
+        'hidden sm:flex flex-col bg-surface-elevated shrink-0 transition-[width,background-color,border-color] duration-200 ease-out z-40 border-r border-border-subtle',
         isCollapsed ? 'w-[68px]' : 'w-56'
       )}
     >
       {/* Logo — the three lanes as a start-line mark */}
       <div className={cn(
-        'flex items-center gap-3 shrink-0 transition-all duration-300',
+        'flex items-center gap-3 shrink-0 transition-[padding,justify-content] duration-200 ease-out',
         isCollapsed ? 'px-3.5 py-5 justify-center' : 'px-5 py-5'
       )}>
         <div className="w-9 h-9 rounded-lg bg-surface-hover border border-border-subtle flex flex-col items-center justify-center gap-[3px] shrink-0">
@@ -110,13 +110,14 @@ export function DesktopSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'relative flex items-center gap-3 rounded-lg text-sm font-medium transition-all',
+                'relative flex min-h-11 items-center gap-3 rounded-lg text-sm font-medium transition-[background-color,color,opacity] duration-150 ease-out',
                 isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5',
                 isActive
                   ? 'bg-surface-hover/70 text-text-primary'
                   : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover/50'
               )}
               title={isCollapsed ? item.label : undefined}
+              aria-current={isActive ? 'page' : undefined}
             >
               {isActive && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-accent" aria-hidden="true" />
@@ -140,10 +141,12 @@ export function DesktopSidebar() {
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            'flex items-center gap-3 rounded-lg text-sm font-medium transition-all w-full text-text-muted hover:text-text-secondary hover:bg-surface-hover/50',
+            'flex min-h-11 items-center gap-3 rounded-lg text-sm font-medium transition-[background-color,color,opacity] duration-150 ease-out w-full text-text-muted hover:text-text-secondary hover:bg-surface-hover/50',
             isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5'
           )}
           title={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+          aria-label={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+          aria-expanded={!isCollapsed}
         >
           {isCollapsed ? <PanelLeft className="w-4 h-4" /> : <><PanelLeftClose className="w-4 h-4" /><span>Colapsar</span></>}
         </button>
