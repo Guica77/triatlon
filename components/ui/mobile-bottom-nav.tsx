@@ -3,12 +3,33 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen, Dumbbell, Heart, Award } from 'lucide-react';
+import { Home, BarChart2, MessageSquare, Settings, Trophy, Dumbbell, Heart, Award, MoreHorizontal } from 'lucide-react';
 import { useNotifications } from '@/components/providers/notification-provider';
+
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  showBadge?: boolean;
+};
+
+const athletePrimaryItems: NavItem[] = [
+  { href: '/dashboard', label: 'Entreno', icon: Dumbbell },
+  { href: '/recuperacion', label: 'Recuperación', icon: Heart },
+  { href: '/analytics', label: 'Análisis', icon: BarChart2 },
+  { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
+];
+
+const athleteMoreItems: NavItem[] = [
+  { href: '/resumen', label: 'Resumen semanal', icon: Award },
+  { href: '/exercises', label: 'Biblioteca de ejercicios', icon: Dumbbell },
+  { href: '/settings', label: 'Ajustes', icon: Settings },
+];
 
 export function MobileBottomNav() {
   const pathname = usePathname();
   const [role, setRole] = React.useState<string | null>(null);
+  const [isMoreOpen, setIsMoreOpen] = React.useState(false);
   const { unreadCount } = useNotifications();
 
   React.useEffect(() => {
@@ -34,6 +55,21 @@ export function MobileBottomNav() {
     fetchRole();
   }, []);
 
+  React.useEffect(() => {
+    setIsMoreOpen(false);
+  }, [pathname]);
+
+  React.useEffect(() => {
+    if (!isMoreOpen) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setIsMoreOpen(false);
+    }
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isMoreOpen]);
+
   // Ocultar en login, callback y chats
   if (
     pathname.includes('/login') ||
@@ -44,7 +80,7 @@ export function MobileBottomNav() {
     return null;
   }
 
-  const navItems = role === 'owner' ? [
+  const navItems: NavItem[] = role === 'owner' ? [
     { href: '/admin', label: 'Business', icon: Trophy },
     { href: '/coach/dashboard', label: 'Roster', icon: Home },
     { href: '/settings', label: 'Ajustes', icon: Settings },
@@ -52,49 +88,107 @@ export function MobileBottomNav() {
     { href: '/coach/dashboard', label: 'Roster', icon: Home },
     { href: '/coach/chat', label: 'Mensajes', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
-  ] : [
-    { href: '/dashboard', label: 'Entreno', icon: Dumbbell },
-    { href: '/recuperacion', label: 'Recup.', icon: Heart },
-    { href: '/exercises', label: 'Ejercicios', icon: BookOpen },
-    { href: '/analytics', label: 'Análisis', icon: BarChart2 },
-    { href: '/resumen', label: 'Resumen', icon: Award },
-    { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
-    { href: '/settings', label: 'Ajustes', icon: Settings },
-  ];
+  ] : athletePrimaryItems;
+
+  const isAthlete = role !== 'owner' && role !== 'coach';
+  const moreItems = isAthlete ? athleteMoreItems : [];
+  const hasSecondaryActiveRoute = moreItems.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
+
+  const isItemActive = (item: NavItem) => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(`${item.href}/`));
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom, 16px)] pt-2 bg-surface-elevated/90 backdrop-blur-lg border-t border-border-default">
-      <div className="flex items-center justify-evenly max-w-md mx-auto w-full">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-          const Icon = item.icon;
+    <>
+      {isMoreOpen && (
+        <button
+          type="button"
+          aria-label="Cerrar menú"
+          className="sm:hidden fixed inset-0 z-40 bg-black/45"
+          onClick={() => setIsMoreOpen(false)}
+        />
+      )}
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 px-3 py-1.5 relative group"
-              aria-label={item.label}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <div className="relative">
-                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-accent' : 'text-text-muted group-hover:text-text-secondary'}`} />
-                {item.showBadge && unreadCount > 0 && (
-                  <span className="absolute -top-2 -right-2 w-4 h-4 bg-run rounded-full flex items-center justify-center border-2 border-surface-elevated">
-                    <span className="text-[9px] font-bold text-white leading-none">
-                      {unreadCount > 9 ? '9+' : unreadCount}
+      {moreItems.length > 0 && isMoreOpen && (
+        <div
+          id="mobile-more-menu"
+          role="menu"
+          aria-label="Más secciones"
+          className="sm:hidden fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] left-4 right-4 z-50 mx-auto max-w-md overflow-hidden rounded-2xl border border-border-default bg-surface-elevated shadow-elevated"
+        >
+          <div className="border-b border-border-subtle px-4 py-3">
+            <p className="font-display text-xs font-bold uppercase tracking-[0.18em] text-text-muted">Más secciones</p>
+          </div>
+          <div className="p-2">
+            {moreItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = isItemActive(item);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  role="menuitem"
+                  className={`flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors ${isActive ? 'bg-surface-hover text-text-primary' : 'text-text-secondary hover:bg-surface-hover/60 hover:text-text-primary'}`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon className={`size-5 ${isActive ? 'text-accent' : 'text-text-muted'}`} />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <nav
+        aria-label="Navegación principal"
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border-default bg-surface-elevated/95 px-3 pb-[env(safe-area-inset-bottom,16px)] pt-2.5 backdrop-blur-lg"
+      >
+        <div className="mx-auto flex min-h-[4.25rem] w-full max-w-lg items-stretch justify-evenly gap-1">
+          {navItems.map((item) => {
+            const isActive = isItemActive(item);
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 rounded-xl px-1 py-2"
+                aria-label={item.label}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                <div className="relative">
+                  <Icon className={`size-[22px] transition-colors ${isActive ? 'text-accent' : 'text-text-muted group-hover:text-text-secondary'}`} />
+                  {item.showBadge && unreadCount > 0 && (
+                    <span className="absolute -right-2 -top-2 flex size-4 items-center justify-center rounded-full border-2 border-surface-elevated bg-run">
+                      <span className="text-[9px] font-bold leading-none text-white">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
                     </span>
-                  </span>
-                )}
-              </div>
+                  )}
+                </div>
+                <span className={`text-[11px] font-semibold tracking-wide ${isActive ? 'text-accent' : 'text-text-muted'}`}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
 
-              <span className={`text-[10px] font-semibold tracking-wide ${isActive ? 'text-accent' : 'text-text-muted'}`}>
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
+          {moreItems.length > 0 && (
+            <button
+              type="button"
+              className={`group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 rounded-xl px-1 py-2 ${isMoreOpen || hasSecondaryActiveRoute ? 'text-accent' : 'text-text-muted'}`}
+              aria-label="Más secciones"
+              aria-haspopup="menu"
+              aria-expanded={isMoreOpen}
+              aria-controls="mobile-more-menu"
+              onClick={() => setIsMoreOpen((open) => !open)}
+            >
+              <MoreHorizontal className="size-[22px]" />
+              <span className="text-[11px] font-semibold tracking-wide">Más</span>
+            </button>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }

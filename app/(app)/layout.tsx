@@ -15,7 +15,7 @@ export default function AppLayout({
       <ToastProvider>
         <div className="relative flex min-h-screen w-full">
           <DesktopSidebar />
-          <div className="flex-1 flex flex-col min-h-screen pb-[calc(env(safe-area-inset-bottom,0px)+4rem)] sm:pb-0 max-w-full">
+          <div className="flex-1 flex flex-col min-h-screen pb-[calc(env(safe-area-inset-bottom,0px)+5.75rem)] sm:pb-0 max-w-full">
             <main className="flex-1 overflow-x-hidden">
               <PageTransition>{children}</PageTransition>
             </main>
