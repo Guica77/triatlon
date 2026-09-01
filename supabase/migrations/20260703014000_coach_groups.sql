@@ -17,17 +17,21 @@ ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES public.coach_groups(id) ON DEL
 ALTER TABLE public.coach_groups ENABLE ROW LEVEL SECURITY;
 
 -- 4. Policies for coach_groups
+DROP POLICY IF EXISTS "Coaches can view their own groups" ON public.coach_groups;
 CREATE POLICY "Coaches can view their own groups" ON public.coach_groups
-    FOR SELECT USING (auth.uid() = coach_id);
+    FOR SELECT USING ((SELECT auth.uid()) = coach_id);
 
+DROP POLICY IF EXISTS "Coaches can insert their own groups" ON public.coach_groups;
 CREATE POLICY "Coaches can insert their own groups" ON public.coach_groups
-    FOR INSERT WITH CHECK (auth.uid() = coach_id);
+    FOR INSERT WITH CHECK ((SELECT auth.uid()) = coach_id);
 
+DROP POLICY IF EXISTS "Coaches can update their own groups" ON public.coach_groups;
 CREATE POLICY "Coaches can update their own groups" ON public.coach_groups
-    FOR UPDATE USING (auth.uid() = coach_id);
+    FOR UPDATE USING ((SELECT auth.uid()) = coach_id);
 
+DROP POLICY IF EXISTS "Coaches can delete their own groups" ON public.coach_groups;
 CREATE POLICY "Coaches can delete their own groups" ON public.coach_groups
-    FOR DELETE USING (auth.uid() = coach_id);
+    FOR DELETE USING ((SELECT auth.uid()) = coach_id);
 
 -- 5. Indexes
 CREATE INDEX IF NOT EXISTS idx_coach_groups_coach ON public.coach_groups(coach_id);

@@ -11,32 +11,34 @@ CREATE TABLE IF NOT EXISTS public.workout_comments (
 -- RLS
 ALTER TABLE public.workout_comments ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view comments on their workouts" ON public.workout_comments;
 CREATE POLICY "Users can view comments on their workouts" ON public.workout_comments
 FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM public.user_workouts 
     WHERE id = workout_comments.workout_id 
     AND (
-      user_id = auth.uid() OR
+      user_id = (SELECT auth.uid()) OR
       EXISTS (
         SELECT 1 FROM public.profiles 
-        WHERE id = user_workouts.user_id AND coach_id = auth.uid()
+        WHERE id = user_workouts.user_id AND coach_id = (SELECT auth.uid())
       )
     )
   )
 );
 
+DROP POLICY IF EXISTS "Users can insert comments on their workouts" ON public.workout_comments;
 CREATE POLICY "Users can insert comments on their workouts" ON public.workout_comments
 FOR INSERT WITH CHECK (
-  auth.uid() = user_id AND
+  (SELECT auth.uid()) = user_id AND
   EXISTS (
     SELECT 1 FROM public.user_workouts 
     WHERE id = workout_comments.workout_id 
     AND (
-      user_id = auth.uid() OR
+      user_id = (SELECT auth.uid()) OR
       EXISTS (
         SELECT 1 FROM public.profiles 
-        WHERE id = user_workouts.user_id AND coach_id = auth.uid()
+        WHERE id = user_workouts.user_id AND coach_id = (SELECT auth.uid())
       )
     )
   )

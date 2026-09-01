@@ -17,17 +17,21 @@ CREATE TABLE IF NOT EXISTS public.coach_workout_library (
 ALTER TABLE public.coach_workout_library ENABLE ROW LEVEL SECURITY;
 
 -- Policies for coach_workout_library
+DROP POLICY IF EXISTS "Coaches can view their own library" ON public.coach_workout_library;
 CREATE POLICY "Coaches can view their own library" ON public.coach_workout_library
-    FOR SELECT USING (auth.uid() = coach_id);
+    FOR SELECT USING ((SELECT auth.uid()) = coach_id);
 
+DROP POLICY IF EXISTS "Coaches can insert to their own library" ON public.coach_workout_library;
 CREATE POLICY "Coaches can insert to their own library" ON public.coach_workout_library
-    FOR INSERT WITH CHECK (auth.uid() = coach_id);
+    FOR INSERT WITH CHECK ((SELECT auth.uid()) = coach_id);
 
+DROP POLICY IF EXISTS "Coaches can update their own library" ON public.coach_workout_library;
 CREATE POLICY "Coaches can update their own library" ON public.coach_workout_library
-    FOR UPDATE USING (auth.uid() = coach_id);
+    FOR UPDATE USING ((SELECT auth.uid()) = coach_id);
 
+DROP POLICY IF EXISTS "Coaches can delete from their own library" ON public.coach_workout_library;
 CREATE POLICY "Coaches can delete from their own library" ON public.coach_workout_library
-    FOR DELETE USING (auth.uid() = coach_id);
+    FOR DELETE USING ((SELECT auth.uid()) = coach_id);
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_coach_library_coach ON public.coach_workout_library(coach_id);
