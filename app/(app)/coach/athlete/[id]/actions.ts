@@ -119,6 +119,51 @@ export async function saveCoachWorkout(
   }
 }
 
+export async function getCoachAthleteWorkouts(
+  athleteId: string,
+  startDate: string,
+  endDate: string
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) return { data: [], error: 'No autorizado' }
+
+  const { data: coachProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!coachProfile || coachProfile.role !== 'coach') {
+    return { data: [], error: 'No autorizado' }
+  }
+
+  const { data: rosterCheck } = await supabase
+    .from('coach_athletes')
+    .select('id')
+    .eq('coach_id', user.id)
+    .eq('athlete_id', athleteId)
+    .maybeSingle()
+
+  if (!rosterCheck) return { data: [], error: 'No autorizado' }
+
+  const { data, error } = await supabase
+    .from('user_workouts')
+    .select('*, training_sessions(*), universal_telemetry(*)')
+    .eq('user_id', athleteId)
+    .gte('scheduled_date', startDate)
+    .lte('scheduled_date', endDate)
+    .order('scheduled_date', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching athlete workouts:', error)
+    return { data: [], error: 'Error al cargar las sesiones' }
+  }
+
+  return { data: data || [] }
+}
+
 export async function updateWorkoutDate(
   athleteId: string,
   workoutId: string,

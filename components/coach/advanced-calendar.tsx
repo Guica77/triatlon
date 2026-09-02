@@ -23,8 +23,8 @@ import {
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDroppable } from '@dnd-kit/core';
-import { Calendar, GripVertical, Activity, Flame, Droplets, Dumbbell, Clock3 } from 'lucide-react';
-import { format, parseISO, addDays, startOfWeek } from 'date-fns';
+import { Calendar, GripVertical, Activity, Flame, Droplets, Dumbbell, Clock3, ChevronLeft, ChevronRight } from 'lucide-react';
+import { format, parseISO, addDays, addMonths, startOfWeek, startOfMonth, endOfMonth, endOfWeek, isSameMonth, isToday } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EditWorkoutModal, EditWorkoutData } from './edit-workout-modal';
 import { CoachWorkoutLibrary } from './coach-workout-library';
@@ -49,10 +49,12 @@ export interface WorkoutItem {
 interface AdvancedCalendarProps {
   workouts: WorkoutItem[];
   onWorkoutMove: (workoutId: string, newDate: string) => Promise<void>;
-  startDate?: Date; // Usually the Monday of the current week
-  athleteId?: string; // Needed for EditWorkoutModal
+  startDate?: Date;
+  athleteId?: string;
   libraryTemplates?: any[];
   onTemplateDrop?: (templateId: string, date: string) => Promise<void>;
+  onLoadRange?: (startDate: string, endDate: string) => Promise<WorkoutItem[]>;
+  canMoveWorkouts?: boolean;
 }
 
 // --- Helper for parsing description ---
@@ -188,7 +190,7 @@ function MiniZonesChart({ zonesSummary }: { zonesSummary: Record<string, number>
 }
 
 // --- Sortable Item Component ---
-function SortableWorkoutCard({ workout, onEdit, moveOptions = [], onMove }: { workout: WorkoutItem, onEdit: (w: WorkoutItem) => void, moveOptions?: { id: string, label: string }[], onMove?: (workout: WorkoutItem, date: string) => void }) {
+function SortableWorkoutCard({ workout, onEdit, moveOptions = [], onMove, canMove = true, compact = false }: { workout: WorkoutItem, onEdit: (w: WorkoutItem) => void, moveOptions?: { id: string, label: string }[], onMove?: (workout: WorkoutItem, date: string) => void, canMove?: boolean, compact?: boolean }) {
   const {
     attributes,
     listeners,
@@ -196,7 +198,9 @@ function SortableWorkoutCard({ workout, onEdit, moveOptions = [], onMove }: { wo
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: workout.id, data: { type: 'Workout', workout } });
+  } = useSortable({ id: workout.id, data: { type: 'Workout', workout }, disabled: !canMove });
+
+  const dragListeners = canMove ? listeners : undefined;
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -210,9 +214,9 @@ function SortableWorkoutCard({ workout, onEdit, moveOptions = [], onMove }: { wo
     return (
       <StyledDiv 
         ref={setNodeRef} styleProps={style} {...attributes}
-        className={`rounded-xl border border-dashed border-border-default bg-surface-hover p-3 ${isDragging ? 'opacity-30' : 'opacity-100'}`}
+        className={`rounded-xl border border-dashed border-border-default bg-surface-hover ${compact ? 'p-2' : 'p-3'} ${isDragging ? 'opacity-30' : 'opacity-100'}`}
       >
-        <div className="flex items-center justify-between gap-2"><span className="text-xs font-bold text-text-muted">Descanso</span><button type="button" {...listeners} className="flex h-11 w-11 items-center justify-center rounded-lg text-text-muted hover:bg-surface-card" aria-label="Arrastrar descanso"><GripVertical className="h-5 w-5" /></button></div>
+        <div className="flex items-center justify-between gap-2"><span className="text-xs font-bold text-text-muted">Descanso</span><button type="button" {...dragListeners} className="flex h-11 w-11 items-center justify-center rounded-lg text-text-muted hover:bg-surface-card" aria-label="Arrastrar descanso"><GripVertical className="h-5 w-5" /></button></div>
       </StyledDiv>
     );
   }
@@ -228,7 +232,7 @@ function SortableWorkoutCard({ workout, onEdit, moveOptions = [], onMove }: { wo
       ref={setNodeRef}
       styleProps={style}
       {...attributes}
-      className={`relative overflow-hidden rounded-xl border bg-surface-card p-3 shadow-card transition-all ${
+      className={`relative overflow-hidden rounded-xl border bg-surface-card ${compact ? 'p-2' : 'p-3'} shadow-card transition-all ${
         isDragging ? 'opacity-50 scale-105 shadow-card-hover z-50 border-swim/50' : 'border-border-default hover:border-border-card hover:bg-surface-hover'
       }`}
     >
@@ -279,9 +283,9 @@ function SortableWorkoutCard({ workout, onEdit, moveOptions = [], onMove }: { wo
         )}
 
         <div className="mt-2 flex items-center gap-2 border-t border-border-subtle pt-2">
-          <button type="button" {...listeners} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-text-muted hover:bg-surface-hover hover:text-text-primary" aria-label={`Arrastrar ${displayTitle}`}><GripVertical className="h-5 w-5" /></button>
+          <button type="button" {...dragListeners} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-text-muted hover:bg-surface-hover hover:text-text-primary" aria-label={`Arrastrar ${displayTitle}`}><GripVertical className="h-5 w-5" /></button>
           <button type="button" onClick={() => onEdit(workout)} className="min-h-11 flex-1 rounded-lg px-3 text-left text-sm font-semibold text-text-secondary hover:bg-surface-hover hover:text-text-primary">Editar sesión</button>
-          {onMove && moveOptions.length > 0 && <select aria-label={`Mover ${displayTitle} a otro día`} value={workout.scheduled_date} onChange={(event) => onMove(workout, event.target.value)} className="min-h-11 max-w-36 rounded-lg border border-border-default bg-surface-elevated px-2 text-sm text-text-secondary"><option value={workout.scheduled_date}>Mover a…</option>{moveOptions.filter((day) => day.id !== workout.scheduled_date).map((day) => <option key={day.id} value={day.id}>{day.label}</option>)}</select>}
+          {canMove && onMove && moveOptions.length > 0 && <select aria-label={`Mover ${displayTitle} a otro día`} value={workout.scheduled_date} onChange={(event) => onMove(workout, event.target.value)} className="min-h-11 max-w-36 rounded-lg border border-border-default bg-surface-elevated px-2 text-sm text-text-secondary"><option value={workout.scheduled_date}>Mover a…</option>{moveOptions.filter((day) => day.id !== workout.scheduled_date).map((day) => <option key={day.id} value={day.id}>{day.label}</option>)}</select>}
         </div>
       </div>
     </StyledDiv>
@@ -289,7 +293,7 @@ function SortableWorkoutCard({ workout, onEdit, moveOptions = [], onMove }: { wo
 }
 
 // --- Droppable Background Component ---
-function DroppableBackground({ id, isEmpty, onAddClick, children }: { id: string, isEmpty: boolean, onAddClick: (dateStr: string) => void, children: React.ReactNode }) {
+function DroppableBackground({ id, isEmpty, onAddClick, children, compact = false }: { id: string, isEmpty: boolean, onAddClick: (dateStr: string) => void, children: React.ReactNode, compact?: boolean }) {
   const { setNodeRef } = useDroppable({
     id,
     data: {
@@ -301,7 +305,7 @@ function DroppableBackground({ id, isEmpty, onAddClick, children }: { id: string
   return (
     <div 
       ref={setNodeRef} 
-      className="flex-1 p-2 min-h-[150px] flex flex-col gap-2 relative group cursor-pointer"
+      className={`flex-1 ${compact ? 'p-1 min-h-[96px]' : 'p-2 min-h-[150px]'} flex flex-col gap-2 relative group cursor-pointer`}
       onClick={(e) => {
         // Only trigger creation if clicking on the empty background, not on a card
         if (e.target === e.currentTarget) {
@@ -330,30 +334,185 @@ function DroppableBackground({ id, isEmpty, onAddClick, children }: { id: string
 }
 
 // --- Main Calendar Component ---
-export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date(), athleteId, libraryTemplates, onTemplateDrop }: AdvancedCalendarProps) {
-  // Normalize start date to Monday
-  const weekStart = startOfWeek(startDate, { weekStartsOn: 1 });
-  
-  // Create an array of 7 days (Monday to Sunday)
-  const days = Array.from({ length: 7 }).map((_, i) => {
-    const d = addDays(weekStart, i);
-    return {
-      id: format(d, 'yyyy-MM-dd'),
-      date: d,
-      name: format(d, 'EEEE', { locale: es }),
-      dayNumber: format(d, 'd')
-    };
-  });
+export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date(), athleteId, libraryTemplates, onTemplateDrop, onLoadRange, canMoveWorkouts = true }: AdvancedCalendarProps) {
+  const [viewMode, setViewMode] = React.useState<'week' | 'month'>('week');
+  const [currentDate, setCurrentDate] = React.useState(() => startDate);
+
+  const visibleDays = React.useMemo(() => {
+    if (viewMode === 'week') {
+      const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+      return Array.from({ length: 7 }).map((_, i) => {
+        const date = addDays(weekStart, i);
+        return {
+          id: format(date, 'yyyy-MM-dd'),
+          date,
+          name: format(date, 'EEEE', { locale: es }),
+          dayNumber: format(date, 'd'),
+          isCurrentMonth: true
+        };
+      });
+    }
+
+    const monthStart = startOfMonth(currentDate);
+    const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const gridEnd = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 });
+    const days: Array<{ id: string; date: Date; name: string; dayNumber: string; isCurrentMonth: boolean }> = [];
+    let date = gridStart;
+
+    while (date <= gridEnd) {
+      days.push({
+        id: format(date, 'yyyy-MM-dd'),
+        date,
+        name: format(date, 'EEEE', { locale: es }),
+        dayNumber: format(date, 'd'),
+        isCurrentMonth: isSameMonth(date, currentDate)
+      });
+      date = addDays(date, 1);
+    }
+
+    return days;
+  }, [currentDate, viewMode]);
+
+  const range = React.useMemo(() => ({
+    start: visibleDays[0]?.id,
+    end: visibleDays[visibleDays.length - 1]?.id
+  }), [visibleDays]);
 
   // Local state for optimistic UI updates during drag
   const [columns, setColumns] = React.useState<Record<string, WorkoutItem[]>>({});
   const [activeWorkout, setActiveWorkout] = React.useState<WorkoutItem | null>(null);
   const [activeTemplate, setActiveTemplate] = React.useState<any | null>(null);
   const [isUpdating, setIsUpdating] = React.useState(false);
-  
+  const [isLoadingRange, setIsLoadingRange] = React.useState(false);
+  const [loadedWorkouts, setLoadedWorkouts] = React.useState<WorkoutItem[]>(workouts);
+  const previousRangeRef = React.useRef<string>('');
+  const pendingMovesRef = React.useRef<Record<string, { previousDate: string; newDate: string }>>({});
+  const dragOriginRef = React.useRef<{ workoutId: string; date: string } | null>(null);
+
+  const days = visibleDays; // Alias kept for the existing card and metric rendering.
+  const monthLabel = format(currentDate, 'MMMM yyyy', { locale: es });
+  const dayLabels = Array.from({ length: 7 }, (_, index) =>
+    format(addDays(startOfWeek(currentDate, { weekStartsOn: 1 }), index), 'EEEEEE', { locale: es })
+  );
+  const isCurrentPeriod = viewMode === 'month'
+    ? isSameMonth(currentDate, new Date())
+    : format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'yyyy-MM-dd') === format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+  const movePeriod = (amount: number) => {
+    setCurrentDate((date) => viewMode === 'month' ? addMonths(date, amount) : addDays(date, amount * 7));
+  };
+  const goToToday = () => setCurrentDate(new Date());
+
   // Edit Modal State
   const [editingWorkout, setEditingWorkout] = React.useState<EditWorkoutData | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    setLoadedWorkouts((current) => {
+      const incomingById = new Map(workouts.map((workout) => [workout.id, workout]));
+      const currentById = new Map(current.map((workout) => [workout.id, workout]));
+      incomingById.forEach((workout, id) => {
+        const pendingMove = pendingMovesRef.current[id];
+        currentById.set(
+          id,
+          pendingMove ? { ...workout, scheduled_date: pendingMove.newDate } : workout
+        );
+      });
+      return Array.from(currentById.values());
+    });
+  }, [workouts]);
+
+  React.useEffect(() => {
+    if (!range.start || !range.end || !onLoadRange) return;
+    const rangeKey = `${range.start}:${range.end}`;
+    if (previousRangeRef.current === rangeKey) return;
+    previousRangeRef.current = rangeKey;
+
+    let cancelled = false;
+    setIsLoadingRange(true);
+    onLoadRange(range.start, range.end)
+      .then((nextWorkouts) => {
+        if (cancelled) return;
+        setLoadedWorkouts((current) => {
+          const merged = new Map(current.map((workout) => [workout.id, workout]));
+          nextWorkouts.forEach((workout) => {
+            const pendingMove = pendingMovesRef.current[workout.id];
+            merged.set(
+              workout.id,
+              pendingMove ? { ...workout, scheduled_date: pendingMove.newDate } : workout
+            );
+          });
+          return Array.from(merged.values());
+        });
+      })
+      .catch((error) => {
+        if (!cancelled) console.error('Failed to load calendar range', error);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingRange(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [onLoadRange, range.end, range.start]);
+
+  React.useEffect(() => {
+    if (!isUpdating) return;
+    const timeout = window.setTimeout(() => setIsUpdating(false), 15000);
+    return () => window.clearTimeout(timeout);
+  }, [isUpdating]);
+
+  const syncMovedWorkout = (workoutId: string, newDate: string, previousDate: string) => {
+    pendingMovesRef.current[workoutId] = { previousDate, newDate };
+    setLoadedWorkouts((current) => current.map((workout) =>
+      workout.id === workoutId ? { ...workout, scheduled_date: newDate } : workout
+    ));
+    setColumns((current) => {
+      const movedWorkout = current[previousDate]?.find((workout) => workout.id === workoutId)
+        || current[newDate]?.find((workout) => workout.id === workoutId);
+      if (!movedWorkout) return current;
+      return {
+        ...current,
+        [previousDate]: (current[previousDate] || []).filter((workout) => workout.id !== workoutId),
+        [newDate]: [
+          ...(current[newDate] || []).filter((workout) => workout.id !== workoutId),
+          { ...movedWorkout, scheduled_date: newDate },
+        ],
+      };
+    });
+  };
+
+  const rollbackMovedWorkout = (workoutId: string, failedDate: string) => {
+    const pendingMove = pendingMovesRef.current[workoutId];
+    if (!pendingMove || pendingMove.newDate !== failedDate) return;
+
+    delete pendingMovesRef.current[workoutId];
+    setLoadedWorkouts((current) => current.map((workout) =>
+      workout.id === workoutId
+        ? { ...workout, scheduled_date: pendingMove.previousDate }
+        : workout
+    ));
+    setColumns((current) => {
+      const movedWorkout = Object.values(current).flat().find((workout) => workout.id === workoutId);
+      if (!movedWorkout) return current;
+
+      const restoredWorkout = { ...movedWorkout, scheduled_date: pendingMove.previousDate };
+      return {
+        ...current,
+        [failedDate]: (current[failedDate] || []).filter((workout) => workout.id !== workoutId),
+        [pendingMove.previousDate]: [
+          ...(current[pendingMove.previousDate] || []).filter((workout) => workout.id !== workoutId),
+          restoredWorkout,
+        ],
+      };
+    });
+  };
+
+  const getDropDate = (overId: string | number) => {
+    const id = overId.toString();
+    return Object.keys(columns).find((date) => columns[date].some((workout) => workout.id === id))
+      || (columns[id] ? id : null);
+  };
 
   const weeklyMetrics = React.useMemo(() => {
     let plannedTotalDur = 0, actualTotalDur = 0;
@@ -403,20 +562,17 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
   };
 
   const handleAccessibleMove = async (workout: WorkoutItem, newDate: string) => {
-    if (newDate === workout.scheduled_date) return;
-    const previousColumns = columns;
-    const movedWorkout = { ...workout, scheduled_date: newDate };
-    setColumns((current) => ({
-      ...current,
-      [workout.scheduled_date]: (current[workout.scheduled_date] || []).filter((item) => item.id !== workout.id),
-      [newDate]: [...(current[newDate] || []), movedWorkout],
-    }));
+    if (!canMoveWorkouts || newDate === workout.scheduled_date) return;
+
+    const previousDate = workout.scheduled_date;
+    syncMovedWorkout(workout.id, newDate, previousDate);
     setIsUpdating(true);
+
     try {
       await onWorkoutMove(workout.id, newDate);
     } catch (error) {
       console.error('Failed to move workout', error);
-      setColumns(previousColumns);
+      rollbackMovedWorkout(workout.id, newDate);
     } finally {
       setIsUpdating(false);
     }
@@ -439,14 +595,14 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
     setIsEditModalOpen(true);
   };
 
-  // Initialize columns from props
+  // Initialize columns from the workouts currently loaded for the visible range
   React.useEffect(() => {
     const newCols: Record<string, WorkoutItem[]> = {};
     days.forEach(d => {
-      newCols[d.id] = workouts.filter(w => w.scheduled_date === d.id);
+      newCols[d.id] = loadedWorkouts.filter(w => w.scheduled_date === d.id);
     });
     setColumns(newCols);
-  }, [workouts]);
+  }, [days, loadedWorkouts]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -456,53 +612,53 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const type = active.data.current?.type;
-    
+
     if (type === 'Template') {
       setActiveTemplate(active.data.current?.template);
-    } else {
-      const { workout } = active.data.current as { workout: WorkoutItem };
+      return;
+    }
+
+    if (!canMoveWorkouts) return;
+    const workout = active.data.current?.workout as WorkoutItem | undefined;
+    if (workout) {
+      dragOriginRef.current = { workoutId: workout.id, date: workout.scheduled_date };
       setActiveWorkout(workout);
     }
   };
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-    if (!over) return;
-    
-    if (active.data.current?.type === 'Template') return; // Don't sort templates while dragging over
+    if (!over || active.data.current?.type === 'Template' || !canMoveWorkouts) return;
 
-    const activeId = active.id;
-    const overId = over.id;
-
+    const activeId = active.id.toString();
+    const overId = over.id.toString();
     if (activeId === overId) return;
 
-    // Find containers
-    const activeContainer = Object.keys(columns).find(key => columns[key].some(w => w.id === activeId));
-    // over can be a container (day id) or another item
-    const overContainer = Object.keys(columns).find(key => columns[key].some(w => w.id === overId)) || overId.toString();
+    const activeContainer = Object.keys(columns).find((date) =>
+      columns[date].some((workout) => workout.id === activeId)
+    );
+    const overContainer = getDropDate(overId);
 
-    if (!activeContainer || !overContainer || activeContainer === overContainer) {
-      return;
-    }
+    if (!activeContainer || !overContainer || activeContainer === overContainer) return;
 
-    setColumns((prev) => {
-      const activeItems = prev[activeContainer];
-      const overItems = prev[overContainer] || [];
-      const activeIndex = activeItems.findIndex(w => w.id === activeId);
-      const overIndex = overItems.findIndex(w => w.id === overId);
+    setColumns((previous) => {
+      const activeItems = previous[activeContainer] || [];
+      const overItems = previous[overContainer] || [];
+      const activeIndex = activeItems.findIndex((workout) => workout.id === activeId);
+      if (activeIndex < 0) return previous;
 
-      const newIndex = overIndex >= 0 ? overIndex : overItems.length + 1;
+      const overIndex = overItems.findIndex((workout) => workout.id === overId);
+      const movedWorkout = { ...activeItems[activeIndex], scheduled_date: overContainer };
+      const newIndex = overIndex >= 0 ? overIndex : overItems.length;
 
       return {
-        ...prev,
-        [activeContainer]: [
-          ...prev[activeContainer].filter(item => item.id !== activeId)
-        ],
+        ...previous,
+        [activeContainer]: activeItems.filter((workout) => workout.id !== activeId),
         [overContainer]: [
-          ...prev[overContainer].slice(0, newIndex),
-          activeItems[activeIndex],
-          ...prev[overContainer].slice(newIndex, prev[overContainer].length)
-        ]
+          ...overItems.slice(0, newIndex),
+          movedWorkout,
+          ...overItems.slice(newIndex),
+        ],
       };
     });
   };
@@ -511,62 +667,63 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
     const { active, over } = event;
     setActiveWorkout(null);
     setActiveTemplate(null);
-    if (!over) return;
+    if (!over) {
+      dragOriginRef.current = null;
+      return;
+    }
 
-    const activeId = active.id;
-    const overId = over.id;
+    const activeId = active.id.toString();
+    const targetDate = getDropDate(over.id);
 
-    // Handle dropping a Template
     if (active.data.current?.type === 'Template') {
       const template = active.data.current?.template;
-      // overId might be the day string directly, or a workout inside the day
-      const targetDay = Object.keys(columns).find(key => columns[key].some(w => w.id === overId)) || overId.toString();
-      
-      // Ensure targetDay is one of the valid columns (a date)
-      if (columns[targetDay] && onTemplateDrop) {
+      if (targetDate && template && onTemplateDrop) {
         setIsUpdating(true);
         try {
-          await onTemplateDrop(template.id, targetDay);
-        } catch (err) {
-          console.error("Failed to drop template", err);
+          await onTemplateDrop(template.id, targetDate);
+        } catch (error) {
+          console.error('Failed to drop template', error);
         } finally {
           setIsUpdating(false);
         }
       }
+      dragOriginRef.current = null;
       return;
     }
 
-    // Handle dropping a Workout
-    const activeContainer = Object.keys(columns).find(key => columns[key].some(w => w.id === activeId));
-    const overContainer = Object.keys(columns).find(key => columns[key].some(w => w.id === overId)) || overId.toString();
-
-    if (!activeContainer || !overContainer) return;
-
-    // Local reorder within the same container
-    if (activeContainer === overContainer) {
-      const activeIndex = columns[activeContainer].findIndex(w => w.id === activeId);
-      const overIndex = columns[overContainer].findIndex(w => w.id === overId);
-
-      if (activeIndex !== overIndex) {
-        setColumns((prev) => ({
-          ...prev,
-          [activeContainer]: arrayMove(prev[activeContainer], activeIndex, overIndex),
-        }));
-      }
+    if (!canMoveWorkouts || !targetDate) {
+      dragOriginRef.current = null;
+      return;
     }
 
-    // Database update if moved to a new day
-    const originalWorkout = workouts.find(w => w.id === activeId);
-    if (originalWorkout && originalWorkout.scheduled_date !== overContainer) {
-      setIsUpdating(true);
-      try {
-        await onWorkoutMove(activeId.toString(), overContainer);
-      } catch (error) {
-        console.error("Failed to move workout", error);
-        // Revert on failure could be implemented here
-      } finally {
-        setIsUpdating(false);
+    const currentWorkout = Object.values(columns).flat().find((workout) => workout.id === activeId);
+    const previousDate = dragOriginRef.current?.workoutId === activeId
+      ? dragOriginRef.current.date
+      : pendingMovesRef.current[activeId]?.newDate || currentWorkout?.scheduled_date;
+    dragOriginRef.current = null;
+    if (!previousDate) return;
+
+    if (previousDate === targetDate) {
+      const activeIndex = columns[targetDate]?.findIndex((workout) => workout.id === activeId) ?? -1;
+      const overIndex = columns[targetDate]?.findIndex((workout) => workout.id === over.id.toString()) ?? -1;
+      if (activeIndex >= 0 && overIndex >= 0 && activeIndex !== overIndex) {
+        setColumns((previous) => ({
+          ...previous,
+          [targetDate]: arrayMove(previous[targetDate], activeIndex, overIndex),
+        }));
       }
+      return;
+    }
+
+    syncMovedWorkout(activeId, targetDate, previousDate);
+    setIsUpdating(true);
+    try {
+      await onWorkoutMove(activeId, targetDate);
+    } catch (error) {
+      console.error('Failed to move workout', error);
+      rollbackMovedWorkout(activeId, targetDate);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -576,25 +733,56 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
 
   return (
     <div className={`transition-opacity duration-300 ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}>
-      <DndContext 
-        sensors={sensors} 
-        collisionDetection={closestCorners} 
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
+        <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-border-default bg-surface-card p-3 shadow-card sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-2">
+            <button type="button" onClick={() => movePeriod(-1)} aria-label="Periodo anterior" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border-default text-text-secondary transition hover:bg-surface-hover hover:text-text-primary">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <div className="min-w-0 flex-1 text-center sm:text-left">
+              <p className="truncate text-sm font-bold capitalize text-text-primary">{viewMode === 'month' ? monthLabel : `${format(visibleDays[0].date, 'd MMM', { locale: es })} – ${format(visibleDays[visibleDays.length - 1].date, 'd MMM yyyy', { locale: es })}`}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-text-muted">{isLoadingRange ? 'Cargando sesiones…' : `${loadedWorkouts.filter((workout) => visibleDays.some((day) => day.id === workout.scheduled_date)).length} sesiones visibles`}</p>
+            </div>
+            <button type="button" onClick={() => movePeriod(1)} aria-label="Siguiente periodo" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border-default text-text-secondary transition hover:bg-surface-hover hover:text-text-primary">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
+            <div className="flex rounded-xl border border-border-default bg-surface-hover p-1" role="group" aria-label="Vista del calendario">
+              {(['week', 'month'] as const).map((mode) => (
+                <button key={mode} type="button" onClick={() => setViewMode(mode)} aria-pressed={viewMode === mode} className={`min-h-11 rounded-lg px-3 text-xs font-bold transition ${viewMode === mode ? 'bg-surface-card text-swim shadow-card' : 'text-text-muted hover:text-text-primary'}`}>
+                  {mode === 'week' ? 'Semana' : 'Mes'}
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={goToToday} disabled={isCurrentPeriod} className="min-h-11 rounded-xl border border-swim/30 bg-swim/10 px-3 text-xs font-bold text-swim transition hover:bg-swim/20 disabled:cursor-default disabled:opacity-50">
+              {viewMode === 'month' ? 'Mes actual' : 'Hoy'}
+            </button>
+          </div>
+        </div>
+        {viewMode === 'month' && (
+          <div className="mb-2 grid grid-cols-7 gap-1 px-1 text-center text-[10px] font-bold uppercase tracking-wider text-text-muted">
+            {dayLabels.map((label) => <span key={label}>{label}</span>)}
+          </div>
+        )}
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="w-full lg:w-1/5 shrink-0 hidden md:block">
             {libraryTemplates && (
               <CoachWorkoutLibrary initialTemplates={libraryTemplates} />
             )}
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-8 gap-2 w-full lg:w-4/5">
+
+          <div className={`grid w-full gap-2 ${viewMode === 'month' ? 'grid-cols-7' : 'grid-cols-1 md:grid-cols-8'} lg:w-4/5`}>
             {/* Weekly Summary Column */}
-            <div className="hidden md:flex flex-col bg-surface-card/50 rounded-2xl overflow-hidden shadow-card">
+            <div className={`${viewMode === 'month' ? 'hidden' : 'hidden md:flex'} flex-col bg-surface-card/50 rounded-2xl overflow-hidden shadow-card`}>
               <div className="p-3 border-b border-border-default bg-surface-hover/60 flex flex-col items-center justify-center">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">Semana</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">{viewMode === 'month' ? 'Mes' : 'Semana'}</span>
                 <span className="text-xl font-black text-text-primary">Total</span>
               </div>
               <div className="p-3 flex flex-col gap-3 text-[10px]">
@@ -659,9 +847,22 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
                   items={columns[day.id]?.map(w => w.id) || []} 
                   strategy={verticalListSortingStrategy}
                 >
-                  <DroppableBackground id={day.id} onAddClick={handleCreateClick} isEmpty={(!columns[day.id] || columns[day.id].length === 0)}>
+                  <DroppableBackground
+                    id={day.id}
+                    onAddClick={handleCreateClick}
+                    isEmpty={(!columns[day.id] || columns[day.id].length === 0)}
+                    compact={viewMode === 'month'}
+                  >
                     {columns[day.id]?.map(workout => (
-                      <SortableWorkoutCard key={workout.id} workout={workout} onEdit={handleEditClick} onMove={handleAccessibleMove} moveOptions={days.map((option) => ({ id: option.id, label: `${option.name} ${option.dayNumber}` }))} />
+                      <SortableWorkoutCard
+                        key={workout.id}
+                        workout={workout}
+                        onEdit={handleEditClick}
+                        onMove={handleAccessibleMove}
+                        moveOptions={days.map((option) => ({ id: option.id, label: `${option.name} ${option.dayNumber}` }))}
+                        compact={viewMode === 'month'}
+                        canMove={canMoveWorkouts}
+                      />
                     ))}
                   </DroppableBackground>
                 </SortableContext>
@@ -672,7 +873,7 @@ export function AdvancedCalendar({ workouts, onWorkoutMove, startDate = new Date
         </div>
 
         <DragOverlay dropAnimation={dropAnimation}>
-          {activeWorkout ? <SortableWorkoutCard workout={activeWorkout} onEdit={() => {}} /> : null}
+          {activeWorkout ? <SortableWorkoutCard workout={activeWorkout} onEdit={() => {}} compact={viewMode === 'month'} canMove={canMoveWorkouts} /> : null}
           {activeTemplate ? (
             <div className="bg-surface-elevated p-3 rounded-xl border border-swim/50 shadow-elevated scale-105 opacity-90 flex items-center gap-3 w-48">
               <span className="font-bold text-text-primary text-sm truncate">{activeTemplate.name}</span>

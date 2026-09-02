@@ -318,11 +318,11 @@ export default async function CoachAthleteDetailPage({ params }: AthletePageProp
         <section className="space-y-4 pt-4 border-t border-border-default">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-bold text-text-primary flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-swim" /> 
-              Constructor Semanal Inteligente
+              <Calendar className="w-4 h-4 text-swim" />
+              Planificación individual
             </h2>
-            <span className="text-xs text-text-secondary font-semibold bg-surface-card px-2.5 py-1 rounded-md border border-border-default ">
-              Arrastra y suelta para reprogramar
+            <span className="text-xs text-text-secondary font-semibold bg-surface-card px-2.5 py-1 rounded-md border border-border-default">
+              Vista semanal y mensual · programa y mueve sesiones
             </span>
           </div>
           <div className="bg-surface-card rounded-2xl shadow-card border border-border-default overflow-hidden">

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { getGroupData, getGroupWorkouts } from './actions';
 import { getCoachLibrary } from '@/app/(app)/coach/athlete/[id]/actions';
 import { GroupDashboardView } from '@/components/coach/group-dashboard-view';
-import { startOfWeek, addDays, format } from 'date-fns';
+import { startOfWeek, startOfMonth, endOfMonth, endOfWeek, format } from 'date-fns';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,10 +21,10 @@ export default async function CoachGroupPage({ params }: GroupPageProps) {
     redirect('/login');
   }
 
-  // Compute date range for the calendar (Monday to Sunday of the current week)
+  // Load the complete current month so both calendar views start with useful data.
   const today = new Date();
-  const calendarStart = startOfWeek(today, { weekStartsOn: 1 });
-  const calendarEnd = addDays(calendarStart, 6);
+  const calendarStart = startOfWeek(startOfMonth(today), { weekStartsOn: 1 });
+  const calendarEnd = endOfWeek(endOfMonth(today), { weekStartsOn: 1 });
   const startStr = format(calendarStart, 'yyyy-MM-dd');
   const endStr = format(calendarEnd, 'yyyy-MM-dd');
 

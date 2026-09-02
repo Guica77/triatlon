@@ -43,6 +43,7 @@ export function GroupCalendarWrapper({ groupId, initialWorkouts, initialLibraryT
       workouts={workouts} 
       onWorkoutMove={handleWorkoutMove} 
       onTemplateDrop={handleTemplateDrop}
+      canMoveWorkouts={false}
       libraryTemplates={initialLibraryTemplates}
     />
   );

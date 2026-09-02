@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { getGroupData, getGroupWorkouts } from '@/app/(app)/coach/group/[id]/actions';
 import { getCoachLibrary } from '@/app/(app)/coach/athlete/[id]/actions';
 import { GroupDashboardView } from './group-dashboard-view';
-import { startOfWeek, addDays, format } from 'date-fns';
+import { startOfWeek, startOfMonth, endOfMonth, endOfWeek, format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 
 export function GroupTabContent({ groupId }: { groupId: string }) {
@@ -17,8 +17,8 @@ export function GroupTabContent({ groupId }: { groupId: string }) {
       setLoading(true);
       
       const today = new Date();
-      const calendarStart = startOfWeek(today, { weekStartsOn: 1 });
-      const calendarEnd = addDays(calendarStart, 6);
+      const calendarStart = startOfWeek(startOfMonth(today), { weekStartsOn: 1 });
+      const calendarEnd = endOfWeek(endOfMonth(today), { weekStartsOn: 1 });
       const startStr = format(calendarStart, 'yyyy-MM-dd');
       const endStr = format(calendarEnd, 'yyyy-MM-dd');
 

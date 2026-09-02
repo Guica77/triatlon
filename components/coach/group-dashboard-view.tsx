@@ -331,7 +331,7 @@ export function GroupDashboardView({ group, athletes, workouts, libraryTemplates
           </h2>
           <div className="flex items-center gap-3">
             <span className="hidden md:inline-flex text-xs text-text-secondary font-semibold bg-surface-card px-2.5 py-1 rounded-md border border-border-default shadow-card">
-              Arrastra para asignar a todo el equipo
+              Semanal y mensual · arrastra plantillas para asignar a todo el grupo
             </span>
             <CloneWeekModal groupId={group.id} currentDate={today} />
           </div>
