@@ -2,7 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { parsePaceToSeconds, adaptWorkoutDescription } from '@/lib/zones-utility';
 
+function escapeXml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 export async function GET(req: NextRequest) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
+
   const searchParams = req.nextUrl.searchParams;
   const workoutId = searchParams.get('workoutId');
 
@@ -10,7 +26,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Falta workoutId' }, { status: 400 });
   }
 
-  const supabase = await createClient();
   const { data: workout, error } = await supabase.from('user_workouts')
     .select(`
       id,
@@ -28,6 +43,20 @@ export async function GET(req: NextRequest) {
 
   if (error || !workout?.training_sessions) {
     return NextResponse.json({ error: 'Entrenamiento no encontrado' }, { status: 404 });
+  }
+
+  if (workout.user_id !== user.id) {
+    const { data: coachLink } = await supabase
+      .from('coach_athletes')
+      .select('athlete_id')
+      .eq('coach_id', user.id)
+      .eq('athlete_id', workout.user_id)
+      .eq('status', 'active')
+      .maybeSingle();
+
+    if (!coachLink) {
+      return NextResponse.json({ error: 'No autorizado para exportar este entrenamiento' }, { status: 403 });
+    }
   }
 
   const session = workout.training_sessions;
@@ -75,8 +104,8 @@ export async function GET(req: NextRequest) {
 <TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd">
   <Workouts>
     <Workout Sport="${sport === 'ciclismo' ? 'Biking' : sport === 'carrera' ? 'Running' : sport === 'natacion' ? 'Swimming' : 'Other'}">
-      <Name>${sport.toUpperCase()} • ${session.day_name}</Name>
-      <Notes>${adaptedNotes}</Notes>
+      <Name>${escapeXml(`${sport.toUpperCase()} • ${session.day_name}`)}</Name>
+      <Notes>${escapeXml(adaptedNotes)}</Notes>
       <Step xsi:type="Step_t">
         <StepId>1</StepId>
         <Name>Calentamiento</Name>

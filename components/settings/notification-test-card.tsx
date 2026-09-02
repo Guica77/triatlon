@@ -70,16 +70,9 @@ export function NotificationTestCard() {
         }
       }
 
-      const payload = {
-        title: '¡Prueba Exitosa! 🎉',
-        body: 'Las notificaciones push están funcionando correctamente en tu dispositivo.',
-        url: '/settings'
-      };
-
       const res = await fetch('/api/notifications/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: sub, payload })
       });
 
       if (!res.ok) {

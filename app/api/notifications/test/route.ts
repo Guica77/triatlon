@@ -1,31 +1,32 @@
 import { NextResponse } from 'next/server';
-import webpush from 'web-push';
-import { configureVapid } from '@/lib/notifications';
+import { createClient } from '@/lib/supabase/server';
+import { sendPushNotification } from '@/lib/notifications';
 
 export async function POST(req: Request) {
   try {
-    if (!configureVapid()) {
-      throw new Error('VAPID keys missing or invalid on server');
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { subscription, payload } = await req.json();
+    const sent = await sendPushNotification(user.id, {
+      title: '¡Prueba exitosa! 🎉',
+      body: 'Las notificaciones push están funcionando correctamente en tu dispositivo.',
+      url: '/settings',
+    });
 
-    if (!subscription || !subscription.endpoint) {
-      return NextResponse.json({ error: 'Suscripción inválida' }, { status: 400 });
+    if (!sent) {
+      return NextResponse.json(
+        { error: 'No hay una suscripción push válida o el servicio no está configurado.' },
+        { status: 503 },
+      );
     }
-
-    await webpush.sendNotification(
-      subscription,
-      JSON.stringify(payload)
-    );
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending test push:', error);
-    return NextResponse.json({ 
-      error: error.message || 'Server Error',
-      statusCode: error.statusCode || null,
-      body: error.body || null
-    }, { status: 500 });
+    return NextResponse.json({ error: 'No se pudo enviar la notificación de prueba.' }, { status: 500 });
   }
 }

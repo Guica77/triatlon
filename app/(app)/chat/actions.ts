@@ -1,13 +1,20 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import webpush from 'web-push'
 import { Resend } from 'resend'
-import { configureVapid } from '@/lib/notifications'
+import { sendPushNotification } from '@/lib/notifications'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key')
 
-// VAPID Details configuration moved inside functions to prevent Vercel build errors
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
 
 export interface ChatMessageItem {
   id: string
@@ -58,70 +65,38 @@ export async function sendMessage(receiverId: string, message: string): Promise<
 
     // --- NOTIFICATION TRIGGER ---
     try {
-      const { data: receiverProfile } = await supabase
+      const { data: senderProfile } = await supabase
         .from('profiles')
-        .select('push_subscriptions, first_name, email')
-        .eq('id', receiverId)
+        .select('first_name')
+        .eq('id', user.id)
         .single()
 
-      if (receiverProfile) {
-        // Fetch sender name for the notification
-        const { data: senderProfile } = await supabase
+      const senderName = senderProfile?.first_name || 'Alguien'
+      const pushSent = await sendPushNotification(receiverId, {
+        title: `Nuevo mensaje de ${senderName}`,
+        body: message.trim().slice(0, 240),
+        url: '/chat',
+      })
+
+      if (!pushSent && process.env.RESEND_API_KEY) {
+        const admin = createAdminClient()
+        const { data: receiverProfile } = await admin
           .from('profiles')
-          .select('first_name')
-          .eq('id', user.id)
+          .select('email')
+          .eq('id', receiverId)
           .single()
 
-        const senderName = senderProfile?.first_name || 'Alguien'
-        let pushSent = false
-
-        if (receiverProfile.push_subscriptions && configureVapid()) {
-          try {
-
-            await webpush.sendNotification(
-              receiverProfile.push_subscriptions as unknown as webpush.PushSubscription,
-              JSON.stringify({
-                title: `Nuevo mensaje de ${senderName}`,
-                body: message.trim(),
-                url: '/chat',
-              })
-            )
-            pushSent = true
-            console.log(`Push notification sent successfully to ${receiverId}`)
-          } catch (pushErr: any) {
-            console.error('Error sending web push notification:', pushErr)
-            
-            // Clean up invalid or expired subscription
-            if (pushErr.statusCode === 410 || pushErr.statusCode === 403 || pushErr.statusCode === 400) {
-              const { createAdminClient } = await import('@/lib/supabase/admin')
-              const supabaseAdmin = createAdminClient()
-              await supabaseAdmin
-                .from('profiles')
-                .update({ push_subscriptions: null })
-                .eq('id', receiverId)
-              console.log(`Cleared invalid push subscription for user ${receiverId} (status ${pushErr.statusCode})`)
-            }
-          }
-        }
-
-        // If push was not sent or failed, fall back to email
-        if (!pushSent && receiverProfile.email) {
-          console.log(`No push token or push failed for ${receiverId}. Triggering Email Fallback...`)
-          try {
-            await resend.emails.send({
-              from: 'Triatlon Pro Notificaciones <onboarding@resend.dev>',
-              to: receiverProfile.email,
-              subject: `Nuevo mensaje de ${user.email}`,
-              html: `<div style="font-family: sans-serif; padding: 20px;">
-                      <h2>Tienes un nuevo mensaje en Triatlón Pro</h2>
-                      <p><strong>Mensaje:</strong> "${message.trim()}"</p>
-                      <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/chat" style="display: inline-block; padding: 10px 20px; background-color: #22d3ee; color: #000; text-decoration: none; border-radius: 5px; font-weight: bold;">Ver en el Chat</a>
-                    </div>`
-            })
-            console.log(`Email fallback sent successfully to ${receiverProfile.email}`)
-          } catch (emailErr) {
-            console.error('Error sending fallback email:', emailErr)
-          }
+        if (receiverProfile?.email) {
+          await resend.emails.send({
+            from: 'Triatlon Pro Notificaciones <onboarding@resend.dev>',
+            to: receiverProfile.email,
+            subject: `Nuevo mensaje de ${senderName}`,
+            html: `<div style="font-family: sans-serif; padding: 20px;">
+                    <h2>Tienes un nuevo mensaje en Triatlón Pro</h2>
+                    <p><strong>Mensaje:</strong> &quot;${escapeHtml(message.trim())}&quot;</p>
+                    <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/chat" style="display: inline-block; padding: 10px 20px; background-color: #22d3ee; color: #000; text-decoration: none; border-radius: 5px; font-weight: bold;">Ver en el Chat</a>
+                  </div>`
+          })
         }
       }
     } catch (notificationErr) {

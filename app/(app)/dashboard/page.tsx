@@ -15,7 +15,6 @@ import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
 import { ObjectiveConfigCard } from '@/components/dashboard/objective-config-card';
-import { PushNotificationManager } from '@/components/chat/push-notification-manager';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
 import { WorkoutAIFeedback } from '@/components/dashboard/workout-ai-feedback';
@@ -393,7 +392,6 @@ export default async function DashboardPage() {
 
         </ExpandableSection>
 
-        <PushNotificationManager />
       </main>
     </div>
   );

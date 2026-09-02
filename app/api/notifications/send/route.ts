@@ -1,56 +1,46 @@
 import { NextResponse } from 'next/server';
-import webpush from 'web-push';
 import { createClient } from '@/lib/supabase/server';
-import { configureVapid } from '@/lib/notifications';
+import { sendPushNotification } from '@/lib/notifications';
 
 export async function POST(req: Request) {
   try {
-    configureVapid();
-
-    const payload = await req.json();
-    // Payload should contain receiver_id, message_body, sender_name
-
-    const { receiver_id, message_body, sender_name } = payload;
-
-    if (!receiver_id) {
-      return NextResponse.json({ error: 'Missing receiver_id' }, { status: 400 });
-    }
-
     const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    // 1. Get the receiver's push subscription from the database
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('push_subscriptions, email')
-      .eq('id', receiver_id)
-      .single();
-
-    if (!profile || !profile.push_subscriptions) {
-      // 2. Fallback to Email if no push subscription exists!
-      // Here you would trigger Resend to send an email.
-      console.log(`No push token for ${receiver_id}. Triggering Email Fallback to ${profile?.email}...`);
-      
-      // Example Resend logic (Free tier 3000 emails/mo)
-      // await resend.emails.send({ to: profile.email, subject: 'Nuevo Mensaje', text: ... })
-      
-      return NextResponse.json({ success: true, method: 'email_fallback' });
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const pushSubscription = profile.push_subscriptions;
+    const payload = await req.json().catch(() => null) as { message_id?: unknown } | null;
+    const messageId = typeof payload?.message_id === 'string' ? payload.message_id : '';
 
-    // 3. Send Web Push Notification (100% Free)
-    await webpush.sendNotification(
-      pushSubscription as any,
-      JSON.stringify({
-        title: `Nuevo mensaje de ${sender_name || 'tu Coach'}`,
-        body: message_body || 'Tienes un nuevo mensaje esperándote.',
-        url: '/chat',
-      })
-    );
+    if (!messageId) {
+      return NextResponse.json({ error: 'Falta message_id' }, { status: 400 });
+    }
 
-    return NextResponse.json({ success: true, method: 'web_push' });
-  } catch (error) {
+    const { data: message } = await supabase
+      .from('chat_messages')
+      .select('id, sender_id, receiver_id, message')
+      .eq('id', messageId)
+      .maybeSingle();
+
+    if (!message) {
+      return NextResponse.json({ error: 'Mensaje no encontrado' }, { status: 404 });
+    }
+
+    if (message.sender_id !== user.id) {
+      return NextResponse.json({ error: 'No autorizado para notificar este mensaje' }, { status: 403 });
+    }
+
+    const sent = await sendPushNotification(message.receiver_id, {
+      title: 'Nuevo mensaje en Triatlón Pro',
+      body: message.message.slice(0, 240),
+      url: '/chat',
+    });
+
+    return NextResponse.json({ success: sent, method: sent ? 'web_push' : 'unavailable' }, { status: sent ? 200 : 503 });
+  } catch (error: unknown) {
     console.error('Error sending push:', error);
-    return NextResponse.json({ error: 'Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'No se pudo enviar la notificación' }, { status: 500 });
   }
 }

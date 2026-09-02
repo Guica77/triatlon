@@ -1,6 +1,33 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+function isValidPushSubscription(value: unknown): value is {
+  endpoint: string;
+  expirationTime?: number | null;
+  keys: { p256dh: string; auth: string };
+} {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Record<string, unknown>;
+  const keys = candidate.keys as Record<string, unknown> | undefined;
+
+  if (typeof candidate.endpoint !== 'string' || candidate.endpoint.length > 2048) return false;
+  try {
+    if (new URL(candidate.endpoint).protocol !== 'https:') return false;
+  } catch {
+    return false;
+  }
+
+  return Boolean(
+    keys
+    && typeof keys.p256dh === 'string'
+    && keys.p256dh.length > 0
+    && keys.p256dh.length <= 512
+    && typeof keys.auth === 'string'
+    && keys.auth.length > 0
+    && keys.auth.length <= 512
+  );
+}
+
 export async function POST(req: Request) {
   try {
     const supabase = await createClient();
@@ -12,7 +39,7 @@ export async function POST(req: Request) {
 
     const subscription = await req.json();
 
-    if (!subscription || !subscription.endpoint) {
+    if (!isValidPushSubscription(subscription)) {
       return NextResponse.json({ error: 'Suscripción inválida' }, { status: 400 });
     }
 
@@ -27,20 +54,12 @@ export async function POST(req: Request) {
 
     if (error) {
       console.error('Error saving subscription:', error);
-      return NextResponse.json({ 
-        error: 'Error al guardar la suscripción',
-        details: error.message,
-        hint: error.hint,
-        code: error.code
-      }, { status: 500 });
+      return NextResponse.json({ error: 'Error al guardar la suscripción' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Subscription error:', error);
-    return NextResponse.json({ 
-      error: 'Error de servidor',
-      details: error.message || String(error)
-    }, { status: 500 });
+    return NextResponse.json({ error: 'Error de servidor' }, { status: 500 });
   }
 }
