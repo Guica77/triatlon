@@ -14,7 +14,7 @@
     },
     {
       "path": "/api/cron/strava-events",
-      "schedule": "7 * * * *"
+      "schedule": "7 4 * * *"
     }
   ]
 }
