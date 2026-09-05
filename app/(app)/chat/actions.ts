@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { after } from 'next/server'
 import { Resend } from 'resend'
 import { sendPushNotification } from '@/lib/notifications'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -22,6 +23,7 @@ export interface ChatMessageItem {
   receiver_id: string
   message: string
   created_at: string
+  is_read?: boolean
 }
 
 export interface ChatParticipant {
@@ -35,10 +37,12 @@ export interface ChatParticipant {
 /**
  * Sends a message from the current user to a target user.
  */
-export async function sendMessage(receiverId: string, message: string): Promise<{ data?: ChatMessageItem; error?: string }> {
+export async function sendMessage(receiverId: string, message: string, messageId?: string): Promise<{ data?: ChatMessageItem; error?: string }> {
   if (!message || !message.trim()) {
     return { error: 'El mensaje no puede estar vacío' }
   }
+
+  if (messageId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(messageId)) return { error: 'Identificador inválido' }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -51,6 +55,7 @@ export async function sendMessage(receiverId: string, message: string): Promise<
     const { data: newMessage, error } = await supabase
       .from('chat_messages')
       .insert({
+        ...(messageId ? { id: messageId } : {}),
         sender_id: user.id,
         receiver_id: receiverId,
         message: message.trim(),
@@ -58,12 +63,19 @@ export async function sendMessage(receiverId: string, message: string): Promise<
       .select('*')
       .single()
 
+    if (error?.code === '23505' && messageId) {
+      const { data: saved } = await supabase.from('chat_messages').select('*')
+        .eq('id', messageId).eq('sender_id', user.id).eq('receiver_id', receiverId).single()
+      if (saved && saved.message === message.trim()) return { data: saved as ChatMessageItem }
+      return { error: 'No se pudo confirmar el mensaje. Reinténtalo.' }
+    }
     if (error) {
       console.error('Error inserting chat message:', error)
       return { error: 'Error al enviar el mensaje' }
     }
 
-    // --- NOTIFICATION TRIGGER ---
+    // A saved message is acknowledged without waiting for notification providers.
+    after(async () => {
     try {
       const { data: senderProfile } = await supabase
         .from('profiles')
@@ -104,6 +116,8 @@ export async function sendMessage(receiverId: string, message: string): Promise<
       // We don't return error here because the message was successfully saved
     }
 
+    })
+
     return { data: newMessage as unknown as ChatMessageItem }
   } catch (err: unknown) {
     console.error('Exception in sendMessage:', err)
@@ -114,7 +128,10 @@ export async function sendMessage(receiverId: string, message: string): Promise<
 /**
  * Fetches the conversation history between the current user and another user.
  */
-export async function getMessages(otherUserId: string): Promise<{ data?: ChatMessageItem[]; error?: string }> {
+export async function getMessages(otherUserId: string, before?: { created_at: string; id: string }): Promise<{ data?: ChatMessageItem[]; hasMore?: boolean; error?: string }> {
+  if (before && (!/^[0-9a-f-]{36}$/i.test(before.id) || !/^\d{4}-\d{2}-\d{2}T[0-9:.]+(?:Z|[+-]\d{2}:\d{2})$/.test(before.created_at))) {
+    return { error: 'Página de historial inválida' }
+  }
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -123,18 +140,22 @@ export async function getMessages(otherUserId: string): Promise<{ data?: ChatMes
   }
 
   try {
-    const { data: messages, error } = await supabase
+    let query = supabase
       .from('chat_messages')
       .select('*')
       .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(51)
+    if (before) query = query.or(`created_at.lt.${before.created_at},and(created_at.eq.${before.created_at},id.lt.${before.id})`)
+    const { data: messages, error } = await query
 
     if (error) {
       console.error('Error fetching chat history:', error)
       return { error: 'Error al obtener el historial de mensajes' }
     }
 
-    return { data: messages as unknown as ChatMessageItem[] }
+    return { data: (messages || []).slice(0, 50).reverse() as ChatMessageItem[], hasMore: (messages?.length || 0) > 50 }
   } catch (err: unknown) {
     console.error('Exception in getMessages:', err)
     return { error: err instanceof Error ? err.message : 'Error inesperado' }
@@ -167,6 +188,23 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
     }
 
     const currentRole = profile.role || 'athlete'
+    const historicalIds = new Set<string>()
+    for (let offset = 0; ; offset += 500) {
+      const { data: page, error } = await supabase.from('chat_messages')
+        .select('sender_id, receiver_id').or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .order('created_at').order('id').range(offset, offset + 499)
+      if (error) throw error
+      for (const row of page || []) historicalIds.add(row.sender_id === user.id ? row.receiver_id : row.sender_id)
+      if (!page || page.length < 500) break
+    }
+    const withHistory = async (current: ChatParticipant[]) => {
+      const ids = [...historicalIds].filter(id => !current.some(p => p.id === id))
+      if (!ids.length) return current
+      const { data, error } = await createAdminClient().from('profiles')
+        .select('id, first_name, last_name, email, role').in('id', ids)
+      if (error) throw error
+      return [...current, ...(data || [])]
+    }
 
     if (currentRole === 'coach') {
       // Fetch athletes connected in roster
@@ -176,7 +214,7 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
         .eq('coach_id', user.id)
 
       if (!links || links.length === 0) {
-        return { data: [], role: 'coach' }
+        return { data: await withHistory([]), role: 'coach' }
       }
 
       const athleteIds = links.map(l => l.athlete_id)
@@ -194,7 +232,7 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
         return { error: 'Error al obtener atletas' }
       }
 
-      return { data: athletes, role: 'coach' }
+      return { data: await withHistory(athletes || []), role: 'coach' }
     } else {
       // Fetch coach details
       // Attempt 1: coach_id from profiles
@@ -213,7 +251,7 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
       }
 
       if (!coachId) {
-        return { data: [], role: 'athlete' }
+        return { data: await withHistory([]), role: 'athlete' }
       }
 
       const { createAdminClient } = await import('@/lib/supabase/admin')
@@ -230,7 +268,7 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
         return { error: 'Error al obtener datos del entrenador' }
       }
 
-      return { data: [coach], role: 'athlete' }
+      return { data: await withHistory([coach]), role: 'athlete' }
     }
   } catch (err: unknown) {
     console.error('Exception in getChatParticipants:', err)

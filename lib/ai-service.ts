@@ -8,7 +8,7 @@
  * - All user-facing text in Spanish
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, type EmbedContentRequest } from '@google/generative-ai';
 import Anthropic from '@anthropic-ai/sdk';
 
 // ============================================================
@@ -85,12 +85,17 @@ export async function generateAIEmbedding(value: string): Promise<number[] | nul
 
   try {
     const model = gemini.getGenerativeModel({
-      model: process.env.GEMINI_EMBEDDING_MODEL || 'text-embedding-004',
+      model: process.env.GEMINI_EMBEDDING_MODEL || 'gemini-embedding-001',
     })
-    const result = await model.embedContent(text)
+    const request: EmbedContentRequest & { outputDimensionality: number } = {
+      content: { role: 'user', parts: [{ text }] },
+      outputDimensionality: 768,
+    }
+    const result = await model.embedContent(request)
     const embedding = result.embedding.values
     if (embedding.length !== 768 || embedding.some(value => !Number.isFinite(value))) return null
-    return embedding
+    const norm = Math.hypot(...embedding)
+    return norm > 0 ? embedding.map(value => value / norm) : null
   } catch (error: any) {
     console.error('[ai-service] Embedding error:', error?.message)
     return null
@@ -125,7 +130,7 @@ export async function aiChat(
   if (gemini) {
     try {
       const model = gemini.getGenerativeModel({
-        model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+        model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
         systemInstruction: systemPrompt,
         generationConfig: {
           temperature: options?.temperature ?? 0.7,
@@ -204,7 +209,7 @@ export async function aiChatStreaming(
   if (gemini) {
     try {
       const model = gemini.getGenerativeModel({
-        model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+        model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
         systemInstruction: systemPrompt,
         generationConfig: {
           temperature: options?.temperature ?? 0.7,
@@ -329,7 +334,7 @@ export async function aiChatStreamToResponse(
       if (gemini) {
         try {
           const model = gemini.getGenerativeModel({
-            model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+            model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
             systemInstruction: systemPrompt,
             generationConfig: {
               temperature: options?.temperature ?? 0.7,

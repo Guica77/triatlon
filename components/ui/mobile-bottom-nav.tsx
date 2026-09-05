@@ -3,7 +3,8 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BarChart2, MessageSquare, Settings, Trophy, BookOpen, Dumbbell, Heart, Award } from 'lucide-react';
+import { Home, BarChart2, MessageSquare, Settings, Trophy, Dumbbell, UserRound } from 'lucide-react';
+import { athleteArea, matchesRoute } from '@/lib/athlete-navigation';
 import { useNotifications } from '@/components/providers/notification-provider';
 
 export function MobileBottomNav() {
@@ -54,19 +55,18 @@ export function MobileBottomNav() {
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ] : [
     { href: '/dashboard', label: 'Entreno', icon: Dumbbell },
-    { href: '/recuperacion', label: 'Recup.', icon: Heart },
-    { href: '/exercises', label: 'Ejercicios', icon: BookOpen },
-    { href: '/analytics', label: 'Análisis', icon: BarChart2 },
-    { href: '/resumen', label: 'Resumen', icon: Award },
+    { href: '/resumen', label: 'Progreso', icon: BarChart2 },
     { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
-    { href: '/settings', label: 'Ajustes', icon: Settings },
+    { href: '/settings', label: 'Perfil', icon: UserRound },
   ];
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom, 16px)] pt-2 bg-surface-elevated/90 backdrop-blur-lg border-t border-border-default">
+    <nav aria-label="Navegación principal" className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-2 bg-surface-elevated/90 backdrop-blur-lg border-t border-border-default">
       <div className="flex items-center justify-evenly max-w-md mx-auto w-full">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+          const isActive = role === 'coach' || role === 'owner'
+            ? matchesRoute(pathname, item.href)
+            : athleteArea(pathname) === item.href;
           const Icon = item.icon;
 
           return (
@@ -94,7 +94,8 @@ export function MobileBottomNav() {
             </Link>
           );
         })}
+
       </div>
-    </div>
+    </nav>
   );
 }

@@ -1,3 +1,4 @@
+import { ChatViewport } from '@/components/chat/chat-viewport'
 import * as React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -42,7 +43,7 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
   const coachName = profile.first_name || 'Entrenador'
 
   return (
-    <div className="relative isolate flex h-dvh min-h-0 flex-col overflow-hidden bg-bg-deep">
+    <ChatViewport>
       {/* Upper Deck Header - the product shell owns the safe-area inset */}
       <header className="shrink-0 border-b border-border-subtle bg-surface-elevated transition-[background-color,border-color,box-shadow,opacity] duration-200 ease-out">
         <div className="flex items-center justify-between gap-3 border-b border-border-subtle px-4 py-3 sm:px-6 sm:py-4">
@@ -100,6 +101,6 @@ export default async function CoachChatPage({ searchParams }: CoachChatPageProps
           preselectedParticipantId={preselectedAthleteId}
         />
       </main>
-    </div>
+    </ChatViewport>
   )
 }

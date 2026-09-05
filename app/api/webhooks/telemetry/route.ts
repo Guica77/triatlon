@@ -32,7 +32,8 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get('hub.verify_token');
   const challenge = searchParams.get('hub.challenge');
 
-  if (mode === 'subscribe' && token === 'triatlon_verify_token') {
+  const verifyToken = process.env.STRAVA_WEBHOOK_VERIFY_TOKEN || 'triatlon_verify_token';
+  if (mode === 'subscribe' && token === verifyToken && challenge) {
     console.log('WEBHOOK_VERIFIED');
     return NextResponse.json({ 'hub.challenge': challenge }, { status: 200 });
   }

@@ -3,6 +3,13 @@ import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
+export function escapeIcsText(value: unknown): string {
+  return String(value ?? '')
+    .replace(/\\/g, '\\\\')
+    .replace(/\r\n|\r|\n/g, '\\n')
+    .replace(/([,;])/g, '\\$1');
+}
+
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -52,8 +59,6 @@ export async function GET(req: NextRequest) {
     if (!w.training_sessions || w.training_sessions.sport_type === 'descanso') continue;
 
     const dateStr = w.scheduled_date.replace(/-/g, ''); // YYYYMMDD
-    const start = `${dateStr}T080000`; // 8:00 AM
-    const end = `${dateStr}T090000`; // 9:00 AM
     const sport = w.training_sessions.sport_type.toUpperCase();
     const duration = w.training_sessions.duration_min ? `${w.training_sessions.duration_min} min` : 'volumen libre';
     const title = `${sport} (${duration}) • Triatlón Pro`;
@@ -62,8 +67,8 @@ export async function GET(req: NextRequest) {
     icsContent.push('BEGIN:VEVENT');
     icsContent.push(`UID:workout-${w.id}@triatlon-pro`);
     icsContent.push(`DTSTART;VALUE=DATE:${dateStr}`); // Todo el día para mejor visualización
-    icsContent.push(`SUMMARY:${title}`);
-    icsContent.push(`DESCRIPTION:${desc.replace(/\n/g, '\\n')}`);
+    icsContent.push(`SUMMARY:${escapeIcsText(title)}`);
+    icsContent.push(`DESCRIPTION:${escapeIcsText(desc)}`);
     icsContent.push('END:VEVENT');
   }
 

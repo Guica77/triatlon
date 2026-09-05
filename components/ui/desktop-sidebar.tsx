@@ -4,10 +4,11 @@ import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Home, BarChart2, MessageSquare, Settings, Users, BookOpen,
-  PanelLeftClose, PanelLeft, Trophy, Dumbbell, Heart, Award
+  Home, BarChart2, MessageSquare, Settings, Users, UserRound,
+  PanelLeftClose, PanelLeft, Trophy, Dumbbell
 } from 'lucide-react'
 import { useNotifications } from '@/components/providers/notification-provider'
+import { athleteArea, matchesRoute } from '@/lib/athlete-navigation'
 import { cn } from '@/lib/utils'
 
 interface SidebarItem {
@@ -19,12 +20,9 @@ interface SidebarItem {
 
 const athleteItems: SidebarItem[] = [
   { href: '/dashboard', label: 'Entrenamiento', icon: Dumbbell },
-  { href: '/recuperacion', label: 'Recuperación', icon: Heart },
-  { href: '/exercises', label: 'Ejercicios', icon: BookOpen },
-  { href: '/analytics', label: 'Analíticas', icon: BarChart2 },
-  { href: '/resumen', label: 'Resumen', icon: Award },
+  { href: '/resumen', label: 'Progreso', icon: BarChart2 },
   { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
-  { href: '/settings', label: 'Ajustes', icon: Settings },
+  { href: '/settings', label: 'Perfil', icon: UserRound },
 ]
 
 const coachItems: SidebarItem[] = [
@@ -102,7 +100,9 @@ export function DesktopSidebar() {
       {/* Nav Items */}
       <nav className="flex-1 py-2 px-2.5 space-y-0.5 overflow-y-auto">
         {items.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/dashboard' && item.href !== '/coach/dashboard' && pathname.startsWith(item.href))
+          const isActive = role === 'coach' || role === 'owner'
+            ? matchesRoute(pathname, item.href)
+            : athleteArea(pathname) === item.href
           const Icon = item.icon
 
           return (

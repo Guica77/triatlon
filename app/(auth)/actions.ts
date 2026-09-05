@@ -5,6 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 
 const getDynamicBaseUrl = async () => {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+
   const headerStore = await headers();
   const host = headerStore.get('host');
   const proto = headerStore.get('x-forwarded-proto') || 'https';
@@ -14,12 +18,6 @@ const getDynamicBaseUrl = async () => {
       return `http://${host}`;
     }
     return `${proto}://${host}`;
-  }
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL;
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
   }
   return 'http://localhost:3000';
 };
@@ -36,6 +34,7 @@ export async function getOAuthUrl(provider: 'apple' | 'google', role?: 'athlete'
     cookieStore.set('oauth_role', role, { 
       path: '/', 
       maxAge: 60 * 5, 
+      httpOnly: true,
       sameSite: 'lax', 
       secure: process.env.NODE_ENV === 'production' 
     });

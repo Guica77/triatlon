@@ -92,7 +92,7 @@ export default function PrivacidadPage() {
               <CheckCircle2 className="w-4 h-4 text-bike shrink-0" /> 4. Tus Derechos
             </h3>
             <p>
-              Puedes revocar en cualquier momento la conexión con plataformas de telemetría de terceros (Strava/Garmin) desde el panel de Ajustes de la aplicación. Si deseas eliminar tu cuenta o exportar tus datos deportivos, puedes contactar con nuestro soporte técnico.
+              Puedes revocar en cualquier momento la conexión con plataformas de telemetría de terceros (Strava/Garmin), exportar tus datos deportivos y eliminar definitivamente tu cuenta desde el panel de Ajustes de la aplicación.
             </p>
           </div>
 

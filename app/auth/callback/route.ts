@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
+import { oauthDisplayName, parseOAuthRole, safeOAuthNext } from '@/lib/auth/oauth'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/dashboard'
+  const next = safeOAuthNext(searchParams.get('next'))
 
   if (code) {
     const supabase = await createClient()
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
       
       // -- OAUTH ROLE HANDLING --
       // Read the role from the cookie set securely by the client browser before the OAuth redirect
-      const oauthRole = cookieStore.get('oauth_role')?.value
+      const oauthRole = parseOAuthRole(cookieStore.get('oauth_role')?.value)
       
       if (oauthRole) {
         const { createAdminClient } = await import('@/lib/supabase/admin')
@@ -26,22 +27,20 @@ export async function GET(request: Request) {
         const { data: existingProfile } = await supabaseAdmin.from('profiles').select('id').eq('id', user.id).maybeSingle()
 
         if (!existingProfile) {
+          const displayName = oauthDisplayName(user.user_metadata)
           // Only insert profile with the selected role if it's a brand new user
           const { error: profileError } = await supabaseAdmin
             .from('profiles')
             .insert({
               id: user.id,
               email: user.email || '',
-              first_name: user.user_metadata?.full_name?.split(' ')[0] || 'Usuario',
-              last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || (oauthRole === 'coach' ? 'Entrenador' : 'Atleta'),
-              role: oauthRole as 'coach' | 'athlete',
+              first_name: displayName.firstName,
+              last_name: displayName.lastName,
+              role: oauthRole,
               level: 'intermedio'
             })
             
           if (profileError) console.error("Error inserting profile for OAuth:", profileError)
-        } else {
-          // Update the existing profile role to the newly selected one (helps with testing and switching)
-          await supabaseAdmin.from('profiles').update({ role: oauthRole as 'coach' | 'athlete' }).eq('id', user.id)
         }
         
         cookieStore.delete('oauth_role')
@@ -93,7 +92,9 @@ export async function GET(request: Request) {
         finalNext = '/onboarding';
       }
       
-      return NextResponse.redirect(`${origin}${finalNext}?_t=${Date.now()}`)
+      const destination = new URL(finalNext, origin)
+      destination.searchParams.set('_t', Date.now().toString())
+      return NextResponse.redirect(destination)
     } else {
       console.error("OAuth Exchange Error:", error);
     }
@@ -106,5 +107,7 @@ export async function GET(request: Request) {
   const oauthRole = cookieStore.get('oauth_role')?.value;
   const fallback = oauthRole === 'coach' ? '/login?role=coach' : '/login?role=athlete';
 
-  return NextResponse.redirect(`${origin}${fallback}?error=AuthCallbackError`)
+  const fallbackUrl = new URL(fallback, origin)
+  fallbackUrl.searchParams.set('error', 'AuthCallbackError')
+  return NextResponse.redirect(fallbackUrl)
 }

@@ -1,10 +1,6 @@
 {
   "crons": [
     {
-      "path": "/api/cron/marketplace",
-      "schedule": "0 8 * * *"
-    },
-    {
       "path": "/api/cron/reminders/morning",
       "schedule": "30 3 * * *"
     },

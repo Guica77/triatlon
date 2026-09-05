@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { isAIAvailable } from '@/lib/ai-service';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -368,6 +369,7 @@ export default async function DashboardPage() {
 
             {/* Coach IA */}
             <WorkoutAIFeedback
+              aiConfigured={isAIAvailable()}
               todayWorkout={todayWorkout ?? null}
               hrv={biometrics?.hrv}
               readiness={biometrics?.readiness_score}

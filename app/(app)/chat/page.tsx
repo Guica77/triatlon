@@ -1,3 +1,4 @@
+import { ChatViewport } from '@/components/chat/chat-viewport'
 import * as React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -40,10 +41,10 @@ export default async function AthleteChatPage() {
   }
 
   return (
-    <div className="relative isolate flex h-dvh min-h-0 flex-col overflow-hidden bg-bg-deep">
+    <ChatViewport>
 
       {/* Top navigation keeps the chat identity and return action in the product shell */}
-      <header className="shrink-0 border-b border-border-subtle bg-surface-elevated px-4 sm:px-6 pb-3 sm:pb-4 pt-3">
+      <header className="flex items-center justify-between gap-2 shrink-0 border-b border-border-subtle bg-surface-elevated px-4 sm:px-6 pb-3 sm:pb-4 pt-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-swim/40 bg-swim-subtle">
             <MessageSquare className="h-4 w-4 text-swim" />
@@ -74,6 +75,6 @@ export default async function AthleteChatPage() {
           currentUserId={user.id}
         />
       </main>
-    </div>
+    </ChatViewport>
   )
 }

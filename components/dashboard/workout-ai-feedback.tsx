@@ -3,9 +3,10 @@
 import * as React from 'react';
 import { Bot, Sparkles, Loader2, AlertCircle, RefreshCw, Activity, MessageSquare, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { isAIAvailable } from '@/lib/ai-service';
+import { parseAIResponse } from '@/lib/ai-response';
 
 interface WorkoutAIFeedbackProps {
+  aiConfigured: boolean;
   todayWorkout?: Record<string, any> | null;
   ctl?: number | null;
   atl?: number | null;
@@ -16,6 +17,7 @@ interface WorkoutAIFeedbackProps {
 }
 
 export function WorkoutAIFeedback({
+  aiConfigured,
   todayWorkout,
   ctl,
   atl,
@@ -29,7 +31,7 @@ export function WorkoutAIFeedback({
   const [error, setError] = React.useState<string | null>(null);
   const [question, setQuestion] = React.useState('');
   const [showChatInput, setShowChatInput] = React.useState(false);
-  const aiAvailable = isAIAvailable();
+  const aiAvailable = aiConfigured;
 
   const buildWorkoutContext = React.useCallback(() => {
     const session = todayWorkout?.training_sessions;
@@ -57,17 +59,19 @@ export function WorkoutAIFeedback({
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        setFeedback(errData.error || 'No se pudo obtener análisis. Usando recomendación automática.');
         if (errData.fallback) {
           setFeedback(getFallbackAnalysis());
+        } else {
+          setError(errData.error || 'No se pudo obtener el análisis. Inténtalo de nuevo.');
         }
       } else {
         const text = await res.text();
-        setFeedback(text || getFallbackAnalysis());
+        const answer = parseAIResponse(text);
+        if (answer.error) setError(answer.error);
+        else setFeedback(answer.content || null);
       }
     } catch {
-      // Fallback to rule-based analysis
-      setFeedback(getFallbackAnalysis());
+      setError('No se pudo conectar con el asistente. Comprueba la conexión y reinténtalo.');
     } finally {
       setLoading(false);
     }
@@ -105,7 +109,7 @@ export function WorkoutAIFeedback({
 
         {!aiAvailable && (
           <span className="px-2 py-0.5 rounded-full bg-bg-hover border border-border-default text-[9px] text-text-muted font-bold uppercase tracking-wider">
-            Offline
+            Sin IA configurada
           </span>
         )}
       </div>
@@ -218,9 +222,9 @@ function getFallbackAnalysis(): string {
 
 No se pudo conectar con el asistente IA. Aquí tienes un análisis basado en reglas:
 
-• **Sesión registrada correctamente.** Sigue monitorizando tu carga semanal.
+• Consulta el estado de tu sesión en el plan para comprobar si está registrada.
 • **Consejo general:** Mantén la consistencia en tus entrenamientos de baja intensidad (Z1-Z2) para construir base aeróbica.
 • **Recuperación:** Prioriza el sueño y la nutrición post-entreno para maximizar adaptaciones.
 
-*Para análisis más detallados, configura una clave de API de IA en Ajustes.*`;
+*Este consejo es general; no sustituye un análisis personalizado de tus datos.*`;
 }

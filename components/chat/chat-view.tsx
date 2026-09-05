@@ -1,6 +1,8 @@
 'use client'
 
 import * as React from 'react'
+import { mergeMessages, restoreOutbox, type PendingMessage } from '@/lib/chat-messages'
+import { ChatLoadingState } from '@/components/chat/chat-loading-state'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Send, 
@@ -41,13 +43,43 @@ export function ChatView({
   const [messages, setMessages] = React.useState<ChatMessageItem[]>([])
   const [newMessageText, setNewMessageText] = React.useState('')
   const [loadingMessages, setLoadingMessages] = React.useState(false)
+  const [historyError, setHistoryError] = React.useState<string | null>(null)
   const [searchQuery, setSearchQuery] = React.useState('')
   const [isTyping, setIsTyping] = React.useState(false)
   const [linkingCoachId, setLinkingCoachId] = React.useState<string | null>(null)
   const [inviteCode, setInviteCode] = React.useState('')
   const [linkingCoachCode, setLinkingCoachCode] = React.useState(false)
 
-  const messagesEndRef = React.useRef<HTMLDivElement>(null)
+  const selectedIdRef = React.useRef<string | null>(null)
+  const messagesRef = React.useRef(messages)
+  React.useEffect(() => { messagesRef.current = messages }, [messages])
+  const syncedMessageRef = React.useRef<string | null>(null)
+  const historyRequestRef = React.useRef(0)
+  const [hasMore, setHasMore] = React.useState(false)
+  const [loadingOlder, setLoadingOlder] = React.useState(false)
+  const [outbox, setOutbox] = React.useState<PendingMessage[]>([])
+  const outboxRef = React.useRef<PendingMessage[]>([])
+  const sendingRef = React.useRef(new Set<string>())
+  const [storageWarning, setStorageWarning] = React.useState(false)
+  const outboxKey = `triatlon-chat-outbox:${currentUserId}`
+  const saveOutbox = (rows: PendingMessage[]) => {
+    outboxRef.current = rows
+    setOutbox(rows)
+    try { localStorage.setItem(outboxKey, JSON.stringify(rows)); setStorageWarning(false) }
+    catch { setStorageWarning(true) }
+  }
+  React.useEffect(() => {
+    try {
+      const restored = restoreOutbox(localStorage.getItem(outboxKey), currentUserId)
+      outboxRef.current = restored
+      setOutbox(restored)
+    } catch { setStorageWarning(true) }
+  }, [outboxKey, currentUserId])
+  const visibleMessages = mergeMessages(
+    outbox.filter(m => m.receiver_id === selectedPart?.id), messages,
+  )
+
+  const messagesListRef = React.useRef<HTMLDivElement>(null)
 
   const { refreshUnreadCount } = useNotifications()
   const reduceMotion = useReducedMotion()
@@ -61,23 +93,37 @@ export function ChatView({
 
   // Select participant and fetch history
   const handleSelectParticipant = async (part: ChatParticipant) => {
+    selectedIdRef.current = part.id
+    const requestId = ++historyRequestRef.current
+    setHasMore(false)
+    setLoadingOlder(false)
     setSelectedPart(part)
     setLoadingMessages(true)
+    setHistoryError(null)
+    syncedMessageRef.current = null
+    messagesRef.current = []
     setMessages([])
     
     try {
       const res = await getMessages(part.id)
+      if (requestId !== historyRequestRef.current || selectedIdRef.current !== part.id) return
+      if (res.error) throw new Error(res.error)
       if (res.data) {
-        setMessages(res.data)
+        setMessages(prev => mergeMessages(prev, res.data!))
+        setHasMore(!!res.hasMore)
+        syncedMessageRef.current = res.data.at(-1)?.id || null
+        saveOutbox(outboxRef.current.filter(m => !res.data!.some(saved => saved.id === m.id)))
       }
       
       // Mark messages from this participant as read
       await markMessagesAsRead(part.id)
       await refreshUnreadCount()
     } catch (err) {
+      if (requestId !== historyRequestRef.current || selectedIdRef.current !== part.id) return
+      setHistoryError('No se pudo cargar el historial. Reinténtalo para ver tus mensajes.')
       console.error('Error fetching chat messages:', err)
     } finally {
-      setLoadingMessages(false)
+      if (requestId === historyRequestRef.current) setLoadingMessages(false)
     }
   }
 
@@ -96,78 +142,121 @@ export function ChatView({
 
   // Scroll to bottom helper
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' })
+    const list = messagesListRef.current
+    list?.scrollTo({ top: list.scrollHeight, behavior: reduceMotion ? 'auto' : 'smooth' })
   }
 
   React.useEffect(() => {
     scrollToBottom()
-  }, [messages, isTyping])
+  }, [visibleMessages.at(-1)?.id, isTyping])
 
-  // Supabase Realtime Subscription
+  const loadOlderMessages = async () => {
+    if (!selectedPart || !messages.length || loadingOlder) return
+    const partId = selectedPart.id
+    const requestId = historyRequestRef.current
+    setLoadingOlder(true)
+    try {
+      const res = await getMessages(partId, messages[0])
+      if (selectedIdRef.current !== partId || requestId !== historyRequestRef.current) return
+      if (res.error) throw new Error(res.error)
+      const list = messagesListRef.current
+      const oldHeight = list?.scrollHeight || 0
+      const oldTop = list?.scrollTop || 0
+      setMessages(prev => mergeMessages(res.data || [], prev))
+      setHasMore(!!res.hasMore)
+      setHistoryError(null)
+      requestAnimationFrame(() => {
+        if (list && selectedIdRef.current === partId) list.scrollTop = oldTop + list.scrollHeight - oldHeight
+      })
+    } catch { if (selectedIdRef.current === partId && requestId === historyRequestRef.current) setHistoryError('No se pudieron cargar los mensajes anteriores. Puedes reintentar.') }
+    finally { if (selectedIdRef.current === partId) setLoadingOlder(false) }
+  }
+
   React.useEffect(() => {
-    if (!currentUserId || !selectedPart) return
-
-    const supabase = createClient()
-    
-    const channel = supabase
-      .channel(`chat_${currentUserId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `receiver_id=eq.${currentUserId}`
-        },
-        (payload) => {
-          const newMsg = payload.new as ChatMessageItem
-          if (newMsg.sender_id === selectedPart.id) {
-            setMessages(prev => {
-              if (prev.some(m => m.id === newMsg.id)) return prev
-              return [...prev, newMsg]
-            })
-          }
+    if (!selectedPart) return
+    const partId = selectedPart.id
+    let active = true
+    let refreshing = false
+    const refresh = async () => {
+      if (refreshing || document.visibilityState === 'hidden') return
+      refreshing = true
+      const lastSyncedId = syncedMessageRef.current
+      try {
+        const res = await getMessages(partId)
+        if (!active || selectedIdRef.current !== partId) return
+        if (res.error) { setHistoryError('No se pudo actualizar la conversación. Reintentaremos al reconectar.'); return }
+        let recovered = res.data || []
+        let page = res
+        const known = messagesRef.current
+        // Catch up across more than one page after a long disconnection.
+        while (lastSyncedId && page.hasMore && page.data?.length &&
+          !recovered.some(m => m.id === lastSyncedId)) {
+          page = await getMessages(partId, page.data[0])
+          if (!active || selectedIdRef.current !== partId) return
+          if (page.error) throw new Error(page.error)
+          recovered = mergeMessages(page.data || [], recovered)
         }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
+        syncedMessageRef.current = res.data?.at(-1)?.id || lastSyncedId
+        if (!known.length) setHasMore(!!res.hasMore)
+        setMessages(prev => mergeMessages(prev, recovered))
+        setHistoryError(null)
+        saveOutbox(outboxRef.current.filter(m => !recovered.some(saved => saved.id === m.id)))
+        await markMessagesAsRead(partId)
+        await refreshUnreadCount()
+      } catch { if (active) setHistoryError('Sin conexión. Tus mensajes guardados siguen en el historial.') }
+      finally { refreshing = false }
     }
-  }, [currentUserId, selectedPart])
+    const supabase = createClient()
+    const receive = (payload: { new: unknown }) => {
+      const message = payload.new as ChatMessageItem
+      if (!active || selectedIdRef.current !== partId) return
+      if (!((message.sender_id === partId && message.receiver_id === currentUserId) ||
+        (message.sender_id === currentUserId && message.receiver_id === partId))) return
+      setMessages(prev => mergeMessages(prev, [message]))
+      saveOutbox(outboxRef.current.filter(m => m.id !== message.id))
+      if (message.receiver_id === currentUserId) void refresh()
+    }
+    const channel = supabase.channel(`chat_${currentUserId}_${partId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages', filter: `receiver_id=eq.${currentUserId}` }, receive)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages', filter: `sender_id=eq.${currentUserId}` }, receive)
+      .subscribe(status => { if (status === 'SUBSCRIBED') void refresh() })
+    window.addEventListener('online', refresh)
+    window.addEventListener('focus', refresh)
+    document.addEventListener('visibilitychange', refresh)
+    const interval = window.setInterval(refresh, 30000)
+    return () => {
+      active = false
+      supabase.removeChannel(channel)
+      window.clearInterval(interval)
+      window.removeEventListener('online', refresh)
+      window.removeEventListener('focus', refresh)
+      document.removeEventListener('visibilitychange', refresh)
+    }
+  }, [currentUserId, selectedPart?.id])
 
-  // Submit message handler
+  const deliverMessage = async (pending: PendingMessage) => {
+    if (sendingRef.current.has(pending.id)) return
+    sendingRef.current.add(pending.id)
+    saveOutbox([...outboxRef.current.filter(m => m.id !== pending.id), { ...pending, delivery: 'sending' }])
+    try {
+      const res = await sendMessage(pending.receiver_id, pending.message, pending.id)
+      if (res.error || !res.data) throw new Error(res.error || 'No se pudo confirmar el envío')
+      if (selectedIdRef.current === pending.receiver_id) setMessages(prev => mergeMessages(prev, [res.data!]))
+      saveOutbox(outboxRef.current.filter(m => m.id !== pending.id))
+    } catch {
+      saveOutbox(outboxRef.current.map(m => m.id === pending.id ? { ...m, delivery: 'failed' } : m))
+    } finally { sendingRef.current.delete(pending.id) }
+  }
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newMessageText.trim() || !selectedPart) return
-
-    const messageText = newMessageText.trim()
+    const pending: PendingMessage = {
+      id: crypto.randomUUID(), sender_id: currentUserId, receiver_id: selectedPart.id,
+      message: newMessageText.trim(), created_at: new Date().toISOString(), delivery: 'sending',
+    }
     setNewMessageText('')
-
-    // 1. Optimistic update
-    const tempId = `temp-${Date.now()}`
-    const optimisticMsg: ChatMessageItem = {
-      id: tempId,
-      sender_id: currentUserId,
-      receiver_id: selectedPart.id,
-      message: messageText,
-      created_at: new Date().toISOString()
-    }
-
-    setMessages(prev => [...prev, optimisticMsg])
-
-    try {
-      const res = await sendMessage(selectedPart.id, messageText)
-      if (res.error) {
-        setMessages(prev => prev.filter(m => m.id !== tempId))
-        alert(res.error)
-      } else if (res.data) {
-        setMessages(prev => prev.map(m => m.id === tempId ? res.data! : m))
-      }
-    } catch (err) {
-      console.error(err)
-      setMessages(prev => prev.filter(m => m.id !== tempId))
-    }
+    await deliverMessage(pending)
   }
 
   const handleLinkCoach = async (coachId: string) => {
@@ -258,7 +347,7 @@ export function ChatView({
       ) : null}
 
       {/* Main Chat Conversation Viewport */}
-      <div className={`flex min-w-0 flex-1 flex-col justify-between bg-surface-elevated ${hasSidebar && !selectedPart ? 'hidden sm:flex' : 'flex'}`}>
+      <div className={`flex min-h-0 min-w-0 flex-1 flex-col justify-between bg-surface-elevated ${hasSidebar && !selectedPart ? 'hidden sm:flex' : 'flex'}`}>
         {selectedPart ? (
           <>
             {/* Active chat header */}
@@ -266,7 +355,7 @@ export function ChatView({
               <div className="flex items-center gap-3">
                 {hasSidebar && (
                   <button 
-                    onClick={() => setSelectedPart(null)}
+                    onClick={() => { selectedIdRef.current = null; historyRequestRef.current++; setSelectedPart(null) }}
                     className="sm:hidden min-h-10 min-w-10 -ml-1 shrink-0 rounded-lg text-text-secondary transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                     aria-label="Volver"
                   >
@@ -281,8 +370,7 @@ export function ChatView({
                     {selectedPart.first_name || 'Triatleta'} {selectedPart.last_name || ''}
                   </h3>
                   <p className="mt-0.5 flex items-center gap-1 text-[9px] font-medium text-text-muted">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" />
-                    Chat activo
+                    Historial guardado en tu cuenta
                   </p>
                 </div>
               </div>
@@ -291,8 +379,8 @@ export function ChatView({
                 {/* Realtime badge (hidden on narrow screens to save space for call buttons) */}
                 <div className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-success/30 bg-bike-subtle px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-bike sm:flex sm:text-[9px]">
                   <Sparkles className="h-3 w-3 animate-pulse text-bike" />
-                  <span className="hidden sm:inline">Conectado (Realtime)</span>
-                  <span className="sm:hidden">Realtime</span>
+                  <span className="hidden sm:inline">Mensajes</span>
+                  <span className="sm:hidden">Mensajes</span>
                 </div>
                 
                 <div className="flex shrink-0 items-center">
@@ -306,12 +394,18 @@ export function ChatView({
             {/* Main Chat Conversation Viewport */}
             <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-bg-deep">
               {/* Messages body list */}
-              <div className="custom-scrollbar relative z-10 flex flex-1 flex-col overflow-y-auto p-4 sm:p-6">
-                {loadingMessages ? (
-                  <div className="flex h-full items-center justify-center text-xs font-semibold text-text-muted">
-                    Cargando conversación...
+              <div ref={messagesListRef} className="custom-scrollbar relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-4 sm:p-6">
+                {storageWarning && <p role="alert" className="mb-3 text-sm text-warning">No se pueden guardar los pendientes en este dispositivo. No cierres el chat hasta confirmar el envío.</p>}
+                {historyError && visibleMessages.length > 0 && <p role="alert" className="mb-3 text-sm text-warning">{historyError}</p>}
+                {hasMore && <button type="button" disabled={loadingOlder} onClick={loadOlderMessages} className="mb-4 min-h-11 shrink-0 rounded-xl bg-surface-card px-4 text-sm text-text-secondary">{loadingOlder ? 'Cargando…' : 'Ver mensajes anteriores'}</button>}
+                {loadingMessages && visibleMessages.length === 0 ? (
+                  <ChatLoadingState />
+                ) : historyError && visibleMessages.length === 0 ? (
+                  <div role="alert" className="flex flex-1 flex-col items-center justify-center gap-3 text-center text-sm text-text-muted">
+                    <p>{historyError}</p>
+                    <button type="button" onClick={() => handleSelectParticipant(selectedPart)} className="min-h-11 rounded-xl bg-surface-card px-4 text-text-primary">Reintentar</button>
                   </div>
-                ) : messages.length === 0 ? (
+                ) : visibleMessages.length === 0 ? (
                   <div className="flex h-full flex-col items-center justify-center space-y-2 text-text-muted">
                     <MessageSquare className="h-8 w-8 text-swim" />
                     <p className="text-xs font-bold text-text-secondary">No hay mensajes previos.</p>
@@ -319,7 +413,8 @@ export function ChatView({
                   </div>
                 ) : (
                   <div className="space-y-4 flex-1">
-                    {messages.map(m => {
+                    {visibleMessages.map(m => {
+                      const pending = !messages.some(saved => saved.id === m.id) ? outbox.find(item => item.id === m.id) : undefined
                       const isOwn = m.sender_id === currentUserId
                       return (
                         <div 
@@ -340,7 +435,9 @@ export function ChatView({
                             {isOwn ? (
                               <div className="float-right ml-3 mt-0.5 flex translate-y-1 items-center justify-end gap-1 text-[9px] font-bold text-text-inverse/70" suppressHydrationWarning>
                                 {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                <span className="text-text-inverse/80 font-black tracking-normal text-[10px]">✓✓</span>
+                                {pending?.delivery === 'failed' ? (
+                                  <button type="button" onClick={() => deliverMessage(pending)} className="min-h-11 px-2 underline">No enviado · Reintentar</button>
+                                ) : <span>{pending ? 'Enviando…' : m.is_read ? 'Leído' : 'Guardado'}</span>}
                               </div>
                             ) : (
                               <div className="float-right ml-3 mt-0.5 translate-y-1 text-right text-[9px] font-bold text-text-muted" suppressHydrationWarning>
@@ -364,7 +461,7 @@ export function ChatView({
                       </div>
                     )}
 
-                    <div ref={messagesEndRef} className="h-2" />
+                    <div className="h-2" />
                   </div>
                 )}
               </div>
@@ -373,7 +470,7 @@ export function ChatView({
             {/* Input form */}
             <form 
               onSubmit={handleSendMessage}
-              className="z-10 flex shrink-0 items-end gap-2 border-t border-border-default bg-surface-elevated p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_-6px_18px_rgba(0,0,0,0.18)] sm:p-3"
+              className="z-10 flex shrink-0 items-end gap-2 border-t border-border-default bg-surface-elevated p-2 pb-[calc(0.5rem+var(--chat-bottom-inset,env(safe-area-inset-bottom)))] shadow-[0_-6px_18px_rgba(0,0,0,0.18)] sm:p-3"
             >
               {/* Attachment Icon */}
               <button 
@@ -402,12 +499,13 @@ export function ChatView({
                     e.target.style.height = 'auto';
                     e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
                   }}
-                  onFocus={(e) => {
+                  onFocus={() => {
                     setTimeout(() => scrollToBottom(), 150);
                   }}
+                  aria-label="Mensaje"
                   placeholder="Mensaje..."
                   rows={1}
-                  className="min-h-[36px] max-h-[120px] w-full resize-none self-center border-none bg-transparent px-1 py-2 text-[15px] text-text-primary outline-none placeholder:text-text-muted custom-scrollbar"
+                  className="min-h-[36px] max-h-[120px] w-full resize-none self-center border-none bg-transparent px-1 py-2 text-base text-text-primary outline-none placeholder:text-text-muted custom-scrollbar"
                 />
                 
                 {/* Paperclip Icon */}

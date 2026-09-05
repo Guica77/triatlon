@@ -14,6 +14,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { InjuryHistory } from '@/components/dashboard/injury-history';
 import { ExportButtons } from '@/components/dashboard/export-buttons';
 import { updateInjuryHistory } from '@/app/(app)/dashboard/biometrics-actions';
+import { DeleteAccountCard } from '@/components/settings/delete-account-card';
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -55,8 +56,8 @@ export default async function SettingsPage() {
 
         <PageHeader
           icon={Settings}
-          title="Ajustes y Perfil del Atleta"
-          subtitle="Hiper-personalización de Entrenamientos"
+          title="Perfil y ajustes"
+          subtitle="Tus datos, objetivos y dispositivos conectados"
         />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -131,6 +132,8 @@ export default async function SettingsPage() {
               <p className="text-[10px] text-text-muted font-medium mb-4">Descarga tu historial de entrenamientos en formato CSV o exporta tu calendario a tu app favorita.</p>
               <ExportButtons />
             </div>
+
+            <DeleteAccountCard />
           </div>
         </div>
 

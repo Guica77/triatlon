@@ -4,6 +4,49 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { fetchGarminData } from '@/lib/telemetry/garmin-sync';
 
+export async function deleteOwnAccount() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'La sesión ha caducado. Vuelve a iniciar sesión.' };
+
+  // Apple requires revoking its authorization when an account is deleted.
+  const hasAppleIdentity = user.identities?.some(identity => identity.provider === 'apple');
+  if (hasAppleIdentity) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.provider_refresh_token || session?.provider_token;
+    const clientId = process.env.APPLE_CLIENT_ID;
+    const clientSecret = process.env.APPLE_CLIENT_SECRET;
+
+    if (token && clientId && clientSecret) {
+      const body = new URLSearchParams({
+        token,
+        client_id: clientId,
+        client_secret: clientSecret,
+        token_type_hint: session?.provider_refresh_token ? 'refresh_token' : 'access_token',
+      });
+      const response = await fetch('https://appleid.apple.com/auth/revoke', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+        cache: 'no-store',
+      });
+      if (!response.ok) console.error('Apple authorization revocation failed:', response.status);
+    } else {
+      console.warn('Apple authorization could not be revoked: missing provider token or Apple credentials.');
+    }
+  }
+
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const { error } = await createAdminClient().auth.admin.deleteUser(user.id, false);
+  if (error) {
+    console.error('Account deletion failed:', error);
+    return { error: 'No se ha podido eliminar la cuenta. Inténtalo de nuevo.' };
+  }
+
+  await supabase.auth.signOut();
+  return { success: true };
+}
+
 export async function updatePhysiologicalData(data: {
   current_ftp?: number | null;
   current_swim_pace?: string | null;

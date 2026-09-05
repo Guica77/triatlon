@@ -2,20 +2,13 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import webpush from 'web-push';
 import { configureVapid } from '@/lib/notifications';
+import { isAuthorizedCronRequest } from '@/lib/cron-auth';
 
-// Permite simular desde el navegador si pasamos un secret
 export const maxDuration = 300;
 
 export async function GET(req: Request) {
   try {
-    const authHeader = req.headers.get('authorization');
-    const isCronRequest = authHeader === `Bearer ${process.env.CRON_SECRET}`;
-
-    // Permitir acceso vía navegador si se pasa la clave secreta por query
-    const url = new URL(req.url);
-    const isManualOverride = url.searchParams.get('secret') === process.env.CRON_SECRET;
-
-    if (!isCronRequest && !isManualOverride) {
+    if (!isAuthorizedCronRequest(req)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
