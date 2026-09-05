@@ -63,7 +63,7 @@ vi.mock('@/lib/strava/activity-ai', async () => {
   };
 });
 
-import { POST } from '@/app/api/webhooks/telemetry/route';
+import { processWebhookRequest as POST } from '@/app/api/webhooks/telemetry/route';
 
 /** Mini-fake de Supabase: cadena encadenable y then-able, registra writes. */
 function buildDb() {

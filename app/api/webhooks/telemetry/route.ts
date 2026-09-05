@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { after, NextRequest, NextResponse } from 'next/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Json } from '@/types/database.types';
 import { createAdminClient } from '@/lib/supabase/admin';
@@ -112,7 +112,93 @@ function pushBody(congrats: ActivityAiOutput, refocus: RefocusAiOutput): string 
  * → clasificar (ok/partial/substitute/extra) → felicitar con IA (todo lo hecho, con
  * honestidad si el plan no se cumplió) → proponer reajuste → persistir + push.
  */
+export interface StravaWebhookEvent {
+  object_type: string;
+  aspect_type: string;
+  object_id: number;
+  owner_id: number;
+  [key: string]: unknown;
+}
+
+/**
+ * Acknowledge Strava immediately. The durable row makes delivery recoverable;
+ * `after` handles the normal low-latency path and the cron retries failures.
+ */
 export async function POST(request: NextRequest) {
+  const body = (await request.json()) as StravaWebhookEvent;
+  if (!body.object_type || !body.aspect_type || !body.object_id || !body.owner_id) {
+    return NextResponse.json({ error: 'Evento incompleto' }, { status: 400 });
+  }
+
+  if (body.object_type !== 'activity' || body.aspect_type !== 'create') {
+    return NextResponse.json({ success: true }, { status: 200 });
+  }
+
+  const supabase = createAdminClient();
+  const { data, error } = await (supabase as any)
+    .from('strava_webhook_events')
+    .upsert({
+      object_type: body.object_type,
+      aspect_type: body.aspect_type,
+      object_id: body.object_id,
+      owner_id: body.owner_id,
+      payload: body,
+      status: 'pending',
+      next_attempt_at: new Date().toISOString(),
+    }, { onConflict: 'object_type,aspect_type,object_id,owner_id', ignoreDuplicates: true })
+    .select('id, status, attempts')
+    .maybeSingle();
+
+  if (error) {
+    console.error('Could not persist Strava webhook event:', error.message);
+    return NextResponse.json({ error: 'No se pudo guardar el evento' }, { status: 500 });
+  }
+
+  if (data?.id && data.status !== 'completed') {
+    after(() => processQueuedStravaEvent(data.id, body, data.attempts || 0));
+  }
+
+  return NextResponse.json({ success: true }, { status: 200 });
+}
+
+export async function processQueuedStravaEvent(eventId: string, body: StravaWebhookEvent, attempts = 0): Promise<boolean> {
+  const supabase = createAdminClient();
+  try {
+    await (supabase as any).from('strava_webhook_events').update({
+      status: 'processing',
+      attempts: attempts + 1,
+      last_error: null,
+    }).eq('id', eventId);
+
+    const response = await processWebhookRequest(new NextRequest('http://internal/api/webhooks/telemetry', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    }));
+    if (!response.ok && response.status !== 404) {
+      throw new Error(`Procesamiento rechazado (${response.status})`);
+    }
+
+    await (supabase as any).from('strava_webhook_events').update({
+      status: 'completed',
+      processed_at: new Date().toISOString(),
+      last_error: response.status === 404 ? 'Atleta no vinculado; evento descartado' : null,
+    }).eq('id', eventId);
+    return true;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Error desconocido';
+    await (supabase as any).from('strava_webhook_events').update({
+      status: 'failed',
+      last_error: message.slice(0, 500),
+      next_attempt_at: new Date(Date.now() + 15 * 60_000).toISOString(),
+    }).eq('id', eventId);
+    console.error('Queued Strava event failed:', message);
+    return false;
+  }
+}
+
+/** Processes one persisted Strava event. Exported for retries and hermetic tests. */
+export async function processWebhookRequest(request: NextRequest) {
   try {
     const body = await request.json();
     console.log('Received webhook event:', body);
@@ -223,6 +309,21 @@ export async function POST(request: NextRequest) {
       actual_duration_min: durationMin,
       actual_distance_km: distanceKm,
       actual_tss: tss,
+      activity_name: typeof activity.name === 'string' ? activity.name : label,
+      activity_started_at: typeof activity.start_date === 'string' ? activity.start_date : now,
+      moving_time_min: durationMin,
+      elapsed_time_min: typeof activity.elapsed_time === 'number' ? Math.round(activity.elapsed_time / 60) : durationMin,
+      average_speed_mps: typeof activity.average_speed === 'number' ? activity.average_speed : null,
+      elevation_gain_m: typeof activity.total_elevation_gain === 'number' ? activity.total_elevation_gain : 0,
+      avg_hr: typeof activity.average_heartrate === 'number' ? activity.average_heartrate : null,
+      max_hr: typeof activity.max_heartrate === 'number' ? activity.max_heartrate : null,
+      avg_power: typeof activity.average_watts === 'number' ? activity.average_watts : null,
+      avg_cadence: typeof activity.average_cadence === 'number' ? activity.average_cadence : null,
+      summary_polyline: typeof (activity.map as Record<string, unknown> | undefined)?.summary_polyline === 'string'
+        ? (activity.map as Record<string, unknown>).summary_polyline as string
+        : null,
+      external_url: `https://www.strava.com/activities/${object_id}`,
+      synced_at: now,
       raw_payload: activity,
       sport_label: label,
       outcome_kind: classification.kind,

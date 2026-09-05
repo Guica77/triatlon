@@ -5,7 +5,6 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { pushWorkoutToDevice } from '@/app/telemetry/workout-push-actions';
 import { sendWorkoutCompletionEmail } from '@/lib/email';
-import { getOrRefreshStravaToken } from '@/lib/telemetry/strava-sync';
 
 function safeWaitUntil(promise: Promise<any>) {
   if (typeof (globalThis as any).waitUntil === 'function') {
@@ -309,79 +308,58 @@ export async function getRecentStravaActivities() {
     const { data: authData } = await supabase.auth.getUser();
     if (!authData?.user) return { error: 'No autorizado' };
 
-    const userId = authData.user.id;
+    const { data, error } = await supabase
+      .from('universal_telemetry')
+      .select(`
+        id,
+        external_activity_id,
+        activity_name,
+        activity_started_at,
+        actual_distance_km,
+        actual_duration_min,
+        average_speed_mps,
+        avg_power,
+        summary_polyline,
+        external_url,
+        synced_at,
+        sport_label,
+        outcome_kind,
+        workout_id,
+        raw_payload,
+        user_workouts(training_sessions(day_name, sport_type, description))
+      `)
+      .eq('user_id', authData.user.id)
+      .eq('source_provider', 'strava')
+      .order('activity_started_at', { ascending: false, nullsFirst: false })
+      .limit(10);
 
-    const accessToken = await getOrRefreshStravaToken(userId);
-
-    if (!accessToken) {
-      return { activities: [] };
+    if (error) {
+      console.error('Failed to read persisted Strava activities:', error.message);
+      return { error: 'Error al leer las actividades guardadas de Strava' };
     }
 
-    // Fetch last 10 activities
-    const activitiesResponse = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=10', {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
+    const activities = (data || []).map((row: any) => {
+      const raw = row.raw_payload && typeof row.raw_payload === 'object' ? row.raw_payload : {};
+      const numericId = String(row.external_activity_id || '').replace(/^strava_/, '');
+      const session = row.user_workouts?.training_sessions;
+      return {
+        id: Number(numericId) || numericId,
+        name: row.activity_name || raw.name || row.sport_label || 'Actividad de Strava',
+        type: raw.type || row.sport_label || 'Workout',
+        start_date: row.activity_started_at || raw.start_date || row.synced_at,
+        distance: Number(row.actual_distance_km || 0) * 1000,
+        moving_time: Number(row.actual_duration_min || 0) * 60,
+        average_speed: Number(row.average_speed_mps || raw.average_speed || 0),
+        average_watts: row.avg_power ?? raw.average_watts ?? null,
+        summary_polyline: row.summary_polyline || raw.map?.summary_polyline || null,
+        external_url: row.external_url || `https://www.strava.com/activities/${numericId}`,
+        synced_at: row.synced_at,
+        outcome_kind: row.outcome_kind,
+        workout_id: row.workout_id,
+        linked_workout_name: session?.day_name || session?.description || null,
+      };
     });
 
-    if (!activitiesResponse.ok) {
-      const errorText = await activitiesResponse.text();
-      console.error('Failed to fetch Strava activities:', errorText);
-      
-      try {
-        const errJson = JSON.parse(errorText);
-        if (errJson.message === 'Forbidden' && errJson.errors?.[0]?.code === 'Inactive') {
-          // Si la app está inactiva, devolver datos MOCK para que la UI funcione y se vea espectacular
-          console.warn('Strava App Inactive - Returning Mock Data for UI demonstration');
-          const mockActivities = [
-            {
-              id: 10001,
-              name: 'Series Umbral 10k 🏃💨',
-              type: 'Run',
-              start_date: new Date(Date.now() - 2 * 3600000).toISOString(),
-              distance: 10250, // 10.25 km
-              moving_time: 2700, // 45 mins
-              average_speed: 3.79, // ~4:24 min/km
-            },
-            {
-              id: 10002,
-              name: 'Fondo Largo Z2 🚴‍♂️⛰️',
-              type: 'Ride',
-              start_date: new Date(Date.now() - 24 * 3600000).toISOString(),
-              distance: 65400, // 65.4 km
-              moving_time: 7200, // 2 hours
-              average_speed: 9.08, // ~32.7 km/h
-              average_watts: 185,
-            },
-            {
-              id: 10003,
-              name: 'Natación Técnica Piscina 🏊‍♂️💦',
-              type: 'Swim',
-              start_date: new Date(Date.now() - 48 * 3600000).toISOString(),
-              distance: 2500, // 2.5 km
-              moving_time: 3300, // 55 mins
-              average_speed: 0.75, // ~1:30 min/100m
-            },
-            {
-              id: 10004,
-              name: 'Transición Bici-Carrera (BRICK) 🧱',
-              type: 'Run',
-              start_date: new Date(Date.now() - 72 * 3600000).toISOString(),
-              distance: 5100, // 5.1 km
-              moving_time: 1260, // 21 mins
-              average_speed: 4.04, // ~4:07 min/km
-            }
-          ];
-          return { activities: mockActivities };
-        }
-      } catch (e) {
-        // Ignorar si no es JSON
-      }
-
-      return { error: 'Error al obtener actividades desde Strava' };
-    }
-
-    const activities = await activitiesResponse.json();
     return { activities };
   } catch (error: any) {
     console.error('Error in getRecentStravaActivities:', error);
@@ -506,4 +484,3 @@ export async function evaluateFeedbackAndAdjustPlan(
     return { adjusted: false, message: error.message || 'Error en el ajuste adaptativo' };
   }
 }
-

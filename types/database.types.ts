@@ -628,6 +628,13 @@ export type Database = {
           actual_duration_min: number
           actual_tss: number
           ai_comment: string | null
+          activity_name: string | null
+          activity_started_at: string | null
+          elapsed_time_min: number | null
+          average_speed_mps: number | null
+          summary_polyline: string | null
+          external_url: string | null
+          synced_at: string | null
           avg_cadence: number | null
           avg_hr: number | null
           avg_power: number | null
@@ -653,6 +660,13 @@ export type Database = {
           actual_duration_min: number
           actual_tss: number
           ai_comment?: string | null
+          activity_name?: string | null
+          activity_started_at?: string | null
+          elapsed_time_min?: number | null
+          average_speed_mps?: number | null
+          summary_polyline?: string | null
+          external_url?: string | null
+          synced_at?: string | null
           avg_cadence?: number | null
           avg_hr?: number | null
           avg_power?: number | null
@@ -678,6 +692,13 @@ export type Database = {
           actual_duration_min?: number
           actual_tss?: number
           ai_comment?: string | null
+          activity_name?: string | null
+          activity_started_at?: string | null
+          elapsed_time_min?: number | null
+          average_speed_mps?: number | null
+          summary_polyline?: string | null
+          external_url?: string | null
+          synced_at?: string | null
           avg_cadence?: number | null
           avg_hr?: number | null
           avg_power?: number | null

@@ -2,11 +2,12 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Watch, Flame, Waves, Footprints, Bike, ExternalLink, RefreshCw, Zap } from 'lucide-react';
+import { Waves, Footprints, Bike, ExternalLink, RefreshCw } from 'lucide-react';
 import { getRecentStravaActivities } from '@/app/telemetry/telemetry-actions';
+import { StravaMapSVG } from '@/components/ui/strava-map-svg';
 
 interface StravaActivity {
-  id: number;
+  id: number | string;
   name: string;
   type: string;
   start_date: string;
@@ -14,6 +15,12 @@ interface StravaActivity {
   moving_time: number; // in seconds
   average_speed: number; // in m/s
   average_watts?: number;
+  summary_polyline?: string | null;
+  external_url: string;
+  synced_at?: string | null;
+  outcome_kind?: 'ok' | 'partial' | 'substitute' | 'extra' | null;
+  workout_id?: string | null;
+  linked_workout_name?: string | null;
 }
 
 export function ActivitiesFeed() {
@@ -98,6 +105,20 @@ export function ActivitiesFeed() {
     }
   };
 
+  const formatSyncTime = (dateStr?: string | null) => {
+    if (!dateStr) return 'Sincronización reciente';
+    return `Actualizado ${new Date(dateStr).toLocaleString('es-ES', {
+      day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+    })}`;
+  };
+
+  const activityStatus = (activity: StravaActivity) => {
+    if (activity.workout_id && activity.outcome_kind === 'partial') return `Parcial · ${activity.linked_workout_name || 'sesión planificada'}`;
+    if (activity.workout_id) return `Vinculada · ${activity.linked_workout_name || 'sesión planificada'}`;
+    if (activity.outcome_kind === 'substitute') return 'Sustitución del entrenamiento previsto';
+    return 'Actividad extra';
+  };
+
   return (
     <motion.div
       initial={reduceMotion ? false : { opacity: 0, y: 15 }}
@@ -109,7 +130,7 @@ export function ActivitiesFeed() {
           <h3 className="font-bold text-text-primary">Actividades Recientes (Strava)</h3>
           <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-500/20">
             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-            Sincronizado hace 2m
+            {formatSyncTime(activities[0]?.synced_at)}
           </span>
         </div>
       </div>
@@ -162,15 +183,11 @@ export function ActivitiesFeed() {
             animate={{ opacity: 1 }}
             className="flex flex-col gap-3"
           >
-            {activities.map((act, index) => {
+            {activities.map((act) => {
               const lowerType = act.type.toLowerCase();
               const isRun = lowerType === 'run';
               const isSwim = lowerType === 'swim';
               const isRide = lowerType === 'ride';
-
-              // Simular vinculación para propósitos visuales como en la maqueta
-              const isLinked = index < 2;
-              const linkedName = isRun ? 'Series Umbral 10k' : isRide ? 'Fondo Largo Z2' : 'Entrenamiento Programado';
 
               let iconBg = 'bg-surface-hover text-text-secondary';
               let Icon = Footprints;
@@ -189,26 +206,25 @@ export function ActivitiesFeed() {
               return (
                 <div
                   key={act.id}
-                  className={`bg-surface-hover border border-border-default p-3 px-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 shadow-card ${!isLinked ? 'opacity-70' : ''}`}
+                  className="bg-surface-hover border border-border-default p-3 px-4 rounded-xl flex flex-col gap-3 shadow-card"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>
-                      <Icon className="w-4 h-4" />
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-lg ${iconBg} flex items-center justify-center shrink-0`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-text-primary line-clamp-1 flex items-center gap-2">
+                          {act.name}
+                        </h4>
+                        <p className="text-[11px] text-text-secondary mt-0.5 line-clamp-1">
+                          {formatDate(act.start_date)} •
+                          <span className={act.workout_id ? 'text-bike font-bold ml-1' : 'text-text-muted ml-1'}>
+                            {act.workout_id ? '✓ ' : ''}{activityStatus(act)}
+                          </span>
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-text-primary line-clamp-1 flex items-center gap-2">
-                        {act.name}
-                      </h4>
-                      <p className="text-[11px] text-text-secondary mt-0.5 line-clamp-1">
-                        {formatDate(act.start_date)} •
-                        {isLinked ? (
-                          <span className="text-bike font-bold ml-1">✓ Vinculado a '{linkedName}'</span>
-                        ) : (
-                          <span className="text-text-muted ml-1">Sesión Libre (Sin Vincular)</span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
 
                   <div className="flex items-center gap-4 self-end sm:self-auto shrink-0">
                     <div className="text-right">
@@ -221,7 +237,7 @@ export function ActivitiesFeed() {
                     </div>
 
                     <a
-                      href={`https://www.strava.com/activities/${act.id}`}
+                      href={act.external_url}
                       target="_blank"
                       rel="noopener noreferrer"
                       title="Ver actividad en Strava"
@@ -229,7 +245,13 @@ export function ActivitiesFeed() {
                     >
                       <ExternalLink className="w-3 h-3" />
                     </a>
+                    </div>
                   </div>
+                  {act.summary_polyline && (
+                    <div className="h-28 overflow-hidden rounded-xl border border-border-default bg-surface-card" aria-label="Recorrido de la actividad">
+                      <StravaMapSVG polyline={act.summary_polyline} className="h-full w-full" />
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -243,7 +265,7 @@ export function ActivitiesFeed() {
           className="bg-surface-hover border border-border-default text-text-secondary fine-hover:text-text-primary fine-hover:bg-border-default px-4 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] inline-flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 items-center gap-2"
         >
           <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-          Ver Historial Completo
+          Actualizar actividades
         </button>
       </div>
     </motion.div>
