@@ -1,10 +1,16 @@
 import os
 import sys
+import json
 from zoneinfo import ZoneInfo
 from datetime import datetime
 from dotenv import load_dotenv
 from supabase import create_client, Client
-from garminconnect import Garmin, GarminConnectAuthenticationError
+from garminconnect import (
+    Garmin,
+    GarminConnectAuthenticationError,
+    GarminConnectConnectionError,
+    GarminConnectTooManyRequestsError,
+)
 
 # Cargar las variables de entorno desde .env.local del proyecto Next.js
 env_path = os.path.join(os.path.dirname(__file__), '../../.env.local')
@@ -53,8 +59,22 @@ def process_user(user):
 
     try:
         print("Autenticando en Garmin...")
-        client = Garmin(email, password)
-        client.login()
+        # GitHub runners use shared IPs that Garmin rate-limits aggressively.
+        # Reuse Garmin's renewable DI session so normal cron runs do not hit SSO.
+        client = Garmin(email, password, retry_attempts=1)
+        saved_session = tokens.get("session")
+        tokenstore = json.dumps(saved_session) if isinstance(saved_session, dict) else None
+        client.login(tokenstore)
+
+        refreshed_session = json.loads(client.client.dumps())
+        if refreshed_session != saved_session:
+            supabase.table("profiles").update({
+                "garmin_auth_tokens": {
+                    **tokens,
+                    "session": refreshed_session,
+                }
+            }).eq("id", user_id).execute()
+            print("✓ Sesión renovable de Garmin guardada.")
 
         today = datetime.now(ZoneInfo(os.environ.get("GARMIN_TIMEZONE", "Europe/Madrid")))
         date_str = today.isoformat()[:10]
@@ -150,8 +170,17 @@ def process_user(user):
         print("✓ Datos guardados exitosamente en Supabase.")
         return True
 
+    except GarminConnectTooManyRequestsError:
+        print("Garmin ha limitado temporalmente la IP del servidor.")
+        return "blocked"
     except GarminConnectAuthenticationError:
         print("Error de autenticación. Las credenciales caducaron o son incorrectas.")
+    except GarminConnectConnectionError as e:
+        message = str(e).lower()
+        if "429" in message or "403" in message or "cloudflare" in message:
+            print("Garmin ha bloqueado temporalmente la IP del servidor.")
+            return "blocked"
+        print("Error de conexión temporal con Garmin.")
     except Exception as e:
         print(f"Error de sincronización: {type(e).__name__}")
     return False
@@ -164,10 +193,26 @@ def main():
         print(f"Encontrados {len(users)} usuarios con Garmin conectado.")
 
         failures = 0
+        skipped = 0
+        successful = 0
         for user in users:
-            if not process_user(user):
+            tokens = user.get("garmin_auth_tokens")
+            if not isinstance(tokens, dict) or not tokens.get("email") or not tokens.get("password"):
+                print(f"\n--- Omitiendo usuario {user['id']}: conexión Garmin incompleta ---")
+                skipped += 1
+                continue
+
+            result = process_user(user)
+            if result == "blocked":
                 failures += 1
-        print(f"Finalizado: {len(users) - failures} correctos, {failures} fallidos.")
+                print("Se detiene el lote para no prolongar el bloqueo de Garmin.")
+                break
+            if result:
+                successful += 1
+            else:
+                failures += 1
+
+        print(f"Finalizado: {successful} correctos, {failures} fallidos, {skipped} omitidos.")
         return 1 if failures else 0
 
     except Exception as e:
