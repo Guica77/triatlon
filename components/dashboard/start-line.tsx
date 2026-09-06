@@ -44,44 +44,58 @@ export function StartLine({ lanes, weekLabel }: StartLineProps) {
   const totalDone = lanes.reduce((acc, l) => acc + l.completedSessions, 0)
   const maxMinutes = Math.max(1, ...lanes.map((l) => l.minutes))
 
+  const hasPlannedSessions = totalSessions > 0
+
   return (
-    <div className="rounded-2xl border border-border-default bg-surface-card p-4 sm:p-5">
+    <section
+      aria-label="Volumen de entrenamiento de la semana"
+      className="rounded-2xl border border-border-default bg-surface-card p-4 sm:p-5"
+    >
       {/* Header row */}
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="flex items-center gap-[3px] shrink-0" aria-hidden="true">
-            <span className="w-1.5 h-3 rounded-full bg-swim" />
-            <span className="w-1.5 h-3 rounded-full bg-bike" />
-            <span className="w-1.5 h-3 rounded-full bg-run" />
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="flex shrink-0 items-center gap-[3px]" aria-hidden="true">
+            <span className="h-3 w-1.5 rounded-full bg-swim" />
+            <span className="h-3 w-1.5 rounded-full bg-bike" />
+            <span className="h-3 w-1.5 rounded-full bg-run" />
           </span>
           <div className="min-w-0">
-            <h2 className="font-display text-lg font-bold tracking-tight text-text-primary leading-none">La línea de salida</h2>
-            <p className="text-[11px] text-text-muted font-medium mt-0.5 truncate">{weekLabel}</p>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-text-muted">Semana en pista</p>
+            <h2 className="mt-1 font-display text-lg font-bold leading-none tracking-tight text-text-primary">La línea de salida</h2>
+            <p className="mt-1 truncate text-[11px] font-medium text-text-muted">{weekLabel}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-mono text-text-secondary shrink-0">
-          <span className="w-1.5 h-1.5 rounded-full bg-bike inline-block" aria-hidden="true" />
-          <span>{totalDone}/{totalSessions} sesiones</span>
+        <div className="shrink-0 text-right">
+          <p className="font-display text-xl font-bold leading-none text-text-primary">{totalDone}/{totalSessions}</p>
+          <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-text-muted">sesiones</p>
         </div>
       </div>
 
       {/* Lanes */}
-      <div className="space-y-3.5">
+      <div className="space-y-4">
         {lanes.map((lane) => {
           const meta = LANE_META[lane.sport]
           const Icon = meta.icon
           const planned = maxMinutes > 0 ? (lane.minutes / maxMinutes) * 100 : 0
           const done = maxMinutes > 0 ? (lane.completedMinutes / maxMinutes) * 100 : 0
           const isFull = lane.minutes > 0 && lane.completedMinutes >= lane.minutes
+          const laneLabel = `${meta.label}: ${lane.completedMinutes} de ${lane.minutes} minutos completados`
 
           return (
-            <div key={lane.sport} className="flex items-center gap-3">
-              <div className={cn('w-20 shrink-0 flex items-center gap-1.5', meta.color)}>
-                <Icon className="w-3.5 h-3.5" aria-hidden="true" />
-                <span className="font-display text-xs font-bold uppercase tracking-widest">{meta.label}</span>
+            <div key={lane.sport} className="grid grid-cols-[5.25rem_minmax(0,1fr)_4rem] items-center gap-3">
+              <div className={cn('flex min-w-0 items-center gap-1.5', meta.color)}>
+                <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span className="truncate font-display text-xs font-bold uppercase tracking-widest">{meta.label}</span>
               </div>
 
-              <div className="relative flex-1 h-2 rounded-full bg-surface-hover overflow-hidden">
+              <div
+                className="relative h-2 overflow-hidden rounded-full bg-surface-hover"
+                role="progressbar"
+                aria-label={laneLabel}
+                aria-valuemin={0}
+                aria-valuemax={lane.minutes || 1}
+                aria-valuenow={Math.min(lane.completedMinutes, lane.minutes || 1)}
+              >
                 {/* planned volume */}
                 <div
                   className={cn('absolute inset-y-0 left-0 rounded-full opacity-40', meta.fill)}
@@ -93,11 +107,11 @@ export function StartLine({ lanes, weekLabel }: StartLineProps) {
                   style={{ width: `${Math.min(done, 100)}%` }}
                 />
                 {isFull && (
-                  <span className="absolute right-1 top-1/2 -translate-y-1/2 w-1 h-1 rounded-full bg-surface-card" aria-hidden="true" />
+                  <span className="absolute right-1 top-1/2 h-1 w-1 -translate-y-1/2 rounded-full bg-surface-card" aria-hidden="true" />
                 )}
               </div>
 
-              <div className="w-16 shrink-0 text-right">
+              <div className="min-w-0 text-right">
                 <span className={cn('font-mono text-[11px] font-medium', lane.minutes > 0 ? 'text-text-primary' : 'text-text-muted')}>
                   {lane.minutes > 0 ? fmtMinutes(lane.minutes) : '—'}
                 </span>
@@ -106,6 +120,12 @@ export function StartLine({ lanes, weekLabel }: StartLineProps) {
           )
         })}
       </div>
-    </div>
+
+      {!hasPlannedSessions && (
+        <p className="mt-5 border-t border-border-subtle pt-3 text-xs text-text-muted">
+          Todavía no hay sesiones planificadas para esta semana.
+        </p>
+      )}
+    </section>
   )
 }
