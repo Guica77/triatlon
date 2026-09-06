@@ -629,7 +629,7 @@ export function DashboardViewTabs({
                     <button
                       key={idx}
                       onClick={() => setSelectedDateStr(dateStr)}
-                      className={`relative min-h-[56px] sm:min-h-[72px] p-1.5 rounded-xl border flex flex-col justify-between items-start transition-all cursor-pointer ${
+                      className={`relative min-h-[56px] sm:min-h-[72px] p-1.5 rounded-xl border flex flex-col justify-between items-start transition-[background-color,border-color,box-shadow,opacity] cursor-pointer ${
                         isSelected
                           ? 'bg-accent/15 border-accent ring-2 ring-accent/20'
                           : isToday

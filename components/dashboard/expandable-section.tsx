@@ -1,8 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, Sparkles, Trophy, Heart, MessageSquare, BarChart2 } from 'lucide-react'
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { ChevronDown, Sparkles } from 'lucide-react'
+
+const EASE_OUT = [0.23, 1, 0.32, 1] as const
 
 interface ExpandableSectionProps {
   title?: string
@@ -17,15 +19,20 @@ export function ExpandableSection({
 }: ExpandableSectionProps) {
   const [isOpen, setIsOpen] = React.useState(false)
   const sectionRef = React.useRef<HTMLDivElement>(null)
+  const reduceMotion = useReducedMotion()
+  const motionEnabled = reduceMotion !== true
 
   const handleToggle = () => {
     const next = !isOpen
     setIsOpen(next)
-    // Smooth scroll to reveal the expanded content after it animates in
+    // Reveal expanded content without forcing motion-sensitive users through a smooth scroll.
     if (next && sectionRef.current) {
       setTimeout(() => {
-        sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 150)
+        sectionRef.current?.scrollIntoView({
+          behavior: reduceMotion ? 'auto' : 'smooth',
+          block: 'start',
+        })
+      }, reduceMotion ? 0 : 150)
     }
   }
 
@@ -34,11 +41,15 @@ export function ExpandableSection({
       {/* Toggle button */}
       <button
         onClick={handleToggle}
-        className="w-full flex items-center justify-center gap-2 py-3 text-xs font-bold text-text-muted hover:text-text-secondary transition-colors cursor-pointer"
+        className="flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 py-3 text-xs font-bold text-text-muted transition-[color] duration-150 ease-out hover:text-text-secondary focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg-app"
       >
-        <Icon className="w-4 h-4" />
+        <Icon className="w-4 h-4" aria-hidden="true" />
         {isOpen ? 'Ocultar secciones' : title}
-        <motion.span animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={motionEnabled ? { duration: 0.2, ease: EASE_OUT } : { duration: 0 }}
+          aria-hidden="true"
+        >
           <ChevronDown className="w-4 h-4" />
         </motion.span>
       </button>
@@ -49,7 +60,7 @@ export function ExpandableSection({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            transition={motionEnabled ? { duration: 0.25, ease: EASE_OUT } : { duration: 0 }}
             className="overflow-hidden"
           >
             <div className="space-y-6 pt-2 pb-4">{children}</div>
