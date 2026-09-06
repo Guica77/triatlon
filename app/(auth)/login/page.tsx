@@ -94,7 +94,7 @@ function UnifiedLoginForm() {
   }
 
   return (
-    <AuthLayout title="Triatlon Pro" subtitle="Inicia sesión en tu cuenta">
+    <AuthLayout title="Triatlon Pro" subtitle="Inicia sesión en tu cuenta" lockViewport>
       <div className="space-y-6">
 
         {accountDeleted && (
@@ -313,7 +313,7 @@ function UnifiedLoginForm() {
 export default function UnifiedLoginPage() {
   return (
     <Suspense fallback={
-      <AuthLayout title="Triatlon Pro" subtitle="Cargando...">
+      <AuthLayout title="Triatlon Pro" subtitle="Cargando..." lockViewport>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
         </div>

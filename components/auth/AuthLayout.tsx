@@ -8,15 +8,37 @@ interface AuthLayoutProps {
   title: string;
   subtitle: string;
   isAthlete?: boolean;
+  lockViewport?: boolean;
 }
 
-export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
+export function AuthLayout({ children, title, subtitle, lockViewport = false }: AuthLayoutProps) {
   const [mounted, setMounted] = React.useState(false);
   const reduceMotion = useReducedMotion();
   React.useEffect(() => setMounted(true), []);
 
+  React.useEffect(() => {
+    if (!lockViewport) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousBodyOverscroll = document.body.style.overscrollBehavior;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousHtmlOverscroll = document.documentElement.style.overscrollBehavior;
+
+    document.body.style.overflow = 'hidden';
+    document.body.style.overscrollBehavior = 'none';
+    document.documentElement.style.overflow = 'hidden';
+    document.documentElement.style.overscrollBehavior = 'none';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.style.overscrollBehavior = previousBodyOverscroll;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.documentElement.style.overscrollBehavior = previousHtmlOverscroll;
+    };
+  }, [lockViewport]);
+
   return (
-    <div className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-x-hidden bg-surface-app px-4 py-6 font-sans selection:bg-accent/30 sm:p-6">
+    <div className={`relative flex w-full flex-col items-center justify-center overflow-x-hidden bg-surface-app px-4 py-6 font-sans selection:bg-accent/30 sm:p-6 ${lockViewport ? 'fixed inset-0 h-svh min-h-0 overflow-y-hidden overscroll-none' : 'min-h-screen'}`}>
       {/* Thin discipline bars — swim / bike / run */}
       <div className="absolute left-0 right-0 top-0 flex h-[3px]">
         <div className="flex-1 bg-swim/70" />
