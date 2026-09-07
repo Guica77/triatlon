@@ -219,68 +219,8 @@ export async function fetchCoachAthletes(): Promise<{ data?: AthleteRosterItem[]
 /**
  * Associates an athlete with the coach by looking up their email.
  */
-export async function addAthleteByEmail(email: string): Promise<{ success?: boolean; error?: string }> {
-  if (!email || !email.trim()) {
-    return { error: 'El correo electrónico es obligatorio' }
-  }
-
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'No autorizado' }
-  }
-
-  try {
-    // 1. Find the athlete profile by email
-    const { data: athleteProfile, error: profileError } = await supabase
-      .from('profiles')
-      .select('id, first_name')
-      .eq('email', email.trim().toLowerCase())
-      .maybeSingle()
-
-    if (profileError) {
-      console.error('Error looking up athlete by email:', profileError)
-      return { error: 'Error al buscar el atleta en la base de datos' }
-    }
-
-    if (!athleteProfile) {
-      return { error: 'No se encontró ningún atleta registrado con ese correo electrónico' }
-    }
-
-    if (athleteProfile.id === user.id) {
-      return { error: 'No puedes añadirte a ti mismo como atleta' }
-    }
-
-    // 2. Insert link into coach_athletes
-    const { error: linkError } = await supabase
-      .from('coach_athletes')
-      .insert({
-        coach_id: user.id,
-        athlete_id: athleteProfile.id,
-        status: 'active'
-      })
-
-    if (linkError) {
-      if (linkError.code === '23505') { // unique_violation
-        return { error: 'Este atleta ya se encuentra en tu roster' }
-      }
-      console.error('Error linking coach and athlete:', linkError)
-      return { error: 'Error al añadir el atleta al roster' }
-    }
-
-    // 3. Update profiles.coach_id for backwards compatibility
-    await supabase
-      .from('profiles')
-      .update({ coach_id: user.id } as any)
-      .eq('id', athleteProfile.id)
-
-    revalidatePath('/coach/dashboard')
-    return { success: true }
-  } catch (err: any) {
-    console.error('Exception in addAthleteByEmail:', err)
-    return { error: err.message || 'Error inesperado' }
-  }
+export async function addAthleteByEmail(_email: string): Promise<{ success?: boolean; error?: string }> {
+  return { error: 'Comparte tu enlace de invitación. El atleta debe aceptar antes de que puedas acceder a sus datos.' };
 }
 
 /**

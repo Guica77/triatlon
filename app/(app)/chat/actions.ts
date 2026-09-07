@@ -100,7 +100,7 @@ export async function sendMessage(receiverId: string, message: string, messageId
 
         if (receiverProfile?.email) {
           await resend.emails.send({
-            from: 'Triatlon Pro Notificaciones <onboarding@resend.dev>',
+            from: 'TriWaveX Notificaciones <onboarding@resend.dev>',
             to: receiverProfile.email,
             subject: `Nuevo mensaje de ${senderName}`,
             html: `<div style="font-family: sans-serif; padding: 20px;">
@@ -281,6 +281,7 @@ export async function getChatParticipants(): Promise<{ data?: ChatParticipant[];
  */
 export async function getAvailableCoaches(): Promise<{ data?: ChatParticipant[]; error?: string }> {
   const supabase = await createClient()
+  if (!(await supabase.auth.getUser()).data.user) return { error: 'No autorizado' }
   
   try {
     const { createAdminClient } = await import('@/lib/supabase/admin')
@@ -288,7 +289,7 @@ export async function getAvailableCoaches(): Promise<{ data?: ChatParticipant[];
 
     const { data: coaches, error } = await supabaseAdmin
       .from('profiles')
-      .select('id, first_name, last_name, email, role, level')
+      .select('id, first_name, last_name, role, level')
       .eq('role', 'coach')
       .order('created_at', { ascending: false })
 
@@ -297,7 +298,7 @@ export async function getAvailableCoaches(): Promise<{ data?: ChatParticipant[];
       return { error: 'Error al obtener la lista de entrenadores' }
     }
 
-    return { data: coaches as any[] }
+    return { data: (coaches || []).map(coach => ({ ...coach, email: null })) as ChatParticipant[] }
   } catch (err: unknown) {
     console.error('Exception in getAvailableCoaches:', err)
     return { error: err instanceof Error ? err.message : 'Error inesperado' }
@@ -308,152 +309,35 @@ export async function getAvailableCoaches(): Promise<{ data?: ChatParticipant[];
  * Links the current athlete to a specific coach.
  */
 export async function linkCoachByAthlete(coachId: string): Promise<{ success?: boolean; error?: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'No autorizado' }
-  }
-
-  try {
-    const { createAdminClient } = await import('@/lib/supabase/admin')
-    const supabaseAdmin = createAdminClient()
-
-    // Insert the link
-    const { error: linkError } = await supabaseAdmin
-      .from('coach_athletes')
-      .insert({
-        coach_id: coachId,
-        athlete_id: user.id,
-        status: 'active'
-      })
-
-    if (linkError && linkError.code !== '23505') {
-      console.error('Error linking to coach:', linkError)
-      return { error: 'Error al vincular con el entrenador' }
-    }
-
-    // Update profile
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .update({ coach_id: coachId })
-      .eq('id', user.id)
-
-    if (profileError) {
-      console.error('Error updating profile with coach:', profileError)
-      return { error: 'Error al actualizar el perfil' }
-    }
-
-    const { revalidatePath } = await import('next/cache')
-    revalidatePath('/chat')
-    revalidatePath('/dashboard')
-
-    return { success: true }
-  } catch (err: unknown) {
-    console.error('Exception in linkCoachByAthlete:', err)
-    return { error: err instanceof Error ? err.message : 'Error inesperado' }
-  }
+  if (typeof coachId !== 'string' || !/^[a-zA-Z0-9_-]{4,64}$/.test(coachId)) return { error: 'Invitación no válida' };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'No autorizado' };
+  const { error } = await (supabase as any).rpc('accept_coach_invite', { invite: coachId });
+  if (error) return { error: 'No se pudo aceptar la invitación. Debes entrar como atleta y utilizar una invitación válida.' };
+  const { revalidatePath } = await import('next/cache');
+  revalidatePath('/chat'); revalidatePath('/dashboard');
+  return { success: true };
 }
 
 /**
  * Looks up a coach by invite code.
  */
 export async function lookupCoachByCode(code: string): Promise<{ success?: boolean; error?: string; coach?: any }> {
-  if (!code || !code.trim()) {
-    return { error: 'El código no puede estar vacío' }
-  }
-
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'No autorizado' }
-  }
-
-  try {
-    const formattedCode = code.trim().toUpperCase()
-
-    const { createAdminClient } = await import('@/lib/supabase/admin')
-    const supabaseAdmin = createAdminClient()
-
-    // Find the coach with this code
-    const { data: coachProfile, error: searchError } = await supabaseAdmin
-      .from('profiles')
-      .select('id, role, first_name, last_name')
-      .eq('invite_code' as any, formattedCode)
-      .maybeSingle()
-
-    if (searchError) {
-      console.error('Error looking up coach by code:', searchError)
-      return { error: 'Error al buscar el código' }
-    }
-
-    if (!coachProfile || coachProfile.role !== 'coach') {
-      return { error: 'Código de entrenador inválido' }
-    }
-
-    return { 
-      success: true, 
-      coach: {
-        id: coachProfile.id,
-        first_name: coachProfile.first_name,
-        last_name: coachProfile.last_name
-      }
-    }
-  } catch (err: unknown) {
-    console.error('Exception in lookupCoachByCode:', err)
-    return { error: err instanceof Error ? err.message : 'Error inesperado' }
-  }
+  if (typeof code !== 'string' || !/^[a-zA-Z0-9_-]{4,64}$/.test(code.trim())) return { error: 'Invitación no válida' };
+  const db = await createClient();
+  const { data, error } = await (db as any).rpc('lookup_coach_invite', { invite: code.trim() });
+  if (error || !data?.[0]) return { error: 'No se encontró una invitación válida.' };
+  return { success: true, coach: data[0] };
 }
 
-/**
- * Links the current athlete to a coach using an invite code.
- */
 export async function linkCoachByCode(code: string): Promise<{ success?: boolean; error?: string }> {
-  if (!code || !code.trim()) {
-    return { error: 'El código no puede estar vacío' }
-  }
-
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return { error: 'No autorizado' }
-  }
-
-  try {
-    const formattedCode = code.trim().toUpperCase()
-
-    const { createAdminClient } = await import('@/lib/supabase/admin')
-    const supabaseAdmin = createAdminClient()
-
-    // Find the coach with this code (use admin client to bypass RLS since users can't read coach profiles by default)
-    const { data: coachProfile, error: searchError } = await supabaseAdmin
-      .from('profiles')
-      .select('id, role')
-      .eq('invite_code' as any, formattedCode)
-      .maybeSingle()
-
-    if (searchError) {
-      console.error('Error looking up coach by code:', searchError)
-      return { error: 'Error al buscar el código' }
-    }
-
-    if (!coachProfile || coachProfile.role !== 'coach') {
-      return { error: 'Código de entrenador inválido' }
-    }
-
-    return await linkCoachByAthlete(coachProfile.id)
-  } catch (err: unknown) {
-    console.error('Exception in linkCoachByCode:', err)
-    return { error: err instanceof Error ? err.message : 'Error inesperado' }
-  }
+  return linkCoachByAthlete(code.trim());
 }
 
-/**
- * Fetches the public directory of available coaches.
- */
 export async function getCoachDirectory(): Promise<{ success?: boolean; error?: string; coaches?: any[] }> {
+  const db = await createClient()
+  if (!(await db.auth.getUser()).data.user) return { error: 'No autorizado' }
   try {
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const supabaseAdmin = createAdminClient()

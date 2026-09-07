@@ -86,10 +86,10 @@ export async function exportCalendarICS(): Promise<{ ics: string; filename: stri
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Triatlon Pro//ES',
+    'PRODID:-//TriWaveX//ES',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    'X-WR-CALNAME:Triatlon Pro - Entrenamientos',
+    'X-WR-CALNAME:TriWaveX - Entrenamientos',
   ]
 
   workouts.forEach((w, i) => {

@@ -1,3 +1,4 @@
+import { WelcomeReady } from '@/components/brand/authenticated-welcome'
 import * as React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -44,6 +45,7 @@ export default async function CoachDashboardPage() {
   const coachName = profile.first_name || 'Entrenador';
 
   return (
+    <>
     <CoachDashboardView 
       initialRoster={roster} 
       plans={plans} 
@@ -52,5 +54,7 @@ export default async function CoachDashboardPage() {
       coachId={user.id}
       initialInviteCode={profile.invite_code}
     />
+      <WelcomeReady />
+    </>
   )
 }

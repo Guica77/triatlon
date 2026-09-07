@@ -1,4 +1,5 @@
 'use client';
+import { ChatSafety } from '@/components/chat/chat-safety';
 
 import * as React from 'react';
 import { createClient } from '@/lib/supabase/client';
@@ -188,6 +189,7 @@ export function GroupChatPanel({ groupId, isOpen, onClose }: GroupChatPanelProps
                 </div>
                 <span className="text-[9px] text-text-muted mt-1 font-medium px-1">
                   {formatTime(msg.created_at)}
+                  {!isMe && <ChatSafety userId={msg.sender_id} messageId={msg.id} kind="group" />}
                 </span>
               </div>
             );

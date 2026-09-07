@@ -14,13 +14,13 @@ export function DeleteAccountCard() {
     if (confirmation !== 'ELIMINAR') return;
     setPending(true);
     setError(null);
-    const result = await deleteOwnAccount();
-    if (result.error) {
-      setError(result.error);
-      setPending(false);
-      return;
-    }
-    window.location.assign('/login?accountDeleted=1');
+    try {
+      const result = await deleteOwnAccount();
+      if (result.error) { setError(result.error); return; }
+      window.location.assign('/cuenta-eliminada' + (result.appleRevocation === 'manual' ? '?apple=manual' : ''));
+    } catch { setError('No se pudo completar la solicitud. Inténtalo de nuevo.'); }
+    finally { setPending(false); }
+
   }
 
   return (
@@ -45,7 +45,7 @@ export function DeleteAccountCard() {
               <button type="button" aria-label="Cerrar" disabled={pending} onClick={() => setOpen(false)} className="rounded-lg p-2 text-text-muted hover:bg-surface-hover"><X className="h-4 w-4" /></button>
             </div>
             <h2 id="delete-account-title" className="mt-4 text-lg font-extrabold text-text-primary">¿Eliminar tu cuenta definitivamente?</h2>
-            <p className="mt-2 text-sm leading-relaxed text-text-muted">Esta acción no se puede deshacer. Se eliminarán todos tus datos de Triatlon Pro.</p>
+            <p className="mt-2 text-sm leading-relaxed text-text-muted">Esta acción no se puede deshacer. Se eliminará tu cuenta y sus datos asociados del servicio activo. Consulta la política de privacidad para los plazos de copias y registros.</p>
             <label className="mt-5 block text-xs font-bold text-text-secondary" htmlFor="delete-confirmation">Escribe ELIMINAR para confirmar</label>
             <input id="delete-confirmation" autoComplete="off" value={confirmation} onChange={event => setConfirmation(event.target.value)} className="mt-2 w-full rounded-lg border border-border-default bg-surface-hover px-3 py-3 text-sm text-text-primary outline-none focus:border-danger" />
             {error && <p role="alert" className="mt-3 text-xs text-danger">{error}</p>}

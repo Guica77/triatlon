@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
   const icsContent = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Triatlon Pro//Training Calendar//ES',
+    'PRODID:-//TriWaveX//Training Calendar//ES',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     'X-WR-CALNAME:Plan Triatlón Pro',

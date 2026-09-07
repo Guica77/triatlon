@@ -1,0 +1,10 @@
+{"path":"/login","status":200,"passed":true,"redirect":null}
+{"path":"/dashboard","status":200,"passed":true,"redirect":null}
+{"path":"/chat","status":200,"passed":true,"redirect":null}
+{"path":"/api/ai/chat","status":401,"passed":true,"redirect":null}
+{"path":"/api/notifications/send","status":401,"passed":true,"redirect":null}
+{"path":"/api/workouts/export-calendar","status":401,"passed":true,"redirect":null}
+{"path":"/api/cron/daily-reminder","status":401,"passed":true,"redirect":null}
+{"path":"/api/exercises?page=1&pageSize=2","status":200,"passed":true,"redirect":null}
+{"path":"/manifest.json","status":200,"passed":true,"redirect":null}
+{"path":"/offline","status":200,"passed":true,"redirect":null}

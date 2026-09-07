@@ -42,7 +42,7 @@ export async function getOrRefreshStravaToken(userId: string): Promise<string | 
     });
 
     if (!refreshResponse.ok) {
-      console.error('Failed to refresh Strava token:', await refreshResponse.text());
+      console.error('Failed to refresh Strava token:', refreshResponse.status);
       return null;
     }
 
@@ -50,18 +50,6 @@ export async function getOrRefreshStravaToken(userId: string): Promise<string | 
     const newAccessToken = refreshData.access_token;
     const newRefreshToken = refreshData.refresh_token || device.refresh_token;
     const newExpiresAt = refreshData.expires_at * 1000;
-
-    // Actualizar la tabla profiles (que contiene strava_auth_tokens para webhooks)
-    await supabase
-      .from('profiles')
-      .update({
-        strava_auth_tokens: {
-          access_token: newAccessToken,
-          refresh_token: newRefreshToken,
-          expires_at: newExpiresAt,
-        }
-      } as any)
-      .eq('id', userId);
 
     // Actualizar la tabla user_connected_devices
     await supabase
@@ -92,6 +80,7 @@ export async function syncPhysiologyFromStrava(userId: string, accessToken: stri
       }
     });
 
+    if (!athleteResponse.ok) return { success: false, error: 'Strava no ha permitido consultar tu perfil. Inténtalo de nuevo.' };
     let stravaFtp: number | null = null;
     if (athleteResponse.ok) {
       const athleteData = await athleteResponse.json();
@@ -107,6 +96,7 @@ export async function syncPhysiologyFromStrava(userId: string, accessToken: stri
       }
     });
 
+    if (!activitiesResponse.ok) return { success: false, error: 'No se han podido consultar tus actividades de Strava.' };
     const runPaces: number[] = []; // seconds per km
     const swimPaces: number[] = []; // seconds per 100m
     let maxRidePower = 0;
@@ -157,17 +147,18 @@ export async function syncPhysiologyFromStrava(userId: string, accessToken: stri
     if (finalRunPace) updatePayload.current_run_pace = finalRunPace;
 
     if (Object.keys(updatePayload).length > 0) {
-      console.log('Syncing physiology metrics from Strava:', updatePayload);
+
       const { error } = await supabase
         .from('profiles')
         .update(updatePayload)
         .eq('id', userId);
 
       if (error) {
-        console.error('Error updating profile with Strava physiology:', error);
+        return { success: false, error: 'No se han podido guardar las métricas.' };
       }
     }
-  } catch (error) {
-    console.error('Exception during Strava physiology sync:', error);
+    return { success: true };
+  } catch {
+    return { success: false, error: 'No se ha podido completar la sincronización con Strava.' };
   }
 }

@@ -1,5 +1,7 @@
 'use server'
 
+import { authorizeAIRequest } from '@/lib/ai-privacy'
+
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -258,7 +260,7 @@ export async function askNutritionAI(
     }
 
     // Try AI-powered response first (with fallback to rule-based)
-    if (isAIAvailable()) {
+    if (user && isAIAvailable() && (await authorizeAIRequest(user.id, user.id)).allowed) {
       try {
         let workoutSport = 'descanso';
         let workoutDuration = 0;

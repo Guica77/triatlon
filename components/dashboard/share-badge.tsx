@@ -12,7 +12,7 @@ interface ShareBadgeProps {
 export function ShareBadge({ badge }: ShareBadgeProps) {
   const [isOpen, setIsOpen] = React.useState(false)
 
-  const shareText = `¡Desbloqueé el logro "${badge.name}" en Triatlon Pro!\n\n${badge.description}\n\n#TriatlonPro #Triathlon #Training`
+  const shareText = `¡Desbloqueé el logro "${badge.name}" en TriWaveX!\n\n${badge.description}\n\n#TriWaveX #Triathlon #Training`
 
   const handleShare = async () => {
     if (navigator.share) {

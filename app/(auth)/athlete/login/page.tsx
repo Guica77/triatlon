@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuthenticatedWelcome, WelcomeReady } from '@/components/brand/authenticated-welcome';
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthLayout } from '@/components/auth/AuthLayout';
@@ -9,9 +10,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AthleteLoginPage() {
   const router = useRouter();
+  const { start: startWelcome } = useAuthenticatedWelcome();
+  const submitting = React.useRef(false);
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [email, setEmail] = React.useState('');
   const [emailError, setEmailError] = React.useState<string | null>(null);
@@ -26,20 +28,23 @@ export default function AthleteLoginPage() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (emailError) return;
-
+    if (submitting.current || emailError) return;
+    submitting.current = true;
     setLoading(true);
     setError(null);
-
-    const formData = new FormData(event.currentTarget);
-    const result = await loginAthlete(formData);
-
-    if (result.error) {
-      setError(result.error);
+    try {
+      const result = await loginAthlete(new FormData(event.currentTarget));
+      if (result.error) {
+        setError(result.error);
+        submitting.current = false;
+        setLoading(false);
+        return;
+      }
+      startWelcome(('destination' in result && typeof result.destination === 'string') ? result.destination : '/dashboard');
+    } catch {
+      submitting.current = false;
       setLoading(false);
-    } else {
-      setSuccess(true);
-      setTimeout(() => router.push('/dashboard'), 800);
+      setError('No se ha podido iniciar sesión. Inténtalo de nuevo.');
     }
   }
 
@@ -49,22 +54,9 @@ export default function AthleteLoginPage() {
       subtitle="Tu plan de entrenamiento personalizado te espera"
       isAthlete={true}
     >
+      <WelcomeReady immediate />
       <div className="space-y-6 relative z-10 overflow-x-hidden w-full pb-24 sm:pb-8">
         <AnimatePresence mode="wait">
-          {success ? (
-            <motion.div
-              key="success"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-8 space-y-4"
-            >
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-emerald-400" />
-              </div>
-              <p className="text-sm text-text-secondary font-medium">¡Bienvenido! Cargando tu dashboard...</p>
-            </motion.div>
-          ) : (
             <motion.form
               key="form"
               initial={{ opacity: 0 }}
@@ -163,7 +155,7 @@ export default function AthleteLoginPage() {
                 )}
               </motion.button>
             </motion.form>
-          )}
+
         </AnimatePresence>
 
         <div className="text-center pt-4">

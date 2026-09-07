@@ -111,7 +111,7 @@ export async function ingestActivityTelemetry(payload: TelemetryPayload) {
       })
     );
 
-    (revalidateTag as any)('analytics');
+    revalidateTag('analytics', 'max');
     revalidatePath('/dashboard');
     revalidatePath('/analytics');
     revalidatePath('/feedback');
@@ -188,44 +188,8 @@ async function evaluateAndAdjustTrainingPlan(userId: string, workoutId: string, 
 /**
  * Función helper para simular la ingesta de un reloj Garmin/Strava desde el cliente (Demo interactiva)
  */
-export async function simulateWatchIngestion(workoutId: string, sportType: string) {
-  try {
-    const supabase = await createClient();
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData?.user) return { error: 'No autorizado' };
-
-    const userId = authData.user.id;
-
-    // Generar telemetría realista con exceso de fatiga para demostrar el recálculo dinámico
-    const actualDuration = sportType === 'ciclismo' ? 120 : sportType === 'carrera' ? 75 : sportType === 'fuerza' ? 50 : 60;
-    const actualDistance = sportType === 'ciclismo' ? 62.5 : sportType === 'carrera' ? 14.2 : sportType === 'fuerza' ? 0 : 3.2;
-    const actualTss = sportType === 'ciclismo' ? 145 : sportType === 'carrera' ? 110 : sportType === 'fuerza' ? 45 : 85;
-
-    const payload: TelemetryPayload = {
-      workout_id: workoutId,
-      user_id: userId,
-      source_provider: Math.random() > 0.5 ? 'garmin' : 'strava',
-      external_activity_id: `ext-${Date.now()}`,
-      actual_duration_min: actualDuration,
-      moving_time_min: actualDuration - 3,
-      actual_distance_km: actualDistance,
-      elevation_gain_m: sportType === 'ciclismo' ? 850 : sportType === 'fuerza' ? 0 : 180,
-      actual_tss: actualTss,
-      avg_hr: sportType === 'fuerza' ? 128 : 152,
-      max_hr: sportType === 'fuerza' ? 158 : 178,
-      avg_power: sportType === 'ciclismo' ? 215 : undefined,
-      normalized_power: sportType === 'ciclismo' ? 230 : undefined,
-      avg_cadence: sportType === 'carrera' ? 176 : sportType === 'fuerza' ? undefined : 92,
-      training_effect_aerobic: sportType === 'fuerza' ? 2.2 : 4.2,
-      training_effect_anaerobic: sportType === 'fuerza' ? 2.8 : 2.1,
-      raw_payload: { simulated: true, device: 'Garmin Forerunner 965', firmware: '18.22' }
-    };
-
-    return await ingestActivityTelemetry(payload);
-
-  } catch (error: any) {
-    return { error: error.message || 'Error en la simulación' };
-  }
+export async function simulateWatchIngestion(_workoutId: string, _sportType: string) {
+  return { error: 'No se pueden generar actividades de reloj simuladas. Registra la sesión manualmente o conecta Strava.' };
 }
 
 /**
@@ -284,7 +248,7 @@ export async function syncAllPendingWorkouts() {
       }
     }
 
-    (revalidateTag as any)('analytics');
+    revalidateTag('analytics', 'max');
     revalidatePath('/dashboard');
     revalidatePath('/analytics');
     revalidatePath('/feedback');

@@ -1,5 +1,6 @@
 'use client';
 
+import { WelcomeReady } from '@/components/brand/authenticated-welcome';
 import * as React from 'react';
 import { Compass, ArrowRight, Activity } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
@@ -8,6 +9,7 @@ import { AnimatedButton } from '@/components/ui/animated-button';
 export default function NotFoundPage() {
   return (
     <div className="min-h-screen bg-[#09090b] text-text-primary flex flex-col items-center justify-center p-4 selection:bg-swim/20">
+      <WelcomeReady immediate />
 
       <ProCard className="w-full max-w-md p-8 text-center space-y-6 bg-bg-app/40 border-border-default/80 backdrop-blur-md">
         <div className="mx-auto w-16 h-16 rounded-full bg-swim/10 border border-swim/20 flex items-center justify-center">
@@ -33,7 +35,7 @@ export default function NotFoundPage() {
 
       <div className="mt-8 flex items-center gap-1.5 text-[10px] text-text-secondary uppercase tracking-widest font-semibold">
         <Activity className="w-3 h-3" />
-        <span>Triatlon Pro Navigation Guard</span>
+        <span>TriWaveX Navigation Guard</span>
       </div>
     </div>
   );

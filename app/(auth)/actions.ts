@@ -2,7 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { headers, cookies } from 'next/headers';
 
 const getDynamicBaseUrl = async () => {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
@@ -26,7 +27,9 @@ const getDynamicBaseUrl = async () => {
 // OAUTH ACTIONS
 // =======================
 export async function getOAuthUrl(provider: 'apple' | 'google', role?: 'athlete' | 'coach') {
+  if (provider !== 'apple' && provider !== 'google') return { error: 'Proveedor no válido' };
   const supabase = await createClient();
+  (await cookies()).set('oauth_provider', provider, { path: '/', maxAge: 600, httpOnly: true, sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
 
   if (role) {
     const { cookies } = await import('next/headers');
@@ -83,22 +86,11 @@ export async function loginAthlete(formData: FormData) {
       await supabaseAdmin.from('profiles').update({ first_login_at: new Date().toISOString() }).eq('id', session.user.id);
     }
 
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    const inviteCoachId = cookieStore.get('invite_coach_id')?.value;
-    if (inviteCoachId) {
-      const { createAdminClient } = await import('@/lib/supabase/admin');
-      const supabaseAdmin = createAdminClient();
-      await supabaseAdmin.from('coach_athletes').insert({
-        coach_id: inviteCoachId,
-        athlete_id: session.user.id,
-        status: 'active'
-      }); // Ignore duplicate
-      await supabaseAdmin.from('profiles').update({ coach_id: inviteCoachId }).eq('id', session.user.id);
-      cookieStore.delete('invite_coach_id');
-    }
+
   }
 
+  const pendingInvite = (await cookies()).get('invite_coach_id')?.value;
+  if (pendingInvite && /^[a-zA-Z0-9_-]{4,64}$/.test(pendingInvite)) return { success: true, destination: `/invite/${encodeURIComponent(pendingInvite)}` };
   // We rely on middleware or callback to handle redirection
   // We can return success to let the client component redirect to dashboard
   return { success: true };
@@ -133,7 +125,7 @@ export async function registerAthlete(formData: FormData) {
     
     await supabaseAdmin
       .from('profiles')
-      .upsert({
+      .insert({
         id: authData.user.id,
         first_name: firstName || '',
         last_name: lastName || '',
@@ -142,20 +134,6 @@ export async function registerAthlete(formData: FormData) {
         role: 'athlete',
       });
 
-    // Magic Link resolution on Registration
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    const inviteCoachId = cookieStore.get('invite_coach_id')?.value;
-    
-    if (inviteCoachId) {
-      await supabaseAdmin.from('coach_athletes').insert({
-        coach_id: inviteCoachId,
-        athlete_id: authData.user.id,
-        status: 'active'
-      });
-      await supabaseAdmin.from('profiles').update({ coach_id: inviteCoachId }).eq('id', authData.user.id);
-      cookieStore.delete('invite_coach_id');
-    }
   }
 
   if (authData.session) {
@@ -214,7 +192,7 @@ export async function registerCoach(formData: FormData) {
     
     await supabaseAdmin
       .from('profiles')
-      .upsert({
+      .insert({
         id: authData.user.id,
         first_name: firstName || '',
         last_name: lastName || '',

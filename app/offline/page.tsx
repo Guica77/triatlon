@@ -33,7 +33,7 @@ export default function OfflinePage() {
         <div className="space-y-2">
           <h1 className="text-xl font-bold text-white uppercase tracking-wider">Sin Conexión a Internet</h1>
           <p className="text-sm text-text-muted leading-relaxed">
-            Parece que has perdido la señal. Triatlon Pro requiere una conexión activa para recalcular tu fatiga y sincronizar tus series en tiempo real.
+            Parece que has perdido la señal. TriWaveX requiere una conexión activa para recalcular tu fatiga y sincronizar tus series en tiempo real.
           </p>
         </div>
 
@@ -70,7 +70,7 @@ export default function OfflinePage() {
 
       <div className="mt-8 flex items-center gap-1.5 text-[10px] text-text-secondary uppercase tracking-widest font-semibold">
         <Activity className="w-3 h-3" />
-        <span>Triatlon Pro Offline Mode</span>
+        <span>TriWaveX Offline Mode</span>
       </div>
     </div>
   );

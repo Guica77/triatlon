@@ -3,11 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 const h = vi.hoisted(() => ({
   user: { id: '11111111-1111-4111-8111-111111111111' } as { id: string } | null,
   available: true,
+  consent: true,
   role: 'athlete',
   context: vi.fn(),
   embed: vi.fn(),
   stream: vi.fn(),
 }))
+vi.mock('@/lib/ai-privacy', () => ({ authorizeAIRequest: async () => ({ allowed: h.consent, code: 'AI_CONSENT_REQUIRED' }) }))
 vi.mock('@/lib/supabase/server', () => ({ createClient: async () => ({
   auth: { getUser: async () => ({ data: { user: h.user }, error: null }) },
   from: () => {
@@ -32,7 +34,7 @@ const request = (body: unknown) => new Request('http://localhost/api/ai/chat', {
 
 describe('dashboard → AI API → authorized RAG context', () => {
   beforeEach(() => {
-    h.user = { id: '11111111-1111-4111-8111-111111111111' }; h.available = true; h.role = 'athlete'
+    h.user = { id: '11111111-1111-4111-8111-111111111111' }; h.available = true; h.consent = true; h.role = 'athlete'
     h.context.mockReset().mockResolvedValue({ text: 'CONTEXTO: sesión propia', sources: [{ id: 'test-source' }] })
     h.embed.mockReset().mockResolvedValue(Array(768).fill(0.1))
     h.stream.mockReset().mockImplementation(async () => new ReadableStream({ start(controller) {
@@ -42,6 +44,13 @@ describe('dashboard → AI API → authorized RAG context', () => {
   it('rejects unauthenticated requests before retrieving private data', async () => {
     h.user = null
     expect((await POST(request(payload))).status).toBe(401)
+    expect(h.context).not.toHaveBeenCalled()
+  })
+  it('does not send embeddings or context without consent', async () => {
+    h.consent = false
+    expect((await POST(request(payload))).status).toBe(403)
+    expect(h.embed).not.toHaveBeenCalled()
+    expect(h.stream).not.toHaveBeenCalled()
     expect(h.context).not.toHaveBeenCalled()
   })
   it('rejects malformed JSON', async () => {

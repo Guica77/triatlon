@@ -1,14 +1,15 @@
 'use client'
+import { ChatSafety } from '@/components/chat/chat-safety'
 
 import * as React from 'react'
 import { mergeMessages, restoreOutbox, type PendingMessage } from '@/lib/chat-messages'
 import { ChatLoadingState } from '@/components/chat/chat-loading-state'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Send, 
-  Search, 
-  MessageSquare, 
-  ChevronRight, 
+import {
+  Send,
+  Search,
+  MessageSquare,
+  ChevronRight,
   ArrowLeft,
   Sparkles,
   Plus,
@@ -31,9 +32,9 @@ interface ChatViewProps {
   availableCoaches?: ChatParticipant[]
 }
 
-export function ChatView({ 
-  initialParticipants, 
-  currentUserRole, 
+export function ChatView({
+  initialParticipants,
+  currentUserRole,
   currentUserId,
   preselectedParticipantId,
   availableCoaches = []
@@ -103,7 +104,7 @@ export function ChatView({
     syncedMessageRef.current = null
     messagesRef.current = []
     setMessages([])
-    
+
     try {
       const res = await getMessages(part.id)
       if (requestId !== historyRequestRef.current || selectedIdRef.current !== part.id) return
@@ -114,7 +115,7 @@ export function ChatView({
         syncedMessageRef.current = res.data.at(-1)?.id || null
         saveOutbox(outboxRef.current.filter(m => !res.data!.some(saved => saved.id === m.id)))
       }
-      
+
       // Mark messages from this participant as read
       await markMessagesAsRead(part.id)
       await refreshUnreadCount()
@@ -286,7 +287,7 @@ export function ChatView({
 
   return (
     <div className="flex min-h-0 flex-1 overflow-hidden rounded-none border border-border-subtle bg-surface-elevated shadow-card sm:rounded-2xl">
-      
+
       {/* Left Sidebar */}
       {hasSidebar ? (
         <div className={`w-full shrink-0 border-border-default bg-surface-app sm:w-80 sm:border-r ${selectedPart ? 'hidden sm:flex' : 'flex'} flex-col`}>
@@ -354,7 +355,7 @@ export function ChatView({
             <div className="flex shrink-0 items-center justify-between border-b border-border-default bg-surface-card px-4 py-3 sm:px-6 sm:py-4">
               <div className="flex items-center gap-3">
                 {hasSidebar && (
-                  <button 
+                  <button
                     onClick={() => { selectedIdRef.current = null; historyRequestRef.current++; setSelectedPart(null) }}
                     className="sm:hidden min-h-10 min-w-10 -ml-1 shrink-0 rounded-lg text-text-secondary transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
                     aria-label="Volver"
@@ -374,7 +375,7 @@ export function ChatView({
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-1 sm:gap-3">
                 {/* Realtime badge (hidden on narrow screens to save space for call buttons) */}
                 <div className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-success/30 bg-bike-subtle px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-bike sm:flex sm:text-[9px]">
@@ -382,11 +383,9 @@ export function ChatView({
                   <span className="hidden sm:inline">Mensajes</span>
                   <span className="sm:hidden">Mensajes</span>
                 </div>
-                
+
                 <div className="flex shrink-0 items-center">
-                  <button type="button" className="min-h-10 min-w-10 rounded-xl p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-swim cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50" aria-label="Opciones">
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
+                  <ChatSafety key={selectedPart.id} userId={selectedPart.id} messageId={[...messages].reverse().find(m => m.sender_id === selectedPart.id)?.id} />
                 </div>
               </div>
             </div>
@@ -417,7 +416,7 @@ export function ChatView({
                       const pending = !messages.some(saved => saved.id === m.id) ? outbox.find(item => item.id === m.id) : undefined
                       const isOwn = m.sender_id === currentUserId
                       return (
-                        <div 
+                        <div
                           key={m.id}
                           className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-1`}
                         >
@@ -468,30 +467,18 @@ export function ChatView({
             </div>
 
             {/* Input form */}
-            <form 
+            <form
               onSubmit={handleSendMessage}
               className="z-10 flex shrink-0 items-end gap-2 border-t border-border-default bg-surface-elevated p-2 pb-[calc(0.5rem+var(--chat-bottom-inset,env(safe-area-inset-bottom)))] shadow-[0_-6px_18px_rgba(0,0,0,0.18)] sm:p-3"
             >
               {/* Attachment Icon */}
-              <button 
-                type="button" 
-                className="min-h-10 min-w-10 shrink-0 rounded-xl p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-coral-400 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50"
-                aria-label="Adjuntar archivo"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
-              
+
+
               {/* Input container wrapper */}
               <div className="flex min-h-[40px] flex-1 items-end rounded-2xl border border-border-default bg-surface-card px-1.5 py-1 shadow-card">
                 {/* Emoji Icon */}
-                <button 
-                  type="button" 
-                  className="min-h-10 min-w-10 shrink-0 p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:text-text-secondary cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
-                  aria-label="Emojis"
-                >
-                  <Smile className="w-5 h-5" />
-                </button>
-                
+
+
                 <textarea
                   value={newMessageText}
                   onChange={(e) => {
@@ -507,36 +494,14 @@ export function ChatView({
                   rows={1}
                   className="min-h-[36px] max-h-[120px] w-full resize-none self-center border-none bg-transparent px-1 py-2 text-base text-text-primary outline-none placeholder:text-text-muted custom-scrollbar"
                 />
-                
+
                 {/* Paperclip Icon */}
-                <button 
-                  type="button" 
-                  className="min-h-10 min-w-10 shrink-0 p-2 text-text-muted transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:text-text-secondary cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
-                  aria-label="Compartir documento"
-                >
-                  <Paperclip className="w-5 h-5" />
-                </button>
+
               </div>
-              
-              {/* Send or Voice Record Icon */}
-              {newMessageText.trim() ? (
-                <AnimatedButton
-                  type="submit"
-                  variant="primary"
-                  size="icon"
-                  className="h-10 w-10 shrink-0 rounded-xl !bg-primary !text-primary-foreground shadow-button transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50"
-                >
-                  <Send className="ml-0.5 h-4 w-4 text-primary-foreground" />
-                </AnimatedButton>
-              ) : (
-                <button
-                  type="button"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl !bg-secondary !text-secondary-foreground shadow-button transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer self-end mb-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
-                  aria-label="Grabar audio"
-                >
-                  <Mic className="w-5 h-5" />
-                </button>
-              )}
+
+              <AnimatedButton type="submit" variant="primary" size="icon" disabled={!newMessageText.trim()} aria-label="Enviar mensaje" className="h-11 w-11 shrink-0 disabled:opacity-50">
+                <Send className="h-4 w-4" />
+              </AnimatedButton>
             </form>
           </>
         ) : (
@@ -564,13 +529,13 @@ export function ChatView({
                     Aún no tienes un entrenador asignado. Vincula tu cuenta mediante un código de invitación o elige un coach certificado.
                   </p>
                 </div>
-                
+
                 {/* Código de invitación */}
                 <form onSubmit={handleLinkByCode} className="mx-auto flex max-w-sm flex-col gap-3 rounded-2xl border border-border-default bg-surface-card p-5 text-left shadow-card">
                   <label className="text-center text-[10px] font-black uppercase tracking-wider text-text-muted">¿Tienes un código de entrenador?</label>
                   <div className="flex gap-2">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
                       placeholder="Ej: GUILLEPRO"
@@ -586,7 +551,7 @@ export function ChatView({
                     </AnimatedButton>
                   </div>
                 </form>
- 
+
                 <div className="relative py-4 max-w-sm mx-auto">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-border-subtle"></div>

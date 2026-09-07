@@ -1,3 +1,4 @@
+import { authorizeAIRequest } from '@/lib/ai-privacy';
 import { after, NextRequest, NextResponse } from 'next/server';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Json } from '@/types/database.types';
@@ -216,7 +217,7 @@ export async function processWebhookRequest(request: NextRequest) {
     // Atleta + perfil fisiológico para personalizar la celebración y el TSS.
     const { data: profile } = await supabase
       .from('profiles')
-      .select('id, first_name, current_ftp, current_run_pace, current_swim_pace, strava_auth_tokens')
+      .select('id, first_name, current_ftp, current_run_pace, current_swim_pace')
       .eq('external_athlete_id', externalAthleteId)
       .single();
 
@@ -289,9 +290,11 @@ export async function processWebhookRequest(request: NextRequest) {
     };
 
     // IA (con fallback por reglas) — la felicitación y la propuesta de reajuste.
+    const aiAllowed = (await authorizeAIRequest(userId, userId)).allowed;
+    const aiDependencies = aiAllowed ? {} : { chat: async () => ({ success: false, content: '', source: 'fallback' as const, error: 'AI consent unavailable' }) };
     const [congrats, refocus] = await Promise.all([
-      generateActivityCongrats(ctx),
-      generateRefocusProposal(ctx),
+      generateActivityCongrats(ctx, aiDependencies),
+      generateRefocusProposal(ctx, aiDependencies),
     ]);
 
     // TSS estimado con la descripción de la sesión planificada y, si hay, potencia.

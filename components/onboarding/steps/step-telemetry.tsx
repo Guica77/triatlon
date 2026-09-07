@@ -52,7 +52,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
         <div className="space-y-6">
           <div className="p-5 rounded-xl bg-coral-500/10 border border-coral-500/30">
             <h3 className="text-sm font-bold text-coral-500 mb-3 flex items-center gap-2">
-              <Zap className="w-4 h-4" /> ¿Cómo funciona el ecosistema Triatlon Pro?
+              <Zap className="w-4 h-4" /> ¿Cómo funciona el ecosistema TriWaveX?
             </h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2.5">

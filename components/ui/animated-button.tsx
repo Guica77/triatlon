@@ -32,10 +32,10 @@ const AnimatedButton = React.forwardRef<HTMLButtonElement, AnimatedButtonProps>(
     const tapAnimation = whileTap ?? { scale: 0.97 };
 
     const variants = {
-      primary: "bg-primary text-primary-foreground fine-hover:opacity-90 font-medium",
+      primary: "bg-primary text-primary-foreground shadow-button fine-hover:bg-lime-400 font-semibold",
       secondary: "bg-secondary text-secondary-foreground border border-border fine-hover:opacity-90",
-      danger: "bg-destructive text-destructive-foreground font-medium fine-hover:opacity-90",
-      ghost: "bg-transparent text-muted-foreground fine-hover:text-foreground fine-hover:bg-accent",
+      danger: "bg-destructive text-destructive-foreground font-medium fine-hover:bg-coral-400",
+      ghost: "bg-transparent text-muted-foreground fine-hover:text-accent fine-hover:bg-accent/10",
     }
 
     const sizes = {

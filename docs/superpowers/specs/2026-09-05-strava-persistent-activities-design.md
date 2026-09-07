@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Cuando un atleta publique una actividad en Strava, Triatlon Pro debe recibirla automáticamente, conservarla en Supabase y mostrarla con datos reales en el Dashboard, el entrenamiento diario, Análisis y Resumen. La actividad debe seguir disponible entre sesiones y no depender de consultar Strava cada vez que se abre una pantalla.
+Cuando un atleta publique una actividad en Strava, TriWaveX debe recibirla automáticamente, conservarla en Supabase y mostrarla con datos reales en el Dashboard, el entrenamiento diario, Análisis y Resumen. La actividad debe seguir disponible entre sesiones y no depender de consultar Strava cada vez que se abre una pantalla.
 
 ## Flujo de datos
 

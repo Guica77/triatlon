@@ -1,5 +1,5 @@
 /**
- * Performance Prediction System — Triatlon Pro
+ * Performance Prediction System — TriWaveX
  *
  * Predice rendimiento futuro basado en:
  * - PMC actual (CTL/ATL/TSB)

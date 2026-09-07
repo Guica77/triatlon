@@ -1,8 +1,9 @@
+import { WelcomeLoading } from '@/components/brand/authenticated-welcome';
 import * as React from 'react';
 
-export default function DashboardLoading() {
+function LoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-[#f3f4f6] pb-24 animate-pulse">
+    <div className="min-h-screen bg-bg-app pb-24 motion-safe:animate-pulse">
       {/* Sticky Header Skeleton */}
       <header className="sticky top-0 z-50 bg-surface-card border-b border-border-default ">
         {/* Nivel 1 */}
@@ -78,3 +79,5 @@ export default function DashboardLoading() {
     </div>
   );
 }
+
+export default function DashboardLoading() { return <WelcomeLoading fallback={<LoadingSkeleton />} />; }

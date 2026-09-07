@@ -2,49 +2,25 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
-import { fetchGarminData } from '@/lib/telemetry/garmin-sync';
 
 export async function deleteOwnAccount() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'La sesión ha caducado. Vuelve a iniciar sesión.' };
-
-  // Apple requires revoking its authorization when an account is deleted.
-  const hasAppleIdentity = user.identities?.some(identity => identity.provider === 'apple');
-  if (hasAppleIdentity) {
-    const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.provider_refresh_token || session?.provider_token;
-    const clientId = process.env.APPLE_CLIENT_ID;
-    const clientSecret = process.env.APPLE_CLIENT_SECRET;
-
-    if (token && clientId && clientSecret) {
-      const body = new URLSearchParams({
-        token,
-        client_id: clientId,
-        client_secret: clientSecret,
-        token_type_hint: session?.provider_refresh_token ? 'refresh_token' : 'access_token',
-      });
-      const response = await fetch('https://appleid.apple.com/auth/revoke', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body,
-        cache: 'no-store',
-      });
-      if (!response.ok) console.error('Apple authorization revocation failed:', response.status);
-    } else {
-      console.warn('Apple authorization could not be revoked: missing provider token or Apple credentials.');
+  try {
+    let appleRevocation: 'revoked' | 'manual' | 'not-applicable' = 'not-applicable';
+    if (user.identities?.some(identity => identity.provider === 'apple')) {
+      const { revokeAppleAuthorization } = await import('@/lib/auth/apple-revocation');
+      // A linked identity does not prove the current session token belongs to Apple.
+      appleRevocation = await revokeAppleAuthorization(user.id, null);
     }
-  }
-
-  const { createAdminClient } = await import('@/lib/supabase/admin');
-  const { error } = await createAdminClient().auth.admin.deleteUser(user.id, false);
-  if (error) {
-    console.error('Account deletion failed:', error);
-    return { error: 'No se ha podido eliminar la cuenta. Inténtalo de nuevo.' };
-  }
-
-  await supabase.auth.signOut();
-  return { success: true };
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const { error } = await createAdminClient().auth.admin.deleteUser(user.id, false);
+    if (error) return { error: 'No se ha podido eliminar la cuenta. Inténtalo de nuevo.' };
+    // The account is already gone: a sign-out failure must not report a false deletion failure.
+    try { await supabase.auth.signOut({ scope: 'local' }); } catch {}
+    return { success: true, appleRevocation };
+  } catch { return { error: 'No se ha podido completar la solicitud. Inténtalo de nuevo.' }; }
 }
 
 export async function updatePhysiologicalData(data: {
@@ -78,7 +54,7 @@ export async function updatePhysiologicalData(data: {
     return { error: 'Error al actualizar los datos fisiológicos' };
   }
 
-  (revalidateTag as any)('analytics');
+  revalidateTag('analytics', 'max');
   revalidatePath('/settings');
   revalidatePath('/dashboard');
   
@@ -114,64 +90,29 @@ export async function updateVirtualGarage(virtual_garage: string[]) {
 }
 
 export async function disconnectTelemetry(provider: string) {
+  if (!['strava', 'garmin'].includes(provider)) return { error: 'Proveedor no admitido.' };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'No autorizado' };
-  }
-
-  const updateData: Record<string, any> = {
-    updated_at: new Date().toISOString(),
-  };
-
-  const isProfileProvider = provider === 'strava' || provider === 'garmin';
-
-  if (isProfileProvider) {
-    if (provider === 'strava') {
-      updateData.strava_connected = false;
-      updateData.strava_auth_tokens = null;
-    } else if (provider === 'garmin') {
-      updateData.garmin_connected = false;
-      updateData.garmin_auth_tokens = null;
-    }
-
-    // If both disconnected, clear external_athlete_id
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('strava_connected, garmin_connected')
-      .eq('id', user.id)
-      .single();
-
-    const willBeStravaConnected = provider === 'strava' ? false : !!profile?.strava_connected;
-    const willBeGarminConnected = provider === 'garmin' ? false : !!profile?.garmin_connected;
-
-    if (!willBeStravaConnected && !willBeGarminConnected) {
-      updateData.external_athlete_id = null;
-    }
-
-    const { error } = await supabase
-      .from('profiles')
-      .update(updateData as any)
-      .eq('id', user.id);
-
-    if (error) {
-      console.error('Error disconnecting telemetry:', error);
-      return { error: 'Error al desconectar el dispositivo' };
+  if (!user) return { error: 'No autorizado' };
+  const { createAdminClient } = await import('@/lib/supabase/admin');
+  const admin = createAdminClient();
+  if (provider === 'strava') {
+    const { getOrRefreshStravaToken } = await import('@/lib/telemetry/strava-sync');
+    const token = await getOrRefreshStravaToken(user.id);
+    if (token) {
+      try {
+        const response = await fetch('https://www.strava.com/oauth/deauthorize', { method: 'POST', headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(10000) });
+        if (!response.ok && response.status !== 401) return { error: 'Strava no ha confirmado la desconexión. Inténtalo de nuevo.' };
+      } catch { return { error: 'No se ha podido contactar con Strava. Inténtalo de nuevo.' }; }
     }
   }
-
-  // Also delete from user_connected_devices
-  await supabase
-    .from('user_connected_devices')
-    .delete()
-    .eq('user_id', user.id)
-    .eq('provider', provider);
-
-  (revalidateTag as any)('analytics');
-  revalidatePath('/settings');
-  revalidatePath('/dashboard');
-  
+  const { error } = await admin.from('user_connected_devices').delete().eq('user_id', user.id).eq('provider', provider);
+  if (error) return { error: 'No se pudo eliminar la conexión.' };
+  const { error: profileError } = await admin.from('profiles').update(provider === 'strava'
+    ? { strava_connected: false, strava_auth_tokens: null, external_athlete_id: null }
+    : { garmin_connected: false, garmin_auth_tokens: null }).eq('id', user.id);
+  if (profileError) return { error: 'Conexión eliminada; no se pudo actualizar su estado. Recarga e inténtalo de nuevo.' };
+  revalidatePath('/settings'); revalidatePath('/dashboard');
   return { success: true };
 }
 
@@ -190,90 +131,22 @@ export async function syncPacesFromStravaAction() {
     return { error: 'No tienes una cuenta de Strava conectada o el token ha expirado y no se pudo refrescar.' };
   }
 
-  await syncPhysiologyFromStrava(user.id, token);
+  const result = await syncPhysiologyFromStrava(user.id, token);
+  if (!result.success) return { error: result.error };
 
-  (revalidateTag as any)('analytics');
+  revalidateTag('analytics', 'max');
   revalidatePath('/settings');
   revalidatePath('/dashboard');
   
   return { success: true };
 }
 
-export async function pushWeekWorkoutsToGarminAction() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'No autorizado' };
-  }
-
-  // 1. Check if Garmin (or Strava) is connected (In a real scenario, we check for Garmin tokens)
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('garmin_connected, strava_connected')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile?.garmin_connected && !profile?.strava_connected) {
-    return { error: 'No tienes ningún reloj Garmin (o cuenta conectada) para enviar entrenamientos.' };
-  }
-
-  // 2. Fetch the next 7 days of workouts for this user
-  const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
-  const nextWeek = new Date(now);
-  nextWeek.setDate(nextWeek.getDate() + 7);
-  const nextWeekStr = nextWeek.toISOString().split('T')[0];
-
-  const { data: workouts } = await supabase
-    .from('user_workouts')
-    .select('id, scheduled_date')
-    .eq('user_id', user.id)
-    .gte('scheduled_date', todayStr)
-    .lte('scheduled_date', nextWeekStr);
-
-  const workoutCount = workouts?.length || 0;
-
-  if (workoutCount === 0) {
-    return { error: 'No tienes entrenamientos planificados para los próximos 7 días en tu calendario.' };
-  }
-
-  // 3. Simulate pushing to Garmin Training API
-  // In a real scenario, we would iterate through workouts, generate FIT files or Garmin API JSON payloads,
-  // and send them via `POST https://apis.garmin.com/training-api/workouts`
-  await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API latency
-
-  return { success: true, count: workoutCount };
+export async function pushWeekWorkoutsToGarminAction(): Promise<{ error?: string; success?: boolean; count?: number }> {
+  return { error: 'El envío directo a Garmin todavía no está disponible. Puedes exportar tu calendario desde Ajustes.' };
 }
 
-export async function updateSubscriptionStatus(status: 'free' | 'pro' | 'coach') {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'No autorizado' };
-  }
-
-  const role = status === 'coach' ? 'coach' : 'athlete';
-
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      subscription_status: status,
-      role: role,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', user.id);
-
-  if (error) {
-    console.error('Error updating subscription status:', error);
-    return { error: 'Error al actualizar el estado de suscripción' };
-  }
-
-  revalidatePath('/settings');
-  revalidatePath('/dashboard');
-  
-  return { success: true };
+export async function updateSubscriptionStatus(_status: 'free' | 'pro' | 'coach') {
+  return { error: 'Las compras y los cambios de suscripción todavía no están disponibles. No se ha realizado ningún cobro ni cambio de plan.' };
 }
 
 export async function updateNutritionSettings(data: {
@@ -305,62 +178,10 @@ export async function updateNutritionSettings(data: {
   return { success: true };
 }
 
-export async function saveGarminCredentialsAction(email: string, password: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'No autorizado' };
-  }
-
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      garmin_connected: true,
-      garmin_auth_tokens: { email, password }, // For local test only
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', user.id);
-
-  if (error) {
-    console.error('Error saving Garmin credentials:', error);
-    return { error: 'Error al conectar con Garmin' };
-  }
-
-  revalidatePath('/settings');
-  revalidatePath('/dashboard');
-  
-  return { success: true };
+export async function saveGarminCredentialsAction(_email: string, _password: string) {
+  return { error: 'La conexión de Garmin con contraseña está deshabilitada. No guardamos tus credenciales de Garmin.' };
 }
 
 export async function testGarminSyncLocalAction() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { error: 'No autorizado' };
-  }
-
-  try {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('garmin_auth_tokens')
-      .eq('id', user.id)
-      .single();
-
-    const tokens = profile?.garmin_auth_tokens as { email?: string; password?: string } | null | undefined;
-    if (!tokens || !tokens.email || !tokens.password) {
-      return { error: 'No hay credenciales de Garmin guardadas. Por favor conéctalo en Ajustes.' };
-    }
-
-    const res = await fetchGarminData(tokens.email, tokens.password, user.id);
-    if (res.error || !res.data) {
-      return { error: res.error || 'Fallo al ejecutar la extracción de Garmin.' };
-    }
-
-    return res;
-  } catch (e: any) {
-    console.error('Error in testGarminSyncLocalAction:', e);
-    return { error: 'Error inesperado al probar conexión.' };
-  }
+  return { error: 'La sincronización directa con Garmin no está disponible.' };
 }

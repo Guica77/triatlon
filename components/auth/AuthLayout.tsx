@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
+import Image from 'next/image';
+import { TriWaveXMark } from '@/components/brand/triwavex-mark';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -55,14 +57,20 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
         >
           {/* Logo */}
           <div className="space-y-4 text-center">
+            <div className="overflow-hidden rounded-2xl border border-border-default bg-bg-deep shadow-card">
+              <Image
+                alt="TriWaveX: tres deportes, una ruta clara"
+                className="h-24 w-full object-cover object-center sm:h-32"
+                height={800}
+                priority
+                src="/brand/triwavex-simple-visual.svg"
+                width={1200}
+              />
+            </div>
             <div className="flex items-center justify-center gap-2">
-              <span className="flex items-center gap-[3px]" aria-hidden="true">
-                <span className="h-3.5 w-1.5 rounded-full bg-swim" />
-                <span className="h-3.5 w-1.5 rounded-full bg-bike" />
-                <span className="h-3.5 w-1.5 rounded-full bg-run" />
-              </span>
+              <TriWaveXMark className="h-8 w-8" />
               <span className="font-display text-2xl font-black leading-none tracking-tight text-text-primary">
-                TRIATLON&nbsp;<span className="text-accent">PRO</span>
+                TRIWAVE<span className="text-accent">X</span>
               </span>
             </div>
 
@@ -103,7 +111,7 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
             transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
             className="text-center text-[10px] tracking-wider text-text-muted"
           >
-            Triatlon Pro
+            TriWaveX
           </motion.p>
         </motion.div>
       )}

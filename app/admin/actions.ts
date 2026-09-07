@@ -75,9 +75,9 @@ export interface BusinessMetrics {
 // ============================================================
 
 export async function getBusinessMetrics(): Promise<BusinessMetrics> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('No autorizado')
+  if (!(await checkAdminAccess())) throw new Error('No autorizado')
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const supabase = createAdminClient()
 
   const now = new Date()
   const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
@@ -376,25 +376,6 @@ export async function checkAdminAccess(): Promise<boolean> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return false
-
-  // Check email pattern (primary)
-  const isAdminEmail = Boolean(
-    user.email === 'guillermo@triatlonpro.com' ||
-    user.email?.endsWith('@triatlonpro.com') ||
-    user.email?.includes('guillermo')
-  )
-
-  if (isAdminEmail) {
-    await supabase.from('profiles').update({ role: 'owner' }).eq('id', user.id)
-    return true
-  }
-
-  // Fallback: check profile role in DB (so role set in Supabase dashboard works too)
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  return profile?.role === 'owner'
+  const allowedIds = (process.env.ADMIN_USER_IDS || '').split(',').map(id => id.trim()).filter(Boolean)
+  return allowedIds.includes(user.id)
 }

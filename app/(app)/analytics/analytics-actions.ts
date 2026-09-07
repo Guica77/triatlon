@@ -258,41 +258,10 @@ export async function fetchAndCalculateAnalytics(userId: string): Promise<Analyt
     let hasRealData = false;
 
     // 1. Fetch real historical activities from Strava if connected
-    if (profile.strava_connected && profile.strava_auth_tokens) {
-      const tokens = profile.strava_auth_tokens as any;
-      let accessToken = tokens?.access_token;
-
+    if (profile.strava_connected) {
+      const { getOrRefreshStravaToken } = await import('@/lib/telemetry/strava-sync');
+      const accessToken = await getOrRefreshStravaToken(userId);
       if (accessToken) {
-        // Refresh token if expired
-        if (tokens?.expires_at && tokens.expires_at < Date.now()) {
-          const refreshResponse = await fetch('https://www.strava.com/oauth/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              client_id: process.env.STRAVA_CLIENT_ID,
-              client_secret: process.env.STRAVA_CLIENT_SECRET,
-              refresh_token: tokens.refresh_token,
-              grant_type: 'refresh_token',
-            }),
-          });
-
-          if (refreshResponse.ok) {
-            const refreshData = await refreshResponse.json();
-            accessToken = refreshData.access_token;
-            
-            await supabase
-              .from('profiles')
-              .update({
-                strava_auth_tokens: {
-                  access_token: refreshData.access_token,
-                  refresh_token: refreshData.refresh_token || tokens.refresh_token,
-                  expires_at: refreshData.expires_at * 1000,
-                }
-              } as any)
-              .eq('id', userId);
-          }
-        }
-
         // Fetch up to 80 activities to compute curves
         const stravaResponse = await fetch('https://www.strava.com/api/v3/athlete/activities?per_page=80', {
           headers: { 'Authorization': `Bearer ${accessToken}` }

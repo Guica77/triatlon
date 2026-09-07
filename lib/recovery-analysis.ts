@@ -1,5 +1,5 @@
 /**
- * Recovery Analysis System — Triatlon Pro
+ * Recovery Analysis System — TriWaveX
  *
  * Analiza la recuperación del atleta basado en:
  * - HRV (Heart Rate Variability)

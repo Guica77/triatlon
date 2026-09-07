@@ -70,7 +70,7 @@ export async function GET(req: Request) {
         const sportType = sportInfo ? sportInfo.sportType.charAt(0).toUpperCase() + sportInfo.sportType.slice(1) : 'Entrenamiento';
 
         const payload = JSON.stringify({
-          title: 'Triatlon Pro: Entreno del Día',
+          title: 'TriWaveX: Entreno del Día',
           body: `¡Buenos días! Tienes sesión de ${sportType} programada para hoy. ¡Vamos a por ello! 🚀`,
           url: '/dashboard',
         });

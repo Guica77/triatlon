@@ -47,7 +47,7 @@ export default function PrivacidadPage() {
             </div>
             <div>
               <h2 className="text-sm font-extrabold text-text-primary uppercase tracking-wider">Tu Privacidad es Primero</h2>
-              <p className="text-xs text-text-secondary">Última actualización: Junio de 2026</p>
+              <p className="text-xs text-text-secondary">Última actualización: 7 de septiembre de 2026</p>
             </div>
           </div>
 
@@ -65,7 +65,7 @@ export default function PrivacidadPage() {
             <ul className="list-disc pl-5 space-y-1.5 text-text-secondary">
               <li><strong>Datos de Perfil:</strong> Nombre, dirección de correo electrónico, nivel de experiencia y marcas objetivo de carreras.</li>
               <li><strong>Datos Fisiológicos:</strong> Zonas de frecuencia cardíaca, FTP de ciclismo, ritmos de natación y carrera a pie.</li>
-              <li><strong>Datos de Telemetría:</strong> Sincronización a través de Strava o Garmin para analizar el volumen, intensidad e ingesta de entrenamientos completados.</li>
+              <li><strong>Datos de Telemetría:</strong> Importación autorizada desde Strava para analizar el volumen, intensidad e ingesta de entrenamientos completados.</li>
               <li><strong>Preferencias Nutricionales:</strong> Preferencias de alimentos e ingredientes, alergias e ingredientes no deseados.</li>
             </ul>
 
@@ -73,11 +73,11 @@ export default function PrivacidadPage() {
               <CheckCircle2 className="w-4 h-4 text-bike shrink-0" /> 2. Uso de la Información
             </h3>
             <p>
-              Tus datos son de tu exclusiva propiedad. Los usamos únicamente para:
+              Tu entrenador vinculado puede acceder a los datos necesarios para el seguimiento deportivo. El servicio utiliza tus datos para:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 text-text-secondary">
-              <li>Generar planes de entrenamiento periódicos personalizados mediante IA.</li>
-              <li>Sincronizar tus relojes deportivos y actualizar el estado de forma y fatiga.</li>
+              <li>Ofrecer orientación mediante IA solo si das permiso explícito en Ajustes. Se pueden enviar consultas, datos deportivos, lesiones y preferencias a Google Gemini y/o Anthropic Claude según la configuración.</li>
+              <li>Importar actividades de Strava y actualizar las métricas disponibles. La conexión directa con Garmin y el envío al reloj no están disponibles.</li>
               <li>Enviarte alertas y notificaciones push necesarias (ej. recordatorios de nutrición o mensajes de tu entrenador).</li>
             </ul>
 
@@ -92,10 +92,11 @@ export default function PrivacidadPage() {
               <CheckCircle2 className="w-4 h-4 text-bike shrink-0" /> 4. Tus Derechos
             </h3>
             <p>
-              Puedes revocar en cualquier momento la conexión con plataformas de telemetría de terceros (Strava/Garmin), exportar tus datos deportivos y eliminar definitivamente tu cuenta desde el panel de Ajustes de la aplicación.
+              Desde Ajustes puedes desconectar Strava, retirar el permiso de IA, exportar entrenamientos e iniciar el borrado de tu cuenta. La exportación de entrenamientos no incluye todos tus datos personales. Si Apple requiere desconexión manual, se muestran instrucciones tras el borrado. Antes del lanzamiento comercial deben completarse el responsable legal, contacto, retención, backups y condiciones de proveedores; consulta Soporte.
             </p>
           </div>
 
+          <Link href="/soporte" className="underline">Soporte y solicitudes de privacidad</Link>
           <div className="pt-6 border-t border-border-subtle text-center">
             <Link href="/dashboard">
               <AnimatedButton variant="primary" className="!bg-coral-500 hover:!bg-coral-600 !text-white font-bold px-6 py-2 rounded-xl text-xs cursor-pointer">

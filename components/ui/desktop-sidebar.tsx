@@ -10,6 +10,7 @@ import {
 import { useNotifications } from '@/components/providers/notification-provider'
 import { athleteArea, matchesRoute } from '@/lib/athlete-navigation'
 import { cn } from '@/lib/utils'
+import { TriWaveXMark } from '@/components/brand/triwavex-mark'
 
 interface SidebarItem {
   href: string
@@ -85,14 +86,10 @@ export function DesktopSidebar() {
         'flex items-center gap-3 shrink-0 transition-[padding,justify-content] duration-200 ease-out',
         isCollapsed ? 'px-3.5 py-5 justify-center' : 'px-5 py-5'
       )}>
-        <div className="w-9 h-9 rounded-lg bg-surface-hover border border-border-subtle flex flex-col items-center justify-center gap-[3px] shrink-0">
-          <span className="w-4 h-[3px] rounded-full bg-swim" />
-          <span className="w-4 h-[3px] rounded-full bg-bike" />
-          <span className="w-4 h-[3px] rounded-full bg-run" />
-        </div>
+        <TriWaveXMark className="h-9 w-9 shrink-0" />
         {!isCollapsed && (
           <span className="font-display text-lg font-bold tracking-wide text-text-primary leading-none whitespace-nowrap">
-            TRIATLON&nbsp;<span className="text-accent">PRO</span>
+            TRIWAVE<span className="text-accent">X</span>
           </span>
         )}
       </div>

@@ -1,3 +1,5 @@
+import { welcomeDestination } from '@/lib/auth/welcome'
+import { rememberAppleToken } from '@/lib/auth/apple-revocation'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
@@ -10,10 +12,15 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data: { user, session }, error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error && user) {
       const cookieStore = await cookies()
+      const oauthProvider = cookieStore.get('oauth_provider')?.value
+      cookieStore.delete('oauth_provider')
+      if (oauthProvider === 'apple' && user.identities?.some(identity => identity.provider === 'apple')) {
+        try { await rememberAppleToken(user.id, session) } catch { console.warn('Apple revocation token could not be stored') }
+      }
       
       // -- OAUTH ROLE HANDLING --
       // Read the role from the cookie set securely by the client browser before the OAuth redirect
@@ -46,37 +53,9 @@ export async function GET(request: Request) {
         cookieStore.delete('oauth_role')
       }
 
-      // -- MAGIC LINK RESOLUTION --
-      const inviteCoachId = cookieStore.get('invite_coach_id')?.value
-
-      if (inviteCoachId) {
-        // Attempt to link athlete to coach
-        try {
-          const { createAdminClient } = await import('@/lib/supabase/admin')
-          const supabaseAdmin = createAdminClient()
-          
-          const { error: linkError } = await supabaseAdmin
-            .from('coach_athletes')
-            .insert({
-              coach_id: inviteCoachId,
-              athlete_id: user.id,
-              status: 'active'
-            })
-            
-          if (!linkError || linkError.code === '23505') {
-            // Also update backwards compatibility
-            await supabaseAdmin
-              .from('profiles')
-              .update({ coach_id: inviteCoachId })
-              .eq('id', user.id)
-          }
-        } catch (e) {
-          console.error("Error resolving magic link:", e)
-        }
-
-        // Clean up cookie
-        cookieStore.delete('invite_coach_id')
-      }
+      // An invitation never creates a relationship during login: the athlete
+      // reviews the coach and explicitly accepts on the invitation page.
+      const pendingInvite = cookieStore.get('invite_coach_id')?.value;
 
       // -- REDIRECTION LOGIC --
       // Fetch profile to decide where to go
@@ -92,7 +71,8 @@ export async function GET(request: Request) {
         finalNext = '/onboarding';
       }
       
-      const destination = new URL(finalNext, origin)
+      if (pendingInvite && /^[a-zA-Z0-9_-]{4,64}$/.test(pendingInvite)) finalNext = `/invite/${encodeURIComponent(pendingInvite)}`;
+      const destination = new URL(welcomeDestination(finalNext) === finalNext ? `/welcome?next=${encodeURIComponent(finalNext)}` : finalNext, origin)
       destination.searchParams.set('_t', Date.now().toString())
       return NextResponse.redirect(destination)
     } else {

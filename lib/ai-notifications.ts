@@ -1,5 +1,5 @@
 /**
- * AI Smart Notifications System — Triatlon Pro
+ * AI Smart Notifications System — TriWaveX
  *
  * La IA analiza los datos de los atletas y envía notificaciones proactivas:
  * - Detección de anomalías (HRV bajo, fatiga alta)

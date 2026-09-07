@@ -45,7 +45,7 @@ export function IosInstallPrompt() {
             </svg>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-text-primary">Añade Triatlon Pro a tu inicio</p>
+            <p className="text-sm font-bold text-text-primary">Añade TriWaveX a tu inicio</p>
             <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">
               Para recibir notificaciones y usar la app a pantalla completa, añádela a tu pantalla de inicio.
             </p>

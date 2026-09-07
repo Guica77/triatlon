@@ -1,3 +1,5 @@
+import { AIConsentCard } from '@/components/settings/ai-consent-card';
+import { aiDisclosure } from '@/lib/ai-privacy';
 import * as React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -43,6 +45,10 @@ export default async function SettingsPage() {
   if (!profile) {
     redirect('/onboarding');
   }
+
+  const disclosure = aiDisclosure();
+  const { data: consent } = await (supabase as any).from('ai_consents').select('version, granted').eq('user_id', user.id).maybeSingle();
+  const aiGranted = consent?.granted === true && consent.version === disclosure.version;
 
   const connectedProviders = [
     ...(profile.garmin_connected ? ['garmin'] : []),
@@ -133,6 +139,7 @@ export default async function SettingsPage() {
               <ExportButtons />
             </div>
 
+            <AIConsentCard {...disclosure} granted={aiGranted} />
             <DeleteAccountCard />
           </div>
         </div>

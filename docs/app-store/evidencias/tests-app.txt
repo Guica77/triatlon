@@ -1,0 +1,12 @@
+
+> triatlon-app@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.7 /Users/guillermohaya/Desktop/triatlon/triatlon-app
+
+
+ Test Files  20 passed (20)
+      Tests  140 passed (140)
+   Start at  11:38:30
+   Duration  1.25s (transform 1.36s, setup 0ms, import 2.83s, tests 202ms, environment 1ms)

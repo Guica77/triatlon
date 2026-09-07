@@ -8,7 +8,6 @@ import { ZoneBadge } from '@/components/ui/zone-badge';
 import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info, Droplet, Zap, AlertTriangle, Cloud } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
-import { simulateWatchIngestion } from '@/app/telemetry/telemetry-actions';
 import { GymTrackerModal } from '@/components/workouts/gym-tracker-modal';
 import Link from 'next/link';
 import { WatchSyncModal } from '@/components/dashboard/watch-sync-modal';
@@ -423,22 +422,6 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     }
     return 'planned'; // Today or future is planned
   }, [status, workout.scheduled_date, plannedTss, telemetry, session, isCompleted, isMissed]);
-
-  // Sincronización Automática en Segundo Plano (Garmin / Strava Webhooks)
-  React.useEffect(() => {
-    if (!readOnly && initialIsConnected && status === 'pending' && session?.sport_type !== 'descanso') {
-      const timer = setTimeout(async () => {
-        const res = await simulateWatchIngestion(workout.id, session?.sport_type || 'ciclismo');
-        if (res?.success) {
-          setStatus('completed');
-          setToastMsg('¡Actividad detectada y sincronizada automáticamente desde tu reloj! TSS Real: 85');
-          // Abrir modal de feedback inmediatamente al sincronizarse en vivo
-          setIsFeedbackOpen(true);
-        }
-      }, 3500);
-      return () => clearTimeout(timer);
-    }
-  }, [initialIsConnected, status, workout.id, session?.sport_type, readOnly]);
 
   if (!session) return null;
 

@@ -1,0 +1,583 @@
+Triathlon Training Methodology Research Pack
+
+
+Purpose: Evidence-led source pack for retrieval-augmented generation (RAG) in a triathlon-training application.
+
+
+Prepared: 7 September 2026
+
+
+Scope: Long-term athlete development, aerobic development, intensity distribution, periodization, swim-bike-run practice, strength and conditioning, recovery and load management, common pitfalls, and example sessions for beginner, intermediate, and advanced athletes.
+
+
+Evidence note: This pack synthesizes peer-reviewed research, consensus/position statements, and federation or governing-body guidance. It is not a substitute for medical assessment or individualized coaching. Triathlon-specific evidence is smaller than the broader endurance literature, so some recommendations are explicitly marked as extrapolations from running, cycling, swimming, or multisport research.
+
+
+Executive summary
+
+
+1.	Train the whole system, not three isolated sports. Triathlon performance depends on sport-specific skill and physiology, the ability to distribute stress across the week, and the quality of transitions between disciplines. The best plan is constrained by the athlete's current durability, technical skill, life stress, race calendar, and injury history—not by a generic weekly template. [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S2](https://triathlon.org/development/coach/coach-education-documents)
+2.	Build frequency and easy volume before adding complexity. Most developing athletes benefit first from consistent, low-intensity practice in all three sports, technical improvement in swimming, and gradual run durability. A large aerobic base is useful, but “base” should not mean endless slow mileage: it should include technique, strength, mobility, and small doses of quality work that can be recovered from. [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S3](https://www.usatriathlon.org/articles/training-tips/the-importance-of-recovery-weeks-and-rest-days)
+3.	Use intensity distribution deliberately. Polarized training—most work easy, a small amount very hard, little moderate threshold work—has often outperformed threshold-heavy approaches in trained endurance athletes, but pyramidal distributions can be appropriate for beginners, high-volume phases, and athletes who need more controlled tempo work. The evidence does not support one universal distribution for every phase, sport, or athlete. [S4](https://pubmed.ncbi.nlm.nih.gov/26578968/) [S5](https://pubmed.ncbi.nlm.nih.gov/39888556/) [S6](https://pubmed.ncbi.nlm.nih.gov/31827355/)
+4.	Periodize stress, not just workouts. Use macrocycles for the season, mesocycles for 2–6 week blocks, and microcycles for the week. Keep the number of truly hard sessions limited, place them where recovery is possible, and taper by reducing volume while preserving some intensity and sport-specific frequency. [S7](https://pubmed.ncbi.nlm.nih.gov/31802956/) [S8](https://pubmed.ncbi.nlm.nih.gov/37163550/) [S9](https://www.usatriathlon.org/articles/training-tips/the-general-phase-of-training)
+5.	Respect sport-specific constraints. Swimming is highly technical and rewards frequent quality practice; cycling is the safest place to accumulate aerobic volume and execute sustained intervals; running provides strong performance returns but also carries the greatest impact and injury cost. Brick training is useful for neuromuscular and pacing familiarity, but it should not turn every bike into a fatigued run test. [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S10](https://pubmed.ncbi.nlm.nih.gov/39044665/) [S11](https://pubmed.ncbi.nlm.nih.gov/31100906/)
+6.	Strength is supportive, not a separate sport. Heavy or high-load strength work, plyometrics, and sport-specific conditioning can improve economy and performance when progressed carefully, but strength training must be dosed around endurance load and individual orthopedic tolerance. [S12](https://pubmed.ncbi.nlm.nih.gov/23914932/) [S13](https://pubmed.ncbi.nlm.nih.gov/40153564/)
+7.	Monitor response, not only workload. Session-RPE load, sleep, soreness, mood, motivation, pain, and performance trends are more useful together than any single formula. Avoid treating acute:chronic workload ratio as a precise injury-prediction tool; use it, if at all, as a rough descriptive flag within a broader decision process. [S14](https://pubmed.ncbi.nlm.nih.gov/29163016/) [S15](https://pubmed.ncbi.nlm.nih.gov/32502973/) [S16](https://pubmed.ncbi.nlm.nih.gov/33144349/)
+8.	Personalization is mandatory. Sex, age, training age, menstrual status, energy availability, work schedule, terrain, climate, equipment, technical skill, and medical history can change the safest prescription. Evidence is often strongest in young male runners/cyclists, not in recreational triathletes, masters athletes, women across the menstrual/perimenopausal lifespan, or athletes with disability. [S17](https://pubmed.ncbi.nlm.nih.gov/37752011/) [S18](https://pubmed.ncbi.nlm.nih.gov/36898525/)
+
+
+How to use this pack in a RAG system
+
+
+•	Retrieve by concept + athlete level + discipline + phase. Examples: polarized intensity intermediate bike, beginner run durability, race taper Olympic-distance, recovery load warning signs.
+•	Keep recommendations separate from evidence claims. Generated plans should say when they are evidence-informed synthesis rather than a direct protocol from a study.
+•	Preserve the source URL and the evidence caveat with every answer. Do not let a short RAG chunk imply that a single study proves a universal rule.
+•	Ask for missing constraints before prescription: race distance/date, current weekly frequency and volume, recent injury, available days, training environment, and whether the athlete is medically cleared.
+
+
+1. Overview: how a triathlete develops
+
+
+Triathlon development is the gradual coordination of three distinct sports under one recovery budget. A complete plan develops: (a) technical competence, (b) aerobic capacity and peripheral endurance, (c) sport-specific durability, (d) pacing and fueling skill, (e) transition competence, and (f) the ability to repeat quality work week after week. Race performance is therefore not predicted by a single laboratory metric or by total hours alone. [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S2](https://triathlon.org/development/coach/coach-education-documents)
+
+
+Developmental sequence
+
+
+Novice / return-to-training: Establish reliable frequency, basic technique, pain-free movement, and realistic recovery. Use short sessions, easy intensity, and repeatable routines. The main objective is to become trainable.
+
+
+Developing / intermediate: Increase sport-specific volume gradually, add one or two structured quality sessions per week, build longer continuous efforts, and introduce controlled bricks. The main objective is to tolerate and absorb training while improving pacing.
+
+
+Trained / advanced: Use more precise intensity control, individualized testing, race-specific blocks, high-quality intervals, strength maintenance, and a deliberate taper. The main objective is to convert accumulated fitness into event-specific performance without exceeding the athlete's recovery capacity.
+
+
+This sequence is not strictly linear. Illness, injury, major life stress, a long break, or a change in race distance can move an athlete back to an earlier emphasis. The planning rule is to progress the minimum effective dose first, then add volume or intensity only when the athlete demonstrates stable response.
+
+
+Core adaptation principles
+
+
+•	Specificity: Adaptations follow the demands trained: technique, duration, intensity, terrain, heat, open water, hills, transitions, and race fueling.
+•	Progressive overload: Training stress must be sufficient to stimulate adaptation, but progression can come from frequency, duration, density, terrain, or quality—not only from adding more volume.
+•	Recovery and supercompensation: Training creates fatigue; adaptation occurs during recovery. A plan that repeatedly stacks hard sessions without absorption can reduce performance and increase illness or injury risk.
+•	Variation: A stable routine is useful, but blocks should vary emphasis so that the athlete can target a limiter without carrying the same stress indefinitely.
+•	Individual response: Two athletes can perform the same session at different internal loads. Use pace, power, heart rate, RPE, technique, and wellness together.
+
+
+Evidence links: [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S2](https://triathlon.org/development/coach/coach-education-documents) [S3](https://www.usatriathlon.org/articles/training-tips/the-importance-of-recovery-weeks-and-rest-days)
+
+
+2. Aerobic base development
+
+
+Aerobic base development means improving the ability to produce and sustain submaximal work, recover between efforts, and maintain technique as fatigue accumulates. It includes mitochondrial and cardiovascular adaptation, but also connective-tissue tolerance, movement economy, skill, fueling habits, and psychological familiarity with training. It is therefore broader than “easy miles.” [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S19](https://pubmed.ncbi.nlm.nih.gov/31827355/)
+
+
+Practical rules
+
+
+1.	Prioritize consistency. Four weeks of repeatable training usually produces more value than one heroic week followed by missed sessions.
+2.	Use easy intensity for most work. Easy should permit controlled breathing and stable technique; exact heart-rate or pace zones need individual calibration.
+3.	Build frequency before long duration when impact is a limiter. Swimming and cycling can often add frequency or time with less orthopedic cost than running.
+4.	Progress one variable at a time. Increase duration, frequency, or density before increasing all three.
+5.	Keep small technical and neuromuscular doses. Drills, strides, short cadence changes, and relaxed accelerations can preserve skill without turning every session into a hard workout.
+6.	Schedule recovery weeks. USA Triathlon guidance describes planned reduction in training load as a normal part of periodization, not as lost fitness. [S3](https://www.usatriathlon.org/articles/training-tips/the-importance-of-recovery-weeks-and-rest-days)
+
+
+Base-phase session mix
+
+
+A useful base week normally contains easy swimming with technique focus, easy-to-moderate cycling, mostly easy running, one modest quality stimulus, and strength or mobility. The exact ratio depends on the athlete's limiter and injury history. A runner with low durability may need cycling to carry more aerobic load; a strong runner with weak swim technique may need more frequent swimming rather than more hard running.
+
+
+What base training should not become
+
+
+•	A period of only low-intensity work with no technical feedback.
+•	A volume contest that ignores pain, sleep, or life stress.
+•	A generic “long slow distance” prescription applied equally to swim, bike, and run.
+•	A reason to postpone all intensity indefinitely. Small, well-recovered doses can maintain economy and motivation.
+
+
+Evidence links: [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S3](https://www.usatriathlon.org/articles/training-tips/the-importance-of-recovery-weeks-and-rest-days) [S19](https://pubmed.ncbi.nlm.nih.gov/31827355/)
+
+
+3. Intensity distribution: pyramidal, polarized, and threshold-heavy models
+
+
+Intensity distribution describes how training time or sessions are allocated across low, moderate, and high intensity. The labels are not interchangeable because studies define zones differently. A useful RAG answer must state the zone model before comparing distributions. [S4](https://pubmed.ncbi.nlm.nih.gov/26578968/) [S5](https://pubmed.ncbi.nlm.nih.gov/39888556/)
+
+
+Three common patterns
+
+
+Pyramidal: Most training is low intensity, a smaller amount is moderate/tempo or threshold-adjacent, and the smallest share is high intensity. This often matches traditional base and build phases and can be practical when athletes need controlled sustained work.
+
+
+Polarized: Most training is low intensity, a small amount is high intensity, and very little sits in the moderate/threshold middle. Several studies and reviews report strong performance responses in trained endurance athletes, especially when the high-intensity work is genuinely separated from easy volume. [S4](https://pubmed.ncbi.nlm.nih.gov/26578968/)
+
+
+Threshold-heavy: A large share is performed around tempo or threshold. This can produce improvement, especially in less-trained athletes or when event demands are strongly sustained, but it is also easy to make every session moderately hard and compromise recovery.
+
+
+How to choose
+
+
+•	Beginner: A pyramidal pattern is often easiest to execute because the athlete has limited technical and physiological reserve; a small amount of controlled moderate work may be more appropriate than frequent maximal intervals.
+•	Intermediate: Use a mostly easy week with one threshold-oriented and one high-intensity or race-specific stimulus, separated by recovery.
+•	Advanced: Polarized or block-polarized distributions may be useful during selected build phases, provided intensity is monitored and the athlete can recover from the high-intensity work.
+•	Race-specific phase: Move some training toward the event's demands. A long-course athlete may need more sustained sub-threshold and fueling practice than a short-course athlete, even if the overall week remains mostly easy.
+
+
+Evidence cautions
+
+
+Research findings are difficult to compare because studies use different zone boundaries, measure time versus session counts, and recruit different athlete levels. Recent meta-analytic work suggests that polarized training is not automatically superior in every outcome or population. Treat distribution as a planning hypothesis, not a law. [S5](https://pubmed.ncbi.nlm.nih.gov/39888556/) [S6](https://pubmed.ncbi.nlm.nih.gov/31827355/)
+
+
+Evidence links: [S4](https://pubmed.ncbi.nlm.nih.gov/26578968/) [S5](https://pubmed.ncbi.nlm.nih.gov/39888556/) [S6](https://pubmed.ncbi.nlm.nih.gov/31827355/) [S20](https://pubmed.ncbi.nlm.nih.gov/33281607/)
+
+
+4. Periodization: macro, meso, and micro cycles
+
+
+Periodization is the planned sequencing of training emphasis, load, and recovery. It does not require a rigid calendar. The best model is the one that makes the athlete's next adaptation clear, limits excessive fatigue, and fits the race calendar and life constraints. [S7](https://pubmed.ncbi.nlm.nih.gov/31802956/) [S9](https://www.usatriathlon.org/articles/training-tips/the-general-phase-of-training)
+
+
+Macrocycle: the season or race build
+
+
+Typical macrocycle phases are:
+
+
+1.	Transition / reset: Reduce structure after a goal race, maintain enjoyable movement, address injuries, and restore motivation.
+2.	General preparation: Rebuild frequency, technique, mobility, strength, and easy aerobic volume.
+3.	Specific preparation: Add race-relevant intensity, duration, terrain, open-water skills, pacing, transitions, and fueling practice.
+4.	Peak / taper: Reduce fatigue while preserving key neuromuscular and intensity signals.
+5.	Race and recovery: Execute the event, then recover before beginning the next objective.
+
+
+For multiple races, use an A/B/C hierarchy. The A race receives the most specific build and longest taper; B races can be used as hard training or checkpoints; C races should not disrupt the larger plan.
+
+
+Mesocycle: a block of emphasis
+
+
+Mesocycles commonly last 2–6 weeks. A block might emphasize swim technique, bike threshold, run durability, maximal strength, or race-specific endurance. The emphasis should be narrow enough to guide decisions but broad enough to retain the other sports.
+
+
+Block periodization can be useful for advanced athletes, but evidence is mixed and the model increases the need for careful recovery and maintenance work in non-emphasized sports. It is not automatically better than traditional periodization. [S7](https://pubmed.ncbi.nlm.nih.gov/31802956/)
+
+
+Microcycle: the week
+
+
+A microcycle allocates hard and easy sessions. A practical pattern is:
+
+
+•	Place the highest-priority quality session when the athlete is most recovered.
+•	Avoid stacking hard run sessions, hard bike sessions, and heavy lower-body strength without a recovery buffer.
+•	Keep easy days genuinely easy enough to support the next key session.
+•	Use swim frequency to maintain technique, but count hard swim work as real load.
+•	Put bricks near race-specific sessions, not after every ride.
+
+
+Tapering
+
+
+Evidence generally supports reducing training volume before competition while retaining some intensity and sport-specific frequency. The exact taper depends on event distance, training history, accumulated fatigue, and the athlete's response. A taper is not a total rest period and is not the time to add missed training. [S8](https://pubmed.ncbi.nlm.nih.gov/37163550/)
+
+
+Evidence links: [S7](https://pubmed.ncbi.nlm.nih.gov/31802956/) [S8](https://pubmed.ncbi.nlm.nih.gov/37163550/) [S9](https://www.usatriathlon.org/articles/training-tips/the-general-phase-of-training) [S2](https://triathlon.org/development/coach/coach-education-documents)
+
+
+5. Discipline-specific guidance
+
+
+Swimming
+
+
+Swimming is the most technique-dependent discipline. For many adult beginners, frequent exposure to good body position, breathing, balance, propulsion, and pacing is more valuable than adding a single very long session. Video feedback, a qualified coach, and carefully chosen drills can improve the technical constraint that limits aerobic work. [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S10](https://pubmed.ncbi.nlm.nih.gov/39044665/)
+
+
+Practical priorities:
+
+
+•	Maintain relaxed alignment and breathing under gradually increasing fatigue.
+•	Use short repeats with enough rest to preserve stroke quality.
+•	Progress from pool confidence to open-water skills: sighting, drafting awareness, starts, turns, wetsuit practice, and swimming in changing conditions.
+•	Keep at least some continuous swimming so athletes can rehearse pacing and mental control.
+•	Avoid using paddles, fins, or heavy resistance to compensate for poor mechanics; equipment should support a clear purpose.
+
+
+Example session: 300 easy + 8 × 50 drill/swim by 25 + 8 × 100 steady with 15–20 seconds rest + 4 × 50 relaxed fast with full technique + 200 easy. Scale by reducing repeats, not by forcing poor form.
+
+
+Cycling
+
+
+Cycling is usually the most practical discipline for accumulating aerobic work with lower impact. It is also a useful place for controlled intervals, cadence work, hills, and fueling rehearsal. Keep position, heat management, and nutrition in view: a session can be physiologically successful but still poor preparation if the athlete cannot maintain sustainable posture or fueling. [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S6](https://pubmed.ncbi.nlm.nih.gov/31827355/)
+
+
+Practical priorities:
+
+
+•	Build a stable endurance ride before adding repeated threshold blocks.
+•	Use power, heart rate, RPE, or talk test consistently rather than chasing every metric at once.
+•	Add cadence variation and hills to develop robustness, but treat them as load.
+•	Practice race fueling during rides long enough to expose gastrointestinal or logistical problems.
+•	Use cycling to add aerobic volume when running impact is limiting.
+
+
+Example session: 15 minutes easy + 3 × 8 minutes at controlled tempo with 4 minutes easy between + 20–40 minutes easy endurance + 10 minutes cool-down. Advanced athletes may use 4–6 × 6 minutes near threshold, but only when the rest of the week supports it.
+
+
+Running
+
+
+Running has a high performance return but also the highest impact cost. Build frequency and tissue tolerance conservatively, especially after a break, injury, or large increase in cycling volume. Easy running, short strides, hill technique, and strength can improve economy without making every run hard. [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S18](https://pubmed.ncbi.nlm.nih.gov/36898525/)
+
+
+Practical priorities:
+
+
+•	Progress duration and frequency before adding frequent speed work.
+•	Keep easy pace easy enough to preserve mechanics and recovery.
+•	Use strides or short hill repetitions for neuromuscular quality when appropriate.
+•	Introduce tempo and intervals only after the athlete demonstrates stable weekly tolerance.
+•	Monitor pain that changes gait, persists, or worsens across sessions; this is a coaching and medical decision point, not a motivation problem.
+
+
+Example session: 10–15 minutes easy + 6 × 20 seconds relaxed strides with full recovery + 20–40 minutes easy + 5–10 minutes cool-down. Intermediate athletes may replace strides with 3 × 8 minutes steady-tempo separated by 3 minutes easy.
+
+
+Bricks and transitions
+
+
+Brick sessions can improve pacing familiarity, neuromuscular coordination, and confidence after cycling. The first minutes of the run should be deliberately controlled. Research on cycling-to-running interactions shows that prior cycling can alter running mechanics and perceived effort, but there is no reason for every brick to be long or hard. [S11](https://pubmed.ncbi.nlm.nih.gov/31100906/) [S21](https://pubmed.ncbi.nlm.nih.gov/36589784/)
+
+
+Evidence links: [S1](https://pubmed.ncbi.nlm.nih.gov/31035719/) [S10](https://pubmed.ncbi.nlm.nih.gov/39044665/) [S11](https://pubmed.ncbi.nlm.nih.gov/31100906/) [S21](https://pubmed.ncbi.nlm.nih.gov/36589784/) [S18](https://pubmed.ncbi.nlm.nih.gov/36898525/)
+
+
+6. Strength and conditioning
+
+
+Strength and conditioning should improve force production, movement economy, tissue capacity, posture, and resilience without creating fatigue that undermines key endurance sessions. Research in endurance athletes supports a role for heavy strength training and, in some contexts, explosive or plyometric work, but the best dose depends on training age, event demands, and injury history. [S12](https://pubmed.ncbi.nlm.nih.gov/23914932/) [S13](https://pubmed.ncbi.nlm.nih.gov/40153564/) [S22](https://pubmed.ncbi.nlm.nih.gov/40632222/)
+
+
+Useful components
+
+
+•	Foundational strength: Squat or split-squat pattern, hinge, calf raise, push, pull, trunk anti-rotation, and single-leg control.
+•	Running-specific robustness: Calf/soleus, hamstrings, gluteal muscles, foot/ankle capacity, and progressive plyometrics when tolerated.
+•	Cycling support: Hip and trunk strength, single-leg control, posterior-chain endurance, and position tolerance.
+•	Swimming support: Scapular control, thoracic mobility, trunk stiffness, and balanced pulling/pushing—not simply maximal lat work.
+•	Power and coordination: Low-volume jumps, medicine-ball throws, or fast controlled lifts for athletes with a stable technical base.
+
+
+Dosing principles
+
+
+Beginners can start with 1–2 full-body sessions per week using technically simple movements and leaving repetitions in reserve. Intermediate athletes can use 2 sessions in general preparation and 1 maintenance session during race-specific phases. Advanced athletes can preserve strength with less volume, especially when endurance intensity rises. Avoid placing a novel or high-eccentricity lower-body session immediately before a key run or brick.
+
+
+What strength cannot do
+
+
+Strength training does not replace sport-specific endurance, technique, pacing practice, or recovery. It also does not guarantee injury prevention. A strength plan should be judged by whether it improves movement and performance without compromising the next important endurance session.
+
+
+Evidence links: [S12](https://pubmed.ncbi.nlm.nih.gov/23914932/) [S13](https://pubmed.ncbi.nlm.nih.gov/40153564/) [S22](https://pubmed.ncbi.nlm.nih.gov/40632222/)
+
+
+7. Recovery and load management
+
+
+Training load is the interaction between what the athlete did and how the athlete responded. External load can include time, distance, power, pace, elevation, repetitions, or total work. Internal load includes RPE, heart rate, heart-rate response, soreness, fatigue, mood, sleep, and perceived readiness. The same external session can be easy for one athlete and excessive for another. [S14](https://pubmed.ncbi.nlm.nih.gov/29163016/)
+
+
+A practical monitoring stack
+
+
+1.	Session-RPE load: Session duration in minutes × global effort score. Use a consistent scale and capture the athlete's whole-session impression.
+2.	Simple wellness check: Sleep quality, fatigue, soreness, mood, motivation, stress, and pain, each on a short scale.
+3.	Performance anchors: Repeated submaximal test, standard interval, swim repeat, or steady ride that can be compared over time.
+4.	Context: Work, travel, heat, illness exposure, menstrual status, nutrition, and life stress.
+5.	Decision rule: Modify the next session when multiple signals deteriorate or when pain changes movement—not because a single number crosses a universal threshold.
+
+
+Recovery essentials
+
+
+•	Protect sleep opportunity and regularity; athlete sleep recommendations emphasize individualized assessment and behavioral consistency rather than a single magic number. [S16](https://pubmed.ncbi.nlm.nih.gov/33144349/)
+•	Replace energy and carbohydrate after demanding sessions, and distribute adequate protein across the day. [S23](https://pubmed.ncbi.nlm.nih.gov/26920240/)
+•	Use easy movement, mobility, or complete rest based on response; recovery is not a contest.
+•	Reintroduce intensity after illness or pain gradually. Fever, chest symptoms, unexplained shortness of breath, or systemic illness require medical caution.
+•	Treat heat, altitude, travel, and poor sleep as load multipliers.
+
+
+Why acute:chronic workload ratio is not enough
+
+
+Acute:chronic workload ratio has been widely discussed, but methodological reviews identify substantial problems with its calculation, assumptions, and causal interpretation. Do not use it to forecast injury with false precision or to justify a rigid “safe range.” Use trend-based monitoring and athlete context instead. [S15](https://pubmed.ncbi.nlm.nih.gov/32502973/)
+
+
+Evidence links: [S14](https://pubmed.ncbi.nlm.nih.gov/29163016/) [S15](https://pubmed.ncbi.nlm.nih.gov/32502973/) [S16](https://pubmed.ncbi.nlm.nih.gov/33144349/) [S23](https://pubmed.ncbi.nlm.nih.gov/26920240/) [S24](https://pubmed.ncbi.nlm.nih.gov/38753045/)
+
+
+8. Common pitfalls
+
+
+1.	Making every session moderately hard. The athlete feels productive but accumulates fatigue without enough easy volume or enough high-quality intensity. Label the purpose of each session and protect easy days.
+2.	Adding run volume because cycling fitness improved. Cardiovascular fitness can rise faster than bone, tendon, and muscle tolerance. Increase running separately and conservatively. [S18](https://pubmed.ncbi.nlm.nih.gov/36898525/)
+3.	Ignoring technique until race season. Swim mechanics, bike position, transitions, and running form are skills; they need year-round maintenance.
+4.	Using a fixed percentage rule for everyone. “Increase by 10%” or a universal zone distribution can be a useful starting heuristic, not a law.
+5.	Treating soreness as a badge of quality. Delayed soreness after novel strength or impact work is not proof of adaptation. Persistent or gait-changing pain needs evaluation.
+6.	Stacking hard sessions across sports. A hard bike followed by a hard run and heavy leg strength may be one combined lower-body stress block, not three independent sessions.
+7.	Neglecting fueling and hydration practice. Race-day nutrition should be rehearsed under similar duration, intensity, heat, and equipment conditions.
+8.	Following elite plans literally. Elite volume, support, sleep, and medical access are not transferable to a time-limited recreational athlete.
+9.	Using gadgets as authority. Power, heart rate, GPS, and readiness scores are decision aids. They do not replace symptoms, technique, RPE, or coaching judgment.
+10.	Missing low energy availability or RED-S signals. Persistent fatigue, recurrent illness, mood change, menstrual disruption, declining performance, or bone stress symptoms need qualified medical and nutrition support. [S17](https://pubmed.ncbi.nlm.nih.gov/37752011/)
+
+
+Triathlon injury literature also shows why prevention should be specific to tissue, sport, and exposure: “triathlon training” is not one homogeneous load. The most actionable risk reduction is usually better progression, better recovery, early symptom response, and targeted strength/technique—not a single universal ratio. [S18](https://pubmed.ncbi.nlm.nih.gov/36898525/)
+
+
+Evidence links: [S17](https://pubmed.ncbi.nlm.nih.gov/37752011/) [S18](https://pubmed.ncbi.nlm.nih.gov/36898525/) [S15](https://pubmed.ncbi.nlm.nih.gov/32502973/)
+
+
+9. Sample sessions by athlete level
+
+
+The sessions below are evidence-informed examples, not direct protocols validated for every athlete. They assume medical clearance, pain-free execution, and the ability to scale duration, repetitions, or recovery. Choose one or two key sessions in a week; do not combine every example into a single plan.
+
+
+Beginner examples
+
+
+Beginner swim: technique + relaxed aerobic
+
+
+•	200 easy
+•	6 × 25 drill with 20 seconds rest
+•	6 × 50 easy-to-steady with 20–30 seconds rest
+•	4 × 25 relaxed build, full control
+•	100 easy
+•	Goal: leave with better technique, not exhaustion.
+
+
+Beginner bike: conversational endurance
+
+
+•	10 minutes easy
+•	30–45 minutes steady at talk-test intensity
+•	5 × 30 seconds smooth high-cadence spin with 90 seconds easy
+•	5–10 minutes easy
+•	Goal: repeatable aerobic work and comfortable cadence.
+
+
+Beginner run/walk: durability
+
+
+•	5–10 minutes brisk walk/easy jog
+•	6–10 cycles of 3 minutes easy run + 1 minute walk
+•	5 minutes easy walk
+•	Goal: stable mechanics and no next-day symptom escalation.
+
+
+Beginner brick: transition confidence
+
+
+•	30–45 minutes easy bike
+•	Quick, calm transition rehearsal
+•	8–15 minutes very easy run/walk
+•	Goal: practice change of movement, not test fitness.
+
+
+Intermediate examples
+
+
+Intermediate swim: threshold-adjacent control
+
+
+•	300 easy + 4 × 50 drill/swim
+•	3 × 400 at strong but controlled effort, 30 seconds rest
+•	8 × 50 alternating easy and fast-but-clean
+•	200 easy
+•	Goal: sustain form and pace without turning every repeat into a maximal effort.
+
+
+Intermediate bike: sustained tempo
+
+
+•	15 minutes easy
+•	3 × 10 minutes controlled tempo, 5 minutes easy between
+•	20–30 minutes endurance
+•	4 × 20 seconds high-cadence spin, full recovery
+•	10 minutes easy
+•	Goal: improve sustained output while keeping the next run available.
+
+
+Intermediate run: controlled quality
+
+
+•	15 minutes easy
+•	3 × 8 minutes steady-tempo, 3 minutes easy jog between
+•	6 × 20 seconds relaxed strides
+•	10 minutes easy
+•	Goal: controlled rhythm, not a race simulation.
+
+
+Intermediate brick: bike-to-run pacing
+
+
+•	75–100 minutes endurance bike
+•	Include 2 × 10 minutes at planned race effort
+•	Transition quickly but calmly
+•	20–30 minutes run: first 10 minutes easy, then settle near planned race effort
+•	Goal: learn restraint in the first minutes of the run.
+
+
+Advanced examples
+
+
+Advanced swim: race-specific repeatability
+
+
+•	400 easy + mobility/activation
+•	3 × 600 with the middle 400 at planned race effort, 45 seconds rest
+•	12 × 50 as 3 rounds of easy / race pace / fast-clean / easy
+•	200 easy
+•	Goal: maintain stroke quality while changing pace.
+
+
+Advanced bike: polarized quality
+
+
+•	20 minutes easy
+•	5 × 5 minutes high aerobic effort, 5 minutes easy between
+•	30–45 minutes easy endurance
+•	4 × 30 seconds fast cadence, full recovery
+•	10 minutes easy
+•	Goal: a small high-intensity dose surrounded by genuinely easy riding.
+
+
+Advanced run: race-specific threshold
+
+
+•	20 minutes easy
+•	2 × 15 minutes at controlled threshold-adjacent effort, 5 minutes easy
+•	6 × 30 seconds relaxed fast with 90 seconds easy
+•	15 minutes easy
+•	Goal: maintain economy and pacing under controlled fatigue.
+
+
+Advanced race-specific brick
+
+
+•	2–3 hours bike with 3 × 15 minutes at race effort
+•	Practice full fueling and equipment setup
+•	30–45 minutes run: first 10 minutes easy, then 3 × 6 minutes at race effort with 3 minutes easy
+•	Goal: test pacing, fueling, and transitions; schedule enough recovery afterward.
+
+
+Strength examples
+
+
+Beginner strength: 2 rounds, easy-to-moderate effort
+
+
+•	Split squat × 8 each side
+•	Hip hinge × 8
+•	Calf raise × 12
+•	Push-up or press × 8
+•	Row × 10
+•	Side plank × 20–30 seconds each side
+
+
+Intermediate strength: 3 rounds, leave 2–3 repetitions in reserve
+
+
+•	Squat or trap-bar deadlift × 4–6
+•	Rear-foot-elevated split squat × 6 each side
+•	Calf raise × 8–12
+•	Pull-up or pulldown × 6–10
+•	Row or press × 8–10
+•	Low-volume pogo or jump variation if technically ready
+
+
+Advanced maintenance: low volume, high quality
+
+
+•	2–3 primary lifts for 2–4 sets of 3–5 repetitions
+•	One single-leg pattern and one calf/foot pattern
+•	One trunk anti-rotation or anti-extension exercise
+•	Stop before technical breakdown; place away from the most important run when possible.
+
+
+Evidence links: [S2](https://triathlon.org/development/coach/coach-education-documents) [S9](https://www.usatriathlon.org/articles/training-tips/the-general-phase-of-training) [S12](https://pubmed.ncbi.nlm.nih.gov/23914932/) [S13](https://pubmed.ncbi.nlm.nih.gov/40153564/) [S14](https://pubmed.ncbi.nlm.nih.gov/29163016/)
+
+
+10. Personalization checklist for the app
+
+
+Before generating a plan, collect:
+
+
+•	Goal race, distance, date, and priority (A/B/C).
+•	Current weekly frequency and approximate duration in swim, bike, and run.
+•	Recent consistency: stable for 4+ weeks, returning, or frequently interrupted.
+•	Strongest and weakest discipline; technical limitations.
+•	Injury history, current pain, medical restrictions, and recent illness.
+•	Sleep, work schedule, travel, caregiving, and available training windows.
+•	Equipment and environment: pool access, open water, power meter, hills, trainer, heat, altitude.
+•	Nutrition and energy-availability context; screen for RED-S risk where relevant.
+•	Preferred intensity anchors: RPE, heart rate, pace, power, or talk test.
+
+
+The model should then generate a plan with explicit “why,” a primary session objective, a fallback version, recovery criteria, and a stop/seek-help rule. If key information is missing, produce a conservative template and ask for the missing data rather than inventing precision.
+
+
+11. Gaps, conflicts, and personalization limits
+
+
+•	Triathlon-specific trials are limited. Many recommendations come from separate running, cycling, swimming, or general endurance studies.
+•	Intensity zones are inconsistent. Zone boundaries, lab tests, session counts, and time-in-zone methods vary, so polarized/pyramidal comparisons are not perfectly comparable.
+•	Athlete samples are narrow. Evidence often overrepresents young, trained men and underrepresents women, masters athletes, adolescents, para-triathletes, low-resource athletes, and people with chronic conditions.
+•	Training response is heterogeneous. The average effect in a study does not tell the app which individual will respond best.
+•	Periodization evidence is not decisive. Traditional, block, polarized, and flexible approaches can all work when load, specificity, and recovery are appropriate.
+•	Injury prevention is multifactorial. No single workload ratio or strength exercise eliminates injury risk.
+•	Race distance changes the prescription. Sprint, Olympic, middle-distance, and long-distance racing require different balances of speed, sustained output, fueling, durability, and taper.
+•	Coach judgment remains important. The app should support—not replace—qualified coaching and medical care, especially with persistent pain, unexplained performance decline, eating concerns, or systemic symptoms.
+
+
+References
+
+
+•	S1 — Pyne et al. Training and competition readiness in triathlon. PubMed record: [https://pubmed.ncbi.nlm.nih.gov/31035719/](https://pubmed.ncbi.nlm.nih.gov/31035719/)
+•	S2 — World Triathlon. Coach education documents. [https://triathlon.org/development/coach/coach-education-documents](https://triathlon.org/development/coach/coach-education-documents)
+•	S3 — USA Triathlon. The importance of recovery weeks and rest days. [https://www.usatriathlon.org/articles/training-tips/the-importance-of-recovery-weeks-and-rest-days](https://www.usatriathlon.org/articles/training-tips/the-importance-of-recovery-weeks-and-rest-days)
+•	S4 — Stöggl & Sperlich. Polarized training has greater impact on key endurance variables than threshold, high intensity, or high volume training. [https://pubmed.ncbi.nlm.nih.gov/26578968/](https://pubmed.ncbi.nlm.nih.gov/26578968/)
+•	S5 — Recent network meta-analysis. Comparative effects of training intensity distributions in endurance athletes. [https://pubmed.ncbi.nlm.nih.gov/39888556/](https://pubmed.ncbi.nlm.nih.gov/39888556/)
+•	S6 — Selles-Pérez et al. Training intensity distribution and performance in triathletes. [https://pubmed.ncbi.nlm.nih.gov/31827355/](https://pubmed.ncbi.nlm.nih.gov/31827355/)
+•	S7 — Weakley et al. Periodization models in endurance training: review/meta-analysis. [https://pubmed.ncbi.nlm.nih.gov/31802956/](https://pubmed.ncbi.nlm.nih.gov/31802956/)
+•	S8 — Tapering review/meta-analysis. Effects of tapering on endurance performance. [https://pubmed.ncbi.nlm.nih.gov/37163550/](https://pubmed.ncbi.nlm.nih.gov/37163550/)
+•	S9 — USA Triathlon. The general phase of training. [https://www.usatriathlon.org/articles/training-tips/the-general-phase-of-training](https://www.usatriathlon.org/articles/training-tips/the-general-phase-of-training)
+•	S10 — Open-water swimming review. [https://pubmed.ncbi.nlm.nih.gov/39044665/](https://pubmed.ncbi.nlm.nih.gov/39044665/)
+•	S11 — Brick-training study. [https://pubmed.ncbi.nlm.nih.gov/31100906/](https://pubmed.ncbi.nlm.nih.gov/31100906/)
+•	S12 — Rønnestad & Mujika. Optimizing strength training for running and cycling endurance performance. [https://pubmed.ncbi.nlm.nih.gov/23914932/](https://pubmed.ncbi.nlm.nih.gov/23914932/)
+•	S13 — Strength-training umbrella review in endurance athletes. [https://pubmed.ncbi.nlm.nih.gov/40153564/](https://pubmed.ncbi.nlm.nih.gov/40153564/)
+•	S14 — Session-RPE training-load review. [https://pubmed.ncbi.nlm.nih.gov/29163016/](https://pubmed.ncbi.nlm.nih.gov/29163016/)
+•	S15 — Critical review of acute:chronic workload ratio. [https://pubmed.ncbi.nlm.nih.gov/32502973/](https://pubmed.ncbi.nlm.nih.gov/32502973/)
+•	S16 — Sleep and the athlete consensus statement. [https://pubmed.ncbi.nlm.nih.gov/33144349/](https://pubmed.ncbi.nlm.nih.gov/33144349/)
+•	S17 — IOC consensus on RED-S. [https://pubmed.ncbi.nlm.nih.gov/37752011/](https://pubmed.ncbi.nlm.nih.gov/37752011/)
+•	S18 — Triathlon injury systematic review. [https://pubmed.ncbi.nlm.nih.gov/36898525/](https://pubmed.ncbi.nlm.nih.gov/36898525/)
+•	S19 — Endurance intensity distribution study/review. [https://pubmed.ncbi.nlm.nih.gov/31827355/](https://pubmed.ncbi.nlm.nih.gov/31827355/)
+•	S20 — Triathlete training-intensity study. [https://pubmed.ncbi.nlm.nih.gov/33281607/](https://pubmed.ncbi.nlm.nih.gov/33281607/)
+•	S21 — Cycling-to-running transition study. [https://pubmed.ncbi.nlm.nih.gov/36589784/](https://pubmed.ncbi.nlm.nih.gov/36589784/)
+•	S22 — Strength training and cycling performance review. [https://pubmed.ncbi.nlm.nih.gov/40632222/](https://pubmed.ncbi.nlm.nih.gov/40632222/)
+•	S23 — Nutrition and athletic performance position statement. [https://pubmed.ncbi.nlm.nih.gov/26920240/](https://pubmed.ncbi.nlm.nih.gov/26920240/)
+•	S24 — Recovery strategies umbrella review. [https://pubmed.ncbi.nlm.nih.gov/38753045/](https://pubmed.ncbi.nlm.nih.gov/38753045/)

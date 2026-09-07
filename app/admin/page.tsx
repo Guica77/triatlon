@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import * as React from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -14,7 +15,7 @@ import type { Metadata } from 'next'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Business Dashboard — Triatlon Pro',
+  title: 'Business Dashboard — TriWaveX',
   description: 'Métricas de negocio: MRR, ARPU, Churn, LTV, CAC',
 }
 
@@ -57,6 +58,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-bg-app">
+      <Link href="/admin/reports" className="underline">Revisar denuncias del chat</Link>
       {/* Admin header — standalone, no app chrome */}
       <header className="sticky top-0 z-50 border-b border-border-default bg-bg-elevated/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">

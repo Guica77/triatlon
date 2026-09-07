@@ -24,6 +24,7 @@ interface AIWorkoutGeneratorProps {
 
 export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, initialPrompt = '' }: AIWorkoutGeneratorProps) {
   const [prompt, setPrompt] = React.useState(initialPrompt);
+  const [error, setError] = React.useState('');
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [generationStep, setGenerationStep] = React.useState(0);
 
@@ -46,92 +47,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!prompt.trim()) return;
-
-    setIsGenerating(true);
-
-    // Simulate AI thinking steps
-    for (let i = 0; i < steps.length; i++) {
-      setGenerationStep(i);
-      await new Promise(res => setTimeout(res, 800 + Math.random() * 500));
-    }
-
-    // Generate Mock Week based on the current date (Monday to Sunday)
-    const baseDate = new Date(currentDate);
-    const day = baseDate.getDay();
-    const diff = baseDate.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
-    const startOfWeek = new Date(baseDate.setDate(diff));
-
-    const mockWorkouts: GeneratedWorkout[] = [
-      {
-        date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate())).toISOString().split('T')[0], // Monday
-        sport_type: 'descanso',
-        title: 'Descanso Activo',
-        duration_minutes: 0,
-        tss: 0,
-        description: 'Día libre de carga para asimilar el fin de semana. Prioriza estiramientos suaves o foam roller.'
-      },
-      {
-        date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 1)).toISOString().split('T')[0], // Tuesday
-        sport_type: 'carrera',
-        title: 'Series de Umbral Anaeróbico',
-        duration_minutes: 60,
-        tss: 65,
-        description: 'Calentamiento 15min Z1. Bloque principal: 5 x 1000m en Z4 (Umbral) recuperando 90s trotando. Enfriamiento 10min Z1.'
-      },
-      {
-        date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 2)).toISOString().split('T')[0], // Wednesday
-        sport_type: 'natacion',
-        title: 'Técnica y Fuerza en Agua (AM)',
-        duration_minutes: 45,
-        tss: 40,
-        description: 'Calentamiento 400m libre. Bloque: 10 x 100m con palas y pullboy enfocado en tracción. Enfriamiento 200m estilos.'
-      },
-      {
-        date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 2)).toISOString().split('T')[0], // Wednesday
-        sport_type: 'carrera',
-        title: 'Rodaje Suave (PM)',
-        duration_minutes: 40,
-        tss: 35,
-        description: 'Doble sesión. Rodaje muy suave en Z1/Z2 para soltar piernas tras la natación de la mañana.'
-      },
-      {
-        date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 3)).toISOString().split('T')[0], // Thursday
-        sport_type: 'ciclismo',
-        title: 'Rodillo: Sweet Spot',
-        duration_minutes: 75,
-        tss: 80,
-        description: 'Sesión indoor. Calentamiento progresivo. 3 bloques de 12 minutos al 88-92% FTP (Sweet Spot), cadencia 90rpm. Rec. 4min Z1.'
-      },
-      {
-        date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 4)).toISOString().split('T')[0], // Friday
-        sport_type: 'fuerza',
-        title: 'Fuerza Core y Piernas',
-        duration_minutes: 40,
-        tss: 30,
-        description: 'Circuito de gimnasio: Sentadillas búlgaras, peso muerto rumano, planchas isométricas. Movilidad articular final.'
-      },
-      {
-        date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 5)).toISOString().split('T')[0], // Saturday
-        sport_type: 'ciclismo',
-        title: 'Tirada Larga Z2',
-        duration_minutes: 180,
-        tss: 140,
-        description: 'Rodaje constante en Z2. Controla alimentación (60g CH/hora). Terreno con desnivel moderado.'
-      },
-      {
-        date: new Date(new Date(startOfWeek).setDate(startOfWeek.getDate() + 6)).toISOString().split('T')[0], // Sunday
-        sport_type: 'carrera',
-        title: 'Transición Carrera Z2',
-        duration_minutes: 90,
-        tss: 95,
-        description: 'Carrera suave en Z2. Puedes hacerlo después de la bici del sábado o como rodaje suelto. Ritmo conversacional.'
-      }
-    ];
-
-    onGenerate(mockWorkouts);
-    setIsGenerating(false);
-    onClose();
+    setError('La generación automática de sesiones todavía no está disponible. Puedes crear una sesión desde el calendario.');
   };
 
   return (
@@ -202,6 +118,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
                 </div>
               ) : (
                 <form onSubmit={handleGenerate} className="space-y-6">
+                  {error && <p role="alert" className="text-sm text-danger">{error}</p>}
                   <p className="text-sm text-text-secondary leading-relaxed">
                     Describe tu objetivo para esta semana. Nuestro motor analizará tu fatiga actual (CTL/ATL) y generará una planificación óptima.
                   </p>
@@ -227,7 +144,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
                     type="submit"
                     variant="primary"
                     disabled={!prompt.trim()}
-                    className="w-full py-3.5 !bg-accent hover:!bg-coral-400 !text-white font-extrabold rounded-xl flex items-center justify-center gap-2"
+                    className="w-full py-3.5 !bg-accent hover:!bg-lime-400 !text-bg-deep font-extrabold rounded-xl flex items-center justify-center gap-2"
                   >
                     <Sparkles className="w-4 h-4" />
                     Generar Calendario AI

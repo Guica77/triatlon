@@ -1,5 +1,5 @@
 /**
- * AI Periodization System — Triatlon Pro
+ * AI Periodization System — TriWaveX
  *
  * Genera planes de entrenamiento periodizados basados en:
  * - PMC actual (CTL/ATL/TSB)

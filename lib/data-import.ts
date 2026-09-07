@@ -1,5 +1,5 @@
 /**
- * Data Import System — Triatlon Pro
+ * Data Import System — TriWaveX
  *
  * Importa datos desde múltiples fuentes:
  * - TrainingPeaks (CSV/XML)

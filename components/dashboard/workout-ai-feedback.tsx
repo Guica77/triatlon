@@ -98,11 +98,9 @@ export function WorkoutAIFeedback({
             )}
           </div>
           <div>
-            <h3 className="text-sm font-bold text-text-primary">
-              {aiAvailable ? 'Coach IA' : 'Asistente de Entrenamiento'}
-            </h3>
+            <h3 className="text-sm font-bold text-text-primary">Ayuda IA</h3>
             <p className="text-[10px] text-text-muted font-medium">
-              {aiAvailable ? 'Análisis inteligente' : 'Recomendación automática'}
+              {aiAvailable ? 'Consejos con IA · tú decides' : 'Asistente disponible al conectar IA'}
             </p>
           </div>
         </div>

@@ -209,16 +209,12 @@ export async function updateCoachWorkoutDetails(
       description = `Calentamiento: ${data.warmup || 'Calentamiento suave.'}\nParte principal: ${data.title ? '**' + data.title + '** - ' : ''}${data.main || 'Rodaje cómodo.'}\nEnfriamiento: ${data.cooldown || 'Enfriamiento y estiramientos.'}`;
     }
 
-    // 4. Update training_sessions
-    const { error: sessionError } = await supabase
-      .from('training_sessions')
-      .update({
-        sport_type: data.sportType,
-        duration_min: data.durationMin,
-        description: description,
-        structured_blocks: data.structured_blocks || []
-      })
-      .eq('id', sessionId)
+    // Customize only this athlete's workout, never the shared template.
+    const { error: sessionError } = await (supabase as any).rpc('customize_coach_workout', {
+      athlete: athleteId, workout: workoutId, expected_session: sessionId,
+      sport: data.sportType, duration: data.durationMin, details: description,
+      blocks: data.structured_blocks || [],
+    });
 
     if (sessionError) {
       console.error('Error updating training session:', sessionError)

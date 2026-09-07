@@ -1,11 +1,11 @@
 {
-  "name": "Triatlón Pro AI",
-  "short_name": "TriPro",
+  "name": "TriWaveX",
+  "short_name": "TriWaveX",
   "description": "Plataforma de entrenamiento inteligente para triatletas",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0B1016",
-  "theme_color": "#0B1016",
+  "background_color": "#0B1117",
+  "theme_color": "#0B1117",
   "orientation": "portrait",
   "icons": [
     {

@@ -1,0 +1,81 @@
+
+> triatlon-app@0.1.0 build
+> next build
+
+▲ Next.js 16.3.4 (Turbopack)
+- Environments: .env.local
+✓ Running next.config.ts took 85ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 1544ms
+  Running TypeScript ...
+  Finished TypeScript in 2.1s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/41) ...
+  Generating static pages using 7 workers (10/41)
+  Generating static pages using 7 workers (20/41)
+  Generating static pages using 7 workers (30/41)
+✓ Generating static pages using 7 workers (41/41) in 339ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /admin/reports
+├ ƒ /analytics
+├ ƒ /api/ai/chat
+├ ƒ /api/auth/telemetry/callback
+├ ƒ /api/auth/telemetry/connect
+├ ƒ /api/cron/daily-reminder
+├ ƒ /api/cron/reminders/evening
+├ ƒ /api/cron/reminders/morning
+├ ƒ /api/cron/reminders/nutrition
+├ ƒ /api/cron/strava-events
+├ ƒ /api/exercises
+├ ƒ /api/notifications/send
+├ ƒ /api/notifications/subscribe
+├ ƒ /api/notifications/test
+├ ƒ /api/webhooks/telemetry
+├ ƒ /api/workouts/export
+├ ƒ /api/workouts/export-calendar
+├ ○ /athlete/login
+├ ○ /athlete/register
+├ ƒ /auth/callback
+├ ○ /auth/reset-password
+├ ƒ /auth/signout
+├ ƒ /chat
+├ ƒ /coach/athlete/[id]
+├ ƒ /coach/chat
+├ ƒ /coach/dashboard
+├ ƒ /coach/group/[id]
+├ ○ /coach/login
+├ ○ /coach/register
+├ ƒ /cuenta-eliminada
+├ ƒ /dashboard
+├ ƒ /dashboard/workout/[id]
+├ ○ /exercises
+├ ƒ /feedback
+├ ○ /forgot-password
+├ ƒ /invite/[coachId]
+├ ○ /login
+├ ○ /offline
+├ ƒ /onboarding
+├ ○ /owner
+├ ○ /principiantes
+├ ○ /privacidad
+├ ƒ /recuperacion
+├ ○ /register
+├ ○ /reset-password
+├ ƒ /resumen
+├ ○ /robots.txt
+├ ƒ /settings
+├ ○ /signup
+├ ○ /soporte
+└ ƒ /welcome
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

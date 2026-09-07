@@ -1,3 +1,4 @@
+import { WelcomeReady } from '@/components/brand/authenticated-welcome'
 import * as React from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
@@ -49,6 +50,7 @@ export default async function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] p-6 pt-16 flex flex-col items-center pb-24">
+      <WelcomeReady />
       <div className="w-full max-w-5xl space-y-12">
 
         {/* Header */}

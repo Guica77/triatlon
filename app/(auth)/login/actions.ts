@@ -4,34 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers, cookies } from 'next/headers'
 
-async function resolveInviteCookie(userId: string) {
+async function resolveInviteCookie(_userId: string) {
   const cookieStore = await cookies();
-  const inviteCoachId = cookieStore.get('invite_coach_id')?.value;
-  
-  if (inviteCoachId) {
-    const { createAdminClient } = await import('@/lib/supabase/admin');
-    const supabaseAdmin = createAdminClient();
-
-    try {
-      const { error: linkError } = await supabaseAdmin
-        .from('coach_athletes')
-        .insert({
-          coach_id: inviteCoachId,
-          athlete_id: userId,
-          status: 'active'
-        });
-        
-      if (!linkError || linkError.code === '23505') {
-        await supabaseAdmin
-          .from('profiles')
-          .update({ coach_id: inviteCoachId })
-          .eq('id', userId);
-      }
-    } catch (e) {
-      console.error("Error resolving magic link:", e);
-    }
-    cookieStore.delete('invite_coach_id');
-  }
+  const invite = cookieStore.get('invite_coach_id')?.value;
+  if (invite && /^[a-zA-Z0-9_-]{4,64}$/.test(invite)) redirect(`/invite/${encodeURIComponent(invite)}`);
 }
 
 export async function login(formData: FormData) {
@@ -39,38 +15,10 @@ export async function login(formData: FormData) {
   const password = formData.get('password') as string
   const supabase = await createClient()
 
-  let { error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
-
-  // Auto-crear y auto-confirmar cuentas demo si no existen
-  if (error && (error.message.includes('Invalid login credentials') || error.message.includes('Credenciales')) && (email === 'coach-demo@triatlonpro.com' || email === 'demo@triatlonpro.com')) {
-    const { createAdminClient } = await import('@/lib/supabase/admin')
-    const admin = createAdminClient()
-    
-    // Crear el usuario con email confirmado para evitar el bloqueo
-    const { data: newUser, error: createError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: {
-        role: email === 'coach-demo@triatlonpro.com' ? 'coach' : 'athlete',
-        first_name: 'Demo',
-        last_name: email === 'coach-demo@triatlonpro.com' ? 'Entrenador' : 'Atleta'
-      }
-    })
-
-    if (!createError && newUser?.user) {
-      // Plantar datos
-      const { seedDemoData } = await import('@/lib/demo-seeder')
-      await seedDemoData(email, newUser.user.id)
-      
-      // Reintentar login ahora que existe y está confirmado
-      const retryAuth = await supabase.auth.signInWithPassword({ email, password })
-      error = retryAuth.error
-    }
-  }
 
   if (error) {
     return { error: error.message }
@@ -80,13 +28,7 @@ export async function login(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
     // Vincular al atleta con el coach si viene de una invitación
-    await resolveInviteCookie(user.id);
 
-    // Seeding on login for demo users
-    if (email === 'coach-demo@triatlonpro.com' || email === 'demo@triatlonpro.com') {
-      const { seedDemoData } = await import('@/lib/demo-seeder')
-      await seedDemoData(email, user.id)
-    }
 
     let { data: profile } = await supabase
       .from('profiles')
@@ -94,22 +36,12 @@ export async function login(formData: FormData) {
       .eq('id', user.id)
       .maybeSingle()
 
-    let isCoach = profile?.role === 'coach' || user.user_metadata?.role === 'coach' || email === 'coach-demo@triatlonpro.com';
-
-    if (email === 'coach-demo@triatlonpro.com') {
-      // Force update the profile role in DB just in case it was created as athlete
-      if (profile && profile.role !== 'coach') {
-        await supabase.from('profiles').update({ role: 'coach' }).eq('id', user.id);
-        profile.role = 'coach';
-      }
-    }
+    let isCoach = profile?.role === 'coach';
 
     // Si no tiene perfil (por ejemplo si falló por RLS al registrarse), lo creamos ahora que sí tiene sesión activa
     if (!profile) {
-      const role = email === 'coach-demo@triatlonpro.com' ? 'coach' 
-                 : email === 'demo@triatlonpro.com' ? 'athlete' 
-                 : (user.user_metadata?.role || 'athlete');
-                 
+      const role = user.user_metadata?.role === 'coach' ? 'coach' : 'athlete';
+
       const { error: insertError } = await supabase.from('profiles').insert({
         id: user.id,
         first_name: user.user_metadata?.first_name || 'Usuario',
@@ -125,6 +57,7 @@ export async function login(formData: FormData) {
       }
     }
 
+    await resolveInviteCookie(user.id);
     if (isCoach) {
       redirect('/coach/dashboard')
     }
@@ -142,7 +75,7 @@ export async function signup(formData: FormData) {
   const password = formData.get('password') as string
   const firstName = formData.get('firstName') as string
   const lastName = formData.get('lastName') as string
-  const role = (formData.get('role') as string) || 'athlete'
+  const role = formData.get('role') === 'coach' ? 'coach' : 'athlete'
 
   const supabase = await createClient()
 
@@ -161,16 +94,12 @@ export async function signup(formData: FormData) {
   if (authError) {
     let errorMessage = authError.message;
     if (errorMessage.includes('Error sending confirmation email') || errorMessage.includes('rate limit')) {
-      errorMessage = 'Límite de registros alcanzado por seguridad (Anti-Spam). Usa "coach-demo@triatlonpro.com" iniciando sesión para probar la demo.';
+      errorMessage = 'Límite de registros alcanzado por seguridad (Anti-Spam). Espera unos minutos antes de volver a intentarlo.';
     }
     return { error: errorMessage }
   }
 
   if (authData.user) {
-    if (email === 'coach-demo@triatlonpro.com' || email === 'demo@triatlonpro.com') {
-      const { seedDemoData } = await import('@/lib/demo-seeder')
-      await seedDemoData(email, authData.user.id)
-    } else {
       // Insertar perfil inicial usando admin client para saltar RLS ya que el usuario aún no tiene la cookie activa
       const { createAdminClient } = await import('@/lib/supabase/admin')
       const supabaseAdmin = createAdminClient()
@@ -191,8 +120,7 @@ export async function signup(formData: FormData) {
       }
 
       // Vincular al atleta con el coach si viene de una invitación
-      await resolveInviteCookie(authData.user.id);
-    }
+      if (authData.session) await resolveInviteCookie(authData.user.id);
   }
 
   // Si requiere confirmación de email (la sesión no está activa tras el signup)

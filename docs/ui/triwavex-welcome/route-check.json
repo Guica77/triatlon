@@ -1,0 +1,10 @@
+{
+  "result": {
+    "path": "/login",
+    "background": "rgb(11, 17, 23)",
+    "welcomeVisible": false,
+    "loginVisible": true,
+    "viewport": "width=device-width, initial-scale=1, viewport-fit=cover"
+  },
+  "errors": []
+}

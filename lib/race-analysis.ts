@@ -1,5 +1,5 @@
 /**
- * Race Analysis System — Triatlon Pro
+ * Race Analysis System — TriWaveX
  *
  * Analiza carreras importadas de Strava/Garmin con:
  * - Splits por segmento (Swim, T1, Bike, T2, Run)

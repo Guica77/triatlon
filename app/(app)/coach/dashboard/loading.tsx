@@ -1,8 +1,9 @@
+import { WelcomeLoading } from '@/components/brand/authenticated-welcome';
 import * as React from 'react';
 
-export default function CoachDashboardLoading() {
+function LoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-[#f3f4f6] pb-24 animate-pulse">
+    <div className="min-h-screen bg-bg-app pb-24 motion-safe:animate-pulse">
       {/* Header Skeleton */}
       <header className="sticky top-0 z-50 bg-surface-card border-b border-border-default ">
         <div className="px-6 py-4 flex justify-between items-center border-b border-border-default/60">
@@ -64,3 +65,5 @@ export default function CoachDashboardLoading() {
     </div>
   );
 }
+
+export default function CoachDashboardLoading() { return <WelcomeLoading fallback={<LoadingSkeleton />} />; }

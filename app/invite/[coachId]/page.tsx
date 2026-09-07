@@ -1,3 +1,5 @@
+import { WelcomeReady } from '@/components/brand/authenticated-welcome'
+import { acceptInvitation } from '@/app/invite/actions'
 import * as React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -14,17 +16,11 @@ export default async function InviteLandingPage({
   const { coachId } = await params
   const supabase = await createClient()
 
-  // 1. Fetch coach details
-  const { data: coach, error } = await supabase
-    .from('profiles')
-    .select('id, first_name, last_name, role')
-    .or(`id.eq.${coachId},invite_code.eq.${coachId.toUpperCase()}`)
-    .single()
-
-  if (error || !coach || coach.role !== 'coach') {
-    // Si el enlace es inválido, llevar a home
-    redirect('/')
-  }
+  if (!/^[a-zA-Z0-9_-]{4,64}$/.test(coachId)) redirect('/');
+  const { data, error } = await (supabase as any).rpc('lookup_coach_invite', { invite: coachId });
+  const coach = data?.[0];
+  if (error || !coach) redirect('/');
+  const { data: { user } } = await supabase.auth.getUser();
 
   // We cannot use cookies().set() in a Server Component.
   // Instead, we will inject a small script to set the cookie securely on the client side.
@@ -35,6 +31,7 @@ export default async function InviteLandingPage({
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center p-6 relative overflow-hidden">
+      <WelcomeReady />
       
       {/* Script to set the invite cookie so auth/callback can read it after login/register */}
       <script dangerouslySetInnerHTML={{ __html: `document.cookie = "invite_coach_id=${coach.id}; path=/; max-age=604800; samesite=lax";` }} />
@@ -67,7 +64,16 @@ export default async function InviteLandingPage({
 
             {/* Actions */}
             <div className="w-full space-y-3 pt-4">
-              <Link href="/register" className="block w-full">
+              {user && <form action={acceptInvitation} className="space-y-4 text-left">
+                <input type="hidden" name="invite" value={coachId} />
+                <label className="flex gap-3 text-sm"><input type="checkbox" name="consent" value="yes" required />
+                  Acepto vincularme con este entrenador y compartir mi planificación y datos de seguimiento deportivo para que pueda entrenarme.
+                </label>
+                <button type="submit" className="w-full rounded-xl border px-4 py-3 font-bold">Aceptar invitación</button>
+                <p className="text-xs text-text-muted">Si no puedes aceptar, comprueba que has iniciado sesión como atleta. La vinculación no se realiza hasta confirmar.</p>
+              </form>}
+
+              <Link hidden={!!user} href="/register" className="block w-full">
                 <AnimatedButton variant="primary" className="w-full py-3.5 text-sm font-black bg-swim hover:bg-swim text-white rounded-xl flex items-center justify-center gap-2 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100">
                   <UserPlus className="w-4 h-4" />
                   Soy nuevo, Registrarme
@@ -75,7 +81,7 @@ export default async function InviteLandingPage({
                 </AnimatedButton>
               </Link>
               
-              <Link href="/login" className="block w-full">
+              <Link hidden={!!user} href="/login" className="block w-full">
                 <AnimatedButton variant="ghost" className="w-full py-3.5 text-sm font-black text-text-secondary hover:text-text-primary bg-bg-elevated hover:bg-bg-hover border border-border-subtle rounded-xl flex items-center justify-center gap-2 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100">
                   <LogIn className="w-4 h-4 text-text-muted" />
                   Ya tengo cuenta, Iniciar Sesión

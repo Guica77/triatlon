@@ -1,0 +1,51 @@
+[
+  {
+    "width": 320,
+    "height": 568,
+    "scale": 1,
+    "overflow": false,
+    "background": "rgb(11, 17, 23)",
+    "heading": "Train with clarity.",
+    "logo": 150
+  },
+  {
+    "width": 390,
+    "height": 844,
+    "scale": 1,
+    "overflow": false,
+    "background": "rgb(11, 17, 23)",
+    "heading": "Train with clarity.",
+    "logo": 150
+  },
+  {
+    "width": 430,
+    "height": 932,
+    "scale": 1,
+    "overflow": false,
+    "background": "rgb(11, 17, 23)",
+    "heading": "Train with clarity.",
+    "logo": 150
+  },
+  {
+    "width": 568,
+    "height": 320,
+    "scale": 1,
+    "overflow": false,
+    "background": "rgb(11, 17, 23)",
+    "heading": "Train with clarity.",
+    "logo": 150
+  },
+  {
+    "width": 320,
+    "height": 568,
+    "scale": 2,
+    "overflow": false,
+    "background": "rgb(11, 17, 23)",
+    "heading": "Train with clarity.",
+    "logo": 150
+  },
+  {
+    "reduceMotion": "none",
+    "transition": "0.08s"
+  }
+]

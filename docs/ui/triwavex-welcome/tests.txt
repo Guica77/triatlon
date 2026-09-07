@@ -1,0 +1,15 @@
+
+> triatlon-app@0.1.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.7 [app]
+
+
+ Test Files  28 passed (28)
+      Tests  183 passed (183)
+   Start at  20:47:31
+   Duration  2.03s (transform 1.47s, setup 0ms, import 2.99s, tests 2.12s, environment 846ms)

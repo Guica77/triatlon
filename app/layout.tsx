@@ -1,3 +1,4 @@
+import { AuthenticatedWelcomeProvider } from '@/components/brand/authenticated-welcome';
 import type { Metadata, Viewport } from "next";
 import { Inter, Barlow_Condensed, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -29,30 +30,28 @@ const jetbrainsMono = JetBrains_Mono({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0B1016",
+  themeColor: "#0B1117",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://triatlonpro.com'),
-  title: "Triatlon Pro - Plataforma de Entrenamiento de Alto Rendimiento",
+  title: "TriWaveX - Plataforma de Entrenamiento de Alto Rendimiento",
   description: "Plataforma de entrenamiento de triatlón de alto rendimiento y telemetría universal. Periodización avanzada basada en FTP, ritmos y fatiga real.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Triatlon Pro - Dashboard de Alto Rendimiento",
+    title: "TriWaveX - Dashboard de Alto Rendimiento",
     description: "Plataforma de entrenamiento de triatlón de alto rendimiento y telemetría universal. Conecta Garmin y Strava.",
     url: "https://triatlonpro.com",
-    siteName: "Triatlon Pro",
+    siteName: "TriWaveX",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Triatlon Pro Dashboard de Alto Rendimiento",
+        alt: "TriWaveX Dashboard de Alto Rendimiento",
       },
     ],
     locale: "es_ES",
@@ -60,13 +59,13 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Triatlon Pro - Entrenamiento Inteligente",
+    title: "TriWaveX - Entrenamiento Inteligente",
     description: "Plataforma de entrenamiento de triatlón de alto rendimiento y telemetría universal",
     images: ["/og-image.png"],
   },
   appleWebApp: {
     capable: true,
-    title: "Triatlon Pro",
+    title: "TriWaveX",
     statusBarStyle: "black-translucent",
   },
   manifest: "/manifest.json",
@@ -80,15 +79,18 @@ export default function RootLayout({
   return (
     <html
       lang="es"
+      style={{ backgroundColor: "#0B1117" }}
       className={`${inter.variable} ${barlowCondensed.variable} ${jetbrainsMono.variable} h-full antialiased dark overflow-x-hidden`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-surface-app text-text-primary flex flex-col font-sans selection:bg-accent/30 overflow-x-hidden w-full" suppressHydrationWarning>
+        <AuthenticatedWelcomeProvider>
         {children}
         <CookieBanner />
         <IosInstallPrompt />
         <ServiceWorkerRegister />
         <AppLifecycleManager />
+        </AuthenticatedWelcomeProvider>
       </body>
     </html>
   );

@@ -90,7 +90,7 @@ export async function createManualWorkoutAction(formData: {
     );
   }
 
-  (revalidateTag as any)('analytics')
+  revalidateTag('analytics', 'max')
   revalidatePath('/dashboard')
   return { success: true, workoutId: workout.id }
 }
@@ -132,7 +132,7 @@ export async function updateWorkoutStatus(workoutId: string, newStatus: 'pending
     );
   }
 
-  (revalidateTag as any)('analytics')
+  revalidateTag('analytics', 'max')
   revalidatePath('/dashboard')
   return { status: newStatus }
 }

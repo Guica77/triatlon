@@ -1,5 +1,5 @@
 /**
- * Weekly Report Generator — Triatlon Pro
+ * Weekly Report Generator — TriWaveX
  *
  * Genera reportes automáticos semanales para coaches con:
  * - Métricas de cada atleta

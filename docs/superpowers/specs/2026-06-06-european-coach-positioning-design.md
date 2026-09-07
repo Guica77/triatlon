@@ -16,7 +16,7 @@ Highlight our natural advantage over TrainingPeaks:
 - Update pricing cards:
   - Add **Plan Entrenador Pro** card at €99/month (flat rate, unlimited athletes).
   - List Coach Pro features (dashboard, chat, alerts, roster).
-- Add an interactive **TrainingPeaks vs. Triatlon Pro savings calculator** with a slider for roster size (5 to 50 athletes).
+- Add an interactive **TrainingPeaks vs. TriWaveX savings calculator** with a slider for roster size (5 to 50 athletes).
 
 ### Settings Billing Card (`components/settings/billing-card.tsx`)
 - Update the Coach tier pricing from `79,00€` to `99,00€` per month.

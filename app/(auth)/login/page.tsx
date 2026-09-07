@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuthenticatedWelcome, WelcomeReady } from '@/components/brand/authenticated-welcome';
 import * as React from 'react';
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -32,13 +33,14 @@ const ROLE_CONFIG = {
 
 function UnifiedLoginForm() {
   const router = useRouter();
+  const { start: startWelcome } = useAuthenticatedWelcome();
+  const submitting = React.useRef(false);
   const searchParams = useSearchParams();
   const [role, setRole] = React.useState<Role>(
     (searchParams.get('role') as Role) || 'athlete'
   );
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [email, setEmail] = React.useState('');
   const [emailError, setEmailError] = React.useState<string | null>(null);
@@ -66,35 +68,50 @@ function UnifiedLoginForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (emailError) return;
+    if (submitting.current || emailError) return;
+    submitting.current = true;
     setLoading(true);
     setError(null);
-    const formData = new FormData(event.currentTarget);
-    const action = role === 'athlete' ? loginAthlete : loginCoach;
-    const result = await action(formData);
-    if (result.error) {
-      setError(result.error);
+    try {
+      const result = await (role === 'athlete' ? loginAthlete : loginCoach)(new FormData(event.currentTarget));
+      if (result.error) {
+        setError(result.error);
+        submitting.current = false;
+        setLoading(false);
+        return;
+      }
+      startWelcome(('destination' in result && typeof result.destination === 'string') ? result.destination : cfg.redirectPath);
+    } catch {
+      submitting.current = false;
       setLoading(false);
-    } else {
-      setSuccess(true);
-      setTimeout(() => router.push(cfg.redirectPath), 800);
+      setError('No se ha podido iniciar sesión. Inténtalo de nuevo.');
     }
   }
 
   async function handleOAuth(provider: 'google' | 'apple') {
+    if (submitting.current) return;
+    submitting.current = true;
     setLoading(true);
     setError(null);
-    const result = await getOAuthUrl(provider, role);
-    if (result.error) {
-      setError(result.error);
-      setLoading(false);
-    } else if (result.url) {
+    try {
+      const result = await getOAuthUrl(provider, role);
+      if (result.error || !result.url) {
+        setError(result.error || 'No se ha podido abrir el proveedor de acceso.');
+        submitting.current = false;
+        setLoading(false);
+        return;
+      }
       window.location.href = result.url;
+    } catch {
+      submitting.current = false;
+      setLoading(false);
+      setError('No se ha podido conectar con el proveedor de acceso. Inténtalo de nuevo.');
     }
   }
 
   return (
-    <AuthLayout title="Triatlon Pro" subtitle="Inicia sesión en tu cuenta" lockViewport>
+    <AuthLayout title="TriWaveX" subtitle="Inicia sesión en tu cuenta" lockViewport>
+      <WelcomeReady immediate />
       <div className="space-y-6">
 
         {accountDeleted && (
@@ -136,21 +153,6 @@ function UnifiedLoginForm() {
 
         {/* Form */}
         <AnimatePresence mode="wait">
-          {success ? (
-            <motion.div
-              key="success"
-              initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.95 }}
-              className="flex flex-col items-center justify-center py-10 space-y-3"
-            >
-              <div className="w-14 h-14 rounded-full bg-coral-500/15 flex items-center justify-center">
-                <CheckCircle className="w-7 h-7 text-coral-500" />
-              </div>
-              <p className="text-base font-semibold text-text-primary">Bienvenido</p>
-              <p className="text-sm text-text-muted">Redirigiendo...</p>
-            </motion.div>
-          ) : (
             <motion.form
               key={`form-${role}`}
               initial={{ opacity: 0 }}
@@ -188,7 +190,7 @@ function UnifiedLoginForm() {
                     placeholder={cfg.placeholder}
                     required
                     className={`w-full bg-surface-hover border rounded-lg pl-10 pr-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors ${
-                      emailError ? 'border-run/50' : 'border-border-default focus:border-coral-500/50'
+                      emailError ? 'border-run/50' : 'border-border-default focus:border-accent/50'
                     }`}
                   />
                 </div>
@@ -217,7 +219,7 @@ function UnifiedLoginForm() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-surface-hover border border-border-default rounded-lg pl-3.5 pr-10 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-coral-500/50 transition-colors font-mono"
+                    className="w-full bg-surface-hover border border-border-default rounded-lg pl-3.5 pr-10 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-accent/50 transition-colors font-mono"
                   />
                   <button
                     type="button"
@@ -234,7 +236,7 @@ function UnifiedLoginForm() {
               <motion.button
                 whileHover={canHover ? { scale: 1.01 } : undefined}
                 whileTap={{ scale: 0.99 }}
-                className="w-full py-2.5 rounded-lg text-sm font-bold text-white bg-coral-500 hover:bg-coral-600 transition-colors shadow-button flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-1"
+                className="w-full py-2.5 rounded-xl text-sm font-bold text-bg-deep bg-accent hover:bg-lime-400 transition-colors shadow-button flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-1"
                 type="submit"
                 disabled={loading || !!emailError}
               >
@@ -251,7 +253,7 @@ function UnifiedLoginForm() {
                 )}
               </motion.button>
             </motion.form>
-          )}
+
         </AnimatePresence>
 
         {/* Divider */}
@@ -313,7 +315,7 @@ function UnifiedLoginForm() {
 export default function UnifiedLoginPage() {
   return (
     <Suspense fallback={
-      <AuthLayout title="Triatlon Pro" subtitle="Cargando..." lockViewport>
+      <AuthLayout title="TriWaveX" subtitle="Cargando..." lockViewport>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
         </div>

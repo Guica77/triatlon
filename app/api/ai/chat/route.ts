@@ -1,3 +1,4 @@
+import { authorizeAIRequest } from '@/lib/ai-privacy';
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -136,6 +137,12 @@ export async function POST(request: NextRequest) {
         { status: 503 }
       );
     }
+
+    const permission = await authorizeAIRequest(user.id, targetResult.target.athleteId);
+    if (!permission.allowed) return Response.json({
+      error: permission.code === 'AI_RATE_LIMIT' ? 'Has alcanzado el límite de consultas. Inténtalo más tarde.' : 'Activa el permiso para IA en Perfil y ajustes. Si consultas otro atleta, también necesita dar su permiso.',
+      code: permission.code,
+    }, { status: permission.code === 'AI_RATE_LIMIT' ? 429 : 403 });
 
     // 3. Build system prompt based on context
     const queryEmbedding = await generateAIEmbedding(lastUserMessage.content);

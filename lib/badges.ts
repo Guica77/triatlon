@@ -1,5 +1,5 @@
 /**
- * Badges System — Gamification for Triatlon Pro
+ * Badges System — Gamification for TriWaveX
  *
  * Each badge has:
  * - id: unique identifier

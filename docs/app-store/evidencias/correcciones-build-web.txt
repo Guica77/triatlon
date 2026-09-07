@@ -1,0 +1,29 @@
+
+> triatlon-landing@0.1.0 build
+> next build
+
+▲ Next.js 16.3.4 (Turbopack)
+✓ Running next.config.ts took 83ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 912ms
+  Running TypeScript ...
+  Finished TypeScript in 1561ms ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/7) ...
+  Generating static pages using 7 workers (1/7)
+  Generating static pages using 7 workers (3/7)
+  Generating static pages using 7 workers (5/7)
+✓ Generating static pages using 7 workers (7/7) in 322ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /principiantes
+├ ○ /privacidad
+├ ○ /soporte
+└ ○ /terminos
+
+
+○  (Static)  prerendered as static content
