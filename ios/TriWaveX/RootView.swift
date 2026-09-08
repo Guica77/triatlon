@@ -22,7 +22,13 @@ struct RootView: View {
                 NavigationStack {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 22) {
-                            VStack(alignment: .leading, spacing: 8) {
+                            VStack(spacing: 10) {
+                                Text("Bienvenido")
+                                    .font(.headline.weight(.semibold))
+                                    .foregroundStyle(.white.opacity(0.9))
+                                TriWaveXMark()
+                                    .frame(width: 64, height: 64)
+                                    .padding(.top, 8)
                                 HStack(spacing: 8) {
                                     Circle().fill(Color(red: 0.47, green: 0.78, blue: 1)).frame(width: 9, height: 9)
                                     Circle().fill(Color(red: 0.72, green: 0.95, blue: 0.42)).frame(width: 9, height: 9)
@@ -31,7 +37,10 @@ struct RootView: View {
                                 Text("TriWaveX").font(.system(size: 38, weight: .bold, design: .rounded)).tracking(-1)
                                 Text("Entrena con un plan que se mueve contigo.")
                                     .font(.body).foregroundStyle(Color.white.opacity(0.66))
-                            }.padding(.top, 24)
+                            }
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 28)
                             rolePicker
                             VStack(spacing: 14) {
                                 TextField("Correo electrónico", text: $email)
@@ -92,7 +101,7 @@ struct RootView: View {
                         }.padding(.horizontal, 24).padding(.bottom, 28).frame(maxWidth: 520)
                     }
                     .background(LinearGradient(colors: [Color(red: 0.04, green: 0.08, blue: 0.11), Color(red: 0.06, green: 0.14, blue: 0.17)], startPoint: .topLeading, endPoint: .bottomTrailing).ignoresSafeArea())
-                    .navigationTitle("Bienvenido").navigationBarTitleDisplayMode(.inline)
+                    .toolbar(.hidden, for: .navigationBar)
                 }
             }
         }
@@ -129,5 +138,32 @@ struct RootView: View {
         }
         .padding(4).background(.white.opacity(0.10), in: Capsule())
         .overlay(Capsule().stroke(.white.opacity(0.08), lineWidth: 1))
+    }
+}
+
+private struct TriWaveXMark: View {
+    var body: some View {
+        Canvas { context, size in
+            let stroke = StrokeStyle(lineWidth: size.width * 0.085, lineCap: .round)
+            let color = Color(red: 0.72, green: 0.95, blue: 0.42)
+            let waves = [
+                (0.23, 0.49, 0.74, 0.29),
+                (0.23, 0.64, 0.82, 0.43),
+                (0.23, 0.79, 0.88, 0.57)
+            ]
+            for (startX, startY, endX, endY) in waves {
+                var path = Path()
+                path.move(to: CGPoint(x: size.width * startX, y: size.height * startY))
+                path.addCurve(
+                    to: CGPoint(x: size.width * endX, y: size.height * endY),
+                    control1: CGPoint(x: size.width * 0.42, y: size.height * 0.11),
+                    control2: CGPoint(x: size.width * 0.65, y: size.height * 0.26)
+                )
+                context.stroke(path, with: .color(color), style: stroke)
+            }
+        }
+        .background(Color(red: 0.04, green: 0.08, blue: 0.11), in: RoundedRectangle(cornerRadius: 20))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.1), lineWidth: 1))
+        .accessibilityLabel("Símbolo TriWaveX")
     }
 }
