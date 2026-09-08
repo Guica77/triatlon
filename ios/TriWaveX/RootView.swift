@@ -59,11 +59,12 @@ struct RootView: View {
                                     session.beginOAuth(.apple, role: role.rawValue)
                                 } label: {
                                     Label("Continuar con Apple", systemImage: "apple.logo")
-                                        .frame(maxWidth: .infinity, minHeight: 44)
+                                        .font(.subheadline.weight(.semibold))
+                                        .frame(maxWidth: .infinity, minHeight: 46)
                                 }
                                 .buttonStyle(.bordered)
-                                .tint(.white)
-                                .foregroundStyle(.primary)
+                                .tint(.white.opacity(0.28))
+                                .foregroundStyle(.white)
                                 .disabled(session.busy)
                                 Button {
                                     session.beginOAuth(.google, role: role.rawValue)
@@ -72,9 +73,12 @@ struct RootView: View {
                                         Text("G").font(.headline.weight(.bold))
                                         Text("Google")
                                     }
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(maxWidth: .infinity, minHeight: 46)
                                 }
                                 .buttonStyle(.bordered)
-                                .frame(minHeight: 44)
+                                .tint(.white.opacity(0.28))
+                                .foregroundStyle(.white)
                                 .disabled(session.busy)
                                 .accessibilityLabel("Continuar con Google")
                             }
