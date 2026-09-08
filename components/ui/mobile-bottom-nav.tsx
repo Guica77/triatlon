@@ -38,6 +38,7 @@ export function MobileBottomNav() {
   if (
     pathname.includes('/login') ||
     pathname.includes('/auth') ||
+    pathname.startsWith('/privacidad') ||
     pathname.startsWith('/chat') ||
     pathname.startsWith('/coach/chat')
   ) {
