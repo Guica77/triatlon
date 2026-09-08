@@ -6,8 +6,13 @@ import { ShieldCheck, X } from 'lucide-react';
  
 export function CookieBanner() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isNative, setIsNative] = React.useState(false);
  
   React.useEffect(() => {
+    if (window.navigator.userAgent.includes('TriWaveXNative/')) {
+      setIsNative(true);
+      return;
+    }
     const consent = localStorage.getItem('cookie-consent');
     if (!consent) {
       setIsOpen(true);
@@ -24,7 +29,7 @@ export function CookieBanner() {
     setIsOpen(false);
   };
  
-  if (!isOpen) return null;
+  if (isNative || !isOpen) return null;
  
   return (
     <div className="fixed bottom-20 left-3 right-3 z-[100] flex max-h-[calc(100dvh-1.5rem)] flex-col gap-4 overflow-y-auto rounded-2xl border border-border-default bg-surface-card/95 p-4 text-left shadow-elevated backdrop-blur-md animate-fade-in sm:bottom-6 sm:left-6 sm:right-6 sm:p-5 md:left-auto md:right-6 md:max-w-md">

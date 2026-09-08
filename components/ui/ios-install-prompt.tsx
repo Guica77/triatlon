@@ -7,9 +7,14 @@ export function IosInstallPrompt() {
   const [osType, setOsType] = React.useState<'ios' | 'android' | null>(null);
   const [isStandalone, setIsStandalone] = React.useState(true); // Default true to prevent flash
   const [isDismissed, setIsDismissed] = React.useState(false);
+  const [isNative, setIsNative] = React.useState(false);
 
   React.useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
+    if (userAgent.includes('triwavexnative/')) {
+      setIsNative(true);
+      return;
+    }
     const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
     const isAndroidDevice = /android/.test(userAgent);
     const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator as any).standalone;
@@ -20,7 +25,7 @@ export function IosInstallPrompt() {
     setIsStandalone(isInStandaloneMode || isMatchMediaStandalone);
   }, []);
 
-  if (!osType || isStandalone || isDismissed) {
+  if (isNative || !osType || isStandalone || isDismissed) {
     return null;
   }
 

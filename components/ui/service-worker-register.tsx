@@ -4,7 +4,7 @@ import * as React from 'react';
 
 export function ServiceWorkerRegister() {
   React.useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    if (typeof window !== 'undefined' && !navigator.userAgent.includes('TriWaveXNative/') && 'serviceWorker' in navigator) {
       const registerSW = async () => {
         try {
           const reg = await navigator.serviceWorker.register('/sw.js');

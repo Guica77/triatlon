@@ -91,6 +91,8 @@ struct ProductWebView: UIViewRepresentable {
             document.documentElement.appendChild(style);
             """, injectionTime: .atDocumentEnd, forMainFrameOnly: true))
         let view = WKWebView(frame: .zero, configuration: configuration)
+        // This identifies the native shell so web-only PWA prompts and its service worker stay out of the iOS app.
+        view.customUserAgent = "TriWaveXNative/1.0"
         view.navigationDelegate = context.coordinator
         view.uiDelegate = context.coordinator
         view.allowsBackForwardNavigationGestures = true
