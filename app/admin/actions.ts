@@ -74,8 +74,9 @@ export interface BusinessMetrics {
 // Fetch & Calculate Business Metrics
 // ============================================================
 
-export async function getBusinessMetrics(): Promise<BusinessMetrics> {
-  if (!(await checkAdminAccess())) throw new Error('No autorizado')
+export async function getBusinessMetrics(options: { allowLocal?: boolean } = {}): Promise<BusinessMetrics> {
+  const localAccess = options.allowLocal === true && process.env.NODE_ENV !== 'production'
+  if (!localAccess && !(await checkAdminAccess())) throw new Error('No autorizado')
   const { createAdminClient } = await import('@/lib/supabase/admin')
   const supabase = createAdminClient()
 
