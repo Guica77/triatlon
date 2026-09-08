@@ -4,6 +4,7 @@ import WebKit
 
 @Observable
 final class SessionModel {
+    enum OAuthProvider: String { case apple, google }
     let origin: URL
     let store = WKWebsiteDataStore.default()
     var destination: String?
@@ -11,6 +12,12 @@ final class SessionModel {
     var error: String?
 
     init(origin: URL) { self.origin = origin }
+
+    func beginOAuth(_ provider: OAuthProvider) {
+        guard !busy else { return }
+        error = nil
+        destination = "/api/native/oauth?provider=\(provider.rawValue)"
+    }
 
     private struct LoginResult: Decodable { let destination: String }
 

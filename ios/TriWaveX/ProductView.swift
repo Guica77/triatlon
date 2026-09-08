@@ -97,7 +97,7 @@ struct ProductWebView: UIViewRepresentable {
         view.isOpaque = false
         model.webView = view
         model.currentPath = initialPath
-        let url = origin.appendingPathComponent(initialPath.trimmingCharacters(in: CharacterSet(charactersIn: "/")))
+        let url = URL(string: initialPath, relativeTo: origin)?.absoluteURL ?? origin
         let request = URLRequest(url: url)
         model.lastRequest = request
         view.load(request)
