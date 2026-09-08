@@ -13,10 +13,10 @@ final class SessionModel {
 
     init(origin: URL) { self.origin = origin }
 
-    func beginOAuth(_ provider: OAuthProvider) {
+    func beginOAuth(_ provider: OAuthProvider, role: String) {
         guard !busy else { return }
         error = nil
-        destination = "/api/native/oauth?provider=\(provider.rawValue)"
+        destination = "/api/native/oauth?provider=\(provider.rawValue)&role=\(role)"
     }
 
     private struct LoginResult: Decodable { let destination: String }
