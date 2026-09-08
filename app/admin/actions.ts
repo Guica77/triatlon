@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { calculateChurnRates } from '@/lib/admin-metrics'
 
 // ============================================================
 // Business Metrics — Churn, CAC, LTV, MRR, Cohort Analysis
@@ -173,43 +174,15 @@ export async function getBusinessMetrics(options: { allowLocal?: boolean } = {})
   // ============================================================
   // 4. CHURN RATE (monthly)
   // ============================================================
-  const churnByMonth: { month: string; rate: number; lost: number }[] = []
-
-  for (let i = 5; i >= 0; i--) {
-    const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59)
-    const prevMonthEnd = new Date(monthStart.getTime() - 1)
-
-    const usersBefore = allProfiles.filter(p => new Date(p.created_at) <= prevMonthEnd).length
-    const churnedThisMonth = allProfiles.filter(p => {
-      if (!p.subscription_status) return false
-      // If status is cancelled/inactive and they existed before this month
-      const isChurned = p.subscription_status === 'cancelled' || p.subscription_status === 'inactive' || p.subscription_status === 'churned'
-      const createdBefore = new Date(p.created_at) <= monthEnd
-      return isChurned && createdBefore
-    }).length
-
-    // Also: users who haven't worked out in 30+ days as "silent churn"
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-    const usersNoActivity = allProfiles.filter(p => {
-      if (p.subscription_status === 'cancelled' || p.subscription_status === 'churned' || p.subscription_status === 'inactive') return false
-      const userWorkouts = allWorkouts.filter(w => w.user_id === p.id && new Date(w.created_at || w.scheduled_date) >= thirtyDaysAgo)
-      return userWorkouts.length === 0
-    }).length
-
-    const totalChurn = churnedThisMonth + Math.round(usersNoActivity * 0.3) // estimate
-    const churnRate = usersBefore > 0 ? Math.round((totalChurn / usersBefore) * 1000) / 10 : 0
-
-    const label = monthStart.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' })
-    churnByMonth.push({ month: label, rate: churnRate, lost: totalChurn })
-  }
-
-  const avgMonthlyChurn = churnByMonth.length > 0
-    ? Math.round((churnByMonth.reduce((s, m) => s + m.rate, 0) / churnByMonth.length) * 10) / 10
-    : 0
-
-  const monthlyChurnRate = avgMonthlyChurn
-  const quarterlyChurnRate = Math.round((1 - Math.pow(1 - monthlyChurnRate / 100, 3)) * 1000) / 10
+  // Profiles contain the current subscription status but no cancellation timestamp.
+  // A month-by-month rate cannot be reconstructed without a subscription history table.
+  // Report the bounded current-base churn snapshot instead of counting the same users repeatedly.
+  const { monthlyChurnRate, quarterlyChurnRate } = calculateChurnRates(totalUsers, totalChurned)
+  const churnByMonth = [{
+    month: now.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' }),
+    rate: monthlyChurnRate,
+    lost: totalChurned,
+  }]
 
   // ============================================================
   // 5. CAC (Customer Acquisition Cost)
