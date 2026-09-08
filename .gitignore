@@ -36,6 +36,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Xcode user state
+**/xcuserdata/
+**/*.xcuserstate
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -45,4 +49,3 @@ next-env.d.ts
 
 # scratch/temporary files
 /scratch/
-
