@@ -94,6 +94,10 @@ export default function PrivacidadPage() {
             <p>
               Desde Ajustes puedes desconectar Strava, retirar el permiso de IA, exportar entrenamientos e iniciar el borrado de tu cuenta. La exportación de entrenamientos no incluye todos tus datos personales. Si Apple requiere desconexión manual, se muestran instrucciones tras el borrado. Antes del lanzamiento comercial deben completarse el responsable legal, contacto, retención, backups y condiciones de proveedores; consulta Soporte.
             </p>
+            <p>
+              Para cualquier consulta o solicitud sobre tus datos personales, escríbenos a{' '}
+              <a className="font-semibold text-swim underline" href="mailto:privacy@triwavex.com?subject=Privacidad%20TriWaveX">privacy@triwavex.com</a>.
+            </p>
           </div>
 
           <Link href="/soporte" className="underline">Soporte y solicitudes de privacidad</Link>

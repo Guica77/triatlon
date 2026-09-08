@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export default function SupportPage() {
-  const candidate = process.env.SUPPORT_EMAIL?.trim() || 'support@triwave.com';
+  const candidate = process.env.SUPPORT_EMAIL?.trim() || 'support@triwavex.com';
   const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(candidate) && !/[\r\n]/.test(candidate) ? candidate : null;
   return <main className="mx-auto max-w-2xl px-6 py-16 space-y-6">
     <Link href="/" className="text-sm underline">Volver al inicio</Link>
