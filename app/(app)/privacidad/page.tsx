@@ -51,7 +51,7 @@ export default function PrivacidadPage() {
 
           <div className="space-y-4 text-xs leading-relaxed">
             <p>
-              En <strong>Triatlón Pro</strong> nos tomamos muy en serio la seguridad y el tratamiento de tus datos personales y deportivos. Esta política detalla cómo recopilamos, utilizamos y protegemos tu información.
+              En <strong>TriWaveX</strong> nos tomamos muy en serio la seguridad y el tratamiento de tus datos personales y deportivos. Esta política detalla cómo recopilamos, utilizamos y protegemos tu información.
             </p>
 
             <h3 className="text-sm font-bold text-text-primary pt-2 flex items-center gap-2">
