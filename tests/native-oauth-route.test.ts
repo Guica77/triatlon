@@ -13,8 +13,14 @@ it('starts only supported OAuth providers and records the provider in http-only 
   const response = await GET(new Request('https://staging.triwavex.com/api/native/oauth?provider=apple'))
   expect(response.headers.get('location')).toBe('https://accounts.example.test/oauth?state=opaque')
   expect(response.headers.get('set-cookie')).toContain('oauth_provider=apple')
+  expect(response.headers.get('set-cookie')).toContain('oauth_role=athlete')
   expect(response.headers.get('set-cookie')).toContain('HttpOnly')
   expect(signInWithOAuth).toHaveBeenCalledWith({ provider: 'apple', options: { redirectTo: 'https://staging.triwavex.com/auth/callback' } })
+})
+
+it('preserves the selected coach role for a new OAuth account', async () => {
+  const response = await GET(new Request('https://staging.triwavex.com/api/native/oauth?provider=google&role=coach'))
+  expect(response.headers.get('set-cookie')).toContain('oauth_role=coach')
 })
 
 it('does not send an unrecognised provider to Supabase', async () => {
