@@ -6,6 +6,7 @@ struct ProductView: View {
     let origin: URL
     let store: WKWebsiteDataStore
     let initialPath: String
+    let onDismiss: (() -> Void)?
     @State private var browser = BrowserModel()
 
     var body: some View {
@@ -23,7 +24,7 @@ struct ProductView: View {
             }
             .navigationTitle("TriWaveX").navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) {
-                if browser.currentPath != "/onboarding" && !browser.currentPath.contains("login") {
+                if browser.showsAppNavigation {
                     HStack {
                         let coach = initialPath == "/coach/dashboard"
                         tab("Entreno", icon: "figure.run", path: coach ? "/coach/dashboard" : "/dashboard")
@@ -35,7 +36,11 @@ struct ProductView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Atrás", systemImage: "chevron.left") { browser.webView?.goBack() }.disabled(!browser.canGoBack)
+                    if let onDismiss {
+                        Button("Cerrar", systemImage: "xmark") { onDismiss() }
+                    } else {
+                        Button("Atrás", systemImage: "chevron.left") { browser.webView?.goBack() }.disabled(!browser.canGoBack)
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Recargar", systemImage: "arrow.clockwise") { browser.retry() }
@@ -65,6 +70,7 @@ final class BrowserModel {
     var error: String?
     var canGoBack = false
     var currentPath = "/onboarding"
+    var showsAppNavigation = false
     var externalURL: URL?
     var webView: WKWebView?
     var lastRequest: URLRequest?
@@ -132,6 +138,7 @@ struct ProductWebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             model.loading = false; model.canGoBack = webView.canGoBack
             model.currentPath = webView.url?.path ?? model.currentPath
+            model.showsAppNavigation = ["/dashboard", "/resumen", "/chat", "/settings", "/coach/dashboard", "/coach/chat"].contains { model.currentPath.hasPrefix($0) }
         }
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { failed(error) }
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { failed(error) }

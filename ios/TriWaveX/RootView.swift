@@ -17,7 +17,7 @@ struct RootView: View {
     var body: some View {
         Group {
             if let destination = session.destination {
-                ProductView(origin: session.origin, store: session.store, initialPath: destination)
+                ProductView(origin: session.origin, store: session.store, initialPath: destination, onDismiss: nil)
             } else {
                 NavigationStack {
                     ScrollView {
@@ -97,7 +97,9 @@ struct RootView: View {
             }
         }
         .sheet(isPresented: Binding(get: { informationURL != nil }, set: { if !$0 { informationURL = nil } })) {
-            if let informationURL { SafariView(url: informationURL) }
+            if let informationURL {
+                ProductView(origin: session.origin, store: session.store, initialPath: informationURL.path, onDismiss: { self.informationURL = nil })
+            }
         }
         .tint(.cyan)
     }
