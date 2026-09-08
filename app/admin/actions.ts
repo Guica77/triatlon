@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { calculateChurnRates } from '@/lib/admin-metrics'
+import { isDemoAccount } from '@/lib/data-quality'
 
 // ============================================================
 // Business Metrics — Churn, CAC, LTV, MRR, Cohort Analysis
@@ -90,7 +91,7 @@ export async function getBusinessMetrics(options: { allowLocal?: boolean } = {})
     .select('id, email, created_at, role, subscription_status, last_name, first_name')
     .order('created_at', { ascending: false })
 
-  const allProfiles = profiles || []
+  const allProfiles = (profiles || []).filter((profile) => !isDemoAccount(profile))
 
   // Fetch workout data for engagement metrics
   const { data: workouts } = await supabase

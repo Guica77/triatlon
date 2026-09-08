@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { Activity, Brain, Database, Users, UserMinus, FileText, CheckCircle2, CircleAlert } from 'lucide-react'
 import { getBusinessMetrics } from '@/app/admin/actions'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { isDemoAccount } from '@/lib/data-quality'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,17 +68,18 @@ async function getFeedbackSnapshot(): Promise<{ users: Array<{ id: string; name:
   const tablesFailed = [appResult, coachResult, workoutResult].every((result) => result.error)
   if (profilesResult.error && tablesFailed) return { users: [], comments: [], error: 'No se pudieron consultar usuarios y comentarios.' }
 
-  const profileRows = profilesResult.data || []
+  const profileRows = (profilesResult.data || []).filter((profile: any) => !isDemoAccount(profile))
   const byId = new Map(profileRows.map((profile: any) => [profile.id, profile]))
+  const realIds = new Set(profileRows.map((profile: any) => profile.id))
   const nameFor = (id: string) => {
     const profile = byId.get(id) as any
     if (!profile) return 'Usuario'
     return [profile.first_name, profile.last_name].filter(Boolean).join(' ') || profile.email || 'Usuario'
   }
   const comments: FeedbackItem[] = [
-    ...(appResult.data || []).map((item: any) => ({ id: item.id, source: `Feedback de app · ${item.rating ?? '—'}/5`, author: nameFor(item.user_id), content: item.comments, createdAt: item.created_at, rating: item.rating })),
-    ...(coachResult.data || []).map((item: any) => ({ id: item.id, source: `Entrenador · ${item.feedback_type}`, author: nameFor(item.coach_id), content: item.content, createdAt: item.created_at })),
-    ...(workoutResult.data || []).map((item: any) => ({ id: item.id, source: 'Comentario de entrenamiento', author: nameFor(item.user_id), content: item.content, createdAt: item.created_at })),
+    ...(appResult.data || []).filter((item: any) => realIds.has(item.user_id)).map((item: any) => ({ id: item.id, source: `Feedback de app · ${item.rating ?? '—'}/5`, author: nameFor(item.user_id), content: item.comments, createdAt: item.created_at, rating: item.rating })),
+    ...(coachResult.data || []).filter((item: any) => realIds.has(item.coach_id)).map((item: any) => ({ id: item.id, source: `Entrenador · ${item.feedback_type}`, author: nameFor(item.coach_id), content: item.content, createdAt: item.created_at })),
+    ...(workoutResult.data || []).filter((item: any) => realIds.has(item.user_id)).map((item: any) => ({ id: item.id, source: 'Comentario de entrenamiento', author: nameFor(item.user_id), content: item.content, createdAt: item.created_at })),
   ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 30)
 
   return {
