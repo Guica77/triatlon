@@ -21,7 +21,12 @@ export function TelemetryConnectCard({ connectedProviders = [] }: { connectedPro
       <button disabled={busy} onClick={() => run(syncPacesFromStravaAction, 'Métricas actualizadas.')} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Actualizar métricas</button>
       <button disabled={busy} onClick={() => run(() => disconnectTelemetry('strava'), 'Strava desconectado.')} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Desconectar</button>
     </div> : <a href="/api/auth/telemetry/connect?provider=strava" className="inline-block rounded-lg border px-3 py-2 text-sm">Conectar con Strava</a>}
-    <p className="text-xs text-text-muted">La conexión directa con Garmin y el envío de sesiones al reloj todavía no están disponibles. No te pediremos tu contraseña de Garmin.</p>
+    <div className="space-y-3 border-t border-border-default pt-4">
+      <h3 className="text-sm font-bold text-text-primary">Garmin Connect</h3>
+      <p id="garmin-availability" className="text-sm text-text-secondary">La conexión directa está pendiente de aprobación de Garmin.</p>
+      <button type="button" disabled aria-describedby="garmin-availability" className="min-h-11 rounded-lg border border-border-default px-3 py-2 text-sm text-text-muted disabled:cursor-not-allowed disabled:opacity-60">Conectar con Garmin · Próximamente</button>
+      <p className="text-xs text-text-muted">Mientras tanto, puedes vincular Garmin con Strava y conectar Strava aquí para importar las actividades que se sincronicen. El envío de entrenamientos al reloj todavía no está disponible.</p>
+    </div>
     <p role="status" className="text-sm text-text-secondary">{busy ? 'Procesando…' : message}</p>
   </section>;
 }

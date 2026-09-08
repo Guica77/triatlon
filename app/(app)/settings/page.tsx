@@ -140,6 +140,11 @@ export default async function SettingsPage() {
             </div>
 
             <AIConsentCard {...disclosure} granted={aiGranted} />
+            <form action="/auth/signout" method="post" className="rounded-xl border border-border-default bg-bg-card p-5">
+              <h3 className="text-sm font-bold text-text-primary">Cerrar sesión</h3>
+              <p className="mt-1 text-xs text-text-muted">Sal de tu cuenta. Tus datos y entrenamientos se conservarán.</p>
+              <button type="submit" className="mt-4 min-h-11 rounded-lg border border-border-default px-4 py-2 text-sm font-bold text-text-primary">Cerrar sesión</button>
+            </form>
             <DeleteAccountCard />
           </div>
         </div>

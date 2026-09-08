@@ -37,9 +37,15 @@ function UnifiedLoginForm() {
   const submitting = React.useRef(false);
   const searchParams = useSearchParams();
   const [role, setRole] = React.useState<Role>(
-    (searchParams.get('role') as Role) || 'athlete'
+    searchParams.get('role') === 'coach' ? 'coach' : 'athlete'
   );
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(
+    searchParams.get('error') === 'ProfileSetupError'
+      ? 'No se pudo preparar tu perfil. Vuelve a entrar con el mismo proveedor y el rol elegido.'
+      : searchParams.get('error') === 'AuthCallbackError'
+        ? 'No se pudo completar el acceso. Inténtalo de nuevo.'
+        : null
+  );
   const [loading, setLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [email, setEmail] = React.useState('');

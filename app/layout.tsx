@@ -69,6 +69,10 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
   },
   manifest: "/manifest.json",
+  icons: {
+    apple: [{ url: "/apple-touch-icon.png?v=triwavex", sizes: "180x180", type: "image/png" }],
+    icon: [{ url: "/icon-192x192.png?v=triwavex", sizes: "192x192", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({

@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import Image from 'next/image';
 import { TriWaveXMark } from '@/components/brand/triwavex-mark';
 
 interface AuthLayoutProps {
@@ -57,16 +56,6 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
         >
           {/* Logo */}
           <div className="space-y-4 text-center">
-            <div className="overflow-hidden rounded-2xl border border-border-default bg-bg-deep shadow-card">
-              <Image
-                alt="TriWaveX: tres deportes, una ruta clara"
-                className="h-24 w-full object-cover object-center sm:h-32"
-                height={800}
-                priority
-                src="/brand/triwavex-simple-visual.svg"
-                width={1200}
-              />
-            </div>
             <div className="flex items-center justify-center gap-2">
               <TriWaveXMark className="h-8 w-8" />
               <span className="font-display text-2xl font-black leading-none tracking-tight text-text-primary">

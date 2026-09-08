@@ -9,6 +9,14 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = safeOAuthNext(searchParams.get('next'))
+  const cookieStore = await cookies()
+  const selectedRole = parseOAuthRole(cookieStore.get('oauth_role')?.value)
+  const profileFailure = () => {
+    const destination = new URL('/login', origin)
+    destination.searchParams.set('role', selectedRole || 'athlete')
+    destination.searchParams.set('error', 'ProfileSetupError')
+    return NextResponse.redirect(destination)
+  }
 
   if (code) {
     const supabase = await createClient()
@@ -31,7 +39,8 @@ export async function GET(request: Request) {
         const supabaseAdmin = createAdminClient()
         
         // Check if profile already exists to avoid overwriting existing roles on login
-        const { data: existingProfile } = await supabaseAdmin.from('profiles').select('id').eq('id', user.id).maybeSingle()
+        const { data: existingProfile, error: lookupError } = await supabaseAdmin.from('profiles').select('id').eq('id', user.id).maybeSingle()
+        if (lookupError) return profileFailure()
 
         if (!existingProfile) {
           const displayName = oauthDisplayName(user.user_metadata)
@@ -47,7 +56,7 @@ export async function GET(request: Request) {
               level: 'intermedio'
             })
             
-          if (profileError) console.error("Error inserting profile for OAuth:", profileError)
+          if (profileError) return profileFailure()
         }
         
         cookieStore.delete('oauth_role')
@@ -59,7 +68,8 @@ export async function GET(request: Request) {
 
       // -- REDIRECTION LOGIC --
       // Fetch profile to decide where to go
-      const { data: profile } = await supabase.from('profiles').select('role, active_plan_id, coach_id').eq('id', user.id).maybeSingle()
+      const { data: profile, error: profileReadError } = await supabase.from('profiles').select('role, active_plan_id, coach_id').eq('id', user.id).maybeSingle()
+      if (profileReadError || !profile) return profileFailure()
       
       let finalNext = next;
       if (!profile) {
@@ -83,7 +93,6 @@ export async function GET(request: Request) {
   }
 
   // Determine fallback based on cookie
-  const cookieStore = await cookies();
   const oauthRole = cookieStore.get('oauth_role')?.value;
   const fallback = oauthRole === 'coach' ? '/login?role=coach' : '/login?role=athlete';
 
