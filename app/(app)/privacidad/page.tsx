@@ -92,6 +92,10 @@ export default function PrivacidadPage() {
             <p>
               Puedes revocar en cualquier momento la conexión con plataformas de telemetría de terceros (Strava/Garmin) desde el panel de Ajustes de la aplicación. Si deseas eliminar tu cuenta o exportar tus datos deportivos, puedes contactar con nuestro soporte técnico.
             </p>
+            <p>
+              Para cualquier consulta o solicitud sobre tus datos personales, escríbenos a{' '}
+              <a className="font-semibold text-swim underline" href="mailto:privacy@triwavex.com?subject=Privacidad%20TriWaveX">privacy@triwavex.com</a>.
+            </p>
           </div>
 
           <div className="pt-6 border-t border-border-subtle text-center">
