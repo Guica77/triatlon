@@ -59,7 +59,7 @@ async function getRagSnapshot(): Promise<RagSnapshot> {
 async function getFeedbackSnapshot(): Promise<{ users: Array<{ id: string; name: string; email: string; role: string | null }>; comments: FeedbackItem[]; error?: string }> {
   const db = createAdminClient() as any
   const [profilesResult, appResult, coachResult, workoutResult] = await Promise.all([
-    db.from('profiles').select('id,first_name,last_name,email,role').order('created_at', { ascending: false }).limit(100),
+    db.from('profiles').select('id,first_name,last_name,email,role').order('created_at', { ascending: false }),
     db.from('app_feedback').select('id,user_id,comments,rating,created_at').not('comments', 'is', null).order('created_at', { ascending: false }).limit(25),
     db.from('coach_feedback').select('id,coach_id,content,feedback_type,created_at').order('created_at', { ascending: false }).limit(25),
     db.from('workout_comments').select('id,user_id,content,created_at').order('created_at', { ascending: false }).limit(25),
