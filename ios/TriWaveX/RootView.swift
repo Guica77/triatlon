@@ -35,6 +35,30 @@ struct RootView: View {
                                 HStack { Spacer(); if session.busy { ProgressView() }; Text("Entrar"); Spacer() }
                             }.buttonStyle(.borderedProminent).controlSize(.large)
                                 .disabled(session.busy || email.isEmpty || password.isEmpty)
+                            HStack(spacing: 12) {
+                                Button {
+                                    session.beginOAuth(.apple)
+                                } label: {
+                                    Label("Continuar con Apple", systemImage: "apple.logo")
+                                        .frame(maxWidth: .infinity, minHeight: 44)
+                                }
+                                .buttonStyle(.bordered)
+                                .tint(.white)
+                                .foregroundStyle(.primary)
+                                .disabled(session.busy)
+                                Button {
+                                    session.beginOAuth(.google)
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Text("G").font(.headline.weight(.bold))
+                                        Text("Google")
+                                    }
+                                }
+                                .buttonStyle(.bordered)
+                                .frame(minHeight: 44)
+                                .disabled(session.busy)
+                                .accessibilityLabel("Continuar con Google")
+                            }
                             Link("Recuperar contraseña", destination: session.origin.appendingPathComponent("forgot-password"))
                             HStack {
                                 Button("Privacidad") { informationURL = session.origin.appendingPathComponent("privacidad") }
