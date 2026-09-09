@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuthenticatedWelcome, WelcomeReady } from '@/components/brand/authenticated-welcome';
 import * as React from 'react';
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -9,7 +10,7 @@ import {
   Eye, EyeOff, Loader2, CheckCircle, AlertCircle, Mail,
   Waves, Bike, ArrowRight,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 type Role = 'athlete' | 'coach';
 
@@ -32,18 +33,36 @@ const ROLE_CONFIG = {
 
 function UnifiedLoginForm() {
   const router = useRouter();
+  const { start: startWelcome } = useAuthenticatedWelcome();
+  const submitting = React.useRef(false);
   const searchParams = useSearchParams();
   const [role, setRole] = React.useState<Role>(
-    (searchParams.get('role') as Role) || 'athlete'
+    searchParams.get('role') === 'coach' ? 'coach' : 'athlete'
   );
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(
+    searchParams.get('error') === 'ProfileSetupError'
+      ? 'No se pudo preparar tu perfil. Vuelve a entrar con el mismo proveedor y el rol elegido.'
+      : searchParams.get('error') === 'AuthCallbackError'
+        ? 'No se pudo completar el acceso. Inténtalo de nuevo.'
+        : null
+  );
   const [loading, setLoading] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [email, setEmail] = React.useState('');
   const [emailError, setEmailError] = React.useState<string | null>(null);
+  const reduceMotion = useReducedMotion();
+  const canHover = React.useSyncExternalStore(
+    React.useCallback((onStoreChange) => {
+      const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
+      mediaQuery.addEventListener('change', onStoreChange);
+      return () => mediaQuery.removeEventListener('change', onStoreChange);
+    }, []),
+    React.useCallback(() => window.matchMedia('(hover: hover) and (pointer: fine)').matches, []),
+    () => false,
+  );
 
   const cfg = ROLE_CONFIG[role];
+  const accountDeleted = searchParams.get('accountDeleted') === '1';
 
   const validateEmail = (value: string) => {
     if (value.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
@@ -55,39 +74,61 @@ function UnifiedLoginForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (emailError) return;
+    if (submitting.current || emailError) return;
+    submitting.current = true;
     setLoading(true);
     setError(null);
-    const formData = new FormData(event.currentTarget);
-    const action = role === 'athlete' ? loginAthlete : loginCoach;
-    const result = await action(formData);
-    if (result.error) {
-      setError(result.error);
+    try {
+      const result = await (role === 'athlete' ? loginAthlete : loginCoach)(new FormData(event.currentTarget));
+      if (result.error) {
+        setError(result.error);
+        submitting.current = false;
+        setLoading(false);
+        return;
+      }
+      startWelcome(('destination' in result && typeof result.destination === 'string') ? result.destination : cfg.redirectPath);
+    } catch {
+      submitting.current = false;
       setLoading(false);
-    } else {
-      setSuccess(true);
-      setTimeout(() => router.push(cfg.redirectPath), 800);
+      setError('No se ha podido iniciar sesión. Inténtalo de nuevo.');
     }
   }
 
   async function handleOAuth(provider: 'google' | 'apple') {
+    if (submitting.current) return;
+    submitting.current = true;
     setLoading(true);
     setError(null);
-    const result = await getOAuthUrl(provider, role);
-    if (result.error) {
-      setError(result.error);
-      setLoading(false);
-    } else if (result.url) {
+    try {
+      const result = await getOAuthUrl(provider, role);
+      if (result.error || !result.url) {
+        setError(result.error || 'No se ha podido abrir el proveedor de acceso.');
+        submitting.current = false;
+        setLoading(false);
+        return;
+      }
       window.location.href = result.url;
+    } catch {
+      submitting.current = false;
+      setLoading(false);
+      setError('No se ha podido conectar con el proveedor de acceso. Inténtalo de nuevo.');
     }
   }
 
   return (
-    <AuthLayout title="Triatlon Pro" subtitle="Inicia sesión en tu cuenta">
+    <AuthLayout title="TriWaveX" subtitle="Entrena con un plan que se mueve contigo." lockViewport>
+      <WelcomeReady immediate />
       <div className="space-y-6">
 
+        {accountDeleted && (
+          <div role="status" className="flex items-center gap-2.5 rounded-lg border border-coral-500/25 bg-coral-500/10 p-3 text-xs font-medium text-text-primary">
+            <CheckCircle className="h-4 w-4 shrink-0 text-coral-500" />
+            Tu cuenta y tus datos se han eliminado correctamente.
+          </div>
+        )}
+
         {/* Role Toggle — with smooth micro-interaction */}
-        <div className="relative grid grid-cols-2 gap-2 p-1.5 bg-surface-hover rounded-lg border border-border-subtle/50">
+        <div className="relative grid grid-cols-2 gap-1 rounded-[18px] border border-white/10 bg-surface-hover/70 p-1.5">
           {(['athlete', 'coach'] as const).map(r => {
             const Icon = ROLE_CONFIG[r].icon;
             const isActive = role === r;
@@ -96,14 +137,14 @@ function UnifiedLoginForm() {
                 key={r}
                 type="button"
                 onClick={() => { setRole(r); setError(null); }}
-                className={`relative flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-md text-sm font-semibold transition-all cursor-pointer select-none ${
-                  isActive ? 'text-white' : 'text-text-muted hover:text-text-secondary'
+                className={`relative flex min-h-11 items-center justify-center gap-2.5 px-4 py-2.5 rounded-[14px] text-sm font-semibold transition-[color,background-color,box-shadow] cursor-pointer select-none ${
+                  isActive ? (r === 'athlete' ? 'text-[#0B1117]' : 'text-[#0B1117]') : 'text-text-muted hover:text-text-secondary'
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="role-bg"
-                    className="absolute inset-0 bg-coral-500 rounded-md shadow-button"
+                    className={`absolute inset-0 rounded-[14px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_3px_rgba(0,0,0,0.28)] ${r === 'athlete' ? 'bg-swim' : 'bg-bike'}`}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -118,21 +159,6 @@ function UnifiedLoginForm() {
 
         {/* Form */}
         <AnimatePresence mode="wait">
-          {success ? (
-            <motion.div
-              key="success"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center py-10 space-y-3"
-            >
-              <div className="w-14 h-14 rounded-full bg-coral-500/15 flex items-center justify-center">
-                <CheckCircle className="w-7 h-7 text-coral-500" />
-              </div>
-              <p className="text-base font-semibold text-text-primary">Bienvenido</p>
-              <p className="text-sm text-text-muted">Redirigiendo...</p>
-            </motion.div>
-          ) : (
             <motion.form
               key={`form-${role}`}
               initial={{ opacity: 0 }}
@@ -169,8 +195,8 @@ function UnifiedLoginForm() {
                     onChange={e => { setEmail(e.target.value); validateEmail(e.target.value); }}
                     placeholder={cfg.placeholder}
                     required
-                    className={`w-full bg-surface-hover border rounded-lg pl-10 pr-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors ${
-                      emailError ? 'border-run/50' : 'border-border-default focus:border-coral-500/50'
+                    className={`w-full bg-surface-hover border rounded-[14px] pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors ${
+                      emailError ? 'border-run/50' : 'border-border-default focus:border-accent/50'
                     }`}
                   />
                 </div>
@@ -199,7 +225,7 @@ function UnifiedLoginForm() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-surface-hover border border-border-default rounded-lg pl-3.5 pr-10 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-coral-500/50 transition-colors font-mono"
+                    className="w-full bg-surface-hover border border-border-default rounded-[14px] pl-3.5 pr-10 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-accent/50 transition-colors font-mono"
                   />
                   <button
                     type="button"
@@ -214,9 +240,9 @@ function UnifiedLoginForm() {
 
               {/* Submit */}
               <motion.button
-                whileHover={{ scale: 1.01 }}
+                whileHover={canHover ? { scale: 1.01 } : undefined}
                 whileTap={{ scale: 0.99 }}
-                className="w-full py-2.5 rounded-lg text-sm font-bold text-white bg-coral-500 hover:bg-coral-600 transition-colors shadow-button flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-1"
+                className={`mt-1 flex w-full items-center justify-center gap-2 rounded-[16px] border border-white/15 py-3 text-sm font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_5px_rgba(0,0,0,0.28)] transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer ${role === 'athlete' ? 'bg-swim text-[#0B1117] hover:bg-swim/90' : 'bg-bike text-[#0B1117] hover:bg-bike/90'}`}
                 type="submit"
                 disabled={loading || !!emailError}
               >
@@ -233,7 +259,7 @@ function UnifiedLoginForm() {
                 )}
               </motion.button>
             </motion.form>
-          )}
+
         </AnimatePresence>
 
         {/* Divider */}
@@ -244,12 +270,27 @@ function UnifiedLoginForm() {
         </div>
 
         {/* OAuth */}
-        <div className="flex gap-3">
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => handleOAuth('apple')}
+            disabled={loading}
+            aria-label="Continuar con Apple"
+            className="flex h-11 w-full items-center justify-center overflow-hidden rounded-[14px] bg-black transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {/* Apple serves the approved artwork, localized and at the required proportions. */}
+            <img
+              aria-hidden="true"
+              alt=""
+              className="h-11 w-full object-fill"
+              src="https://appleid.cdn-apple.com/appleid/button?type=continue&color=black&border=false&border_radius=8&locale=es_ES&height=44&width=375"
+            />
+          </button>
           <button
             type="button"
             onClick={() => handleOAuth('google')}
             disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-surface-hover border border-border-default hover:border-border-default/80 transition-colors text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-40 cursor-pointer"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-[14px] bg-surface-hover border border-border-default hover:border-border-default/80 transition-colors text-sm font-semibold text-text-secondary hover:text-text-primary disabled:opacity-40 cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -257,18 +298,7 @@ function UnifiedLoginForm() {
               <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
               <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
-            Google
-          </button>
-          <button
-            type="button"
-            onClick={() => handleOAuth('apple')}
-            disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-surface-hover border border-border-default hover:border-border-default/80 transition-colors text-xs font-medium text-text-secondary hover:text-text-primary disabled:opacity-40 cursor-pointer"
-          >
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-            </svg>
-            Apple
+            Continuar con Google
           </button>
         </div>
 
@@ -291,7 +321,7 @@ function UnifiedLoginForm() {
 export default function UnifiedLoginPage() {
   return (
     <Suspense fallback={
-      <AuthLayout title="Triatlon Pro" subtitle="Cargando...">
+      <AuthLayout title="TriWaveX" subtitle="Cargando..." lockViewport>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
         </div>
