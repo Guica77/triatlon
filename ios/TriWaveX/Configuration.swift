@@ -12,7 +12,7 @@ enum Configuration {
     }
 
     static func allows(_ url: URL, origin: URL) -> Bool {
-        url.scheme == "https" && url.host == origin.host && url.port == origin.port
-            && url.user == nil && url.password == nil
+        guard url.scheme == "https", url.user == nil, url.password == nil else { return false }
+        return url.host == origin.host && url.port == origin.port
     }
 }

@@ -1,3 +1,4 @@
+import AuthenticationServices
 import SwiftUI
 
 struct RootView: View {
@@ -64,19 +65,17 @@ struct RootView: View {
                                 .disabled(session.busy || email.isEmpty || password.isEmpty)
                             HStack { Rectangle().fill(.white.opacity(0.12)).frame(height: 1); Text("o continúa con").font(.caption).foregroundStyle(.secondary); Rectangle().fill(.white.opacity(0.12)).frame(height: 1) }
                             HStack(spacing: 12) {
-                                Button {
-                                    session.beginOAuth(.apple, role: role.rawValue)
-                                } label: {
-                                    Label("Continuar con Apple", systemImage: "apple.logo")
-                                        .font(.subheadline.weight(.semibold))
-                                        .frame(maxWidth: .infinity, minHeight: 46)
+                                SignInWithAppleButton(.signIn) { request in
+                                    session.prepareAppleRequest(request)
+                                } onCompletion: { result in
+                                    Task { await session.handleAppleCompletion(result, role: role.rawValue) }
                                 }
-                                .buttonStyle(.bordered)
-                                .tint(.white.opacity(0.28))
-                                .foregroundStyle(.white)
+                                .signInWithAppleButtonStyle(.white)
+                                .frame(maxWidth: .infinity, minHeight: 46)
+                                .clipShape(Capsule())
                                 .disabled(session.busy)
                                 Button {
-                                    session.beginOAuth(.google, role: role.rawValue)
+                                    session.error = "Estamos terminando la conexión segura de Google. Apple ya usa el acceso nativo."
                                 } label: {
                                     HStack(spacing: 4) {
                                         Text("G").font(.headline.weight(.bold))
