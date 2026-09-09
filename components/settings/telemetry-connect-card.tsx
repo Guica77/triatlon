@@ -8,6 +8,7 @@ export function TelemetryConnectCard({ connectedProviders = [] }: { connectedPro
   const [message, setMessage] = useState('');
   const router = useRouter();
   const connected = connectedProviders.includes('strava');
+  const native = typeof navigator !== 'undefined' && navigator.userAgent.includes('TriWaveXNative/');
   async function run(action: () => Promise<{ error?: string }>, success: string) {
     setBusy(true); setMessage('');
     try { const result = await action(); setMessage(result.error || success); if (!result.error) router.refresh(); }
@@ -20,7 +21,7 @@ export function TelemetryConnectCard({ connectedProviders = [] }: { connectedPro
     {connected ? <div className="flex flex-wrap gap-2">
       <button disabled={busy} onClick={() => run(syncPacesFromStravaAction, 'Métricas actualizadas.')} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Actualizar métricas</button>
       <button disabled={busy} onClick={() => run(() => disconnectTelemetry('strava'), 'Strava desconectado.')} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Desconectar</button>
-    </div> : <a href="/api/auth/telemetry/connect?provider=strava" className="inline-block rounded-lg border px-3 py-2 text-sm">Conectar con Strava</a>}
+    </div> : <a href={native ? 'triwavex://strava/connect' : '/api/auth/telemetry/connect?provider=strava'} className="inline-block rounded-lg border px-3 py-2 text-sm">Conectar con Strava</a>}
     <div className="space-y-3 border-t border-border-default pt-4">
       <h3 className="text-sm font-bold text-text-primary">Garmin Connect</h3>
       <p id="garmin-availability" className="text-sm text-text-secondary">La conexión directa está pendiente de aprobación de Garmin.</p>
