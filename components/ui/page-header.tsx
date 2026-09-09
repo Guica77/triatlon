@@ -22,9 +22,9 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <div className={cn('flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
+    <div className={cn('apple-page-header flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
       <div className="flex min-w-0 items-center gap-3">
-        <div className={cn('flex size-10 shrink-0 items-center justify-center rounded-lg border border-border-subtle bg-surface-hover', iconBg)}>
+        <div className={cn('flex size-11 shrink-0 items-center justify-center rounded-[14px] border border-border-subtle bg-surface-hover shadow-card', iconBg)}>
           <Icon className={cn('size-4', iconColor)} />
         </div>
         <div className="min-w-0">

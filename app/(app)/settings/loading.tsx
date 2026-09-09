@@ -1,6 +1,11 @@
+import { AppleLoadingMark } from '@/components/brand/apple-loading-mark'
+
 export default function SettingsLoading() {
   return (
-    <div className="min-h-screen bg-bg-app pb-24 animate-pulse">
+    <div className="min-h-screen bg-bg-app pb-24">
+      <div className="flex min-h-48 items-center justify-center px-6 pt-12">
+        <AppleLoadingMark label="Preparando tus ajustes" />
+      </div>
       <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-8 space-y-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-bg-hover" />

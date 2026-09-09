@@ -58,7 +58,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-bg-app w-full overflow-x-hidden">
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-24 sm:pb-8 space-y-6">
+      <main className="apple-athlete-content max-w-5xl mx-auto px-4 sm:px-6 pt-6 pb-24 sm:pb-8 space-y-6">
 
         <PageHeader
           icon={Settings}

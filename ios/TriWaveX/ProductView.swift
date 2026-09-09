@@ -19,10 +19,7 @@ struct ProductView: View {
             ZStack {
                 ProductWebView(model: browser, origin: origin, store: store, initialPath: initialPath, onStravaConnect: connectStrava)
                 if browser.loading {
-                    ProgressView("Cargando…")
-                        .padding(.horizontal, 18).padding(.vertical, 14)
-                        .background(.regularMaterial, in: Capsule())
-                        .overlay(Capsule().stroke(.white.opacity(0.12), lineWidth: 1))
+                    TriWaveXLoadingMark(reduceMotion: reduceMotion)
                         .transition(.opacity)
                 }
                 if let message = browser.error {
@@ -158,6 +155,48 @@ struct ProductView: View {
             .background(.ultraThinMaterial, in: Circle())
             .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 1))
             .accessibilityLabel(label)
+    }
+}
+
+private struct TriWaveXLoadingMark: View {
+    let reduceMotion: Bool
+    @State private var breathing = false
+
+    var body: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(.ultraThinMaterial)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .stroke(Color.triWaveXAqua.opacity(0.34), lineWidth: 1)
+                    }
+                Image(systemName: "wave.3.right.circle.fill")
+                    .font(.system(size: 36, weight: .semibold))
+                    .foregroundStyle(Color.triWaveXAqua)
+                    .accessibilityHidden(true)
+            }
+            .frame(width: 84, height: 84)
+            .scaleEffect(breathing ? 1.035 : 1)
+            Text("Cargando TriWaveX")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 22).padding(.vertical, 18)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(.white.opacity(0.12), lineWidth: 1)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Cargando TriWaveX")
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { breathing = true }
+        }
+        .onChange(of: reduceMotion) { _, reduced in
+            if reduced { breathing = false }
+        }
     }
 }
 
