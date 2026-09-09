@@ -92,6 +92,14 @@ export async function syncPhysiologyFromStrava(userId: string, accessToken: stri
       }
     });
 
+    if (!athleteResponse.ok) {
+      return {
+        success: false,
+        error: 'Strava no ha permitido consultar tu perfil.',
+        needsReconnect: athleteResponse.status === 401 || athleteResponse.status === 403,
+      };
+    }
+
     let stravaFtp: number | null = null;
     if (athleteResponse.ok) {
       const athleteData = await athleteResponse.json();

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { syncPhysiologyFromStrava } from '@/lib/telemetry/strava-sync';
+import { hasRequiredStravaScopes, normalizeStravaScopes } from '@/lib/telemetry/strava-scopes';
 
 function getBaseUrl(request: NextRequest) {
   const url = new URL(request.url);
@@ -54,6 +55,10 @@ export async function GET(request: NextRequest) {
 
     const tokenData = await tokenResponse.json();
     const { access_token, refresh_token, expires_at, athlete } = tokenData;
+    const scopes = normalizeStravaScopes(tokenData.scope);
+    if (!hasRequiredStravaScopes(scopes)) {
+      return NextResponse.redirect(new URL(isOnboarding ? '/dashboard?error=strava_missing_permissions' : '/settings?error=strava_missing_permissions', request.url));
+    }
     const externalAthleteId = `strava_user_${athlete.id}`;
 
     // Update profile in database
@@ -83,7 +88,7 @@ export async function GET(request: NextRequest) {
         access_token,
         refresh_token,
         expires_at: new Date(expires_at * 1000).toISOString(),
-        scopes: ['activity:read_all', 'read'],
+        scopes,
       }, { onConflict: 'user_id, provider' });
 
     if (deviceError) {

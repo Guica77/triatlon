@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { STRAVA_REQUIRED_SCOPES } from '@/lib/telemetry/strava-scopes';
 
 function getBaseUrl(request: NextRequest) {
   const url = new URL(request.url);
@@ -28,7 +29,8 @@ export async function GET(request: NextRequest) {
     const redirectUri = `${getBaseUrl(request)}/api/auth/telemetry/callback`;
     const isPopup = searchParams.get('popup') === 'true';
     const state = (isOnboarding ? 'onboarding' : 'settings') + (isPopup ? '_popup' : '');
-    const stravaUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&approval_prompt=auto&scope=activity:read_all,read&state=${state}`;
+    const reconnect = searchParams.get('reconnect') === '1';
+    const stravaUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&approval_prompt=${reconnect ? 'force' : 'auto'}&scope=${encodeURIComponent(STRAVA_REQUIRED_SCOPES.join(','))}&state=${state}`;
     return NextResponse.redirect(stravaUrl);
   }
 

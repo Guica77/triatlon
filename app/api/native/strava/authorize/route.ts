@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { issueNativeTelemetryState } from '@/lib/auth/telemetry-oauth'
+import { STRAVA_REQUIRED_SCOPES } from '@/lib/telemetry/strava-scopes'
 
 const reply = (body: object, status = 200) => Response.json(body, {
   status, headers: { 'Cache-Control': 'no-store', 'Vary': 'Cookie' },
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
       redirect_uri: 'triwavex://strava/callback',
       response_type: 'code',
       approval_prompt: 'auto',
-      scope: 'read,activity:read_all',
+      scope: STRAVA_REQUIRED_SCOPES.join(','),
       state,
     }).toString()
     return reply({ authorizationURL: authorizationURL.href })

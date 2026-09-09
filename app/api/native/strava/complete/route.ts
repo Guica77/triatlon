@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout'
 import { consumeNativeTelemetryState } from '@/lib/auth/telemetry-oauth'
+import { hasRequiredStravaScopes, normalizeStravaScopes } from '@/lib/telemetry/strava-scopes'
 
 const reply = (body: object, status = 200) => Response.json(body, {
   status, headers: { 'Cache-Control': 'no-store', 'Vary': 'Cookie' },
@@ -32,8 +33,8 @@ export async function POST(request: Request) {
     const token = await exchange.json()
     if (typeof token.access_token !== 'string' || typeof token.refresh_token !== 'string' ||
         !Number.isFinite(token.expires_at) || !Number.isSafeInteger(token.athlete?.id)) return reply({ error: 'Respuesta inválida de Strava.' }, 502)
-    const scopes = typeof token.scope === 'string' ? token.scope.split(/[ ,]+/).filter(Boolean) : []
-    if (!scopes.includes('activity:read_all')) return reply({ error: 'No autorizaste el acceso a actividades. Vuelve a intentarlo.' }, 403)
+    const scopes = normalizeStravaScopes(token.scope)
+    if (!hasRequiredStravaScopes(scopes)) return reply({ error: 'Necesitamos permiso para actividades y perfil. Vuelve a conectar Strava.' }, 403)
     const admin = createAdminClient()
     const { error: deviceError } = await admin.from('user_connected_devices').upsert({
       user_id: user.id, provider: 'strava', access_token: token.access_token, refresh_token: token.refresh_token,

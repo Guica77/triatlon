@@ -113,6 +113,10 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
     try {
       const res = await syncPacesFromStravaAction();
       if (res.error) {
+        if (res.needsReconnect && window.confirm(`${res.error}\n\n¿Quieres reconectar Strava ahora?`)) {
+          window.location.assign(isNative ? 'triwavex://strava/connect' : '/api/auth/telemetry/connect?provider=strava&reconnect=1');
+          return;
+        }
         alert(res.error);
       } else {
         alert('Tus métricas fisiológicas y de ritmos se han recalculado exitosamente con tus actividades de Strava.');

@@ -147,7 +147,10 @@ export async function syncPacesFromStravaAction() {
     return { error: 'No tienes una cuenta de Strava conectada o el token ha expirado y no se pudo refrescar.' };
   }
 
-  await syncPhysiologyFromStrava(user.id, token);
+  const result = await syncPhysiologyFromStrava(user.id, token);
+  if (!result.success) {
+    return { error: result.error, needsReconnect: 'needsReconnect' in result && result.needsReconnect === true };
+  }
 
   (revalidateTag as any)('analytics');
   revalidatePath('/settings');
