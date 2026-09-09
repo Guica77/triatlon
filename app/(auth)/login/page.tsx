@@ -116,7 +116,7 @@ function UnifiedLoginForm() {
   }
 
   return (
-    <AuthLayout title="TriWaveX" subtitle="Inicia sesión en tu cuenta" lockViewport>
+    <AuthLayout title="TriWaveX" subtitle="Entrena con un plan que se mueve contigo." lockViewport>
       <WelcomeReady immediate />
       <div className="space-y-6">
 
@@ -128,7 +128,7 @@ function UnifiedLoginForm() {
         )}
 
         {/* Role Toggle — with smooth micro-interaction */}
-        <div className="relative grid grid-cols-2 gap-2 p-1.5 bg-surface-hover rounded-lg border border-border-subtle/50">
+        <div className="relative grid grid-cols-2 gap-1 rounded-[18px] border border-white/10 bg-surface-hover/70 p-1.5">
           {(['athlete', 'coach'] as const).map(r => {
             const Icon = ROLE_CONFIG[r].icon;
             const isActive = role === r;
@@ -137,14 +137,14 @@ function UnifiedLoginForm() {
                 key={r}
                 type="button"
                 onClick={() => { setRole(r); setError(null); }}
-                className={`relative flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-md text-sm font-semibold transition-[color,background-color,box-shadow] cursor-pointer select-none ${
-                  isActive ? 'text-white' : 'text-text-muted hover:text-text-secondary'
+                className={`relative flex min-h-11 items-center justify-center gap-2.5 px-4 py-2.5 rounded-[14px] text-sm font-semibold transition-[color,background-color,box-shadow] cursor-pointer select-none ${
+                  isActive ? (r === 'athlete' ? 'text-[#0B1117]' : 'text-[#0B1117]') : 'text-text-muted hover:text-text-secondary'
                 }`}
               >
                 {isActive && (
                   <motion.div
                     layoutId="role-bg"
-                    className="absolute inset-0 bg-coral-500 rounded-md shadow-button"
+                    className={`absolute inset-0 rounded-[14px] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_1px_3px_rgba(0,0,0,0.28)] ${r === 'athlete' ? 'bg-swim' : 'bg-bike'}`}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                 )}
@@ -195,7 +195,7 @@ function UnifiedLoginForm() {
                     onChange={e => { setEmail(e.target.value); validateEmail(e.target.value); }}
                     placeholder={cfg.placeholder}
                     required
-                    className={`w-full bg-surface-hover border rounded-lg pl-10 pr-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors ${
+                    className={`w-full bg-surface-hover border rounded-[14px] pl-10 pr-3.5 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none transition-colors ${
                       emailError ? 'border-run/50' : 'border-border-default focus:border-accent/50'
                     }`}
                   />
@@ -225,7 +225,7 @@ function UnifiedLoginForm() {
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     required
-                    className="w-full bg-surface-hover border border-border-default rounded-lg pl-3.5 pr-10 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-accent/50 transition-colors font-mono"
+                    className="w-full bg-surface-hover border border-border-default rounded-[14px] pl-3.5 pr-10 py-3 text-sm text-text-primary placeholder:text-text-muted outline-none focus:border-accent/50 transition-colors font-mono"
                   />
                   <button
                     type="button"
@@ -242,7 +242,7 @@ function UnifiedLoginForm() {
               <motion.button
                 whileHover={canHover ? { scale: 1.01 } : undefined}
                 whileTap={{ scale: 0.99 }}
-                className="w-full py-2.5 rounded-xl text-sm font-bold text-bg-deep bg-accent hover:bg-lime-400 transition-colors shadow-button flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-1"
+                className={`mt-1 flex w-full items-center justify-center gap-2 rounded-[16px] border border-white/15 py-3 text-sm font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_2px_5px_rgba(0,0,0,0.28)] transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer ${role === 'athlete' ? 'bg-swim text-[#0B1117] hover:bg-swim/90' : 'bg-bike text-[#0B1117] hover:bg-bike/90'}`}
                 type="submit"
                 disabled={loading || !!emailError}
               >
@@ -270,13 +270,13 @@ function UnifiedLoginForm() {
         </div>
 
         {/* OAuth */}
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => handleOAuth('apple')}
             disabled={loading}
             aria-label="Continuar con Apple"
-            className="flex h-11 w-full items-center justify-center overflow-hidden rounded-lg bg-black transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex h-11 w-full items-center justify-center overflow-hidden rounded-[14px] bg-black transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {/* Apple serves the approved artwork, localized and at the required proportions. */}
             <img
@@ -290,7 +290,7 @@ function UnifiedLoginForm() {
             type="button"
             onClick={() => handleOAuth('google')}
             disabled={loading}
-            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-surface-hover border border-border-default hover:border-border-default/80 transition-colors text-sm font-medium text-text-secondary hover:text-text-primary disabled:opacity-40 cursor-pointer"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-[14px] bg-surface-hover border border-border-default hover:border-border-default/80 transition-colors text-sm font-semibold text-text-secondary hover:text-text-primary disabled:opacity-40 cursor-pointer"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />

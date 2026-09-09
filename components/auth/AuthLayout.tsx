@@ -39,36 +39,31 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
   }, [lockViewport]);
 
   return (
-    <div className={`relative flex w-full flex-col items-center justify-center overflow-x-hidden bg-surface-app px-4 py-6 font-sans selection:bg-accent/30 sm:p-6 ${lockViewport ? 'fixed inset-0 h-svh min-h-0 overflow-y-hidden overscroll-none' : 'min-h-screen'}`}>
-      {/* Thin discipline bars — swim / bike / run */}
-      <div className="absolute left-0 right-0 top-0 flex h-[3px]">
-        <div className="flex-1 bg-swim/70" />
-        <div className="flex-1 bg-bike/70" />
-        <div className="flex-1 bg-run/70" />
-      </div>
+    <div className={`relative flex w-full flex-col items-center justify-center overflow-x-hidden bg-[radial-gradient(circle_at_15%_5%,rgba(121,199,255,0.13),transparent_34%),radial-gradient(circle_at_85%_100%,rgba(183,243,107,0.10),transparent_38%),#0B1117] px-4 py-6 font-sans selection:bg-accent/30 sm:p-8 ${lockViewport ? 'fixed inset-0 h-svh min-h-0 overflow-y-auto overscroll-none' : 'min-h-screen'}`}>
 
       {mounted && (
         <motion.div
           initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
-          className="relative z-10 min-w-0 w-full max-w-sm space-y-6"
+          className="relative z-10 min-w-0 w-full max-w-md space-y-6"
         >
           {/* Logo */}
-          <div className="space-y-4 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <TriWaveXMark className="h-8 w-8" />
-              <span className="font-display text-2xl font-black leading-none tracking-tight text-text-primary">
-                TRIWAVE<span className="text-accent">X</span>
-              </span>
+          <div className="space-y-3 text-center">
+            <p className="text-sm font-semibold text-text-primary/90">Bienvenido</p>
+            <TriWaveXMark className="mx-auto h-16 w-16 rounded-[22px] border border-white/10 bg-[#0B1117] p-2.5 shadow-[0_12px_30px_rgba(0,0,0,0.28)]" />
+            <div className="flex justify-center gap-2" aria-hidden="true">
+              <span className="h-2.5 w-2.5 rounded-full bg-swim" />
+              <span className="h-2.5 w-2.5 rounded-full bg-bike" />
+              <span className="h-2.5 w-2.5 rounded-full bg-run" />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <motion.h1
                 initial={{ opacity: 0, y: reduceMotion ? 0 : 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
-                className="font-display text-2xl font-bold tracking-tight text-text-primary"
+                className="text-4xl font-bold tracking-[-0.055em] text-text-primary sm:text-[42px]"
               >
                 {title}
               </motion.h1>
@@ -76,7 +71,7 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
                 initial={{ opacity: 0, y: reduceMotion ? 0 : 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
-                className="text-sm text-text-secondary"
+                className="text-base text-text-secondary"
               >
                 {subtitle}
               </motion.p>
@@ -88,7 +83,7 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
             initial={{ opacity: 0, y: reduceMotion ? 0 : 6, scale: reduceMotion ? 1 : 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
-            className="rounded-xl border border-border-default bg-surface-card p-6 sm:p-7"
+            className="rounded-[28px] border border-white/10 bg-surface-card/85 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.30)] backdrop-blur-xl sm:p-7"
           >
             {children}
           </motion.div>
