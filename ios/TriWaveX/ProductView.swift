@@ -12,18 +12,29 @@ struct ProductView: View {
     let onDismiss: (() -> Void)?
     @State private var browser = BrowserModel()
     @State private var strava = StravaSessionModel()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         NavigationStack {
             ZStack {
                 ProductWebView(model: browser, origin: origin, store: store, initialPath: initialPath, onStravaConnect: connectStrava)
-                if browser.loading { ProgressView("Cargando…").padding().background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16)) }
+                if browser.loading {
+                    ProgressView("Cargando…")
+                        .padding(.horizontal, 18).padding(.vertical, 14)
+                        .background(.regularMaterial, in: Capsule())
+                        .overlay(Capsule().stroke(.white.opacity(0.12), lineWidth: 1))
+                        .transition(.opacity)
+                }
                 if let message = browser.error {
                     ContentUnavailableView {
                         Label("No se pudo cargar", systemImage: "wifi.exclamationmark")
                     } description: { Text(message) } actions: {
-                        Button("Reintentar") { browser.retry() }.buttonStyle(.borderedProminent)
-                    }.background(.background)
+                        Button("Reintentar") { browser.retry() }
+                            .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
+                    }
+                    .padding(24)
+                    .background(.background)
+                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
                 }
             }
             .navigationTitle("TriWaveX").navigationBarTitleDisplayMode(.inline)
@@ -35,7 +46,12 @@ struct ProductView: View {
                         if !coach { tab("Progreso", icon: "chart.xyaxis.line", path: "/resumen") }
                         tab("Chat", icon: "bubble.left.and.bubble.right", path: coach ? "/coach/chat" : "/chat")
                         tab("Perfil", icon: "person.crop.circle", path: "/settings")
-                    }.padding(.vertical, 10).background(.regularMaterial)
+                    }
+                    .padding(8)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .overlay(Capsule().stroke(.white.opacity(0.12), lineWidth: 1))
+                    .padding(.horizontal, 12).padding(.bottom, 4)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
             .toolbar {
@@ -57,6 +73,9 @@ struct ProductView: View {
         .alert("Strava", isPresented: Binding(get: { strava.message != nil }, set: { if !$0 { strava.message = nil } })) {
             Button("Aceptar", role: .cancel) { strava.message = nil }
         } message: { Text(strava.message ?? "") }
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: browser.loading)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: browser.error)
+        .animation(reduceMotion ? nil : .spring(response: 0.34, dampingFraction: 0.88), value: browser.showsAppNavigation)
     }
 
     private func connectStrava() {
@@ -115,7 +134,9 @@ struct ProductView: View {
             VStack(spacing: 4) { Image(systemName: icon); Text(title).font(.caption) }
                 .frame(maxWidth: .infinity).frame(minHeight: 44)
         }
-        .foregroundStyle(browser.currentPath.hasPrefix(path) ? Color.cyan : Color.secondary)
+        .foregroundStyle(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua : Color.secondary)
+        .background(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua.opacity(0.16) : .clear, in: Capsule())
+        .buttonStyle(TriWaveXSelectionButtonStyle())
         .accessibilityAddTraits(browser.currentPath.hasPrefix(path) ? .isSelected : [])
     }
 }
