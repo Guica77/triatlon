@@ -10,7 +10,12 @@ import { useNotifications } from '@/components/providers/notification-provider';
 export function MobileBottomNav() {
   const pathname = usePathname();
   const [role, setRole] = React.useState<string | null>(null);
+  const [isNativeApp, setIsNativeApp] = React.useState(false);
   const { unreadCount } = useNotifications();
+
+  React.useEffect(() => {
+    setIsNativeApp(navigator.userAgent.includes('TriWaveXNative/'));
+  }, []);
 
   React.useEffect(() => {
     async function fetchRole() {
@@ -62,8 +67,15 @@ export function MobileBottomNav() {
   ];
 
   return (
-    <nav aria-label="Navegación principal" className="sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-2 bg-surface-elevated/90 backdrop-blur-lg border-t border-border-default">
-      <div className="flex items-center justify-evenly max-w-md mx-auto w-full">
+    <nav
+      aria-label="Navegación principal"
+      className={isNativeApp
+        ? 'sm:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)] pt-2'
+        : 'sm:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-2 bg-surface-elevated/90 backdrop-blur-lg border-t border-border-default'}
+    >
+      <div className={isNativeApp
+        ? 'mx-auto flex w-full max-w-md items-center justify-evenly rounded-[1.4rem] border border-white/10 bg-[#18242d]/95 px-1.5 py-1.5 shadow-[0_12px_35px_rgba(0,0,0,0.42)] backdrop-blur-2xl'
+        : 'flex items-center justify-evenly max-w-md mx-auto w-full'}>
         {navItems.map((item) => {
           const isActive = role === 'coach' || role === 'owner'
             ? matchesRoute(pathname, item.href)
@@ -74,12 +86,12 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 px-3 py-1.5 relative group"
+              className={`relative flex min-w-0 flex-col items-center justify-center gap-1 transition-all duration-200 ${isNativeApp ? `min-h-14 flex-1 rounded-2xl px-2 py-1.5 ${isActive ? 'bg-white/12 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]' : 'active:bg-white/8'}` : 'min-h-11 px-3 py-1.5 group'}`}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
             >
               <div className="relative">
-                <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-accent' : 'text-text-muted group-hover:text-text-secondary'}`} />
+                <Icon className={`h-5 w-5 transition-colors ${isActive ? 'text-accent' : 'text-text-muted'} ${!isNativeApp ? 'group-hover:text-text-secondary' : ''}`} strokeWidth={isNativeApp && isActive ? 2.5 : 2} />
                 {item.showBadge && unreadCount > 0 && (
                   <span className="absolute -top-2 -right-2 w-4 h-4 bg-run rounded-full flex items-center justify-center border-2 border-surface-elevated">
                     <span className="text-[9px] font-bold text-white leading-none">
