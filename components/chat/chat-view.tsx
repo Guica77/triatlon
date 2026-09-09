@@ -519,40 +519,40 @@ export function ChatView({
                 </div>
               </div>
             ) : (
-              <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-[100%] pr-2 custom-scrollbar">
-                <div className="mb-8 mt-4 space-y-2 text-center">
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-coral-500/40 bg-run-subtle text-coral-300 shadow-card">
-                    <Sparkles className="h-6 w-6 animate-pulse" />
+              <div className="mx-auto max-h-full w-full max-w-xl space-y-5 overflow-y-auto px-4 pb-8 pt-6 custom-scrollbar sm:px-6 sm:pt-10">
+                <div className="mx-auto max-w-md space-y-2 text-center">
+                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-swim/40 bg-swim-subtle text-swim shadow-card">
+                    <Sparkles className="h-6 w-6 motion-safe:animate-pulse" />
                   </div>
-                  <h3 className="text-xl font-black tracking-tight text-text-primary">Directorio de Entrenadores</h3>
-                  <p className="mx-auto max-w-md text-sm font-medium leading-relaxed text-text-muted">
+                  <h3 className="text-xl font-black tracking-tight text-text-primary sm:text-2xl">Directorio de Entrenadores</h3>
+                  <p className="text-sm font-medium leading-relaxed text-text-muted sm:text-base">
                     Aún no tienes un entrenador asignado. Vincula tu cuenta mediante un código de invitación o elige un coach certificado.
                   </p>
                 </div>
 
                 {/* Código de invitación */}
-                <form onSubmit={handleLinkByCode} className="mx-auto flex max-w-sm flex-col gap-3 rounded-2xl border border-border-default bg-surface-card p-5 text-left shadow-card">
+                <form onSubmit={handleLinkByCode} className="mx-auto w-full rounded-2xl border border-border-default bg-surface-card p-4 text-left shadow-card sm:p-5">
                   <label className="text-center text-[10px] font-black uppercase tracking-wider text-text-muted">¿Tienes un código de entrenador?</label>
-                  <div className="flex gap-2">
+                  <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
                     <input
                       type="text"
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
                       placeholder="Ej: GUILLEPRO"
-                      className="flex-1 rounded-xl border border-border-default bg-surface-elevated px-4 py-3 text-sm font-black uppercase tracking-wider text-text-primary outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out placeholder:text-text-muted focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/30"
+                      className="min-w-0 rounded-xl border border-border-default bg-surface-elevated px-3 py-3 text-sm font-black uppercase tracking-wider text-text-primary outline-none transition-[background-color,color,border-color,box-shadow] duration-150 ease-out placeholder:text-text-muted focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/30 sm:px-4"
                     />
                     <AnimatedButton
                       type="submit"
                       variant="primary"
                       disabled={linkingCoachCode || !inviteCode.trim()}
-                      className="min-h-10 cursor-pointer px-6 py-3 text-sm font-black !bg-primary !text-primary-foreground shadow-button transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="min-h-12 cursor-pointer rounded-xl px-4 py-3 text-sm font-black !bg-primary !text-primary-foreground shadow-button transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 disabled:cursor-not-allowed disabled:opacity-50 sm:px-6"
                     >
                       {linkingCoachCode ? '...' : 'Vincular'}
                     </AnimatedButton>
                   </div>
                 </form>
 
-                <div className="relative py-4 max-w-sm mx-auto">
+                <div className="relative mx-auto max-w-xl py-2">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-border-subtle"></div>
                   </div>
@@ -562,7 +562,7 @@ export function ChatView({
                 </div>
 
                 {availableCoaches.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12 text-left">
+                  <div className="grid grid-cols-1 gap-4 pb-4 text-left sm:grid-cols-2">
                     {availableCoaches.map(coach => (
                       <div key={coach.id} className="group flex flex-col justify-between rounded-2xl border border-border-default bg-surface-card p-5 shadow-card transition-[border-color,box-shadow,background-color] duration-150 ease-out fine-hover:border-swim/50">
                         <div className="flex items-center gap-3 mb-4">
@@ -590,7 +590,7 @@ export function ChatView({
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-border-default bg-surface-card p-8 pb-12 text-center font-medium shadow-card">
+                  <div className="rounded-2xl border border-border-default bg-surface-card p-8 text-center font-medium shadow-card">
                     <p className="text-sm text-text-muted">No hay entrenadores disponibles en este momento.</p>
                   </div>
                 )}

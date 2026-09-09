@@ -15,19 +15,32 @@ export function TelemetryConnectCard({ connectedProviders = [] }: { connectedPro
     catch { setMessage('No se pudo completar la operación. Inténtalo de nuevo.'); }
     finally { setBusy(false); }
   }
-  return <section className="h-full rounded-xl border border-border-default bg-bg-card p-5 space-y-3">
-    <h3 className="text-sm font-bold text-text-primary">Actividades de Strava</h3>
-    <p className="text-sm text-text-secondary">{connected ? 'Cuenta conectada.' : 'Conecta tu cuenta para importar tus actividades. La autorización se realiza en Strava.'}</p>
-    {connected ? <div className="flex flex-wrap gap-2">
-      <button disabled={busy} onClick={() => run(syncPacesFromStravaAction, 'Métricas actualizadas.')} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Actualizar métricas</button>
-      <button disabled={busy} onClick={() => run(() => disconnectTelemetry('strava'), 'Strava desconectado.')} className="rounded-lg border px-3 py-2 text-sm disabled:opacity-50">Desconectar</button>
-    </div> : <a href={native ? 'triwavex://strava/connect' : '/api/auth/telemetry/connect?provider=strava'} className="inline-block rounded-lg border px-3 py-2 text-sm">Conectar con Strava</a>}
-    <div className="space-y-3 border-t border-border-default pt-4">
-      <h3 className="text-sm font-bold text-text-primary">Garmin Connect</h3>
-      <p id="garmin-availability" className="text-sm text-text-secondary">La conexión directa está pendiente de aprobación de Garmin.</p>
-      <button type="button" disabled aria-describedby="garmin-availability" className="min-h-11 rounded-lg border border-border-default px-3 py-2 text-sm text-text-muted disabled:cursor-not-allowed disabled:opacity-60">Conectar con Garmin · Próximamente</button>
-      <p className="text-xs text-text-muted">Mientras tanto, puedes vincular Garmin con Strava y conectar Strava aquí para importar las actividades que se sincronicen. El envío de entrenamientos al reloj todavía no está disponible.</p>
+  return <section className="h-full rounded-2xl border border-border-default bg-bg-card p-5 shadow-card sm:p-6">
+    <div className="flex items-start justify-between gap-3">
+      <div>
+        <p className="text-[10px] font-black uppercase tracking-[0.16em] text-swim">Conexiones</p>
+        <h3 className="mt-1 text-base font-bold text-text-primary">Actividades de Strava</h3>
+      </div>
+      <span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${connected ? 'border-success/30 bg-bike-subtle text-bike' : 'border-border-default bg-surface-elevated text-text-muted'}`}>
+        {connected ? 'Conectado' : 'Disponible'}
+      </span>
     </div>
-    <p role="status" className="text-sm text-text-secondary">{busy ? 'Procesando…' : message}</p>
+    <p className="mt-3 text-sm leading-relaxed text-text-secondary">{connected ? 'Tu cuenta está conectada. Importaremos las actividades nuevas en TriWaveX.' : 'Autoriza Strava de forma segura para importar tus actividades y métricas.'}</p>
+    {connected ? <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <button disabled={busy} onClick={() => run(syncPacesFromStravaAction, 'Métricas actualizadas.')} className="min-h-11 rounded-xl border border-swim/40 bg-swim-subtle px-4 py-2 text-sm font-bold text-swim transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50">Actualizar métricas</button>
+      <button disabled={busy} onClick={() => run(() => disconnectTelemetry('strava'), 'Strava desconectado.')} className="min-h-11 rounded-xl border border-border-default bg-surface-elevated px-4 py-2 text-sm font-bold text-text-secondary transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50">Desconectar</button>
+    </div> : <a href={native ? 'triwavex://strava/connect' : '/api/auth/telemetry/connect?provider=strava'} className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-button transition-[background-color,transform] duration-150 active:scale-[0.98] sm:w-auto">Conectar con Strava</a>}
+    <div className="mt-5 border-t border-border-default pt-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-bold text-text-primary">Garmin Connect</h3>
+          <p id="garmin-availability" className="mt-1 text-sm leading-relaxed text-text-secondary">La conexión directa está pendiente de aprobación de Garmin.</p>
+        </div>
+        <span className="shrink-0 rounded-full border border-border-default bg-surface-elevated px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-text-muted">Pendiente</span>
+      </div>
+      <button type="button" disabled aria-describedby="garmin-availability" className="mt-3 min-h-11 w-full rounded-xl border border-border-default bg-surface-elevated px-4 py-2 text-sm font-bold text-text-muted disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">Conectar con Garmin · Próximamente</button>
+      <p className="mt-3 text-xs leading-relaxed text-text-muted">Puedes vincular Garmin con Strava y conectar Strava aquí para importar las actividades que se sincronicen. El envío de entrenamientos al reloj todavía no está disponible.</p>
+    </div>
+    {(busy || message) && <p role="status" className="mt-4 rounded-xl border border-border-default bg-surface-elevated px-3 py-2 text-sm text-text-secondary">{busy ? 'Procesando…' : message}</p>}
   </section>;
 }
