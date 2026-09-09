@@ -134,6 +134,28 @@
     outline-offset: 2px;
   }
 
+  /* Every native button gets the same short, interruptible press feedback.
+     Keep this here so direct buttons share the Button primitive's interaction model. */
+  button {
+    -webkit-tap-highlight-color: transparent;
+    transition-property: background-color, color, border-color, opacity, box-shadow, transform;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
+  /* Shared Apple-like control geometry. Custom buttons keep their TriWaveX
+     action colour, while rounded-full icon controls deliberately stay circular. */
+  button:not([class*="rounded-full"]):not([class*="rounded-none"]) {
+    border-radius: 14px !important;
+  }
+
+  button:not([data-variant="ghost"]):not([data-variant="link"]):not([class*="bg-transparent"]) {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0, 0, 0, 0.28);
+}
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 3px; }
