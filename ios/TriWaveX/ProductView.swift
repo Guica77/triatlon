@@ -57,13 +57,23 @@ struct ProductView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if let onDismiss {
-                        Button("Cerrar", systemImage: "xmark") { onDismiss() }
+                        Button(action: onDismiss) {
+                            toolbarControl("xmark", label: "Cerrar")
+                        }
+                        .buttonStyle(TriWaveXSelectionButtonStyle())
                     } else {
-                        Button("Atrás", systemImage: "chevron.left") { browser.webView?.goBack() }.disabled(!browser.canGoBack)
+                        Button { browser.webView?.goBack() } label: {
+                            toolbarControl("chevron.left", label: "Atrás")
+                        }
+                        .buttonStyle(TriWaveXSelectionButtonStyle())
+                        .disabled(!browser.canGoBack)
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Recargar", systemImage: "arrow.clockwise") { browser.retry() }
+                    Button { browser.retry() } label: {
+                        toolbarControl("arrow.clockwise", label: "Recargar")
+                    }
+                    .buttonStyle(TriWaveXSelectionButtonStyle())
                 }
             }
         }
@@ -138,6 +148,16 @@ struct ProductView: View {
         .background(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua.opacity(0.16) : .clear, in: Capsule())
         .buttonStyle(TriWaveXSelectionButtonStyle())
         .accessibilityAddTraits(browser.currentPath.hasPrefix(path) ? .isSelected : [])
+    }
+
+    private func toolbarControl(_ icon: String, label: String) -> some View {
+        Image(systemName: icon)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(Color.triWaveXAqua)
+            .frame(width: 38, height: 38)
+            .background(.ultraThinMaterial, in: Circle())
+            .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 1))
+            .accessibilityLabel(label)
     }
 }
 

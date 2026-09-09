@@ -49,31 +49,30 @@ export default async function AthleteChatPage() {
       }}
     >
 
-      {/* Top Navbar — safe-area top so the system status bar never overlaps the title */}
-      <header className="border-b border-border-subtle bg-white/95 backdrop-blur-md px-4 sm:px-6 pt-[env(safe-area-inset-top)] pb-3 sm:pb-4 flex items-center justify-between gap-3 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-swim border border-swim flex items-center justify-center shrink-0">
-            <MessageSquare className="w-4 h-4 text-swim" />
+      {/* Keep the product identity centred within the same mobile column as the content. */}
+      <header className="shrink-0 border-b border-border-subtle bg-white/95 backdrop-blur-md pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-swim/40 bg-swim-subtle shadow-sm">
+              <MessageSquare className="h-4 w-4 text-swim" />
+            </div>
+            <div className="min-w-0">
+              <h1 className="truncate text-sm font-bold tracking-tight text-text-primary sm:text-base">Chat con Entrenador</h1>
+              <p className="truncate text-[11px] font-semibold text-text-muted sm:text-xs">Comunicación directa y resolución de dudas</p>
+            </div>
           </div>
-          <div className="min-w-0">
-            <h1 className="text-sm sm:text-base font-bold text-text-primary tracking-tight truncate">Chat con Entrenador</h1>
-            <p className="text-[11px] sm:text-xs text-text-muted font-semibold truncate">
-              Comunicación directa y resolución de dudas
-            </p>
-          </div>
-        </div>
 
-        {/* Compact back control — arrow + small label, keeps the header to one row */}
-        <Link href="/dashboard" className="shrink-0" aria-label="Volver al Dashboard">
-          <AnimatedButton variant="ghost" className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-semibold text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 border border-transparent cursor-pointer transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden min-[380px]:inline">Dashboard</span>
-          </AnimatedButton>
-        </Link>
+          <Link href="/dashboard" className="shrink-0" aria-label="Volver al Dashboard">
+            <AnimatedButton variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-zinc-200 text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Dashboard</span>
+            </AnimatedButton>
+          </Link>
+        </div>
       </header>
 
       {/* Main chat viewport */}
-      <main className="max-w-4xl mx-auto w-full px-0 sm:px-6 pt-2 sm:pt-8 flex-1 flex flex-col overflow-hidden pb-0 min-h-0">
+      <main className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col overflow-hidden px-0 pb-0 pt-2 sm:px-6 sm:pt-8">
         <ChatView
           initialParticipants={participants}
           availableCoaches={availableCoaches}

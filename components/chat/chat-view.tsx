@@ -468,40 +468,40 @@ export function ChatView({
                 </div>
               </div>
             ) : (
-              <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-y-auto max-h-[100%] pr-2 custom-scrollbar">
-                <div className="text-center space-y-2 mb-8 mt-4">
+              <div className="mx-auto max-h-full w-full max-w-xl space-y-5 overflow-y-auto px-4 pb-8 pt-6 custom-scrollbar sm:px-6 sm:pt-10">
+                <div className="mx-auto max-w-md space-y-2 text-center">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-cyan-50 border border-cyan-100 text-cyan-600 mb-4 shadow-sm">
-                    <Sparkles className="w-6 h-6 animate-pulse" />
+                    <Sparkles className="w-6 h-6 motion-safe:animate-pulse" />
                   </div>
-                  <h3 className="text-xl font-black text-zinc-900 tracking-tight">Directorio de Entrenadores</h3>
-                  <p className="text-sm text-zinc-500 font-medium max-w-md mx-auto leading-relaxed">
+                  <h3 className="text-xl font-black text-zinc-900 tracking-tight sm:text-2xl">Directorio de Entrenadores</h3>
+                  <p className="text-sm text-zinc-500 font-medium leading-relaxed sm:text-base">
                     Aún no tienes un entrenador asignado. Vincula tu cuenta mediante un código de invitación o elige un coach certificado.
                   </p>
                 </div>
                 
                 {/* Código de invitación */}
-                <form onSubmit={handleLinkByCode} className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3 max-w-sm mx-auto text-left">
+                <form onSubmit={handleLinkByCode} className="mx-auto w-full rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-left shadow-sm sm:p-5">
                   <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider text-center">¿Tienes un código de entrenador?</label>
-                  <div className="flex gap-2">
+                  <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] gap-2">
                     <input 
                       type="text" 
                       value={inviteCode}
                       onChange={(e) => setInviteCode(e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''))}
                       placeholder="Ej: GUILLEPRO"
-                      className="flex-1 bg-white border border-zinc-200 focus:border-cyan-600 rounded-xl px-4 py-3 text-sm text-cyan-700 font-black uppercase tracking-wider outline-none transition-all"
+                      className="min-w-0 rounded-xl border border-zinc-200 bg-white px-3 py-3 text-sm font-black uppercase tracking-wider text-cyan-700 outline-none transition-all focus:border-cyan-600 sm:px-4"
                     />
                     <AnimatedButton
                       type="submit"
                       variant="primary"
                       disabled={linkingCoachCode || !inviteCode.trim()}
-                      className="px-6 py-3 text-sm font-black !bg-cyan-700 hover:!bg-cyan-600 !text-white shadow-md cursor-pointer"
+                      className="min-h-12 rounded-xl px-4 py-3 text-sm font-black !bg-cyan-700 !text-white shadow-md hover:!bg-cyan-600 sm:px-6"
                     >
                       {linkingCoachCode ? '...' : 'Vincular'}
                     </AnimatedButton>
                   </div>
                 </form>
  
-                <div className="relative py-4 max-w-sm mx-auto">
+                <div className="relative mx-auto max-w-xl py-2">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-zinc-200"></div>
                   </div>
@@ -511,7 +511,7 @@ export function ChatView({
                 </div>
 
                 {availableCoaches.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-12 text-left">
+                  <div className="grid grid-cols-1 gap-4 pb-4 text-left sm:grid-cols-2">
                     {availableCoaches.map(coach => (
                       <div key={coach.id} className="bg-white border border-zinc-200 rounded-2xl p-5 flex flex-col justify-between hover:border-cyan-500/40 transition-all group shadow-sm">
                         <div className="flex items-center gap-3 mb-4">
@@ -539,7 +539,7 @@ export function ChatView({
                     ))}
                   </div>
                 ) : (
-                  <div className="p-8 text-center bg-zinc-50 border border-zinc-200 rounded-2xl pb-12 font-medium">
+                  <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-8 text-center font-medium">
                     <p className="text-sm text-zinc-500">No hay entrenadores disponibles en este momento.</p>
                   </div>
                 )}
