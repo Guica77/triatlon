@@ -63,6 +63,7 @@ const PROVIDERS = [
 ];
 
 export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: TelemetryConnectCardProps) {
+  const isNative = typeof navigator !== 'undefined' && navigator.userAgent.includes('TriWaveXNative/');
   const [isDisconnecting, setIsDisconnecting] = React.useState<string | null>(null);
   const [isSyncing, setIsSyncing] = React.useState(false);
   const [isPushingWorkouts, setIsPushingWorkouts] = React.useState(false);
@@ -241,7 +242,7 @@ export function TelemetryConnectCard({ connectedProviders = [], lastSyncTime }: 
                       </button>
                     ) : (
                       <a 
-                        href={`/api/auth/telemetry/connect?provider=${prov.id}`}
+                        href={isNative && prov.id === 'strava' ? 'triwavex://strava/connect' : `/api/auth/telemetry/connect?provider=${prov.id}`}
                         title={`Conectar con ${prov.name}`}
                         aria-label={`Conectar con ${prov.name}`}
                       >
