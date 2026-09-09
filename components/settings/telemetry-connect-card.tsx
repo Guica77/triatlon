@@ -6,12 +6,13 @@ import { disconnectTelemetry, syncPacesFromStravaAction } from '@/app/(app)/sett
 export function TelemetryConnectCard({ connectedProviders = [] }: { connectedProviders: string[]; lastSyncTime?: string | null }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [needsReconnect, setNeedsReconnect] = useState(false);
   const router = useRouter();
   const connected = connectedProviders.includes('strava');
   const native = typeof navigator !== 'undefined' && navigator.userAgent.includes('TriWaveXNative/');
-  async function run(action: () => Promise<{ error?: string }>, success: string) {
-    setBusy(true); setMessage('');
-    try { const result = await action(); setMessage(result.error || success); if (!result.error) router.refresh(); }
+  async function run(action: () => Promise<{ error?: string; needsReconnect?: boolean }>, success: string) {
+    setBusy(true); setMessage(''); setNeedsReconnect(false);
+    try { const result = await action(); setMessage(result.error || success); setNeedsReconnect(result.needsReconnect === true); if (!result.error) router.refresh(); }
     catch { setMessage('No se pudo completar la operación. Inténtalo de nuevo.'); }
     finally { setBusy(false); }
   }
@@ -30,6 +31,7 @@ export function TelemetryConnectCard({ connectedProviders = [] }: { connectedPro
       <button disabled={busy} onClick={() => run(syncPacesFromStravaAction, 'Métricas actualizadas.')} className="min-h-11 rounded-xl border border-swim/40 bg-swim-subtle px-4 py-2 text-sm font-bold text-swim transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50">Actualizar métricas</button>
       <button disabled={busy} onClick={() => run(() => disconnectTelemetry('strava'), 'Strava desconectado.')} className="min-h-11 rounded-xl border border-border-default bg-surface-elevated px-4 py-2 text-sm font-bold text-text-secondary transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50">Desconectar</button>
     </div> : <a href={native ? 'triwavex://strava/connect' : '/api/auth/telemetry/connect?provider=strava'} className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-button transition-[background-color,transform] duration-150 active:scale-[0.98] sm:w-auto">Conectar con Strava</a>}
+    {connected && needsReconnect && <a href={native ? 'triwavex://strava/connect' : '/api/auth/telemetry/connect?provider=strava&reconnect=1'} className="mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-warning/40 bg-warning/10 px-4 py-2 text-sm font-bold text-warning transition-[background-color,transform] duration-150 active:scale-[0.98] sm:w-auto">Reconectar Strava</a>}
     <div className="mt-5 border-t border-border-default pt-5">
       <div className="flex items-start justify-between gap-3">
         <div>

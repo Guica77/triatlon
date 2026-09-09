@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 import { consumeTelemetryState, TELEMETRY_COOKIE } from '@/lib/auth/telemetry-oauth';
+import { hasRequiredStravaScopes, normalizeStravaScopes } from '@/lib/telemetry/strava-scopes';
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -24,10 +25,12 @@ export async function GET(request: NextRequest) {
     if (!response.ok) throw new Error('Token exchange failed');
     const token = await response.json();
     if (typeof token.access_token !== 'string' || typeof token.refresh_token !== 'string' || !Number.isFinite(token.expires_at) || !Number.isSafeInteger(token.athlete?.id)) throw new Error('Invalid token response');
+    const scopes = normalizeStravaScopes(token.scope);
+    if (!hasRequiredStravaScopes(scopes)) return NextResponse.redirect(new URL(returnPath + '?error=strava_missing_permissions', request.url));
     const admin = createAdminClient();
     const { error: deviceError } = await admin.from('user_connected_devices').upsert({
       user_id: user.id, provider: 'strava', access_token: token.access_token, refresh_token: token.refresh_token,
-      expires_at: new Date(token.expires_at * 1000).toISOString(), scopes: ['activity:read_all','read'],
+      expires_at: new Date(token.expires_at * 1000).toISOString(), scopes,
     }, { onConflict: 'user_id, provider' });
     if (deviceError) throw new Error('Could not save connection');
     const { error: profileError } = await admin.from('profiles').update({

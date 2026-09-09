@@ -132,7 +132,7 @@ export async function syncPacesFromStravaAction() {
   }
 
   const result = await syncPhysiologyFromStrava(user.id, token);
-  if (!result.success) return { error: result.error };
+  if (!result.success) return { error: result.error, needsReconnect: 'needsReconnect' in result && result.needsReconnect === true };
 
   revalidateTag('analytics', 'max');
   revalidatePath('/settings');
