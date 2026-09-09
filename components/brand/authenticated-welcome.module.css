@@ -1,0 +1,39 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  min-height: 100svh;
+  overflow-y: auto;
+  display: grid;
+  align-items: center;
+  padding: max(2rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right)) max(2rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
+  background: var(--color-bg-deep, #0B1117);
+  color: #F4F7F7;
+  font-family: var(--font-inter), Inter, sans-serif;
+  opacity: 1;
+  transition: opacity 220ms cubic-bezier(.23, 1, .32, 1);
+}
+.screen[data-leaving="true"] { opacity: 0; pointer-events: none; }
+.content { width: min(100%, 26rem); margin-inline: auto; padding-block: 2rem; text-align: center; }
+.identity { margin-bottom: clamp(2.5rem, 8svh, 4rem); }
+.mark { display: block; width: 5.25rem; height: auto; margin-inline: auto; }
+.wordmark { display: block; margin-top: 1.25rem; font-size: clamp(1rem, 7vw, 2.25rem); font-weight: 750; letter-spacing: .0735em; line-height: 1.2; }
+.primary { margin: 0; font-size: clamp(1.75rem, 7.5vw, 2.5rem); font-weight: 500; letter-spacing: -.04em; line-height: 1.2; text-wrap: balance; }
+.translation { margin: .75rem 0 0; color: #AAB7BE; font-size: 1.0625rem; line-height: 1.5; }
+.progress { width: 4rem; height: 3px; overflow: hidden; margin: 2.5rem auto 0; border-radius: 2px; background: #26353D; }
+.progress span { display: block; width: 45%; height: 100%; background: #B7F36B; border-radius: inherit; animation: progress 1400ms ease-in-out infinite alternate; }
+.screen[data-animate="true"] .identity { animation: reveal 300ms ease-out both; }
+.screen[data-animate="true"] .primary { animation: reveal 280ms 80ms ease-out both; }
+.screen[data-animate="true"] .translation { animation: reveal 280ms 160ms ease-out both; }
+.app { min-height: 100%; flex: 1; display: flex; flex-direction: column; }
+.retry { display: block; margin: 2rem auto 0; padding: .75rem 1rem; min-height: 44px; border: 1px solid #B7F36B; border-radius: .75rem; color: #B7F36B; background: transparent; font: inherit; cursor: pointer; }
+.retry:focus-visible { outline: 2px solid #F4F7F7; outline-offset: 4px; }
+@keyframes reveal { from { opacity: 0; } to { opacity: 1; } }
+@keyframes progress { from { transform: translateX(-40%); } to { transform: translateX(160%); } }
+@media (prefers-reduced-motion: reduce) {
+  .screen { transition-duration: 80ms; }
+  .screen[data-animate="true"] .identity,
+  .screen[data-animate="true"] .primary,
+  .screen[data-animate="true"] .translation,
+  .progress span { animation: none; }
+}
