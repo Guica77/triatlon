@@ -27,7 +27,7 @@ export default async function AppLayout({
             </main>
           </div>
         </div>
-        <MobileBottomNav />
+        {!isNativeApp && <MobileBottomNav />}
         <PushNotificationManager />
       </ToastProvider>
     </NotificationProvider>

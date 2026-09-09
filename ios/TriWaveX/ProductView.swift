@@ -18,69 +18,30 @@ struct ProductView: View {
         NavigationStack {
             ZStack {
                 ProductWebView(model: browser, origin: origin, store: store, initialPath: initialPath, onStravaConnect: connectStrava)
-                if browser.loading {
-                    TriWaveXLoadingMark(reduceMotion: reduceMotion)
+                if browser.loading && !browser.hasCompletedInitialLoad {
+                    TriWaveXLaunchScreen(reduceMotion: reduceMotion)
                         .transition(.opacity)
                 }
                 if let message = browser.error {
-                    ContentUnavailableView {
-                        Label("No se pudo cargar", systemImage: "wifi.exclamationmark")
-                    } description: { Text(message) } actions: {
-                        Button("Reintentar") { browser.retry() }
-                            .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
-                    }
-                    .padding(24)
-                    .background(.background)
+                    TriWaveXErrorState(message: message, retry: browser.retry)
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
                 }
             }
-            .navigationTitle("TriWaveX").navigationBarTitleDisplayMode(.inline)
             .safeAreaInset(edge: .bottom) {
                 if browser.showsAppNavigation {
-                    HStack {
-                        let coach = initialPath == "/coach/dashboard"
-                        tab("Entreno", icon: "figure.run", path: coach ? "/coach/dashboard" : "/dashboard")
-                        if !coach { tab("Progreso", icon: "chart.xyaxis.line", path: "/resumen") }
-                        tab("Chat", icon: "bubble.left.and.bubble.right", path: coach ? "/coach/chat" : "/chat")
-                        tab("Perfil", icon: "person.crop.circle", path: "/settings")
-                    }
-                    .padding(8)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .overlay(Capsule().stroke(.white.opacity(0.12), lineWidth: 1))
-                    .padding(.horizontal, 12).padding(.bottom, 4)
+                    nativeTabBar
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if let onDismiss {
-                        Button(action: onDismiss) {
-                            toolbarControl("xmark", label: "Cerrar")
-                        }
-                        .buttonStyle(TriWaveXSelectionButtonStyle())
-                    } else {
-                        Button { browser.webView?.goBack() } label: {
-                            toolbarControl("chevron.left", label: "Atrás")
-                        }
-                        .buttonStyle(TriWaveXSelectionButtonStyle())
-                        .disabled(!browser.canGoBack)
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { browser.retry() } label: {
-                        toolbarControl("arrow.clockwise", label: "Recargar")
-                    }
-                    .buttonStyle(TriWaveXSelectionButtonStyle())
-                }
-            }
         }
+        .toolbar(.hidden, for: .navigationBar)
         .sheet(isPresented: Binding(get: { browser.externalURL != nil }, set: { if !$0 { browser.externalURL = nil } })) {
             if let url = browser.externalURL { SafariView(url: url) }
         }
         .alert("Strava", isPresented: Binding(get: { strava.message != nil }, set: { if !$0 { strava.message = nil } })) {
             Button("Aceptar", role: .cancel) { strava.message = nil }
         } message: { Text(strava.message ?? "") }
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: browser.loading)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: browser.loading)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: browser.error)
         .animation(reduceMotion ? nil : .spring(response: 0.34, dampingFraction: 0.88), value: browser.showsAppNavigation)
     }
@@ -138,65 +99,108 @@ struct ProductView: View {
         Button {
             browser.webView?.load(URLRequest(url: origin.appendingPathComponent(String(path.dropFirst()))))
         } label: {
-            VStack(spacing: 4) { Image(systemName: icon); Text(title).font(.caption) }
-                .frame(maxWidth: .infinity).frame(minHeight: 44)
+            VStack(spacing: 3) {
+                Image(systemName: icon).font(.system(size: 17, weight: .semibold))
+                Text(title).font(.caption2.weight(.semibold))
+            }
+            .frame(maxWidth: .infinity, minHeight: 50)
         }
-        .foregroundStyle(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua : Color.secondary)
-        .background(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua.opacity(0.16) : .clear, in: Capsule())
+        .foregroundStyle(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua : Color.white.opacity(0.62))
+        .background(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua.opacity(0.18) : .clear, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
         .buttonStyle(TriWaveXSelectionButtonStyle())
         .accessibilityAddTraits(browser.currentPath.hasPrefix(path) ? .isSelected : [])
     }
 
-    private func toolbarControl(_ icon: String, label: String) -> some View {
-        Image(systemName: icon)
-            .font(.subheadline.weight(.semibold))
-            .foregroundStyle(Color.triWaveXAqua)
-            .frame(width: 38, height: 38)
-            .background(.ultraThinMaterial, in: Circle())
-            .overlay(Circle().stroke(.white.opacity(0.14), lineWidth: 1))
-            .accessibilityLabel(label)
+    private var nativeTabBar: some View {
+        HStack(spacing: 4) {
+            let coach = initialPath == "/coach/dashboard"
+            tab("Entreno", icon: "figure.run", path: coach ? "/coach/dashboard" : "/dashboard")
+            if !coach { tab("Progreso", icon: "chart.xyaxis.line", path: "/resumen") }
+            tab("Chat", icon: "bubble.left.and.bubble.right", path: coach ? "/coach/chat" : "/chat")
+            tab("Perfil", icon: "person.crop.circle", path: "/settings")
+        }
+        .padding(6)
+        .background(Color.triWaveXChrome.opacity(0.94), in: RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 25, style: .continuous)
+                .stroke(.white.opacity(0.12), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.26), radius: 16, y: 8)
+        .padding(.horizontal, 14)
+        .padding(.top, 6)
+        .padding(.bottom, 4)
+        .accessibilityElement(children: .contain)
     }
+
 }
 
-private struct TriWaveXLoadingMark: View {
+private struct TriWaveXLaunchScreen: View {
     let reduceMotion: Bool
-    @State private var breathing = false
 
     var body: some View {
-        VStack(spacing: 12) {
+        ZStack {
+            LinearGradient(
+                colors: [Color.triWaveXInk, Color.triWaveXSurface],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 18) {
             ZStack {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .stroke(Color.triWaveXAqua.opacity(0.34), lineWidth: 1)
-                    }
-                Image(systemName: "wave.3.right.circle.fill")
-                    .font(.system(size: 36, weight: .semibold))
-                    .foregroundStyle(Color.triWaveXAqua)
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(Color.triWaveXChrome)
+                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(.white.opacity(0.10), lineWidth: 1))
+                TriWaveXMark()
+                    .padding(18)
                     .accessibilityHidden(true)
             }
-            .frame(width: 84, height: 84)
-            .scaleEffect(breathing ? 1.035 : 1)
-            Text("Cargando TriWaveX")
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 22).padding(.vertical, 18)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(.white.opacity(0.12), lineWidth: 1)
+            .frame(width: 96, height: 96)
+            Text("TriWaveX")
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.white)
+            ProgressView()
+                .tint(.triWaveXAqua)
+                .controlSize(.regular)
+            Text("Preparando tu entrenamiento")
+                .font(.footnote)
+                .foregroundStyle(.white.opacity(0.58))
+            }
+            .multilineTextAlignment(.center)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Cargando TriWaveX")
-        .onAppear {
-            guard !reduceMotion else { return }
-            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) { breathing = true }
+    }
+}
+
+private struct TriWaveXErrorState: View {
+    let message: String
+    let retry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 28, weight: .semibold))
+                .foregroundStyle(Color.triWaveXAqua)
+                .frame(width: 56, height: 56)
+                .background(Color.triWaveXAqua.opacity(0.13), in: Circle())
+            Text("No se pudo cargar")
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.white)
+            Text(message)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.66))
+                .multilineTextAlignment(.center)
+            Button("Reintentar", action: retry)
+                .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
+                .padding(.top, 2)
         }
-        .onChange(of: reduceMotion) { _, reduced in
-            if reduced { breathing = false }
-        }
+        .padding(28)
+        .frame(maxWidth: 340)
+        .background(Color.triWaveXChrome, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(.white.opacity(0.10), lineWidth: 1))
+        .shadow(color: .black.opacity(0.28), radius: 20, y: 10)
+        .padding(24)
     }
 }
 
@@ -239,6 +243,7 @@ final class StravaSessionModel: NSObject, ASWebAuthenticationPresentationContext
 @Observable
 final class BrowserModel {
     var loading = true
+    var hasCompletedInitialLoad = false
     var error: String?
     var canGoBack = false
     var currentPath = "/onboarding"
@@ -275,7 +280,9 @@ struct ProductWebView: UIViewRepresentable {
         view.navigationDelegate = context.coordinator
         view.uiDelegate = context.coordinator
         view.allowsBackForwardNavigationGestures = true
-        view.isOpaque = false
+        view.isOpaque = true
+        view.backgroundColor = .systemBackground
+        view.scrollView.backgroundColor = .systemBackground
         model.webView = view
         model.currentPath = initialPath
         let url = URL(string: initialPath, relativeTo: origin)?.absoluteURL ?? origin
@@ -313,7 +320,7 @@ struct ProductWebView: UIViewRepresentable {
             model.loading = true; model.error = nil
         }
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            model.loading = false; model.canGoBack = webView.canGoBack
+            model.loading = false; model.hasCompletedInitialLoad = true; model.canGoBack = webView.canGoBack
             model.currentPath = webView.url?.path ?? model.currentPath
             model.showsAppNavigation = ["/dashboard", "/resumen", "/chat", "/settings", "/coach/dashboard", "/coach/chat"].contains { model.currentPath.hasPrefix($0) }
         }

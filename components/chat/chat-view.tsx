@@ -519,7 +519,7 @@ export function ChatView({
                 </div>
               </div>
             ) : (
-              <div className="mx-auto max-h-full w-full max-w-xl space-y-5 overflow-y-auto px-4 pb-8 pt-6 custom-scrollbar sm:px-6 sm:pt-10">
+              <div className="custom-scrollbar mx-auto h-full min-h-0 w-full max-w-xl space-y-5 overflow-y-auto overscroll-y-contain px-4 pb-8 pt-6 [-webkit-overflow-scrolling:touch] [touch-action:pan-y] sm:px-6 sm:pt-10">
                 <div className="mx-auto max-w-md space-y-2 text-center">
                   <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-swim/40 bg-swim-subtle text-swim shadow-card">
                     <Sparkles className="h-6 w-6 motion-safe:animate-pulse" />
