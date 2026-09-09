@@ -1,3 +1,4 @@
+import { AuthenticatedWelcomeProvider } from '@/components/brand/authenticated-welcome';
 import type { Metadata, Viewport } from "next";
 import { Inter, Barlow_Condensed, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -84,11 +85,13 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full bg-surface-app text-text-primary flex flex-col font-sans selection:bg-accent/30 overflow-x-hidden w-full" suppressHydrationWarning>
+        <AuthenticatedWelcomeProvider>
         {children}
         <CookieBanner />
         <IosInstallPrompt />
         <ServiceWorkerRegister />
         <AppLifecycleManager />
+        </AuthenticatedWelcomeProvider>
       </body>
     </html>
   );
