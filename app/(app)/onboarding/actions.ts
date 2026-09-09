@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { selectTrainingPlan } from '@/lib/training-plan-selection'
 import { redirect } from 'next/navigation'
 
 export async function selectPlan(planId: string) {
@@ -194,52 +195,14 @@ export async function saveRaceGoalAndPlan(formData: {
     .from('training_plans')
     .select('*');
 
-  let selectedPlanId = plans?.[0]?.id; // Respaldo por defecto
-
-  if (plans && plans.length > 0) {
-    // Buscar coincidencia por distancia y nivel
-    let match = plans.find((p: any) => {
-      const dist = (p.distance || '').toLowerCase();
-      const planLvl = (p.level || '').toLowerCase();
-      const targetLvl = (athlete_level || 'intermedio').toLowerCase();
-      
-      const distanceMatch = 
-        (target_race_distance === 'sprint' && dist.includes('sprint')) ||
-        (target_race_distance === 'olimpico' && (dist.includes('olimpico') || dist.includes('olímpico'))) ||
-        (target_race_distance === 'half' && (dist.includes('half') || dist.includes('70.3') || dist.includes('media'))) ||
-        (target_race_distance === 'full' && (dist.includes('full') || dist.includes('ironman') || dist.includes('larga'))) ||
-        (target_race_modality === 'carrera' && (dist.includes('maraton') || dist.includes('carrera') || dist.includes('run') || true)); // Fallback para carrera
-
-      const levelMatch = 
-        planLvl === targetLvl || 
-        (targetLvl === 'principiante' && (planLvl === 'principiante' || planLvl === 'principiante_absoluto'));
-
-      return distanceMatch && levelMatch;
-    });
-
-    // Fallback si no hay coincidencia de nivel
-    if (!match) {
-      match = plans.find((p: any) => {
-        const dist = (p.distance || '').toLowerCase();
-        return (target_race_distance === 'sprint' && dist.includes('sprint')) ||
-               (target_race_distance === 'olimpico' && (dist.includes('olimpico') || dist.includes('olímpico'))) ||
-               (target_race_distance === 'half' && (dist.includes('half') || dist.includes('70.3') || dist.includes('media'))) ||
-               (target_race_distance === 'full' && (dist.includes('full') || dist.includes('ironman') || dist.includes('larga'))) ||
-               (target_race_modality === 'carrera' && (dist.includes('maraton') || dist.includes('carrera') || dist.includes('run') || true));
-      });
-    }
-
-    if (match) {
-      selectedPlanId = match.id;
-    }
-  }
+  const selectedPlan = selectTrainingPlan(plans, target_race_distance, athlete_level)
+  const selectedPlanId = selectedPlan?.id
 
   if (!selectedPlanId) {
-    return { success: true };
+    return { error: 'No hay un plan de entrenamiento compatible con la distancia seleccionada.' }
   }
 
   // 1.8 Determinar nivel final
-  const selectedPlan = plans?.find((p: any) => p.id === selectedPlanId);
   const level = athlete_level || selectedPlan?.level || 'intermedio';
 
   // 2. Comprobar si el perfil ya existe para evitar fallos de RLS con upsert en Supabase
@@ -377,4 +340,3 @@ export async function saveRaceGoalAndPlan(formData: {
 
   return { success: true };
 }
-

@@ -22,15 +22,27 @@ struct ProductView: View {
                     TriWaveXLaunchScreen(reduceMotion: reduceMotion)
                         .transition(.opacity)
                 }
+                if browser.loading && browser.hasCompletedInitialLoad {
+                    VStack {
+                        TriWaveXLoadingBar()
+                            .padding(.horizontal, 24)
+                            .padding(.top, 8)
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel("Actualizando contenido")
+                        Spacer()
+                    }
+                    .allowsHitTesting(false)
+                    .transition(.opacity)
+                }
                 if let message = browser.error {
                     TriWaveXErrorState(message: message, retry: browser.retry)
-                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
+                        .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
                 }
             }
             .safeAreaInset(edge: .bottom) {
                 if browser.showsAppNavigation {
                     nativeTabBar
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
                 }
             }
         }
@@ -100,36 +112,44 @@ struct ProductView: View {
             browser.webView?.load(URLRequest(url: origin.appendingPathComponent(String(path.dropFirst()))))
         } label: {
             VStack(spacing: 3) {
-                Image(systemName: icon).font(.system(size: 17, weight: .semibold))
-                Text(title).font(.caption2.weight(.semibold))
+                Image(systemName: icon)
+                    .font(.system(size: 17, weight: .semibold))
+                Text(title)
+                    .font(.caption2.weight(.semibold))
             }
-            .frame(maxWidth: .infinity, minHeight: 50)
+            .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
         }
         .foregroundStyle(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua : Color.white.opacity(0.62))
         .background(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua.opacity(0.18) : .clear, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
         .buttonStyle(TriWaveXSelectionButtonStyle())
+        .accessibilityLabel(title)
+        .accessibilityValue(browser.currentPath.hasPrefix(path) ? "Seleccionado" : "")
         .accessibilityAddTraits(browser.currentPath.hasPrefix(path) ? .isSelected : [])
+        .accessibilityHint("Doble toque para abrir")
     }
 
     private var nativeTabBar: some View {
         HStack(spacing: 4) {
             let coach = initialPath == "/coach/dashboard"
             tab("Entreno", icon: "figure.run", path: coach ? "/coach/dashboard" : "/dashboard")
-            if !coach { tab("Progreso", icon: "chart.xyaxis.line", path: "/resumen") }
+            if !coach {
+                tab("Progreso", icon: "chart.xyaxis.line", path: "/resumen")
+            }
             tab("Chat", icon: "bubble.left.and.bubble.right", path: coach ? "/coach/chat" : "/chat")
             tab("Perfil", icon: "person.crop.circle", path: "/settings")
         }
-        .padding(6)
-        .background(Color.triWaveXChrome.opacity(0.94), in: RoundedRectangle(cornerRadius: 25, style: .continuous))
+        .padding(5)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.navigationRadius, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 25, style: .continuous)
-                .stroke(.white.opacity(0.12), lineWidth: 1)
+            RoundedRectangle(cornerRadius: TriWaveXMetrics.navigationRadius, style: .continuous)
+                .stroke(.white.opacity(0.16), lineWidth: 1)
         }
-        .shadow(color: .black.opacity(0.26), radius: 16, y: 8)
+        .shadow(color: .black.opacity(0.20), radius: 14, y: 6)
         .padding(.horizontal, 14)
         .padding(.top, 6)
         .padding(.bottom, 4)
         .accessibilityElement(children: .contain)
+        .accessibilityLabel("Navegación principal")
     }
 
 }
@@ -139,17 +159,12 @@ private struct TriWaveXLaunchScreen: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Color.triWaveXInk, Color.triWaveXSurface],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            Color.triWaveXInk.ignoresSafeArea()
 
             VStack(spacing: 18) {
             ZStack {
                 RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(Color.triWaveXChrome)
+                    .fill(.ultraThinMaterial)
                     .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(.white.opacity(0.10), lineWidth: 1))
                 TriWaveXMark()
                     .padding(18)
@@ -159,9 +174,8 @@ private struct TriWaveXLaunchScreen: View {
             Text("TriWaveX")
                 .font(.title3.weight(.bold))
                 .foregroundStyle(.white)
-            ProgressView()
-                .tint(.triWaveXAqua)
-                .controlSize(.regular)
+            TriWaveXLoadingBar()
+                .frame(maxWidth: 180)
             Text("Preparando tu entrenamiento")
                 .font(.footnote)
                 .foregroundStyle(.white.opacity(0.58))
