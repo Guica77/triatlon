@@ -1,6 +1,9 @@
 import SwiftUI
 import WebKit
 import SafariServices
+import AuthenticationServices
+import Observation
+import UIKit
 
 struct ProductView: View {
     let origin: URL
@@ -8,11 +11,12 @@ struct ProductView: View {
     let initialPath: String
     let onDismiss: (() -> Void)?
     @State private var browser = BrowserModel()
+    @State private var strava = StravaSessionModel()
 
     var body: some View {
         NavigationStack {
             ZStack {
-                ProductWebView(model: browser, origin: origin, store: store, initialPath: initialPath)
+                ProductWebView(model: browser, origin: origin, store: store, initialPath: initialPath, onStravaConnect: connectStrava)
                 if browser.loading { ProgressView("Cargando…").padding().background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16)) }
                 if let message = browser.error {
                     ContentUnavailableView {
@@ -50,6 +54,58 @@ struct ProductView: View {
         .sheet(isPresented: Binding(get: { browser.externalURL != nil }, set: { if !$0 { browser.externalURL = nil } })) {
             if let url = browser.externalURL { SafariView(url: url) }
         }
+        .alert("Strava", isPresented: Binding(get: { strava.message != nil }, set: { if !$0 { strava.message = nil } })) {
+            Button("Aceptar", role: .cancel) { strava.message = nil }
+        } message: { Text(strava.message ?? "") }
+    }
+
+    private func connectStrava() {
+        guard let webView = browser.webView else { return }
+        let script = """
+        fetch('/api/native/strava/authorize', { credentials: 'same-origin', headers: { 'X-TriWaveX-Native': '1' } })
+          .then(async response => JSON.stringify({ status: response.status, body: await response.json() }))
+        """
+        webView.evaluateJavaScript(script) { result, error in
+            guard error == nil, let text = result as? String,
+                  let data = text.data(using: .utf8),
+                  let response = try? JSONDecoder().decode(NativeStravaStart.self, from: data),
+                  response.status == 200, let value = response.body.authorizationURL,
+                  let url = URL(string: value) else {
+                strava.message = "No se ha podido iniciar la conexión con Strava."
+                return
+            }
+            strava.start(url: url) { callback in completeStrava(callback, in: webView) }
+        }
+    }
+
+    private func completeStrava(_ callback: URL, in webView: WKWebView) {
+        guard let components = URLComponents(url: callback, resolvingAgainstBaseURL: false),
+              components.scheme == "triwavex", components.host == "strava", components.path == "/callback",
+              let code = components.queryItems?.first(where: { $0.name == "code" })?.value,
+              let state = components.queryItems?.first(where: { $0.name == "state" })?.value,
+              let data = try? JSONSerialization.data(withJSONObject: ["code": code, "state": state]),
+              let body = String(data: data, encoding: .utf8) else {
+            strava.message = "Strava no ha devuelto una respuesta válida."
+            return
+        }
+        let script = """
+        fetch('/api/native/strava/complete', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-TriWaveX-Native': '1' }, body: JSON.stringify(\(body)) })
+          .then(async response => JSON.stringify({ status: response.status, body: await response.json() }))
+        """
+        webView.evaluateJavaScript(script) { result, error in
+            guard error == nil, let text = result as? String,
+                  let data = text.data(using: .utf8),
+                  let response = try? JSONDecoder().decode(NativeStravaCompletion.self, from: data) else {
+                strava.message = "No se ha podido terminar la conexión con Strava."
+                return
+            }
+            if response.status == 200 && response.body.connected == true {
+                strava.message = "Strava ya está conectado. Tus actividades se importarán en TriWaveX."
+                browser.webView?.reload()
+            } else {
+                strava.message = response.body.error ?? "No se ha podido conectar Strava."
+            }
+        }
     }
 
     private func tab(_ title: String, icon: String, path: String) -> some View {
@@ -61,6 +117,42 @@ struct ProductView: View {
         }
         .foregroundStyle(browser.currentPath.hasPrefix(path) ? Color.cyan : Color.secondary)
         .accessibilityAddTraits(browser.currentPath.hasPrefix(path) ? .isSelected : [])
+    }
+}
+
+private struct NativeStravaStart: Decodable {
+    struct Body: Decodable { let authorizationURL: String?; let error: String? }
+    let status: Int
+    let body: Body
+}
+
+private struct NativeStravaCompletion: Decodable {
+    struct Body: Decodable { let connected: Bool?; let error: String? }
+    let status: Int
+    let body: Body
+}
+
+@Observable
+final class StravaSessionModel: NSObject, ASWebAuthenticationPresentationContextProviding {
+    var message: String?
+    private var session: ASWebAuthenticationSession?
+
+    func start(url: URL, completion: @escaping (URL) -> Void) {
+        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: "triwavex") { [weak self] callback, error in
+            defer { self?.session = nil }
+            if let callback { completion(callback) }
+            else if (error as? ASWebAuthenticationSessionError)?.code != .canceledLogin {
+                self?.message = "No se ha podido abrir Strava. Comprueba tu conexión e inténtalo de nuevo."
+            }
+        }
+        session.presentationContextProvider = self
+        session.prefersEphemeralWebBrowserSession = false
+        self.session = session
+        if !session.start() { message = "No se ha podido abrir Strava."; self.session = nil }
+    }
+
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.windows.first(where: \.isKeyWindow) }.first ?? ASPresentationAnchor()
     }
 }
 
@@ -85,8 +177,9 @@ struct ProductWebView: UIViewRepresentable {
     let origin: URL
     let store: WKWebsiteDataStore
     let initialPath: String
+    let onStravaConnect: () -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(model: model, origin: origin) }
+    func makeCoordinator() -> Coordinator { Coordinator(model: model, origin: origin, onStravaConnect: onStravaConnect) }
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = store
@@ -116,10 +209,14 @@ struct ProductWebView: UIViewRepresentable {
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         let model: BrowserModel
         let origin: URL
-        init(model: BrowserModel, origin: URL) { self.model = model; self.origin = origin }
+        let onStravaConnect: () -> Void
+        init(model: BrowserModel, origin: URL, onStravaConnect: @escaping () -> Void) { self.model = model; self.origin = origin; self.onStravaConnect = onStravaConnect }
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping @MainActor @Sendable (WKNavigationActionPolicy) -> Void) {
             guard let url = action.request.url else { decisionHandler(.cancel); return }
+            if url.scheme == "triwavex", url.host == "strava", url.path == "/connect" {
+                onStravaConnect(); decisionHandler(.cancel); return
+            }
             if Configuration.allows(url, origin: origin) {
                 if action.targetFrame?.isMainFrame != false { model.lastRequest = action.request }
                 decisionHandler(.allow)
