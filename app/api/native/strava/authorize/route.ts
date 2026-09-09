@@ -25,7 +25,10 @@ export async function GET(request: Request) {
       client_id: process.env.STRAVA_CLIENT_ID,
       redirect_uri: 'triwavex://strava/callback',
       response_type: 'code',
-      approval_prompt: 'auto',
+      // This endpoint is only entered from the native reconnect path. Force the
+      // consent sheet so accounts authorized before profile:read_all was added
+      // can grant the missing permission.
+      approval_prompt: 'force',
       scope: STRAVA_REQUIRED_SCOPES.join(','),
       state,
     }).toString()
