@@ -107,20 +107,16 @@ struct ProductView: View {
         }
     }
 
-    private func tab(_ title: String, icon: String, path: String) -> some View {
+    private func tab(_ title: String, path: String) -> some View {
         Button {
             browser.webView?.load(URLRequest(url: origin.appendingPathComponent(String(path.dropFirst()))))
         } label: {
-            VStack(spacing: 3) {
-                Image(systemName: icon)
-                    .font(.system(size: 17, weight: .semibold))
-                Text(title)
-                    .font(.caption2.weight(.semibold))
-            }
-            .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+            Text(title)
+                .font(.subheadline.weight(.medium))
+                .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
         }
         .foregroundStyle(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua : Color.white.opacity(0.62))
-        .background(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua.opacity(0.18) : .clear, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+        .background(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua.opacity(0.12) : .clear, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.controlRadius, style: .continuous))
         .buttonStyle(TriWaveXSelectionButtonStyle())
         .accessibilityLabel(title)
         .accessibilityValue(browser.currentPath.hasPrefix(path) ? "Seleccionado" : "")
@@ -131,23 +127,22 @@ struct ProductView: View {
     private var nativeTabBar: some View {
         HStack(spacing: 4) {
             let coach = initialPath == "/coach/dashboard"
-            tab("Entreno", icon: "figure.run", path: coach ? "/coach/dashboard" : "/dashboard")
+            tab("Entreno", path: coach ? "/coach/dashboard" : "/dashboard")
             if !coach {
-                tab("Progreso", icon: "chart.xyaxis.line", path: "/resumen")
+                tab("Progreso", path: "/resumen")
             }
-            tab("Chat", icon: "bubble.left.and.bubble.right", path: coach ? "/coach/chat" : "/chat")
-            tab("Perfil", icon: "person.crop.circle", path: "/settings")
+            tab("Chat", path: coach ? "/coach/chat" : "/chat")
+            tab("Perfil", path: "/settings")
         }
-        .padding(5)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.navigationRadius, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: TriWaveXMetrics.navigationRadius, style: .continuous)
-                .stroke(.white.opacity(0.16), lineWidth: 1)
+        .padding(.horizontal, 16)
+        .padding(.top, 4)
+        .padding(.bottom, 3)
+        .background(Color.triWaveXSurface.opacity(0.96))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(.white.opacity(0.08))
+                .frame(height: 1)
         }
-        .shadow(color: .black.opacity(0.20), radius: 14, y: 6)
-        .padding(.horizontal, 14)
-        .padding(.top, 6)
-        .padding(.bottom, 4)
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Navegación principal")
     }
@@ -161,24 +156,12 @@ private struct TriWaveXLaunchScreen: View {
         ZStack {
             Color.triWaveXInk.ignoresSafeArea()
 
-            VStack(spacing: 18) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(.ultraThinMaterial)
-                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(.white.opacity(0.10), lineWidth: 1))
-                TriWaveXMark()
-                    .padding(18)
-                    .accessibilityHidden(true)
-            }
-            .frame(width: 96, height: 96)
-            Text("TriWaveX")
-                .font(.title3.weight(.bold))
-                .foregroundStyle(.white)
-            TriWaveXLoadingBar()
-                .frame(maxWidth: 180)
-            Text("Preparando tu entrenamiento")
-                .font(.footnote)
-                .foregroundStyle(.white.opacity(0.58))
+            VStack(spacing: 16) {
+                Text("TriWaveX")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.white)
+                TriWaveXLoadingBar()
+                    .frame(maxWidth: 180)
             }
             .multilineTextAlignment(.center)
         }
@@ -192,28 +175,24 @@ private struct TriWaveXErrorState: View {
     let retry: () -> Void
 
     var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "wifi.exclamationmark")
-                .font(.system(size: 28, weight: .semibold))
-                .foregroundStyle(Color.triWaveXAqua)
-                .frame(width: 56, height: 56)
-                .background(Color.triWaveXAqua.opacity(0.13), in: Circle())
+        VStack(alignment: .leading, spacing: 14) {
             Text("No se pudo cargar")
-                .font(.title3.weight(.bold))
+                .font(.title3.weight(.semibold))
                 .foregroundStyle(.white)
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.66))
-                .multilineTextAlignment(.center)
+                .foregroundStyle(.white.opacity(0.68))
             Button("Reintentar", action: retry)
                 .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
-                .padding(.top, 2)
+                .padding(.top, 4)
         }
-        .padding(28)
+        .padding(24)
         .frame(maxWidth: 340)
-        .background(Color.triWaveXChrome, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(.white.opacity(0.10), lineWidth: 1))
-        .shadow(color: .black.opacity(0.28), radius: 20, y: 10)
+        .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous)
+                .stroke(.white.opacity(0.08), lineWidth: 1)
+        }
         .padding(24)
     }
 }

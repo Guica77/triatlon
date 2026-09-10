@@ -10,12 +10,8 @@ struct RootView: View {
             self == .athlete ? "Atleta" : "Entrenador"
         }
 
-        var icon: String {
-            self == .athlete ? "figure.run" : "figure.outdoor.cycle"
-        }
-
         var tint: Color {
-            self == .athlete ? .triWaveXAqua : .triWaveXLime
+            .triWaveXPrimaryAccent
         }
     }
 
@@ -29,7 +25,6 @@ struct RootView: View {
     @State private var password = ""
     @State private var informationURL: URL?
     @State private var role: Role = .athlete
-    @Namespace private var roleSelection
     @FocusState private var focusedField: FocusedField?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -80,9 +75,9 @@ struct RootView: View {
                     credentialFields
 
                     if let error = session.error {
-                        Label(error, systemImage: "exclamationmark.triangle.fill")
+                        Text(error)
                             .font(.footnote.weight(.medium))
-                            .foregroundStyle(Color.triWaveXCoral)
+                            .foregroundStyle(Color.triWaveXError)
                             .accessibilityLabel("Error: \(error)")
                             .accessibilityAddTraits(.isStaticText)
                     }
@@ -117,29 +112,10 @@ struct RootView: View {
     }
 
     private var branding: some View {
-        VStack(spacing: 12) {
-            Text("TU ESPACIO DE ENTRENAMIENTO")
-                .font(.caption2.weight(.bold))
-                .tracking(1.2)
-                .foregroundStyle(Color.triWaveXAqua)
-
-            TriWaveXMark()
-                .frame(width: 72, height: 72)
-                .padding(.top, 2)
-                .accessibilityHidden(true)
-
-            Text("TriWaveX")
-                .font(.system(.largeTitle, design: .rounded).weight(.bold))
-                .tracking(-0.8)
-
-            Text("Entrena con un plan que se mueve contigo.")
-                .font(.subheadline)
-                .foregroundStyle(Color.white.opacity(0.64))
-        }
-        .multilineTextAlignment(.center)
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("TriWaveX. Tu espacio de entrenamiento. Entrena con un plan que se mueve contigo.")
+        Text("TriWaveX")
+            .font(.system(.largeTitle, design: .default).weight(.semibold))
+            .frame(maxWidth: .infinity)
+            .accessibilityLabel("TriWaveX")
     }
 
     private var roleSection: some View {
@@ -150,28 +126,21 @@ struct RootView: View {
     }
 
     private var rolePicker: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: 0) {
             ForEach(Role.allCases, id: \.self) { option in
                 Button {
                     withAnimation(TriWaveXMotion.selection(reduced: reduceMotion)) {
                         role = option
                     }
                 } label: {
-                    HStack(spacing: 7) {
-                        Image(systemName: option.icon)
-                            .font(.subheadline.weight(.semibold))
-                        Text(option.title)
-                            .font(.subheadline.weight(.semibold))
-                    }
-                    .foregroundStyle(role == option ? Color.black : Color.white.opacity(0.68))
-                    .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.compactControlHeight)
-                    .background {
-                        if role == option {
-                            Capsule()
-                                .fill(option.tint)
-                                .matchedGeometryEffect(id: "role-selection", in: roleSelection)
-                        }
-                    }
+                    Text(option.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(role == option ? .white : .white.opacity(0.62))
+                        .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.compactControlHeight)
+                        .background(
+                            role == option ? Color.white.opacity(0.14) : .clear,
+                            in: RoundedRectangle(cornerRadius: TriWaveXMetrics.controlRadius, style: .continuous)
+                        )
                 }
                 .buttonStyle(TriWaveXSelectionButtonStyle())
                 .accessibilityLabel(option.title)
@@ -179,9 +148,8 @@ struct RootView: View {
                 .accessibilityAddTraits(role == option ? .isSelected : [])
             }
         }
-        .padding(4)
-        .background(Color.triWaveXChrome, in: Capsule())
-        .overlay(Capsule().stroke(.white.opacity(0.10), lineWidth: 1))
+        .padding(2)
+        .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.controlRadius, style: .continuous))
         .accessibilityElement(children: .contain)
         .accessibilityLabel("Tipo de cuenta")
     }
@@ -190,11 +158,6 @@ struct RootView: View {
         TriWaveXSurface(padding: 0) {
             VStack(spacing: 0) {
                 HStack(spacing: 12) {
-                    Image(systemName: "envelope")
-                        .foregroundStyle(role.tint)
-                        .frame(width: 18)
-                        .accessibilityHidden(true)
-
                     TextField("Correo electrónico", text: $email)
                         .textContentType(.username)
                         .keyboardType(.emailAddress)
@@ -211,14 +174,9 @@ struct RootView: View {
 
                 Divider()
                     .overlay(.white.opacity(0.10))
-                    .padding(.leading, 46)
+                    .padding(.leading, 16)
 
                 HStack(spacing: 12) {
-                    Image(systemName: "lock")
-                        .foregroundStyle(role.tint)
-                        .frame(width: 18)
-                        .accessibilityHidden(true)
-
                     SecureField("Contraseña", text: $password)
                         .textContentType(.password)
                         .submitLabel(.go)
@@ -240,18 +198,15 @@ struct RootView: View {
                 Rectangle()
                     .fill(.white.opacity(0.10))
                     .frame(height: 1)
-                Text("CONTINÚA CON")
-                    .font(.caption2.weight(.semibold))
-                    .tracking(0.8)
-                    .lineLimit(1)
-                    .layoutPriority(1)
-                    .foregroundStyle(.white.opacity(0.46))
+                Text("O también")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.52))
                 Rectangle()
                     .fill(.white.opacity(0.10))
                     .frame(height: 1)
             }
 
-            HStack(spacing: 12) {
+            VStack(spacing: 10) {
                 SignInWithAppleButton(.signIn) { request in
                     session.prepareAppleRequest(request)
                 } onCompletion: { result in
@@ -259,26 +214,17 @@ struct RootView: View {
                 }
                 .signInWithAppleButtonStyle(.white)
                 .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.compactControlHeight)
-                .clipShape(Capsule())
-                .shadow(color: .black.opacity(0.16), radius: 8, y: 3)
+                .clipShape(RoundedRectangle(cornerRadius: TriWaveXMetrics.controlRadius, style: .continuous))
                 .disabled(session.busy)
                 .accessibilityLabel("Continuar con Apple")
 
-                Button {
-                    session.error = "Estamos terminando la conexión segura de Google. Apple ya usa el acceso nativo."
-                } label: {
-                    HStack(spacing: 4) {
-                        Text("G")
-                            .font(.headline.weight(.bold))
-                        Text("Google")
-                    }
-                    .font(.subheadline.weight(.semibold))
-                    .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.compactControlHeight)
-                }
-                .buttonStyle(TriWaveXSecondaryButtonStyle())
-                .disabled(session.busy)
-                .accessibilityLabel("Continuar con Google")
-                .accessibilityHint("No disponible todavía")
+                Text("Google todavía no está disponible")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.5))
+                    .frame(minHeight: TriWaveXMetrics.minimumTouchTarget)
+                    .multilineTextAlignment(.center)
+                    .accessibilityLabel("Google todavía no está disponible")
+                    .accessibilityAddTraits(.isStaticText)
             }
         }
     }
