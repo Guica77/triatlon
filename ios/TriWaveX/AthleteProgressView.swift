@@ -80,15 +80,6 @@ struct AthleteProgressView: View {
             }
 
             Section {
-                LabeledContent("Preparación", value: readiness(progress.recovery))
-                LabeledContent("HRV", value: progress.recovery.hrv.map { "\(Int($0)) ms" } ?? "—")
-                LabeledContent("Sueño", value: progress.recovery.sleepHours.map { String(format: "%.1f h", $0) } ?? "—")
-                LabeledContent("Fatiga", value: progress.recovery.fatigueRating.map { String(Int($0)) } ?? "—")
-            } header: {
-                Label("Recuperación", systemImage: "heart.text.square")
-            }
-
-            Section {
                 if let workout = progress.todayWorkout {
                     LabeledContent("Disciplina", value: workout.sport.capitalized)
                     LabeledContent("Duración", value: "\(workout.durationMinutes) min")
@@ -107,6 +98,15 @@ struct AthleteProgressView: View {
                 }
             } header: {
                 Label("Entrenamiento de hoy", systemImage: "figure.run")
+            }
+
+            Section {
+                LabeledContent("Preparación", value: readiness(progress.recovery))
+                LabeledContent("HRV", value: progress.recovery.hrv.map { "\(Int($0)) ms" } ?? "—")
+                LabeledContent("Sueño", value: progress.recovery.sleepHours.map { String(format: "%.1f h", $0) } ?? "—")
+                LabeledContent("Fatiga", value: progress.recovery.fatigueRating.map { String(Int($0)) } ?? "—")
+            } header: {
+                Label("Recuperación", systemImage: "heart.text.square")
             }
 
             Section {

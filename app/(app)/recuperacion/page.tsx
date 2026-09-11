@@ -6,6 +6,7 @@ import { analyzeRecovery } from '@/lib/recovery-analysis'
 import { RecoveryDashboard } from '@/components/dashboard/recovery-dashboard'
 import { BiometricsCard } from '@/components/dashboard/biometrics-card'
 import { DailyFuelCard } from '@/components/dashboard/daily-fuel-card'
+import { TodayWorkoutHero } from '@/components/dashboard/today-workout-hero'
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions'
 import { Heart, Flame } from 'lucide-react'
 
@@ -18,10 +19,15 @@ export default async function RecuperacionPage() {
 
   const todayStr = new Date().toISOString().split('T')[0]
 
-  const [profileRes, biometricsRes, nutritionRes] = await Promise.all([
+  const [profileRes, biometricsRes, nutritionRes, workoutsRes] = await Promise.all([
     supabase.from('profiles').select('first_name, preferred_ingredients').eq('id', user.id).single(),
     getDailyBiometrics(),
     getDailyNutrition(todayStr),
+    supabase
+      .from('user_workouts')
+      .select('*, training_sessions(*)')
+      .eq('user_id', user.id)
+      .eq('scheduled_date', todayStr),
   ])
 
   const profile = profileRes.data
@@ -54,6 +60,7 @@ export default async function RecuperacionPage() {
   }))
 
   const recoveryAnalysis = analyzeRecovery(recoveryData, recoveryHistory)
+  const todayWorkout = workoutsRes.data?.find((workout: any) => workout.training_sessions?.sport_type !== 'descanso') ?? null
 
   return (
     <div className="min-h-screen bg-surface-app w-full overflow-x-hidden">
@@ -69,6 +76,11 @@ export default async function RecuperacionPage() {
             <p className="text-xs text-text-muted font-medium">Tu estado de recuperación y biometría</p>
           </div>
         </div>
+
+        <section>
+          <h2 className="mb-3 text-base font-semibold text-text-primary">Entrenamiento de hoy</h2>
+          <TodayWorkoutHero workout={todayWorkout} />
+        </section>
 
         {/* Recovery Dashboard */}
         <RecoveryDashboard analysis={recoveryAnalysis} />
