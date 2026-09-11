@@ -24,7 +24,7 @@ Reparar la compilación de la aplicación iOS y unificar la aplicación SwiftUI 
 
 ## Decisiones
 
-1. La app no se forzará a modo claro: empleará colores semánticos de SwiftUI para mantener contraste correcto y adaptación futura, con una apariencia luminosa por defecto.
+1. La app se fija en modo claro y emplea colores semánticos de SwiftUI para ofrecer una experiencia luminosa consistente en todos los dispositivos.
 2. La web se rediseñará desde los tokens globales y componentes compartidos antes de ajustar las secciones; así no se mezclan identidades visuales.
 3. La autenticación y las llamadas al servidor no cambiarán. Solo se modifica presentación y se repara la estructura sintáctica de `RootView`.
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Foundations
 
@@ -7,8 +8,17 @@ enum TriWaveXMetrics {
     static let compactControlHeight: CGFloat = 46
     static let controlHeight: CGFloat = 52
     static let minimumTouchTarget: CGFloat = 44
-    static let cardRadius: CGFloat = 14
-    static let controlRadius: CGFloat = 10
+    static let cardRadius: CGFloat = 18
+    static let controlRadius: CGFloat = 12
+}
+
+private enum TriWaveXPalette {
+    static let ink = Color(uiColor: .systemBackground)
+    static let surface = Color(uiColor: .secondarySystemGroupedBackground)
+    static let elevated = Color(uiColor: .tertiarySystemGroupedBackground)
+    static let textPrimary = Color(uiColor: .label)
+    static let textSecondary = Color(uiColor: .secondaryLabel)
+    static let border = Color(uiColor: .separator)
 }
 
 enum TriWaveXMotion {
@@ -26,10 +36,14 @@ enum TriWaveXMotion {
 }
 
 extension Color {
-    static let triWaveXInk = Color(red: 0.035, green: 0.035, blue: 0.04)
-    static let triWaveXSurface = Color(red: 0.09, green: 0.09, blue: 0.10)
-    static let triWaveXAqua = Color(red: 0.42, green: 0.66, blue: 0.82)
-    static let triWaveXCoral = Color(red: 0.94, green: 0.43, blue: 0.38)
+    static let triWaveXInk = TriWaveXPalette.ink
+    static let triWaveXSurface = TriWaveXPalette.surface
+    static let triWaveXElevated = TriWaveXPalette.elevated
+    static let triWaveXTextPrimary = TriWaveXPalette.textPrimary
+    static let triWaveXTextSecondary = TriWaveXPalette.textSecondary
+    static let triWaveXBorder = TriWaveXPalette.border
+    static let triWaveXAqua = Color(uiColor: .systemBlue)
+    static let triWaveXCoral = Color(uiColor: .systemRed)
 
     static let triWaveXBackground = triWaveXInk
     static let triWaveXPrimaryAccent = triWaveXAqua
@@ -51,7 +65,7 @@ struct TriWaveXSurface<Content: View>: View {
             .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous)
-                    .stroke(.white.opacity(0.08), lineWidth: 1)
+                    .stroke(Color.triWaveXBorder, lineWidth: 1)
             }
     }
 }
@@ -62,7 +76,7 @@ struct TriWaveXSectionLabel: View {
     var body: some View {
         Text(text)
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(.white.opacity(0.72))
+            .foregroundStyle(Color.triWaveXTextSecondary)
             .accessibilityAddTraits(.isHeader)
     }
 }
@@ -111,15 +125,15 @@ struct TriWaveXSecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Self.Configuration) -> Self.Body {
         AnyView(
             configuration.label
-                .foregroundStyle(.white.opacity(configuration.isPressed ? 0.72 : 0.92))
+                .foregroundStyle(Color.triWaveXTextPrimary.opacity(configuration.isPressed ? 0.72 : 0.92))
                 .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.compactControlHeight)
                 .background(
-                    .white.opacity(configuration.isPressed ? 0.14 : 0.08),
+                    Color.triWaveXElevated.opacity(configuration.isPressed ? 0.92 : 0.76),
                     in: RoundedRectangle(cornerRadius: TriWaveXMetrics.controlRadius, style: .continuous)
                 )
                 .overlay {
                     RoundedRectangle(cornerRadius: TriWaveXMetrics.controlRadius, style: .continuous)
-                        .stroke(.white.opacity(0.14), lineWidth: 1)
+                        .stroke(Color.triWaveXBorder, lineWidth: 1)
                 }
                 .scaleEffect(reduceMotion || !configuration.isPressed ? 1 : 0.98)
                 .animation(reduceMotion ? nil : TriWaveXMotion.press, value: configuration.isPressed)
