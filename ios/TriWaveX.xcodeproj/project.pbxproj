@@ -211,7 +211,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				TARGETED_DEVICE_FAMILY = 1;
-				TRIWAVEX_SITE_URL = "https://staging.triwavex.com";
+				TRIWAVEX_SITE_URL = "https://app.triwavex.com";
 			};
 			name = Debug;
 		};

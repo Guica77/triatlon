@@ -2,7 +2,7 @@
 
 Cliente SwiftUI con vistas WKWebView para el producto Next.js existente. La web sigue funcionando por separado.
 
-Abrir `TriWaveX.xcodeproj` con Xcode 26. Debug usa `https://staging.triwavex.com` y Release usa `https://app.triwavex.com`; ambos deben servir el despliegue que incluya `/api/native/session`. Seleccionar el equipo Apple y sustituir `dev.triwavex.preview` por el Bundle ID del titular antes de distribuir. No hay secretos dentro del proyecto.
+Abrir `TriWaveX.xcodeproj` con Xcode 26. Debug y Release usan `https://app.triwavex.com`, el despliegue publicado de la app. Seleccionar el equipo Apple y sustituir `dev.triwavex.preview` por el Bundle ID del titular antes de distribuir. No hay secretos dentro del proyecto.
 
 El primer incremento incluye acceso con correo, navegación nativa, sesión de WebKit, recuperación de errores y enlaces externos en el navegador del sistema. El servidor valida al usuario y decide el destino según su perfil. Las credenciales viajan en un POST HTTPS y no se guardan; las cookies se instalan directamente en WebKit, sin pasarlas por JavaScript ni URLs.
 
