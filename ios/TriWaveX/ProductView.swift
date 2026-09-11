@@ -104,7 +104,7 @@ struct ProductView: View {
                     AthleteProgressView(model: athleteProgress, onFallback: openWebProgress)
                 }
                 if !showingNativeProgress && browser.loading && !browser.hasCompletedInitialLoad {
-                    TriWaveXLaunchScreen(reduceMotion: reduceMotion)
+                    TriWaveXLaunchScreen()
                 }
                 if !showingNativeProgress && browser.loading && browser.hasCompletedInitialLoad {
                     VStack {
@@ -274,37 +274,20 @@ struct ProductView: View {
 }
 
 private struct TriWaveXLaunchScreen: View {
-    let reduceMotion: Bool
-
     var body: some View {
         ZStack {
-            Color.triWaveXInk.ignoresSafeArea()
+            Color(.systemBackground).ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                VStack(spacing: 6) {
-                    Text("TriWaveX")
-                        .font(.system(.title2, design: .rounded).weight(.semibold))
-                        .foregroundStyle(Color.triWaveXTextPrimary)
-                    Text("Preparando tu espacio de entrenamiento")
-                        .font(.footnote)
-                        .foregroundStyle(Color.triWaveXTextSecondary)
-                        .multilineTextAlignment(.center)
-                }
-
-                TriWaveXLoadingBar()
-                    .frame(maxWidth: 220)
-            }
-            .padding(.horizontal, 28)
-            .padding(.vertical, 24)
-            .frame(maxWidth: 340)
-            .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous)
-                    .stroke(Color.triWaveXBorder, lineWidth: 1)
+            VStack(spacing: 14) {
+                ProgressView()
+                    .controlSize(.large)
+                Text("Cargando TriWaveX")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Cargando TriWaveX. Preparando tu espacio de entrenamiento")
+        .accessibilityLabel("Cargando TriWaveX")
     }
 }
 

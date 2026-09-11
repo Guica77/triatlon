@@ -2,7 +2,6 @@
 
 import * as React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-import { TriWaveXMark } from '@/components/brand/triwavex-mark';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -50,8 +49,7 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
           {/* Logo */}
           <div className="space-y-3 text-center">
             <p className="text-sm font-semibold text-text-primary/90">Bienvenido</p>
-            <TriWaveXMark className="mx-auto h-16 w-16 rounded-[20px] border border-border-default bg-bg-elevated p-2.5 shadow-card" />
-            <div className="mx-auto h-px w-12 bg-aqua-500/60" aria-hidden="true" />
+            <p className="font-display text-xl font-semibold tracking-tight text-text-primary">TriWaveX</p>
 
             <div className="space-y-1.5">
               <motion.h1

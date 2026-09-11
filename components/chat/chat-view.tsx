@@ -363,7 +363,7 @@ export function ChatView({
                     <ArrowLeft className="w-5 h-5" />
                   </button>
                 )}
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-swim/40 bg-swim-subtle text-xs font-bold text-swim">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-hover text-sm font-medium text-text-secondary">
                   {(selectedPart.first_name || 'T')[0].toUpperCase()}
                 </div>
                 <div>
@@ -378,11 +378,6 @@ export function ChatView({
 
               <div className="flex items-center gap-1 sm:gap-3">
                 {/* Realtime badge (hidden on narrow screens to save space for call buttons) */}
-                <div className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-success/30 bg-bike-subtle px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-bike sm:flex sm:text-[9px]">
-                  <Sparkles className="h-3 w-3 animate-pulse text-bike" />
-                  <span className="hidden sm:inline">Mensajes</span>
-                  <span className="sm:hidden">Mensajes</span>
-                </div>
 
                 <div className="flex shrink-0 items-center">
                   <ChatSafety key={selectedPart.id} userId={selectedPart.id} messageId={[...messages].reverse().find(m => m.sender_id === selectedPart.id)?.id} />
@@ -391,7 +386,7 @@ export function ChatView({
             </div>
 
             {/* Main Chat Conversation Viewport */}
-            <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-bg-deep">
+            <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden bg-surface-app">
               {/* Messages body list */}
               <div ref={messagesListRef} className="custom-scrollbar relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-4 sm:p-6">
                 {storageWarning && <p role="alert" className="mb-3 text-sm text-warning">No se pueden guardar los pendientes en este dispositivo. No cierres el chat hasta confirmar el envío.</p>}
@@ -405,10 +400,10 @@ export function ChatView({
                     <button type="button" onClick={() => handleSelectParticipant(selectedPart)} className="min-h-11 rounded-xl bg-surface-card px-4 text-text-primary">Reintentar</button>
                   </div>
                 ) : visibleMessages.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center space-y-2 text-text-muted">
-                    <MessageSquare className="h-8 w-8 text-swim" />
-                    <p className="text-xs font-bold text-text-secondary">No hay mensajes previos.</p>
-                    <p className="text-[10px] font-semibold text-text-muted">¡Escribe tu primer mensaje!</p>
+                  <div className="flex h-full flex-col items-center justify-center space-y-2 text-center text-text-muted">
+                    <MessageSquare className="h-6 w-6" strokeWidth={1.5} />
+                    <p className="text-base font-medium text-text-secondary">No hay mensajes todavía</p>
+                    <p className="text-sm">Escribe el primero cuando quieras.</p>
                   </div>
                 ) : (
                   <div className="space-y-4 flex-1">
@@ -469,13 +464,13 @@ export function ChatView({
             {/* Input form */}
             <form
               onSubmit={handleSendMessage}
-              className="z-10 flex shrink-0 items-end gap-2 border-t border-border-default bg-surface-elevated p-2 pb-[calc(0.5rem+var(--chat-bottom-inset,env(safe-area-inset-bottom)))] shadow-[0_-6px_18px_rgba(0,0,0,0.18)] sm:p-3"
+              className="z-10 flex shrink-0 items-end gap-2 border-t border-border-default bg-surface-elevated p-2 pb-[calc(0.5rem+var(--chat-bottom-inset,env(safe-area-inset-bottom)))] sm:p-3"
             >
               {/* Attachment Icon */}
 
 
               {/* Input container wrapper */}
-              <div className="flex min-h-[40px] flex-1 items-end rounded-2xl border border-border-default bg-surface-card px-1.5 py-1 shadow-card">
+              <div className="flex min-h-[40px] flex-1 items-end rounded-xl border border-border-default bg-surface-card px-1.5 py-1">
                 {/* Emoji Icon */}
 
 

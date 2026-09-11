@@ -264,31 +264,18 @@
   color: var(--color-text-secondary);
 }
 
-.apple-loading-mark__orb {
-  display: grid;
-  width: 5.25rem;
-  height: 5.25rem;
-  place-items: center;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--color-aqua-500) 35%, transparent);
-  border-radius: 1.55rem;
-  background: linear-gradient(145deg, color-mix(in srgb, var(--color-aqua-500) 16%, var(--color-bg-card)), var(--color-bg-elevated));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 10px 24px rgba(0, 0, 0, 0.22);
-  animation: apple-brand-arrive 320ms var(--ease-out) both, apple-brand-breathe 1800ms ease-in-out 420ms infinite;
+.apple-loading-mark__spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid color-mix(in srgb, var(--color-text-muted) 22%, transparent);
+  border-top-color: var(--color-accent);
+  border-radius: 999px;
+  animation: apple-loading-spin 700ms linear infinite;
 }
 
-.apple-loading-mark__logo { width: 3.5rem; height: 3.5rem; }
-.apple-loading-mark__label { font-size: 0.8125rem; font-weight: 650; letter-spacing: -0.01em; }
+.apple-loading-mark__label { font-size: 0.9375rem; font-weight: 500; letter-spacing: -0.01em; }
 
-@keyframes apple-brand-arrive {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes apple-brand-breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.035); }
-}
+@keyframes apple-loading-spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 639px) {
   .athlete-app-shell main > :not(.apple-chat-toolbar) {
@@ -307,5 +294,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .apple-loading-mark__orb { animation: apple-brand-arrive 150ms ease-out both; }
+  .apple-loading-mark__spinner { animation-duration: 1.2s; }
 }

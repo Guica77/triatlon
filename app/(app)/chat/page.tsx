@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getChatParticipants, getAvailableCoaches } from '@/app/(app)/chat/actions'
 import { ChatView } from '@/components/chat/chat-view'
-import { ArrowLeft, MessageSquare } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { AnimatedButton } from '@/components/ui/animated-button'
 
@@ -47,20 +47,17 @@ export default async function AthleteChatPage() {
       <header className="apple-chat-toolbar shrink-0 border-b border-border-subtle bg-surface-elevated/88 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-4xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-swim/40 bg-swim-subtle shadow-card">
-              <MessageSquare className="h-4 w-4 text-swim" />
-            </div>
             <div className="min-w-0">
-              <h1 className="truncate text-sm font-bold tracking-tight text-text-primary sm:text-base">Chat con Entrenador</h1>
-              <p className="truncate text-[11px] font-semibold text-text-muted sm:text-xs">
+              <h1 className="truncate text-xl font-semibold tracking-tight text-text-primary">Chat con tu entrenador</h1>
+              <p className="mt-0.5 truncate text-sm text-text-muted">
                 Comunicación directa y resolución de dudas
               </p>
             </div>
           </div>
 
           <Link href="/dashboard" className="shrink-0" aria-label="Volver al Dashboard">
-            <AnimatedButton variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-border-default text-text-secondary fine-hover:bg-surface-hover fine-hover:text-text-primary">
-              <ArrowLeft className="h-4 w-4" />
+            <AnimatedButton variant="ghost" size="icon" className="h-11 w-11 rounded-full text-text-secondary fine-hover:bg-surface-hover fine-hover:text-text-primary">
+              <ArrowLeft className="h-5 w-5" />
               <span className="sr-only">Dashboard</span>
             </AnimatedButton>
           </Link>

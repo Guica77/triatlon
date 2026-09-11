@@ -15,7 +15,6 @@ interface PageHeaderProps {
 export function PageHeader({
   icon: Icon,
   iconColor = 'text-text-secondary',
-  iconBg,
   title,
   subtitle,
   actions,
@@ -24,9 +23,7 @@ export function PageHeader({
   return (
     <div className={cn('apple-page-header flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
       <div className="flex min-w-0 items-center gap-3">
-        <div className={cn('flex size-11 shrink-0 items-center justify-center rounded-[14px] border border-border-subtle bg-surface-hover shadow-card', iconBg)}>
-          <Icon className={cn('size-4', iconColor)} />
-        </div>
+        <Icon className={cn('size-5 shrink-0', iconColor)} aria-hidden="true" />
         <div className="min-w-0">
           <h1 className="truncate font-display text-xl font-bold leading-tight tracking-tight text-text-primary sm:text-2xl">{title}</h1>
           {subtitle && (
