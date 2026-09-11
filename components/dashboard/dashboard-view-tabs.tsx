@@ -13,7 +13,6 @@ import { Calendar, Plus, X, Flame, Sparkles, ChevronLeft, ChevronRight, Activity
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AIWorkoutGenerator, GeneratedWorkout } from './ai-workout-generator';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
-import { DailyFuelCard } from '@/components/dashboard/daily-fuel-card';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
 import {
   calculateDailyMacros,
@@ -352,16 +351,6 @@ export function DashboardViewTabs({
             />
           </div>
         )}
-        <div className="h-full">
-          <DailyFuelCard
-            nutritionData={nutritionData}
-            error={null}
-            loading={false}
-            preferredIngredients={profile?.preferred_ingredients || []}
-            workouts={selectedDayWorkouts}
-            dateString={selectedDateStr}
-          />
-        </div>
       </section>
 
       {/* Tabs and Quick Actions */}

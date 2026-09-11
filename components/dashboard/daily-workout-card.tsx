@@ -56,6 +56,9 @@ interface WorkoutCardProps {
   };
 }
 
+// Product flag: keep energy metrics available while meal guidance stays hidden.
+const showNutritionGuidance = false;
+
 function parseWorkoutDescription(desc: string, sportType: string) {
   let main = desc || 'Sesión de entrenamiento aeróbico de construcción base.';
   let warmup = '15 mins de calentamiento progresivo de Z1 a Z2 con movilidad articular.';
@@ -703,7 +706,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               <Dumbbell className="w-3.5 h-3.5" />
               <span>Material</span>
             </button>
-            <button
+            {showNutritionGuidance && <button
               onClick={() => setActiveTab('nutrition')}
               className={`flex-1 min-w-0 sm:min-w-[80px] px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
                 activeTab === 'nutrition'
@@ -713,7 +716,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>Nutrición</span>
-            </button>
+            </button>}
             {telemetry && (
               <button
                 onClick={() => setActiveTab('telemetry')}
@@ -753,7 +756,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           </div>
                         </div>
                         <span className="text-[9px] text-text-muted max-w-[120px] text-right font-medium leading-tight">
-                          Nutrición ajustada para este clima.
+                          Condiciones previstas para tu sesión.
                         </span>
                       </div>
                     )}
@@ -793,8 +796,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                           Bloques Estructurados de Entrenamiento
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          {/* Pre-Workout Nutrition Block (Chronological order: Before warmup) */}
-                          <div className="p-3.5 rounded-xl bg-bg-hover border border-border-default flex flex-col justify-between">
+                          {showNutritionGuidance && <div className="p-3.5 rounded-xl bg-bg-hover border border-border-default flex flex-col justify-between">
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] font-bold text-swim uppercase tracking-wider flex items-center gap-1.5">
                                 <Zap className="w-3.5 h-3.5 text-swim" />
@@ -812,7 +814,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                 {preWorkoutMeal.macronutrientFocus}
                               </div>
                             </div>
-                          </div>
+                          </div>}
 
                           {/* Structured workout steps */}
                           {localSteps.map((step, index) => {
@@ -886,8 +888,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                             );
                           })}
 
-                          {/* Post-Workout Recovery Nutrition Block (Chronological order: After cooldown) */}
-                          <div className="p-3.5 rounded-xl bg-bg-hover border border-bike/30 flex flex-col justify-between">
+                          {showNutritionGuidance && <div className="p-3.5 rounded-xl bg-bg-hover border border-bike/30 flex flex-col justify-between">
                             <div className="flex items-center justify-between">
                               <span className="text-[10px] font-bold text-bike uppercase tracking-wider flex items-center gap-1.5">
                                 <Sparkles className="w-3.5 h-3.5 text-bike" />
@@ -913,7 +914,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                 <div className={`bg-amber-500 h-full ${durationMin >= 60 ? 'w-[15%]' : 'w-[25%]'}`} />
                               </div>
                             </div>
-                          </div>
+                          </div>}
                         </div>
                       </div>
                     )}
@@ -953,7 +954,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                     )}
                   </div>
                 )}
-                {activeTab === 'nutrition' && (
+                {showNutritionGuidance && activeTab === 'nutrition' && (
                   <div className="space-y-4 w-full">
                     <div className="space-y-4">
                       <div className="flex justify-between items-center flex-wrap gap-2">

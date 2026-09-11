@@ -6,9 +6,7 @@ import { redirect } from 'next/navigation';
 import { DailyWorkoutCard } from '@/components/dashboard/daily-workout-card';
 import { WeeklyNav } from '@/components/dashboard/weekly-nav';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
-import { DailyFuelCard } from '@/components/dashboard/daily-fuel-card';
 import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
-import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
 import { Activity, BookOpen, ChevronRight, Megaphone, Award, CalendarDays } from 'lucide-react';
@@ -80,13 +78,11 @@ export default async function DashboardPage() {
   // 2. Fetch all other data in parallel
   const [
     biometricsRes,
-    nutritionRes,
     analyticsData,
     devicesRes,
     workoutsRes
   ] = await Promise.all([
     getDailyBiometrics(),
-    getDailyNutrition(todayStr),
     getAnalyticsDashboardData(),
     supabase
       .from('user_connected_devices')
@@ -117,8 +113,6 @@ export default async function DashboardPage() {
 
   const biometrics = biometricsRes.data || null;
   const biometricsHistory = biometricsRes.history || [];
-
-  const nutritionData = nutritionRes.data || null;
 
   const devices = devicesRes.data;
   const isConnected = Boolean(profile.garmin_connected || profile.strava_connected || (devices && devices.length > 0));
@@ -314,14 +308,13 @@ export default async function DashboardPage() {
               profile={profile}
               initialBiometrics={biometrics}
               initialBiometricsHistory={biometricsHistory}
-              initialNutrition={nutritionData}
               initialAnalytics={analyticsData}
             />
           </div>
         </section>
 
         {/* Secciones secundarias detrás del menú desplegable */}
-        <ExpandableSection title="Nutrición, actividad, logros y ajustes">
+        <ExpandableSection title="Actividad, logros y ajustes">
 
           {/* ── Tu entrenador ── */}
           <div className="space-y-3">

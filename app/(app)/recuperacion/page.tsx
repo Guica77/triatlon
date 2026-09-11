@@ -5,10 +5,8 @@ import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions'
 import { analyzeRecovery } from '@/lib/recovery-analysis'
 import { RecoveryDashboard } from '@/components/dashboard/recovery-dashboard'
 import { BiometricsCard } from '@/components/dashboard/biometrics-card'
-import { DailyFuelCard } from '@/components/dashboard/daily-fuel-card'
 import { TodayWorkoutHero } from '@/components/dashboard/today-workout-hero'
-import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions'
-import { Heart, Flame } from 'lucide-react'
+import { Heart } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,10 +17,8 @@ export default async function RecuperacionPage() {
 
   const todayStr = new Date().toISOString().split('T')[0]
 
-  const [profileRes, biometricsRes, nutritionRes, workoutsRes] = await Promise.all([
-    supabase.from('profiles').select('first_name, preferred_ingredients').eq('id', user.id).single(),
+  const [biometricsRes, workoutsRes] = await Promise.all([
     getDailyBiometrics(),
-    getDailyNutrition(todayStr),
     supabase
       .from('user_workouts')
       .select('*, training_sessions(*)')
@@ -30,10 +26,8 @@ export default async function RecuperacionPage() {
       .eq('scheduled_date', todayStr),
   ])
 
-  const profile = profileRes.data
   const biometrics = biometricsRes.data || null
   const biometricsHistory = biometricsRes.history || []
-  const nutritionData = nutritionRes.data || null
 
   const recoveryData = {
     date: todayStr,
@@ -94,17 +88,6 @@ export default async function RecuperacionPage() {
           />
         </div>
 
-        {/* Nutrition Fuel */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Flame className="w-4 h-4 text-coral-500" />
-            <h2 className="text-sm font-bold text-text-primary">Combustible</h2>
-          </div>
-          <DailyFuelCard
-            nutritionData={nutritionData}
-            preferredIngredients={profile?.preferred_ingredients || []}
-          />
-        </div>
       </main>
     </div>
   )
