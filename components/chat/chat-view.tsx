@@ -11,7 +11,6 @@ import {
   MessageSquare,
   ChevronRight,
   ArrowLeft,
-  Sparkles,
   Plus,
   Smile,
   Paperclip,
@@ -286,7 +285,7 @@ export function ChatView({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 overflow-hidden rounded-none border border-border-subtle bg-surface-elevated shadow-card sm:rounded-2xl">
+    <div className="flex min-h-0 flex-1 overflow-hidden bg-surface-elevated">
 
       {/* Left Sidebar */}
       {hasSidebar ? (
@@ -294,7 +293,7 @@ export function ChatView({
 
           {/* Search bar */}
           <div className="flex items-center gap-2 border-b border-border-subtle bg-surface-elevated p-3 sm:p-4">
-            <div className="flex w-full items-center gap-2 rounded-xl border border-border-default bg-surface-card px-3 py-2 shadow-card">
+            <div className="flex w-full items-center gap-2 rounded-lg bg-surface-hover px-3 py-2">
               <Search className="h-4 w-4 shrink-0 text-text-muted" />
               <input
                 type="text"
@@ -321,12 +320,12 @@ export function ChatView({
                     onClick={() => handleSelectParticipant(p)}
                     className={`flex min-h-11 w-full items-center justify-between p-4 text-left transition-[background-color,border-color,color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50 focus-visible:ring-inset motion-reduce:transition-opacity motion-reduce:active:scale-100 ${
                       isSelected
-                        ? 'bg-swim-subtle/70 border-l-2 border-swim'
+                        ? 'bg-surface-hover'
                         : 'fine-hover:bg-surface-hover'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border-default bg-surface-card text-xs font-bold text-text-secondary">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-hover text-sm font-medium text-text-secondary">
                         {(p.first_name || 'T')[0].toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -352,36 +351,25 @@ export function ChatView({
         {selectedPart ? (
           <>
             {/* Active chat header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-border-default bg-surface-card px-4 py-3 sm:px-6 sm:py-4">
-              <div className="flex items-center gap-3">
+            <div className="grid shrink-0 grid-cols-[2.75rem_1fr_2.75rem] items-center border-b border-border-subtle bg-surface-elevated px-2 py-2 sm:px-4">
+              <div>
                 {hasSidebar && (
                   <button
                     onClick={() => { selectedIdRef.current = null; historyRequestRef.current++; setSelectedPart(null) }}
-                    className="sm:hidden min-h-10 min-w-10 -ml-1 shrink-0 rounded-lg text-text-secondary transition-[color,background-color,opacity,transform] duration-150 ease-out active:scale-[0.97] fine-hover:bg-surface-hover fine-hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50"
+                    className="min-h-11 min-w-11 rounded-full text-accent transition-colors fine-hover:bg-surface-hover sm:hidden"
                     aria-label="Volver"
                   >
                     <ArrowLeft className="w-5 h-5" />
                   </button>
                 )}
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-hover text-sm font-medium text-text-secondary">
-                  {(selectedPart.first_name || 'T')[0].toUpperCase()}
-                </div>
-                <div>
-                  <h3 className="text-xs font-bold text-text-primary">
-                    {selectedPart.first_name || 'Triatleta'} {selectedPart.last_name || ''}
-                  </h3>
-                  <p className="mt-0.5 flex items-center gap-1 text-[9px] font-medium text-text-muted">
-                    Historial guardado en tu cuenta
-                  </p>
-                </div>
               </div>
-
-              <div className="flex items-center gap-1 sm:gap-3">
-                {/* Realtime badge (hidden on narrow screens to save space for call buttons) */}
-
-                <div className="flex shrink-0 items-center">
-                  <ChatSafety key={selectedPart.id} userId={selectedPart.id} messageId={[...messages].reverse().find(m => m.sender_id === selectedPart.id)?.id} />
-                </div>
+              <div className="min-w-0 text-center">
+                <h3 className="truncate text-sm font-semibold text-text-primary">
+                  {selectedPart.first_name || 'Triatleta'} {selectedPart.last_name || ''}
+                </h3>
+              </div>
+              <div className="flex justify-end">
+                <ChatSafety key={selectedPart.id} userId={selectedPart.id} messageId={[...messages].reverse().find(m => m.sender_id === selectedPart.id)?.id} />
               </div>
             </div>
 
@@ -401,12 +389,11 @@ export function ChatView({
                   </div>
                 ) : visibleMessages.length === 0 ? (
                   <div className="flex h-full flex-col items-center justify-center space-y-2 text-center text-text-muted">
-                    <MessageSquare className="h-6 w-6" strokeWidth={1.5} />
                     <p className="text-base font-medium text-text-secondary">No hay mensajes todavía</p>
                     <p className="text-sm">Escribe el primero cuando quieras.</p>
                   </div>
                 ) : (
-                  <div className="space-y-4 flex-1">
+                  <div className="flex flex-1 flex-col gap-2">
                     {visibleMessages.map(m => {
                       const pending = !messages.some(saved => saved.id === m.id) ? outbox.find(item => item.id === m.id) : undefined
                       const isOwn = m.sender_id === currentUserId
@@ -419,22 +406,22 @@ export function ChatView({
                             initial={reduceMotion ? false : { opacity: 0, scale: 0.95, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
-                            className={`max-w-[80%] sm:max-w-[70%] px-3.5 py-2 rounded-2xl text-[13px] leading-relaxed shadow-sm relative ${
+                            className={`relative max-w-[80%] rounded-[20px] px-3.5 py-2 text-[15px] leading-relaxed sm:max-w-[70%] ${
                               isOwn
-                                ? 'bg-coral-500 text-text-inverse font-medium rounded-tr-sm border border-coral-400 shadow-button'
-                                : 'bg-surface-card text-text-primary rounded-tl-sm border border-border-default font-medium'
+                                ? 'rounded-br-md bg-[#007AFF] text-white'
+                                : 'rounded-bl-md bg-[#E9E9EB] text-black'
                             }`}
                           >
                             <p className="whitespace-pre-wrap">{m.message}</p>
                             {isOwn ? (
-                              <div className="float-right ml-3 mt-0.5 flex translate-y-1 items-center justify-end gap-1 text-[9px] font-bold text-text-inverse/70" suppressHydrationWarning>
+                              <div className="float-right ml-3 mt-0.5 flex translate-y-1 items-center justify-end gap-1 text-[9px] font-medium text-white/70" suppressHydrationWarning>
                                 {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 {pending?.delivery === 'failed' ? (
                                   <button type="button" onClick={() => deliverMessage(pending)} className="min-h-11 px-2 underline">No enviado · Reintentar</button>
                                 ) : <span>{pending ? 'Enviando…' : m.is_read ? 'Leído' : 'Guardado'}</span>}
                               </div>
                             ) : (
-                              <div className="float-right ml-3 mt-0.5 translate-y-1 text-right text-[9px] font-bold text-text-muted" suppressHydrationWarning>
+                              <div className="float-right ml-3 mt-0.5 translate-y-1 text-right text-[9px] font-medium text-black/45" suppressHydrationWarning>
                                 {new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                               </div>
                             )}
@@ -447,10 +434,10 @@ export function ChatView({
                     {/* Typing Indicator */}
                     {isTyping && (
                       <div className="flex justify-start">
-                        <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-none border border-border-default bg-surface-card p-3.5 text-text-muted shadow-card">
-                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-swim [animation-delay:0ms]" />
-                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-swim [animation-delay:150ms]" />
-                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-swim [animation-delay:300ms]" />
+                        <div className="flex items-center gap-1.5 rounded-[20px] rounded-bl-md bg-[#E9E9EB] p-3.5">
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-black/35 [animation-delay:0ms]" />
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-black/35 [animation-delay:150ms]" />
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-black/35 [animation-delay:300ms]" />
                         </div>
                       </div>
                     )}
@@ -464,13 +451,13 @@ export function ChatView({
             {/* Input form */}
             <form
               onSubmit={handleSendMessage}
-              className="z-10 flex shrink-0 items-end gap-2 border-t border-border-default bg-surface-elevated p-2 pb-[calc(0.5rem+var(--chat-bottom-inset,env(safe-area-inset-bottom)))] sm:p-3"
+              className="z-10 flex shrink-0 items-end gap-2 border-t border-border-subtle bg-surface-elevated p-2 pb-[calc(0.5rem+var(--chat-bottom-inset,env(safe-area-inset-bottom)))] sm:p-3"
             >
               {/* Attachment Icon */}
 
 
               {/* Input container wrapper */}
-              <div className="flex min-h-[40px] flex-1 items-end rounded-xl border border-border-default bg-surface-card px-1.5 py-1">
+              <div className="flex min-h-[40px] flex-1 items-end rounded-full border border-[#C7C7CC] bg-surface-elevated px-3 py-1">
                 {/* Emoji Icon */}
 
 
@@ -494,18 +481,16 @@ export function ChatView({
 
               </div>
 
-              <AnimatedButton type="submit" variant="primary" size="icon" disabled={!newMessageText.trim()} aria-label="Enviar mensaje" className="h-11 w-11 shrink-0 disabled:opacity-50">
-                <Send className="h-4 w-4" />
+              <AnimatedButton type="submit" variant="primary" size="icon" disabled={!newMessageText.trim()} aria-label="Enviar mensaje" className="h-10 w-10 shrink-0 rounded-full !bg-[#007AFF] disabled:opacity-35">
+                <Send className="h-4 w-4" strokeWidth={2} />
               </AnimatedButton>
             </form>
           </>
         ) : (
-          <div className="flex min-h-0 flex-1 flex-col items-center bg-bg-deep p-6">
+          <div className="flex min-h-0 flex-1 flex-col items-center bg-surface-app p-6">
             {currentUserRole === 'coach' ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-swim/40 bg-swim-subtle text-swim shadow-card">
-                  <MessageSquare className="h-8 w-8 text-swim" />
-                </div>
+                <MessageSquare className="h-7 w-7 text-text-muted" strokeWidth={1.5} />
                 <div>
                   <h3 className="text-lg font-black tracking-tight text-text-primary">Centro de Mensajería</h3>
                   <p className="mt-2 max-w-sm text-sm font-medium leading-relaxed text-text-muted">
@@ -516,9 +501,7 @@ export function ChatView({
             ) : (
               <div className="custom-scrollbar mx-auto h-full min-h-0 w-full max-w-xl space-y-5 overflow-y-auto overscroll-y-contain px-4 pb-8 pt-6 [-webkit-overflow-scrolling:touch] [touch-action:pan-y] sm:px-6 sm:pt-10">
                 <div className="mx-auto max-w-md space-y-2 text-center">
-                  <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-swim/40 bg-swim-subtle text-swim shadow-card">
-                    <Sparkles className="h-6 w-6 motion-safe:animate-pulse" />
-                  </div>
+                  <MessageSquare className="mx-auto mb-4 h-7 w-7 text-text-muted" strokeWidth={1.5} />
                   <h3 className="text-xl font-black tracking-tight text-text-primary sm:text-2xl">Directorio de Entrenadores</h3>
                   <p className="text-sm font-medium leading-relaxed text-text-muted sm:text-base">
                     Aún no tienes un entrenador asignado. Vincula tu cuenta mediante un código de invitación o elige un coach certificado.
@@ -552,7 +535,7 @@ export function ChatView({
                     <div className="w-full border-t border-border-subtle"></div>
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-bg-deep px-4 text-xs font-bold uppercase tracking-wide text-text-muted">o elige uno disponible</span>
+                    <span className="bg-surface-app px-4 text-xs font-medium text-text-muted">o elige uno disponible</span>
                   </div>
                 </div>
 

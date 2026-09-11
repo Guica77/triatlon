@@ -281,13 +281,13 @@ private struct TriWaveXLaunchScreen: View {
             VStack(spacing: 14) {
                 ProgressView()
                     .controlSize(.large)
-                Text("Cargando TriWaveX")
+                Text("Cargando…")
                     .font(.body)
                     .foregroundStyle(.secondary)
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Cargando TriWaveX")
+        .accessibilityLabel("Cargando")
     }
 }
 

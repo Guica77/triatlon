@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Ellipsis } from 'lucide-react'
 import { reportChatMessage, setChatBlock } from '@/app/(app)/chat/safety-actions'
 
 export function ChatSafety({ userId, messageId, kind = 'direct' }: { userId:string; messageId?:string; kind?:'direct'|'group' }) {
@@ -11,7 +12,9 @@ export function ChatSafety({ userId, messageId, kind = 'direct' }: { userId:stri
     finally {setBusy(false)}
   }
   return <div className="relative">
-    <button type="button" onClick={()=>setOpen(!open)} aria-expanded={open} className="min-h-11 rounded-lg px-2 text-xs underline">Seguridad</button>
+    <button type="button" onClick={()=>setOpen(!open)} aria-expanded={open} aria-label="Opciones de seguridad" className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-accent hover:bg-surface-hover">
+      <Ellipsis className="h-5 w-5" />
+    </button>
     {open && <div className="absolute right-0 z-40 w-64 rounded-xl border border-border-default bg-surface-card p-4 shadow-xl space-y-3">
       <p className="text-xs">El bloqueo impide nuevos mensajes directos y oculta sus mensajes de grupo al volver a cargar. Puedes deshacerlo aquí.</p>
       <button type="button" disabled={busy} onClick={()=>run(()=>setChatBlock(userId,true),'Usuario bloqueado.')} className="min-h-11 text-sm underline">Bloquear usuario</button>
