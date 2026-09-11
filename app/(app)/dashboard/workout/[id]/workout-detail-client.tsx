@@ -10,15 +10,10 @@ import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
 import { 
   Flame, 
-  Target, 
-  Activity, 
-  RefreshCw, 
-  Wind, 
   Download, 
   CheckCircle2, 
   XCircle, 
   Circle, 
-  Info, 
   ShoppingBag, 
   Dumbbell, 
   Heart, 
@@ -97,6 +92,22 @@ const sportGlows: Record<string, string> = {
   ciclismo: 'bg-[#10b981]/10',
   carrera: 'bg-[#f97316]/10',
   fuerza: 'bg-[#a855f7]/10',
+};
+
+const stepAccent: Record<WorkoutStep['type'], string> = {
+  Warmup: 'bg-warning',
+  Interval: 'bg-swim',
+  Rest: 'bg-bike',
+  Repeat: 'bg-accent',
+  Cooldown: 'bg-text-muted',
+};
+
+const stepLabel: Record<WorkoutStep['type'], string> = {
+  Warmup: 'Calentamiento',
+  Interval: 'Intervalo',
+  Rest: 'Recuperación',
+  Repeat: 'Repetir bloque',
+  Cooldown: 'Vuelta a la calma',
 };
 
 export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDetailClientProps) {
@@ -301,48 +312,26 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
     return '';
   };
 
-  const renderStepIcon = (type: string) => {
-    switch (type) {
-      case 'Warmup':
-        return <Flame className="w-4 h-4 text-warning" />;
-      case 'Interval':
-        return <Target className="w-4 h-4 text-swim" />;
-      case 'Rest':
-        return <Info className="w-4 h-4 text-bike" />;
-      case 'Repeat':
-        return <RefreshCw className="w-4 h-4 text-purple-400" />;
-      case 'Cooldown':
-        return <Wind className="w-4 h-4 text-swim" />;
-      default:
-        return <Activity className="w-4 h-4 text-text-muted" />;
-    }
-  };
-
   const renderStepCard = (step: WorkoutStep, index: number) => {
     if (step.type === 'Repeat') {
       return (
-        <div key={index} className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/20 space-y-3">
-          <div className="flex items-center justify-between border-b border-purple-500/10 pb-2">
-            <span className="flex items-center gap-2 text-xs font-bold text-purple-300 uppercase tracking-wider">
-              {renderStepIcon('Repeat')}
-              Repetir Bloque ({step.repeatCount} veces)
-            </span>
+        <div key={index} className="overflow-hidden rounded-xl border border-border-default bg-surface-card">
+          <div className="flex items-center gap-3 px-4 py-3">
+            <span className="h-9 w-1 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-text-primary">Repetir bloque {step.repeatCount ? `· ${step.repeatCount} veces` : ''}</p>
+              <p className="mt-0.5 text-xs text-text-secondary">Completa cada paso antes de repetir.</p>
+            </div>
           </div>
-          <div className="space-y-3 pl-4 border-l border-purple-500/10">
+          <div className="divide-y divide-border-subtle border-t border-border-subtle">
             {step.workoutSteps?.map((subStep, subIdx) => (
-              <div key={subIdx} className="p-3 rounded-lg bg-bg-app/40 border border-border-subtle flex items-center justify-between flex-wrap gap-2 text-xs">
-                <div className="flex items-center gap-2">
-                  {renderStepIcon(subStep.type)}
-                  <div>
-                    <p className="font-semibold text-text-primary capitalize">{subStep.type === 'Interval' ? 'Intervalo de Carga' : 'Recuperación'}</p>
-                    <p className="text-[10px] text-text-secondary">{formatCondition(subStep.endCondition, subStep.endConditionValue)}</p>
-                  </div>
+              <div key={subIdx} className="flex items-center gap-3 px-4 py-3">
+                <span className={`h-8 w-1 shrink-0 rounded-full ${stepAccent[subStep.type]}`} aria-hidden="true" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-text-primary">{stepLabel[subStep.type]}</p>
+                  <p className="mt-0.5 text-xs text-text-secondary">{formatCondition(subStep.endCondition, subStep.endConditionValue)}</p>
                 </div>
-                <div className="text-right">
-                  <span className="px-2.5 py-1 rounded bg-surface-card text-text-muted font-bold border border-border-subtle">
-                    Objetivo: {formatTarget(subStep.targetType, subStep.targetValueOne, subStep.targetValueTwo)}
-                  </span>
-                </div>
+                <p className="shrink-0 text-right text-xs font-medium text-text-secondary">{formatTarget(subStep.targetType, subStep.targetValueOne, subStep.targetValueTwo)}</p>
               </div>
             ))}
           </div>
@@ -351,25 +340,13 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
     }
 
     return (
-      <div key={index} className="p-3.5 rounded-xl bg-card border border-border flex items-center justify-between flex-wrap gap-3 text-xs sm:text-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-surface-hover flex items-center justify-center border border-border-default">
-            {renderStepIcon(step.type)}
-          </div>
-          <div>
-            <p className="font-semibold text-foreground capitalize">
-              {step.type === 'Warmup' ? 'Calentamiento' : step.type === 'Cooldown' ? 'Vuelta a la Calma' : 'Intervalo'}
-            </p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground">
-              {formatCondition(step.endCondition, step.endConditionValue)}
-            </p>
-          </div>
+      <div key={index} className="flex min-h-16 items-center gap-3 rounded-xl border border-border-default bg-surface-card px-4 py-3">
+        <span className={`h-9 w-1 shrink-0 rounded-full ${stepAccent[step.type]}`} aria-hidden="true" />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-text-primary">{stepLabel[step.type]}</p>
+          <p className="mt-0.5 text-xs text-text-secondary">{formatCondition(step.endCondition, step.endConditionValue)}</p>
         </div>
-        <div>
-          <span className="px-3 py-1 rounded-lg bg-surface-hover text-foreground font-bold border border-border-default text-xs">
-            {formatTarget(step.targetType, step.targetValueOne, step.targetValueTwo)}
-          </span>
-        </div>
+        <p className="shrink-0 text-right text-xs font-medium text-text-secondary">{formatTarget(step.targetType, step.targetValueOne, step.targetValueTwo)}</p>
       </div>
     );
   };
