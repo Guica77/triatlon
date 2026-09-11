@@ -11,7 +11,7 @@ import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
-import { Activity, BookOpen, ChevronRight, Megaphone, Award } from 'lucide-react';
+import { Activity, BookOpen, ChevronRight, Megaphone, Award, CalendarDays } from 'lucide-react';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
@@ -44,6 +44,9 @@ export default async function DashboardPage() {
   calendarEnd.setHours(23, 59, 59, 999);
 
   const todayStr = now.toISOString().split('T')[0];
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -187,6 +190,8 @@ export default async function DashboardPage() {
 
   // Find today's workout for AI coach feedback
   const todayWorkout = workouts?.find((w: any) => w.scheduled_date === todayStr && w.training_sessions?.sport_type !== 'descanso');
+  const tomorrowWorkout = workouts?.find((w: any) => w.scheduled_date === tomorrowStr && w.training_sessions?.sport_type !== 'descanso');
+  const tomorrowSession = tomorrowWorkout?.training_sessions;
 
   // Evaluate badges
   const allWorkoutsCompleted = workouts?.filter((w: any) => w.status === 'completed').length || 0
@@ -252,14 +257,39 @@ export default async function DashboardPage() {
           <p className="mt-1 text-sm text-text-secondary">Tu estado y la prioridad de hoy, en un solo vistazo.</p>
         </div>
 
-        <div className="mb-8 grid items-start gap-4 lg:grid-cols-[.9fr_1.1fr]">
+        <section className="mb-5">
+          <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Entrenamiento de hoy</h2>
+          <TodayWorkoutHero workout={todayWorkout ?? null} />
+        </section>
+
+        <div className="mb-8 grid items-start gap-5 lg:grid-cols-[1.1fr_.9fr]">
           <section>
-            <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Tu recuperación</h2>
+            <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Estado de hoy</h2>
             <RecoverySummary readinessScore={biometrics?.readiness_score} hrv={biometrics?.hrv} sleepHours={biometrics?.sleep_hours} fatigue={biometrics?.fatigue_rating} />
           </section>
           <section>
-            <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Entrenamiento de hoy</h2>
-            <TodayWorkoutHero workout={todayWorkout ?? null} />
+            <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Próxima sesión</h2>
+            {tomorrowWorkout ? (
+              <Link
+                href={`/dashboard/workout/${tomorrowWorkout.id}`}
+                className="group flex min-h-20 items-center gap-3 rounded-2xl border border-border-default bg-surface-card px-4 py-3 transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-hover text-accent">
+                  <CalendarDays className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium text-text-muted">Mañana · {tomorrowSession?.sport_type || 'Entrenamiento'}</p>
+                  <p className="truncate text-sm font-semibold text-text-primary">{tomorrowSession?.description || 'Entrenamiento programado'}</p>
+                  {tomorrowSession?.duration_min ? <p className="mt-0.5 text-xs text-text-secondary">{tomorrowSession.duration_min} min</p> : null}
+                </div>
+                <ChevronRight className="h-4 w-4 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              </Link>
+            ) : (
+              <div className="flex min-h-20 items-center gap-3 rounded-2xl border border-border-default bg-surface-card px-4 py-3">
+                <CalendarDays className="h-5 w-5 shrink-0 text-text-muted" aria-hidden="true" />
+                <p className="text-sm text-text-secondary">No hay entrenamiento programado para mañana.</p>
+              </div>
+            )}
           </section>
         </div>
 
