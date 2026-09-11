@@ -39,8 +39,7 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
   }, [lockViewport]);
 
   return (
-    <div className={`relative flex w-full flex-col items-center justify-center overflow-x-hidden bg-[radial-gradient(circle_at_15%_5%,rgba(121,199,255,0.13),transparent_34%),radial-gradient(circle_at_85%_100%,rgba(183,243,107,0.10),transparent_38%),#0B1117] px-4 py-6 font-sans selection:bg-accent/30 sm:p-8 ${lockViewport ? 'fixed inset-0 h-svh min-h-0 overflow-y-auto overscroll-none' : 'min-h-screen'}`}>
-
+    <div className={`relative flex w-full flex-col items-center justify-center overflow-x-hidden bg-bg-deep px-4 py-6 font-sans selection:bg-accent/30 sm:p-8 ${lockViewport ? 'fixed inset-0 h-svh min-h-0 overflow-y-auto overscroll-none' : 'min-h-screen'}`}>
       {mounted && (
         <motion.div
           initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
@@ -51,12 +50,8 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
           {/* Logo */}
           <div className="space-y-3 text-center">
             <p className="text-sm font-semibold text-text-primary/90">Bienvenido</p>
-            <TriWaveXMark className="mx-auto h-16 w-16 rounded-[22px] border border-white/10 bg-[#0B1117] p-2.5 shadow-[0_12px_30px_rgba(0,0,0,0.28)]" />
-            <div className="flex justify-center gap-2" aria-hidden="true">
-              <span className="h-2.5 w-2.5 rounded-full bg-swim" />
-              <span className="h-2.5 w-2.5 rounded-full bg-bike" />
-              <span className="h-2.5 w-2.5 rounded-full bg-run" />
-            </div>
+            <TriWaveXMark className="mx-auto h-16 w-16 rounded-[20px] border border-border-default bg-bg-elevated p-2.5 shadow-card" />
+            <div className="mx-auto h-px w-12 bg-aqua-500/60" aria-hidden="true" />
 
             <div className="space-y-1.5">
               <motion.h1
@@ -83,7 +78,7 @@ export function AuthLayout({ children, title, subtitle, lockViewport = false }: 
             initial={{ opacity: 0, y: reduceMotion ? 0 : 6, scale: reduceMotion ? 1 : 0.99 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: reduceMotion ? 0.15 : 0.2, ease: 'easeOut' }}
-            className="rounded-[28px] border border-white/10 bg-surface-card/85 p-5 shadow-[0_18px_50px_rgba(0,0,0,0.30)] backdrop-blur-xl sm:p-7"
+            className="rounded-2xl border border-border-card bg-surface-card p-5 shadow-card sm:p-7"
           >
             {children}
           </motion.div>

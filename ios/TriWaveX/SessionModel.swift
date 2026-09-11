@@ -26,6 +26,8 @@ final class SessionModel {
     }
 
     func handleAppleCompletion(_ result: Result<ASAuthorization, Error>, role: String) async {
+        defer { appleNonce = nil }
+
         switch result {
         case .failure(let error as ASAuthorizationError) where error.code == .canceled:
             return
@@ -41,7 +43,6 @@ final class SessionModel {
             }
             await signInWithApple(identityToken: identityToken, nonce: nonce, role: role)
         }
-        appleNonce = nil
     }
 
     func login(email: String, password: String) async {
