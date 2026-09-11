@@ -124,7 +124,7 @@ export function ObjectiveConfigModal({ isOpen, onClose }: { isOpen: boolean; onC
             </div>
             <div className="text-left">
               <DialogTitle className="text-xl font-bold tracking-tight">Define tu Objetivo</DialogTitle>
-              <DialogDescription className="text-sm">Selecciona tu carrera y disponibilidad para que la IA recalibre tu plan.</DialogDescription>
+              <DialogDescription className="text-sm">Selecciona tu carrera y disponibilidad para recalibrar tu plan.</DialogDescription>
             </div>
           </div>
         </DialogHeader>

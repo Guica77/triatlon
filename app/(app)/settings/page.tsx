@@ -1,5 +1,3 @@
-import { AIConsentCard } from '@/components/settings/ai-consent-card';
-import { aiDisclosure } from '@/lib/ai-privacy';
 import * as React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -45,10 +43,6 @@ export default async function SettingsPage() {
   if (!profile) {
     redirect('/onboarding');
   }
-
-  const disclosure = aiDisclosure();
-  const { data: consent } = await (supabase as any).from('ai_consents').select('version, granted').eq('user_id', user.id).maybeSingle();
-  const aiGranted = consent?.granted === true && consent.version === disclosure.version;
 
   const connectedProviders = [
     ...(profile.garmin_connected ? ['garmin'] : []),
@@ -139,7 +133,6 @@ export default async function SettingsPage() {
               <ExportButtons />
             </div>
 
-            <AIConsentCard {...disclosure} granted={aiGranted} />
             <form action="/auth/signout" method="post" className="rounded-xl border border-border-default bg-bg-card p-5">
               <h3 className="text-sm font-bold text-text-primary">Cerrar sesión</h3>
               <p className="mt-1 text-xs text-text-muted">Sal de tu cuenta. Tus datos y entrenamientos se conservarán.</p>

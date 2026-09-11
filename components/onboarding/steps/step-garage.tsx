@@ -30,7 +30,7 @@ export function StepGarage(props: StepGarageProps) {
       <ProCard className="space-y-6 bg-surface-card border border-border-default shadow-card">
         <div className="border-b border-border-default pb-4">
           <h2 className="text-xl font-bold text-text-primary flex items-center gap-2"><Wrench className="w-5 h-5 text-coral-500" /> Garaje Virtual</h2>
-          <p className="text-sm text-text-secondary mt-1">Selecciona el material que ya posees. La IA usará esto para sugerirte chollos en entrenamientos donde te falte equipamiento.</p>
+          <p className="text-sm text-text-secondary mt-1">Selecciona el material que ya posees para adaptar las recomendaciones de equipamiento a tus entrenamientos.</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

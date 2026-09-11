@@ -379,7 +379,7 @@ export function DailyFuelCard({
             <div className="bg-teal-50 border border-teal-150 rounded-xl p-2.5 text-[9.5px] text-teal-900 relative animate-fade-in max-h-[100px] overflow-y-auto shrink-0 custom-scrollbar">
               <div className="flex items-center gap-1.5 mb-1 text-teal-700 font-bold text-[8px] uppercase tracking-wider">
                 <Bot className="w-3.5 h-3.5 text-teal-600" />
-                <span>IA de Nutrición</span>
+                <span>Orientación nutricional</span>
               </div>
               <div className="prose prose-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: formatMarkdown(aiAnswer) }} />
               <button

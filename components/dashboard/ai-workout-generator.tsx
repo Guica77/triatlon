@@ -74,7 +74,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
                   <Bot className="w-4 h-4" />
                 </div>
                 <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
-                  Generador AI
+                  Planificador semanal
                   <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-accent/20 text-accent border border-accent/30">Beta</span>
                 </h3>
               </div>
@@ -147,7 +147,7 @@ export function AIWorkoutGenerator({ isOpen, onClose, onGenerate, currentDate, i
                     className="w-full py-3.5 !bg-accent hover:!bg-lime-400 !text-bg-deep font-extrabold rounded-xl flex items-center justify-center gap-2"
                   >
                     <Sparkles className="w-4 h-4" />
-                    Generar Calendario AI
+                    Preparar calendario
                   </AnimatedButton>
                 </form>
               )}

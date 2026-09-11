@@ -58,7 +58,7 @@ export function VirtualGarageCard({ initialGarage = [] }: { initialGarage: strin
           {initialGarage.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-text-secondary text-xs text-center py-4 font-medium">
               <p>Tu garaje está vacío.</p>
-              <p className="text-[10px] text-text-muted mt-1">Añade material para el IA Gear Match.</p>
+              <p className="text-[10px] text-text-muted mt-1">Añade material para recibir recomendaciones de equipamiento.</p>
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">

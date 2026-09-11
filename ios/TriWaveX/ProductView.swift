@@ -6,23 +6,107 @@ import Observation
 import UIKit
 
 struct ProductView: View {
+    private enum AppTab: Hashable {
+        case training
+        case progress
+        case chat
+        case profile
+    }
+
     let origin: URL
     let store: WKWebsiteDataStore
     let initialPath: String
     let onDismiss: (() -> Void)?
     @State private var browser = BrowserModel()
     @State private var strava = StravaSessionModel()
+    @State private var nativeProgressEnabled = true
+    @State private var webPathOverride: String?
+    @State private var athleteProgress: AthleteProgressModel
+    @State private var selectedTab: AppTab
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var isCoach: Bool {
+        initialPath.hasPrefix("/coach/")
+    }
+
+    private var initialTab: AppTab {
+        Self.tab(for: initialPath, isCoach: isCoach)
+    }
+
+    init(origin: URL, store: WKWebsiteDataStore, initialPath: String, onDismiss: (() -> Void)?) {
+        self.origin = origin
+        self.store = store
+        self.initialPath = initialPath
+        self.onDismiss = onDismiss
+        _athleteProgress = State(initialValue: AthleteProgressModel(client: AthleteProgressClient(origin: origin, store: store)))
+        _selectedTab = State(initialValue: Self.tab(for: initialPath, isCoach: initialPath.hasPrefix("/coach/")))
+    }
+
+    private static func tab(for path: String, isCoach: Bool) -> AppTab {
+        if path == "/resumen" && !isCoach { return .progress }
+        if path.hasPrefix("/chat") || path.hasPrefix("/coach/chat") { return .chat }
+        if path == "/settings" { return .profile }
+        return .training
+    }
+
+    private func path(for tab: AppTab) -> String {
+        switch tab {
+        case .training:
+            return isCoach ? "/coach/dashboard" : "/dashboard"
+        case .progress:
+            return "/resumen"
+        case .chat:
+            return isCoach ? "/coach/chat" : "/chat"
+        case .profile:
+            return "/settings"
+        }
+    }
 
     var body: some View {
         NavigationStack {
             ZStack {
-                ProductWebView(model: browser, origin: origin, store: store, initialPath: initialPath, onStravaConnect: connectStrava)
-                if browser.loading && !browser.hasCompletedInitialLoad {
-                    TriWaveXLaunchScreen(reduceMotion: reduceMotion)
-                        .transition(.opacity)
+                TabView(selection: $selectedTab) {
+                    Color.clear
+                        .accessibilityHidden(true)
+                        .tabItem { Label("Entreno", systemImage: "figure.run") }
+                        .tag(AppTab.training)
+
+                    if !isCoach {
+                        Color.clear
+                            .accessibilityHidden(true)
+                            .tabItem { Label("Progreso", systemImage: "chart.bar.xaxis") }
+                            .tag(AppTab.progress)
+                    }
+
+                    Color.clear
+                        .accessibilityHidden(true)
+                        .tabItem { Label("Chat", systemImage: "bubble.left.and.bubble.right") }
+                        .tag(AppTab.chat)
+
+                    Color.clear
+                        .accessibilityHidden(true)
+                        .tabItem { Label("Perfil", systemImage: "person.crop.circle") }
+                        .tag(AppTab.profile)
                 }
-                if browser.loading && browser.hasCompletedInitialLoad {
+                .toolbar(.hidden, for: .tabBar)
+
+                ProductWebView(
+                    model: browser,
+                    origin: origin,
+                    store: store,
+                    initialPath: initialPath,
+                    isActive: !showingNativeProgress,
+                    onStravaConnect: connectStrava
+                )
+                    .opacity(showingNativeProgress ? 0 : 1)
+                    .allowsHitTesting(!showingNativeProgress)
+                if showingNativeProgress {
+                    AthleteProgressView(model: athleteProgress, onFallback: openWebProgress)
+                }
+                if !showingNativeProgress && browser.loading && !browser.hasCompletedInitialLoad {
+                    TriWaveXLaunchScreen(reduceMotion: reduceMotion)
+                }
+                if !showingNativeProgress && browser.loading && browser.hasCompletedInitialLoad {
                     VStack {
                         TriWaveXLoadingBar()
                             .padding(.horizontal, 24)
@@ -32,17 +116,23 @@ struct ProductView: View {
                         Spacer()
                     }
                     .allowsHitTesting(false)
-                    .transition(.opacity)
                 }
-                if let message = browser.error {
+                if !showingNativeProgress, let message = browser.error {
                     TriWaveXErrorState(message: message, retry: browser.retry)
-                        .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
                 }
             }
-            .safeAreaInset(edge: .bottom) {
-                if browser.showsAppNavigation {
+            .onChange(of: selectedTab) { _, tab in
+                selectTab(path: path(for: tab))
+            }
+            .onChange(of: browser.currentPath) { _, path in
+                let nextTab = Self.tab(for: path, isCoach: isCoach)
+                if selectedTab != nextTab {
+                    selectedTab = nextTab
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if shouldShowTabBar {
                     nativeTabBar
-                    .transition(reduceMotion ? .opacity : .move(edge: .bottom).combined(with: .opacity))
                 }
             }
         }
@@ -53,9 +143,83 @@ struct ProductView: View {
         .alert("Strava", isPresented: Binding(get: { strava.message != nil }, set: { if !$0 { strava.message = nil } })) {
             Button("Aceptar", role: .cancel) { strava.message = nil }
         } message: { Text(strava.message ?? "") }
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.18), value: browser.loading)
-        .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: browser.error)
-        .animation(reduceMotion ? nil : .spring(response: 0.34, dampingFraction: 0.88), value: browser.showsAppNavigation)
+    }
+
+    private var shouldShowTabBar: Bool {
+        guard onDismiss == nil else { return false }
+        return showingNativeProgress || browser.showsAppNavigation ||
+            (!browser.hasCompletedInitialLoad && isMainNavigationPath(initialPath))
+    }
+
+    private func isMainNavigationPath(_ path: String) -> Bool {
+        ["/dashboard", "/resumen", "/chat", "/settings", "/coach/dashboard", "/coach/chat"]
+            .contains { path.hasPrefix($0) }
+    }
+
+    private var nativeTabBar: some View {
+        HStack(spacing: 0) {
+            tabButton(.training, title: "Entreno", systemImage: "figure.run")
+            if !isCoach {
+                tabButton(.progress, title: "Progreso", systemImage: "chart.bar.xaxis")
+            }
+            tabButton(.chat, title: "Chat", systemImage: "bubble.left.and.bubble.right")
+            tabButton(.profile, title: "Perfil", systemImage: "person.crop.circle")
+        }
+        .padding(.top, 8)
+        .padding(.bottom, 6)
+        .background(.bar)
+        .overlay(alignment: .top) {
+            Divider()
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Navegación principal")
+    }
+
+    private func tabButton(_ tab: AppTab, title: String, systemImage: String) -> some View {
+        let isSelected = selectedTab == tab
+        return Button {
+            selectedTab = tab
+        } label: {
+            VStack(spacing: 3) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 18, weight: isSelected ? .semibold : .regular))
+                Text(title)
+                    .font(.caption2.weight(isSelected ? .semibold : .regular))
+            }
+            .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+            .foregroundStyle(isSelected ? Color.triWaveXAqua : .secondary)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
+        .accessibilityValue(isSelected ? "Seleccionado" : "")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private var showingNativeProgress: Bool {
+        nativeProgressEnabled && (initialPath == "/resumen" || webPathOverride == "/resumen") && !initialPath.hasPrefix("/coach/")
+    }
+
+    private func openWebProgress() {
+        nativeProgressEnabled = false
+        webPathOverride = "/resumen"
+        browser.currentPath = "/resumen"
+        let request = URLRequest(url: origin.appendingPathComponent("resumen"))
+        browser.lastRequest = request
+        browser.webView?.load(request)
+    }
+
+    private func selectTab(path: String) {
+        if path == "/resumen" && !isCoach {
+            webPathOverride = nil
+            nativeProgressEnabled = true
+            return
+        }
+        webPathOverride = path
+        nativeProgressEnabled = false
+        browser.currentPath = path
+        let request = URLRequest(url: origin.appendingPathComponent(String(path.dropFirst())))
+        browser.lastRequest = request
+        browser.webView?.load(request)
     }
 
     private func connectStrava() {
@@ -107,46 +271,6 @@ struct ProductView: View {
         }
     }
 
-    private func tab(_ title: String, path: String) -> some View {
-        Button {
-            browser.webView?.load(URLRequest(url: origin.appendingPathComponent(String(path.dropFirst()))))
-        } label: {
-            Text(title)
-                .font(.subheadline.weight(.medium))
-                .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
-        }
-        .foregroundStyle(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua : Color.white.opacity(0.62))
-        .background(browser.currentPath.hasPrefix(path) ? Color.triWaveXAqua.opacity(0.12) : .clear, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.controlRadius, style: .continuous))
-        .buttonStyle(TriWaveXSelectionButtonStyle())
-        .accessibilityLabel(title)
-        .accessibilityValue(browser.currentPath.hasPrefix(path) ? "Seleccionado" : "")
-        .accessibilityAddTraits(browser.currentPath.hasPrefix(path) ? .isSelected : [])
-        .accessibilityHint("Doble toque para abrir")
-    }
-
-    private var nativeTabBar: some View {
-        HStack(spacing: 4) {
-            let coach = initialPath == "/coach/dashboard"
-            tab("Entreno", path: coach ? "/coach/dashboard" : "/dashboard")
-            if !coach {
-                tab("Progreso", path: "/resumen")
-            }
-            tab("Chat", path: coach ? "/coach/chat" : "/chat")
-            tab("Perfil", path: "/settings")
-        }
-        .padding(.horizontal, 16)
-        .padding(.top, 4)
-        .padding(.bottom, 3)
-        .background(Color.triWaveXSurface.opacity(0.96))
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(.white.opacity(0.08))
-                .frame(height: 1)
-        }
-        .accessibilityElement(children: .contain)
-        .accessibilityLabel("Navegación principal")
-    }
-
 }
 
 private struct TriWaveXLaunchScreen: View {
@@ -156,17 +280,31 @@ private struct TriWaveXLaunchScreen: View {
         ZStack {
             Color.triWaveXInk.ignoresSafeArea()
 
-            VStack(spacing: 16) {
-                Text("TriWaveX")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(.white)
+            VStack(spacing: 20) {
+                VStack(spacing: 6) {
+                    Text("TriWaveX")
+                        .font(.system(.title2, design: .rounded).weight(.semibold))
+                        .foregroundStyle(Color.triWaveXTextPrimary)
+                    Text("Preparando tu espacio de entrenamiento")
+                        .font(.footnote)
+                        .foregroundStyle(Color.triWaveXTextSecondary)
+                        .multilineTextAlignment(.center)
+                }
+
                 TriWaveXLoadingBar()
-                    .frame(maxWidth: 180)
+                    .frame(maxWidth: 220)
             }
-            .multilineTextAlignment(.center)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 24)
+            .frame(maxWidth: 340)
+            .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous)
+                    .stroke(Color.triWaveXBorder, lineWidth: 1)
+            }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Cargando TriWaveX")
+        .accessibilityLabel("Cargando TriWaveX. Preparando tu espacio de entrenamiento")
     }
 }
 
@@ -178,22 +316,24 @@ private struct TriWaveXErrorState: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("No se pudo cargar")
                 .font(.title3.weight(.semibold))
-                .foregroundStyle(.white)
+                .foregroundStyle(Color.triWaveXTextPrimary)
             Text(message)
                 .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.68))
+                .foregroundStyle(Color.triWaveXTextSecondary)
+                .fixedSize(horizontal: false, vertical: true)
             Button("Reintentar", action: retry)
                 .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
                 .padding(.top, 4)
         }
         .padding(24)
-        .frame(maxWidth: 340)
+        .frame(maxWidth: 360)
         .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: TriWaveXMetrics.cardRadius, style: .continuous)
-                .stroke(.white.opacity(0.08), lineWidth: 1)
+                .stroke(Color.triWaveXBorder, lineWidth: 1)
         }
         .padding(24)
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -255,6 +395,7 @@ struct ProductWebView: UIViewRepresentable {
     let origin: URL
     let store: WKWebsiteDataStore
     let initialPath: String
+    let isActive: Bool
     let onStravaConnect: () -> Void
 
     func makeCoordinator() -> Coordinator { Coordinator(model: model, origin: origin, onStravaConnect: onStravaConnect) }
@@ -278,13 +419,23 @@ struct ProductWebView: UIViewRepresentable {
         view.scrollView.backgroundColor = .systemBackground
         model.webView = view
         model.currentPath = initialPath
+        if isActive {
+            loadInitialRequest(in: view)
+        }
+        return view
+    }
+
+    func updateUIView(_ uiView: WKWebView, context: Context) {
+        guard isActive, uiView.url == nil, model.lastRequest == nil else { return }
+        loadInitialRequest(in: uiView)
+    }
+
+    private func loadInitialRequest(in webView: WKWebView) {
         let url = URL(string: initialPath, relativeTo: origin)?.absoluteURL ?? origin
         let request = URLRequest(url: url)
         model.lastRequest = request
-        view.load(request)
-        return view
+        webView.load(request)
     }
-    func updateUIView(_ uiView: WKWebView, context: Context) {}
 
     final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
         let model: BrowserModel

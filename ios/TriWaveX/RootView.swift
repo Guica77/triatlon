@@ -162,26 +162,31 @@ struct RootView: View {
                 .opacity(session.busy ? 0.7 : 1)
                 .animation(TriWaveXMotion.stateChange(reduced: reduceMotion), value: session.busy)
 
-                Section("Ayuda") {
-                    Link(destination: session.origin.appendingPathComponent("forgot-password")) {
-                        Label("Recuperar contraseña", systemImage: "lock.rotation.open")
-                    }
-                    .buttonStyle(.plain)
+                Section {
+                    VStack(spacing: 4) {
+                        Link(destination: session.origin.appendingPathComponent("forgot-password")) {
+                            Text("Recuperar contraseña")
+                                .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+                        }
 
-                    Button {
-                        informationURL = session.origin.appendingPathComponent("privacidad")
-                    } label: {
-                        Label("Privacidad", systemImage: "hand.raised")
-                    }
-                    .buttonStyle(.plain)
+                        HStack {
+                            Button("Privacidad") {
+                                informationURL = session.origin.appendingPathComponent("privacidad")
+                            }
 
-                    Button {
-                        informationURL = session.origin.appendingPathComponent("soporte")
-                    } label: {
-                        Label("Soporte", systemImage: "questionmark.circle")
+                            Spacer()
+
+                            Button("Soporte") {
+                                informationURL = session.origin.appendingPathComponent("soporte")
+                            }
+                        }
+                        .frame(minHeight: TriWaveXMetrics.minimumTouchTarget)
                     }
-                    .buttonStyle(.plain)
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tint)
                 }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             }
             .formStyle(.grouped)
             .scrollContentBackground(.visible)

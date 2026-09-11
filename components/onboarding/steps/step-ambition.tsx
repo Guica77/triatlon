@@ -117,7 +117,7 @@ export function StepAmbition(props: StepAmbitionProps) {
                 className="w-full bg-surface-hover border border-border-default rounded-xl px-4 py-3 text-sm text-text-primary placeholder-text-muted focus:bg-surface-card focus:border-swim focus:ring-1 focus:ring-swim outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim/50  min-h-[80px]" 
               />
             </div>
-            <p className="text-[10px] text-text-muted mt-2">Si no conoces tus zonas, déjalo en blanco y la IA las estimará según tu experiencia.</p>
+            <p className="text-[10px] text-text-muted mt-2">Si no conoces tus zonas, déjalo en blanco y las estimaremos según tu experiencia.</p>
           </div>
 
 

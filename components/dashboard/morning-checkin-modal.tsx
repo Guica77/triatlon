@@ -123,10 +123,10 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-md p-6 bg-surface-card sm:rounded-xl border border-border-default shadow-elevated">
+      <DialogContent className="max-w-md p-6 bg-surface-card sm:rounded-2xl border border-border-default shadow-elevated">
         <DialogHeader className="mb-4">
-          <div className="w-12 h-12 rounded-xl bg-coral-500/15 flex items-center justify-center mb-3 mx-auto">
-            <Sun className="w-6 h-6 text-coral-500" />
+          <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-3 mx-auto">
+            <Sun className="w-6 h-6 text-accent" />
           </div>
           <DialogTitle className="text-xl font-bold text-center text-text-primary tracking-tight">
             Buenos días
@@ -138,7 +138,7 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
           {/* Streak badge */}
           {currentStreak > 0 && (
             <div className="flex justify-center mt-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-coral-500/10 border border-coral-500/20 text-coral-500 text-xs font-bold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-semibold">
                 <Flame className="w-3.5 h-3.5" />
                 {currentStreak} {currentStreak === 1 ? 'día' : 'días'} seguidos
               </span>
@@ -158,7 +158,7 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
                 <span className="text-sm font-bold text-text-primary">{getFatigueLabel(fatigue)}</span>
               </div>
               <input type="range" min="1" max="5" value={fatigue} onChange={e => setFatigue(Number(e.target.value))}
-                className="min-h-10 w-full accent-coral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50" aria-label="Nivel de fatiga muscular" />
+                className="min-h-10 w-full accent-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50" aria-label="Nivel de fatiga muscular" />
               <div className="flex justify-between mt-1.5 text-[9px] font-medium text-text-muted">
                 <span>Mucha Fatiga</span><span>Fresco</span>
               </div>
@@ -174,7 +174,7 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
                 <span className="text-sm font-bold text-text-primary">{getStressLabel(stress)}</span>
               </div>
               <input type="range" min="1" max="5" value={stress} onChange={e => setStress(Number(e.target.value))}
-                className="min-h-10 w-full accent-coral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50" aria-label="Nivel de estrés mental" />
+                className="min-h-10 w-full accent-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50" aria-label="Nivel de estrés mental" />
               <div className="flex justify-between mt-1.5 text-[9px] font-medium text-text-muted">
                 <span>Estresado</span><span>Tranquilo</span>
               </div>
@@ -189,18 +189,18 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
                     <span className="text-sm font-bold text-text-primary">{sleepHours}h</span>
                   </div>
                   <input type="range" min="3" max="12" step="0.5" value={sleepHours} onChange={e => setSleepHours(Number(e.target.value))}
-                    className="min-h-10 w-full accent-coral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50" aria-label="Horas de sueño" />
+                    className="min-h-10 w-full accent-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50" aria-label="Horas de sueño" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-[10px] font-bold text-text-muted uppercase block mb-1">HRV (ms)</label>
                     <input type="number" value={hrv} onChange={e => setHrv(Number(e.target.value))}
-                      className="min-h-10 w-full p-2 text-sm font-bold text-text-primary bg-surface-card border border-border-default rounded-lg outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus:bg-surface-hover focus:border-coral-500/40 focus-visible:ring-2 focus-visible:ring-coral-500/50" />
+                      className="min-h-10 w-full p-2 text-sm font-semibold text-text-primary bg-surface-card border border-border-default rounded-xl outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus:bg-surface-hover focus:border-accent/40 focus-visible:ring-2 focus-visible:ring-accent/50" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-text-muted uppercase block mb-1">FC Reposo</label>
                     <input type="number" value={rhr} onChange={e => setRhr(Number(e.target.value))}
-                      className="min-h-10 w-full p-2 text-sm font-bold text-text-primary bg-surface-card border border-border-default rounded-lg outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus:bg-surface-hover focus:border-coral-500/40 focus-visible:ring-2 focus-visible:ring-coral-500/50" />
+                      className="min-h-10 w-full p-2 text-sm font-semibold text-text-primary bg-surface-card border border-border-default rounded-xl outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus:bg-surface-hover focus:border-accent/40 focus-visible:ring-2 focus-visible:ring-accent/50" />
                   </div>
                 </div>
               </div>
@@ -214,7 +214,7 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasGarminSync }: Morn
           </div>
 
           <button type="submit" disabled={loading}
-            className="w-full min-h-11 py-3 rounded-lg text-sm font-bold text-white bg-coral-500 fine-hover:bg-coral-600 shadow-button flex items-center justify-center gap-2 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral-500/50 disabled:opacity-50 disabled:active:scale-100">
+            className="w-full min-h-11 py-3 rounded-xl text-sm font-semibold text-white bg-accent fine-hover:bg-accent-subtle shadow-button flex items-center justify-center gap-2 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50 disabled:active:scale-100">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             Completar Check-in
           </button>

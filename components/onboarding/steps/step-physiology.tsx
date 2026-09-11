@@ -135,7 +135,7 @@ export function StepPhysiology(props: StepPhysiologyProps) {
       <ProCard className="space-y-6 bg-surface-card border border-border-default shadow-card">
         <div className="border-b border-border-default pb-4">
           <h2 className="text-xl font-bold text-text-primary flex items-center gap-2"><Activity className="w-5 h-5 text-swim" /> Calibración Fisiológica</h2>
-          <p className="text-sm text-text-secondary mt-1">Introduce tus zonas actuales. Si no las sabes, las estimaremos automáticamente por IA.</p>
+          <p className="text-sm text-text-secondary mt-1">Introduce tus zonas actuales. Si no las sabes, podremos estimarlas a partir de tu experiencia.</p>
         </div>
 
         <div className="space-y-4">
@@ -150,10 +150,10 @@ export function StepPhysiology(props: StepPhysiologyProps) {
               }`}
             >
               <div className="flex justify-between items-center w-full">
-                <span className="font-bold text-sm">IA Autónoma</span>
+                <span className="font-bold text-sm">Plan personalizado</span>
                 {!props.wantsCoach && <div className="h-2 w-2 rounded-full bg-swim" aria-hidden="true" />}
               </div>
-              <span className="text-[10px] opacity-80 font-semibold">Planificación 100% generada por IA</span>
+              <span className="text-[10px] opacity-80 font-semibold">Planificación adaptada a tus datos</span>
             </button>
             
             <button

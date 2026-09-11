@@ -397,7 +397,7 @@ export function DashboardViewTabs({
                 className="min-h-11 bg-accent/15 fine-hover:bg-accent/25 text-accent border border-accent/30 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 cursor-pointer shadow-card motion-reduce:transition-opacity motion-reduce:active:scale-100"
               >
                 <Bot className="w-4 h-4" />
-                <span className="hidden sm:inline">Generar Plan AI</span>
+                <span className="hidden sm:inline">Preparar plan</span>
               </AnimatedButton>
               <AnimatedButton
                 variant="primary"

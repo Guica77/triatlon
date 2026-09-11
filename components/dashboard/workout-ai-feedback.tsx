@@ -98,16 +98,16 @@ export function WorkoutAIFeedback({
             )}
           </div>
           <div>
-            <h3 className="text-sm font-bold text-text-primary">Ayuda IA</h3>
+            <h3 className="text-sm font-bold text-text-primary">Orientación del entrenamiento</h3>
             <p className="text-[10px] text-text-muted font-medium">
-              {aiAvailable ? 'Consejos con IA · tú decides' : 'Asistente disponible al conectar IA'}
+              {aiAvailable ? 'Recomendaciones para tu sesión' : 'Recomendaciones no disponibles'}
             </p>
           </div>
         </div>
 
         {!aiAvailable && (
           <span className="px-2 py-0.5 rounded-full bg-bg-hover border border-border-default text-[9px] text-text-muted font-bold uppercase tracking-wider">
-            Sin IA configurada
+            No disponible
           </span>
         )}
       </div>
@@ -213,12 +213,12 @@ export function WorkoutAIFeedback({
 }
 
 /**
- * Fallback rule-based analysis when AI is unavailable
+ * Fallback rule-based analysis when personalised guidance is unavailable.
  */
 function getFallbackAnalysis(): string {
   return `**Resumen Automático**
 
-No se pudo conectar con el asistente IA. Aquí tienes un análisis basado en reglas:
+No se pudo cargar la orientación. Aquí tienes un resumen basado en tu plan:
 
 • Consulta el estado de tu sesión en el plan para comprobar si está registrada.
 • **Consejo general:** Mantén la consistencia en tus entrenamientos de baja intensidad (Z1-Z2) para construir base aeróbica.

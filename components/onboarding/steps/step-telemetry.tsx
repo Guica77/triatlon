@@ -45,7 +45,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
             <Activity className="w-5 h-5 text-coral-500" aria-hidden="true" /> Conectar Reloj y Telemetría
           </h2>
           <p className="text-sm text-text-secondary mt-1">
-            Sincroniza tus entrenamientos reales automáticamente. La Inteligencia Artificial necesita leer tu pulso, ritmos y fatiga para ajustar tu periodización diaria.
+            Sincroniza tus entrenamientos reales automáticamente para ajustar tu periodización diaria con tus ritmos, pulso y fatiga.
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
               <li className="flex items-start gap-2.5">
                 <div className="w-5 h-5 rounded bg-surface-hover border border-border-default flex items-center justify-center text-xs font-bold text-text-secondary shrink-0 mt-0.5">1</div>
                 <p className="text-xs text-text-secondary leading-relaxed font-semibold">
-                  <strong className="text-text-primary font-bold">IA Dinámica:</strong> Cada día la Inteligencia Artificial analiza tus métricas y genera tus entrenamientos (series, ritmos, potencias) a medida en el Dashboard.
+                  <strong className="text-text-primary font-bold">Plan dinámico:</strong> Cada día tus métricas actualizan los entrenamientos, series, ritmos y potencias que ves en el panel.
                 </p>
               </li>
               <li className="flex items-start gap-2.5">
@@ -76,7 +76,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
               <li className="flex items-start gap-2.5">
                 <div className="w-5 h-5 rounded bg-surface-hover border border-border-default flex items-center justify-center text-xs font-bold text-text-secondary shrink-0 mt-0.5">4</div>
                 <p className="text-xs text-text-secondary leading-relaxed font-semibold">
-                  <strong className="text-text-primary font-bold">Sincronización Mágica:</strong> Cuando terminas de sudar, tu reloj sube la actividad a Strava. Nuestra IA la lee al instante, la vincula con tu sesión planificada y recalcula tu fatiga y progreso diario.
+                  <strong className="text-text-primary font-bold">Sincronización automática:</strong> Cuando terminas, tu reloj sube la actividad a Strava, se vincula con tu sesión planificada y actualiza tu fatiga y progreso diario.
                 </p>
               </li>
             </ul>

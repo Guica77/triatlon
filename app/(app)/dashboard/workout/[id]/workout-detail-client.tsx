@@ -433,22 +433,22 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
               workout.adjustment_reason === 'lesion' ? (
                 <span className="px-2 py-0.5 rounded bg-danger/40 border border-danger/30 text-danger text-[9px] font-bold flex items-center gap-1">
                   <AlertTriangle className="w-2.5 h-2.5 text-danger" />
-                  <span>IA: Prevención de Lesión</span>
+                  <span>Prevención de lesión</span>
                 </span>
               ) : workout.adjustment_reason === 'adherencia' ? (
                 <span className="px-2 py-0.5 rounded bg-swim/40 border border-swim/30 text-swim text-[9px] font-bold flex items-center gap-1">
                   <ShieldCheck className="w-2.5 h-2.5 text-swim" />
-                  <span>IA: Ajuste de Carga</span>
+                  <span>Ajuste de carga</span>
                 </span>
               ) : workout.adjustment_reason === 'recuperacion' ? (
                 <span className="px-2 py-0.5 rounded bg-bike/40 border border-bike/30 text-bike text-[9px] font-bold flex items-center gap-1">
                   <ShieldCheck className="w-2.5 h-2.5 text-bike" />
-                  <span>IA: Recuperación</span>
+                  <span>Ajuste de recuperación</span>
                 </span>
               ) : (
                 <span className="px-2 py-0.5 rounded bg-warning/40 border border-warning/30 text-warning text-[9px] font-bold flex items-center gap-1">
                   <Flame className="w-2.5 h-2.5 text-warning" />
-                  <span>IA: Ajuste por Fatiga</span>
+                  <span>Ajuste por fatiga</span>
                 </span>
               )
             )}
@@ -478,7 +478,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
           </div>
         </div>
 
-        {/* Panel de Inteligencia Artificial: felicitación honesta + propuesta de reajuste */}
+        {/* Resumen de la sesión y propuesta de reajuste. */}
         {(workout.ai_feedback || workout.refocus_proposal) && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
@@ -488,7 +488,7 @@ export function WorkoutDetailClient({ workout, structured, profile }: WorkoutDet
               <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl pointer-events-none bg-coral-500/5" />
               <div className="flex items-center gap-2 border-b border-border-subtle pb-2">
                 <Sparkles className="w-4 h-4 text-coral-500" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-text-primary">Análisis de la IA</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-text-primary">Resumen de la sesión</h3>
               </div>
 
               {workout.ai_feedback && (

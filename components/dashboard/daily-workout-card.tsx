@@ -576,17 +576,17 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               workout.adjustment_reason === 'lesion' ? (
                 <span className="px-2 py-0.5 rounded-full bg-danger/10 border border-danger/20 text-danger text-[10px] font-bold flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3 text-danger" />
-                  <span>IA: Prevención de Lesión</span>
+                  <span>Prevención de lesión</span>
                 </span>
               ) : workout.adjustment_reason === 'adherencia' ? (
                 <span className="px-2 py-0.5 rounded-full bg-swim/10 border border-swim/20 text-swim text-[10px] font-bold flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3 text-swim" />
-                  <span>IA: Ajuste de Carga</span>
+                  <span>Ajuste de carga</span>
                 </span>
               ) : (
                 <span className="px-2 py-0.5 rounded-full bg-warning/10 border border-warning/20 text-warning text-[10px] font-bold flex items-center gap-1">
                   <Flame className="w-3 h-3 text-warning" />
-                  <span>IA: Ajuste por Fatiga</span>
+                  <span>Ajuste por fatiga</span>
                 </span>
               )
             )}
@@ -1495,7 +1495,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                       className="p-3 rounded-xl bg-warning/10 border border-warning/20 text-warning text-xs font-semibold flex items-center gap-2"
                     >
                       <Sparkles className="w-4 h-4 text-warning shrink-0" />
-                      <span>¡Actividad importada de Strava! Valora tus sensaciones para que la IA adapte tu plan.</span>
+                      <span>¡Actividad importada de Strava! Valora tus sensaciones para mantener tu plan al día.</span>
                     </motion.div>
                   )}
 

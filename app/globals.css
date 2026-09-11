@@ -7,9 +7,9 @@
   /* ── Typography ──
      Inter = body/UI · Barlow Condensed = display/timing-board
      JetBrains Mono = data readouts (TSS, HR, splits, timestamps) */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+  --font-mono: "SF Mono", SFMono-Regular, Menlo, monospace;
 
   /* ── TriWaveX palette — lime action, aqua signal, coral state ── */
   --color-lime-50: #F7FFE9;
@@ -39,10 +39,10 @@
   --color-coral-900: #512923;
 
   /* ── Background hierarchy — carbon-blue canvas ── */
-  --color-bg-deep: #0B1117;
-  --color-bg-elevated: #111A21;
-  --color-bg-card: #17242B;
-  --color-bg-hover: #20303A;
+  --color-bg-deep: #F2F2F7;
+  --color-bg-elevated: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-hover: #E5E5EA;
   --color-bg-app: var(--color-bg-deep);
 
   /* ── Surface variants ── */
@@ -52,15 +52,15 @@
   --color-surface-hover: var(--color-bg-hover);
 
   /* ── Text hierarchy (cool gray, blue-tinted) ── */
-  --color-text-primary: #F4F7F7;
-  --color-text-secondary: #C0CDD0;
-  --color-text-muted: #94A3A8;
-  --color-text-inverse: #0B1117;
+  --color-text-primary: #000000;
+  --color-text-secondary: #3C3C43;
+  --color-text-muted: #6C6C70;
+  --color-text-inverse: #FFFFFF;
 
   /* ── Border ── */
-  --color-border-default: #2A3942;
-  --color-border-subtle: #1D2A32;
-  --color-border-card: #2A3942;
+  --color-border-default: rgba(60, 60, 67, 0.18);
+  --color-border-subtle: rgba(60, 60, 67, 0.12);
+  --color-border-card: rgba(60, 60, 67, 0.18);
 
   /* ── Discipline palette — the structural identity (swim / bike / run) ── */
   --color-swim: var(--color-aqua-500);
@@ -71,18 +71,18 @@
   --color-run-subtle: #4A2826;
 
   /* ── Semantic ── */
-  --color-accent: var(--color-lime-500);
-  --color-accent-subtle: var(--color-lime-700);
-  --color-success: var(--color-lime-500);
-  --color-warning: #F3C969;
-  --color-danger: var(--color-coral-500);
-  --color-info: var(--color-swim);
+  --color-accent: #007AFF;
+  --color-accent-subtle: #0066CC;
+  --color-success: #34C759;
+  --color-warning: #FF9500;
+  --color-danger: #FF3B30;
+  --color-info: #007AFF;
 
   /* ── Shadows (flat, hairline — no glow) ── */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-card-hover: 0 2px 10px rgba(0, 0, 0, 0.4);
-  --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.45);
-  --shadow-button: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 4px 14px rgba(0, 0, 0, 0.10);
+  --shadow-elevated: 0 12px 36px rgba(0, 0, 0, 0.16);
+  --shadow-button: 0 1px 2px rgba(0, 0, 0, 0.12);
 
   /* ── Motion vocabulary ── */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -105,7 +105,7 @@
   --color-popover: var(--color-bg-elevated);
   --color-popover-foreground: var(--color-text-primary);
   --color-primary: var(--color-accent);
-  --color-primary-foreground: #0B1117;
+  --color-primary-foreground: #FFFFFF;
   --color-secondary: var(--color-bg-hover);
   --color-secondary-foreground: var(--color-text-primary);
   --color-muted: var(--color-bg-hover);
@@ -135,7 +135,7 @@
   body {
     background-color: var(--color-bg-deep);
     color: var(--color-text-primary);
-    color-scheme: dark;
+    color-scheme: light;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -149,7 +149,7 @@
 
   ::selection {
     background-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
-    color: #FFFFFF;
+    color: #000000;
   }
 
   *:focus-visible {
@@ -177,7 +177,7 @@
   }
 
   button:not([data-variant="ghost"]):not([data-variant="link"]):not([class*="bg-transparent"]) {
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   }
 
   ::-webkit-scrollbar { width: 6px; height: 6px; }

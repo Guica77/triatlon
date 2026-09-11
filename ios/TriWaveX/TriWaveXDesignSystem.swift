@@ -22,7 +22,7 @@ private enum TriWaveXPalette {
 }
 
 enum TriWaveXMotion {
-    static let stateChange = Animation.easeInOut(duration: 0.2)
+    static let stateChange = Animation.easeOut(duration: 0.2)
     static let selection = Animation.easeInOut(duration: 0.16)
     static let press = Animation.easeOut(duration: 0.14)
 

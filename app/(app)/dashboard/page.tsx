@@ -1,6 +1,5 @@
 import { WelcomeReady } from '@/components/brand/authenticated-welcome'
 import * as React from 'react';
-import { isAIAvailable } from '@/lib/ai-service';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
@@ -12,7 +11,7 @@ import { getDailyBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
 import { getDailyNutrition } from '@/app/(app)/dashboard/nutrition-actions';
 import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actions';
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
-import { Activity, BookOpen, ChevronRight, Megaphone, Award, Sparkles } from 'lucide-react';
+import { Activity, BookOpen, ChevronRight, Megaphone, Award } from 'lucide-react';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
@@ -251,13 +250,6 @@ export default async function DashboardPage() {
             {now.getHours() < 12 ? 'Buenos días' : now.getHours() < 19 ? 'Buenas tardes' : 'Buenas noches'}, {profile.first_name || 'triatleta'}
           </h1>
           <p className="mt-1 text-sm text-text-secondary">Tu estado y la prioridad de hoy, en un solo vistazo.</p>
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold text-accent">
-              <Sparkles className="h-3.5 w-3.5" />
-              Ayuda IA para entrenar con claridad
-            </span>
-            <span className="text-[10px] font-medium text-text-muted">Consejos contextuales · tú decides</span>
-          </div>
         </div>
 
         <div className="mb-8 grid items-start gap-4 lg:grid-cols-[.9fr_1.1fr]">
@@ -376,9 +368,8 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {/* Coach IA */}
             <WorkoutAIFeedback
-              aiConfigured={isAIAvailable()}
+              aiConfigured
               todayWorkout={todayWorkout ?? null}
               hrv={biometrics?.hrv}
               readiness={biometrics?.readiness_score}
