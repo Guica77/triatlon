@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, Edit2, X, Zap, Waves, Footprints, Clock } from 'lucide-react';
+import { X } from 'lucide-react';
 import { updatePhysiologicalData } from '@/app/(app)/settings/actions';
 import { AnimatedButton } from '@/components/ui/animated-button';
 
@@ -40,62 +40,30 @@ export function PhysiologicalCard({ ftp, swimPace, runPace, baselineHours, previ
   };
 
   return (
-    <div className="p-6 rounded-2xl bg-surface-card border border-border-default shadow-card relative h-full flex flex-col group">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-bike/10 border border-bike/20 flex items-center justify-center ">
-            <Activity className="w-4 h-4 text-bike" />
-          </div>
-          <h3 className="text-sm sm:text-base font-bold text-text-primary tracking-tight leading-tight">Fisiología y Zonas</h3>
-        </div>
+    <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card relative h-full">
+      <div className="flex items-center justify-between px-5 py-4">
+        <h3 className="text-base font-semibold tracking-tight text-text-primary">Fisiología y zonas</h3>
         <button 
           onClick={() => setIsEditing(true)}
           title="Editar métricas"
           aria-label="Editar métricas"
-          className="w-8 h-8 rounded-full bg-surface-hover border border-border-default flex items-center justify-center text-text-secondary hover:text-swim hover:border-swim hover:bg-swim/10 transition-colors cursor-pointer"
+          className="flex min-h-11 items-center gap-1 text-sm font-medium text-accent transition-colors hover:text-accent/80"
         >
-          <Edit2 className="w-3.5 h-3.5" />
+          Editar
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 flex-1 mb-4">
-        <div className="p-4 rounded-xl bg-surface-hover border border-border-subtle/80 flex flex-col justify-center ">
-          <div className="flex items-center gap-1.5 text-text-muted mb-1">
-            <Zap className="w-3.5 h-3.5 text-warning" />
-            <span className="text-[10px] uppercase tracking-widest font-black">FTP Bici</span>
-          </div>
-          <p className="text-xl font-black text-text-primary">{ftp ? `${ftp} W` : '---'}</p>
-        </div>
-        <div className="p-4 rounded-xl bg-surface-hover border border-border-subtle/80 flex flex-col justify-center ">
-          <div className="flex items-center gap-1.5 text-text-muted mb-1">
-            <Waves className="w-3.5 h-3.5 text-swim" />
-            <span className="text-[10px] uppercase tracking-widest font-black">Ritmo Nado</span>
-          </div>
-          <p className="text-xl font-black text-text-primary">{swimPace ? `${swimPace}` : '---'}</p>
-          <p className="text-[9px] text-text-secondary mt-0.5">/ 100m</p>
-        </div>
-        <div className="p-4 rounded-xl bg-surface-hover border border-border-subtle/80 flex flex-col justify-center ">
-          <div className="flex items-center gap-1.5 text-text-muted mb-1">
-            <Footprints className="w-3.5 h-3.5 text-run" />
-            <span className="text-[10px] uppercase tracking-widest font-black">Ritmo Carrera</span>
-          </div>
-          <p className="text-xl font-black text-text-primary">{runPace ? `${runPace}` : '---'}</p>
-          <p className="text-[9px] text-text-secondary mt-0.5">/ km</p>
-        </div>
-        <div className="p-4 rounded-xl bg-surface-hover border border-border-subtle/80 flex flex-col justify-center ">
-          <div className="flex items-center gap-1.5 text-text-muted mb-1">
-            <Clock className="w-3.5 h-3.5 text-purple-500" />
-            <span className="text-[10px] uppercase tracking-widest font-black">Horas Base</span>
-          </div>
-          <p className="text-xl font-black text-text-primary">{baselineHours || '---'}</p>
-          <p className="text-[9px] text-text-secondary mt-0.5">/ semana</p>
-        </div>
+      <div className="divide-y divide-border-subtle border-t border-border-subtle">
+        <div className="flex items-center justify-between gap-4 px-5 py-3"><span className="text-sm text-text-secondary">FTP bici</span><span className="text-sm font-medium text-text-primary">{ftp ? `${ftp} W` : '—'}</span></div>
+        <div className="flex items-center justify-between gap-4 px-5 py-3"><span className="text-sm text-text-secondary">Ritmo nado</span><span className="text-sm font-medium text-text-primary">{swimPace ? `${swimPace} /100 m` : '—'}</span></div>
+        <div className="flex items-center justify-between gap-4 px-5 py-3"><span className="text-sm text-text-secondary">Ritmo carrera</span><span className="text-sm font-medium text-text-primary">{runPace ? `${runPace} /km` : '—'}</span></div>
+        <div className="flex items-center justify-between gap-4 px-5 py-3"><span className="text-sm text-text-secondary">Horas base</span><span className="text-sm font-medium text-text-primary">{baselineHours ? `${baselineHours} / semana` : '—'}</span></div>
       </div>
 
       {previousInjuries && (
-        <div className="mt-2 p-3 bg-danger/10 border border-danger/20 rounded-xl">
-          <p className="text-[10px] font-bold text-danger uppercase tracking-widest mb-1">Lesiones / Patologías Previas</p>
-          <p className="text-xs text-danger">{previousInjuries}</p>
+        <div className="border-t border-border-subtle px-5 py-3">
+          <p className="text-xs font-medium text-danger">Lesiones / patologías previas</p>
+          <p className="mt-1 text-sm text-text-secondary">{previousInjuries}</p>
         </div>
       )}
 
