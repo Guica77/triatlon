@@ -43,6 +43,19 @@ La recomendación solo se calcula cuando están presentes todas las entradas nec
 - Después de una lectura válida, `ProductView` transmite un resumen mínimo y validado a la sesión web existente mediante el mismo patrón de petición nativa que Strava. No expone cookies, tokens ni muestras completas a SwiftUI o JavaScript.
 - La actualización ocurre al autorizar, al entrar en la app y al pulsar “Actualizar ahora”. HealthKit no garantiza entrega en segundo plano; el diseño no promete sincronización instantánea si el usuario no abre la app.
 
+### Entrenamientos con pulso en directo
+
+La lectura histórica de Salud y la frecuencia en directo son flujos distintos. TriWaveX añadirá una única sesión nativa en directo con dos posibles fuentes:
+
+1. **Apple Watch**: un objetivo watchOS compañero inicia una `HKWorkoutSession` y usa `HKLiveWorkoutBuilder` para recibir la frecuencia cardiaca durante un entrenamiento activo. WatchConnectivity entrega las muestras al iPhone.
+2. **Pulsómetro Bluetooth**: un gestor CoreBluetooth en el iPhone busca el servicio estándar Heart Rate, se vincula al accesorio elegido y recibe las notificaciones de frecuencia cardiaca.
+
+La banda Bluetooth tiene prioridad sobre Apple Watch cuando ambas fuentes están disponibles, porque es la fuente elegida explícitamente para ese entrenamiento. La pantalla muestra una sola fuente activa, su estado de conexión y la lectura actual; nunca mezcla las dos curvas ni presenta dos valores de pulso.
+
+La vista de entrenamiento nativa muestra pulso actual, zona de pulso objetivo y el nombre de la fuente. Al salir de la zona se muestra una indicación visual discreta y accesible. Al terminar, se guarda un resumen de la sesión y sus muestras se asocian al entrenamiento; no se transmite una secuencia en directo al servidor para cada latido.
+
+Si el Apple Watch no está disponible o la banda pierde conexión, TriWaveX intenta el otro origen permitido y comunica el cambio. Si no hay otra fuente, mantiene el último valor claramente marcado como no actualizado y ofrece reconectar, sin inventar pulso.
+
 ### Backend y datos
 
 - Añadir `POST /api/native/health/sync`, limitado a llamadas con `X-TriWaveX-Native: 1`, mismo origen y sesión de atleta autenticada.
@@ -59,6 +72,7 @@ La recomendación solo se calcula cuando están presentes todas las entradas nec
 - Apple Watch no emparejado o sin muestras: Salud puede estar conectada pero la app muestra “Esperando datos recientes”.
 - Error de red tras leer el reloj: los datos siguen en el teléfono y la interfaz ofrece “Reintentar”; no borra la última sincronización válida.
 - Una respuesta o sesión no autorizada no escribe biometría ni crea una conexión.
+- Durante un entrenamiento, si ambas fuentes están disponibles, la banda Bluetooth conserva prioridad. Un cambio de fuente queda marcado en el resumen de la sesión.
 
 ## Verificación
 
@@ -67,3 +81,4 @@ La recomendación solo se calcula cuando están presentes todas las entradas nec
 - Pruebas de la pantalla de recuperación: sin Salud no hay números ni recomendación inventada; con resumen válido muestra la fuente y hora.
 - `swiftc -parse` para las fuentes iOS y una compilación de Xcode con la capacidad HealthKit.
 - Prueba manual en un iPhone físico con Apple Watch y datos de Salud. El simulador no valida datos de reloj.
+- Prueba manual con una banda Bluetooth compatible con el perfil estándar Heart Rate: conexión, pérdida de señal, reconexión y prioridad frente al Apple Watch.
