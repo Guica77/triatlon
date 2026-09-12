@@ -11,7 +11,6 @@ import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actio
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
 import { Activity, BookOpen, ChevronRight, Megaphone, Award, CalendarDays } from 'lucide-react';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
-import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs';
 import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
 import { ObjectiveConfigCard } from '@/components/dashboard/objective-config-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
@@ -23,7 +22,6 @@ import { evaluateBadges, getEarnedCount } from '@/lib/badges';
 import { TodayWorkoutHero } from '@/components/dashboard/today-workout-hero';
 import { RecoverySummary } from '@/components/dashboard/recovery-summary';
 import { ExpandableSection } from '@/components/dashboard/expandable-section';
-import { StartLine, type StartLane } from '@/components/dashboard/start-line';
 
 export const dynamic = 'force-dynamic'
 
@@ -131,38 +129,6 @@ export default async function DashboardPage() {
 
   const monStr = monday.toISOString().split('T')[0];
   const sunStr = sunday.toISOString().split('T')[0];
-
-  const weeklyWorkouts = workouts?.filter(w => w.scheduled_date >= monStr && w.scheduled_date <= sunStr) || [];
-
-  // Per-discipline stats for the Start Line. Brick sessions count on the bike lane.
-  const emptyLane = { minutes: 0, completedMinutes: 0, sessions: 0, completedSessions: 0 };
-  const startLaneInit: Record<StartLane['sport'], typeof emptyLane> = {
-    natacion: { ...emptyLane },
-    ciclismo: { ...emptyLane },
-    carrera: { ...emptyLane },
-  };
-  for (const w of weeklyWorkouts) {
-    const st = w.training_sessions?.sport_type;
-    const lane = st === 'brick' ? 'ciclismo' : st;
-    if (!(lane in startLaneInit)) continue;
-    const dur = w.training_sessions?.duration_min || 0;
-    const acc = startLaneInit[lane as StartLane['sport']];
-    acc.minutes += dur;
-    acc.sessions += 1;
-    if (w.status === 'completed') {
-      acc.completedMinutes += dur;
-      acc.completedSessions += 1;
-    }
-  }
-  const startLanes: StartLane[] = (['natacion', 'ciclismo', 'carrera'] as const).map((sport) => ({
-    sport,
-    ...startLaneInit[sport],
-  }));
-  const weekLabel = `Semana del ${monday.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}`;
-
-  const completedCount = weeklyWorkouts.filter(w => w.status === 'completed').length || 0;
-  const totalCount = weeklyWorkouts.filter(w => w.training_sessions?.sport_type !== 'descanso').length || 0;
-  const progressPercent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   // 4. Calcular días desde primer login para disparar feedback modal (NPS)
   const loginDate = new Date(profile.first_login_at || profile.created_at || new Date());
@@ -287,30 +253,16 @@ export default async function DashboardPage() {
           </section>
         </div>
 
-        {/* LA SEMANA — volumen por disciplina + calendario de planificación */}
+        {/* Planificación: el calendario vive en su propia pestaña. */}
         <section className="mb-8">
-          <div className="flex items-center justify-between gap-3 px-0.5 mb-3">
-            <h2 className="text-xs font-semibold text-text-muted">Tu semana</h2>
-            <Link
-              href="/resumen"
-              className="group flex items-center gap-1.5 text-xs font-bold text-text-secondary hover:text-text-primary transition-colors"
-            >
-              <Award className="w-3.5 h-3.5 text-accent" />
-              <span>Resumen semanal</span>
-              <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-          </div>
-          <div className="space-y-3">
-            <StartLine lanes={startLanes} weekLabel={weekLabel} />
-            <DashboardViewTabs
-              initialWorkouts={workouts || []}
-              isConnected={isConnected}
-              profile={profile}
-              initialBiometrics={biometrics}
-              initialBiometricsHistory={biometricsHistory}
-              initialAnalytics={analyticsData}
-            />
-          </div>
+          <Link href="/plan" className="group flex min-h-16 items-center gap-3 rounded-2xl border border-border-default bg-surface-card px-4 py-3 transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+            <CalendarDays className="h-5 w-5 text-accent" aria-hidden="true" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-primary">Ver plan de entrenamiento</p>
+              <p className="mt-0.5 text-xs text-text-secondary">Calendario, sesiones programadas y semana actual.</p>
+            </div>
+            <ChevronRight className="h-4 w-4 text-text-muted transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
         </section>
 
         {/* Secciones secundarias detrás del menú desplegable */}

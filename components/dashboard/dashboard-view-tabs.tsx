@@ -9,7 +9,7 @@ import { DailyFocusCard } from '@/components/dashboard/daily-focus-card';
 import { WeeklyNav } from '@/components/dashboard/weekly-nav';
 import { Card, CardContent } from '@/components/ui/card';
 import { AnimatedButton } from '@/components/ui/animated-button';
-import { Calendar, Plus, X, Flame, Sparkles, ChevronLeft, ChevronRight, Activity, Bot, Eye, ListFilter } from 'lucide-react';
+import { Calendar, Plus, X, Flame, Sparkles, ChevronLeft, ChevronRight, Activity, SlidersHorizontal, Eye, ListFilter } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { AIWorkoutGenerator, GeneratedWorkout } from './ai-workout-generator';
 import { BiometricsCard } from '@/components/dashboard/biometrics-card';
@@ -30,6 +30,7 @@ interface DashboardViewTabsProps {
   initialBiometricsHistory?: any[];
   initialNutrition?: any;
   initialAnalytics?: any;
+  variant?: 'dashboard' | 'plan';
 }
 
 const sportColors: Record<string, string> = {
@@ -49,7 +50,8 @@ export function DashboardViewTabs({
   initialBiometrics,
   initialBiometricsHistory,
   initialNutrition,
-  initialAnalytics
+  initialAnalytics,
+  variant = 'dashboard'
 }: DashboardViewTabsProps) {
   const [isMounted, setIsMounted] = React.useState(false);
   const reduceMotion = useReducedMotion();
@@ -330,7 +332,7 @@ export function DashboardViewTabs({
     <div className="space-y-6">
 
       {/* Sección Estado de Forma, Biometría y Nutrición Dinámica */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {variant === 'dashboard' && <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="h-full">
           <FormStatusWidget
             tsb={initialAnalytics?.currentTsb || 0}
@@ -351,7 +353,7 @@ export function DashboardViewTabs({
             />
           </div>
         )}
-      </section>
+      </section>}
 
       {/* Tabs and Quick Actions */}
       <Tabs value={activeTab} onValueChange={(v: string) => setActiveTab(v as 'semana' | 'mes')} className="w-full">
@@ -385,8 +387,8 @@ export function DashboardViewTabs({
                 }}
                 className="min-h-11 bg-accent/15 fine-hover:bg-accent/25 text-accent border border-accent/30 text-xs py-2 px-3 rounded-xl font-bold flex items-center gap-1.5 transition-[background-color,color,border-color,opacity,box-shadow,transform] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 cursor-pointer shadow-card motion-reduce:transition-opacity motion-reduce:active:scale-100"
               >
-                <Bot className="w-4 h-4" />
-                <span className="hidden sm:inline">Preparar plan</span>
+                <SlidersHorizontal className="w-4 h-4" />
+                <span className="hidden sm:inline">Ajustar plan</span>
               </AnimatedButton>
               <AnimatedButton
                 variant="primary"
@@ -511,7 +513,7 @@ export function DashboardViewTabs({
             {!readOnly && (
               <div className="pt-6 border-t border-border-default/60 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <Bot className="w-4 h-4 text-accent" />
+                  <SlidersHorizontal className="w-4 h-4 text-accent" />
                   <p className="text-xs text-text-secondary font-medium">¿Necesitas ajustar la semana?</p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">

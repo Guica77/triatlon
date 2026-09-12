@@ -8,6 +8,7 @@ import UIKit
 struct ProductView: View {
     private enum AppTab: Hashable {
         case training
+        case plan
         case progress
         case chat
         case profile
@@ -43,6 +44,7 @@ struct ProductView: View {
     }
 
     private static func tab(for path: String, isCoach: Bool) -> AppTab {
+        if path == "/plan" && !isCoach { return .plan }
         if path == "/resumen" && !isCoach { return .progress }
         if path.hasPrefix("/chat") || path.hasPrefix("/coach/chat") { return .chat }
         if path == "/settings" { return .profile }
@@ -53,6 +55,8 @@ struct ProductView: View {
         switch tab {
         case .training:
             return isCoach ? "/coach/dashboard" : "/dashboard"
+        case .plan:
+            return "/plan"
         case .progress:
             return "/resumen"
         case .chat:
@@ -68,10 +72,15 @@ struct ProductView: View {
                 TabView(selection: $selectedTab) {
                     Color.clear
                         .accessibilityHidden(true)
-                        .tabItem { Label("Entreno", systemImage: "figure.run") }
+                        .tabItem { Label("Hoy", systemImage: "house") }
                         .tag(AppTab.training)
 
                     if !isCoach {
+                        Color.clear
+                            .accessibilityHidden(true)
+                            .tabItem { Label("Plan", systemImage: "calendar") }
+                            .tag(AppTab.plan)
+
                         Color.clear
                             .accessibilityHidden(true)
                             .tabItem { Label("Progreso", systemImage: "chart.bar.xaxis") }
@@ -152,14 +161,15 @@ struct ProductView: View {
     }
 
     private func isMainNavigationPath(_ path: String) -> Bool {
-        ["/dashboard", "/resumen", "/chat", "/settings", "/coach/dashboard", "/coach/chat"]
+        ["/dashboard", "/plan", "/resumen", "/chat", "/settings", "/coach/dashboard", "/coach/chat"]
             .contains { path.hasPrefix($0) }
     }
 
     private var nativeTabBar: some View {
         HStack(spacing: 0) {
-            tabButton(.training, title: "Entreno", systemImage: "figure.run")
+            tabButton(.training, title: "Hoy", systemImage: "house")
             if !isCoach {
+                tabButton(.plan, title: "Plan", systemImage: "calendar")
                 tabButton(.progress, title: "Progreso", systemImage: "chart.bar.xaxis")
             }
             tabButton(.chat, title: "Chat", systemImage: "bubble.left.and.bubble.right")
@@ -449,7 +459,7 @@ struct ProductWebView: UIViewRepresentable {
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             model.loading = false; model.hasCompletedInitialLoad = true; model.canGoBack = webView.canGoBack
             model.currentPath = webView.url?.path ?? model.currentPath
-            model.showsAppNavigation = ["/dashboard", "/resumen", "/chat", "/settings", "/coach/dashboard", "/coach/chat"].contains { model.currentPath.hasPrefix($0) }
+            model.showsAppNavigation = ["/dashboard", "/plan", "/resumen", "/chat", "/settings", "/coach/dashboard", "/coach/chat"].contains { model.currentPath.hasPrefix($0) }
         }
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) { failed(error) }
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) { failed(error) }

@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, BarChart2, MessageSquare, Settings, Trophy, Dumbbell, UserRound } from 'lucide-react';
+import { Home, BarChart2, MessageSquare, Settings, Trophy, Dumbbell, UserRound, CalendarDays } from 'lucide-react';
 import { athleteArea, matchesRoute } from '@/lib/athlete-navigation';
 import { useNotifications } from '@/components/providers/notification-provider';
 
@@ -55,7 +55,8 @@ export function MobileBottomNav() {
     { href: '/coach/chat', label: 'Mensajes', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Ajustes', icon: Settings },
   ] : [
-    { href: '/dashboard', label: 'Entreno', icon: Dumbbell },
+    { href: '/dashboard', label: 'Hoy', icon: Home },
+    { href: '/plan', label: 'Plan', icon: CalendarDays },
     { href: '/resumen', label: 'Progreso', icon: BarChart2 },
     { href: '/chat', label: 'Chat', icon: MessageSquare, showBadge: true },
     { href: '/settings', label: 'Perfil', icon: UserRound },
