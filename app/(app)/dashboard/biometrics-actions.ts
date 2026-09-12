@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { fetchGarminData } from '@/lib/telemetry/garmin-sync'
+import { hasCompleteReadinessInputs } from '@/lib/biometrics'
 
 export interface DailyBiometrics {
   id?: string
@@ -119,12 +120,27 @@ export async function updateBiometrics(formData: Partial<DailyBiometrics>): Prom
   const today = new Date().toISOString().split('T')[0]
 
   try {
-    const hrv = formData.hrv ?? 65
-    const rhr = formData.rhr ?? 52
-    const sleep_hours = formData.sleep_hours ?? 7.5
-    const weight = formData.weight ?? 72.0
-    const fatigue_rating = formData.fatigue_rating ?? 2
-    const stress_level = formData.stress_level ?? 2
+    const { data: existing } = await supabase
+      .from('user_biometrics')
+      .select('hrv, rhr, sleep_hours, weight, fatigue_rating, stress_level')
+      .eq('user_id', user.id)
+      .eq('date', today)
+      .maybeSingle()
+
+    const biometrics = {
+      hrv: formData.hrv ?? existing?.hrv ?? null,
+      rhr: formData.rhr ?? existing?.rhr ?? null,
+      sleep_hours: formData.sleep_hours ?? existing?.sleep_hours ?? null,
+      fatigue_rating: formData.fatigue_rating ?? existing?.fatigue_rating ?? null,
+      stress_level: formData.stress_level ?? existing?.stress_level ?? null,
+    }
+
+    if (!hasCompleteReadinessInputs(biometrics)) {
+      return { error: 'Completa sueño, HRV, frecuencia en reposo, fatiga y estrés para calcular tu recuperación.' }
+    }
+
+    const { hrv, rhr, sleep_hours, fatigue_rating, stress_level } = biometrics
+    const weight = formData.weight ?? existing?.weight ?? null
     const nutrition_adherence = formData.nutrition_adherence ?? null
 
     const { data: calc } = await calculateReadiness(hrv, rhr, sleep_hours, fatigue_rating, stress_level)
@@ -191,4 +207,3 @@ export async function updateInjuryHistory(injuries: string[]): Promise<{ success
     return { error: err.message || 'Error interno' }
   }
 }
-

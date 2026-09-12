@@ -111,6 +111,7 @@ export default async function DashboardPage() {
 
   const biometrics = biometricsRes.data || null;
   const biometricsHistory = biometricsRes.history || [];
+  const hasDeviceBiometrics = Boolean(biometrics?.raw_garmin_data && Object.keys(biometrics.raw_garmin_data).length > 0)
 
   const devices = devicesRes.data;
   const isConnected = Boolean(profile.garmin_connected || profile.strava_connected || (devices && devices.length > 0));
@@ -203,7 +204,7 @@ export default async function DashboardPage() {
       {activeFeedbackDays !== null && (
         <AppFeedbackModal daysUsed={activeFeedbackDays} />
       )}
-      <MorningCheckInModal hasCompletedCheckIn={hasCompletedCheckIn} hasGarminSync={isConnected} />
+      <MorningCheckInModal hasCompletedCheckIn={hasCompletedCheckIn} hasDeviceBiometrics={hasDeviceBiometrics} />
 
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pb-8 lg:px-8">
 
