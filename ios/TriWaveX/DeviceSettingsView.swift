@@ -7,6 +7,7 @@ final class TrainingLocationService: NSObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
     private(set) var status: CLAuthorizationStatus = .notDetermined
     private(set) var hasLocation = false
+    private(set) var location: CLLocation?
 
     override init() {
         super.init()
@@ -14,11 +15,17 @@ final class TrainingLocationService: NSObject, CLLocationManagerDelegate {
         status = manager.authorizationStatus
     }
 
-    func requestAccess() { manager.requestWhenInUseAuthorization() }
+    func requestAccess() {
+        manager.requestWhenInUseAuthorization()
+        if hasLocation { manager.requestLocation() }
+    }
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         status = manager.authorizationStatus
         hasLocation = status == .authorizedWhenInUse || status == .authorizedAlways
+        if hasLocation { manager.requestLocation() }
     }
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) { location = locations.last }
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) { location = nil }
 }
 
 struct DeviceSettingsView: View {
@@ -26,6 +33,7 @@ struct DeviceSettingsView: View {
     @Bindable var bluetooth: BluetoothHeartRateService
     let onHealthSnapshot: (HealthSnapshot) -> Void
     @State private var location = TrainingLocationService()
+    @State private var weather = TrainingWeatherService()
 
     var body: some View {
         NavigationStack {
@@ -51,8 +59,11 @@ struct DeviceSettingsView: View {
                     deviceRow("Ubicación de entrenamiento", detail: locationDetail, systemImage: "location", tint: .blue) {
                         location.requestAccess()
                     }
+                    deviceRow("Tiempo local", detail: weather.summary, systemImage: "cloud.sun", tint: .blue) {
+                        Task { await weather.refresh(for: location.location) }
+                    }
                 } footer: {
-                    Text("Usamos tu ubicación solo al preparar un entrenamiento exterior. También podrás elegir una ciudad manualmente.")
+                    Text(weather.trainingAdvice ?? "Usamos tu ubicación solo al preparar un entrenamiento exterior. También podrás elegir una ciudad manualmente.")
                 }
             }
             .navigationTitle("Dispositivos")
