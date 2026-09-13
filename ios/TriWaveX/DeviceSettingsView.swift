@@ -96,7 +96,10 @@ struct DeviceSettingsView: View {
 
     private var appleWatchDetail: String { health.latestSnapshot?.sourceName ?? "Disponible al conectar Salud" }
     private var bluetoothDetail: String {
-        if case let .connected(name) = bluetooth.state { return "Conectado · \(name)" }
+        if case let .connected(name) = bluetooth.state {
+            if let heartRate = bluetooth.heartRate { return "\(heartRate) lpm · \(name)" }
+            return "Conectado · \(name)"
+        }
         return bluetooth.state == .scanning ? "Buscando…" : "Conectar banda Bluetooth"
     }
     private var locationDetail: String { location.hasLocation ? "Usar mi ubicación" : "Permitir al usar la app" }
