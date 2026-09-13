@@ -163,6 +163,26 @@ struct RootView: View {
                 .animation(TriWaveXMotion.stateChange(reduced: reduceMotion), value: session.busy)
 
                 Section {
+                    Button {
+                        informationURL = session.origin.appendingPathComponent(
+                            role == .athlete ? "athlete/register" : "coach/register"
+                        )
+                    } label: {
+                        Text("Crear cuenta")
+                            .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+                    }
+                    .accessibilityHint("Abre el registro de \(role.title.lowercased())")
+
+                    Text("Si continúas con Apple y es tu primera vez, también crearemos tu cuenta.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } header: {
+                    Text("¿Es tu primera vez?")
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+
+                Section {
                     VStack(spacing: 4) {
                         Link(destination: session.origin.appendingPathComponent("forgot-password")) {
                             Text("Recuperar contraseña")
