@@ -157,7 +157,7 @@ struct ProductView: View {
             Button("Aceptar", role: .cancel) { strava.message = nil }
         } message: { Text(strava.message ?? "") }
         .sheet(isPresented: $showingDevices) {
-            DeviceSettingsView(health: health, bluetooth: bluetooth)
+            DeviceSettingsView(health: health, bluetooth: bluetooth, onHealthSnapshot: syncHealth)
                 .presentationDetents([.medium, .large])
         }
     }
@@ -257,6 +257,18 @@ struct ProductView: View {
             }
             strava.start(url: url) { callback in completeStrava(callback, in: webView) }
         }
+    }
+
+    private func syncHealth(_ snapshot: HealthSnapshot) {
+        guard let webView = browser.webView,
+              let data = try? JSONSerialization.data(withJSONObject: [
+                "date": String(ISO8601DateFormatter().string(from: snapshot.date).prefix(10)),
+                "sleepHours": snapshot.sleepHours!,
+                "hrv": snapshot.hrv!,
+                "restingHeartRate": snapshot.restingHeartRate!,
+              ]), let body = String(data: data, encoding: .utf8) else { return }
+        let script = "fetch('/api/native/health/sync', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-TriWaveX-Native': '1' }, body: JSON.stringify(\(body)) })"
+        webView.evaluateJavaScript(script) { _, _ in webView.reload() }
     }
 
     private func completeStrava(_ callback: URL, in webView: WKWebView) {

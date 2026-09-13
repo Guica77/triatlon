@@ -752,6 +752,8 @@ export type Database = {
           weight: number | null
           daily_steps: number | null
           nutrition_adherence: number | null
+          source: string | null
+          source_updated_at: string | null
         }
         Insert: {
           created_at?: string
@@ -768,6 +770,8 @@ export type Database = {
           weight?: number | null
           daily_steps?: number | null
           nutrition_adherence?: number | null
+          source?: string | null
+          source_updated_at?: string | null
         }
         Update: {
           created_at?: string
@@ -784,6 +788,8 @@ export type Database = {
           weight?: number | null
           daily_steps?: number | null
           nutrition_adherence?: number | null
+          source?: string | null
+          source_updated_at?: string | null
         }
         Relationships: []
       }

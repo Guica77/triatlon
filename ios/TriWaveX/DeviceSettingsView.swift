@@ -24,6 +24,7 @@ final class TrainingLocationService: NSObject, CLLocationManagerDelegate {
 struct DeviceSettingsView: View {
     @Bindable var health: HealthKitService
     @Bindable var bluetooth: BluetoothHeartRateService
+    let onHealthSnapshot: (HealthSnapshot) -> Void
     @State private var location = TrainingLocationService()
 
     var body: some View {
@@ -31,10 +32,10 @@ struct DeviceSettingsView: View {
             List {
                 Section("Salud y recuperación") {
                     deviceRow("Salud", detail: healthDetail, systemImage: "heart.fill", tint: .red) {
-                        Task { await health.requestAccess() }
+                        Task { await health.requestAccess(); if let snapshot = health.latestSnapshot, snapshot.hasRecoveryMetrics { onHealthSnapshot(snapshot) } }
                     }
                     deviceRow("Apple Watch", detail: appleWatchDetail, systemImage: "applewatch", tint: .blue) {
-                        Task { await health.refresh() }
+                        Task { await health.refresh(); if let snapshot = health.latestSnapshot, snapshot.hasRecoveryMetrics { onHealthSnapshot(snapshot) } }
                     }
                 }
 
