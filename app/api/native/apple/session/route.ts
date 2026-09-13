@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { oauthDisplayName } from '@/lib/auth/oauth'
 
 const reply = (body: object, status = 200) => Response.json(body, {
   status, headers: { 'Cache-Control': 'no-store', 'Vary': 'Cookie' },
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
         !input.identityToken || !input.nonce || input.identityToken.length > 12288 || input.nonce.length > 256) {
       return reply({ error: 'Credencial de Apple inválida' }, 400)
     }
+    const role = (input as Record<string, unknown>).role === 'coach' ? 'coach' : 'athlete'
 
     const supabase = await createClient()
     const { data, error } = await supabase.auth.signInWithIdToken({
@@ -29,9 +31,23 @@ export async function POST(request: Request) {
     })
     if (error || !data.user || !data.session) return reply({ error: 'No se ha podido verificar Apple' }, 401)
 
-    const { data: profile, error: profileError } = await supabase.from('profiles')
+    let { data: profile, error: profileError } = await supabase.from('profiles')
       .select('role, active_plan_id').eq('id', data.user.id).maybeSingle()
     if (profileError) return reply({ error: 'No se ha podido cargar el perfil' }, 503)
+    if (!profile) {
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const name = oauthDisplayName(data.user.user_metadata)
+      const { error: createProfileError } = await createAdminClient().from('profiles').insert({
+        id: data.user.id,
+        email: data.user.email || '',
+        first_name: name.firstName,
+        last_name: name.lastName,
+        role,
+        level: 'intermedio',
+      })
+      if (createProfileError) return reply({ error: 'No se ha podido preparar el perfil' }, 503)
+      profile = { role, active_plan_id: null }
+    }
     const destination = profile?.role === 'coach' ? '/coach/dashboard' : profile?.active_plan_id ? '/dashboard' : '/onboarding'
     return reply({ destination })
   } catch {

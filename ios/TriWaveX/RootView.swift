@@ -142,7 +142,7 @@ struct RootView: View {
                 }
 
                 Section("Otra forma de entrar") {
-                    SignInWithAppleButton(.signIn) { request in
+                    SignInWithAppleButton(.continue) { request in
                         session.prepareAppleRequest(request)
                     } onCompletion: { result in
                         Task { await session.handleAppleCompletion(result, role: role.rawValue) }
