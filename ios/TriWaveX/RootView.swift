@@ -121,25 +121,28 @@ struct RootView: View {
                         .accessibilityLabel("Error: \(error)")
                     }
 
+                }
+
+                Section {
                     Button {
                         login()
                     } label: {
-                        HStack {
+                        HStack(spacing: 8) {
                             if session.busy {
                                 ProgressView()
                             }
-                            Label(
-                                "Entrar como \(role.title.lowercased())",
-                                systemImage: "arrow.right.circle.fill"
-                            )
+                            Text("Entrar como \(role.title.lowercased())")
                         }
-                        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
                     .disabled(!canSubmit || session.busy)
                     .accessibilityHint(session.busy ? "Iniciando sesión" : "Doble toque para iniciar sesión")
                 }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 2, leading: 20, bottom: 8, trailing: 20))
 
                 Section("Otra forma de entrar") {
                     SignInWithAppleButton(.continue) { request in
@@ -168,19 +171,23 @@ struct RootView: View {
                             role == .athlete ? "athlete/register" : "coach/register"
                         )
                     } label: {
-                        Text("Crear cuenta")
-                            .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+                        HStack {
+                            Text("¿Es tu primera vez?")
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Text("Crear cuenta")
+                                .foregroundStyle(.tint)
+                            Image(systemName: "chevron.right")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                        .frame(minHeight: TriWaveXMetrics.minimumTouchTarget)
                     }
                     .accessibilityHint("Abre el registro de \(role.title.lowercased())")
-
-                    Text("Si continúas con Apple y es tu primera vez, también crearemos tu cuenta.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                } header: {
-                    Text("¿Es tu primera vez?")
                 }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
+                footer: {
+                    Text("Puedes crearla con Apple o con correo electrónico.")
+                }
 
                 Section {
                     VStack(spacing: 4) {
