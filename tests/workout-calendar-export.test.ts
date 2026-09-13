@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { escapeIcsText } from '@/app/api/workouts/export-calendar/route'
+import { escapeIcsText } from '@/lib/calendar-export'
 
 describe('escapeIcsText', () => {
   it('escapes ICS delimiters, backslashes, and line breaks', () => {

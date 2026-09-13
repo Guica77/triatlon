@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { escapeIcsText } from '@/lib/calendar-export';
 
 export const dynamic = 'force-dynamic';
-
-export function escapeIcsText(value: unknown): string {
-  return String(value ?? '')
-    .replace(/\\/g, '\\\\')
-    .replace(/\r\n|\r|\n/g, '\\n')
-    .replace(/([,;])/g, '\\$1');
-}
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
