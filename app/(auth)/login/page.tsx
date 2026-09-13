@@ -302,17 +302,16 @@ function UnifiedLoginForm() {
           </button>
         </div>
 
-        {/* Register */}
-        <p className="text-center text-xs text-text-muted">
-          ¿No tienes cuenta?{' '}
+        <div className="space-y-2 pt-1">
+          <p className="text-center text-xs text-text-muted">¿Es tu primera vez en TriWaveX?</p>
           <button
             type="button"
             onClick={() => router.push(cfg.registerPath)}
-            className="font-semibold text-coral-500 hover:text-coral-400 transition-colors cursor-pointer"
+            className="min-h-11 w-full rounded-[14px] border border-border-default bg-surface-card px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-hover cursor-pointer"
           >
-            Regístrate
+            Crear cuenta de {cfg.label.toLowerCase()}
           </button>
-        </p>
+        </div>
       </div>
     </AuthLayout>
   );
