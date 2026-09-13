@@ -75,6 +75,7 @@ struct RootView: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                    .font(.headline)
                     .padding(8)
                     .background(loginSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                     .accessibilityLabel("Tipo de cuenta")
@@ -92,6 +93,7 @@ struct RootView: View {
                             .onSubmit { focusedField = .password }
                             .accessibilityLabel("Correo electrónico")
                             .frame(minHeight: 52)
+                            .font(.system(size: 18))
 
                         Divider()
 
@@ -102,6 +104,7 @@ struct RootView: View {
                             .onSubmit { if canSubmit { login() } }
                             .accessibilityLabel("Contraseña")
                             .frame(minHeight: 52)
+                            .font(.system(size: 18))
 
                         if let error = session.error {
                             Divider()
@@ -120,6 +123,7 @@ struct RootView: View {
                             if session.busy { ProgressView() }
                             Text("Entrar como \(role.title.lowercased())")
                         }
+                        .font(.system(size: 18, weight: .bold))
                         .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
                     }
                     .buttonStyle(.borderedProminent)
@@ -178,10 +182,11 @@ struct RootView: View {
                         }
                     }
                     .font(.footnote.weight(.semibold))
+                    .padding(.horizontal, -8)
                     .padding(.top, 26)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 22)
+                .padding(.top, 54)
                 .padding(.bottom, 32)
             }
             .background(Color(uiColor: .systemGroupedBackground))
@@ -196,7 +201,7 @@ struct RootView: View {
 
     private func loginSectionTitle(_ title: String) -> some View {
         Text(title)
-            .font(.title3.weight(.semibold))
+            .font(.system(size: 21, weight: .bold))
             .foregroundStyle(.secondary)
             .padding(.top, 18)
             .padding(.bottom, 8)
@@ -215,11 +220,11 @@ struct RootView: View {
     private var branding: some View {
         VStack(spacing: 6) {
             Text("TriWaveX")
-                .font(.largeTitle.weight(.semibold))
+                .font(.system(size: 34, weight: .bold))
                 .foregroundStyle(.primary)
 
             Text("Entrena con una dirección clara")
-                .font(.subheadline)
+                .font(.system(size: 17))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
