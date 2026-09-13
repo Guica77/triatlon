@@ -63,87 +63,85 @@ struct RootView: View {
 
     private var loginView: some View {
         NavigationStack {
-            Form {
-                Section {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
                     branding
-                }
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top: 18, leading: 20, bottom: 8, trailing: 20))
+                        .padding(.bottom, 30)
 
-                Section("Tipo de cuenta") {
+                    loginSectionTitle("Tipo de cuenta")
                     Picker("Tipo de cuenta", selection: $role) {
                         ForEach(Role.allCases, id: \.self) { option in
                             Text(option.title).tag(option)
                         }
                     }
                     .pickerStyle(.segmented)
+                    .padding(8)
+                    .background(loginSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                     .accessibilityLabel("Tipo de cuenta")
                     .disabled(session.busy)
-                }
 
-                Section("Acceso") {
-                    TextField("Correo electrónico", text: $email)
-                        .textContentType(.username)
-                        .keyboardType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .submitLabel(.next)
-                        .focused($focusedField, equals: .email)
-                        .onSubmit { focusedField = .password }
-                        .accessibilityLabel("Correo electrónico")
+                    loginSectionTitle("Acceso")
+                    loginSurfaceGroup {
+                        TextField("Correo electrónico", text: $email)
+                            .textContentType(.username)
+                            .keyboardType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .submitLabel(.next)
+                            .focused($focusedField, equals: .email)
+                            .onSubmit { focusedField = .password }
+                            .accessibilityLabel("Correo electrónico")
+                            .frame(minHeight: 52)
 
-                    SecureField("Contraseña", text: $password)
-                        .textContentType(.password)
-                        .submitLabel(.go)
-                        .focused($focusedField, equals: .password)
-                        .onSubmit { if canSubmit { login() } }
-                        .accessibilityLabel("Contraseña")
+                        Divider()
 
-                    if let error = session.error {
-                        Label {
-                            Text(error)
+                        SecureField("Contraseña", text: $password)
+                            .textContentType(.password)
+                            .submitLabel(.go)
+                            .focused($focusedField, equals: .password)
+                            .onSubmit { if canSubmit { login() } }
+                            .accessibilityLabel("Contraseña")
+                            .frame(minHeight: 52)
+
+                        if let error = session.error {
+                            Divider()
+                            Label(error, systemImage: "exclamationmark.triangle.fill")
+                                .font(.footnote.weight(.medium))
+                                .foregroundStyle(.red)
                                 .fixedSize(horizontal: false, vertical: true)
-                        } icon: {
-                            Image(systemName: "exclamationmark.triangle.fill")
+                                .accessibilityLabel("Error: \(error)")
                         }
-                        .font(.footnote.weight(.medium))
-                        .foregroundStyle(.red)
-                        .accessibilityLabel("Error: \(error)")
                     }
 
-                }
-
-                Section {
                     Button {
                         login()
                     } label: {
                         HStack(spacing: 8) {
-                            if session.busy {
-                                ProgressView()
-                            }
+                            if session.busy { ProgressView() }
                             Text("Entrar como \(role.title.lowercased())")
                         }
                         .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)
+                    .padding(.top, 14)
                     .disabled(!canSubmit || session.busy)
                     .accessibilityHint(session.busy ? "Iniciando sesión" : "Doble toque para iniciar sesión")
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 2, leading: 20, bottom: 8, trailing: 20))
 
-                Section {
                     Link(destination: session.origin.appendingPathComponent("forgot-password")) {
                         Text("¿Has olvidado la contraseña?")
                             .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
                     }
-                }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
+                    .font(.subheadline)
+                    .padding(.top, 8)
 
-                Section {
+                    Text("Otra forma de entrar")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 24)
+                        .padding(.bottom, 12)
+
                     SignInWithAppleButton(.continue) { request in
                         session.prepareAppleRequest(request)
                     } onCompletion: { result in
@@ -154,22 +152,8 @@ struct RootView: View {
                     .frame(height: 50)
                     .disabled(session.busy)
                     .accessibilityHint("Usa tu cuenta de Apple para iniciar sesión")
-                }
-                header: {
-                    Text("Otra forma de entrar")
-                        .textCase(nil)
-                        .frame(maxWidth: .infinity)
-                }
-                .listRowSpacing(12)
-                .listRowInsets(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
-                .accessibilityElement(children: .contain)
-                .accessibilityLabel("Acceso con Apple")
-                .accessibilityHint("También puedes usar una cuenta de Apple")
-                .disabled(session.busy)
-                .opacity(session.busy ? 0.7 : 1)
-                .animation(TriWaveXMotion.stateChange(reduced: reduceMotion), value: session.busy)
+                    .opacity(session.busy ? 0.7 : 1)
 
-                Section {
                     VStack(spacing: 8) {
                         Text("¿Nuevo en TriWaveX?")
                             .foregroundStyle(.secondary)
@@ -179,37 +163,53 @@ struct RootView: View {
                             )
                         }
                     }
+                    .font(.subheadline)
                     .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+                    .padding(.top, 28)
                     .accessibilityHint("Abre el registro de \(role.title.lowercased())")
-                }
-                .font(.footnote)
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
 
-                Section {
                     HStack {
                         Button("Privacidad") {
                             informationURL = session.origin.appendingPathComponent("privacidad")
                         }
-
                         Spacer()
-
                         Button("Soporte") {
                             informationURL = session.origin.appendingPathComponent("soporte")
                         }
                     }
-                    .frame(minHeight: TriWaveXMetrics.minimumTouchTarget)
                     .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tint)
+                    .padding(.top, 26)
                 }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
+                .padding(.horizontal, 20)
+                .padding(.top, 22)
+                .padding(.bottom, 32)
             }
-            .formStyle(.grouped)
-            .scrollContentBackground(.visible)
+            .background(Color(uiColor: .systemGroupedBackground))
             .scrollDismissesKeyboard(.interactively)
             .toolbar(.hidden, for: .navigationBar)
         }
+    }
+
+    private var loginSurface: Color {
+        Color(uiColor: .secondarySystemGroupedBackground)
+    }
+
+    private func loginSectionTitle(_ title: String) -> some View {
+        Text(title)
+            .font(.title3.weight(.semibold))
+            .foregroundStyle(.secondary)
+            .padding(.top, 18)
+            .padding(.bottom, 8)
+            .padding(.horizontal, 8)
+    }
+
+    private func loginSurfaceGroup<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            content()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 4)
+        .background(loginSurface, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private var branding: some View {
