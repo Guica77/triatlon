@@ -17,6 +17,9 @@ export function TelemetryConnectCard({ connectedProviders = [] }: { connectedPro
     finally { setBusy(false); }
   }
   return <section className="h-full rounded-2xl border border-border-default bg-bg-card p-5 shadow-card sm:p-6">
+    {native && <a href="triwavex://devices" className="mb-5 flex min-h-11 items-center justify-between rounded-xl border border-border-default bg-surface-elevated px-4 py-3 text-sm font-semibold text-text-primary transition-colors active:bg-surface-hover">
+      <span>Dispositivos conectados</span><span aria-hidden="true" className="text-text-muted">›</span>
+    </a>}
     <div className="flex items-start justify-between gap-3">
       <div>
         <p className="text-[10px] font-black uppercase tracking-[0.16em] text-swim">Conexiones</p>

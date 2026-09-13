@@ -33,8 +33,18 @@
     </array>
     <key>LSApplicationQueriesSchemes</key>
     <array><string>strava</string></array>
+	<key>NSHealthShareUsageDescription</key>
+	<string>TriWaveX lee sueño, VFC, frecuencia en reposo y entrenamientos para mostrar tu recuperación y entrenar con tus datos reales.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>TriWaveX usa Bluetooth para conectar tu pulsómetro durante un entrenamiento.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TriWaveX usa tu ubicación mientras preparas un entrenamiento exterior para ofrecerte el tiempo local y avisos de seguridad.</string>
     <key>UILaunchScreen</key>
     <dict/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
+	</array>
     <key>UISupportedInterfaceOrientations</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>

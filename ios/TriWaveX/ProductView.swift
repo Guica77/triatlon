@@ -20,6 +20,9 @@ struct ProductView: View {
     let onDismiss: (() -> Void)?
     @State private var browser = BrowserModel()
     @State private var strava = StravaSessionModel()
+    @State private var health = HealthKitService()
+    @State private var bluetooth = BluetoothHeartRateService()
+    @State private var showingDevices = false
     @State private var nativeProgressEnabled = true
     @State private var webPathOverride: String?
     @State private var athleteProgress: AthleteProgressModel
@@ -105,7 +108,8 @@ struct ProductView: View {
                     store: store,
                     initialPath: initialPath,
                     isActive: !showingNativeProgress,
-                    onStravaConnect: connectStrava
+                    onStravaConnect: connectStrava,
+                    onOpenDevices: { showingDevices = true }
                 )
                     .opacity(showingNativeProgress ? 0 : 1)
                     .allowsHitTesting(!showingNativeProgress)
@@ -152,6 +156,10 @@ struct ProductView: View {
         .alert("Strava", isPresented: Binding(get: { strava.message != nil }, set: { if !$0 { strava.message = nil } })) {
             Button("Aceptar", role: .cancel) { strava.message = nil }
         } message: { Text(strava.message ?? "") }
+        .sheet(isPresented: $showingDevices) {
+            DeviceSettingsView(health: health, bluetooth: bluetooth)
+                .presentationDetents([.medium, .large])
+        }
     }
 
     private var shouldShowTabBar: Bool {
@@ -390,8 +398,9 @@ struct ProductWebView: UIViewRepresentable {
     let initialPath: String
     let isActive: Bool
     let onStravaConnect: () -> Void
+    let onOpenDevices: () -> Void
 
-    func makeCoordinator() -> Coordinator { Coordinator(model: model, origin: origin, onStravaConnect: onStravaConnect) }
+    func makeCoordinator() -> Coordinator { Coordinator(model: model, origin: origin, onStravaConnect: onStravaConnect, onOpenDevices: onOpenDevices) }
     func makeUIView(context: Context) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = store
@@ -434,12 +443,16 @@ struct ProductWebView: UIViewRepresentable {
         let model: BrowserModel
         let origin: URL
         let onStravaConnect: () -> Void
-        init(model: BrowserModel, origin: URL, onStravaConnect: @escaping () -> Void) { self.model = model; self.origin = origin; self.onStravaConnect = onStravaConnect }
+        let onOpenDevices: () -> Void
+        init(model: BrowserModel, origin: URL, onStravaConnect: @escaping () -> Void, onOpenDevices: @escaping () -> Void) { self.model = model; self.origin = origin; self.onStravaConnect = onStravaConnect; self.onOpenDevices = onOpenDevices }
         func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                      decisionHandler: @escaping @MainActor @Sendable (WKNavigationActionPolicy) -> Void) {
             guard let url = action.request.url else { decisionHandler(.cancel); return }
             if url.scheme == "triwavex", url.host == "strava", url.path == "/connect" {
                 onStravaConnect(); decisionHandler(.cancel); return
+            }
+            if url.scheme == "triwavex", url.host == "devices" {
+                onOpenDevices(); decisionHandler(.cancel); return
             }
             if Configuration.allows(url, origin: origin) {
                 if action.targetFrame?.isMainFrame != false { model.lastRequest = action.request }
