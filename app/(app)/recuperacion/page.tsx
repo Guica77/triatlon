@@ -54,7 +54,7 @@ export default async function RecuperacionPage() {
   }))
 
   const recoveryAnalysis = analyzeRecovery(recoveryData, recoveryHistory)
-  const todayWorkout = workoutsRes.data?.find((workout: any) => workout.training_sessions?.sport_type !== 'descanso') ?? null
+  const todayWorkouts = (workoutsRes.data || []).filter((workout: any) => workout.training_sessions?.sport_type !== 'descanso')
 
   return (
     <div className="min-h-screen bg-surface-app w-full overflow-x-hidden">
@@ -73,7 +73,7 @@ export default async function RecuperacionPage() {
 
         <section>
           <h2 className="mb-3 text-base font-semibold text-text-primary">Entrenamiento de hoy</h2>
-          <TodayWorkoutHero workout={todayWorkout} />
+          <TodayWorkoutHero workouts={todayWorkouts} />
         </section>
 
         {/* Recovery Dashboard */}

@@ -150,8 +150,12 @@ export default async function DashboardPage() {
   const hasCompletedCheckIn = biometrics?.fatigue_rating !== null && biometrics?.fatigue_rating !== undefined;
 
   // Find today's workout for AI coach feedback
-  const todayWorkout = workouts?.find((w: any) => w.scheduled_date === todayStr && w.training_sessions?.sport_type !== 'descanso');
-  const tomorrowWorkout = workouts?.find((w: any) => w.scheduled_date === tomorrowStr && w.training_sessions?.sport_type !== 'descanso');
+  const slotOrder: Record<string, number> = { morning: 0, flexible: 1, evening: 2 }
+  const sortBySlot = (items: any[]) => [...items].sort((a, b) => (slotOrder[a.scheduled_slot] ?? 1) - (slotOrder[b.scheduled_slot] ?? 1))
+  const todayWorkouts = sortBySlot((workouts || []).filter((w: any) => w.scheduled_date === todayStr && w.training_sessions?.sport_type !== 'descanso'))
+  const tomorrowWorkouts = sortBySlot((workouts || []).filter((w: any) => w.scheduled_date === tomorrowStr && w.training_sessions?.sport_type !== 'descanso'))
+  const todayWorkout = todayWorkouts[0]
+  const tomorrowWorkout = tomorrowWorkouts[0]
   const tomorrowSession = tomorrowWorkout?.training_sessions;
 
   // Evaluate badges
@@ -220,7 +224,7 @@ export default async function DashboardPage() {
 
         <section className="mb-5">
           <h2 className="mb-3 px-0.5 text-xs font-semibold text-text-muted">Entrenamiento de hoy</h2>
-          <TodayWorkoutHero workout={todayWorkout ?? null} />
+          <TodayWorkoutHero workouts={todayWorkouts} />
         </section>
 
         <div className="mb-8 grid items-start gap-5 lg:grid-cols-[1.1fr_.9fr]">
@@ -239,7 +243,7 @@ export default async function DashboardPage() {
                   <CalendarDays className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-text-muted">Mañana · {tomorrowSession?.sport_type || 'Entrenamiento'}</p>
+                  <p className="text-xs font-medium text-text-muted">Mañana{tomorrowWorkouts.length > 1 ? ` · ${tomorrowWorkouts.length} sesiones` : ''} · {tomorrowSession?.sport_type || 'Entrenamiento'}</p>
                   <p className="truncate text-sm font-semibold text-text-primary">{tomorrowSession?.description || 'Entrenamiento programado'}</p>
                   {tomorrowSession?.duration_min ? <p className="mt-0.5 text-xs text-text-secondary">{tomorrowSession.duration_min} min</p> : null}
                 </div>

@@ -30,6 +30,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
 
   const [formData, setFormData] = React.useState({
     scheduledDate: getTodayString(),
+    scheduledSlot: 'flexible' as 'morning' | 'evening' | 'flexible',
     sportType: 'ciclismo',
     durationMin: 60,
     title: '',
@@ -64,6 +65,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
           // Reset form
           setFormData({
             scheduledDate: getTodayString(),
+            scheduledSlot: 'flexible',
             sportType: 'ciclismo',
             durationMin: 60,
             title: '',
@@ -160,7 +162,7 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                 ) : (
                   <>
                     {/* Date and Sport Type split */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-1.5">
                         <label htmlFor="scheduledDate" className="text-[10px] text-text-secondary uppercase tracking-wider font-bold">Fecha de Ejecución</label>
                         <input 
@@ -173,6 +175,22 @@ export function SessionPlanner({ athleteId }: SessionPlannerProps) {
                           onChange={handleInputChange}
                           className="w-full bg-surface-elevated border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out cursor-pointer"
                         />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label htmlFor="scheduledSlot" className="text-[10px] text-text-secondary uppercase tracking-wider font-bold">Franja</label>
+                        <select
+                          id="scheduledSlot"
+                          name="scheduledSlot"
+                          title="Franja horaria"
+                          value={formData.scheduledSlot}
+                          onChange={handleInputChange}
+                          className="w-full bg-surface-elevated border border-border-default focus:border-swim focus-visible:ring-2 focus-visible:ring-swim/40 rounded-xl p-3 text-xs text-text-primary outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out cursor-pointer"
+                        >
+                          <option value="morning">Mañana</option>
+                          <option value="evening">Tarde</option>
+                          <option value="flexible">Flexible</option>
+                        </select>
                       </div>
 
                       <div className="space-y-1.5">

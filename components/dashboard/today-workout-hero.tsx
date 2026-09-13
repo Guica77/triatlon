@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
 interface TodayWorkoutHeroProps {
-  workout?: any | null
+  workouts?: any[]
 }
 
 /* The hero session styled as a race timing slip: a discipline left-rail,
@@ -19,7 +19,8 @@ const SPORT_CONFIG: Record<string, { icon: any; color: string; rail: string; lab
   fuerza: { icon: Dumbbell, color: 'text-accent', rail: 'bg-accent', label: 'Fuerza' },
 }
 
-export function TodayWorkoutHero({ workout }: TodayWorkoutHeroProps) {
+export function TodayWorkoutHero({ workouts = [] }: TodayWorkoutHeroProps) {
+  const workout = workouts[0] ?? null
   const session = workout?.training_sessions
   const sport = session?.sport_type || workout?.sport_type || 'descanso'
   const cfg = SPORT_CONFIG[sport] || { icon: Activity, color: 'text-text-muted', rail: 'bg-border-default', label: sport }
@@ -126,6 +127,25 @@ export function TodayWorkoutHero({ workout }: TodayWorkoutHeroProps) {
           >
             {isCompleted ? 'Consultar entrenamiento' : 'Abrir entrenamiento'}
           </Link>
+        )}
+
+        {workouts.length > 1 && (
+          <div className="border-t border-border-subtle pt-3">
+            <p className="text-xs font-medium text-text-muted">También hoy</p>
+            <div className="mt-2 space-y-2">
+              {workouts.slice(1).map((nextWorkout) => {
+                const nextSession = nextWorkout.training_sessions
+                const nextLabel = SPORT_CONFIG[nextSession?.sport_type]?.label || nextSession?.sport_type || 'Entrenamiento'
+                const slot = nextWorkout.scheduled_slot === 'morning' ? 'Mañana' : nextWorkout.scheduled_slot === 'evening' ? 'Tarde' : 'Flexible'
+                return (
+                  <Link key={nextWorkout.id} href={`/dashboard/workout/${nextWorkout.id}`} className="flex min-h-11 items-center justify-between gap-3 rounded-xl bg-surface-hover px-3 text-sm transition-colors hover:bg-border-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+                    <span className="min-w-0 truncate font-medium text-text-primary">{nextLabel} · {nextSession?.duration_min || 0} min</span>
+                    <span className="shrink-0 text-xs text-text-muted">{slot}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
         )}
       </div>
     </div>

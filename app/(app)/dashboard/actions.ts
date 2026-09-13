@@ -21,6 +21,7 @@ export async function createManualWorkoutAction(formData: {
   sport_type: string;
   duration_min: number;
   scheduled_date: string;
+  scheduled_slot?: 'morning' | 'evening' | 'flexible';
   description?: string;
   status: 'pending' | 'completed';
 }) {
@@ -66,6 +67,7 @@ export async function createManualWorkoutAction(formData: {
       user_id: user.id,
       session_id: session.id,
       scheduled_date,
+      scheduled_slot: formData.scheduled_slot || 'flexible',
       status,
       completed_at: status === 'completed' ? new Date().toISOString() : null
     })

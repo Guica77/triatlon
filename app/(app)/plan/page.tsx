@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { redirect } from 'next/navigation'
-import { CalendarDays, ChevronRight, UserRound } from 'lucide-react'
+import { CalendarDays, ChevronRight, CircleCheckBig, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs'
+import { evaluateDoubleSessionReadiness } from '@/lib/double-session-progression'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,27 +24,38 @@ export default async function PlanPage() {
   if (!profile.active_plan_id && !profile.coach_id) redirect('/onboarding')
 
   const now = new Date()
-  const start = new Date(now.getFullYear(), now.getMonth(), 1)
-  start.setDate(start.getDate() - 7)
+  const start = new Date(now)
+  start.setDate(start.getDate() - 28)
   const end = new Date(now.getFullYear(), now.getMonth() + 2, 0)
 
-  const [{ data: workouts }, { data: devices }] = await Promise.all([
+  const [{ data: workouts }, { data: devices }, { data: biometrics }] = await Promise.all([
     supabase
       .from('user_workouts')
       .select('*, training_sessions(*), universal_telemetry(*), workout_feedback(*)')
       .eq('user_id', user.id)
       .gte('scheduled_date', start.toISOString().split('T')[0])
       .lte('scheduled_date', end.toISOString().split('T')[0])
-      .order('scheduled_date', { ascending: true }),
+      .order('scheduled_date', { ascending: true })
+      .order('scheduled_slot', { ascending: true }),
     supabase
       .from('user_connected_devices')
       .select('provider')
       .eq('user_id', user.id),
+    supabase
+      .from('user_biometrics')
+      .select('readiness_score, fatigue_rating')
+      .eq('user_id', user.id)
+      .gte('date', start.toISOString().split('T')[0])
+      .order('date', { ascending: false }),
   ])
 
   const assignedByCoach = Boolean(profile.coach_id)
   const planName = profile.training_plans?.name || profile.target_race_name || 'Plan de entrenamiento'
   const isConnected = Boolean(profile.garmin_connected || profile.strava_connected || (devices && devices.length > 0))
+  const painReported = (workouts || []).some((workout: any) =>
+    (workout.workout_feedback || []).some((feedback: any) => Boolean(feedback.pain_localized)),
+  )
+  const doubleSessionReadiness = evaluateDoubleSessionReadiness(workouts || [], biometrics || [], painReported)
 
   return (
     <div className="min-h-screen bg-bg-app">
@@ -61,6 +73,30 @@ export default async function PlanPage() {
               <p className="mt-0.5 text-xs text-text-secondary">{assignedByCoach ? 'Plan asignado por tu entrenador' : 'Plan recomendado para tu objetivo y disponibilidad'}</p>
             </div>
             {assignedByCoach ? <UserRound className="h-4 w-4 text-text-muted" aria-label="Gestionado por entrenador" /> : <Link href="/onboarding" className="flex items-center gap-1 text-sm font-medium text-accent">Cambiar <ChevronRight className="h-4 w-4" /></Link>}
+          </div>
+        </section>
+
+        <section className="mb-6 rounded-2xl border border-border-default bg-surface-card px-5 py-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-hover text-accent">
+              <CircleCheckBig className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-text-primary">
+                {doubleSessionReadiness.eligible ? 'Preparado para valorar dos sesiones' : 'Progresión hacia dos sesiones al día'}
+              </p>
+              <p className="mt-0.5 text-xs leading-relaxed text-text-secondary">
+                {doubleSessionReadiness.eligible
+                  ? profile.coach_id
+                    ? 'Tu entrenador puede incorporar una segunda sesión ligera en un día compatible.'
+                    : 'La IA propondrá una segunda sesión ligera en un día compatible; podrás mantener una sola si lo prefieres.'
+                  : doubleSessionReadiness.reasons[0] || 'Seguimos revisando tu continuidad, carga y recuperación.'}
+              </p>
+              <p className="mt-2 text-xs text-text-muted">
+                Adherencia {doubleSessionReadiness.adherence}% · {doubleSessionReadiness.stableWeeks}/4 semanas estables
+                {doubleSessionReadiness.averageReadiness !== null ? ` · Recuperación media ${Math.round(doubleSessionReadiness.averageReadiness)}` : ''}
+              </p>
+            </div>
           </div>
         </section>
 

@@ -848,6 +848,7 @@ export type Database = {
           created_at: string
           id: string
           scheduled_date: string
+          scheduled_slot: string
           session_id: string
           status: string | null
           updated_at: string
@@ -867,6 +868,7 @@ export type Database = {
           created_at?: string
           id?: string
           scheduled_date: string
+          scheduled_slot?: string
           session_id: string
           status?: string | null
           updated_at?: string
@@ -886,6 +888,7 @@ export type Database = {
           created_at?: string
           id?: string
           scheduled_date?: string
+          scheduled_slot?: string
           session_id?: string
           status?: string | null
           updated_at?: string

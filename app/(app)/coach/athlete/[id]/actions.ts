@@ -9,6 +9,7 @@ export async function saveCoachWorkout(
     scheduledDate: string
     sportType: string
     durationMin: number
+    scheduledSlot?: 'morning' | 'evening' | 'flexible'
     title: string
     warmup: string
     main: string
@@ -101,6 +102,7 @@ export async function saveCoachWorkout(
         user_id: athleteId,
         session_id: session.id,
         scheduled_date: data.scheduledDate,
+        scheduled_slot: data.scheduledSlot || 'flexible',
         status: 'pending'
       })
 

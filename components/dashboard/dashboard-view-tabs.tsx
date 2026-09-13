@@ -298,7 +298,11 @@ export function DashboardViewTabs({
     ).sort((a, b) => a.scheduled_date.localeCompare(b.scheduled_date));
   };
 
-  const weeklyWorkouts = getWeeklyWorkouts();  const selectedDayWorkouts = allWorkouts.filter(w => w.scheduled_date === selectedDateStr);
+  const slotOrder: Record<string, number> = { morning: 0, flexible: 1, evening: 2 }
+  const weeklyWorkouts = getWeeklyWorkouts().sort((a, b) => (slotOrder[a.scheduled_slot] ?? 1) - (slotOrder[b.scheduled_slot] ?? 1))
+  const selectedDayWorkouts = allWorkouts
+    .filter(w => w.scheduled_date === selectedDateStr)
+    .sort((a, b) => (slotOrder[a.scheduled_slot] ?? 1) - (slotOrder[b.scheduled_slot] ?? 1))
 
   const progressPercent = React.useMemo(() => {
     const weeklyWorkouts = allWorkouts.filter(w => {
