@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { toggleWorkoutStatus, updateWorkoutStatus } from '@/app/(app)/dashboard/actions';
+import { applyWeatherAdjustment, toggleWorkoutStatus, updateWorkoutStatus } from '@/app/(app)/dashboard/actions';
 import { Card, CardContent } from '@/components/ui/card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
@@ -14,6 +14,7 @@ import { WatchSyncModal } from '@/components/dashboard/watch-sync-modal';
 import { calculateSessionPacing, calculateRecoveryMeal, calculatePreWorkoutMeal } from '@/lib/nutrition-utility';
 import { StravaMapSVG } from '@/components/ui/strava-map-svg';
 import { SportIllustration } from '@/components/ui/sport-illustration';
+import { proposeWeatherAdjustment, type WeatherAdjustment } from '@/lib/weather-training-adjustment';
 
 interface WorkoutCardProps {
   initialIsConnected?: boolean;
@@ -31,6 +32,7 @@ interface WorkoutCardProps {
     auto_adjusted?: boolean | null;
     adjustment_reason?: string | null;
     actual_tss?: number | null;
+    weather_adjustment?: WeatherAdjustment | null;
     training_sessions: {
       sport_type: string;
       duration_min: number;
@@ -58,6 +60,14 @@ interface WorkoutCardProps {
 
 // Product flag: keep energy metrics available while meal guidance stays hidden.
 const showNutritionGuidance = false;
+
+type ForecastPoint = { time: string; temperature: number; humidity: number; wind: number; precipitation: number | null };
+
+function isWeatherAdjustment(value: unknown): value is WeatherAdjustment {
+  if (!value || typeof value !== 'object') return false;
+  const adjustment = value as WeatherAdjustment;
+  return Number.isFinite(adjustment.durationFactor) && Number.isFinite(adjustment.zoneOffset) && typeof adjustment.reason === 'string' && typeof adjustment.guidance === 'string';
+}
 
 function parseWorkoutDescription(desc: string, sportType: string) {
   let main = desc || 'Sesión de entrenamiento aeróbico de construcción base.';
@@ -227,38 +237,46 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const [clothing, setClothing] = React.useState<'ligera' | 'normal' | 'abrigada' | 'neopreno'>('normal');
   const [isWeatherLoading, setIsWeatherLoading] = React.useState(false);
   const [weatherCelsius, setWeatherCelsius] = React.useState<number | null>(null);
+  const [weatherWindKmh, setWeatherWindKmh] = React.useState<number | null>(null);
+  const [weatherForecast, setWeatherForecast] = React.useState<ForecastPoint[]>([]);
+  const [isWeatherDetailsOpen, setIsWeatherDetailsOpen] = React.useState(false);
+  const [isWeatherSaving, setIsWeatherSaving] = React.useState(false);
+  const [weatherAdjustmentApplied, setWeatherAdjustmentApplied] = React.useState(() => isWeatherAdjustment(workout.weather_adjustment) ? workout.weather_adjustment : null);
 
-  React.useEffect(() => {
-    // Re-set when workout changes
+  const fetchWeatherForCoords = React.useCallback(async (lat: number, lon: number) => {
+    try {
+      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation_probability&forecast_days=1&timezone=auto`);
+      if (!res.ok) throw new Error('Weather response unavailable');
+      const data = await res.json();
+      const temp = data.current.temperature_2m;
+      const hum = data.current.relative_humidity_2m;
+      const wind = data.current.wind_speed_10m;
+      let condition: 'frio' | 'templado' | 'calor' | 'extremo' = 'templado';
+      if (temp < 10) condition = 'frio';
+      else if (temp > 28 && temp <= 35) condition = 'calor';
+      else if (temp > 35) condition = 'extremo';
+      setWeatherCondition(condition);
+      setHumidityLevel(hum);
+      setWeatherCelsius(temp);
+      setWeatherWindKmh(wind);
+      const currentIndex = Math.max(0, data.hourly.time.indexOf(data.current.time));
+      setWeatherForecast(data.hourly.time.slice(currentIndex, currentIndex + 4).map((time: string, index: number) => ({
+        time,
+        temperature: data.hourly.temperature_2m[currentIndex + index],
+        humidity: data.hourly.relative_humidity_2m[currentIndex + index],
+        wind: data.hourly.wind_speed_10m[currentIndex + index],
+        precipitation: data.hourly.precipitation_probability?.[currentIndex + index] ?? null,
+      })));
+    } catch (err) {
+      console.error('[Weather] Failed to fetch weather', err);
+    } finally {
+      setIsWeatherLoading(false);
+    }
+  }, []);
+
+  const refreshWeather = React.useCallback(() => {
     setWeatherCondition('templado');
     setHumidityLevel(50);
-    
-    const fetchWeatherForCoords = async (lat: number, lon: number) => {
-      try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m&timezone=auto`);
-        if (res.ok) {
-          const data = await res.json();
-          const temp = data.current.temperature_2m;
-          const hum = data.current.relative_humidity_2m;
-          
-          let condition: 'frio' | 'templado' | 'calor' | 'extremo' = 'templado';
-          if (temp < 10) condition = 'frio';
-          else if (temp > 28 && temp <= 35) condition = 'calor';
-          else if (temp > 35) condition = 'extremo';
-          
-          setWeatherCondition(condition);
-          setHumidityLevel(hum);
-          setWeatherCelsius(temp);
-          console.log(`[Weather] ${temp}°C, Hum: ${hum}%, Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`);
-        }
-      } catch (err) {
-        console.error("[Weather] Failed to fetch weather", err);
-      } finally {
-        setIsWeatherLoading(false);
-      }
-    };
-
-    // Fallback: get location from IP address (no permission needed)
     const fetchLocationByIP = async () => {
       try {
         const res = await fetch('https://ipapi.co/json/');
@@ -295,7 +313,13 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     } else {
       fetchLocationByIP();
     }
-  }, [workout.id]);
+  }, [fetchWeatherForCoords]);
+
+  React.useEffect(() => {
+    setWeatherAdjustmentApplied(isWeatherAdjustment(workout.weather_adjustment) ? workout.weather_adjustment : null);
+    setIsWeatherDetailsOpen(false);
+    refreshWeather();
+  }, [workout.id, workout.weather_adjustment, refreshWeather]);
   
   const [isGymModeOpen, setIsGymModeOpen] = React.useState(false);
   const [isSyncingOpen, setIsSyncingOpen] = React.useState(false);
@@ -337,8 +361,30 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
         dur = Math.round(dur * 0.75);
       }
     }
+    if (weatherAdjustmentApplied) dur = Math.round(dur * weatherAdjustmentApplied.durationFactor);
     return dur;
-  }, [session.duration_min, workout.auto_adjusted, workout.adjustment_reason]);
+  }, [session.duration_min, workout.auto_adjusted, workout.adjustment_reason, weatherAdjustmentApplied]);
+
+  const isOutdoorSession = session?.sport_type === 'carrera' || session?.sport_type === 'ciclismo';
+  const weatherAdjustment = React.useMemo(() => proposeWeatherAdjustment(
+    session?.sport_type || '',
+    isOutdoorSession,
+    weatherCelsius !== null && weatherWindKmh !== null ? { temperatureC: weatherCelsius, humidityPercent: humidityLevel, windKmh: weatherWindKmh } : null,
+  ), [session?.sport_type, isOutdoorSession, weatherCelsius, humidityLevel, weatherWindKmh]);
+
+  const handleApplyWeatherAdjustment = async () => {
+    if (!weatherAdjustment) return;
+    setIsWeatherSaving(true);
+    try {
+      await applyWeatherAdjustment(workout.id, weatherAdjustment);
+      setWeatherAdjustmentApplied(weatherAdjustment);
+      setToastMsg('Ajuste por meteorología aplicado a esta sesión.');
+    } catch (error) {
+      setToastMsg(error instanceof Error ? error.message : 'No se ha podido aplicar el ajuste.');
+    } finally {
+      setIsWeatherSaving(false);
+    }
+  };
 
   const isCompleted = status === 'completed';
   const isMissed = status === 'missed';
@@ -745,19 +791,77 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
               >
                 {activeTab === 'main' && (
                   <div className="space-y-4 w-full">
-                    {/* Clima / Meteo Widget (Añadido por petición del usuario para prever la sesión) */}
-                    {session.sport_type !== 'fuerza' && session.sport_type !== 'descanso' && !isCompleted && (
-                      <div className="p-3.5 rounded-xl bg-bg-hover border border-border-default flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                          <Cloud className="w-5 h-5 text-sky-500" />
-                          <div>
-                            <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider">Meteorología (En Vivo)</p>
-                            <p className="text-sm font-bold text-text-primary capitalize">{weatherCelsius !== null ? `${Math.round(weatherCelsius)}°C` : weatherCondition} • Hum {humidityLevel}%</p>
-                          </div>
-                        </div>
-                        <span className="text-[9px] text-text-muted max-w-[120px] text-right font-medium leading-tight">
-                          Condiciones previstas para tu sesión.
-                        </span>
+                    {/* Time is compact until the athlete asks for the decision-making detail. */}
+                    {isOutdoorSession && !isCompleted && (
+                      <div className="overflow-hidden rounded-xl border border-border-default bg-bg-hover">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsWeatherDetailsOpen((open) => !open)
+                            if (!isWeatherDetailsOpen) refreshWeather()
+                          }}
+                          aria-expanded={isWeatherDetailsOpen}
+                          className="flex min-h-14 w-full items-center justify-between gap-3 px-3.5 text-left transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        >
+                          <span className="flex min-w-0 items-center gap-2.5">
+                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning/10 text-warning"><Cloud className="h-4.5 w-4.5" /></span>
+                            <span className="min-w-0">
+                              <span className="block text-sm font-semibold text-text-primary">{isWeatherLoading ? 'Actualizando tiempo…' : weatherCelsius !== null ? `${Math.round(weatherCelsius)} °C · Humedad ${humidityLevel}%` : 'Tiempo para tu entrenamiento'}</span>
+                              <span className="mt-0.5 block text-xs text-text-muted">En vivo · Toca para ver la previsión</span>
+                            </span>
+                          </span>
+                          <ChevronRight className={`h-4 w-4 shrink-0 text-text-muted transition-transform ${isWeatherDetailsOpen ? 'rotate-90' : ''}`} />
+                        </button>
+
+                        <AnimatePresence initial={false}>
+                          {isWeatherDetailsOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.18, ease: 'easeOut' }}
+                              className="overflow-hidden border-t border-border-default"
+                            >
+                              <div className="space-y-3 p-3.5">
+                                <div className="grid grid-cols-3 divide-x divide-border-default rounded-lg border border-border-default bg-bg-elevated">
+                                  <div className="p-2.5"><p className="text-base font-semibold tabular-nums text-text-primary">{weatherCelsius !== null ? `${Math.round(weatherCelsius)}°` : '—'}</p><p className="mt-0.5 text-[10px] text-text-muted">Ahora</p></div>
+                                  <div className="p-2.5"><p className="text-base font-semibold tabular-nums text-text-primary">{humidityLevel}%</p><p className="mt-0.5 text-[10px] text-text-muted">Humedad</p></div>
+                                  <div className="p-2.5"><p className="text-base font-semibold tabular-nums text-text-primary">{weatherWindKmh !== null ? `${Math.round(weatherWindKmh)}` : '—'}</p><p className="mt-0.5 text-[10px] text-text-muted">km/h viento</p></div>
+                                </div>
+
+                                {weatherForecast.length > 0 && (
+                                  <div className="grid grid-cols-4 gap-1.5">
+                                    {weatherForecast.map((point) => (
+                                      <div key={point.time} className="rounded-lg px-1 py-2 text-center">
+                                        <p className="text-[10px] text-text-muted">{new Date(point.time).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</p>
+                                        <Cloud className="mx-auto my-1 h-3.5 w-3.5 text-warning" />
+                                        <p className="text-xs font-semibold text-text-primary">{Math.round(point.temperature)}°</p>
+                                        <p className="mt-0.5 text-[10px] text-text-muted">{Math.round(point.humidity)}%</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {weatherAdjustment ? (
+                                  <div className="rounded-lg bg-warning/10 p-3">
+                                    <p className="text-xs font-semibold text-text-primary">{weatherAdjustment.reason}</p>
+                                    <p className="mt-1 text-xs leading-relaxed text-text-secondary">{weatherAdjustment.guidance}</p>
+                                    <div className="mt-3 flex gap-2">
+                                      <button type="button" onClick={() => setIsWeatherDetailsOpen(false)} className="min-h-10 flex-1 rounded-lg border border-border-default bg-bg-elevated px-3 text-xs font-semibold text-text-secondary">Mantener plan</button>
+                                      <button type="button" disabled={isWeatherSaving || Boolean(weatherAdjustmentApplied)} onClick={handleApplyWeatherAdjustment} className="min-h-10 flex-1 rounded-lg bg-accent px-3 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
+                                        {weatherAdjustmentApplied ? 'Ajuste aplicado' : isWeatherSaving ? 'Aplicando…' : 'Aplicar ajuste'}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="rounded-lg bg-bg-elevated p-3 text-xs leading-relaxed text-text-secondary">Condiciones adecuadas. Mantén el entrenamiento previsto y guíate por sensaciones.</p>
+                                )}
+
+                                <button type="button" onClick={refreshWeather} disabled={isWeatherLoading} className="flex min-h-9 w-full items-center justify-center gap-1.5 text-xs font-medium text-accent disabled:opacity-60"><RefreshCw className={`h-3.5 w-3.5 ${isWeatherLoading ? 'animate-spin' : ''}`} />Actualizar ahora</button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     )}
 

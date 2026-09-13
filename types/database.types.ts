@@ -853,6 +853,7 @@ export type Database = {
           status: string | null
           updated_at: string
           user_id: string
+          weather_adjustment: Json | null
           rpe: number | null
           feelings: string | null
           refocus_applied: boolean | null
@@ -873,6 +874,7 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id: string
+          weather_adjustment?: Json | null
           rpe?: number | null
           feelings?: string | null
           refocus_applied?: boolean | null
@@ -893,6 +895,7 @@ export type Database = {
           status?: string | null
           updated_at?: string
           user_id?: string
+          weather_adjustment?: Json | null
           rpe?: number | null
           feelings?: string | null
           refocus_applied?: boolean | null

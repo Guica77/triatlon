@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { sendWorkoutCompletionEmail } from '@/lib/email'
 import { evaluateFeedbackAndAdjustPlan } from '@/app/telemetry/telemetry-actions'
+import type { WeatherAdjustment } from '@/lib/weather-training-adjustment'
 
 function safeWaitUntil(promise: Promise<any>) {
   if (typeof (globalThis as any).waitUntil === 'function') {
@@ -137,6 +138,41 @@ export async function updateWorkoutStatus(workoutId: string, newStatus: 'pending
   revalidateTag('analytics', 'max')
   revalidatePath('/dashboard')
   return { status: newStatus }
+}
+
+/** Saves an explicit weather adjustment. It is never silently applied from the client. */
+export async function applyWeatherAdjustment(workoutId: string, adjustment: WeatherAdjustment) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('No autenticado')
+
+  if (!Number.isFinite(adjustment.durationFactor) || adjustment.durationFactor < 0.8 || adjustment.durationFactor > 1 || ![-1, 0].includes(adjustment.zoneOffset)) {
+    throw new Error('El ajuste meteorológico no es válido')
+  }
+
+  const { data: workout, error: lookupError } = await supabase
+    .from('user_workouts')
+    .select('id, training_sessions(sport_type)')
+    .eq('id', workoutId)
+    .eq('user_id', user.id)
+    .single()
+
+  const sport = (workout?.training_sessions as { sport_type?: string } | null)?.sport_type
+  if (lookupError || !workout || (sport !== 'carrera' && sport !== 'ciclismo')) {
+    throw new Error('Este ajuste solo está disponible para carrera y ciclismo exterior')
+  }
+
+  const { error } = await supabase
+    .from('user_workouts')
+    .update({ weather_adjustment: adjustment })
+    .eq('id', workoutId)
+    .eq('user_id', user.id)
+
+  if (error) throw new Error('No se ha podido guardar el ajuste meteorológico')
+  revalidatePath('/dashboard')
+  revalidatePath('/plan')
+  revalidatePath('/recuperacion')
+  return { success: true }
 }
 
 /**
