@@ -267,7 +267,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* Secciones secundarias detrás del menú desplegable */}
-        <ExpandableSection title="Actividad, logros y ajustes">
+        {false && <ExpandableSection title="Actividad, logros y ajustes">
 
           {/* ── Tu entrenador ── */}
           <div className="space-y-3">
@@ -368,7 +368,7 @@ export default async function DashboardPage() {
             </div>
           )}
 
-        </ExpandableSection>
+        </ExpandableSection>}
 
       </main>
     </div>
