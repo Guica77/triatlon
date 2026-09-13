@@ -13,7 +13,7 @@ import { ExportButtons } from '@/components/dashboard/export-buttons';
 import { updateInjuryHistory } from '@/app/(app)/dashboard/biometrics-actions';
 import { DeleteAccountCard } from '@/components/settings/delete-account-card';
 import { WorkoutAIFeedback } from '@/components/dashboard/workout-ai-feedback';
-import { ChevronRight, CircleAlert, HeartPulse, Route, Watch, MessageCircle, ShieldCheck, Bell, Droplets, CloudSun, FileDown, HelpCircle, LogOut } from 'lucide-react';
+import { ChevronRight, CircleAlert, HeartPulse, Route, Watch, MessageCircle, ShieldCheck, Bell, Droplets, CloudSun, FileDown, HelpCircle, LogOut, BookOpen } from 'lucide-react';
 
 function SettingsRow({ href, label, detail, pending, icon: Icon }: { href: string; label: string; detail?: string; pending?: boolean; icon?: typeof HeartPulse }) {
   return (
@@ -110,6 +110,7 @@ export default async function SettingsPage() {
           <p className="px-1 text-xs font-medium uppercase tracking-wide text-text-secondary">Dispositivos y datos</p>
           <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default">
             <SettingsRow href="#conexiones" label="Dispositivos conectados" detail={connectedProviders[0] || 'Pendiente'} pending={!connectedProviders.length} icon={Watch} />
+            <SettingsRow href="/biblioteca" label="Biblioteca y fuentes" detail="Conocimiento para tu IA" icon={BookOpen} />
             <SettingsRow href="#conexiones" label="Notificaciones" detail="Gestionar" icon={Bell} />
             <SettingsRow href="#privacidad" label="Privacidad y datos" icon={ShieldCheck} />
           </div>

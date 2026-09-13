@@ -414,9 +414,10 @@ async function loadSnapshot(supabase: Supabase, athleteId: string): Promise<Athl
 }
 
 async function loadTextFallback(supabase: Supabase, athleteId: string, query: string, sportType?: string | null) {
-  const [memoryResult, documentResult] = await Promise.all([
+  const [memoryResult, documentResult, resourceResult] = await Promise.all([
     supabase.from('athlete_ai_memories').select('id, athlete_id, memory_type, content, sport_type, source, confidence, active, expires_at, created_at').eq('athlete_id', athleteId).eq('active', true).limit(30),
     supabase.from('ai_knowledge_documents').select('id, title, category, sport_type, source, active, ai_knowledge_chunks(id, document_id, content, chunk_index, active)').eq('active', true).limit(20),
+    (supabase as any).from('triathlon_resources').select('id, title, category, sport_type, source_url, content, active').eq('active', true).limit(20),
   ])
   const memories = (memoryResult.data || []) as unknown as RetrievedMemory[]
   const documents = documentResult.data || []
@@ -431,9 +432,14 @@ async function loadTextFallback(supabase: Supabase, athleteId: string, query: st
       source: doc.source,
     }))
   }) as RetrievedKnowledgeChunk[]
+  const resourceKnowledge = ((resourceResult.data || []) as Array<Record<string, unknown>>).map(resource => ({
+    id: String(resource.id), document_id: String(resource.id), title: String(resource.title), category: String(resource.category),
+    sport_type: typeof resource.sport_type === 'string' ? resource.sport_type : null,
+    source: typeof resource.source_url === 'string' ? resource.source_url : 'Biblioteca privada', content: String(resource.content), active: true,
+  })) as RetrievedKnowledgeChunk[]
   return {
     memories: memories.filter(memory => memory.athlete_id === athleteId && isValidMemory(memory)),
-    knowledge: knowledge.filter(chunk => isValidKnowledge(chunk) && (!sportType || !chunk.sport_type || chunk.sport_type === sportType)),
+    knowledge: [...knowledge, ...resourceKnowledge].filter(chunk => isValidKnowledge(chunk) && (!sportType || !chunk.sport_type || chunk.sport_type === sportType)),
     query,
   }
 }
@@ -445,7 +451,7 @@ export async function buildAIContext(supabase: Supabase, options: BuildAIContext
   let usedSemanticSearch = false
 
   if (options.queryEmbedding?.length) {
-    const [memoryResult, knowledgeResult] = await Promise.all([
+    const [memoryResult, knowledgeResult, resourceResult] = await Promise.all([
       supabase.rpc('match_athlete_ai_memories', {
         query_embedding: options.queryEmbedding,
         match_athlete_id: options.athleteId,
@@ -459,10 +465,16 @@ export async function buildAIContext(supabase: Supabase, options: BuildAIContext
         match_threshold: 0.5,
         match_count: AI_CONTEXT_LIMITS.maxKnowledgeChunks,
       }),
+      (supabase as any).rpc('match_triathlon_resource_chunks', {
+        query_embedding: options.queryEmbedding,
+        match_athlete_id: options.athleteId,
+        match_threshold: 0.5,
+        match_count: 4,
+      }),
     ])
     memories = (memoryResult.data || []) as RetrievedMemory[]
-    knowledge = (knowledgeResult.data || []) as RetrievedKnowledgeChunk[]
-    usedSemanticSearch = !memoryResult.error && !knowledgeResult.error
+    knowledge = [...(knowledgeResult.data || []), ...(resourceResult.data || [])] as RetrievedKnowledgeChunk[]
+    usedSemanticSearch = !memoryResult.error && !knowledgeResult.error && !resourceResult.error
   }
 
   if (!usedSemanticSearch) {
