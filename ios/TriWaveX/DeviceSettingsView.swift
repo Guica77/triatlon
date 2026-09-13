@@ -47,21 +47,25 @@ struct DeviceSettingsView: View {
                     }
                 }
 
-                Section("Entrenamiento en directo") {
+                Section {
                     deviceRow("Pulsómetro", detail: bluetoothDetail, systemImage: "heart.circle", tint: .orange) {
                         if case .connected = bluetooth.state { bluetooth.disconnect() } else { bluetooth.connect() }
                     }
+                } header: {
+                    Text("Entrenamiento en directo")
                 } footer: {
                     Text("La banda Bluetooth tiene prioridad durante el entrenamiento. Apple Watch queda como respaldo.")
                 }
 
-                Section("Tiempo") {
+                Section {
                     deviceRow("Ubicación de entrenamiento", detail: locationDetail, systemImage: "location", tint: .blue) {
                         location.requestAccess()
                     }
                     deviceRow("Tiempo local", detail: weather.summary, systemImage: "cloud.sun", tint: .blue) {
                         Task { await weather.refresh(for: location.location) }
                     }
+                } header: {
+                    Text("Tiempo")
                 } footer: {
                     Text(weather.trainingAdvice ?? "Usamos tu ubicación solo al preparar un entrenamiento exterior. También podrás elegir una ciudad manualmente.")
                 }
