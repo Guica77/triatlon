@@ -13,7 +13,7 @@ import { ExportButtons } from '@/components/dashboard/export-buttons';
 import { updateInjuryHistory } from '@/app/(app)/dashboard/biometrics-actions';
 import { DeleteAccountCard } from '@/components/settings/delete-account-card';
 import { WorkoutAIFeedback } from '@/components/dashboard/workout-ai-feedback';
-import { ChevronRight, CircleAlert, HeartPulse, Route, Watch, MessageCircle, ShieldCheck } from 'lucide-react';
+import { ChevronRight, CircleAlert, HeartPulse, Route, Watch, MessageCircle, ShieldCheck, Bell, Droplets, CloudSun, FileDown, HelpCircle, LogOut } from 'lucide-react';
 
 function SettingsRow({ href, label, detail, pending, icon: Icon }: { href: string; label: string; detail?: string; pending?: boolean; icon?: typeof HeartPulse }) {
   return (
@@ -110,7 +110,17 @@ export default async function SettingsPage() {
           <p className="px-1 text-xs font-medium uppercase tracking-wide text-text-secondary">Dispositivos y datos</p>
           <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default">
             <SettingsRow href="#conexiones" label="Dispositivos conectados" detail={connectedProviders[0] || 'Pendiente'} pending={!connectedProviders.length} icon={Watch} />
+            <SettingsRow href="#conexiones" label="Notificaciones" detail="Gestionar" icon={Bell} />
             <SettingsRow href="#privacidad" label="Privacidad y datos" icon={ShieldCheck} />
+          </div>
+        </section>
+
+        <section className="space-y-2">
+          <p className="px-1 text-xs font-medium uppercase tracking-wide text-text-secondary">Preferencias</p>
+          <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default">
+            <SettingsRow href="#fisiologia" label="Nutrición e hidratación" icon={Droplets} />
+            <SettingsRow href="#orientacion" label="Clima y ajustes del entrenamiento" icon={CloudSun} />
+            <SettingsRow href="#exportar" label="Exportar datos" icon={FileDown} />
           </div>
         </section>
 
@@ -153,31 +163,37 @@ export default async function SettingsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="px-0.5 text-sm font-medium text-text-secondary">Conexiones y cuenta</h2>
-          <TelemetryConnectCard
+          <h2 className="px-0.5 text-sm font-medium text-text-secondary">Conexiones</h2>
+          <div id="conexiones" className="scroll-mt-6"><TelemetryConnectCard
                   connectedProviders={connectedProviders}
                   lastSyncTime={null}
-          />
-          <BillingCard
-                  status={profile.subscription_status}
-          />
+          /></div>
           <div id="lesiones" className="scroll-mt-6"><InjuryHistory
               injuries={(profile.previous_injuries || '').split(' | ').filter(Boolean)}
               onSave={updateInjuryHistory}
           /></div>
 
-          <div id="conexiones" className="rounded-2xl border border-border-default bg-surface-card p-5">
+          <div id="exportar" className="rounded-2xl border border-border-default bg-surface-card p-5 scroll-mt-6">
               <h3 className="text-sm font-bold text-text-primary mb-3">Exportar Datos</h3>
               <p className="text-[10px] text-text-muted font-medium mb-4">Descarga tu historial de entrenamientos en formato CSV o exporta tu calendario a tu app favorita.</p>
               <ExportButtons />
           </div>
 
+        </section>
+
+        <section id="privacidad" className="space-y-3 scroll-mt-6">
+          <h2 className="px-0.5 text-sm font-medium text-text-secondary">Cuenta y privacidad</h2>
+          <BillingCard status={profile.subscription_status} />
+          <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default">
+            <SettingsRow href="/privacidad" label="Privacidad y permisos" icon={ShieldCheck} />
+            <SettingsRow href="/soporte" label="Soporte" icon={HelpCircle} />
+          </div>
           <form action="/auth/signout" method="post" className="rounded-2xl border border-border-default bg-surface-card p-5">
-              <h3 className="text-sm font-bold text-text-primary">Cerrar sesión</h3>
-              <p className="mt-1 text-xs text-text-muted">Sal de tu cuenta. Tus datos y entrenamientos se conservarán.</p>
+              <div className="flex items-start gap-3"><LogOut className="mt-0.5 h-5 w-5 text-text-secondary" /><div><h3 className="text-sm font-bold text-text-primary">Cerrar sesión</h3><p className="mt-1 text-xs text-text-muted">Sal de tu cuenta. Tus datos y entrenamientos se conservarán.</p></div></div>
               <button type="submit" className="mt-4 min-h-11 rounded-lg border border-border-default px-4 py-2 text-sm font-bold text-text-primary">Cerrar sesión</button>
           </form>
-          <div id="privacidad"><DeleteAccountCard /></div>
+          <Link href="/soporte" className="flex min-h-14 items-center justify-between rounded-2xl border border-border-default bg-surface-card px-4 text-[17px] text-text-primary"><span className="flex items-center gap-3"><HelpCircle className="h-5 w-5 text-text-secondary" />Ayuda y soporte</span><ChevronRight className="h-4 w-4 text-text-muted" /></Link>
+          <DeleteAccountCard scheduledFor={profile.deletion_scheduled_for} />
         </section>
 
       </main>

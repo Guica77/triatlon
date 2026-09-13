@@ -404,6 +404,8 @@ export type Database = {
           allergies: string[] | null
           disliked_ingredients: string[] | null
           daily_steps: number | null
+          deletion_requested_at: string | null
+          deletion_scheduled_for: string | null
           current_finish_time: string | null
           current_swim_time: string | null
           current_bike_time: string | null
@@ -462,6 +464,8 @@ export type Database = {
           allergies?: string[] | null
           disliked_ingredients?: string[] | null
           daily_steps?: number | null
+          deletion_requested_at?: string | null
+          deletion_scheduled_for?: string | null
           current_finish_time?: string | null
           current_swim_time?: string | null
           current_bike_time?: string | null
@@ -520,6 +524,8 @@ export type Database = {
           allergies?: string[] | null
           disliked_ingredients?: string[] | null
           daily_steps?: number | null
+          deletion_requested_at?: string | null
+          deletion_scheduled_for?: string | null
           current_finish_time?: string | null
           current_swim_time?: string | null
           current_bike_time?: string | null

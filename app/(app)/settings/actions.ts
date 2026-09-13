@@ -3,24 +3,33 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 
-export async function deleteOwnAccount() {
+export async function requestAccountDeletion() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'La sesión ha caducado. Vuelve a iniciar sesión.' };
   try {
-    let appleRevocation: 'revoked' | 'manual' | 'not-applicable' = 'not-applicable';
-    if (user.identities?.some(identity => identity.provider === 'apple')) {
-      const { revokeAppleAuthorization } = await import('@/lib/auth/apple-revocation');
-      // A linked identity does not prove the current session token belongs to Apple.
-      appleRevocation = await revokeAppleAuthorization(user.id, null);
-    }
-    const { createAdminClient } = await import('@/lib/supabase/admin');
-    const { error } = await createAdminClient().auth.admin.deleteUser(user.id, false);
-    if (error) return { error: 'No se ha podido eliminar la cuenta. Inténtalo de nuevo.' };
-    // The account is already gone: a sign-out failure must not report a false deletion failure.
+    const scheduledFor = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { error } = await supabase
+      .from('profiles')
+      .update({ deletion_requested_at: new Date().toISOString(), deletion_scheduled_for: scheduledFor })
+      .eq('id', user.id);
+    if (error) return { error: 'No se ha podido programar la eliminación. Inténtalo de nuevo.' };
     try { await supabase.auth.signOut({ scope: 'local' }); } catch {}
-    return { success: true, appleRevocation };
+    return { success: true, scheduledFor };
   } catch { return { error: 'No se ha podido completar la solicitud. Inténtalo de nuevo.' }; }
+}
+
+export async function cancelAccountDeletion() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'La sesión ha caducado. Vuelve a iniciar sesión.' };
+  const { error } = await supabase
+    .from('profiles')
+    .update({ deletion_requested_at: null, deletion_scheduled_for: null })
+    .eq('id', user.id);
+  if (error) return { error: 'No se ha podido cancelar la eliminación. Inténtalo de nuevo.' };
+  revalidatePath('/settings');
+  return { success: true };
 }
 
 export async function updatePhysiologicalData(data: {

@@ -15,7 +15,7 @@ export default function SupportPage() {
       : <p role="status">El canal de soporte público todavía no está habilitado. Esta versión no está abierta al lanzamiento comercial.</p>}
     <p>El enlace de contacto abre tu aplicación de correo: debes enviar el mensaje desde ella. Aquí no se registra ni se confirma el envío de una consulta.</p>
     <section className="space-y-3"><h2 className="text-xl font-bold">Eliminar tu cuenta</h2>
-      <p>Dentro de la aplicación, abre Perfil y ajustes → Eliminar cuenta. Escribe ELIMINAR y confirma. Si utilizas Apple y hace falta una desconexión manual, te mostraremos los pasos después del borrado.</p>
+      <p>Dentro de la aplicación, abre Perfil y ajustes → Eliminar cuenta. Escribe ELIMINAR y confirma. La cuenta queda programada para borrarse en 30 días; puedes cancelar la solicitud iniciando sesión y entrando de nuevo en Ajustes.</p>
       <p>Eliminar la cuenta no sustituye la gestión de una suscripción contratada en Apple.</p>
     </section>
     <Link href="/privacidad" className="underline">Política de privacidad</Link>

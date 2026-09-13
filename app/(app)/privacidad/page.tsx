@@ -42,7 +42,7 @@ export default function PrivacidadPage() {
 
       <section className="space-y-4">
         <h2 className="text-xl font-bold">4. Tus derechos</h2>
-        <p>Desde Ajustes puedes desconectar Strava, retirar permisos de IA, exportar entrenamientos e iniciar el borrado de tu cuenta. La exportación de entrenamientos no incluye todos tus datos personales. Si Apple requiere una desconexión manual, se muestran instrucciones tras el borrado. La eliminación de la cuenta no sustituye la gestión de una suscripción contratada con Apple.</p>
+        <p>Desde Ajustes puedes desconectar Strava, retirar permisos de IA, exportar entrenamientos e iniciar el borrado de tu cuenta. La eliminación se programa para dentro de 30 días y puede cancelarse desde Ajustes iniciando sesión antes de esa fecha. La exportación de entrenamientos no incluye todos tus datos personales. La eliminación de la cuenta no sustituye la gestión de una suscripción contratada con Apple.</p>
       </section>
 
       <section className="space-y-3 rounded-2xl border border-border-default bg-surface-card p-5">
