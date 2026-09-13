@@ -82,32 +82,22 @@ struct RootView: View {
                 }
 
                 Section("Acceso") {
-                    Label {
-                        TextField("Correo electrónico", text: $email)
-                            .textContentType(.username)
-                            .keyboardType(.emailAddress)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .submitLabel(.next)
-                            .focused($focusedField, equals: .email)
-                            .onSubmit { focusedField = .password }
-                            .accessibilityLabel("Correo electrónico")
-                    } icon: {
-                        Image(systemName: "envelope")
-                            .foregroundStyle(.secondary)
-                    }
+                    TextField("Correo electrónico", text: $email)
+                        .textContentType(.username)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .submitLabel(.next)
+                        .focused($focusedField, equals: .email)
+                        .onSubmit { focusedField = .password }
+                        .accessibilityLabel("Correo electrónico")
 
-                    Label {
-                        SecureField("Contraseña", text: $password)
-                            .textContentType(.password)
-                            .submitLabel(.go)
-                            .focused($focusedField, equals: .password)
-                            .onSubmit { if canSubmit { login() } }
-                            .accessibilityLabel("Contraseña")
-                    } icon: {
-                        Image(systemName: "lock")
-                            .foregroundStyle(.secondary)
-                    }
+                    SecureField("Contraseña", text: $password)
+                        .textContentType(.password)
+                        .submitLabel(.go)
+                        .focused($focusedField, equals: .password)
+                        .onSubmit { if canSubmit { login() } }
+                        .accessibilityLabel("Contraseña")
 
                     if let error = session.error {
                         Label {
@@ -144,7 +134,16 @@ struct RootView: View {
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets(top: 2, leading: 20, bottom: 8, trailing: 20))
 
-                Section("Otra forma de entrar") {
+                Section {
+                    Link(destination: session.origin.appendingPathComponent("forgot-password")) {
+                        Text("¿Has olvidado la contraseña?")
+                            .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+                    }
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+
+                Section {
                     SignInWithAppleButton(.continue) { request in
                         session.prepareAppleRequest(request)
                     } onCompletion: { result in
@@ -156,6 +155,11 @@ struct RootView: View {
                     .disabled(session.busy)
                     .accessibilityHint("Usa tu cuenta de Apple para iniciar sesión")
                 }
+                header: {
+                    Text("Otra forma de entrar")
+                        .textCase(nil)
+                        .frame(maxWidth: .infinity)
+                }
                 .listRowSpacing(12)
                 .listRowInsets(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
                 .accessibilityElement(children: .contain)
@@ -166,49 +170,35 @@ struct RootView: View {
                 .animation(TriWaveXMotion.stateChange(reduced: reduceMotion), value: session.busy)
 
                 Section {
-                    Button {
-                        informationURL = session.origin.appendingPathComponent(
-                            role == .athlete ? "athlete/register" : "coach/register"
-                        )
-                    } label: {
-                        HStack {
-                            Text("¿Es tu primera vez?")
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Text("Crear cuenta")
-                                .foregroundStyle(.tint)
-                            Image(systemName: "chevron.right")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.tertiary)
+                    VStack(spacing: 8) {
+                        Text("¿Nuevo en TriWaveX?")
+                            .foregroundStyle(.secondary)
+                        Button("Crear cuenta") {
+                            informationURL = session.origin.appendingPathComponent(
+                                role == .athlete ? "athlete/register" : "coach/register"
+                            )
                         }
-                        .frame(minHeight: TriWaveXMetrics.minimumTouchTarget)
                     }
+                    .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
                     .accessibilityHint("Abre el registro de \(role.title.lowercased())")
                 }
-                footer: {
-                    Text("Puedes crearla con Apple o con correo electrónico.")
-                }
+                .font(.footnote)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
 
                 Section {
-                    VStack(spacing: 16) {
-                        Link(destination: session.origin.appendingPathComponent("forgot-password")) {
-                            Text("Recuperar contraseña")
-                                .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+                    HStack {
+                        Button("Privacidad") {
+                            informationURL = session.origin.appendingPathComponent("privacidad")
                         }
 
-                        HStack {
-                            Button("Privacidad") {
-                                informationURL = session.origin.appendingPathComponent("privacidad")
-                            }
+                        Spacer()
 
-                            Spacer()
-
-                            Button("Soporte") {
-                                informationURL = session.origin.appendingPathComponent("soporte")
-                            }
+                        Button("Soporte") {
+                            informationURL = session.origin.appendingPathComponent("soporte")
                         }
-                        .frame(minHeight: TriWaveXMetrics.minimumTouchTarget)
                     }
+                    .frame(minHeight: TriWaveXMetrics.minimumTouchTarget)
                     .font(.footnote.weight(.semibold))
                     .foregroundStyle(.tint)
                 }
