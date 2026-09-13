@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Clock, CheckCircle2, Circle, Waves, Bike, Footprints, Activity, Dumbbell } from 'lucide-react'
+import { Clock, CheckCircle2, Circle, Waves, Bike, Footprints, Activity, Dumbbell, CloudSun, ChevronRight, Wind } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 
@@ -28,6 +28,26 @@ export function TodayWorkoutHero({ workouts = [] }: TodayWorkoutHeroProps) {
   const durationMin = session?.duration_min || session?.duration_minutes || 0
   const isCompleted = workout?.status === 'completed'
   const Icon = cfg.icon
+  const [weather, setWeather] = React.useState<{ temperature: number; humidity: number; wind: number } | null>(null)
+  const [weatherLoading, setWeatherLoading] = React.useState(false)
+  const outdoorSession = ['ciclismo', 'carrera', 'brick'].includes(sport)
+
+  React.useEffect(() => {
+    if (!outdoorSession) return
+    let cancelled = false
+    async function loadWeather(latitude = 40.4168, longitude = -3.7038) {
+      setWeatherLoading(true)
+      try {
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m&timezone=auto`)
+        const data = await response.json()
+        if (!cancelled && data.current) setWeather({ temperature: data.current.temperature_2m, humidity: data.current.relative_humidity_2m, wind: data.current.wind_speed_10m })
+      } catch { /* The detailed workout screen keeps the retry control. */ }
+      finally { if (!cancelled) setWeatherLoading(false) }
+    }
+    if (navigator.geolocation) navigator.geolocation.getCurrentPosition(position => loadWeather(position.coords.latitude, position.coords.longitude), () => loadWeather(), { timeout: 5000, maximumAge: 300000 })
+    else loadWeather()
+    return () => { cancelled = true }
+  }, [outdoorSession, workout?.id])
 
   // Nothing scheduled today
   if (!workout && !session) {
@@ -119,6 +139,13 @@ export function TodayWorkoutHero({ workouts = [] }: TodayWorkoutHeroProps) {
         {/* Description */}
         {session?.description && (
           <p className="line-clamp-3 max-w-2xl text-sm leading-relaxed text-text-secondary">{session.description}</p>
+        )}
+        {outdoorSession && workout?.id && (
+          <Link href={`/dashboard/workout/${workout.id}#tiempo`} className="flex min-h-14 items-center gap-3 rounded-xl border border-border-default bg-surface-hover px-3.5 transition-colors hover:bg-bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning/10 text-warning"><CloudSun className="h-4.5 w-4.5" /></span>
+            <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-text-primary">{weatherLoading ? 'Actualizando tiempo…' : weather ? `${Math.round(weather.temperature)} °C · Humedad ${weather.humidity}%` : 'Tiempo para tu entrenamiento'}</span><span className="mt-0.5 flex items-center gap-1 text-xs text-text-muted">En vivo · {weather ? <><Wind className="h-3 w-3" />{Math.round(weather.wind)} km/h · Ver previsión</> : 'Toca para actualizar'}</span></span>
+            <ChevronRight className="h-4 w-4 shrink-0 text-text-muted" />
+          </Link>
         )}
         {workout?.id && (
           <Link

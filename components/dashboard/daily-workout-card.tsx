@@ -793,7 +793,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                   <div className="space-y-4 w-full">
                     {/* Time is compact until the athlete asks for the decision-making detail. */}
                     {isOutdoorSession && !isCompleted && (
-                      <div className="overflow-hidden rounded-xl border border-border-default bg-bg-hover">
+                      <div id="tiempo" className="overflow-hidden rounded-xl border border-border-default bg-bg-hover">
                         <button
                           type="button"
                           onClick={() => {
