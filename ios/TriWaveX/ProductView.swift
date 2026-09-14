@@ -247,7 +247,9 @@ struct ProductView: View {
             return
         }
         if path == "/settings" {
-            webPathOverride = nil
+            // The native profile is rendered from this path. Keeping the override
+            // makes it visible when the athlete switches here from another tab.
+            webPathOverride = "/settings"
             nativeProfileEnabled = true
             return
         }
