@@ -5,7 +5,7 @@ import { applyWeatherAdjustment, toggleWorkoutStatus, updateWorkoutStatus } from
 import { Card, CardContent } from '@/components/ui/card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ZoneBadge } from '@/components/ui/zone-badge';
-import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info, Droplet, Zap, AlertTriangle, Cloud } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, Flame, MessageSquarePlus, Bell, Target, Sparkles, ShieldCheck, Dumbbell, ShoppingBag, Watch, Activity, Download, XCircle, ChevronRight, RefreshCw, Wind, Info, Droplet, Zap, AlertTriangle, Cloud, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WorkoutFeedbackModal } from '@/components/feedback/workout-feedback-modal';
 import { GymTrackerModal } from '@/components/workouts/gym-tracker-modal';
@@ -238,12 +238,13 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const [isWeatherLoading, setIsWeatherLoading] = React.useState(false);
   const [weatherCelsius, setWeatherCelsius] = React.useState<number | null>(null);
   const [weatherWindKmh, setWeatherWindKmh] = React.useState<number | null>(null);
+  const [weatherLocation, setWeatherLocation] = React.useState<string | null>(null);
   const [weatherForecast, setWeatherForecast] = React.useState<ForecastPoint[]>([]);
   const [isWeatherDetailsOpen, setIsWeatherDetailsOpen] = React.useState(false);
   const [isWeatherSaving, setIsWeatherSaving] = React.useState(false);
   const [weatherAdjustmentApplied, setWeatherAdjustmentApplied] = React.useState(() => isWeatherAdjustment(workout.weather_adjustment) ? workout.weather_adjustment : null);
 
-  const fetchWeatherForCoords = React.useCallback(async (lat: number, lon: number) => {
+  const fetchWeatherForCoords = React.useCallback(async (lat: number, lon: number, location: string) => {
     try {
       const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation_probability&forecast_days=1&timezone=auto`);
       if (!res.ok) throw new Error('Weather response unavailable');
@@ -259,6 +260,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
       setHumidityLevel(hum);
       setWeatherCelsius(temp);
       setWeatherWindKmh(wind);
+      setWeatherLocation(location);
       const currentIndex = Math.max(0, data.hourly.time.indexOf(data.current.time));
       setWeatherForecast(data.hourly.time.slice(currentIndex, currentIndex + 4).map((time: string, index: number) => ({
         time,
@@ -277,14 +279,14 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
   const refreshWeather = React.useCallback(() => {
     setWeatherCondition('templado');
     setHumidityLevel(50);
+    setWeatherLocation(null);
     const fetchLocationByIP = async () => {
       try {
         const res = await fetch('https://ipapi.co/json/');
         if (res.ok) {
           const data = await res.json();
           if (data.latitude && data.longitude) {
-            console.log(`[Weather] IP location: ${data.city}, ${data.country_name}`);
-            fetchWeatherForCoords(data.latitude, data.longitude);
+            fetchWeatherForCoords(data.latitude, data.longitude, [data.city, data.country_name].filter(Boolean).join(', ') || 'Ubicación aproximada');
             return;
           }
         }
@@ -292,7 +294,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
         console.warn('[Weather] IP geolocation failed:', err);
       }
       // Ultimate fallback: Madrid
-      fetchWeatherForCoords(40.4168, -3.7038);
+      fetchWeatherForCoords(40.4168, -3.7038, 'Madrid (estimación)');
     };
 
     setIsWeatherLoading(true);
@@ -301,7 +303,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          fetchWeatherForCoords(position.coords.latitude, position.coords.longitude);
+          fetchWeatherForCoords(position.coords.latitude, position.coords.longitude, 'Tu ubicación');
         },
         () => {
           // Browser geolocation denied → try IP-based location
@@ -807,7 +809,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-warning/10 text-warning"><Cloud className="h-4.5 w-4.5" /></span>
                             <span className="min-w-0">
                               <span className="block text-sm font-semibold text-text-primary">{isWeatherLoading ? 'Actualizando tiempo…' : weatherCelsius !== null ? `${Math.round(weatherCelsius)} °C · Humedad ${humidityLevel}%` : 'Tiempo para tu entrenamiento'}</span>
-                              <span className="mt-0.5 block text-xs text-text-muted">En vivo · Toca para ver la previsión</span>
+                              <span className="mt-0.5 flex items-center gap-1 text-xs text-text-muted"><MapPin className="h-3 w-3" />{weatherLocation || 'Buscando ubicación…'} · En vivo</span>
                             </span>
                           </span>
                           <ChevronRight className={`h-4 w-4 shrink-0 text-text-muted transition-transform ${isWeatherDetailsOpen ? 'rotate-90' : ''}`} />
@@ -823,6 +825,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                               className="overflow-hidden border-t border-border-default"
                             >
                               <div className="space-y-3 p-3.5">
+                                <p className="flex items-center gap-1.5 text-xs text-text-secondary"><MapPin className="h-3.5 w-3.5 text-accent" />{weatherLocation || 'Ubicación pendiente'}</p>
                                 <div className="grid grid-cols-3 divide-x divide-border-default rounded-lg border border-border-default bg-bg-elevated">
                                   <div className="p-2.5"><p className="text-base font-semibold tabular-nums text-text-primary">{weatherCelsius !== null ? `${Math.round(weatherCelsius)}°` : '—'}</p><p className="mt-0.5 text-[10px] text-text-muted">Ahora</p></div>
                                   <div className="p-2.5"><p className="text-base font-semibold tabular-nums text-text-primary">{humidityLevel}%</p><p className="mt-0.5 text-[10px] text-text-muted">Humedad</p></div>
@@ -844,7 +847,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
 
                                 {weatherAdjustment ? (
                                   <div className="rounded-lg bg-warning/10 p-3">
-                                    <p className="text-xs font-semibold text-text-primary">{weatherAdjustment.reason}</p>
+                                    <p className="text-xs font-semibold text-text-primary">Propuesta de ajuste · {weatherAdjustment.reason}</p>
                                     <p className="mt-1 text-xs leading-relaxed text-text-secondary">{weatherAdjustment.guidance}</p>
                                     <div className="mt-3 flex gap-2">
                                       <button type="button" onClick={() => setIsWeatherDetailsOpen(false)} className="min-h-10 flex-1 rounded-lg border border-border-default bg-bg-elevated px-3 text-xs font-semibold text-text-secondary">Mantener plan</button>

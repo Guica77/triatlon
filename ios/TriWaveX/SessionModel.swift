@@ -117,7 +117,10 @@ final class SessionModel {
         let cookies = HTTPCookie.cookies(withResponseHeaderFields: fields, for: origin)
         guard !cookies.isEmpty else { error = "El servidor no ha creado una sesión. Vuelve a intentarlo."; return }
         await store.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast)
-        for cookie in cookies { await store.httpCookieStore.setCookie(cookie) }
+        for cookie in cookies {
+            await store.httpCookieStore.setCookie(cookie)
+            HTTPCookieStorage.shared.setCookie(cookie)
+        }
         destination = result.destination
     }
 

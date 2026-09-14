@@ -24,6 +24,8 @@ struct ProductView: View {
     @State private var bluetooth = BluetoothHeartRateService()
     @State private var showingDevices = false
     @State private var nativeProgressEnabled = true
+    @State private var nativeProfileEnabled = true
+    @State private var nativeChatEnabled = true
     @State private var webPathOverride: String?
     @State private var athleteProgress: AthleteProgressModel
     @State private var selectedTab: AppTab
@@ -107,19 +109,23 @@ struct ProductView: View {
                     origin: origin,
                     store: store,
                     initialPath: initialPath,
-                    isActive: !showingNativeProgress,
+                    isActive: !showingNativeProgress && !showingNativeProfile && !showingNativeChat,
                     onStravaConnect: connectStrava,
                     onOpenDevices: { showingDevices = true }
                 )
-                    .opacity(showingNativeProgress ? 0 : 1)
-                    .allowsHitTesting(!showingNativeProgress)
+                    .opacity(showingNativeProgress || showingNativeProfile || showingNativeChat ? 0 : 1)
+                    .allowsHitTesting(!showingNativeProgress && !showingNativeProfile && !showingNativeChat)
                 if showingNativeProgress {
                     AthleteProgressView(model: athleteProgress, onFallback: openWebProgress)
                 }
-                if !showingNativeProgress && browser.loading && !browser.hasCompletedInitialLoad {
+                if showingNativeProfile {
+                    ProfileMenuView(openWeb: openProfileDestination, openDevices: { showingDevices = true })
+                }
+                if showingNativeChat { NativeChatView(origin: origin) }
+                if !showingNativeProgress && !showingNativeProfile && !showingNativeChat && browser.loading && !browser.hasCompletedInitialLoad {
                     TriWaveXLaunchScreen()
                 }
-                if !showingNativeProgress && browser.loading && browser.hasCompletedInitialLoad {
+                if !showingNativeProgress && !showingNativeProfile && !showingNativeChat && browser.loading && browser.hasCompletedInitialLoad {
                     VStack {
                         TriWaveXLoadingBar()
                             .padding(.horizontal, 24)
@@ -130,7 +136,7 @@ struct ProductView: View {
                     }
                     .allowsHitTesting(false)
                 }
-                if !showingNativeProgress, let message = browser.error {
+                if !showingNativeProgress && !showingNativeProfile && !showingNativeChat, let message = browser.error {
                     TriWaveXErrorState(message: message, retry: browser.retry)
                 }
             }
@@ -217,6 +223,14 @@ struct ProductView: View {
         nativeProgressEnabled && (initialPath == "/resumen" || webPathOverride == "/resumen") && !initialPath.hasPrefix("/coach/")
     }
 
+    private var showingNativeProfile: Bool {
+        nativeProfileEnabled && (initialPath == "/settings" || webPathOverride == "/settings")
+    }
+
+    private var showingNativeChat: Bool {
+        nativeChatEnabled && (initialPath == "/chat" || initialPath == "/coach/chat" || webPathOverride == "/chat" || webPathOverride == "/coach/chat")
+    }
+
     private func openWebProgress() {
         nativeProgressEnabled = false
         webPathOverride = "/resumen"
@@ -232,10 +246,33 @@ struct ProductView: View {
             nativeProgressEnabled = true
             return
         }
+        if path == "/settings" {
+            webPathOverride = nil
+            nativeProfileEnabled = true
+            return
+        }
+        if path == "/chat" || path == "/coach/chat" {
+            webPathOverride = path
+            nativeChatEnabled = true
+            return
+        }
         webPathOverride = path
         nativeProgressEnabled = false
+        nativeProfileEnabled = false
+        nativeChatEnabled = false
         browser.currentPath = path
         let request = URLRequest(url: origin.appendingPathComponent(String(path.dropFirst())))
+        browser.lastRequest = request
+        browser.webView?.load(request)
+    }
+
+    private func openProfileDestination(_ path: String) {
+        nativeProfileEnabled = false
+        nativeChatEnabled = false
+        webPathOverride = path
+        browser.currentPath = path
+        guard let url = URL(string: path, relativeTo: origin)?.absoluteURL else { return }
+        let request = URLRequest(url: url)
         browser.lastRequest = request
         browser.webView?.load(request)
     }

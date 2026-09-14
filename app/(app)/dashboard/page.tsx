@@ -11,7 +11,6 @@ import { getAnalyticsDashboardData } from '@/app/(app)/analytics/analytics-actio
 import { FormStatusWidget } from '@/components/dashboard/form-status-widget';
 import { Activity, BookOpen, ChevronRight, Megaphone, Award, CalendarDays } from 'lucide-react';
 import { AppFeedbackModal } from '@/components/dashboard/app-feedback-modal';
-import { MorningCheckInModal } from '@/components/dashboard/morning-checkin-modal';
 import { ObjectiveConfigCard } from '@/components/dashboard/objective-config-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { ActivitiesFeed } from '@/components/dashboard/activities-feed';
@@ -146,8 +145,6 @@ export default async function DashboardPage() {
     activeFeedbackDays = 21;
   }
 
-  const hasCompletedCheckIn = biometrics?.fatigue_rating !== null && biometrics?.fatigue_rating !== undefined;
-
   // Find today's workout for AI coach feedback
   const slotOrder: Record<string, number> = { morning: 0, flexible: 1, evening: 2 }
   const sortBySlot = (items: any[]) => [...items].sort((a, b) => (slotOrder[a.scheduled_slot] ?? 1) - (slotOrder[b.scheduled_slot] ?? 1))
@@ -207,8 +204,6 @@ export default async function DashboardPage() {
       {activeFeedbackDays !== null && (
         <AppFeedbackModal daysUsed={activeFeedbackDays} />
       )}
-      <MorningCheckInModal hasCompletedCheckIn={hasCompletedCheckIn} />
-
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6 sm:pb-8 lg:px-8">
 
         <div className="mb-6">
