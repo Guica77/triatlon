@@ -30,7 +30,7 @@ export function TodayWorkoutHero({ workouts = [] }: TodayWorkoutHeroProps) {
   const Icon = cfg.icon
   const [weather, setWeather] = React.useState<{ temperature: number; humidity: number; wind: number } | null>(null)
   const [weatherLoading, setWeatherLoading] = React.useState(false)
-  const outdoorSession = ['ciclismo', 'carrera', 'brick'].includes(sport)
+  const outdoorSession = ['ciclismo', 'carrera', 'brick', 'bike', 'bicycle', 'run', 'running', 'correr'].includes(sport)
 
   React.useEffect(() => {
     if (!outdoorSession) return

@@ -367,7 +367,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
     return dur;
   }, [session.duration_min, workout.auto_adjusted, workout.adjustment_reason, weatherAdjustmentApplied]);
 
-  const isOutdoorSession = session?.sport_type === 'carrera' || session?.sport_type === 'ciclismo';
+  const isOutdoorSession = ['carrera', 'ciclismo', 'run', 'running', 'correr', 'bike', 'bicycle'].includes(session?.sport_type || '');
   const weatherAdjustment = React.useMemo(() => proposeWeatherAdjustment(
     session?.sport_type || '',
     isOutdoorSession,
@@ -794,7 +794,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                 {activeTab === 'main' && (
                   <div className="space-y-4 w-full">
                     {/* Time is compact until the athlete asks for the decision-making detail. */}
-                    {isOutdoorSession && !isCompleted && (
+                    {isOutdoorSession && (
                       <div id="tiempo" className="overflow-hidden rounded-xl border border-border-default bg-bg-hover">
                         <button
                           type="button"
@@ -845,7 +845,7 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                                   </div>
                                 )}
 
-                                {weatherAdjustment ? (
+                                {weatherAdjustment && !isCompleted ? (
                                   <div className="rounded-lg bg-warning/10 p-3">
                                     <p className="text-xs font-semibold text-text-primary">Propuesta de ajuste · {weatherAdjustment.reason}</p>
                                     <p className="mt-1 text-xs leading-relaxed text-text-secondary">{weatherAdjustment.guidance}</p>
