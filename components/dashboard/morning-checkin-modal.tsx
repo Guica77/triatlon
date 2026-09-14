@@ -2,12 +2,11 @@
 
 import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Loader2, Sun, Heart, Activity, BrainCircuit, Check, Flame } from 'lucide-react';
+import { Loader2, Sun, Activity, BrainCircuit, Check, Flame } from 'lucide-react';
 import { updateBiometrics } from '@/app/(app)/dashboard/biometrics-actions';
 
 interface MorningCheckInModalProps {
   hasCompletedCheckIn: boolean;
-  hasDeviceBiometrics: boolean;
 }
 
 const STORAGE_KEY = 'triatlonpro_checkin_date';
@@ -50,7 +49,7 @@ function computeStreak(): number {
   return 1; // gap broken
 }
 
-export function MorningCheckInModal({ hasCompletedCheckIn, hasDeviceBiometrics }: MorningCheckInModalProps) {
+export function MorningCheckInModal({ hasCompletedCheckIn }: MorningCheckInModalProps) {
   const today = getTodayStr();
   const alreadyDoneToday = hasCompletedCheckIn || getLastCheckinDate() === today;
 
@@ -60,9 +59,6 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasDeviceBiometrics }
 
   const [fatigue, setFatigue] = React.useState<number | null>(null);
   const [stress, setStress] = React.useState<number | null>(null);
-  const [sleepHours, setSleepHours] = React.useState('');
-  const [hrv, setHrv] = React.useState('');
-  const [rhr, setRhr] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   // Show the streak if we're continuing it (checked in yesterday or already today)
@@ -83,14 +79,8 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasDeviceBiometrics }
     e.preventDefault();
     setErrorMessage(null);
 
-    const manualMetrics = {
-      sleep_hours: Number(sleepHours),
-      hrv: Number(hrv),
-      rhr: Number(rhr),
-    };
-
-    if (fatigue === null || stress === null || (!hasDeviceBiometrics && (!sleepHours || !hrv || !rhr))) {
-      setErrorMessage('Completa tus sensaciones y las métricas de hoy. No usamos valores de ejemplo.');
+    if (fatigue === null || stress === null) {
+      setErrorMessage('Completa cómo te sientes hoy para personalizar tu recomendación.');
       return;
     }
 
@@ -99,7 +89,6 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasDeviceBiometrics }
     const result = await updateBiometrics({
       fatigue_rating: fatigue,
       stress_level: stress,
-      ...(!hasDeviceBiometrics && manualMetrics),
     });
 
     if (result.error) {
@@ -200,35 +189,6 @@ export function MorningCheckInModal({ hasCompletedCheckIn, hasDeviceBiometrics }
               </div>
             </div>
 
-            {/* Ask for manual metrics until a device has provided real measurements. */}
-            {!hasDeviceBiometrics && (
-              <div className="bg-surface-hover p-4 rounded-lg border border-border-subtle space-y-3">
-                <p className="text-xs font-medium text-text-secondary">Introduce las métricas de hoy para que la recomendación sea tuya.</p>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="text-[10px] font-bold text-text-muted uppercase block mb-1">Sueño (h)</label>
-                    <input type="number" min="0" max="24" step="0.25" value={sleepHours} onChange={e => setSleepHours(e.target.value)} placeholder="—"
-                      className="min-h-10 w-full p-2 text-sm font-semibold text-text-primary bg-surface-card border border-border-default rounded-xl outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus:bg-surface-hover focus:border-accent/40 focus-visible:ring-2 focus-visible:ring-accent/50" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold text-text-muted uppercase block mb-1">HRV (ms)</label>
-                    <input type="number" min="0" value={hrv} onChange={e => setHrv(e.target.value)} placeholder="—"
-                      className="min-h-10 w-full p-2 text-sm font-semibold text-text-primary bg-surface-card border border-border-default rounded-xl outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus:bg-surface-hover focus:border-accent/40 focus-visible:ring-2 focus-visible:ring-accent/50" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold text-text-muted uppercase block mb-1">FC Reposo</label>
-                    <input type="number" min="0" value={rhr} onChange={e => setRhr(e.target.value)} placeholder="—"
-                      className="min-h-10 w-full p-2 text-sm font-semibold text-text-primary bg-surface-card border border-border-default rounded-xl outline-none transition-[background-color,border-color,box-shadow,color] duration-150 ease-out focus:bg-surface-hover focus:border-accent/40 focus-visible:ring-2 focus-visible:ring-accent/50" />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {hasDeviceBiometrics && (
-              <p className="text-[10px] text-text-muted text-center flex items-center justify-center gap-1">
-                <Heart className="w-3 h-3" /> Datos de sueño y pulso obtenidos de Garmin
-              </p>
-            )}
           </div>
 
           {errorMessage && <p role="alert" className="text-xs font-medium text-red-600">{errorMessage}</p>}
