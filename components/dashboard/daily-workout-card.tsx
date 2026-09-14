@@ -794,7 +794,10 @@ export function DailyWorkoutCard({ workout, initialIsConnected = false, virtualG
                 {activeTab === 'main' && (
                   <div className="space-y-4 w-full">
                     {/* Time is compact until the athlete asks for the decision-making detail. */}
-                    {isOutdoorSession && (
+                    {/* El contexto meteorológico y la ubicación sirven también para que la IA
+                        interprete sesiones de natación; solo los ajustes automáticos se
+                        restringen a disciplinas al aire libre. */}
+                    {session && (
                       <div id="tiempo" className="overflow-hidden rounded-xl border border-border-default bg-bg-hover">
                         <button
                           type="button"
