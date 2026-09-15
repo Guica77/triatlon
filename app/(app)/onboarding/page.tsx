@@ -49,22 +49,22 @@ export default async function OnboardingPage() {
   const canSkip = Boolean(profile?.coach_id || profile?.active_plan_id);
 
   return (
-    <div className="min-h-screen bg-[var(--color-background)] p-6 pt-16 flex flex-col items-center pb-24">
+    <div className="min-h-dvh bg-[var(--color-background)] px-4 pb-16 pt-10 sm:px-6 sm:pt-16">
       <WelcomeReady />
-      <div className="w-full max-w-5xl space-y-12">
+      <div className="mx-auto w-full max-w-4xl space-y-8 sm:space-y-10">
 
         {/* Header */}
-        <header className="text-center space-y-3 max-w-xl mx-auto">
-          <p className="text-xs text-swim uppercase tracking-widest font-bold">Onboarding Express · 2 pasos</p>
-          <h1 className="text-4xl font-black tracking-tight text-text-primary">Configura tu Objetivo</h1>
-          <p className="text-sm text-text-secondary font-medium leading-relaxed">
-            Define tu meta, tu nivel y tu disponibilidad. La IA generará tu primer plan de entrenamiento en menos de 5 minutos.
+        <header className="mx-auto max-w-xl space-y-3 text-center">
+          <p className="text-xs font-semibold tracking-wide text-swim">CONFIGURACIÓN INICIAL</p>
+          <h1 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Prepara tu plan</h1>
+          <p className="text-[15px] leading-6 text-text-secondary">
+            Define tu objetivo, tu nivel y el tiempo que tienes disponible. Solo pedimos lo necesario para empezar bien.
           </p>
         </header>
 
         {/* Skip banner when user already has a plan or coach */}
         {canSkip && (
-          <div className="w-full max-w-3xl mx-auto flex items-center justify-between gap-4 p-4 rounded-2xl bg-surface-card border border-border-default shadow-card">
+          <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 rounded-[20px] border border-border-default bg-surface-card p-4 shadow-card">
             <div className="min-w-0">
               <p className="text-sm font-bold text-text-primary">
                 {profile?.first_name || '¡Ya casi!'} · Ya tienes un plan o entrenador asignado
@@ -73,7 +73,7 @@ export default async function OnboardingPage() {
             </div>
             <Link
               href="/dashboard"
-              className="shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-swim text-white text-sm font-bold hover:bg-swim/90 transition-colors"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl bg-swim px-4 text-sm font-semibold text-white transition-colors hover:bg-swim/90"
             >
               <LayoutDashboard className="w-4 h-4" />
               Ir al dashboard

@@ -29,7 +29,7 @@ struct NativeProfile: Decodable, Sendable {
     struct Goal: Decodable, Sendable { let name: String?; let date: String? }
     struct Physiology: Decodable, Sendable { let ftp: Double?; let swimPace: String?; let runPace: String?; let baselineHours: String?; let injuries: String? }
     struct Recovery: Decodable, Sendable { let readiness: Double?; let hrv: Double?; let sleepHours: Double?; let fatigue: Double? }
-    struct Connections: Decodable, Sendable { let strava: Bool; let garmin: Bool }
+    struct Connections: Decodable, Sendable { let strava: Bool; let garmin: Bool; let polar: Bool; let coros: Bool }
 }
 
 struct NativeProfileClient {
@@ -82,6 +82,7 @@ struct NativeProfileClient {
 struct NativeProfileView: View {
     @Bindable var model: NativeProfileModel
     let openDevices: () -> Void
+    let openCoros: () -> Void
     let openAccount: () -> Void
     @State private var hasLoaded = false
 
@@ -129,11 +130,21 @@ struct NativeProfileView: View {
                 Button(action: openDevices) { Label("Apple Health, Watch y sensores", systemImage: "applewatch").foregroundStyle(.primary) }
                 connectionRow("Strava", connected: profile.connections.strava, icon: "figure.run")
                 connectionRow("Garmin", connected: profile.connections.garmin, icon: "watchface.applewatch.case")
-                Label("COROS, Amazfit, Polar y Suunto", systemImage: "arrow.triangle.2.circlepath").foregroundStyle(.secondary)
+                Button(action: openCoros) {
+                    HStack {
+                        Label("COROS", systemImage: "timer")
+                        Spacer()
+                        Text(profile.connections.coros ? "Conectado" : "Conectar")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(profile.connections.coros ? .green : .tint)
+                    }
+                }
+                connectionRow("Polar", connected: profile.connections.polar, icon: "heart.circle")
+                Label("Amazfit y Suunto", systemImage: "arrow.triangle.2.circlepath").foregroundStyle(.secondary)
                 Label("Importar archivo FIT o GPX", systemImage: "square.and.arrow.down").foregroundStyle(.secondary)
             } header: {
                 Text("Dispositivos y conexiones")
-            } footer: { Text("Las marcas sin acceso directo se conectan mediante Strava o Apple Health cuando estén disponibles.") }
+            } footer: { Text("COROS abre un consentimiento seguro. Garmin y Polar muestran el estado de sus conexiones. Las marcas sin acceso directo usan Strava, Salud o archivos FIT/GPX.") }
             Section("Preferencias") {
                 NavigationLink { ProfileDetailView(title: "Notificaciones", rows: [("Estado", "Gestiona los permisos desde Ajustes del iPhone")]) } label: { Label("Notificaciones", systemImage: "bell") }
                 NavigationLink { ProfileDetailView(title: "Clima", rows: [("Tiempo local", "Disponible al preparar entrenamientos exteriores")]) } label: { Label("Clima", systemImage: "cloud.sun") }

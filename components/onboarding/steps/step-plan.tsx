@@ -2,176 +2,51 @@
 
 import * as React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Trophy, Calendar, Flag, Dumbbell, Clock, Target, Zap, UserPlus, ChevronLeft, Loader2, Activity } from 'lucide-react';
-import { ProCard } from '@/components/ui/pro-card';
-import { AnimatedButton } from '@/components/ui/animated-button';
+import { Activity, Calendar, Check, ChevronLeft, Clock3, Dumbbell, Flag, Loader2, LockKeyhole, Plus, Target, Trophy, UserRoundPlus, Watch } from 'lucide-react';
 
 const DISTANCE_LABELS: Record<string, string> = {
-  sprint: 'Sprint',
-  olimpico: 'Olímpico',
-  half: 'Media (70.3)',
-  full: 'Larga (Ironman)',
-  '5k': '5K',
-  '10k': '10K',
-  medio_maraton: 'Media Maratón',
-  maraton: 'Maratón',
-  ultra: 'Ultra',
+  sprint: 'Sprint', olimpico: 'Olímpico', half: 'Media distancia (70.3)', full: 'Larga distancia',
+  '5k': '5K', '10k': '10K', medio_maraton: 'Media maratón', maraton: 'Maratón', ultra: 'Ultra',
 };
-
 const MODALITY_LABELS: Record<string, string> = {
-  triatlon: 'Triatlón',
-  duatlon: 'Duatlón',
-  acuatlon: 'Acuatlón',
-  acuabike: 'Acuabike',
-  cross: 'Cross',
-  carrera: 'Running',
+  triatlon: 'Triatlón', duatlon: 'Duatlón', acuatlon: 'Acuatlón', acuabike: 'Acuabike', cross: 'Cross', carrera: 'Running',
 };
-
-const LEVEL_LABELS: Record<string, string> = {
-  principiante: 'Principiante',
-  intermedio: 'Intermedio',
-  avanzado: 'Avanzado',
-};
+const LEVEL_LABELS: Record<string, string> = { principiante: 'Principiante', intermedio: 'Intermedio', avanzado: 'Avanzado' };
 
 interface StepPlanProps {
   loading: boolean;
-  summary: {
-    raceName: string;
-    raceDate: string | null;
-    distance: string;
-    modality: string;
-    level: string;
-    totalHours: number;
-    targetTime: string;
-  };
+  summary: { raceName: string; raceDate: string | null; distance: string; modality: string; level: string; totalHours: number; targetTime: string };
   inviteCode: string;
   setInviteCode: (v: string) => void;
   wantsCoach: boolean;
   setWantsCoach: (v: boolean) => void;
   onPrev: () => void;
   onSave: () => void;
-  onConnect: (provider: 'strava' | 'garmin' | 'coros') => Promise<void>;
+  onConnect: (provider: 'strava' | 'garmin' | 'coros' | 'polar') => Promise<void>;
 }
 
 function SummaryItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-3 p-3 rounded-xl bg-surface-hover/50 border border-border-default">
-      <div className="w-8 h-8 rounded-lg bg-surface-card border border-border-default flex items-center justify-center shrink-0">
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-[10px] text-text-muted uppercase tracking-wider font-bold">{label}</p>
-        <p className="text-sm font-bold text-text-primary truncate mt-0.5" title={value}>{value}</p>
-      </div>
-    </div>
-  );
+  return <div className="min-w-0 rounded-2xl bg-surface-hover/60 px-3.5 py-3"><div className="mb-2 flex items-center gap-2 text-text-muted">{icon}<span className="text-[11px] font-semibold">{label}</span></div><p className="truncate text-sm font-semibold text-text-primary" title={value}>{value}</p></div>;
+}
+
+function ConnectionCard({ label, detail, onClick, disabled }: { label: string; detail: string; onClick: () => void; disabled: boolean }) {
+  return <button type="button" onClick={onClick} disabled={disabled} className="group flex min-h-24 w-full items-center gap-3 rounded-[20px] border border-border-default bg-surface-card px-4 text-left shadow-sm transition-[border-color,box-shadow,transform] duration-150 hover:border-swim/45 hover:shadow-card active:scale-[0.99] disabled:cursor-wait disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100"><span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-swim/10 text-swim"><Watch className="size-5" /></span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-text-primary">{label}</span><span className="mt-0.5 block text-xs leading-5 text-text-secondary">{detail}</span></span>{disabled ? <Loader2 className="size-4 animate-spin text-text-muted" /> : <Plus className="size-4 text-text-muted transition-colors group-hover:text-swim" />}</button>;
 }
 
 export function StepPlan(props: StepPlanProps) {
   const { summary } = props;
+  const isCoachFlow = props.wantsCoach || props.inviteCode.trim().length > 0;
   const modalityLabel = MODALITY_LABELS[summary.modality] || summary.modality || 'Triatlón';
 
-  const connectProviders: { id: 'strava' | 'garmin' | 'coros'; label: string; icon: string; hover: string }[] = [
-    { id: 'garmin', label: 'Garmin', icon: '⌚', hover: 'hover:bg-swim/10 hover:border-swim/50 hover:ring-1 hover:ring-swim/50' },
-    { id: 'strava', label: 'Strava', icon: '🔄', hover: 'hover:bg-coral-500/10 hover:border-coral-500/50 hover:ring-1 hover:ring-coral-500/50' },
-    { id: 'coros', label: 'Coros', icon: '⏱️', hover: 'hover:bg-bike/10 hover:border-bike/50 hover:ring-1 hover:ring-bike/50' },
-  ];
+  return <motion.div key="step-plan" initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }} transition={{ duration: 0.18 }} className="space-y-5 motion-reduce:transition-none">
+    <header className="px-1"><span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-swim/10 px-3 py-1 text-xs font-semibold text-swim"><Check className="size-3.5" /> Preparado para guardar</span><h1 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Revisa tu punto de partida</h1><p className="mt-2 max-w-xl text-[15px] leading-6 text-text-secondary">Tu plan se creará con estos datos. Podrás ajustar la carga y las sesiones después, cuando lo necesites.</p></header>
 
-  return (
-    <motion.div key="step-plan" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
-      {/* Celebratory header */}
-      <div className="text-center space-y-4 py-2">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, rotate: -8 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', duration: 0.5, bounce: 0.2, delay: 0.05 }}
-          className="w-20 h-20 rounded-full bg-coral-500/15 border-2 border-coral-500/40 flex items-center justify-center mx-auto"
-        >
-          <CheckCircle2 className="w-10 h-10 text-coral-500" />
-        </motion.div>
-        <div>
-          <h2 className="text-3xl font-black tracking-tight text-text-primary">¡Tu plan está listo!</h2>
-          <p className="text-sm text-text-secondary font-medium mt-1.5 max-w-md mx-auto">
-            La IA generará tu periodización al instante y verás tu primera semana de entrenamientos en el dashboard.
-          </p>
-        </div>
-      </div>
+    <section aria-label="Resumen del plan" className="rounded-[24px] border border-border-default bg-surface-card p-4 shadow-card sm:p-5"><div className="mb-4 flex items-center justify-between gap-3"><div><p className="text-base font-semibold text-text-primary">{modalityLabel}</p><p className="mt-0.5 text-xs text-text-secondary">Perfil inicial</p></div><span className="rounded-full bg-surface-hover px-3 py-1.5 text-xs font-medium text-text-secondary">{summary.totalHours} h/semana</span></div><div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3"><SummaryItem icon={<Trophy className="size-3.5" />} label="Objetivo" value={summary.raceName} /><SummaryItem icon={<Calendar className="size-3.5" />} label="Fecha" value={summary.raceDate || 'Sin fecha fija'} /><SummaryItem icon={<Flag className="size-3.5" />} label="Distancia" value={DISTANCE_LABELS[summary.distance] || summary.distance} /><SummaryItem icon={<Dumbbell className="size-3.5" />} label="Nivel" value={LEVEL_LABELS[summary.level] || summary.level} /><SummaryItem icon={<Clock3 className="size-3.5" />} label="Volumen" value={`${summary.totalHours} h/semana`} /><SummaryItem icon={<Target className="size-3.5" />} label="Marca" value={summary.targetTime || 'A definir'} /></div></section>
 
-      {/* Summary */}
-      <ProCard className="bg-surface-card border border-border-default shadow-card">
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <SummaryItem icon={<Trophy className="w-4 h-4 text-swim" />} label="Carrera" value={summary.raceName} />
-          <SummaryItem icon={<Calendar className="w-4 h-4 text-swim" />} label="Fecha" value={summary.raceDate || 'Flexible'} />
-          <SummaryItem icon={<Flag className="w-4 h-4 text-coral-500" />} label="Distancia" value={DISTANCE_LABELS[summary.distance] || summary.distance} />
-          <SummaryItem icon={<Dumbbell className="w-4 h-4 text-bike" />} label="Nivel" value={LEVEL_LABELS[summary.level] || summary.level} />
-          <SummaryItem icon={<Clock className="w-4 h-4 text-warning" />} label="Volumen" value={`${summary.totalHours}h/semana`} />
-          <SummaryItem icon={<Target className="w-4 h-4 text-swim" />} label="Tiempo objetivo" value={summary.targetTime || '—'} />
-        </div>
-        <p className="text-[11px] text-text-muted font-medium mt-3 text-center">{modalityLabel} · Perfil guardado correctamente</p>
-      </ProCard>
+    <section className="rounded-[24px] border border-border-default bg-surface-card p-4 shadow-card sm:p-5"><div className="flex gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-swim/10 text-swim"><Watch className="size-5" /></span><div><h2 className="text-base font-semibold text-text-primary">Conecta tus datos</h2><p className="mt-0.5 text-sm leading-5 text-text-secondary">Es opcional. Puedes hacerlo ahora o desde Ajustes cuando tengas tu reloj a mano.</p></div></div><div className="mt-4 grid gap-2.5 sm:grid-cols-3"><ConnectionCard label="Polar" detail="Sesiones y métricas" disabled={props.loading} onClick={() => props.onConnect('polar')} /><ConnectionCard label="COROS" detail="Sesiones y métricas" disabled={props.loading} onClick={() => props.onConnect('coros')} /><ConnectionCard label="Strava" detail="Actividades recientes" disabled={props.loading} onClick={() => props.onConnect('strava')} /></div><div className="mt-3 flex items-center gap-2 rounded-xl bg-surface-hover/70 px-3 py-2.5 text-xs leading-5 text-text-secondary"><LockKeyhole className="size-3.5 shrink-0 text-text-muted" /> Garmin estará disponible cuando Garmin apruebe la integración. No ocultamos ese estado ni simulamos una conexión.</div></section>
 
-      {/* Optional connections */}
-      <ProCard className="bg-surface-hover/30 border border-border-default">
-        <div className="space-y-5">
-          {/* Telemetry */}
-          <div>
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-              <Zap className="w-4 h-4 text-coral-500" /> Conecta tu reloj <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">(opcional)</span>
-            </h3>
-            <p className="text-xs text-text-secondary mt-1">
-              Sincroniza tus entrenamientos reales para que la IA ajuste tu plan cada día. Puedes hacerlo ahora o más tarde desde Ajustes.
-            </p>
-            <div className="grid grid-cols-3 gap-3 mt-4">
-              {connectProviders.map(provider => (
-                <button
-                  key={provider.id}
-                  onClick={() => props.onConnect(provider.id)}
-                  disabled={props.loading}
-                  className={`flex min-h-11 flex-col items-center justify-center rounded-2xl border border-border-default bg-surface-card p-4 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] group cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100 ${provider.hover}`}
-                >
-                  <span className="text-2xl mb-2 block">{provider.icon}</span>
-                  <span className="text-xs font-bold text-text-primary group-hover:text-swim transition-[color] duration-150 ease-out motion-reduce:transition-opacity">{provider.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+    <section className="rounded-[24px] border border-border-default bg-surface-card p-4 shadow-card sm:p-5"><div className="flex gap-3"><span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-bike/10 text-bike"><UserRoundPlus className="size-5" /></span><div className="min-w-0 flex-1"><h2 className="text-base font-semibold text-text-primary">¿Tienes entrenador?</h2><p className="mt-0.5 text-sm leading-5 text-text-secondary">Introduce su código si quieres que gestione tu planificación.</p></div></div><label className="sr-only" htmlFor="coach-invite-code">Código de entrenador</label><input id="coach-invite-code" type="text" value={props.inviteCode} onChange={e => { const value = e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, ''); props.setInviteCode(value); props.setWantsCoach(value.trim().length > 0); }} placeholder="Código de entrenador" autoCapitalize="characters" className="mt-4 min-h-12 w-full rounded-xl border border-border-default bg-surface-hover px-4 text-sm font-semibold uppercase tracking-[0.08em] text-text-primary outline-none transition-[border-color,box-shadow] placeholder:normal-case placeholder:tracking-normal placeholder:text-text-muted focus:border-swim focus:ring-4 focus:ring-swim/10" /><p className="mt-2 text-xs leading-5 text-text-muted">{isCoachFlow ? 'Tu entrenador tendrá el control del plan; la IA no modificará sus decisiones.' : 'Sin entrenador, podrás activar recomendaciones adaptativas cuando completes el perfil.'}</p></section>
 
-          {/* Coach (optional) */}
-          <div className="border-t border-border-default pt-4">
-            <h3 className="text-sm font-bold text-text-primary flex items-center gap-2">
-              <UserPlus className="w-4 h-4 text-bike" /> ¿Tienes un entrenador? <span className="text-[10px] text-text-muted font-bold uppercase tracking-wider">(opcional)</span>
-            </h3>
-            <input
-              type="text"
-              value={props.inviteCode}
-              onChange={e => {
-                const v = e.target.value.toUpperCase().replace(/[^A-Z0-9_-]/g, '');
-                props.setInviteCode(v);
-                props.setWantsCoach(v.trim().length > 0);
-              }}
-              placeholder="CÓDIGO DE ENTRENADOR (opcional)"
-              className="mt-3 w-full rounded-xl border border-border-default bg-surface-card px-4 py-3 text-sm font-bold uppercase tracking-widest text-swim outline-none transition-[background-color,color,border-color,box-shadow,opacity] duration-150 ease-out placeholder-text-muted focus:bg-surface-card focus:border-bike focus:ring-1 focus:ring-bike motion-reduce:transition-opacity"
-            />
-            <p className="text-xs text-text-muted mt-1.5">Si tu entrenador te dio un código, introdúcelo aquí y te vincularemos al guardar.</p>
-          </div>
-        </div>
-      </ProCard>
-
-      {/* Footer */}
-      <div className="flex justify-between items-center pt-4 border-t border-border-default">
-        <button onClick={props.onPrev} className="flex min-h-11 items-center px-6 py-3 text-sm font-semibold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100">
-          <ChevronLeft className="w-4 h-4 mr-1" /> Atrás
-        </button>
-        <div className="flex flex-col items-end gap-1.5">
-          <AnimatedButton variant="primary" onClick={props.onSave} disabled={props.loading} className="px-8 py-3 text-sm !bg-coral-500 hover:!bg-coral-600 !text-white min-w-[200px]">
-            {props.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
-            {props.loading ? 'Generando plan...' : 'Crear mi plan'}
-          </AnimatedButton>
-          <button onClick={props.onSave} disabled={props.loading} className="min-h-9 text-xs font-semibold text-text-secondary transition-[color,opacity,transform] duration-150 ease-out hover:text-text-primary active:scale-[0.98] cursor-pointer disabled:opacity-50 motion-reduce:transition-opacity motion-reduce:active:scale-100">
-            Conectar más tarde
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  );
+    <footer className="flex items-center justify-between gap-4 pt-1"><button type="button" onClick={props.onPrev} disabled={props.loading} className="inline-flex min-h-11 items-center gap-1 rounded-xl px-3 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary disabled:opacity-50"><ChevronLeft className="size-4" /> Atrás</button><button type="button" onClick={props.onSave} disabled={props.loading} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-swim px-5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform] hover:bg-swim/90 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100">{props.loading ? <Loader2 className="size-4 animate-spin" /> : <Activity className="size-4" />}{props.loading ? 'Guardando…' : 'Crear mi plan'}</button></footer>
+  </motion.div>;
 }

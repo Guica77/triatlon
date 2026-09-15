@@ -228,17 +228,17 @@ export function HybridWizard() {
 
   if (!isMounted) {
     return (
-      <div className="flex min-h-[600px] w-full max-w-5xl items-center justify-center space-y-8 rounded-3xl bg-surface-app/50">
-        <div className="w-10 h-10 rounded-full border-4 border-swim border-t-transparent animate-spin"></div>
+      <div className="flex min-h-[420px] w-full max-w-3xl items-center justify-center rounded-[24px] border border-border-default bg-surface-card">
+        <div className="size-8 rounded-full border-2 border-swim border-t-transparent animate-spin" aria-label="Cargando configuración" />
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-5xl space-y-8">
+    <div className="w-full max-w-3xl space-y-6">
       {/* Stepper Header */}
-      <div className="flex items-center justify-between relative mb-12 max-w-md mx-auto">
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-border-default -z-10" />
+      <nav aria-label="Progreso de configuración" className="relative mx-auto mb-2 flex max-w-sm items-start justify-between">
+        <div className="absolute left-5 right-5 top-5 h-px bg-border-default" />
         {Array.from({ length: totalSteps }).map((_, i) => {
           const num = i + 1;
           return (
@@ -246,16 +246,17 @@ export function HybridWizard() {
               key={num}
               type="button"
               onClick={() => setStep(num)}
-              className="flex flex-col items-center gap-2 bg-[var(--color-background)] px-4 cursor-pointer focus:outline-none group"
+              aria-current={step === num ? 'step' : undefined}
+              className="group z-10 flex flex-col items-center gap-2 bg-[var(--color-background)] px-3 focus:outline-none"
             >
               <div className={`flex size-10 items-center justify-center rounded-full border-2 font-bold transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-200 ease-out motion-reduce:transition-opacity ${
                 step >= num
-                  ? 'bg-swim border-swim text-white shadow-[0_0_15px_rgba(59,130,246,0.4)] scale-105'
-                  : 'bg-surface-card border-border-default text-text-muted group-hover:border-border-default group-hover:text-text-secondary'
+                  ? 'bg-swim border-swim text-white shadow-sm'
+                  : 'bg-surface-card border-border-default text-text-muted group-hover:text-text-secondary'
               }`}>
                 {step > num ? <Check className="w-5 h-5" /> : num}
               </div>
-              <span className={`text-[10px] uppercase tracking-wider font-bold transition-colors duration-200 ${
+              <span className={`text-[11px] font-medium transition-colors duration-200 ${
                 step >= num ? 'text-swim' : 'text-text-muted group-hover:text-text-secondary'
               }`}>
                 {num === 1 ? 'Objetivo y nivel' : 'Tu plan'}
@@ -263,7 +264,7 @@ export function HybridWizard() {
             </button>
           );
         })}
-      </div>
+      </nav>
 
       <AnimatePresence mode="wait">
         {step === 1 && (

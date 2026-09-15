@@ -130,7 +130,12 @@ struct ProductView: View {
                     AthleteProgressView(model: athleteProgress, onFallback: openWebProgress)
                 }
                 if showingNativeProfile {
-                    NativeProfileView(model: nativeProfile, openDevices: { showingDevices = true }, openAccount: { showingAccount = true })
+                    NativeProfileView(
+                        model: nativeProfile,
+                        openDevices: { showingDevices = true },
+                        openCoros: { openProfileDestination("/api/auth/coros/connect") },
+                        openAccount: { showingAccount = true }
+                    )
                 }
                 if showingNativeChat { NativeChatView(origin: origin) }
                 if !showingNativeSurface && browser.loading && !browser.hasCompletedInitialLoad {

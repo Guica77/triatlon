@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Target, Search, Sparkles, ChevronRight, ChevronDown, Clock, HeartPulse } from 'lucide-react';
+import { Trophy, Target, Search, SlidersHorizontal, ChevronRight, ChevronDown, Clock, HeartPulse } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
 import { RACES_CATALOG, RaceCatalogItem, MultisportModality } from '@/lib/races-data';
@@ -74,16 +74,16 @@ export function StepGoal(props: StepGoalProps) {
   const isRunOnly = props.customModality === 'carrera';
 
   return (
-    <motion.div key="step-goal" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
-      <ProCard className="space-y-6 bg-surface-card border border-border-default shadow-card">
+    <motion.div key="step-goal" initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 12 }} transition={{ duration: 0.18 }} className="space-y-5 motion-reduce:transition-none">
+      <ProCard className="space-y-6 rounded-[24px] border border-border-default bg-surface-card shadow-card sm:p-6">
         {/* Header */}
         <div className="border-b border-border-default pb-4 flex items-start gap-3">
           <div className="w-10 h-10 rounded-xl bg-swim/10 border border-swim/30 flex items-center justify-center shrink-0">
             <Target className="w-5 h-5 text-swim" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-text-primary">Objetivo y nivel</h2>
-            <p className="text-sm text-text-secondary mt-0.5">Cuéntanos quién eres y a qué quieres llegar. Solo lo esencial.</p>
+            <h2 className="text-xl font-semibold tracking-tight text-text-primary">Objetivo y nivel</h2>
+            <p className="mt-0.5 text-sm leading-5 text-text-secondary">Cuéntanos a qué quieres llegar y con qué base partes.</p>
           </div>
         </div>
 
@@ -298,7 +298,7 @@ export function StepGoal(props: StepGoalProps) {
             className="w-full flex items-center justify-between gap-2 px-4 py-3 rounded-xl border border-border-default bg-surface-hover/40 hover:bg-surface-hover transition-[background-color,color,border-color,opacity] duration-150 ease-out motion-reduce:transition-opacity cursor-pointer"
           >
             <span className="flex items-center gap-2 text-sm font-semibold text-text-secondary">
-              <Sparkles className="w-4 h-4 text-coral-500" />
+              <SlidersHorizontal className="w-4 h-4 text-swim" />
               Datos opcionales para calibrar tu plan
             </span>
             <ChevronDown className={`w-4 h-4 text-text-muted transition-transform duration-200 ${showDetails ? 'rotate-180' : ''}`} />
@@ -371,7 +371,7 @@ export function StepGoal(props: StepGoalProps) {
         {/* Footer */}
         <div className="flex justify-between pt-4 border-t border-border-default">
           <div />
-          <AnimatedButton variant="primary" onClick={props.onNext} className="px-8 py-3 text-sm !bg-swim hover:!bg-swim/90 !text-white">
+          <AnimatedButton variant="primary" onClick={props.onNext} className="min-h-12 rounded-xl px-6 text-sm !bg-swim font-semibold hover:!bg-swim/90 !text-white">
             Continuar <ChevronRight className="w-4 h-4 ml-1" />
           </AnimatedButton>
         </div>

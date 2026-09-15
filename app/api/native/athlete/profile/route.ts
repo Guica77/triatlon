@@ -34,7 +34,12 @@ export async function GET(request: Request) {
       goal: { name: profile.target_race_name || null, date: profile.target_race_date || null },
       physiology: { ftp: profile.current_ftp || null, swimPace: profile.current_swim_pace || null, runPace: profile.current_run_pace || null, baselineHours: profile.baseline_training_hours || null, injuries: profile.previous_injuries || null },
       recovery: biometrics ? { readiness: biometrics.readiness_score, hrv: biometrics.hrv, sleepHours: biometrics.sleep_hours, fatigue: biometrics.fatigue_rating } : null,
-      connections: { strava: profile.strava_connected || providers.has('strava'), garmin: profile.garmin_connected || providers.has('garmin') },
+      connections: {
+        strava: profile.strava_connected || providers.has('strava'),
+        garmin: profile.garmin_connected || providers.has('garmin'),
+        polar: providers.has('polar'),
+        coros: providers.has('coros'),
+      },
     })
   } catch {
     return reply({ error: 'Servicio no disponible.' }, 503)
