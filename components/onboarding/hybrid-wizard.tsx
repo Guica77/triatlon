@@ -205,7 +205,7 @@ export function HybridWizard() {
         alert(`Error al guardar objetivos: ${result.error}`);
         setLoading(false);
       } else {
-        window.location.href = `/api/auth/telemetry/connect?provider=${provider}&onboarding=true`;
+        window.location.href = provider === 'coros' ? '/api/auth/coros/connect?onboarding=true' : `/api/auth/telemetry/connect?provider=${provider}&onboarding=true`;
       }
     } catch (error) {
       console.error('Error:', error);

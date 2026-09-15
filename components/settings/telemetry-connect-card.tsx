@@ -10,6 +10,7 @@ export function TelemetryConnectCard({ connectedProviders = [] }: { connectedPro
   const router = useRouter();
   const connected = connectedProviders.includes('strava');
   const polarConnected = connectedProviders.includes('polar');
+  const corosConnected = connectedProviders.includes('coros');
   const native = typeof navigator !== 'undefined' && navigator.userAgent.includes('TriWaveXNative/');
   async function run(action: () => Promise<{ error?: string; needsReconnect?: boolean }>, success: string) {
     setBusy(true); setMessage(''); setNeedsReconnect(false);
@@ -39,6 +40,10 @@ export function TelemetryConnectCard({ connectedProviders = [] }: { connectedPro
     <div className="mt-5 border-t border-border-default pt-5">
       <div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-bold text-text-primary">Polar Flow</h3><p className="mt-1 text-sm leading-relaxed text-text-secondary">{polarConnected ? 'Polar está conectado. Importaremos entrenamientos, sueño y recuperación con tu permiso.' : 'Conecta Polar Flow de forma segura para importar entrenamientos y recuperación.'}</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${polarConnected ? 'border-success/30 bg-bike-subtle text-bike' : 'border-border-default bg-surface-elevated text-text-muted'}`}>{polarConnected ? 'Conectado' : 'Disponible'}</span></div>
       {polarConnected ? <button disabled={busy} onClick={() => run(() => disconnectTelemetry('polar'), 'Polar desconectado.')} className="mt-3 min-h-11 rounded-xl border border-border-default bg-surface-elevated px-4 py-2 text-sm font-bold text-text-secondary transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50">Desconectar Polar</button> : <a href="/api/auth/telemetry/connect?provider=polar" className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-button transition-[background-color,transform] duration-150 active:scale-[0.98] sm:w-auto">Conectar con Polar</a>}
+    </div>
+    <div className="mt-5 border-t border-border-default pt-5">
+      <div className="flex items-start justify-between gap-3"><div><h3 className="text-sm font-bold text-text-primary">COROS</h3><p className="mt-1 text-sm leading-relaxed text-text-secondary">{corosConnected ? 'COROS está conectado. Tus datos y entrenamientos se sincronizan con tu permiso.' : 'Conecta tu cuenta COROS con OAuth seguro para consultar datos y publicar entrenamientos.'}</p></div><span className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${corosConnected ? 'border-success/30 bg-bike-subtle text-bike' : 'border-border-default bg-surface-elevated text-text-muted'}`}>{corosConnected ? 'Conectado' : 'Disponible'}</span></div>
+      {corosConnected ? <button disabled={busy} onClick={() => run(() => disconnectTelemetry('coros'), 'COROS desconectado.')} className="mt-3 min-h-11 rounded-xl border border-border-default bg-surface-elevated px-4 py-2 text-sm font-bold text-text-secondary transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50">Desconectar COROS</button> : <a href="/api/auth/coros/connect" className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-button transition-[background-color,transform] duration-150 active:scale-[0.98] sm:w-auto">Conectar con COROS</a>}
     </div>
     <div className="mt-5 border-t border-border-default pt-5">
       <div className="flex items-start justify-between gap-3">

@@ -22,7 +22,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
     if (provider === 'strava') {
       window.open('/api/auth/telemetry/connect?provider=strava&onboarding=true&popup=true', '_blank');
       setActiveModal('strava_confirm');
-    } else {
+    } else if (provider !== 'coros') {
       setActiveModal(provider);
     }
   };
@@ -124,6 +124,16 @@ export function StepTelemetry(props: StepTelemetryProps) {
               <span className="text-3xl mb-3 block">🔄</span>
               <span className="text-sm font-bold text-text-primary transition-[color] duration-150 ease-out group-hover:text-coral-500 motion-reduce:transition-opacity">Conectar Strava</span>
               <span className="text-[10px] text-text-muted mt-1 uppercase tracking-wider font-semibold">Vía Strava Bridge</span>
+            </button>
+
+            <button
+              onClick={() => props.handleSaveAndConnect('coros')}
+              disabled={props.loading}
+              className="flex min-h-11 flex-col items-center justify-center p-5 rounded-2xl border border-border-default bg-surface-hover/30 hover:bg-bike/10 hover:border-bike/50 hover:ring-1 hover:ring-bike/50 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] group relative overflow-hidden text-center cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+            >
+              <span className="text-3xl mb-3 block">⏱️</span>
+              <span className="text-sm font-bold text-text-primary transition-[color] duration-150 ease-out group-hover:text-bike motion-reduce:transition-opacity">Conectar COROS</span>
+              <span className="text-[10px] text-text-muted mt-1 uppercase tracking-wider font-semibold">OAuth seguro</span>
             </button>
           </div>
         </div>

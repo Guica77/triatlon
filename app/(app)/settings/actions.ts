@@ -99,7 +99,7 @@ export async function updateVirtualGarage(virtual_garage: string[]) {
 }
 
 export async function disconnectTelemetry(provider: string) {
-  if (!['strava', 'garmin', 'polar'].includes(provider)) return { error: 'Proveedor no admitido.' };
+  if (!['strava', 'garmin', 'polar', 'coros'].includes(provider)) return { error: 'Proveedor no admitido.' };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'No autorizado' };
