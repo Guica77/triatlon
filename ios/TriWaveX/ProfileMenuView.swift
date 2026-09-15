@@ -26,7 +26,6 @@ struct ProfileMenuView: View {
             }
 
             Section("Preferencias") {
-                row("Nutrición e hidratación", systemImage: "drop", tint: .cyan) { openWeb("/settings?section=nutricion") }
                 row("Notificaciones", systemImage: "bell", tint: .red) { openWeb("/settings?section=notificaciones") }
                 row("Clima", systemImage: "cloud.sun", tint: .blue) { openWeb("/settings?section=clima") }
             }

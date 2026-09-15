@@ -16,6 +16,12 @@ final class SessionModel {
 
     init(origin: URL) { self.origin = origin }
 
+    func endSession() async {
+        await store.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast)
+        destination = nil
+        error = nil
+    }
+
     private struct LoginResult: Decodable { let destination: String }
 
     func prepareAppleRequest(_ request: ASAuthorizationAppleIDRequest) {

@@ -18,16 +18,19 @@ struct ProductView: View {
     let store: WKWebsiteDataStore
     let initialPath: String
     let onDismiss: (() -> Void)?
+    let onSessionEnded: (() -> Void)?
     @State private var browser = BrowserModel()
     @State private var strava = StravaSessionModel()
     @State private var health = HealthKitService()
     @State private var bluetooth = BluetoothHeartRateService()
     @State private var showingDevices = false
+    @State private var showingAccount = false
     @State private var nativeProgressEnabled = true
     @State private var nativeProfileEnabled = true
     @State private var nativeChatEnabled = true
     @State private var webPathOverride: String?
     @State private var athleteProgress: AthleteProgressModel
+    @State private var nativeProfile: NativeProfileModel
     @State private var selectedTab: AppTab
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -39,12 +42,14 @@ struct ProductView: View {
         Self.tab(for: initialPath, isCoach: isCoach)
     }
 
-    init(origin: URL, store: WKWebsiteDataStore, initialPath: String, onDismiss: (() -> Void)?) {
+    init(origin: URL, store: WKWebsiteDataStore, initialPath: String, onDismiss: (() -> Void)?, onSessionEnded: (() -> Void)? = nil) {
         self.origin = origin
         self.store = store
         self.initialPath = initialPath
         self.onDismiss = onDismiss
+        self.onSessionEnded = onSessionEnded
         _athleteProgress = State(initialValue: AthleteProgressModel(client: AthleteProgressClient(origin: origin, store: store)))
+        _nativeProfile = State(initialValue: NativeProfileModel(client: NativeProfileClient(origin: origin, store: store)))
         _selectedTab = State(initialValue: Self.tab(for: initialPath, isCoach: initialPath.hasPrefix("/coach/")))
     }
 
@@ -119,7 +124,7 @@ struct ProductView: View {
                     AthleteProgressView(model: athleteProgress, onFallback: openWebProgress)
                 }
                 if showingNativeProfile {
-                    ProfileMenuView(openWeb: openProfileDestination, openDevices: { showingDevices = true })
+                    NativeProfileView(model: nativeProfile, openDevices: { showingDevices = true }, openAccount: { showingAccount = true })
                 }
                 if showingNativeChat { NativeChatView(origin: origin) }
                 if !showingNativeProgress && !showingNativeProfile && !showingNativeChat && browser.loading && !browser.hasCompletedInitialLoad {
@@ -165,6 +170,9 @@ struct ProductView: View {
         .sheet(isPresented: $showingDevices) {
             DeviceSettingsView(health: health, bluetooth: bluetooth, onHealthSnapshot: syncHealth)
                 .presentationDetents([.medium, .large])
+        }
+        .sheet(isPresented: $showingAccount) {
+            NavigationStack { AccountSettingsView(model: AccountSettingsModel(origin: origin, store: store), onSessionEnded: { showingAccount = false; onSessionEnded?() }) }
         }
     }
 

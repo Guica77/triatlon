@@ -35,7 +35,8 @@ struct RootView: View {
                     origin: session.origin,
                     store: session.store,
                     initialPath: destination,
-                    onDismiss: nil
+                    onDismiss: nil,
+                    onSessionEnded: { Task { await session.endSession() } }
                 )
                 .transition(.opacity)
             } else {
@@ -53,7 +54,8 @@ struct RootView: View {
                     origin: session.origin,
                     store: session.store,
                     initialPath: informationURL.path,
-                    onDismiss: { self.informationURL = nil }
+                    onDismiss: { self.informationURL = nil },
+                    onSessionEnded: { informationURL = nil; Task { await session.endSession() } }
                 )
             }
         }
