@@ -14,7 +14,7 @@ import { DeleteAccountCard } from '@/components/settings/delete-account-card';
 import { WorkoutAIFeedback } from '@/components/dashboard/workout-ai-feedback';
 import { NotificationTestCard } from '@/components/settings/notification-test-card';
 import { AccountSessionCard } from '@/components/settings/account-session-card';
-import { ArrowLeft, ChevronRight, CircleAlert, HeartPulse, Route, Watch, MessageCircle, ShieldCheck, Bell, CloudSun, FileDown, HelpCircle, BookOpen } from 'lucide-react';
+import { ArrowLeft, ChevronRight, CircleAlert, HeartPulse, Route, Watch, MessageCircle, ShieldCheck, Bell, CloudSun, FileDown, HelpCircle, LogOut, BookOpen } from 'lucide-react';
 
 function SettingsRow({ href, label, detail, pending, icon: Icon }: { href: string; label: string; detail?: string; pending?: boolean; icon?: typeof HeartPulse }) {
   return (
