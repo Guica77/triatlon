@@ -55,7 +55,7 @@ struct RootView: View {
                     store: session.store,
                     initialPath: informationURL.path,
                     onDismiss: { self.informationURL = nil },
-                    onSessionEnded: { informationURL = nil; Task { await session.endSession() } }
+                    onSessionEnded: { self.informationURL = nil; Task { await session.endSession() } }
                 )
             }
         }
