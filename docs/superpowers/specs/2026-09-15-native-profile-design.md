@@ -23,7 +23,7 @@ Se añadirá `/api/native/athlete/profile` protegido igual que el endpoint nativ
 
 - Requiere `X-TriWaveX-Native: 1` y la sesión autenticada de cookies de WebKit.
 - Solo permite el rol `athlete`.
-- `GET` devuelve un DTO exclusivo de la app: identidad, objetivo, fisiología, lesiones, nutrición, conexiones, preferencias de notificaciones y el último estado de recuperación.
+- `GET` devuelve un DTO exclusivo de la app: identidad, objetivo, fisiología, lesiones, conexiones, preferencias de notificaciones y el último estado de recuperación.
 - `PATCH` acepta una actualización parcial con campos permitidos por sección. Valida tipos, límites y listas antes de escribir únicamente el perfil del usuario autenticado.
 - No devuelve datos sensibles, credenciales de proveedores ni payloads de salud sin procesar.
 
@@ -38,10 +38,24 @@ El cliente Swift reutilizará la estrategia de cookies, origen permitido y error
 - `PlanGoalView`: prueba objetivo, fecha y tiempos objetivo.
 - `PhysiologyView`: FTP, ritmos y horas base; muestra zonas calculadas a partir de esos datos.
 - `InjuryHistoryView`: lista, alta y baja de lesiones.
-- `NutritionSettingsView`: tasa de sudor y carbohidratos por hora.
-- `ConnectionsView`: estado de Salud, Apple Watch, pulsómetro y Strava. Reutiliza el selector de dispositivos existente; Garmin se presenta como “Próximamente”.
+- `ConnectionsView`: centro universal de dispositivos, compartido conceptualmente con la web. Muestra estado, última sincronización, permisos y desconexión de cada proveedor.
 - `WeatherAndNotificationsView`: ubicación, tiempo local y un interruptor para avisos. El tiempo de una sesión sigue viéndose también en la tarjeta del entrenamiento.
 - `DataAndAccountView`: exportación, privacidad, ayuda y cuenta. Las acciones destructivas permanecen protegidas por confirmación explícita.
+
+## Conexiones universales
+
+La interfaz mostrará una única lista de proveedores, tanto en web como en SwiftUI. Cada fila tendrá uno de estos estados inequívocos: `Conectar`, `Conectado`, `Disponible mediante Strava o Salud`, `Importar archivo` o `Pendiente de autorización oficial`. No se ofrecerán controles activos en los dos últimos casos.
+
+### Vías de conexión
+
+- **Nativas de la aplicación:** Apple Health/Apple Watch mediante HealthKit y sensores Bluetooth (pulsómetros, potenciómetros y sensores de cadencia). Solo están disponibles en la app iOS; la web muestra el último estado y sincronización.
+- **Cuentas de entrenamiento:** Strava, Garmin, COROS, Polar, Suunto, Fitbit, Wahoo y Zwift se conectarán mediante OAuth únicamente cuando exista acceso oficial habilitado para TriWaveX. El servidor normalizará actividades y evitará duplicados por proveedor, identificador externo y hora de inicio.
+- **Puentes universales:** cualquier reloj que escriba en Strava o Apple Health se podrá importar desde esa conexión, incluyendo dispositivos de Amazfit/Zepp cuando la persona usuaria haya configurado ese puente. No se afirmará una integración directa de una marca sin una API o autorización vigente.
+- **Respaldo:** importación manual de archivos FIT y GPX para relojes y plataformas que no tengan un conector autorizado.
+
+### Seguridad y sincronización
+
+Los tokens OAuth se cifran en servidor y nunca se devuelven a los clientes. Cada proveedor mantiene su propio permiso revocable. Los webhooks se usan cuando el proveedor los ofrece; de lo contrario, la sincronización se inicia manualmente o mediante una tarea programada con límites de tasa. Una desconexión revoca el token remoto cuando el proveedor lo permita y elimina las credenciales locales, sin borrar los entrenamientos ya importados.
 
 ## Navegación
 
@@ -66,6 +80,6 @@ Los destinos que dependen de una acción fuera del perfil (chat, autorización d
 
 ## Fuera de alcance
 
-- No se implementará la integración directa con Garmin ni se activará sin su aprobación.
+- La integración directa de cada marca requiere sus credenciales, autorización y condiciones vigentes; hasta entonces se mostrará su vía de puente o importación, no una conexión ficticia.
 - No se modificará el onboarding web ni se duplicarán sus flujos de pago.
 - No se guardarán datos nuevos de HealthKit desde Perfil: solo se visualizará la última sincronización y se enlazará al flujo de dispositivos ya existente.
