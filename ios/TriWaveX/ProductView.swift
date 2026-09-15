@@ -26,10 +26,12 @@ struct ProductView: View {
     @State private var showingDevices = false
     @State private var showingAccount = false
     @State private var nativeProgressEnabled = true
+    @State private var nativePlanEnabled = true
     @State private var nativeProfileEnabled = true
     @State private var nativeChatEnabled = true
     @State private var webPathOverride: String?
     @State private var athleteProgress: AthleteProgressModel
+    @State private var nativePlan: NativePlanModel
     @State private var nativeProfile: NativeProfileModel
     @State private var selectedTab: AppTab
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -49,6 +51,7 @@ struct ProductView: View {
         self.onDismiss = onDismiss
         self.onSessionEnded = onSessionEnded
         _athleteProgress = State(initialValue: AthleteProgressModel(client: AthleteProgressClient(origin: origin, store: store)))
+        _nativePlan = State(initialValue: NativePlanModel(client: NativePlanClient(origin: origin, store: store)))
         _nativeProfile = State(initialValue: NativeProfileModel(client: NativeProfileClient(origin: origin, store: store)))
         _selectedTab = State(initialValue: Self.tab(for: initialPath, isCoach: initialPath.hasPrefix("/coach/")))
     }
@@ -114,12 +117,15 @@ struct ProductView: View {
                     origin: origin,
                     store: store,
                     initialPath: initialPath,
-                    isActive: !showingNativeProgress && !showingNativeProfile && !showingNativeChat,
+                    isActive: !showingNativeSurface,
                     onStravaConnect: connectStrava,
                     onOpenDevices: { showingDevices = true }
                 )
-                    .opacity(showingNativeProgress || showingNativeProfile || showingNativeChat ? 0 : 1)
-                    .allowsHitTesting(!showingNativeProgress && !showingNativeProfile && !showingNativeChat)
+                    .opacity(showingNativeSurface ? 0 : 1)
+                    .allowsHitTesting(!showingNativeSurface)
+                if showingNativePlan {
+                    NativePlanView(model: nativePlan)
+                }
                 if showingNativeProgress {
                     AthleteProgressView(model: athleteProgress, onFallback: openWebProgress)
                 }
@@ -127,10 +133,10 @@ struct ProductView: View {
                     NativeProfileView(model: nativeProfile, openDevices: { showingDevices = true }, openAccount: { showingAccount = true })
                 }
                 if showingNativeChat { NativeChatView(origin: origin) }
-                if !showingNativeProgress && !showingNativeProfile && !showingNativeChat && browser.loading && !browser.hasCompletedInitialLoad {
+                if !showingNativeSurface && browser.loading && !browser.hasCompletedInitialLoad {
                     TriWaveXLaunchScreen()
                 }
-                if !showingNativeProgress && !showingNativeProfile && !showingNativeChat && browser.loading && browser.hasCompletedInitialLoad {
+                if !showingNativeSurface && browser.loading && browser.hasCompletedInitialLoad {
                     VStack {
                         TriWaveXLoadingBar()
                             .padding(.horizontal, 24)
@@ -141,7 +147,7 @@ struct ProductView: View {
                     }
                     .allowsHitTesting(false)
                 }
-                if !showingNativeProgress && !showingNativeProfile && !showingNativeChat, let message = browser.error {
+                if !showingNativeSurface, let message = browser.error {
                     TriWaveXErrorState(message: message, retry: browser.retry)
                 }
             }
@@ -178,7 +184,7 @@ struct ProductView: View {
 
     private var shouldShowTabBar: Bool {
         guard onDismiss == nil else { return false }
-        return showingNativeProgress || browser.showsAppNavigation ||
+        return showingNativePlan || showingNativeProgress || showingNativeProfile || showingNativeChat || browser.showsAppNavigation ||
             (!browser.hasCompletedInitialLoad && isMainNavigationPath(initialPath))
     }
 
@@ -228,15 +234,23 @@ struct ProductView: View {
     }
 
     private var showingNativeProgress: Bool {
-        nativeProgressEnabled && (initialPath == "/resumen" || webPathOverride == "/resumen") && !initialPath.hasPrefix("/coach/")
+        nativeProgressEnabled && selectedTab == .progress && !isCoach
+    }
+
+    private var showingNativePlan: Bool {
+        nativePlanEnabled && selectedTab == .plan && !isCoach
+    }
+
+    private var showingNativeSurface: Bool {
+        showingNativePlan || showingNativeProgress || showingNativeProfile || showingNativeChat
     }
 
     private var showingNativeProfile: Bool {
-        nativeProfileEnabled && (initialPath == "/settings" || webPathOverride == "/settings")
+        nativeProfileEnabled && selectedTab == .profile
     }
 
     private var showingNativeChat: Bool {
-        nativeChatEnabled && (initialPath == "/chat" || initialPath == "/coach/chat" || webPathOverride == "/chat" || webPathOverride == "/coach/chat")
+        nativeChatEnabled && selectedTab == .chat
     }
 
     private func openWebProgress() {
@@ -249,6 +263,11 @@ struct ProductView: View {
     }
 
     private func selectTab(path: String) {
+        if path == "/plan" && !isCoach {
+            webPathOverride = "/plan"
+            nativePlanEnabled = true
+            return
+        }
         if path == "/resumen" && !isCoach {
             webPathOverride = nil
             nativeProgressEnabled = true
@@ -267,6 +286,7 @@ struct ProductView: View {
             return
         }
         webPathOverride = path
+        nativePlanEnabled = false
         nativeProgressEnabled = false
         nativeProfileEnabled = false
         nativeChatEnabled = false

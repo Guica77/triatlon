@@ -92,7 +92,7 @@ Un atleta sin entrenador puede simular, revisar, confirmar y deshacer una reorga
 2. Compilar el proyecto iOS sin firma y verificar los flujos críticos en simulador.
 3. Revisar visualmente modos claro/oscuro, tamaños de texto, VoiceOver, teclado y estados sin datos.
 4. Confirmar que los planes con entrenador nunca llaman al motor de IA.
-5. Confirmar que una simulación no escribe y que una confirmación nunca deja cambios parciales.
+5. Confirmar que una simulación no modifica el calendario ni las sesiones y que una confirmación nunca deja cambios parciales.
 6. Documentar la migración, variables necesarias y proceso de rollback antes del despliegue.
 
 ## Proyecto posterior — conectores de dispositivos

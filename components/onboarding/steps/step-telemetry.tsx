@@ -9,7 +9,7 @@ interface StepTelemetryProps {
   loading: boolean;
   onPrev: () => void;
   handleSave: () => Promise<void>;
-  handleSaveAndConnect: (provider: 'strava' | 'garmin' | 'coros') => Promise<void>;
+  handleSaveAndConnect: (provider: 'strava' | 'garmin' | 'coros' | 'polar') => Promise<void>;
 }
 
 export function StepTelemetry(props: StepTelemetryProps) {
@@ -93,7 +93,7 @@ export function StepTelemetry(props: StepTelemetryProps) {
             </ol>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto">
             {/* Garmin direct button */}
             <button
               onClick={() => handleConnectClick('garmin')}
@@ -102,6 +102,16 @@ export function StepTelemetry(props: StepTelemetryProps) {
             >
               <span className="text-3xl mb-3 block">⌚</span>
               <span className="text-sm font-bold text-text-primary transition-[color] duration-150 ease-out group-hover:text-swim motion-reduce:transition-opacity">Conectar Garmin</span>
+              <span className="text-[10px] text-text-muted mt-1 uppercase tracking-wider font-semibold">Directo / Oficial</span>
+            </button>
+
+            <button
+              onClick={() => props.handleSaveAndConnect('polar')}
+              disabled={props.loading}
+              className="flex min-h-11 flex-col items-center justify-center p-5 rounded-2xl border border-border-default bg-surface-hover/30 hover:bg-red-500/10 hover:border-red-500/50 hover:ring-1 hover:ring-red-500/50 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out active:scale-[0.98] group relative overflow-hidden text-center cursor-pointer motion-reduce:transition-opacity motion-reduce:active:scale-100"
+            >
+              <span className="text-3xl mb-3 block">❤️</span>
+              <span className="text-sm font-bold text-text-primary transition-[color] duration-150 ease-out group-hover:text-red-600 motion-reduce:transition-opacity">Conectar Polar</span>
               <span className="text-[10px] text-text-muted mt-1 uppercase tracking-wider font-semibold">Directo / Oficial</span>
             </button>
 

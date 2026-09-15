@@ -11,7 +11,7 @@ El trabajo se divide en dos proyectos. Este documento cubre el primero: el motor
 ## Principios aprobados
 
 - Existe un único motor de reglas en el servidor. SwiftUI y web son clientes del mismo contrato.
-- Simular un cambio nunca modifica datos.
+- Simular un cambio nunca modifica el calendario ni las sesiones. Puede registrar una propuesta idempotente y con caducidad para que una confirmación posterior sea verificable.
 - Un cambio seguro puede confirmarse directamente.
 - Un conflicto corregible devuelve una fecha recomendada y requiere confirmación.
 - Un riesgo claro bloquea el cambio y explica el motivo.

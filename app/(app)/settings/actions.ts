@@ -99,7 +99,7 @@ export async function updateVirtualGarage(virtual_garage: string[]) {
 }
 
 export async function disconnectTelemetry(provider: string) {
-  if (!['strava', 'garmin'].includes(provider)) return { error: 'Proveedor no admitido.' };
+  if (!['strava', 'garmin', 'polar'].includes(provider)) return { error: 'Proveedor no admitido.' };
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'No autorizado' };
@@ -117,9 +117,12 @@ export async function disconnectTelemetry(provider: string) {
   }
   const { error } = await admin.from('user_connected_devices').delete().eq('user_id', user.id).eq('provider', provider);
   if (error) return { error: 'No se pudo eliminar la conexión.' };
-  const { error: profileError } = await admin.from('profiles').update(provider === 'strava'
+  const profileUpdate = provider === 'strava'
     ? { strava_connected: false, strava_auth_tokens: null, external_athlete_id: null }
-    : { garmin_connected: false, garmin_auth_tokens: null }).eq('id', user.id);
+    : provider === 'garmin'
+      ? { garmin_connected: false, garmin_auth_tokens: null }
+      : {};
+  const { error: profileError } = await admin.from('profiles').update(profileUpdate).eq('id', user.id);
   if (profileError) return { error: 'Conexión eliminada; no se pudo actualizar su estado. Recarga e inténtalo de nuevo.' };
   revalidatePath('/settings'); revalidatePath('/dashboard');
   return { success: true };

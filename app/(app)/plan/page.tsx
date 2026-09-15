@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs'
 import { evaluateDoubleSessionReadiness } from '@/lib/double-session-progression'
+import { PlanChangeCenter } from '@/components/plan/plan-change-center'
 
 export const dynamic = 'force-dynamic'
 
@@ -99,6 +100,8 @@ export default async function PlanPage() {
             </div>
           </div>
         </section>
+
+        <PlanChangeCenter workouts={(workouts || []) as any} readOnly={assignedByCoach} />
 
         <DashboardViewTabs
           variant="plan"

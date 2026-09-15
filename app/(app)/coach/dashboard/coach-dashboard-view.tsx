@@ -13,6 +13,7 @@ import { GroupTabContent } from '@/components/coach/group-tab-content'
 import { assignPlanToAthlete, removeAthlete, AthleteRosterItem } from './actions'
 import { AthleteRosterCard } from '@/components/coach/athlete-roster-card'
 import { CoachGroupsManager } from '@/components/coach/coach-groups-manager'
+import { PlanAdjustmentRequests, type CoachPlanRequest } from '@/components/coach/plan-adjustment-requests'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -28,9 +29,10 @@ interface CoachDashboardViewProps {
   coachName: string
   coachId: string
   initialInviteCode?: string | null
+  initialPlanRequests: CoachPlanRequest[]
 }
 
-export function CoachDashboardView({ initialRoster, plans, groups, coachName, coachId, initialInviteCode }: CoachDashboardViewProps) {
+export function CoachDashboardView({ initialRoster, plans, groups, coachName, coachId, initialInviteCode, initialPlanRequests }: CoachDashboardViewProps) {
   const [roster, setRoster] = React.useState<AthleteRosterItem[]>(initialRoster)
   React.useEffect(() => { setRoster(initialRoster) }, [initialRoster])
   const [searchQuery, setSearchQuery] = React.useState('')
@@ -186,6 +188,8 @@ export function CoachDashboardView({ initialRoster, plans, groups, coachName, co
             </div>
           )}
         </section>
+
+        <PlanAdjustmentRequests initialRequests={initialPlanRequests} />
 
         <section aria-label="Resumen del grupo" className="mb-8 grid grid-cols-2 overflow-hidden rounded-2xl border border-border-default bg-surface-card md:grid-cols-4">
           {[

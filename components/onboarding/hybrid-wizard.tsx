@@ -166,7 +166,7 @@ export function HybridWizard() {
     }
   };
 
-  const handleSaveAndConnect = async (provider: 'strava' | 'garmin' | 'coros' = 'strava') => {
+  const handleSaveAndConnect = async (provider: 'strava' | 'garmin' | 'coros' | 'polar' = 'strava') => {
     setLoading(true);
     try {
       const result = await saveRaceGoalAndPlan({

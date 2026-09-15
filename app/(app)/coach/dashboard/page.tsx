@@ -17,7 +17,7 @@ export default async function CoachDashboardPage() {
   }
 
   // 1. Fetch coach profile, roster data, and training plans in parallel
-  const [profileRes, rosterResult, plansRes, groupsRes] = await Promise.all([
+  const [profileRes, rosterResult, plansRes, groupsRes, requestsRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('role, first_name, invite_code')
@@ -28,7 +28,8 @@ export default async function CoachDashboardPage() {
       .from('training_plans')
       .select('id, name')
       .order('name', { ascending: true }),
-    getCoachGroups()
+    getCoachGroups(),
+    (supabase as any).from('plan_adjustment_proposals').select('id,athlete_id,intent,created_at').eq('status', 'pending').order('created_at', { ascending: false }).limit(12),
   ]);
 
   const profile = profileRes.data;
@@ -43,6 +44,11 @@ export default async function CoachDashboardPage() {
   const plans = plansRes.data || [];
   const groups = groupsRes.data || [];
   const coachName = profile.first_name || 'Entrenador';
+  const planRequests = ((requestsRes.data || []) as any[]).map(request => {
+    const athlete = roster.find(item => item.id === request.athlete_id)
+    const athleteName = [athlete?.first_name, athlete?.last_name].filter(Boolean).join(' ') || athlete?.email || 'Atleta'
+    return { id: request.id, athleteName, requestedDate: request.intent?.targetDate || 'fecha no indicada', createdAt: request.created_at }
+  })
 
   return (
     <>
@@ -53,6 +59,7 @@ export default async function CoachDashboardPage() {
       coachName={coachName} 
       coachId={user.id}
       initialInviteCode={profile.invite_code}
+      initialPlanRequests={planRequests}
     />
       <WelcomeReady />
     </>

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { notifyAthleteOfPlanDecision } from '@/lib/adaptive-plan/notifications'
 
 export interface AthleteRosterItem {
   id: string
@@ -36,6 +37,28 @@ export interface AthleteRosterItem {
     high_tss: boolean
     high_fatigue: boolean
   }
+}
+
+export async function resolvePlanAdjustmentRequest(proposalId: string, accept: boolean): Promise<{ success?: boolean; error?: string }> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(proposalId)) {
+    return { error: 'La solicitud no es válida.' }
+  }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+  const rpc = supabase as unknown as {
+    rpc(name: 'confirm_plan_adjustment' | 'reject_plan_adjustment_request', args: { proposal: string }): Promise<{ data: unknown; error: { code?: string; message: string } | null }>
+  }
+  const operation = accept ? 'confirm_plan_adjustment' : 'reject_plan_adjustment_request'
+  const { data, error } = await rpc.rpc(operation, { proposal: proposalId })
+  if (error?.code === '40001') return { error: 'El plan cambió. Pide al atleta que vuelva a enviar la solicitud.' }
+  if (error) return { error: 'La solicitud ya no está disponible.' }
+  if (data && typeof data === 'object' && 'athleteId' in data && typeof data.athleteId === 'string') {
+    await notifyAthleteOfPlanDecision(data.athleteId, accept)
+  }
+  revalidatePath('/coach/dashboard')
+  revalidatePath('/plan')
+  return { success: true }
 }
 
 /**

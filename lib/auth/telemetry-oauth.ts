@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const TELEMETRY_COOKIE = 'strava_oauth_state'
+export const TELEMETRY_PROVIDER_COOKIE = 'telemetry_oauth_provider'
 export function stateHash(state: string) { return createHash('sha256').update(state).digest('hex') }
 
 export async function issueTelemetryState(userId: string, returnPath: string) {
