@@ -5,6 +5,7 @@ import * as React from 'react';
 import { AlertOctagon, RefreshCw, Home, Activity } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
+import { useRouter } from 'next/navigation';
 
 export default function GlobalError({
   error,
@@ -13,6 +14,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const router = useRouter();
   React.useEffect(() => {
     // Log the error to an error reporting service
     console.error('Unhandled app error:', error);
@@ -54,7 +56,7 @@ export default function GlobalError({
 
         <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => router.push('/')}
             className="w-full py-3 rounded-xl border border-border-default hover:border-border-default bg-bg-card/30 text-xs font-semibold transition"
           >
             Inicio

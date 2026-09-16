@@ -29,7 +29,7 @@ struct NativeProfile: Decodable, Sendable {
     struct Goal: Decodable, Sendable { let name: String?; let date: String? }
     struct Physiology: Decodable, Sendable { let ftp: Double?; let swimPace: String?; let runPace: String?; let baselineHours: String?; let injuries: String? }
     struct Recovery: Decodable, Sendable { let readiness: Double?; let hrv: Double?; let sleepHours: Double?; let fatigue: Double? }
-    struct Connections: Decodable, Sendable { let strava: Bool; let garmin: Bool; let polar: Bool; let coros: Bool }
+    struct Connections: Decodable, Sendable { let strava: Bool; let garmin: Bool; let polar: Bool; let coros: Bool; let suunto: Bool; let amazfit: Bool }
 }
 
 struct NativeProfileClient {
@@ -83,6 +83,7 @@ struct NativeProfileView: View {
     @Bindable var model: NativeProfileModel
     let openDevices: () -> Void
     let openCoros: () -> Void
+    let openStrava: () -> Void
     let openAccount: () -> Void
     @State private var hasLoaded = false
 
@@ -136,15 +137,44 @@ struct NativeProfileView: View {
                         Spacer()
                         Text(profile.connections.coros ? "Conectado" : "Conectar")
                             .font(.caption.weight(.semibold))
-                            .foregroundStyle(profile.connections.coros ? .green : .tint)
+                            .foregroundStyle(profile.connections.coros ? .green : Color.triWaveXAqua)
                     }
                 }
                 connectionRow("Polar", connected: profile.connections.polar, icon: "heart.circle")
-                Label("Amazfit y Suunto", systemImage: "arrow.triangle.2.circlepath").foregroundStyle(.secondary)
+                if profile.connections.suunto {
+                    connectionRow("Suunto", connected: true, icon: "mountain.2")
+                } else {
+                    Button(action: openStrava) {
+                        HStack {
+                            Label("Suunto", systemImage: "mountain.2")
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text("Solicitud enviada").font(.caption.weight(.semibold)).foregroundStyle(.orange)
+                                Text("Conectar con Strava").font(.caption2).foregroundStyle(.tint)
+                            }
+                        }
+                    }
+                    .accessibilityLabel("Suunto: solicitud enviada. Conectar Strava mientras tanto")
+                }
+                if profile.connections.amazfit {
+                    connectionRow("Amazfit", connected: true, icon: "watchface.applewatch.case")
+                } else {
+                    Link(destination: URL(string: "mailto:developer@zepp.com?subject=TriWaveX%20%E2%80%94%20Amazfit%2FZepp%20partner%20API%20request")!) {
+                        HStack {
+                            Label("Amazfit / Zepp", systemImage: "watchface.applewatch.case")
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text("Solicitud requerida").font(.caption.weight(.semibold)).foregroundStyle(.orange)
+                                Text("Contactar Zepp Health").font(.caption2).foregroundStyle(.tint)
+                            }
+                        }
+                    }
+                    .accessibilityLabel("Amazfit y Zepp: solicitar acceso de partner")
+                }
                 Label("Importar archivo FIT o GPX", systemImage: "square.and.arrow.down").foregroundStyle(.secondary)
             } header: {
                 Text("Dispositivos y conexiones")
-            } footer: { Text("COROS abre un consentimiento seguro. Garmin y Polar muestran el estado de sus conexiones. Las marcas sin acceso directo usan Strava, Salud o archivos FIT/GPX.") }
+            } footer: { Text("COROS abre un consentimiento seguro. Suunto está en revisión y permite usar Strava mientras tanto. Garmin y Polar muestran el estado de sus conexiones. Las marcas sin acceso directo usan Strava, Salud o archivos FIT/GPX.") }
             Section("Preferencias") {
                 NavigationLink { ProfileDetailView(title: "Notificaciones", rows: [("Estado", "Gestiona los permisos desde Ajustes del iPhone")]) } label: { Label("Notificaciones", systemImage: "bell") }
                 NavigationLink { ProfileDetailView(title: "Clima", rows: [("Tiempo local", "Disponible al preparar entrenamientos exteriores")]) } label: { Label("Clima", systemImage: "cloud.sun") }

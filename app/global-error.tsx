@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { AlertOctagon, RefreshCw, Home } from 'lucide-react';
 import { AnimatedButton } from '@/components/ui/animated-button';
+import Link from 'next/link';
 
 /**
  * global-error.tsx — captura errores del layout raíz (app/layout.tsx) que
@@ -43,13 +44,13 @@ export default function GlobalError({
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => window.location.href = '/'}
+            <Link
+              href="/"
               className="w-full py-3 rounded-xl border border-white/10 hover:border-white/20 bg-zinc-900/50 text-xs font-semibold transition"
             >
               <Home className="w-3.5 h-3.5 inline mr-1.5" />
               Inicio
-            </button>
+            </Link>
             <AnimatedButton
               variant="primary"
               onClick={reset}

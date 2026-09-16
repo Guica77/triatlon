@@ -4,8 +4,10 @@ import * as React from 'react';
 import { WifiOff, RotateCw, HelpCircle, Activity } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
+import { useRouter } from 'next/navigation';
 
 export default function OfflinePage() {
+  const router = useRouter();
   const [checking, setChecking] = React.useState(false);
 
   const handleRetry = () => {
@@ -14,7 +16,7 @@ export default function OfflinePage() {
     setTimeout(() => {
       if (typeof window !== 'undefined') {
         if (navigator.onLine) {
-          window.location.href = '/';
+          router.push('/');
         } else {
           setChecking(false);
         }

@@ -366,7 +366,7 @@ struct NativePlanView: View {
     private func changeWeek(_ offset: Int) { withAnimation(TriWaveXMotion.selection(reduced: reduceMotion)) { weekStart = Calendar.current.date(byAdding: .day, value: offset * 7, to: weekStart) ?? weekStart; selectedDate = weekStart } }
     private static let dayFormatter: DateFormatter = { let value = DateFormatter(); value.calendar = Calendar(identifier: .gregorian); value.locale = Locale(identifier: "en_US_POSIX"); value.dateFormat = "yyyy-MM-dd"; return value }()
     private func sportIcon(_ sport: String) -> String { switch sport { case "natacion": "figure.pool.swim"; case "ciclismo": "bicycle"; case "carrera": "figure.run"; case "fuerza": "dumbbell"; default: "figure.mixed.cardio" } }
-    private func sportColor(_ sport: String) -> Color { switch sport { case "natacion": .blue; case "ciclismo": .orange; case "carrera": .green; case "fuerza": .purple; default: .secondary } }
+    private func sportColor(_ sport: String) -> Color { switch sport { case "natacion": .triWaveXSwim; case "ciclismo": .triWaveXBike; case "carrera": .green; case "fuerza": .purple; default: .secondary } }
     private func statusLabel(_ status: String) -> String { switch status { case "completed": "Completado"; case "missed": "No realizado"; default: "Pendiente" } }
 }
 

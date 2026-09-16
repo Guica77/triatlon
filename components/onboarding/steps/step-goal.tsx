@@ -93,14 +93,14 @@ export function StepGoal(props: StepGoalProps) {
             <Trophy className="w-4 h-4 text-swim" /> ¿Qué carrera estás preparando?
           </label>
 
-          <div className="flex gap-1 p-1 bg-surface-hover rounded-xl border border-border-default">
-            <button onClick={() => props.setActiveTab('catalog')} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-[background-color,color,border-color,opacity] duration-150 ease-out motion-reduce:transition-opacity cursor-pointer ${props.activeTab === 'catalog' ? 'bg-surface-card text-swim border border-border-default/50' : 'text-text-secondary hover:text-text-primary'}`}>
+          <div role="tablist" aria-label="Tipo de objetivo" className="flex gap-1 rounded-xl border border-border-default bg-surface-hover p-1">
+            <button type="button" role="tab" aria-selected={props.activeTab === 'catalog'} onClick={() => props.setActiveTab('catalog')} className={`min-h-11 flex-1 rounded-lg py-2 text-sm font-semibold transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim focus-visible:ring-offset-2 ${props.activeTab === 'catalog' ? 'border border-border-default/50 bg-surface-card text-swim shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}>
               Catálogo
             </button>
-            <button onClick={() => props.setActiveTab('custom')} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-[background-color,color,border-color,opacity] duration-150 ease-out motion-reduce:transition-opacity cursor-pointer ${props.activeTab === 'custom' ? 'bg-surface-card text-swim border border-border-default/50' : 'text-text-secondary hover:text-text-primary'}`}>
+            <button type="button" role="tab" aria-selected={props.activeTab === 'custom'} onClick={() => props.setActiveTab('custom')} className={`min-h-11 flex-1 rounded-lg py-2 text-sm font-semibold transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim focus-visible:ring-offset-2 ${props.activeTab === 'custom' ? 'border border-border-default/50 bg-surface-card text-swim shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}>
               A medida
             </button>
-            <button onClick={() => props.setActiveTab('none')} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-[background-color,color,border-color,opacity] duration-150 ease-out motion-reduce:transition-opacity cursor-pointer ${props.activeTab === 'none' ? 'bg-surface-card text-swim border border-border-default/50' : 'text-text-secondary hover:text-text-primary'}`}>
+            <button type="button" role="tab" aria-selected={props.activeTab === 'none'} onClick={() => props.setActiveTab('none')} className={`min-h-11 flex-1 rounded-lg py-2 text-sm font-semibold transition-[background-color,color,border-color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim focus-visible:ring-offset-2 ${props.activeTab === 'none' ? 'border border-border-default/50 bg-surface-card text-swim shadow-sm' : 'text-text-secondary hover:text-text-primary'}`}>
               Sin meta
             </button>
           </div>
@@ -209,7 +209,8 @@ export function StepGoal(props: StepGoalProps) {
                 key={lvl.id}
                 type="button"
                 onClick={() => props.setAthleteLevel(lvl.id)}
-                className={`py-3 px-2 rounded-xl border text-sm font-semibold transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out motion-reduce:transition-opacity flex flex-col items-center justify-center text-center gap-0.5 cursor-pointer ${
+                aria-pressed={props.athleteLevel === lvl.id}
+                className={`min-h-[76px] rounded-xl border px-2 py-3 text-center text-sm font-semibold transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ease-out motion-reduce:transition-opacity flex flex-col items-center justify-center gap-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-swim focus-visible:ring-offset-2 ${
                   props.athleteLevel === lvl.id
                     ? 'bg-swim/10 border-swim text-swim ring-1 ring-swim '
                     : 'bg-surface-hover/30 border-border-default text-text-secondary hover:border-border-default hover:bg-surface-hover'
@@ -369,7 +370,7 @@ export function StepGoal(props: StepGoalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between pt-4 border-t border-border-default">
+        <div className="sticky bottom-3 z-10 -mx-1 flex justify-between border-t border-border-default bg-surface-card/95 px-1 pt-4 backdrop-blur-sm lg:bottom-5">
           <div />
           <AnimatedButton variant="primary" onClick={props.onNext} className="min-h-12 rounded-xl px-6 text-sm !bg-swim font-semibold hover:!bg-swim/90 !text-white">
             Continuar <ChevronRight className="w-4 h-4 ml-1" />

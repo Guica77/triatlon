@@ -3,8 +3,10 @@
 import * as React from 'react';
 import { AlertTriangle, Loader2, Trash2, X } from 'lucide-react';
 import { cancelAccountDeletion, requestAccountDeletion } from '@/app/(app)/settings/actions';
+import { useRouter } from 'next/navigation';
 
 export function DeleteAccountCard({ scheduledFor }: { scheduledFor?: string | null }) {
+  const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [confirmation, setConfirmation] = React.useState('');
   const [pending, setPending] = React.useState(false);
@@ -17,7 +19,7 @@ export function DeleteAccountCard({ scheduledFor }: { scheduledFor?: string | nu
     try {
       const result = await requestAccountDeletion();
       if (result.error) { setError(result.error); return; }
-      window.location.assign(`/cuenta-eliminada?programada=${encodeURIComponent(result.scheduledFor || '')}`);
+      router.push(`/cuenta-eliminada?programada=${encodeURIComponent(result.scheduledFor || '')}`);
     } catch { setError('No se pudo completar la solicitud. Inténtalo de nuevo.'); }
     finally { setPending(false); }
 

@@ -63,9 +63,10 @@
   --color-border-card: rgba(60, 60, 67, 0.18);
 
   /* ── Discipline palette — the structural identity (swim / bike / run) ── */
-  --color-swim: var(--color-aqua-500);
+  /* These tones are used as both information and text. Keep them dark enough on white. */
+  --color-swim: #0077B6;
   --color-swim-subtle: #17384C;
-  --color-bike: var(--color-lime-500);
+  --color-bike: #2F7D3A;
   --color-bike-subtle: #30451F;
   --color-run: var(--color-coral-500);
   --color-run-subtle: #4A2826;

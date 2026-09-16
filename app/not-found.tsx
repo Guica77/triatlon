@@ -5,8 +5,10 @@ import * as React from 'react';
 import { Compass, ArrowRight, Activity } from 'lucide-react';
 import { ProCard } from '@/components/ui/pro-card';
 import { AnimatedButton } from '@/components/ui/animated-button';
+import { useRouter } from 'next/navigation';
 
 export default function NotFoundPage() {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-[#09090b] text-text-primary flex flex-col items-center justify-center p-4 selection:bg-swim/20">
       <WelcomeReady immediate />
@@ -26,7 +28,7 @@ export default function NotFoundPage() {
 
         <AnimatedButton
           variant="primary"
-          onClick={() => window.location.href = '/'}
+          onClick={() => router.push('/')}
           className="w-full py-3.5 text-xs font-bold"
         >
           Volver a la Ruta <ArrowRight className="w-4 h-4 ml-1.5 text-black" />

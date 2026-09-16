@@ -134,10 +134,11 @@ struct ProductView: View {
                         model: nativeProfile,
                         openDevices: { showingDevices = true },
                         openCoros: { openProfileDestination("/api/auth/coros/connect") },
+                        openStrava: { openProfileDestination("/api/auth/telemetry/connect?provider=strava") },
                         openAccount: { showingAccount = true }
                     )
                 }
-                if showingNativeChat { NativeChatView(origin: origin) }
+                if showingNativeChat { NativeChatView(origin: origin, store: store) }
                 if !showingNativeSurface && browser.loading && !browser.hasCompletedInitialLoad {
                     TriWaveXLaunchScreen()
                 }

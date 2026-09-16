@@ -1,10 +1,18 @@
 # Auditoría máxima de lanzamiento: Apple, APIs e IA
 
-Fecha: 15 de septiembre de 2026. Alcance: revisión estática del repositorio y de la configuración visible localmente. No sustituye pruebas con cuentas reales, revisión de Apple ni una auditoría de seguridad independiente.
+Fecha: 16 de septiembre de 2026. Alcance: revisión estática del repositorio, compilación Release sin firma y configuración visible localmente. No sustituye pruebas con cuentas reales, revisión de Apple ni una auditoría de seguridad independiente.
 
 ## Veredicto
 
-**No subir hoy a App Store.** Existe una base iOS SwiftUI y numerosas funciones reales, pero aún faltan controles de lanzamiento, comprobación en dispositivos y el sistema de compra validado. Publicar antes de cerrar los bloqueos podría provocar rechazo, acceso incorrecto o declaraciones de privacidad inexactas.
+**No subir hoy a App Store.** La Release de iPhone compila y los controles automáticos están limpios, pero aún faltan pagos reales, comprobación en dispositivos y configuración de distribución. Publicar antes de cerrar los bloqueos podría provocar rechazo, acceso incorrecto o declaraciones de privacidad inexactas.
+
+## Evidencia de esta revisión
+
+- `xcodebuild` de la configuración **Release** para iPhone: correcto (sin firma de distribución).
+- Pruebas web: 48 archivos y 278 pruebas, correctas.
+- Lint, comprobación de TypeScript y análisis sintáctico Swift: correctos.
+- Se añadió `PrivacyInfo.xcprivacy` al objetivo iOS; declara los datos de cuenta, salud/forma física y contenido de chat usados por la app. Debe compararse una última vez con el binario final y los SDK de producción antes de enviar.
+- Se corrigió un error de compilación de Perfil y la sesión nativa de Chat reutiliza las cookies de la sesión WebKit, evitando que la conversación nativa pierda la autenticación tras iniciar sesión.
 
 ## Estado de conectores
 
@@ -35,14 +43,14 @@ Los avisos mediante `alert()` y varios detalles de analítica deben sustituirse 
 
 ## Bloqueos de App Store
 
-- [ ] Compilar Archive Release firmado y probarlo en iPhone físico y TestFlight.
-- [ ] Crear y revisar `PrivacyInfo.xcprivacy` a partir del binario y SDK realmente incluidos.
+- [ ] Compilar Archive Release **firmado** y probarlo en iPhone físico y TestFlight.
+- [x] Crear `PrivacyInfo.xcprivacy`; revisar el manifest final contra el binario y SDK realmente incluidos.
 - [ ] Completar App Privacy con datos de cuenta, salud/forma física, actividad, mensajes, diagnósticos y proveedores reales.
 - [ ] Confirmar propósito y textos de HealthKit, Bluetooth, notificaciones y cualquier otro permiso usado.
 - [ ] Preparar icono final, capturas reales, URL pública de soporte y política de privacidad sin iniciar sesión.
 - [ ] Mantener cuentas sintéticas y notas claras para App Review.
 - [ ] Ejecutar prueba de eliminación, revocación Apple y recuperación con sesión antigua.
-- [ ] Configurar compras con StoreKit, restauración y validación servidor antes de poner precios en iOS.
+- [ ] Configurar compras con StoreKit, restauración y validación de servidor antes de activar precios o una prueba real en iOS.
 - [ ] Validar que todas las declaraciones de integraciones coinciden con el estado de la tabla anterior.
 
 Apple requiere que las prácticas de privacidad declaradas sean exactas y cubran también a proveedores terceros; los manifests de privacidad documentan datos y APIs de razón requerida. Referencias: [App Privacy](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy), [privacy manifests](https://developer.apple.com/documentation/bundleresources/privacy-manifest-files) y [revisión](https://developer.apple.com/app-store/review/guidelines/).

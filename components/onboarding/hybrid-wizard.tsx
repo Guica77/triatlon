@@ -235,7 +235,7 @@ export function HybridWizard() {
   }
 
   return (
-    <div className="w-full max-w-3xl space-y-6">
+    <div className="w-full max-w-3xl space-y-6 lg:max-w-[860px]">
       {/* Stepper Header */}
       <nav aria-label="Progreso de configuración" className="relative mx-auto mb-2 flex max-w-sm items-start justify-between">
         <div className="absolute left-5 right-5 top-5 h-px bg-border-default" />

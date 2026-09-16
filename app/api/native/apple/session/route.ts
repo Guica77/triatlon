@@ -31,9 +31,10 @@ export async function POST(request: Request) {
     })
     if (error || !data.user || !data.session) return reply({ error: 'No se ha podido verificar Apple' }, 401)
 
-    let { data: profile, error: profileError } = await supabase.from('profiles')
+    const { data: initialProfile, error: profileError } = await supabase.from('profiles')
       .select('role, active_plan_id').eq('id', data.user.id).maybeSingle()
     if (profileError) return reply({ error: 'No se ha podido cargar el perfil' }, 503)
+    let profile = initialProfile
     if (!profile) {
       const { createAdminClient } = await import('@/lib/supabase/admin')
       const name = oauthDisplayName(data.user.user_metadata)

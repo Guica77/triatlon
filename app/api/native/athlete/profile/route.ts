@@ -39,6 +39,8 @@ export async function GET(request: Request) {
         garmin: profile.garmin_connected || providers.has('garmin'),
         polar: providers.has('polar'),
         coros: providers.has('coros'),
+        suunto: providers.has('suunto'),
+        amazfit: providers.has('amazfit'),
       },
     })
   } catch {

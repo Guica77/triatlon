@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import SwiftUI
+import WebKit
 
 struct NativeChatParticipant: Identifiable, Decodable, Hashable {
     let id: String
@@ -23,6 +24,7 @@ struct NativeChatMessage: Identifiable, Decodable, Hashable {
 @MainActor @Observable
 final class NativeChatModel {
     private let origin: URL
+    private let store: WKWebsiteDataStore
     var participants: [NativeChatParticipant] = []
     var selected: NativeChatParticipant?
     var messages: [NativeChatMessage] = []
@@ -31,7 +33,7 @@ final class NativeChatModel {
     var sending = false
     var error: String?
 
-    init(origin: URL) { self.origin = origin }
+    init(origin: URL, store: WKWebsiteDataStore) { self.origin = origin; self.store = store }
 
     func load() async {
         loading = true; error = nil
@@ -80,12 +82,25 @@ final class NativeChatModel {
     private func request<Response: Decodable>(_ path: String, method: String = "GET", body: Data? = nil) async throws -> Response {
         guard let url = URL(string: path, relativeTo: origin) else { throw ChatError.message("Dirección de chat inválida.") }
         var request = URLRequest(url: url)
-        request.httpMethod = method; request.timeoutInterval = 20
+        request.httpMethod = method; request.timeoutInterval = 20; request.httpShouldHandleCookies = false
         request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
         if let body { request.setValue("application/json", forHTTPHeaderField: "Content-Type"); request.httpBody = body }
+        if let cookie = await cookieHeader(for: url) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw ChatError.message("No se ha podido conectar con el chat.") }
         return try JSONDecoder().decode(Response.self, from: data)
+    }
+
+    private func cookieHeader(for url: URL) async -> String? {
+        guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return nil }
+        let cookies = await withCheckedContinuation { continuation in store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) } }
+        let now = Date()
+        let matching = cookies.filter { cookie in
+            let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
+            return (cookie.expiresDate.map { $0 > now } ?? true) && (!cookie.isSecure || scheme == "https") &&
+                (host == domain || host.hasSuffix(".\(domain)")) && !cookie.name.contains(";") && !cookie.value.contains(";")
+        }
+        return matching.isEmpty ? nil : matching.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
     }
 
     private struct ParticipantsResponse: Decodable { let data: [NativeChatParticipant]?; let error: String? }
@@ -99,7 +114,7 @@ struct NativeChatView: View {
     @State private var model: NativeChatModel
     @FocusState private var composerFocused: Bool
 
-    init(origin: URL) { _model = State(initialValue: NativeChatModel(origin: origin)) }
+    init(origin: URL, store: WKWebsiteDataStore) { _model = State(initialValue: NativeChatModel(origin: origin, store: store)) }
 
     var body: some View {
         NavigationStack {

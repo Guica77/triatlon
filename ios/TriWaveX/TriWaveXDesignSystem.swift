@@ -44,6 +44,8 @@ extension Color {
     static let triWaveXBorder = TriWaveXPalette.border
     static let triWaveXAqua = Color(uiColor: .systemBlue)
     static let triWaveXCoral = Color(uiColor: .systemRed)
+    static let triWaveXSwim = Color(red: 0, green: 0.42, blue: 0.66)
+    static let triWaveXBike = Color(red: 0.16, green: 0.45, blue: 0.23)
 
     static let triWaveXBackground = triWaveXInk
     static let triWaveXPrimaryAccent = triWaveXAqua

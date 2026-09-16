@@ -49,12 +49,12 @@ export default async function OnboardingPage() {
   const canSkip = Boolean(profile?.coach_id || profile?.active_plan_id);
 
   return (
-    <div className="min-h-dvh bg-[var(--color-background)] px-4 pb-16 pt-10 sm:px-6 sm:pt-16">
+    <main className="min-h-dvh bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.07),transparent_30rem)] bg-[var(--color-background)] px-4 pb-16 pt-10 sm:px-6 sm:pt-16">
       <WelcomeReady />
-      <div className="mx-auto w-full max-w-4xl space-y-8 sm:space-y-10">
+      <div className="mx-auto w-full max-w-5xl space-y-8 sm:space-y-10">
 
         {/* Header */}
-        <header className="mx-auto max-w-xl space-y-3 text-center">
+        <header className="mx-auto max-w-2xl space-y-3 text-center">
           <p className="text-xs font-semibold tracking-wide text-swim">CONFIGURACIÓN INICIAL</p>
           <h1 className="text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">Prepara tu plan</h1>
           <p className="text-[15px] leading-6 text-text-secondary">
@@ -83,11 +83,11 @@ export default async function OnboardingPage() {
         )}
 
         {/* 2-Step Wizard */}
-        <div className="flex justify-center w-full">
+        <div className="flex w-full justify-center">
           <HybridWizard />
         </div>
 
       </div>
-    </div>
+    </main>
   );
 }
