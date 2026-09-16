@@ -55,7 +55,7 @@ export async function PATCH(request: Request) {
   const origin = request.headers.get('origin')
   if (request.headers.get('x-triwavex-native') !== '1' || request.headers.get('content-type')?.split(';')[0] !== 'application/json' || (origin !== null && origin !== new URL(request.url).origin)) return reply({ error: 'Solicitud no permitida' }, 403)
   const input = await request.json().catch(() => null) as Record<string, unknown> | null
-  if (!input || !['physiology', 'injuries'].includes(String(input.kind))) return reply({ error: 'Cambio no válido.' }, 400)
+  if (!input || !['physiology', 'injuries', 'goal'].includes(String(input.kind))) return reply({ error: 'Cambio no válido.' }, 400)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return reply({ error: 'Tu sesión ha caducado.' }, 401)
@@ -70,6 +70,16 @@ export async function PATCH(request: Request) {
       updated_at: new Date().toISOString(),
     }).eq('id', user.id)
     return error ? reply({ error: 'No se ha podido guardar la fisiología.' }, 503) : reply({ saved: true })
+  }
+
+  if (input.kind === 'goal') {
+    if (!shortText(input.name, 120) || !shortText(input.date, 10) || (typeof input.date === 'string' && input.date.trim() && !/^\d{4}-\d{2}-\d{2}$/.test(input.date.trim()))) return reply({ error: 'El objetivo no es válido.' }, 400)
+    const { error } = await supabase.from('profiles').update({
+      target_race_name: typeof input.name === 'string' ? input.name.trim() || null : null,
+      target_race_date: typeof input.date === 'string' ? input.date.trim() || null : null,
+      updated_at: new Date().toISOString(),
+    }).eq('id', user.id)
+    return error ? reply({ error: 'No se ha podido guardar el objetivo.' }, 503) : reply({ saved: true })
   }
 
   if (!shortText(input.injuries, 1_500)) return reply({ error: 'El historial de lesiones no es válido.' }, 400)

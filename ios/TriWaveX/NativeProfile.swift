@@ -104,6 +104,7 @@ struct NativeProfileView: View {
     let openPlanEditor: () -> Void
     let openAccount: () -> Void
     @State private var hasLoaded = false
+    @State private var managingPlan = false
 
     var body: some View {
         NavigationStack {
@@ -141,9 +142,9 @@ struct NativeProfileView: View {
                 else { Label("Aún no hay datos de recuperación", systemImage: "heart.text.square").foregroundStyle(.secondary) }
             }
             Section("Mi preparación") {
-                Button(action: openPlanEditor) {
+                Button { managingPlan = true } label: {
                     HStack {
-                        Label("Editar plan y sesiones", systemImage: "calendar.badge.pencil")
+                        Label("Gestionar mi plan", systemImage: "slider.horizontal.3")
                         Spacer()
                         VStack(alignment: .trailing, spacing: 2) {
                             Text(profile.goal.name ?? "Abrir plan").lineLimit(1)
@@ -153,7 +154,7 @@ struct NativeProfileView: View {
                         Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.tertiary)
                     }
                 }
-                .accessibilityHint("Abre el calendario para mover y actualizar tus sesiones")
+                .accessibilityHint("Edita sesiones, objetivo o carga sin repetir el onboarding")
                 NavigationLink { NativePhysiologyEditor(physiology: profile.physiology, save: { values in await model.save(values) }) } label: { Label("Fisiología", systemImage: "heart.text.square") }
                 NavigationLink { NativeInjuryEditor(injuries: profile.physiology.injuries, save: { values in await model.save(values) }) } label: { Label("Lesiones", systemImage: "cross.case") }
             }
@@ -220,10 +221,110 @@ struct NativeProfileView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .sheet(isPresented: $managingPlan) {
+            NativePlanManagementSheet(
+                goal: profile.goal,
+                saveGoal: { values in await model.save(values) },
+                openSessions: { managingPlan = false; openPlanEditor() }
+            )
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
     }
 
     private func metric(_ label: String, value: String) -> some View { VStack(alignment: .leading, spacing: 2) { Text(value).font(.headline.monospacedDigit()); Text(label).font(.caption).foregroundStyle(.secondary) } }
     private func connectionRow(_ name: String, connected: Bool, icon: String) -> some View { HStack { Label(name, systemImage: icon); Spacer(); Text(connected ? "Conectado" : "Disponible").font(.caption.weight(.semibold)).foregroundStyle(connected ? .green : .secondary) } }
+}
+
+struct NativePlanManagementSheet: View {
+    let goal: NativeProfile.Goal
+    let saveGoal: ([String: Any]) async -> Bool
+    let openSessions: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var showingGoal = false
+    @State private var showingLoad = false
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    Label("Gestiona cambios sin reiniciar tu preparación.", systemImage: "checkmark.shield")
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+                Section {
+                    Button { openSessions() } label: {
+                        Label("Editar sesiones", systemImage: "calendar.badge.pencil")
+                    }
+                    Button { showingGoal = true } label: {
+                        LabeledContent { Text(goal.name ?? "Definir objetivo").foregroundStyle(.secondary).lineLimit(1) } label: { Label("Cambiar objetivo", systemImage: "flag.checkered") }
+                    }
+                    Button { showingLoad = true } label: {
+                        Label("Subir carga", systemImage: "chart.line.uptrend.xyaxis")
+                    }
+                } header: {
+                    Text("Tu plan")
+                } footer: {
+                    Text("Los cambios de carga se analizan antes de guardar. Si tienes entrenador, él mantiene el control del plan.")
+                }
+            }
+            .navigationTitle("Gestionar mi plan")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cerrar") { dismiss() } } }
+            .sheet(isPresented: $showingGoal) { NativeGoalEditor(goal: goal, save: saveGoal) }
+            .sheet(isPresented: $showingLoad) { NativeLoadAdjustmentSheet() }
+        }
+    }
+}
+
+struct NativeGoalEditor: View {
+    let goal: NativeProfile.Goal
+    let save: ([String: Any]) async -> Bool
+    @State private var name: String
+    @State private var date: Date
+    @State private var saving = false
+    @State private var error: String?
+    @Environment(\.dismiss) private var dismiss
+
+    init(goal: NativeProfile.Goal, save: @escaping ([String: Any]) async -> Bool) {
+        self.goal = goal; self.save = save
+        _name = State(initialValue: goal.name ?? "")
+        _date = State(initialValue: NativePlanViewDayParser.date(goal.date ?? "") ?? Date())
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Objetivo") { TextField("Nombre de la prueba", text: $name); DatePicker("Fecha", selection: $date, displayedComponents: .date) }
+                if let error { Section { Text(error).foregroundStyle(.red) } }
+            }
+            .navigationTitle("Cambiar objetivo").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } }; ToolbarItem(placement: .confirmationAction) { Button(saving ? "Guardando…" : "Guardar") { Task { await submit() } }.disabled(saving) } }
+        }
+    }
+
+    private func submit() async {
+        guard name.trimmingCharacters(in: .whitespacesAndNewlines).count <= 120 else { error = "El nombre no puede superar 120 caracteres."; return }
+        saving = true; error = nil
+        let didSave = await save(["kind": "goal", "name": name, "date": NativePlanViewDayParser.string(date)])
+        saving = false; if didSave { dismiss() } else { error = "No se ha podido guardar el objetivo." }
+    }
+}
+
+struct NativeLoadAdjustmentSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var scope = "Semana completa"
+    @State private var level = "Suave"
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Qué quieres reforzar") { Picker("Alcance", selection: $scope) { Text("Semana completa").tag("Semana completa"); Text("Natación").tag("Natación"); Text("Bici").tag("Bici"); Text("Carrera").tag("Carrera") }; Picker("Progresión", selection: $level) { Text("Suave · hasta 5 %").tag("Suave"); Text("Media · hasta 10 %").tag("Media") } }
+                Section("Antes de aplicar") { Label("Comprobaremos recuperación, adherencia, dolor o lesión y el límite del 10 %.", systemImage: "checkmark.shield") }
+                Section { Label("Para ajustar minutos concretos, elige una sesión desde «Editar sesiones». La vista previa se mostrará antes de guardar.", systemImage: "info.circle") .font(.footnote).foregroundStyle(.secondary) }
+            }
+            .navigationTitle("Subir carga").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cerrar") { dismiss() } } }
+        }
+    }
 }
 
 struct NativePhysiologyEditor: View {

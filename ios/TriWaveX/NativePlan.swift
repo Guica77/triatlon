@@ -462,7 +462,7 @@ struct PlanProposalSheet: View {
     }
 }
 
-private enum NativePlanViewDayParser {
+enum NativePlanViewDayParser {
     static let formatter: DateFormatter = { let value = DateFormatter(); value.calendar = Calendar(identifier: .gregorian); value.locale = Locale(identifier: "en_US_POSIX"); value.dateFormat = "yyyy-MM-dd"; return value }()
     static func date(_ value: String) -> Date? { formatter.date(from: value) }
     static func string(_ value: Date) -> String { formatter.string(from: value) }
