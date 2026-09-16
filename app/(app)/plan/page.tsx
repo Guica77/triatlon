@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { redirect } from 'next/navigation'
-import { CalendarDays, ChevronRight, CircleCheckBig, UserRound } from 'lucide-react'
+import { CalendarDays, ChartNoAxesCombined, ChevronRight, CircleCheckBig, Cross, Flag, SlidersHorizontal, UserRound } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { DashboardViewTabs } from '@/components/dashboard/dashboard-view-tabs'
@@ -73,7 +73,7 @@ export default async function PlanPage() {
               <p className="text-sm font-medium text-text-primary">{planName}</p>
               <p className="mt-0.5 text-xs text-text-secondary">{assignedByCoach ? 'Plan asignado por tu entrenador' : 'Plan recomendado para tu objetivo y disponibilidad'}</p>
             </div>
-            {assignedByCoach ? <UserRound className="h-4 w-4 text-text-muted" aria-label="Gestionado por entrenador" /> : <Link href="#cambios-del-plan" className="flex items-center gap-1 text-sm font-medium text-accent">Gestionar <ChevronRight className="h-4 w-4" /></Link>}
+            {assignedByCoach ? <UserRound className="h-4 w-4 text-text-muted" aria-label="Gestionado por entrenador" /> : <Link href="#gestionar-plan" className="flex items-center gap-1 text-sm font-medium text-accent">Gestionar <ChevronRight className="h-4 w-4" /></Link>}
           </div>
         </section>
 
@@ -99,6 +99,17 @@ export default async function PlanPage() {
               </p>
             </div>
           </div>
+        </section>
+
+        <section id="gestionar-plan" className="mb-6 scroll-mt-6 overflow-hidden rounded-[22px] border border-border-default bg-surface-card shadow-sm">
+          <div className="flex items-center gap-3 border-b border-border-default px-5 py-4"><span className="grid h-10 w-10 place-items-center rounded-xl bg-accent/12 text-accent"><SlidersHorizontal className="h-5 w-5" /></span><div><h2 className="font-semibold text-text-primary">Gestionar mi plan</h2><p className="text-xs text-text-secondary">Cambia lo necesario sin volver al onboarding.</p></div></div>
+          <div className="divide-y divide-border-default">
+            <a href="#cambios-del-plan" className="flex min-h-14 items-center gap-3 px-5 transition-colors hover:bg-surface-hover"><CalendarDays className="h-5 w-5 text-accent" /><span className="flex-1 text-sm font-medium text-text-primary">Editar sesiones</span><ChevronRight className="h-4 w-4 text-text-muted" /></a>
+            <Link href="/settings?section=plan" className="flex min-h-14 items-center gap-3 px-5 transition-colors hover:bg-surface-hover"><Flag className="h-5 w-5 text-accent" /><span className="flex-1 text-sm font-medium text-text-primary">Cambiar objetivo</span><span className="max-w-28 truncate text-xs text-text-secondary">{profile.target_race_name || 'Definir'}</span><ChevronRight className="h-4 w-4 text-text-muted" /></Link>
+            <a href="#cambios-del-plan" className="flex min-h-14 items-center gap-3 px-5 transition-colors hover:bg-surface-hover"><ChartNoAxesCombined className="h-5 w-5 text-accent" /><span className="flex-1 text-sm font-medium text-text-primary">Subir carga</span><ChevronRight className="h-4 w-4 text-text-muted" /></a>
+            <Link href="/settings?section=lesiones" className="flex min-h-14 items-center gap-3 px-5 transition-colors hover:bg-surface-hover"><Cross className="h-5 w-5 text-accent" /><span className="flex-1 text-sm font-medium text-text-primary">Lesiones e historial</span><ChevronRight className="h-4 w-4 text-text-muted" /></Link>
+          </div>
+          <p className="border-t border-border-default px-5 py-3 text-xs leading-relaxed text-text-secondary">Los cambios se revisan antes de guardarse. {assignedByCoach ? 'Tu entrenador conserva el control y recibirá la solicitud.' : 'Nunca se aplicará una modificación sin confirmarte el impacto.'}</p>
         </section>
 
         <PlanChangeCenter workouts={(workouts || []) as any} readOnly={assignedByCoach} />

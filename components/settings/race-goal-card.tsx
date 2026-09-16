@@ -53,8 +53,8 @@ export function RaceGoalCard({
           </div>
         )}
       </div>
-      <Link href="/plan#cambios-del-plan" className="flex min-h-12 items-center justify-between px-5 text-sm font-medium text-accent transition-colors hover:bg-surface-hover">
-        Gestionar cambios del plan
+      <Link href="/plan#gestionar-plan" className="flex min-h-12 items-center justify-between px-5 text-sm font-medium text-accent transition-colors hover:bg-surface-hover">
+        Gestionar mi plan
         <ChevronRight className="h-4 w-4" aria-hidden="true" />
       </Link>
     </motion.div>

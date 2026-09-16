@@ -224,6 +224,7 @@ struct NativeProfileView: View {
         .sheet(isPresented: $managingPlan) {
             NativePlanManagementSheet(
                 goal: profile.goal,
+                physiology: profile.physiology,
                 saveGoal: { values in await model.save(values) },
                 openSessions: { managingPlan = false; openPlanEditor() }
             )
@@ -238,11 +239,13 @@ struct NativeProfileView: View {
 
 struct NativePlanManagementSheet: View {
     let goal: NativeProfile.Goal
+    let physiology: NativeProfile.Physiology
     let saveGoal: ([String: Any]) async -> Bool
     let openSessions: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var showingGoal = false
     @State private var showingLoad = false
+    @State private var showingInjuries = false
 
     var body: some View {
         NavigationStack {
@@ -261,6 +264,9 @@ struct NativePlanManagementSheet: View {
                     Button { showingLoad = true } label: {
                         Label("Subir carga", systemImage: "chart.line.uptrend.xyaxis")
                     }
+                    Button { showingInjuries = true } label: {
+                        LabeledContent { Text(physiology.injuries?.isEmpty == false ? "Revisar historial" : "Sin datos").foregroundStyle(.secondary) } label: { Label("Lesiones e historial", systemImage: "cross.case") }
+                    }
                 } header: {
                     Text("Tu plan")
                 } footer: {
@@ -272,6 +278,7 @@ struct NativePlanManagementSheet: View {
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cerrar") { dismiss() } } }
             .sheet(isPresented: $showingGoal) { NativeGoalEditor(goal: goal, save: saveGoal) }
             .sheet(isPresented: $showingLoad) { NativeLoadAdjustmentSheet() }
+            .sheet(isPresented: $showingInjuries) { NavigationStack { NativeInjuryEditor(injuries: physiology.injuries, save: saveGoal) } }
         }
     }
 }
