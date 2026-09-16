@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     if (!user) return reply({ error: 'Tu sesión ha caducado.' }, 401)
 
     const [{ data: profile, error: profileError }, { data: devices, error: devicesError }, { data: biometrics, error: biometricsError }] = await Promise.all([
-      supabase.from('profiles').select('first_name,last_name,level,target_race_name,target_race_date,current_ftp,current_swim_pace,current_run_pace,baseline_training_hours,previous_injuries,strava_connected,garmin_connected').eq('id', user.id).maybeSingle(),
+      supabase.from('profiles').select('first_name,last_name,level,subscription_status,target_race_name,target_race_date,current_ftp,current_swim_pace,current_run_pace,baseline_training_hours,previous_injuries,strava_connected,garmin_connected').eq('id', user.id).maybeSingle(),
       supabase.from('user_connected_devices').select('provider').eq('user_id', user.id),
       supabase.from('user_biometrics').select('readiness_score,hrv,sleep_hours,fatigue_rating').eq('user_id', user.id).order('date', { ascending: false }).limit(1).maybeSingle(),
     ])
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     return reply({
       athlete: {
         firstName: profile.first_name || 'Atleta', lastName: profile.last_name || null,
-        level: profile.level || null,
+        level: profile.level || null, subscriptionStatus: profile.subscription_status || null,
       },
       goal: { name: profile.target_race_name || null, date: profile.target_race_date || null },
       physiology: { ftp: profile.current_ftp || null, swimPace: profile.current_swim_pace || null, runPace: profile.current_run_pace || null, baselineHours: profile.baseline_training_hours || null, injuries: profile.previous_injuries || null },

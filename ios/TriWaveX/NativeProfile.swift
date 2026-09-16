@@ -25,7 +25,7 @@ struct NativeProfile: Decodable, Sendable {
     let physiology: Physiology
     let recovery: Recovery?
     let connections: Connections
-    struct Athlete: Decodable, Sendable { let firstName: String; let lastName: String?; let level: String? }
+    struct Athlete: Decodable, Sendable { let firstName: String; let lastName: String?; let level: String?; let subscriptionStatus: String? }
     struct Goal: Decodable, Sendable { let name: String?; let date: String? }
     struct Physiology: Decodable, Sendable { let ftp: Double?; let swimPace: String?; let runPace: String?; let baselineHours: String?; let injuries: String? }
     struct Recovery: Decodable, Sendable { let readiness: Double?; let hrv: Double?; let sleepHours: Double?; let fatigue: Double? }
@@ -180,8 +180,13 @@ struct NativeProfileView: View {
                 NavigationLink { ProfileDetailView(title: "Clima", rows: [("Tiempo local", "Disponible al preparar entrenamientos exteriores")]) } label: { Label("Clima", systemImage: "cloud.sun") }
                 NavigationLink { ProfileDetailView(title: "Privacidad", rows: [("Tus datos", "Solo se usan para personalizar tu entrenamiento")]) } label: { Label("Privacidad", systemImage: "hand.raised") }
             }
-            Section {
-                Button(action: openAccount) { Label("Cuenta", systemImage: "person.crop.circle").foregroundStyle(.primary) }
+            Section("Cuenta") {
+                NavigationLink {
+                    SubscriptionManagementView(status: profile.athlete.subscriptionStatus)
+                } label: {
+                    Label("Suscripción y plan", systemImage: "creditcard")
+                }
+                Button(action: openAccount) { Label("Cuenta y seguridad", systemImage: "person.crop.circle").foregroundStyle(.primary) }
             }
         }
         .listStyle(.insetGrouped)
@@ -189,6 +194,61 @@ struct NativeProfileView: View {
 
     private func metric(_ label: String, value: String) -> some View { VStack(alignment: .leading, spacing: 2) { Text(value).font(.headline.monospacedDigit()); Text(label).font(.caption).foregroundStyle(.secondary) } }
     private func connectionRow(_ name: String, connected: Bool, icon: String) -> some View { HStack { Label(name, systemImage: icon); Spacer(); Text(connected ? "Conectado" : "Disponible").font(.caption.weight(.semibold)).foregroundStyle(connected ? .green : .secondary) } }
+}
+
+struct SubscriptionManagementView: View {
+    let status: String?
+
+    private var statusLabel: String {
+        switch status?.lowercased() {
+        case "coach": return "Entrenador"
+        case "trial": return "Prueba"
+        case "active", "premium", "pro": return "Activa"
+        default: return "Sin suscripción activa"
+        }
+    }
+
+    var body: some View {
+        List {
+            Section {
+                LabeledContent("Estado", value: statusLabel)
+                Text("Esta pantalla gestiona tu acceso sin repetir el onboarding ni cambiar tus objetivos deportivos.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Text("Tu suscripción")
+            }
+
+            Section("Opciones") {
+                planRow("Atleta", detail: "5 €/mes después de 7 días de prueba", icon: "figure.run")
+                planRow("Entrenador", detail: "30 €/mes · 10 atletas incluidos", icon: "person.2")
+                Text("A partir del atleta 11, se añaden 2 €/mes por cada bloque de hasta 5 plazas.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Label("Los cambios de plan y las compras se activarán cuando App Store y el cobro seguro estén configurados.", systemImage: "checkmark.shield")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } footer: {
+                Text("No se realizará ningún cargo ni se modificará tu acceso desde esta pantalla hasta entonces.")
+            }
+        }
+        .navigationTitle("Suscripción y plan")
+        .navigationBarTitleDisplayMode(.large)
+    }
+
+    private func planRow(_ title: String, detail: String, icon: String) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).foregroundStyle(.primary)
+                Text(detail).font(.footnote).foregroundStyle(.secondary)
+            }
+        } icon: {
+            Image(systemName: icon).foregroundStyle(Color.triWaveXAqua)
+        }
+    }
 }
 
 struct ProfileDetailView: View {
