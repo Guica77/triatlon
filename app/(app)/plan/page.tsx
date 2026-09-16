@@ -73,7 +73,7 @@ export default async function PlanPage() {
               <p className="text-sm font-medium text-text-primary">{planName}</p>
               <p className="mt-0.5 text-xs text-text-secondary">{assignedByCoach ? 'Plan asignado por tu entrenador' : 'Plan recomendado para tu objetivo y disponibilidad'}</p>
             </div>
-            {assignedByCoach ? <UserRound className="h-4 w-4 text-text-muted" aria-label="Gestionado por entrenador" /> : <Link href="/onboarding" className="flex items-center gap-1 text-sm font-medium text-accent">Cambiar <ChevronRight className="h-4 w-4" /></Link>}
+            {assignedByCoach ? <UserRound className="h-4 w-4 text-text-muted" aria-label="Gestionado por entrenador" /> : <Link href="#cambios-del-plan" className="flex items-center gap-1 text-sm font-medium text-accent">Gestionar <ChevronRight className="h-4 w-4" /></Link>}
           </div>
         </section>
 

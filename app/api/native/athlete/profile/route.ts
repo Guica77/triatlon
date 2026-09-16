@@ -5,6 +5,9 @@ const reply = (body: object, status = 200) => Response.json(body, {
   headers: { 'Cache-Control': 'no-store', Vary: 'Cookie' },
 })
 
+const shortText = (value: unknown, limit: number) => value === null || (typeof value === 'string' && value.trim().length <= limit)
+const validFTP = (value: unknown) => value === null || (typeof value === 'number' && Number.isFinite(value) && value >= 50 && value <= 600)
+
 export async function GET(request: Request) {
   const origin = request.headers.get('origin')
   if (request.headers.get('x-triwavex-native') !== '1' || (origin !== null && origin !== new URL(request.url).origin)) {
@@ -46,4 +49,30 @@ export async function GET(request: Request) {
   } catch {
     return reply({ error: 'Servicio no disponible.' }, 503)
   }
+}
+
+export async function PATCH(request: Request) {
+  const origin = request.headers.get('origin')
+  if (request.headers.get('x-triwavex-native') !== '1' || request.headers.get('content-type')?.split(';')[0] !== 'application/json' || (origin !== null && origin !== new URL(request.url).origin)) return reply({ error: 'Solicitud no permitida' }, 403)
+  const input = await request.json().catch(() => null) as Record<string, unknown> | null
+  if (!input || !['physiology', 'injuries'].includes(String(input.kind))) return reply({ error: 'Cambio no válido.' }, 400)
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return reply({ error: 'Tu sesión ha caducado.' }, 401)
+
+  if (input.kind === 'physiology') {
+    if (!validFTP(input.ftp) || !shortText(input.swimPace, 30) || !shortText(input.runPace, 30) || !shortText(input.baselineHours, 30)) return reply({ error: 'Los valores de fisiología no son válidos.' }, 400)
+    const { error } = await supabase.from('profiles').update({
+      current_ftp: input.ftp === null ? null : Math.round(input.ftp as number),
+      current_swim_pace: typeof input.swimPace === 'string' ? input.swimPace.trim() || null : null,
+      current_run_pace: typeof input.runPace === 'string' ? input.runPace.trim() || null : null,
+      baseline_training_hours: typeof input.baselineHours === 'string' ? input.baselineHours.trim() || null : null,
+      updated_at: new Date().toISOString(),
+    }).eq('id', user.id)
+    return error ? reply({ error: 'No se ha podido guardar la fisiología.' }, 503) : reply({ saved: true })
+  }
+
+  if (!shortText(input.injuries, 1_500)) return reply({ error: 'El historial de lesiones no es válido.' }, 400)
+  const { error } = await supabase.from('profiles').update({ previous_injuries: typeof input.injuries === 'string' ? input.injuries.trim() || null : null, updated_at: new Date().toISOString() }).eq('id', user.id)
+  return error ? reply({ error: 'No se ha podido guardar el historial.' }, 503) : reply({ saved: true })
 }

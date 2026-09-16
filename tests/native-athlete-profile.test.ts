@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { GET } from '@/app/api/native/athlete/profile/route'
+import { GET, PATCH } from '@/app/api/native/athlete/profile/route'
 
 const { getUser, from } = vi.hoisted(() => ({ getUser: vi.fn(), from: vi.fn() }))
 
@@ -10,6 +10,7 @@ const query = (value: unknown, error: unknown = null) => ({
   eq: vi.fn(() => query(value, error)),
   order: vi.fn(() => query(value, error)),
   limit: vi.fn(() => query(value, error)),
+  update: vi.fn(() => query(value, error)),
   maybeSingle: vi.fn(async () => ({ data: value, error })),
   then: (resolve: (result: { data: unknown; error: unknown }) => unknown) => resolve({ data: value, error }),
 })
@@ -27,6 +28,12 @@ beforeEach(() => {
 
 const request = (headers: Record<string, string> = {}) => new Request('https://triwavex.test/api/native/athlete/profile', {
   headers: { 'x-triwavex-native': '1', ...headers },
+})
+
+const patchRequest = (body: object, headers: Record<string, string> = {}) => new Request('https://triwavex.test/api/native/athlete/profile', {
+  method: 'PATCH',
+  headers: { 'x-triwavex-native': '1', 'content-type': 'application/json', ...headers },
+  body: JSON.stringify(body),
 })
 
 describe('GET /api/native/athlete/profile', () => {
@@ -50,5 +57,15 @@ describe('GET /api/native/athlete/profile', () => {
       connections: { strava: true, garmin: false },
       recovery: null,
     })
+  })
+
+  it('validates native physiology before saving it', async () => {
+    expect((await PATCH(patchRequest({ kind: 'physiology', ftp: 701, swimPace: '', runPace: '', baselineHours: '' }))).status).toBe(400)
+
+    const response = await PATCH(patchRequest({ kind: 'physiology', ftp: 240, swimPace: '1:45/100 m', runPace: '4:30/km', baselineHours: '8 h' }))
+    expect(response.status).toBe(200)
+    const profileQuery = from.mock.results.find((result) => result.value?.update)?.value
+    expect(profileQuery.update).toHaveBeenCalledWith(expect.objectContaining({ current_ftp: 240, current_run_pace: '4:30/km' }))
+    expect(from).toHaveBeenCalledWith('profiles')
   })
 })

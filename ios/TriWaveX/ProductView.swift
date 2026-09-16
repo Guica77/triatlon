@@ -135,6 +135,7 @@ struct ProductView: View {
                         openDevices: { showingDevices = true },
                         openCoros: { openProfileDestination("/api/auth/coros/connect") },
                         openStrava: { openProfileDestination("/api/auth/telemetry/connect?provider=strava") },
+                        openPlanEditor: { selectedTab = .plan },
                         openAccount: { showingAccount = true }
                     )
                 }

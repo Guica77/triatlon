@@ -16,6 +16,12 @@ final class NativeProfileModel {
         do { state = .loaded(try await client.fetch()) }
         catch { state = .failed("No se ha podido cargar tu perfil. Inténtalo de nuevo.") }
     }
+    func save(_ values: [String: Any]) async -> Bool {
+        guard !isLoading else { return false }
+        state = .loading
+        do { try await client.update(values); state = .loaded(try await client.fetch()); return true }
+        catch { state = .failed("No se han podido guardar los cambios. Inténtalo de nuevo."); return false }
+    }
     private var isLoading: Bool { if case .loading = state { return true }; return false }
 }
 
@@ -62,6 +68,17 @@ struct NativeProfileClient {
         return try JSONDecoder().decode(NativeProfile.self, from: data)
     }
 
+    func update(_ values: [String: Any]) async throws {
+        guard Configuration.allows(origin, origin: origin), let url = URL(string: "/api/native/athlete/profile", relativeTo: origin)?.absoluteURL else { throw URLError(.badURL) }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PATCH"; request.timeoutInterval = 30; request.httpShouldHandleCookies = false
+        request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native"); request.setValue("application/json", forHTTPHeaderField: "Accept"); request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: values)
+        if let cookies = await cookieHeader(for: url) { request.setValue(cookies, forHTTPHeaderField: "Cookie") }
+        let (_, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { throw URLError(.badServerResponse) }
+    }
+
     private func cookieHeader(for url: URL) async -> String? {
         guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return nil }
         let cookies = await withCheckedContinuation { continuation in store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) } }
@@ -84,6 +101,7 @@ struct NativeProfileView: View {
     let openDevices: () -> Void
     let openCoros: () -> Void
     let openStrava: () -> Void
+    let openPlanEditor: () -> Void
     let openAccount: () -> Void
     @State private var hasLoaded = false
 
@@ -123,9 +141,21 @@ struct NativeProfileView: View {
                 else { Label("Aún no hay datos de recuperación", systemImage: "heart.text.square").foregroundStyle(.secondary) }
             }
             Section("Mi preparación") {
-                NavigationLink { ProfileDetailView(title: "Plan", rows: [("Objetivo", profile.goal.name ?? "Sin definir"), ("Fecha", profile.goal.date ?? "Sin fecha")]) } label: { Label("Plan", systemImage: "calendar") }
-                NavigationLink { ProfileDetailView(title: "Fisiología", rows: [("FTP", profile.physiology.ftp.map { "\(Int($0)) W" } ?? "Sin configurar"), ("Ritmo nado", profile.physiology.swimPace ?? "Sin configurar"), ("Ritmo carrera", profile.physiology.runPace ?? "Sin configurar")]) } label: { Label("Fisiología", systemImage: "heart.text.square") }
-                NavigationLink { ProfileDetailView(title: "Lesiones", rows: [("Historial", profile.physiology.injuries ?? "Ninguna registrada")]) } label: { Label("Lesiones", systemImage: "cross.case") }
+                Button(action: openPlanEditor) {
+                    HStack {
+                        Label("Editar plan y sesiones", systemImage: "calendar.badge.pencil")
+                        Spacer()
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(profile.goal.name ?? "Abrir plan").lineLimit(1)
+                            Text(profile.goal.date ?? "Toca para reorganizar").font(.caption2)
+                        }
+                        .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.tertiary)
+                    }
+                }
+                .accessibilityHint("Abre el calendario para mover y actualizar tus sesiones")
+                NavigationLink { NativePhysiologyEditor(physiology: profile.physiology, save: { values in await model.save(values) }) } label: { Label("Fisiología", systemImage: "heart.text.square") }
+                NavigationLink { NativeInjuryEditor(injuries: profile.physiology.injuries, save: { values in await model.save(values) }) } label: { Label("Lesiones", systemImage: "cross.case") }
             }
             Section {
                 Button(action: openDevices) { Label("Apple Health, Watch y sensores", systemImage: "applewatch").foregroundStyle(.primary) }
@@ -194,6 +224,76 @@ struct NativeProfileView: View {
 
     private func metric(_ label: String, value: String) -> some View { VStack(alignment: .leading, spacing: 2) { Text(value).font(.headline.monospacedDigit()); Text(label).font(.caption).foregroundStyle(.secondary) } }
     private func connectionRow(_ name: String, connected: Bool, icon: String) -> some View { HStack { Label(name, systemImage: icon); Spacer(); Text(connected ? "Conectado" : "Disponible").font(.caption.weight(.semibold)).foregroundStyle(connected ? .green : .secondary) } }
+}
+
+struct NativePhysiologyEditor: View {
+    let physiology: NativeProfile.Physiology
+    let save: ([String: Any]) async -> Bool
+    @State private var ftp: String
+    @State private var swimPace: String
+    @State private var runPace: String
+    @State private var baselineHours: String
+    @State private var saving = false
+    @State private var error: String?
+    @Environment(\.dismiss) private var dismiss
+
+    init(physiology: NativeProfile.Physiology, save: @escaping ([String: Any]) async -> Bool) {
+        self.physiology = physiology; self.save = save
+        _ftp = State(initialValue: physiology.ftp.map { String(Int($0)) } ?? "")
+        _swimPace = State(initialValue: physiology.swimPace ?? "")
+        _runPace = State(initialValue: physiology.runPace ?? "")
+        _baselineHours = State(initialValue: physiology.baselineHours ?? "")
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                TextField("FTP (vatios)", text: $ftp).keyboardType(.numberPad)
+                TextField("Ritmo de natación", text: $swimPace).textInputAutocapitalization(.never)
+                TextField("Ritmo de carrera", text: $runPace).textInputAutocapitalization(.never)
+            } header: { Text("Potencia y ritmos") } footer: { Text("Ejemplo: 1:50/100 m en natación y 5:00/km en carrera.") }
+            Section { TextField("Horas semanales", text: $baselineHours).keyboardType(.numbersAndPunctuation) } header: { Text("Carga habitual") }
+            if let error { Section { Text(error).foregroundStyle(.red) } }
+        }
+        .navigationTitle("Fisiología").navigationBarTitleDisplayMode(.inline)
+        .toolbar { ToolbarItem(placement: .confirmationAction) { Button(saving ? "Guardando…" : "Guardar") { Task { await submit() } }.disabled(saving) } }
+    }
+
+    private func submit() async {
+        let cleanedFTP = ftp.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parsedFTP = cleanedFTP.isEmpty ? nil : Double(cleanedFTP)
+        if !cleanedFTP.isEmpty && (parsedFTP == nil || parsedFTP! < 50 || parsedFTP! > 600) { error = "El FTP debe estar entre 50 y 600 W."; return }
+        saving = true; error = nil
+        let didSave = await save(["kind": "physiology", "ftp": parsedFTP ?? NSNull(), "swimPace": swimPace, "runPace": runPace, "baselineHours": baselineHours])
+        saving = false
+        if didSave { dismiss() } else { error = "No se han podido guardar los cambios." }
+    }
+}
+
+struct NativeInjuryEditor: View {
+    let injuries: String?
+    let save: ([String: Any]) async -> Bool
+    @State private var value: String
+    @State private var saving = false
+    @State private var error: String?
+    @Environment(\.dismiss) private var dismiss
+
+    init(injuries: String?, save: @escaping ([String: Any]) async -> Bool) { self.injuries = injuries; self.save = save; _value = State(initialValue: injuries ?? "") }
+
+    var body: some View {
+        Form {
+            Section { TextEditor(text: $value).frame(minHeight: 150) } header: { Text("Historial") } footer: { Text("Incluye información para adaptar tu entrenamiento. Si tienes dolor agudo o síntomas preocupantes, consulta con un profesional sanitario.") }
+            if let error { Section { Text(error).foregroundStyle(.red) } }
+        }
+        .navigationTitle("Lesiones e historial").navigationBarTitleDisplayMode(.inline)
+        .toolbar { ToolbarItem(placement: .confirmationAction) { Button(saving ? "Guardando…" : "Guardar") { Task { await submit() } }.disabled(saving) } }
+    }
+
+    private func submit() async {
+        guard value.count <= 1_500 else { error = "El historial no puede superar 1.500 caracteres."; return }
+        saving = true; error = nil; let didSave = await save(["kind": "injuries", "injuries": value]); saving = false
+        if didSave { dismiss() } else { error = "No se han podido guardar los cambios." }
+    }
 }
 
 struct SubscriptionManagementView: View {

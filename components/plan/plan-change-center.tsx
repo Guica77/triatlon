@@ -89,7 +89,7 @@ export function PlanChangeCenter({ workouts, readOnly }: { workouts: Workout[]; 
     })
   }
 
-  return <section className="mb-6 overflow-hidden rounded-[22px] border border-border-default bg-surface-card shadow-sm">
+  return <section id="cambios-del-plan" className="mb-6 scroll-mt-6 overflow-hidden rounded-[22px] border border-border-default bg-surface-card shadow-sm">
     <div className="border-b border-border-default px-5 py-4"><div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-xl bg-accent/12 text-accent"><CalendarClock className="h-5 w-5" /></span><div><h2 className="font-semibold text-text-primary">Cambios del plan</h2><p className="text-xs text-text-secondary">Mueve una sesión y entiende el impacto antes de continuar.</p></div></div></div>
     <div className="divide-y divide-border-default">
       {upcoming.map(workout => <div key={workout.id} className="flex items-center gap-3 px-5 py-3.5"><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-text-primary">{workout.training_sessions?.description || 'Entrenamiento'}</p><p className="mt-0.5 text-xs capitalize text-text-secondary">{workout.training_sessions?.sport_type || 'Sesión'}</p></div><input type="date" value={draftDates[workout.id] || workout.scheduled_date} disabled={pending} onChange={event => preview(workout, event.target.value)} aria-label={readOnly ? 'Proponer nueva fecha al entrenador' : 'Proponer nueva fecha'} className="min-h-11 rounded-xl border border-border-default bg-surface-elevated px-3 text-sm font-medium text-text-primary outline-none transition active:scale-[0.98] focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:opacity-60" /></div>)}

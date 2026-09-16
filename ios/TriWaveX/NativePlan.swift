@@ -297,7 +297,7 @@ struct NativePlanView: View {
     private func planHeader(_ plan: NativePlan) -> some View {
         HStack(spacing: 12) {
             Image(systemName: "calendar").font(.title2).foregroundStyle(.white).frame(width: 46, height: 46).background(Color.triWaveXAqua, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            VStack(alignment: .leading, spacing: 3) { Text(plan.planName).font(.headline); Text(plan.readOnly ? "Gestionado por tu entrenador" : "Toca una sesión para modificarla").font(.footnote).foregroundStyle(.secondary) }
+            VStack(alignment: .leading, spacing: 3) { Text(plan.planName).font(.headline); Text(plan.readOnly ? "Gestionado por tu entrenador" : "Toca una sesión para editar fecha y estado").font(.footnote).foregroundStyle(.secondary) }
             Spacer()
         }
         .padding(14).background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -356,7 +356,7 @@ struct NativePlanView: View {
         HStack(spacing: 12) {
             Image(systemName: sportIcon(workout.sport)).font(.headline).foregroundStyle(sportColor(workout.sport)).frame(width: 40, height: 40).background(sportColor(workout.sport).opacity(0.12), in: RoundedRectangle(cornerRadius: 11))
             VStack(alignment: .leading, spacing: 4) { Text(workout.title).font(.subheadline.weight(.semibold)).lineLimit(2); Text("\(workout.durationMinutes) min · \(statusLabel(workout.status))").font(.caption).foregroundStyle(.secondary) }
-            Spacer(); if model.savingIDs.contains(workout.id) { ProgressView() } else { Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.tertiary) }
+            Spacer(); if model.savingIDs.contains(workout.id) { ProgressView() } else { Image(systemName: "pencil.circle.fill").font(.title3).foregroundStyle(Color.triWaveXAqua) }
         }
         .padding(14).background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
