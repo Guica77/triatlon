@@ -20,6 +20,7 @@ struct RootView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var informationURL: URL?
+    @State private var registrationRole: Role?
     @State private var role: Role = .athlete
     @FocusState private var focusedField: FocusedField?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -30,7 +31,26 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if let destination = session.destination {
+            if let registrationRole {
+                NativeRegistrationView(
+                    role: registrationRole.rawValue,
+                    origin: session.origin,
+                    store: session.store,
+                    onCancel: { self.registrationRole = nil },
+                    onRegistered: { outcome in
+                        self.registrationRole = nil
+                        session.destination = outcome.destination
+                    }
+                )
+                .transition(.opacity)
+            } else if session.destination == "/onboarding" {
+                NativeOnboardingView(
+                    origin: session.origin,
+                    store: session.store,
+                    onFinished: { session.destination = "/dashboard" }
+                )
+                .transition(.opacity)
+            } else if let destination = session.destination {
                 ProductView(
                     origin: session.origin,
                     store: session.store,
@@ -164,9 +184,7 @@ struct RootView: View {
                         Text("¿Nuevo en TriWaveX?")
                             .foregroundStyle(.secondary)
                         Button("Crear cuenta") {
-                            informationURL = session.origin.appendingPathComponent(
-                                role == .athlete ? "athlete/register" : "coach/register"
-                            )
+                            registrationRole = role
                         }
                     }
                     .font(.subheadline)

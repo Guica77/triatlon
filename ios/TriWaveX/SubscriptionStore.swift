@@ -14,26 +14,68 @@ import Observation
         do { products = try await Product.products(for: identifiers); state = .idle }
         catch { state = .failed("No se han podido consultar las opciones de App Store.") }
     }
-    func purchase(_ product: Product) async {
-        do { let result = try await product.purchase(); if case .success(let verification) = result, case .verified(let transaction) = verification { await transaction.finish(); state = .idle } }
-        catch { state = .failed("No se ha completado la compra. Inténtalo de nuevo.") }
+    func purchase(_ product: Product) async -> Bool {
+        do {
+            let result = try await product.purchase()
+            if case .success(let verification) = result, case .verified(let transaction) = verification {
+                await transaction.finish()
+                state = .idle
+                return true
+            }
+            if case .userCancelled = result { state = .idle; return false }
+            state = .failed("No se ha podido verificar la compra.")
+            return false
+        } catch {
+            state = .failed("No se ha completado la compra. Inténtalo de nuevo.")
+            return false
+        }
     }
 }
 
 struct NativeSubscriptionStoreView: View {
+    let role: String
+    let onFinished: () -> Void
     @State private var store = SubscriptionStore()
+    private var productIdentifier: String { role == "coach" ? "com.triwavex.coach.monthly" : "com.triwavex.athlete.monthly" }
+
+    init(role: String = "athlete", onFinished: @escaping () -> Void = {}) {
+        self.role = role
+        self.onFinished = onFinished
+    }
+
     var body: some View {
-        List {
-            Section { Text("7 días gratis · no se cobra hoy").font(.headline); Text("La suscripción se gestiona de forma segura con tu Apple ID. Puedes restaurarla desde Ajustes de App Store.").font(.footnote).foregroundStyle(.secondary) }
-            Section("Elige tu plan") {
-                ForEach(store.products, id: \.id) { product in
-                    Button { Task { await store.purchase(product) } } label: { VStack(alignment: .leading, spacing: 4) { Text(product.displayName).foregroundStyle(.primary); Text(product.displayPrice + " · mensual").font(.footnote).foregroundStyle(.secondary) } }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                Image(systemName: "checkmark.seal.fill").font(.system(size: 40)).foregroundStyle(Color.triWaveXAqua)
+                Text("Tu plan está listo").font(.largeTitle.bold())
+                Text("Empieza con 7 días gratis. Apple gestiona el pago y podrás cancelarlo desde Ajustes cuando quieras.").foregroundStyle(.secondary)
+                ForEach(store.products.filter { $0.id == productIdentifier }, id: \.id) { product in
+                    TriWaveXSurface {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(role == "coach" ? "Entrenador" : "Atleta").font(.title3.bold())
+                            Text(product.displayPrice + " al mes después de la prueba").foregroundStyle(.secondary)
+                            Button("Empezar prueba gratuita") { Task { if await store.purchase(product) { onFinished() } } }
+                                .buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity)
+                        }
+                    }
                 }
+                if store.products.filter({ $0.id == productIdentifier }).isEmpty, !isLoading {
+                    ContentUnavailableView("Plan no disponible", systemImage: "creditcard.trianglebadge.exclamationmark", description: Text("Vuelve a intentarlo cuando tengas conexión con App Store."))
+                }
+                Button("Continuar y activar más tarde", action: onFinished).buttonStyle(.borderless).frame(maxWidth: .infinity)
+                    .accessibilityHint("Podrás activar o cambiar tu plan desde Perfil")
             }
-            if case .loading = store.state { ProgressView("Consultando App Store…") }
-            if case .failed(let message) = store.state { ContentUnavailableView("Pago no disponible", systemImage: "creditcard.trianglebadge.exclamationmark", description: Text(message)) }
+            .padding(20).frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading).frame(maxWidth: .infinity)
         }
-        .navigationTitle("Suscripción")
+        .background(Color(uiColor: .systemGroupedBackground))
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Prueba gratuita")
+        .overlay(alignment: .center) {
+            if case .loading = store.state { ProgressView("Consultando App Store…") }
+            if case .failed(let message) = store.state { ContentUnavailableView("Pago no disponible", systemImage: "creditcard.trianglebadge.exclamationmark", description: Text(message)).background(.regularMaterial) }
+        }
         .task { await store.load() }
     }
+
+    private var isLoading: Bool { if case .loading = store.state { true } else { false } }
 }
