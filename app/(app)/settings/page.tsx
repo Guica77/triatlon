@@ -6,6 +6,7 @@ import { RaceGoalCard } from '@/components/settings/race-goal-card';
 import { PhysiologicalCard } from '@/components/settings/physiological-card';
 import { TelemetryConnectCard } from '@/components/settings/telemetry-connect-card';
 import { BillingCard } from '@/components/settings/billing-card';
+import { CheckoutPlanButtons } from '@/components/settings/checkout-plan-buttons';
 import { TrainingZonesCard } from '@/components/settings/training-zones-card';
 import { InjuryHistory } from '@/components/dashboard/injury-history';
 import { ExportButtons } from '@/components/dashboard/export-buttons';
@@ -81,7 +82,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             <div className="p-5"><p className="font-semibold text-text-primary">Atleta</p><p className="mt-1 text-sm text-text-secondary">5 €/mes después de 7 días de prueba.</p></div>
             <div className="p-5"><p className="font-semibold text-text-primary">Entrenador</p><p className="mt-1 text-sm text-text-secondary">30 €/mes, con 10 atletas incluidos. Después, 2 €/mes por cada bloque de hasta 5 plazas.</p></div>
           </div>
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-950"><p className="font-semibold">Pagos aún no activados</p><p className="mt-1">Todavía no se puede cambiar de plan ni iniciar una prueba desde esta pantalla: el cobro y los permisos se activarán solo cuando Stripe y App Store estén verificados. No se realizará ningún cargo hasta entonces.</p></div>
+          <div className="rounded-2xl border border-border-default bg-surface-card p-4 text-sm leading-relaxed text-text-secondary"><p className="font-semibold text-text-primary">7 días gratis · no se cobra hoy</p><p className="mt-1">Al continuar verás el total aplicable antes de confirmar. Apple Pay aparece en Stripe Checkout cuando el dispositivo es compatible.</p><div className="mt-4"><CheckoutPlanButtons /></div></div>
         </section>
       : section === 'privacidad' ? <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default"><SettingsRow href="/privacidad" label="Privacidad y permisos" icon={ShieldCheck} /><SettingsRow href="/soporte" label="Ayuda y soporte" icon={HelpCircle} /></div>
       : <div className="rounded-2xl border border-border-default bg-surface-card p-5"><CloudSun className="h-6 w-6 text-accent" /><h2 className="mt-3 font-semibold text-text-primary">Clima y ajustes</h2><p className="mt-1 text-sm leading-relaxed text-text-secondary">El tiempo se consulta en vivo desde la tarjeta de cada sesión exterior. Al tocarlo puedes ver previsión, humedad, viento y aceptar una propuesta de ajuste.</p></div>;

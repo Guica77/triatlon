@@ -1,0 +1,28 @@
+# Configuración de Stripe para producción
+
+Las variables de producción de Vercel son:
+
+- `STRIPE_SECRET_KEY`: la clave restringida de producción creada en Stripe. Nunca usar el prefijo `NEXT_PUBLIC_`.
+- `STRIPE_PRICE_ATHLETE`: precio mensual de atleta.
+- `STRIPE_PRICE_COACH`: precio mensual de entrenador.
+- `STRIPE_WEBHOOK_SECRET`: secreto del endpoint de Stripe, creado en el siguiente paso.
+- `NEXT_PUBLIC_SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`: ya usadas por el servidor para persistir acceso.
+
+## Endpoint de eventos
+
+En Stripe, crea un endpoint de eventos de producción con esta URL:
+
+`https://app.triwavex.com/api/billing/webhook`
+
+Escoge exclusivamente estos eventos:
+
+- `checkout.session.completed`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+
+Guarda el secreto que Stripe muestra solo como `STRIPE_WEBHOOK_SECRET` en Vercel. No debe compartirse por chat ni añadirse al repositorio. Después, redeploy de producción y envía un evento de prueba desde Stripe; debe contestar con `200`.
+
+## Límites de plataforma
+
+El checkout de Stripe y Apple Pay queda disponible en web. En iOS, las suscripciones digitales se cobran mediante StoreKit/App Store In-App Purchase; ambas plataformas deben reflejarse en la misma tabla de permisos, pero no compartir la clave de Stripe con la app.

@@ -436,6 +436,10 @@ struct SubscriptionManagementView: View {
             }
 
             Section {
+                NavigationLink { NativeSubscriptionStoreView() } label: { Label("Cambiar plan", systemImage: "arrow.triangle.2.circlepath") }
+            }
+
+            Section {
                 Label("Los cambios de plan y las compras se activarán cuando App Store y el cobro seguro estén configurados.", systemImage: "checkmark.shield")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
