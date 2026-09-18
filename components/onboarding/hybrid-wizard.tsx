@@ -166,6 +166,24 @@ export function HybridWizard() {
     }
   };
 
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      const plan = wantsCoach || inviteCode.trim().length > 0 ? 'coach' : 'athlete';
+      const response = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan, returnTo: '/onboarding?checkout=success' }),
+      });
+      const result = await response.json() as { url?: string; error?: string };
+      if (!response.ok || !result.url) throw new Error(result.error || 'No se ha podido abrir Stripe.');
+      window.location.assign(result.url);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'No se ha podido abrir Stripe.');
+      setLoading(false);
+    }
+  };
+
   const handleSaveAndConnect = async (provider: 'strava' | 'garmin' | 'coros' | 'polar' = 'strava') => {
     setLoading(true);
     try {
@@ -333,7 +351,7 @@ export function HybridWizard() {
             wantsCoach={wantsCoach}
             setWantsCoach={setWantsCoach}
             onPrev={() => setStep(1)}
-            onSave={() => handleSave(false)}
+            onSave={handleCheckout}
             onConnect={handleSaveAndConnect}
           />
         )}

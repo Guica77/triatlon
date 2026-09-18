@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
 
   const body: unknown = await request.json().catch(() => null);
   const plan = typeof body === 'object' && body !== null ? (body as { plan?: unknown }).plan : null;
+  const returnTo = typeof body === 'object' && body !== null ? (body as { returnTo?: unknown }).returnTo : null;
   if (!isBillingPlan(plan)) return NextResponse.json({ error: 'Plan no válido.' }, { status: 400 });
 
   const { data: existingEntitlement } = await supabase
@@ -33,8 +34,8 @@ export async function POST(request: NextRequest) {
     'metadata[plan]': plan,
     'subscription_data[metadata][user_id]': user.id,
     'subscription_data[metadata][plan]': plan,
-    success_url: `${origin}/settings?section=suscripcion&checkout=success`,
-    cancel_url: `${origin}/settings?section=suscripcion&checkout=cancelled`,
+    success_url: `${origin}${typeof returnTo === 'string' && returnTo.startsWith('/') ? returnTo : '/settings?section=suscripcion&checkout=success'}`,
+    cancel_url: `${origin}${typeof returnTo === 'string' && returnTo.startsWith('/') ? `${returnTo}${returnTo.includes('?') ? '&' : '?'}checkout=cancelled` : '/settings?section=suscripcion&checkout=cancelled'}`,
   });
   if (!existingEntitlement) form.set('subscription_data[trial_period_days]', '7');
   const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
