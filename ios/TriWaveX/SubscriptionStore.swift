@@ -103,6 +103,7 @@ struct NativeSubscriptionStoreView: View {
     @State private var store = SubscriptionStore()
     @State private var restoredMessage: String?
     @State private var selectedRole: String
+    @State private var showingPaymentReview = false
 
     private let privacyURL = URL(string: "https://app.triwavex.com/legal/privacidad")!
     private let termsURL = URL(string: "https://app.triwavex.com/legal/terminos")!
@@ -147,6 +148,16 @@ struct NativeSubscriptionStoreView: View {
         .overlay { if isBusy { loadingOverlay } }
         .task { await store.load() }
         .task { await store.observeTransactions() }
+        .sheet(isPresented: $showingPaymentReview) {
+            if let product = selectedProduct {
+                NativePaymentReviewView(product: product, role: selectedRole, eligibleForIntro: store.introEligibleProductIDs.contains(product.id), isBusy: isBusy) {
+                    showingPaymentReview = false
+                    Task {
+                        if await store.purchase(product) { onPurchased() }
+                    }
+                }
+            }
+        }
         .alert("Compras restauradas", isPresented: Binding(
             get: { restoredMessage != nil },
             set: { if !$0 { restoredMessage = nil } }
@@ -245,7 +256,7 @@ struct NativeSubscriptionStoreView: View {
                 benefit("arrow.triangle.2.circlepath", "Renovación mensual hasta que canceles")
                 benefit("iphone.and.arrow.forward", "Disponible con tu Apple ID en tus dispositivos")
                 if selectedRole == "coach" {
-                    Text("Las ampliaciones de capacidad se mostrarán antes de confirmar cualquier cargo adicional.")
+                    Text("Cada bloque adicional de 5 atletas cuesta 2,99 €/mes y se muestra antes de confirmar.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
             }
@@ -260,15 +271,9 @@ struct NativeSubscriptionStoreView: View {
         let eligible = store.introEligibleProductIDs.contains(product.id)
         let alreadyPurchased = store.purchasedProductIDs.contains(product.id)
         return Button {
-            Task {
-                if alreadyPurchased {
-                    onPurchased()
-                } else if await store.purchase(product) {
-                    onPurchased()
-                }
-            }
+            if alreadyPurchased { onPurchased() } else { showingPaymentReview = true }
         } label: {
-            Text(alreadyPurchased ? "Continuar con mi suscripción" : eligible ? "Empezar 7 días gratis" : "Suscribirme por \(product.displayPrice)/mes")
+            Text(alreadyPurchased ? "Continuar con mi suscripción" : "Revisar y continuar al pago")
         }
         .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
         .disabled(isBusy)
@@ -343,5 +348,41 @@ struct NativeSubscriptionStoreView: View {
     private var failureMessage: String? {
         if case .failed(let message) = store.state { return message }
         return nil
+    }
+}
+
+private struct NativePaymentReviewView: View {
+    let product: Product
+    let role: String
+    let eligibleForIntro: Bool
+    let isBusy: Bool
+    let onConfirm: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 20) {
+                Label("Pago seguro con Apple", systemImage: "lock.shield.fill")
+                    .font(.headline)
+                    .foregroundStyle(Color.triWaveXAqua)
+                Text("Revisa tu suscripción")
+                    .font(.largeTitle.bold())
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack { Text(role == "coach" ? "Entrenador" : "Atleta con IA"); Spacer(); Text("\(product.displayPrice)/mes").bold() }
+                    if eligibleForIntro { Text("7 días gratis, sin cobro hoy.").foregroundStyle(.secondary) }
+                    if role == "coach" { Text("Incluye 10 atletas. Cada bloque adicional de 5 atletas cuesta 2,99 €/mes.").font(.subheadline).foregroundStyle(.secondary) }
+                    Text("Apple mostrará el importe final y los impuestos antes de confirmar. Puedes cancelar desde Ajustes de tu Apple ID.").font(.footnote).foregroundStyle(.secondary)
+                }
+                .padding(16)
+                .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                Spacer()
+                Button(action: onConfirm) { Label(eligibleForIntro ? "Empezar 7 días gratis" : "Confirmar suscripción", systemImage: "lock.fill") }
+                    .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
+                    .disabled(isBusy)
+            }
+            .padding(20)
+            .navigationTitle("Confirmar pago")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .presentationDetents([.medium, .large])
     }
 }
