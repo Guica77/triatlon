@@ -10,6 +10,16 @@ export async function POST(request: NextRequest) {
   const body: unknown = await request.json().catch(() => null);
   const plan = typeof body === 'object' && body !== null ? (body as { plan?: unknown }).plan : null;
   if (!isBillingPlan(plan)) return NextResponse.json({ error: 'Plan no válido.' }, { status: 400 });
+
+  const { data: existingEntitlement } = await supabase
+    .from('billing_entitlements')
+    .select('source,status,trial_ends_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (existingEntitlement?.source === 'stripe' && ['trialing', 'active', 'past_due'].includes(existingEntitlement.status)) {
+    return NextResponse.json({ error: 'Ya tienes una suscripción. Utiliza “Gestionar suscripción” para cambiarla o cancelarla.' }, { status: 409 });
+  }
+
   const price = process.env[BILLING_PLANS[plan].priceEnv];
   const secret = process.env.STRIPE_SECRET_KEY;
   if (!price || !secret) return NextResponse.json({ error: 'El cobro seguro aún no está configurado.' }, { status: 503 });
@@ -17,7 +27,6 @@ export async function POST(request: NextRequest) {
   const origin = new URL(request.url).origin;
   const form = new URLSearchParams({
     mode: 'subscription', 'line_items[0][price]': price, 'line_items[0][quantity]': '1',
-    'subscription_data[trial_period_days]': '7',
     'client_reference_id': user.id,
     'customer_email': user.email || '',
     'metadata[user_id]': user.id,
@@ -27,6 +36,7 @@ export async function POST(request: NextRequest) {
     success_url: `${origin}/settings?section=suscripcion&checkout=success`,
     cancel_url: `${origin}/settings?section=suscripcion&checkout=cancelled`,
   });
+  if (!existingEntitlement) form.set('subscription_data[trial_period_days]', '7');
   const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
     method: 'POST', headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: form,
   });

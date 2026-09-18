@@ -28,8 +28,9 @@ function SettingsRow({ href, label, detail, pending, icon: Icon }: { href: strin
   );
 }
 
-export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ section?: string }> }) {
-  const section = (await searchParams).section;
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ section?: string; checkout?: string }> }) {
+  const query = await searchParams;
+  const section = query.section;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -38,7 +39,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   }
 
   // Obtener perfil y dispositivos conectados en paralelo
-  const [profileRes, devicesRes] = await Promise.all([
+  const [profileRes, devicesRes, entitlementRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('*, training_plans(name)')
@@ -47,11 +48,17 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
     supabase
       .from('user_connected_devices')
       .select('provider')
+      .eq('user_id', user.id),
+    supabase
+      .from('billing_entitlements')
+      .select('source,status,trial_ends_at,period_ends_at')
       .eq('user_id', user.id)
+      .maybeSingle()
   ]);
 
   const profile = profileRes.data;
   const devices = devicesRes.data;
+  const entitlement = entitlementRes.data;
 
   if (!profile) {
     redirect('/onboarding');
@@ -73,16 +80,18 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       : section === 'notificaciones' ? <NotificationTestCard />
       : section === 'cuenta' ? <section className="space-y-3"><BillingCard status={profile.subscription_status} /><AccountSessionCard /><DeleteAccountCard scheduledFor={profile.deletion_scheduled_for} /></section>
       : section === 'suscripcion' ? <section className="space-y-4">
-          <div className="rounded-2xl border border-border-default bg-surface-card p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-text-secondary">Tu acceso</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">Gestionar plan</h2>
-            <p className="mt-2 text-sm leading-relaxed text-text-secondary">Esta pantalla estará separada del onboarding: aquí podrás revisar tu acceso, cambiar de modalidad o restaurar una compra sin modificar tu perfil deportivo.</p>
+          {query.checkout === 'success' ? <div role="status" className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-700 dark:text-emerald-300">Suscripción confirmada. Tu acceso se está sincronizando.</div> : null}
+          {query.checkout === 'cancelled' ? <div role="status" className="rounded-2xl border border-border-default bg-surface-card px-4 py-3 text-sm text-text-secondary">No se ha realizado ningún cargo. Puedes continuar cuando quieras.</div> : null}
+          <div className="rounded-[26px] border border-border-default bg-surface-card p-6 shadow-[0_18px_60px_rgba(15,23,42,0.08)]">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-secondary">Tu acceso</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-text-primary">El plan que encaja contigo.</h2>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-text-secondary">Cambia de modalidad o gestiona tu suscripción sin reiniciar objetivos, historial ni preferencias deportivas.</p>
+            {entitlement ? <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent"><span className="h-2 w-2 rounded-full bg-accent" />{entitlement.status === 'trialing' ? 'Prueba activa' : entitlement.status === 'active' ? 'Suscripción activa' : 'Estado: ' + entitlement.status}</div> : null}
           </div>
-          <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default">
-            <div className="p-5"><p className="font-semibold text-text-primary">Atleta</p><p className="mt-1 text-sm text-text-secondary">5 €/mes después de 7 días de prueba.</p></div>
-            <div className="p-5"><p className="font-semibold text-text-primary">Entrenador</p><p className="mt-1 text-sm text-text-secondary">30 €/mes, con 10 atletas incluidos. Después, 2 €/mes por cada bloque de hasta 5 plazas.</p></div>
+          <div className="rounded-[26px] border border-border-default bg-surface-card p-5 sm:p-6">
+            <CheckoutPlanButtons canManage={entitlement?.source === 'stripe'} />
           </div>
-          <div className="rounded-2xl border border-border-default bg-surface-card p-4 text-sm leading-relaxed text-text-secondary"><p className="font-semibold text-text-primary">7 días gratis · no se cobra hoy</p><p className="mt-1">Al continuar verás el total aplicable antes de confirmar. Apple Pay aparece en Stripe Checkout cuando el dispositivo es compatible.</p><div className="mt-4"><CheckoutPlanButtons /></div></div>
+          <p className="px-2 text-xs leading-relaxed text-text-muted">La prueba gratuita solo se aplica una vez por cuenta. En iPhone, las compras digitales se realizan y restauran desde App Store; en la web, Stripe gestiona el pago seguro y puede mostrar Apple Pay cuando está disponible.</p>
         </section>
       : section === 'privacidad' ? <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default"><SettingsRow href="/privacidad" label="Privacidad y permisos" icon={ShieldCheck} /><SettingsRow href="/soporte" label="Ayuda y soporte" icon={HelpCircle} /></div>
       : <div className="rounded-2xl border border-border-default bg-surface-card p-5"><CloudSun className="h-6 w-6 text-accent" /><h2 className="mt-3 font-semibold text-text-primary">Clima y ajustes</h2><p className="mt-1 text-sm leading-relaxed text-text-secondary">El tiempo se consulta en vivo desde la tarjeta de cada sesión exterior. Al tocarlo puedes ver previsión, humedad, viento y aceptar una propuesta de ajuste.</p></div>;

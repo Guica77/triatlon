@@ -39,6 +39,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      billing_entitlements: {
+        Row: {
+          period_ends_at: string | null
+          plan: string
+          provider_reference: string | null
+          source: string
+          status: string
+          trial_ends_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          period_ends_at?: string | null
+          plan: string
+          provider_reference?: string | null
+          source: string
+          status: string
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          period_ends_at?: string | null
+          plan?: string
+          provider_reference?: string | null
+          source?: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_entitlements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           created_at: string

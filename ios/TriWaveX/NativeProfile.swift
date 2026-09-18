@@ -450,6 +450,7 @@ struct NativeInjuryEditor: View {
 
 struct SubscriptionManagementView: View {
     let status: String?
+    private let subscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
 
     private var statusLabel: String {
         switch status?.lowercased() {
@@ -471,24 +472,34 @@ struct SubscriptionManagementView: View {
                 Text("Tu suscripción")
             }
 
-            Section("Opciones") {
-                planRow("Atleta", detail: "5 €/mes después de 7 días de prueba", icon: "figure.run")
-                planRow("Entrenador", detail: "30 €/mes · 10 atletas incluidos", icon: "person.2")
-                Text("A partir del atleta 11, se añaden 2 €/mes por cada bloque de hasta 5 plazas.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-
             Section {
-                NavigationLink { NativeSubscriptionStoreView() } label: { Label("Cambiar plan", systemImage: "arrow.triangle.2.circlepath") }
-            }
-
-            Section {
-                Label("Los cambios de plan y las compras se activarán cuando App Store y el cobro seguro estén configurados.", systemImage: "checkmark.shield")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+                NavigationLink {
+                    NativeSubscriptionStoreView(role: "athlete")
+                } label: {
+                    planRow("Atleta", detail: "Entrenamiento personal y seguimiento", icon: "figure.run")
+                }
+                NavigationLink {
+                    NativeSubscriptionStoreView(role: "coach")
+                } label: {
+                    planRow("Entrenador", detail: "Gestión de hasta 10 atletas", icon: "person.2")
+                }
+            } header: {
+                Text("Opciones")
             } footer: {
-                Text("No se realizará ningún cargo ni se modificará tu acceso desde esta pantalla hasta entonces.")
+                Text("App Store mostrará el precio vigente y cualquier prueba disponible antes de confirmar.")
+            }
+
+            Section {
+                Link(destination: subscriptionsURL) {
+                    Label("Gestionar o cancelar en App Store", systemImage: "arrow.up.right.square")
+                }
+                NavigationLink {
+                    NativeSubscriptionStoreView(role: status?.lowercased() == "coach" ? "coach" : "athlete")
+                } label: {
+                    Label("Restaurar compras", systemImage: "arrow.clockwise")
+                }
+            } footer: {
+                Text("Las compras se asocian a tu Apple ID. Restaurar no genera un nuevo cargo.")
             }
         }
         .navigationTitle("Suscripción y plan")
