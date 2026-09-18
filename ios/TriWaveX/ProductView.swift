@@ -19,6 +19,7 @@ struct ProductView: View {
     let initialPath: String
     let onDismiss: (() -> Void)?
     let onSessionEnded: (() -> Void)?
+    let onGuidedTourFinished: () -> Void
     @State private var browser = BrowserModel()
     @State private var strava = StravaSessionModel()
     @State private var health = HealthKitService()
@@ -34,6 +35,7 @@ struct ProductView: View {
     @State private var nativePlan: NativePlanModel
     @State private var nativeProfile: NativeProfileModel
     @State private var selectedTab: AppTab
+    @State private var guidedOnboarding: GuidedOnboardingModel?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var isCoach: Bool {
@@ -44,16 +46,26 @@ struct ProductView: View {
         Self.tab(for: initialPath, isCoach: isCoach)
     }
 
-    init(origin: URL, store: WKWebsiteDataStore, initialPath: String, onDismiss: (() -> Void)?, onSessionEnded: (() -> Void)? = nil) {
+    init(
+        origin: URL,
+        store: WKWebsiteDataStore,
+        initialPath: String,
+        onDismiss: (() -> Void)?,
+        onSessionEnded: (() -> Void)? = nil,
+        guidedTourRequest: GuidedTourRequest? = nil,
+        onGuidedTourFinished: @escaping () -> Void = {}
+    ) {
         self.origin = origin
         self.store = store
         self.initialPath = initialPath
         self.onDismiss = onDismiss
         self.onSessionEnded = onSessionEnded
+        self.onGuidedTourFinished = onGuidedTourFinished
         _athleteProgress = State(initialValue: AthleteProgressModel(client: AthleteProgressClient(origin: origin, store: store)))
         _nativePlan = State(initialValue: NativePlanModel(client: NativePlanClient(origin: origin, store: store)))
         _nativeProfile = State(initialValue: NativeProfileModel(client: NativeProfileClient(origin: origin, store: store)))
         _selectedTab = State(initialValue: Self.tab(for: initialPath, isCoach: initialPath.hasPrefix("/coach/")))
+        _guidedOnboarding = State(initialValue: guidedTourRequest.map { GuidedOnboardingModel(request: $0) })
     }
 
     private static func tab(for path: String, isCoach: Bool) -> AppTab {
@@ -136,7 +148,8 @@ struct ProductView: View {
                         openCoros: { openProfileDestination("/api/auth/coros/connect") },
                         openStrava: { openProfileDestination("/api/auth/telemetry/connect?provider=strava") },
                         openPlanEditor: { selectedTab = .plan },
-                        openAccount: { showingAccount = true }
+                        openAccount: { showingAccount = true },
+                        replayGuide: replayGuidedTour
                     )
                 }
                 if showingNativeChat { NativeChatView(origin: origin, store: store) }
@@ -156,6 +169,14 @@ struct ProductView: View {
                 }
                 if !showingNativeSurface, let message = browser.error {
                     TriWaveXErrorState(message: message, retry: browser.retry)
+                }
+                if let guidedOnboarding, guidedOnboarding.isPresented {
+                    GuidedOnboardingOverlay(
+                        model: guidedOnboarding,
+                        onStepChanged: showGuidedStep,
+                        onFinished: onGuidedTourFinished
+                    )
+                    .zIndex(20)
                 }
             }
             .onChange(of: selectedTab) { _, tab in
@@ -187,7 +208,61 @@ struct ProductView: View {
         .sheet(isPresented: $showingAccount) {
             NavigationStack { AccountSettingsView(model: AccountSettingsModel(origin: origin, store: store), onSessionEnded: { showingAccount = false; onSessionEnded?() }) }
         }
+#if DEBUG
+        .task {
+            guard ProcessInfo.processInfo.arguments.contains("--capture-demo-tour") else { return }
+            await runDemoCaptureTour()
+        }
+#endif
     }
+
+    private func showGuidedStep(_ step: Int) {
+        guard let guidedOnboarding else { return }
+        let nextTab: AppTab
+        switch (guidedOnboarding.request.role, step) {
+        case (.athlete, 0), (.athlete, 2), (.coach, 0), (.coach, 1): nextTab = .training
+        case (.athlete, 1): nextTab = .plan
+        case (.coach, 2): nextTab = .chat
+        default: nextTab = .training
+        }
+        guard selectedTab != nextTab else { return }
+        withAnimation(TriWaveXMotion.stateChange(reduced: reduceMotion)) {
+            selectedTab = nextTab
+        }
+    }
+
+    private func replayGuidedTour() {
+        if let guidedOnboarding {
+            guidedOnboarding.restart()
+        } else {
+            let role: GuidedOnboardingRole = isCoach ? .coach : .athlete
+            let name: String
+            if case .loaded(let profile) = nativeProfile.state { name = profile.athlete.firstName }
+            else { name = "" }
+            let model = GuidedOnboardingModel(request: GuidedTourRequest(role: role, givenName: name))
+            model.restart()
+            guidedOnboarding = model
+        }
+        showGuidedStep(0)
+    }
+
+#if DEBUG
+    private func runDemoCaptureTour() async {
+        let tour: [AppTab] = isCoach
+            ? [.training, .chat, .profile]
+            : [.training, .plan, .progress, .chat, .profile]
+
+        for tab in tour {
+            guard !Task.isCancelled else { return }
+            if selectedTab != tab {
+                withAnimation(TriWaveXMotion.stateChange(reduced: reduceMotion)) {
+                    selectedTab = tab
+                }
+            }
+            try? await Task.sleep(for: .seconds(8))
+        }
+    }
+#endif
 
     private var shouldShowTabBar: Bool {
         guard onDismiss == nil else { return false }

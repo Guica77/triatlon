@@ -16,6 +16,30 @@ final class SessionModel {
 
     init(origin: URL) { self.origin = origin }
 
+    func restore() async {
+        guard destination == nil, !busy else { return }
+        guard let cookie = await cookieHeader() else { return }
+        busy = true
+        defer { busy = false }
+        do {
+            var request = URLRequest(url: origin.appendingPathComponent("api/native/session"))
+            request.httpMethod = "GET"
+            request.timeoutInterval = 15
+            request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            request.setValue(cookie, forHTTPHeaderField: "Cookie")
+            let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
+            guard let http = response as? HTTPURLResponse else { return }
+            if http.statusCode == 401 { return }
+            guard http.statusCode == 200,
+                  let result = try? JSONDecoder().decode(LoginResult.self, from: data),
+                  ["/dashboard", "/coach/dashboard", "/onboarding"].contains(result.destination) else { return }
+            destination = result.destination
+        } catch {
+            // Session restoration is best effort; the normal login remains available.
+        }
+    }
+
     func endSession() async {
         await store.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast)
         destination = nil
@@ -140,6 +164,22 @@ final class SessionModel {
             if random < 64 { result.append(alphabet[Int(random)]); remaining -= 1 }
         }
         return result
+    }
+
+    private func cookieHeader() async -> String? {
+        let cookies = await withCheckedContinuation { continuation in
+            store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) }
+        }
+        let host = origin.host?.lowercased() ?? ""
+        let now = Date()
+        let matching = cookies.filter { cookie in
+            let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
+            return (cookie.expiresDate.map { $0 > now } ?? true) &&
+                (!cookie.isSecure || origin.scheme == "https") &&
+                (host == domain || host.hasSuffix(".\(domain)")) &&
+                !cookie.name.contains(";") && !cookie.value.contains(";")
+        }
+        return matching.isEmpty ? nil : matching.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
     }
 
     private static func sha256(_ value: String) -> String {

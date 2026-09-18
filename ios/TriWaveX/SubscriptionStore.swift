@@ -35,12 +35,18 @@ import Observation
 struct NativeSubscriptionStoreView: View {
     let role: String
     let onFinished: () -> Void
+    let onPurchased: () -> Void
     @State private var store = SubscriptionStore()
     private var productIdentifier: String { role == "coach" ? "com.triwavex.coach.monthly" : "com.triwavex.athlete.monthly" }
 
-    init(role: String = "athlete", onFinished: @escaping () -> Void = {}) {
+    init(
+        role: String = "athlete",
+        onFinished: @escaping () -> Void = {},
+        onPurchased: (() -> Void)? = nil
+    ) {
         self.role = role
         self.onFinished = onFinished
+        self.onPurchased = onPurchased ?? onFinished
     }
 
     var body: some View {
@@ -54,7 +60,7 @@ struct NativeSubscriptionStoreView: View {
                         VStack(alignment: .leading, spacing: 10) {
                             Text(role == "coach" ? "Entrenador" : "Atleta").font(.title3.bold())
                             Text(product.displayPrice + " al mes después de la prueba").foregroundStyle(.secondary)
-                            Button("Empezar prueba gratuita") { Task { if await store.purchase(product) { onFinished() } } }
+                            Button("Empezar prueba gratuita") { Task { if await store.purchase(product) { onPurchased() } } }
                                 .buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity)
                         }
                     }

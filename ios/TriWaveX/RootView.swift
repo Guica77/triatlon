@@ -2,6 +2,11 @@ import AuthenticationServices
 import SwiftUI
 
 struct RootView: View {
+    private struct CoachCheckout {
+        let destination: String
+        let givenName: String
+    }
+
     private enum Role: String, CaseIterable {
         case athlete
         case coach
@@ -22,11 +27,24 @@ struct RootView: View {
     @State private var informationURL: URL?
     @State private var registrationRole: Role?
     @State private var role: Role = .athlete
+    @State private var onboardingGivenName = ""
+    @State private var coachCheckout: CoachCheckout?
+    @State private var guidedTourRequest: GuidedTourRequest?
     @FocusState private var focusedField: FocusedField?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(origin: URL) {
         _session = State(initialValue: SessionModel(origin: origin))
+        let defaults = UserDefaults.standard
+        _email = State(initialValue: defaults.string(forKey: "triwavex.login.email") ?? "")
+        _role = State(initialValue: Role(rawValue: defaults.string(forKey: "triwavex.login.role") ?? "") ?? .athlete)
+        _registrationRole = State(initialValue: Role(rawValue: defaults.string(forKey: "triwavex.registration.activeRole") ?? ""))
+        if defaults.bool(forKey: "triwavex.coachCheckout.pending") {
+            _coachCheckout = State(initialValue: CoachCheckout(
+                destination: defaults.string(forKey: "triwavex.coachCheckout.destination") ?? "/coach/dashboard",
+                givenName: defaults.string(forKey: "triwavex.coachCheckout.givenName") ?? ""
+            ))
+        }
     }
 
     var body: some View {
@@ -36,18 +54,45 @@ struct RootView: View {
                     role: registrationRole.rawValue,
                     origin: session.origin,
                     store: session.store,
-                    onCancel: { self.registrationRole = nil },
+                    onCancel: { setRegistrationRole(nil) },
                     onRegistered: { outcome in
-                        self.registrationRole = nil
-                        session.destination = outcome.destination
+                        setRegistrationRole(nil)
+                        onboardingGivenName = outcome.givenName
+                        if outcome.role == Role.coach.rawValue {
+                            setCoachCheckout(CoachCheckout(destination: outcome.destination, givenName: outcome.givenName))
+                        } else {
+                            session.destination = outcome.destination
+                        }
                     }
                 )
+                .transition(.opacity)
+            } else if let coachCheckout {
+                NavigationStack {
+                    NativeSubscriptionStoreView(
+                        role: Role.coach.rawValue,
+                        onFinished: {
+                            setCoachCheckout(nil)
+                            session.destination = coachCheckout.destination
+                        },
+                        onPurchased: {
+                            guidedTourRequest = GuidedTourRequest(role: .coach, givenName: coachCheckout.givenName)
+                            setCoachCheckout(nil)
+                            session.destination = coachCheckout.destination
+                        }
+                    )
+                }
                 .transition(.opacity)
             } else if session.destination == "/onboarding" {
                 NativeOnboardingView(
                     origin: session.origin,
                     store: session.store,
-                    onFinished: { session.destination = "/dashboard" }
+                    givenName: onboardingGivenName,
+                    onFinished: { purchased in
+                        if purchased {
+                            guidedTourRequest = GuidedTourRequest(role: .athlete, givenName: onboardingGivenName)
+                        }
+                        session.destination = "/dashboard"
+                    }
                 )
                 .transition(.opacity)
             } else if let destination = session.destination {
@@ -56,7 +101,9 @@ struct RootView: View {
                     store: session.store,
                     initialPath: destination,
                     onDismiss: nil,
-                    onSessionEnded: { Task { await session.endSession() } }
+                    onSessionEnded: { Task { await session.endSession() } },
+                    guidedTourRequest: guidedTourRequest,
+                    onGuidedTourFinished: { guidedTourRequest = nil }
                 )
                 .transition(.opacity)
             } else {
@@ -75,12 +122,35 @@ struct RootView: View {
                     store: session.store,
                     initialPath: informationURL.path,
                     onDismiss: { self.informationURL = nil },
-                    onSessionEnded: { self.informationURL = nil; Task { await session.endSession() } }
+                    onSessionEnded: { self.informationURL = nil; Task { await session.endSession() } },
+                    guidedTourRequest: nil,
+                    onGuidedTourFinished: {}
                 )
             }
         }
         .tint(.triWaveXAqua)
         .animation(TriWaveXMotion.stateChange(reduced: reduceMotion), value: session.destination)
+        .task {
+#if DEBUG
+            let arguments = ProcessInfo.processInfo.arguments
+            if arguments.contains("--capture-demo-tour") || arguments.contains("--preview-guided-onboarding") { return }
+#endif
+            await session.restore()
+        }
+#if DEBUG
+        .task {
+            let arguments = ProcessInfo.processInfo.arguments
+            guard arguments.contains("--capture-demo-tour") || arguments.contains("--preview-guided-onboarding"),
+                  session.destination == nil,
+                  !session.busy else { return }
+            if arguments.contains("--preview-guided-onboarding") {
+                guidedTourRequest = GuidedTourRequest(role: .athlete, givenName: "Guillermo")
+            }
+            try? await Task.sleep(for: .seconds(3))
+            guard !Task.isCancelled else { return }
+            await session.login(email: "demo@triatlonpro.com", password: "demo123456")
+        }
+#endif
     }
 
     private var loginView: some View {
@@ -102,6 +172,9 @@ struct RootView: View {
                     .background(loginSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                     .accessibilityLabel("Tipo de cuenta")
                     .disabled(session.busy)
+                    .onChange(of: role) { _, value in
+                        UserDefaults.standard.set(value.rawValue, forKey: "triwavex.login.role")
+                    }
 
                     loginSectionTitle("Acceso")
                     loginSurfaceGroup {
@@ -116,6 +189,9 @@ struct RootView: View {
                             .accessibilityLabel("Correo electrónico")
                             .frame(minHeight: 52)
                             .font(.system(size: 18))
+                            .onChange(of: email) { _, value in
+                                UserDefaults.standard.set(value, forKey: "triwavex.login.email")
+                            }
 
                         Divider()
 
@@ -181,10 +257,15 @@ struct RootView: View {
                     .opacity(session.busy ? 0.7 : 1)
 
                     VStack(spacing: 8) {
+                        if !email.isEmpty {
+                            Label("Continuamos donde lo dejaste", systemImage: "arrow.counterclockwise.circle.fill")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.tint)
+                        }
                         Text("¿Nuevo en TriWaveX?")
                             .foregroundStyle(.secondary)
                         Button("Crear cuenta") {
-                            registrationRole = role
+                            setRegistrationRole(role)
                         }
                     }
                     .font(.subheadline)
@@ -267,6 +348,30 @@ struct RootView: View {
             )
             if session.destination != nil {
                 password = ""
+                UserDefaults.standard.removeObject(forKey: "triwavex.login.email")
+            }
+        }
+    }
+
+    private func setRegistrationRole(_ value: Role?) {
+        registrationRole = value
+        if let value {
+            UserDefaults.standard.set(value.rawValue, forKey: "triwavex.registration.activeRole")
+        } else {
+            UserDefaults.standard.removeObject(forKey: "triwavex.registration.activeRole")
+        }
+    }
+
+    private func setCoachCheckout(_ value: CoachCheckout?) {
+        coachCheckout = value
+        let defaults = UserDefaults.standard
+        if let value {
+            defaults.set(true, forKey: "triwavex.coachCheckout.pending")
+            defaults.set(value.destination, forKey: "triwavex.coachCheckout.destination")
+            defaults.set(value.givenName, forKey: "triwavex.coachCheckout.givenName")
+        } else {
+            ["pending", "destination", "givenName"].forEach {
+                defaults.removeObject(forKey: "triwavex.coachCheckout.\($0)")
             }
         }
     }

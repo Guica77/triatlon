@@ -103,6 +103,7 @@ struct NativeProfileView: View {
     let openStrava: () -> Void
     let openPlanEditor: () -> Void
     let openAccount: () -> Void
+    let replayGuide: () -> Void
     @State private var hasLoaded = false
     @State private var managingPlan = false
 
@@ -219,6 +220,16 @@ struct NativeProfileView: View {
                 }
                 Button(action: openAccount) { Label("Cuenta y seguridad", systemImage: "person.crop.circle").foregroundStyle(.primary) }
             }
+            Section("Ayuda") {
+                Button(action: replayGuide) {
+                    Label("Descubrir TriWaveX", systemImage: "sparkles")
+                }
+                NavigationLink {
+                    TriWaveXQuickHelpView()
+                } label: {
+                    Label("Guía rápida", systemImage: "questionmark.circle")
+                }
+            }
         }
         .listStyle(.insetGrouped)
         .sheet(isPresented: $managingPlan) {
@@ -235,6 +246,39 @@ struct NativeProfileView: View {
 
     private func metric(_ label: String, value: String) -> some View { VStack(alignment: .leading, spacing: 2) { Text(value).font(.headline.monospacedDigit()); Text(label).font(.caption).foregroundStyle(.secondary) } }
     private func connectionRow(_ name: String, connected: Bool, icon: String) -> some View { HStack { Label(name, systemImage: icon); Spacer(); Text(connected ? "Conectado" : "Disponible").font(.caption.weight(.semibold)).foregroundStyle(connected ? .green : .secondary) } }
+}
+
+private struct TriWaveXQuickHelpView: View {
+    var body: some View {
+        List {
+            help(
+                "Dispositivos y salud",
+                symbol: "applewatch",
+                text: "Conecta Apple Health, sensores y proveedores compatibles desde Perfil > Dispositivos y conexiones."
+            )
+            help(
+                "Lesiones y recuperación",
+                symbol: "cross.case",
+                text: "Registra límites y sensaciones para adaptar la carga. TriWaveX no sustituye el consejo de un profesional sanitario."
+            )
+            help(
+                "Plan y suscripción",
+                symbol: "creditcard",
+                text: "Cambia objetivos desde Gestionar mi plan y administra o restaura tu compra desde Suscripción y plan."
+            )
+        }
+        .navigationTitle("Guía rápida")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func help(_ title: String, symbol: String, text: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(title, systemImage: symbol).font(.headline)
+            Text(text).font(.subheadline).foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 6)
+        .accessibilityElement(children: .combine)
+    }
 }
 
 struct NativePlanManagementSheet: View {

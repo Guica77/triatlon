@@ -75,7 +75,11 @@ private struct NativeEntryTransport {
 @MainActor
 @Observable final class NativeRegistrationModel {
     enum State { case idle, saving, confirmationRequired(String), failed(String) }
-    struct Outcome { let destination: String }
+    struct Outcome {
+        let destination: String
+        let givenName: String
+        let role: String
+    }
 
     var firstName = ""
     var lastName = ""
@@ -87,11 +91,18 @@ private struct NativeEntryTransport {
 
     private let transport: NativeEntryTransport
     private let role: String
+    private let defaults: UserDefaults
 
-    init(origin: URL, store: WKWebsiteDataStore, role: String) {
+    init(origin: URL, store: WKWebsiteDataStore, role: String, defaults: UserDefaults = .standard) {
         transport = NativeEntryTransport(origin: origin, store: store)
         self.role = role
+        self.defaults = defaults
+        firstName = defaults.string(forKey: draftKey("firstName")) ?? ""
+        lastName = defaults.string(forKey: draftKey("lastName")) ?? ""
+        email = defaults.string(forKey: draftKey("email")) ?? ""
     }
+
+    var hasDraft: Bool { !firstName.isEmpty || !lastName.isEmpty || !email.isEmpty }
 
     var canSubmit: Bool {
         !firstName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
@@ -107,12 +118,29 @@ private struct NativeEntryTransport {
         do {
             let result = try await transport.send("/api/native/register", body: Input(email: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password, firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines), lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines), role: role), response: Result.self)
             password = ""; passwordConfirmation = ""
+            clearDraft()
             if result.emailConfirmRequired { state = .confirmationRequired(email); return nil }
             guard let destination = result.destination else { state = .failed("No se ha podido iniciar la sesión."); return nil }
             state = .idle
-            return Outcome(destination: destination)
+            return Outcome(
+                destination: destination,
+                givenName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
+                role: role
+            )
         } catch { state = .failed(error.localizedDescription); return nil }
     }
+
+    func persistDraft() {
+        defaults.set(firstName, forKey: draftKey("firstName"))
+        defaults.set(lastName, forKey: draftKey("lastName"))
+        defaults.set(email, forKey: draftKey("email"))
+    }
+
+    private func clearDraft() {
+        ["firstName", "lastName", "email"].forEach { defaults.removeObject(forKey: draftKey($0)) }
+    }
+
+    private func draftKey(_ field: String) -> String { "triwavex.registration.\(role).\(field)" }
 }
 
 struct NativeRegistrationView: View {
@@ -139,6 +167,11 @@ struct NativeRegistrationView: View {
                         Text("Crear cuenta").font(.largeTitle.bold())
                         Text(role == "coach" ? "Empieza a acompañar a tus atletas." : "Empieza a entrenar con una dirección clara.")
                             .foregroundStyle(.secondary)
+                        if model.hasDraft {
+                            Label("Continuamos donde lo dejaste", systemImage: "arrow.counterclockwise.circle.fill")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.tint)
+                        }
                     }.padding(.bottom, 8)
 
                     Group {
@@ -177,6 +210,9 @@ struct NativeRegistrationView: View {
             .background(Color(uiColor: .systemGroupedBackground))
             .navigationTitle("TriWaveX").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarLeading) { Button("Cancelar", action: onCancel) } }
+            .onChange(of: model.firstName) { _, _ in model.persistDraft() }
+            .onChange(of: model.lastName) { _, _ in model.persistDraft() }
+            .onChange(of: model.email) { _, _ in model.persistDraft() }
         }
     }
 
@@ -203,8 +239,41 @@ struct NativeRegistrationView: View {
     var injuries = ""
     var state: State = .editing
     private let transport: NativeEntryTransport
+    private let defaults: UserDefaults
 
-    init(origin: URL, store: WKWebsiteDataStore) { transport = NativeEntryTransport(origin: origin, store: store) }
+    init(origin: URL, store: WKWebsiteDataStore, defaults: UserDefaults = .standard) {
+        transport = NativeEntryTransport(origin: origin, store: store)
+        self.defaults = defaults
+        goal = defaults.string(forKey: "triwavex.onboarding.goal") ?? goal
+        modality = defaults.string(forKey: "triwavex.onboarding.modality") ?? modality
+        level = defaults.string(forKey: "triwavex.onboarding.level") ?? level
+        if defaults.object(forKey: "triwavex.onboarding.weeklyHours") != nil {
+            weeklyHours = defaults.double(forKey: "triwavex.onboarding.weeklyHours")
+        }
+        wantsCoach = defaults.bool(forKey: "triwavex.onboarding.wantsCoach")
+        injuries = defaults.string(forKey: "triwavex.onboarding.injuries") ?? ""
+        if defaults.bool(forKey: "triwavex.onboarding.readyForPayment") { state = .readyForPayment }
+    }
+
+    var hasDraft: Bool {
+        defaults.object(forKey: "triwavex.onboarding.step") != nil || defaults.bool(forKey: "triwavex.onboarding.readyForPayment")
+    }
+
+    func persistDraft(step: Int) {
+        defaults.set(goal, forKey: "triwavex.onboarding.goal")
+        defaults.set(modality, forKey: "triwavex.onboarding.modality")
+        defaults.set(level, forKey: "triwavex.onboarding.level")
+        defaults.set(weeklyHours, forKey: "triwavex.onboarding.weeklyHours")
+        defaults.set(wantsCoach, forKey: "triwavex.onboarding.wantsCoach")
+        defaults.set(injuries, forKey: "triwavex.onboarding.injuries")
+        defaults.set(step, forKey: "triwavex.onboarding.step")
+    }
+
+    func clearDraft() {
+        ["goal", "modality", "level", "weeklyHours", "wantsCoach", "injuries", "step", "readyForPayment"].forEach {
+            defaults.removeObject(forKey: "triwavex.onboarding.\($0)")
+        }
+    }
 
     func save() async {
         state = .saving
@@ -213,6 +282,7 @@ struct NativeRegistrationView: View {
         do {
             _ = try await transport.send("/api/native/onboarding", body: Input(goal: goal, modality: modality, level: level, weeklyHours: weeklyHours, wantsCoach: wantsCoach, previousInjuries: injuries), response: Result.self)
             state = .readyForPayment
+            defaults.set(true, forKey: "triwavex.onboarding.readyForPayment")
         } catch { state = .failed(error.localizedDescription) }
     }
 }
@@ -220,27 +290,53 @@ struct NativeRegistrationView: View {
 struct NativeOnboardingView: View {
     let origin: URL
     let store: WKWebsiteDataStore
-    let onFinished: () -> Void
+    let givenName: String
+    let onFinished: (_ purchased: Bool) -> Void
     @State private var model: NativeOnboardingModel
     @State private var step = 0
 
-    init(origin: URL, store: WKWebsiteDataStore, onFinished: @escaping () -> Void) {
-        self.origin = origin; self.store = store; self.onFinished = onFinished
+    init(origin: URL, store: WKWebsiteDataStore, givenName: String, onFinished: @escaping (_ purchased: Bool) -> Void) {
+        self.origin = origin; self.store = store; self.givenName = givenName; self.onFinished = onFinished
         _model = State(initialValue: NativeOnboardingModel(origin: origin, store: store))
+        _step = State(initialValue: min(max(UserDefaults.standard.integer(forKey: "triwavex.onboarding.step"), 0), 2))
     }
 
     var body: some View {
         NavigationStack {
             Group {
                 if case .readyForPayment = model.state {
-                    NativeSubscriptionStoreView(role: "athlete", onFinished: onFinished)
+                    NativeSubscriptionStoreView(
+                        role: "athlete",
+                        onFinished: { model.clearDraft(); onFinished(false) },
+                        onPurchased: { model.clearDraft(); onFinished(true) }
+                    )
                 } else {
-                    ScrollView { VStack(alignment: .leading, spacing: 22) { progress; content; actions }.padding(20).frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading).frame(maxWidth: .infinity) }
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 22) {
+                            if model.hasDraft {
+                                Label("Continuamos donde lo dejaste", systemImage: "arrow.counterclockwise.circle.fill")
+                                    .font(.footnote.weight(.semibold)).foregroundStyle(.tint)
+                            }
+                            progress
+                            content
+                            Label("Guardado", systemImage: "checkmark.circle.fill")
+                                .font(.caption).foregroundStyle(.secondary)
+                            actions
+                        }
+                        .padding(20).frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading).frame(maxWidth: .infinity)
+                    }
                         .background(Color(uiColor: .systemGroupedBackground))
                 }
             }
             .navigationTitle(step == 0 ? "Conócete" : step == 1 ? "Tu semana" : "Último detalle")
             .navigationBarTitleDisplayMode(.inline)
+            .onChange(of: step) { _, value in model.persistDraft(step: value) }
+            .onChange(of: model.goal) { _, _ in model.persistDraft(step: step) }
+            .onChange(of: model.modality) { _, _ in model.persistDraft(step: step) }
+            .onChange(of: model.level) { _, _ in model.persistDraft(step: step) }
+            .onChange(of: model.weeklyHours) { _, _ in model.persistDraft(step: step) }
+            .onChange(of: model.wantsCoach) { _, _ in model.persistDraft(step: step) }
+            .onChange(of: model.injuries) { _, _ in model.persistDraft(step: step) }
         }
     }
 
@@ -248,7 +344,7 @@ struct NativeOnboardingView: View {
 
     @ViewBuilder private var content: some View {
         if step == 0 {
-            Text("¿Qué quieres conseguir?").font(.largeTitle.bold())
+            Text(onboardingQuestion).font(.largeTitle.bold())
             Text("Usaremos esta información para prepararte un plan inicial.").foregroundStyle(.secondary)
             TextField("Ejemplo: Mi primer 70.3", text: $model.goal).textFieldStyle(.roundedBorder).font(.title3)
             Picker("Deporte", selection: $model.modality) { Text("Triatlón").tag("triatlon"); Text("Carrera").tag("carrera"); Text("Duatlón").tag("duatlon"); Text("Acuatlón").tag("acuatlon"); Text("Acuabike").tag("acuabike") }.pickerStyle(.navigationLink)
@@ -263,6 +359,15 @@ struct NativeOnboardingView: View {
             Toggle("Quiero encontrar o conectar con un entrenador", isOn: $model.wantsCoach)
             VStack(alignment: .leading, spacing: 8) { Text("Lesiones o límites actuales (opcional)").font(.headline); TextEditor(text: $model.injuries).frame(minHeight: 110).padding(8).background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous)); Text("Solo lo usamos para ajustar el entrenamiento. No sustituye a un profesional sanitario.").font(.footnote).foregroundStyle(.secondary) }
         }
+    }
+
+    private var onboardingQuestion: String {
+        let name = givenName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard (2...30).contains(name.count),
+              name.unicodeScalars.contains(where: CharacterSet.letters.contains) else {
+            return "¿Qué quieres conseguir?"
+        }
+        return "\(name), ¿qué quieres conseguir?"
     }
 
     private var actions: some View {

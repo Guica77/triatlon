@@ -121,6 +121,11 @@ Only one tip may be visible at a time. A dismissed tip does not immediately reap
 - If a target has not loaded, show a normal loading state and wait for its registered anchor; after a timeout, skip that demonstration and continue with an accessible explanation.
 - If network data fails, dismiss the overlay and expose the screen's normal retry state.
 - If the app closes mid-tour, resume at the last completed step, not mid-animation.
+- If the app closes during registration, restore role, name and email on the same registration screen, but never persist either password field.
+- If the app closes during the pre-payment questions, restore the exact question and non-sensitive answers. If those answers were already submitted, return to payment instead of submitting them twice.
+- If the app closes on payment, return to payment and ask StoreKit for the current entitlement; never infer purchase success from a saved screen state.
+- If a valid authenticated cookie still exists, restore the server-confirmed destination instead of showing login again.
+- Show “Continuamos donde lo dejaste” once after a successful restoration and use a brief “Guardado” status after saving a draft.
 - If the role changes or is corrected, discard incompatible local progress and load the matching server state.
 - If an invitation or workout action fails, keep the user on the real screen with its standard error message; the tour does not claim success.
 
