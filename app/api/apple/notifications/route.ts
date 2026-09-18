@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   const transactionReference = transaction?.originalTransactionId || transaction?.transactionId;
   const revoke = [NotificationTypeV2.REFUND, NotificationTypeV2.REVOKE, NotificationTypeV2.EXPIRED, NotificationTypeV2.DID_FAIL_TO_RENEW].includes(notification.notificationType as NotificationTypeV2);
   if (transactionReference && revoke) {
-    const { data: entitlement } = await admin.from('billing_entitlements').select('user_id').eq('provider_reference', transactionReference).maybeSingle();
+    const { data: entitlement } = await admin.from('billing_entitlements').select('user_id').or(`provider_reference.eq.${transactionReference},provider_transaction_reference.eq.${transactionReference}`).maybeSingle();
     if (entitlement?.user_id) {
       await admin.from('billing_entitlements').update({ status: notification.notificationType === NotificationTypeV2.DID_FAIL_TO_RENEW ? 'past_due' : 'cancelled', updated_at: new Date().toISOString() }).eq('user_id', entitlement.user_id);
       await admin.from('profiles').update({ subscription_status: notification.notificationType === NotificationTypeV2.DID_FAIL_TO_RENEW ? 'past_due' : 'cancelled' }).eq('id', entitlement.user_id);
