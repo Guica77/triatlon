@@ -102,13 +102,14 @@ struct NativeSubscriptionStoreView: View {
 
     @State private var store = SubscriptionStore()
     @State private var restoredMessage: String?
+    @State private var selectedRole: String
 
     private let privacyURL = URL(string: "https://app.triwavex.com/legal/privacidad")!
     private let termsURL = URL(string: "https://app.triwavex.com/legal/terminos")!
     private let subscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
 
     private var productIdentifier: String {
-        role == "coach" ? "com.triwavex.coach.monthly" : "com.triwavex.athlete.monthly"
+        selectedRole == "coach" ? "com.triwavex.coach.monthly" : "com.triwavex.athlete.monthly"
     }
 
     private var selectedProduct: Product? {
@@ -119,12 +120,14 @@ struct NativeSubscriptionStoreView: View {
         self.role = role
         self.onFinished = onFinished
         self.onPurchased = onPurchased ?? onFinished
+        _selectedRole = State(initialValue: role)
     }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 header
+                planComparison
                 if let product = selectedProduct {
                     planCard(product)
                     purchaseButton(product)
@@ -156,18 +159,69 @@ struct NativeSubscriptionStoreView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: role == "coach" ? "person.2.badge.gearshape.fill" : "figure.run.circle.fill")
+            Image(systemName: selectedRole == "coach" ? "person.2.badge.gearshape.fill" : "figure.run.circle.fill")
                 .font(.system(size: 42, weight: .semibold))
                 .foregroundStyle(Color.triWaveXAqua)
                 .accessibilityHidden(true)
-            Text(role == "coach" ? "Entrena a tu equipo" : "Tu plan está listo")
+            Text(selectedRole == "coach" ? "Entrena a tu equipo" : "Tu plan está listo")
                 .font(.largeTitle.bold())
                 .tracking(-0.6)
-            Text(role == "coach"
+            Text(selectedRole == "coach"
                  ? "Organiza hasta 10 atletas, comparte sesiones y sigue su evolución desde un solo lugar."
                  : "Sigue tu semana, registra cada sesión y adapta el plan con tus datos reales.")
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private var planComparison: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Elige tu forma de entrenar")
+                .font(.title3.bold())
+            Picker("Tipo de cuenta", selection: $selectedRole) {
+                Text("Atleta").tag("athlete")
+                Text("Entrenador").tag("coach")
+            }
+            .pickerStyle(.segmented)
+            .accessibilityLabel("Tipo de suscripción")
+
+            HStack(alignment: .top, spacing: 12) {
+                comparisonCard(
+                    title: "Atleta con IA",
+                    price: price(for: "com.triwavex.athlete.monthly"),
+                    detail: "Planificación adaptativa y métricas para tu progreso.",
+                    selected: selectedRole == "athlete"
+                ) { selectedRole = "athlete" }
+                comparisonCard(
+                    title: "Si eres entrenador",
+                    price: price(for: "com.triwavex.coach.monthly"),
+                    detail: "10 atletas incluidos. Desde el undécimo, añade bloques de hasta 5 atletas.",
+                    selected: selectedRole == "coach"
+                ) { selectedRole = "coach" }
+            }
+            Text("La prueba gratuita y el importe exacto aparecen antes de confirmar. Los impuestos se muestran cuando corresponda.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func comparisonCard(title: String, price: String, detail: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                Text(price).font(.headline.bold()).foregroundStyle(.primary)
+                Text(detail).font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.leading)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(14)
+            .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(selected ? Color.triWaveXAqua : .clear, lineWidth: 2) }
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+
+    private func price(for identifier: String) -> String {
+        store.products.first(where: { $0.id == identifier })?.displayPrice.map { "\($0)/mes" } ?? "Disponible en App Store"
     }
 
     private func planCard(_ product: Product) -> some View {
@@ -175,7 +229,7 @@ struct NativeSubscriptionStoreView: View {
         return TriWaveXSurface {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(role == "coach" ? "Entrenador" : "Atleta").font(.title3.bold())
+                    Text(selectedRole == "coach" ? "Entrenador" : "Atleta").font(.title3.bold())
                     Spacer()
                     if eligible {
                         Text("7 días gratis")
@@ -187,10 +241,10 @@ struct NativeSubscriptionStoreView: View {
                 }
                 Text("\(product.displayPrice) al mes").font(.title2.bold().monospacedDigit())
                 Divider()
-                benefit("checkmark.circle.fill", role == "coach" ? "10 atletas incluidos" : "Plan adaptado a tu progreso")
+                benefit("checkmark.circle.fill", selectedRole == "coach" ? "10 atletas incluidos" : "Plan adaptado a tu progreso")
                 benefit("arrow.triangle.2.circlepath", "Renovación mensual hasta que canceles")
                 benefit("iphone.and.arrow.forward", "Disponible con tu Apple ID en tus dispositivos")
-                if role == "coach" {
+                if selectedRole == "coach" {
                     Text("Las ampliaciones de capacidad se mostrarán antes de confirmar cualquier cargo adicional.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
