@@ -23,7 +23,10 @@ export async function POST(request: NextRequest) {
 
   const price = process.env[BILLING_PLANS[plan].priceEnv];
   const secret = process.env.STRIPE_SECRET_KEY;
-  if (!price || !secret) return NextResponse.json({ error: 'El cobro seguro aún no está configurado.' }, { status: 503 });
+  if (!price || !secret) {
+    const missing = [!secret ? 'STRIPE_SECRET_KEY' : null, !price ? BILLING_PLANS[plan].priceEnv : null].filter(Boolean);
+    return NextResponse.json({ error: `Falta configurar Stripe en producción: ${missing.join(', ')}.` }, { status: 503 });
+  }
 
   const origin = new URL(request.url).origin;
   const form = new URLSearchParams({
@@ -41,7 +44,10 @@ export async function POST(request: NextRequest) {
   const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
     method: 'POST', headers: { Authorization: `Bearer ${secret}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: form,
   });
-  const data = await response.json() as { url?: string };
-  if (!response.ok || !data.url) return NextResponse.json({ error: 'No se ha podido iniciar el pago seguro.' }, { status: 502 });
+  const data = await response.json() as { url?: string; error?: { message?: string } };
+  if (!response.ok || !data.url) {
+    console.error('Stripe Checkout error', { status: response.status, message: data.error?.message });
+    return NextResponse.json({ error: data.error?.message || 'Stripe no ha podido iniciar el pago seguro.' }, { status: 502 });
+  }
   return NextResponse.json({ url: data.url });
 }
