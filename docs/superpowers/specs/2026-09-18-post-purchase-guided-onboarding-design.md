@@ -15,6 +15,13 @@ The athlete should understand where to find today's workout, the plan, progress,
 - Preserve the user's progress locally and on the account so the tour does not restart across devices.
 - Use progressive disclosure: secondary features explain themselves on first use.
 - Do not execute payments, send invitations or messages, or change workouts on the user's behalf.
+- Address the user naturally by their given name without repeating it in every step.
+
+## Personalization
+
+The coordinator receives the authenticated profile's given name before presenting the first step. The opening and closing copy use the normalized name, for example: “Guillermo, aquí empieza tu día” and “Guillermo, ya estás listo.” Intermediate instructions remain concise and do not repeat the name mechanically.
+
+Names are trimmed and validated for display length. If the name is missing, still loading, implausibly long, or contains only symbols, the tour uses a natural role-neutral greeting without a placeholder. The tour never blocks while waiting for a name and does not infer a name from the email address. VoiceOver reads the personalized sentence once without adding the name to every control label.
 
 ## Entry Conditions
 
@@ -94,6 +101,9 @@ After the short tour, first-use tips appear only in context:
 
 - Athlete: editing a plan, recording recovery, completing a workout, viewing progress, connecting a device, and contacting a coach or AI.
 - Coach: reviewing an athlete, adapting a plan, responding in Chat, monitoring progress, and managing capacity.
+- Devices and health: on the first visit to Profile, explain where supported Apple Health and external-provider connections are managed.
+- Injuries and recovery: when the user first records readiness or a limitation, explain that TriWaveX can adapt training load but does not replace medical advice.
+- Plan and subscription: on the first relevant visit, explain where goals, plan changes, purchase restoration, and subscription management live.
 
 Only one tip may be visible at a time. A dismissed tip does not immediately reappear. Every tip is reachable later from Profile > Help > Discover TriWaveX.
 
