@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
   const origin = new URL(request.url).origin;
   const form = new URLSearchParams({
     mode: 'subscription', 'line_items[0][price]': price, 'line_items[0][quantity]': '1',
+    // TriWaveX uses Stripe Billing for subscriptions; Managed Payments requires
+    // product tax codes and is not used for this checkout flow.
+    'managed_payments[enabled]': 'false',
     'client_reference_id': user.id,
     'customer_email': user.email || '',
     'metadata[user_id]': user.id,
