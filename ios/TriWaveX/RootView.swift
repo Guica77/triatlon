@@ -220,7 +220,7 @@ struct RootView: View {
                     branding
                         .padding(.bottom, 30)
 
-                    if loginIntroStage >= 5 {
+                    if loginIntroStage >= 6 {
                         loginSectionTitle("Tipo de cuenta")
                             .transition(loginEntryTransition)
                         Picker("Tipo de cuenta", selection: $role) {
@@ -240,7 +240,7 @@ struct RootView: View {
                         .transition(loginEntryTransition)
                     }
 
-                    if loginIntroStage >= 6 {
+                    if loginIntroStage >= 7 {
                         loginSectionTitle("Acceso")
                             .transition(loginEntryTransition)
                         loginSurfaceGroup {
@@ -282,7 +282,7 @@ struct RootView: View {
                         .transition(loginEntryTransition)
                     }
 
-                    if loginIntroStage >= 7 {
+                    if loginIntroStage >= 8 {
                         Button {
                             login()
                         } label: {
@@ -395,15 +395,15 @@ struct RootView: View {
             if loginIntroStage < 3 {
                 TypingText(
                     text: loginIntroCopy[loginIntroStage],
-                    characterDelay: reduceMotion ? .zero : .milliseconds(20)
+                    characterDelay: reduceMotion ? .zero : .milliseconds(32)
                 )
-                .font(.system(size: 23, weight: .semibold))
+                .font(.system(size: 31, weight: .bold))
                 .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
                 .transition(.opacity)
             } else if loginIntroStage == 3 {
                 Text("Para eso está…")
-                    .font(.system(size: 23, weight: .semibold))
+                    .font(.system(size: 28, weight: .semibold))
                     .foregroundStyle(.secondary)
                     .transition(.opacity)
             } else {
@@ -430,6 +430,8 @@ struct RootView: View {
             }
         }
         .frame(maxWidth: .infinity, minHeight: 76)
+        .offset(y: loginIntroStage < 5 ? 250 : 0)
+        .animation(TriWaveXMotion.entry(reduced: reduceMotion), value: loginIntroStage)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(loginIntroStage < 3 ? loginIntroCopy[loginIntroStage] : "TriWaveX. Entrena con una dirección clara")
     }
@@ -453,7 +455,7 @@ struct RootView: View {
         logoRevealProgress = false
         defer { isPlayingLoginIntro = false }
 
-        let delays = [600, 600, 600, 300, 600, 250, 250]
+        let delays = [1100, 1100, 1100, 500, 900, 550, 300, 300]
         for (index, delay) in delays.enumerated() {
             try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : delay))
             guard !Task.isCancelled else { return }

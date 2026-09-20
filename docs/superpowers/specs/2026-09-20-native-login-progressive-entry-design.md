@@ -6,15 +6,15 @@ Convertir cada apertura de la pantalla nativa de acceso en una secuencia de bien
 
 ## Secuencia
 
-La secuencia se reproduce siempre que se muestra la pantalla de acceso y dura aproximadamente 3,5 segundos:
+La secuencia se reproduce siempre que se muestra la pantalla de acceso y dura aproximadamente 6 segundos:
 
-1. De 0,0 a 1,8 segundos, se escriben carácter a carácter tres frases cortas, una detrás de otra, sobre los problemas que resuelve la aplicación:
+1. De 0,0 a 3,3 segundos, se escriben lentamente, carácter a carácter y en el centro de la pantalla, tres frases cortas sobre los problemas que resuelve la aplicación:
    - «¿Pagar demasiado por entrenar?»
    - «¿Otra app difícil de manejar?»
    - «¿No sabes ni por dónde empezar?»
-2. De 1,8 a 2,1 segundos, aparece el cierre: `Para eso está…`.
-3. De 2,1 a 2,7 segundos, la marca `TriWaveX` se revela de izquierda a derecha mediante una máscara, acompañada de una línea de acento azul discreta.
-4. De 2,7 a 3,5 segundos, se incorporan el lema, selector de cuenta, credenciales, acceso con Apple y enlaces. Cada bloque entra una vez, con un desfase corto, opacidad y un desplazamiento vertical mínimo.
+2. A continuación aparece el cierre: `Para eso está…`.
+3. La marca `TriWaveX` se revela de izquierda a derecha en el centro de la pantalla y se mantiene brevemente.
+4. La misma marca se desplaza hasta el encabezado de la pantalla de acceso. Solo al completar ese movimiento se incorporan el lema, selector de cuenta, credenciales, acceso con Apple y enlaces; cada bloque entra una vez, con un desfase corto, opacidad y un desplazamiento vertical mínimo.
 
 La entrada utiliza curvas existentes de TriWaveX, transforma y opacidad; no anima medidas ni posiciones de layout. La interacción queda disponible al terminar la secuencia.
 
