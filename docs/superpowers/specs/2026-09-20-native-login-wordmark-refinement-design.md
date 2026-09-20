@@ -6,7 +6,7 @@ Dar más presencia a TriWaveX al terminar el preonboarding y al volver a la pant
 
 ## Secuencia de primera apertura
 
-Después de las tres preguntas existentes, la secuencia será:
+Después de las tres preguntas existentes —escritas, mantenidas y borradas a un ritmo más lento para que se lean con calma— la secuencia será:
 
 1. Mostrar `Para eso está…` centrado durante una pausa de lectura ligeramente más larga que la actual.
 2. Fundir esa frase y revelar `TriWaveX` centrado con el subtítulo `Entrena con una dirección clara` debajo.
@@ -18,7 +18,7 @@ No habrá halo, símbolo, fondo azul ni una animación repetitiva. `TriWave` con
 
 ## Vuelta al acceso
 
-En aperturas posteriores se omiten las preguntas y `Para eso está…`. Se muestra directamente el wordmark centrado con su subtítulo, ambos se mantienen brevemente, el subtítulo se desvanece y el wordmark sube al encabezado. La versión es sensiblemente más corta que la primera apertura.
+En aperturas posteriores se omiten las preguntas y `Para eso está…`. Se muestra directamente `TriWaveX` centrado con la `X` azul y el subtítulo debajo. El subtítulo se desvanece lentamente, pero el wordmark no desaparece: permanece visible y asciende de forma continua hasta convertirse en el encabezado del login. La versión es sensiblemente más corta que la primera apertura.
 
 ## Accesibilidad e interacción
 
