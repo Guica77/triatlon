@@ -44,6 +44,5 @@ export async function nativeAccessForUser(
 
   if (!entitled) return { destination: '/onboarding', userID, role, entitled: false }
   if (role === 'coach') return { destination: '/coach/dashboard', userID, role, entitled: true }
-  if (profile?.active_plan_id) return { destination: '/dashboard', userID, role, entitled: true }
-  return { destination: '/onboarding', userID, role, entitled: true }
+  return { destination: '/dashboard', userID, role, entitled: true }
 }

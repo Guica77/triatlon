@@ -17,10 +17,13 @@ struct ProductView: View {
     let origin: URL
     let store: WKWebsiteDataStore
     let initialPath: String
+    let authenticatedUserID: String?
+    let authenticatedRole: String?
     let onDismiss: (() -> Void)?
     let onSessionEnded: (() -> Void)?
     let guidedTourRequest: GuidedTourRequest?
     let onGuidedTourFinished: () -> Void
+    let onSubscriptionFinished: ((NativeSubscriptionResult) -> Void)?
     @State private var browser = BrowserModel()
     @State private var strava = StravaSessionModel()
     @State private var health = HealthKitService()
@@ -37,6 +40,7 @@ struct ProductView: View {
     @State private var nativeProfile: NativeProfileModel
     @State private var selectedTab: AppTab
     @State private var guidedOnboarding: GuidedOnboardingModel?
+    @State private var hasPresentedInitialContent = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var isCoach: Bool {
@@ -51,18 +55,24 @@ struct ProductView: View {
         origin: URL,
         store: WKWebsiteDataStore,
         initialPath: String,
+        authenticatedUserID: String? = nil,
+        authenticatedRole: String? = nil,
         onDismiss: (() -> Void)?,
         onSessionEnded: (() -> Void)? = nil,
         guidedTourRequest: GuidedTourRequest? = nil,
-        onGuidedTourFinished: @escaping () -> Void = {}
+        onGuidedTourFinished: @escaping () -> Void = {},
+        onSubscriptionFinished: ((NativeSubscriptionResult) -> Void)? = nil
     ) {
         self.origin = origin
         self.store = store
         self.initialPath = initialPath
+        self.authenticatedUserID = authenticatedUserID
+        self.authenticatedRole = authenticatedRole
         self.onDismiss = onDismiss
         self.onSessionEnded = onSessionEnded
         self.guidedTourRequest = guidedTourRequest
         self.onGuidedTourFinished = onGuidedTourFinished
+        self.onSubscriptionFinished = onSubscriptionFinished
         _athleteProgress = State(initialValue: AthleteProgressModel(client: AthleteProgressClient(origin: origin, store: store)))
         _nativePlan = State(initialValue: NativePlanModel(client: NativePlanClient(origin: origin, store: store)))
         _nativeProfile = State(initialValue: NativeProfileModel(client: NativeProfileClient(origin: origin, store: store)))
@@ -135,8 +145,11 @@ struct ProductView: View {
                     onStravaConnect: connectStrava,
                     onOpenDevices: { showingDevices = true }
                 )
-                    .opacity(showingNativeSurface ? 0 : 1)
-                    .allowsHitTesting(!showingNativeSurface)
+                    .opacity(showingNativeSurface || !hasPresentedInitialContent ? 0 : 1)
+                    .scaleEffect(showingNativeSurface || hasPresentedInitialContent || reduceMotion ? 1 : 0.985)
+                    .offset(y: showingNativeSurface || hasPresentedInitialContent || reduceMotion ? 0 : 8)
+                    .animation(TriWaveXMotion.entry(reduced: reduceMotion), value: hasPresentedInitialContent)
+                    .allowsHitTesting(!showingNativeSurface && hasPresentedInitialContent)
                 if showingNativePlan {
                     NativePlanView(model: nativePlan)
                 }
@@ -146,17 +159,24 @@ struct ProductView: View {
                 if showingNativeProfile {
                     NativeProfileView(
                         model: nativeProfile,
+                        origin: origin,
+                        store: store,
+                        authenticatedUserID: authenticatedUserID,
+                        authenticatedRole: authenticatedRole,
                         openDevices: { showingDevices = true },
                         openCoros: { openProfileDestination("/api/auth/coros/connect") },
                         openStrava: { openProfileDestination("/api/auth/telemetry/connect?provider=strava") },
                         openPlanEditor: { selectedTab = .plan },
                         openAccount: { showingAccount = true },
-                        replayGuide: replayGuidedTour
+                        replayGuide: replayGuidedTour,
+                        onSubscriptionFinished: onSubscriptionFinished
                     )
                 }
                 if showingNativeChat { NativeChatView(origin: origin, store: store) }
-                if !showingNativeSurface && browser.loading && !browser.hasCompletedInitialLoad {
+                if !showingNativeSurface && !hasPresentedInitialContent && browser.error == nil {
                     TriWaveXLaunchScreen()
+                        .transition(.opacity)
+                        .zIndex(10)
                 }
                 if !showingNativeSurface && browser.loading && browser.hasCompletedInitialLoad {
                     VStack {
@@ -183,6 +203,12 @@ struct ProductView: View {
             }
             .onChange(of: selectedTab) { _, tab in
                 selectTab(path: path(for: tab))
+            }
+            .onChange(of: browser.hasCompletedInitialLoad) { _, isReady in
+                guard isReady, !hasPresentedInitialContent else { return }
+                withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
+                    hasPresentedInitialContent = true
+                }
             }
             .onChange(of: browser.currentPath) { _, path in
                 let nextTab = Self.tab(for: path, isCoach: isCoach)
@@ -456,20 +482,42 @@ struct ProductView: View {
 }
 
 private struct TriWaveXLaunchScreen: View {
+    @State private var isAnimating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
         ZStack {
             Color(.systemBackground).ignoresSafeArea()
 
-            VStack(spacing: 14) {
-                ProgressView()
-                    .controlSize(.large)
-                Text("Cargando…")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
+            VStack(spacing: 18) {
+                VStack(spacing: 7) {
+                    Text("TriWaveX")
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                        .foregroundStyle(Color.triWaveXTextPrimary)
+                    Capsule(style: .continuous)
+                        .fill(Color.triWaveXAqua)
+                        .frame(width: 44, height: 4)
+                        .scaleEffect(x: reduceMotion ? 1 : (isAnimating ? 1 : 0.72), y: 1)
+                        .opacity(reduceMotion ? 1 : (isAnimating ? 1 : 0.55))
+                }
+
+                HStack(spacing: 10) {
+                    ProgressView()
+                        .controlSize(.small)
+                    Text("Cargando…")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+                }
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Cargando")
+        .accessibilityLabel("TriWaveX. Cargando")
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeOut(duration: 0.7).repeatForever(autoreverses: true)) {
+                isAnimating = true
+            }
+        }
     }
 }
 

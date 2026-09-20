@@ -209,10 +209,6 @@ export async function POST(request: Request) {
     const selectedPlan = role === 'athlete'
       ? selectTrainingPlan(plans, profile?.target_race_distance, profile?.level)
       : null
-    if (role === 'athlete' && event.status === 'active' && !selectedPlan) {
-      return reply({ error: 'Completa primero la configuración de tu plan.' }, 409)
-    }
-
     const reconciliation = await reconcileAppleEvent(admin, user.id, event, selectedPlan?.id ?? null)
     const access = await nativeAccessForUser(admin, user.id)
     return reply({

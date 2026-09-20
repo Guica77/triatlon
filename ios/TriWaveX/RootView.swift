@@ -32,6 +32,11 @@ struct RootView: View {
     @State private var onboardingGivenName = ""
     @State private var coachCheckout: CoachCheckout?
     @State private var guidedTourRequest: GuidedTourRequest?
+    @State private var hasCompletedStartup = false
+    @State private var hasCompletedStartupBeat = false
+    @State private var loginIntroStage = 0
+    @State private var logoRevealProgress = false
+    @State private var isPlayingLoginIntro = false
     @FocusState private var focusedField: FocusedField?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -53,7 +58,10 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if let registrationRole {
+            if !hasCompletedStartup {
+                TriWaveXStartupView(isRestoringSession: !session.hasCompletedRestore)
+                    .transition(.opacity)
+            } else if let registrationRole {
                 NativeRegistrationView(
                     role: registrationRole.rawValue,
                     origin: session.origin,
@@ -74,40 +82,62 @@ struct RootView: View {
             } else if let coachCheckout {
                 NavigationStack {
                     NativeSubscriptionStoreView(
+                        origin: session.origin,
+                        store: session.store,
+                        expectedUserID: coachCheckout.userID,
                         role: Role.coach.rawValue,
-                        onFinished: {
-                            // Closing or cancelling checkout never grants access.
-                            setCoachCheckout(coachCheckout)
-                        },
-                        onPurchased: {
-                            guidedTourRequest = GuidedTourRequest(userID: coachCheckout.userID, role: coachCheckout.role == .coach ? .coach : .athlete, givenName: coachCheckout.givenName)
+                        onFinished: { result in
+                            guard result.userID == coachCheckout.userID,
+                                  result.role == Role.coach.rawValue else { return }
+                            guidedTourRequest = GuidedTourRequest(
+                                userID: result.userID,
+                                role: .coach,
+                                givenName: coachCheckout.givenName
+                            )
                             setCoachCheckout(nil)
-                            session.destination = coachCheckout.destination
+                            session.destination = result.destination
                         }
                     )
                 }
                 .transition(.opacity)
             } else if session.destination == "/onboarding" {
-                NativeOnboardingView(
-                    origin: session.origin,
-                    store: session.store,
-                    givenName: onboardingGivenName,
-                    onFinished: { purchased in
-                        guard purchased, let userID = session.stableUserID else { return }
-                        guidedTourRequest = GuidedTourRequest(userID: userID, role: .athlete, givenName: onboardingGivenName)
-                        session.destination = "/dashboard"
+                Group {
+                    if let userID = session.stableUserID {
+                        NativeOnboardingView(
+                            origin: session.origin,
+                            store: session.store,
+                            expectedUserID: userID,
+                            givenName: onboardingGivenName,
+                            onFinished: { result in
+                                guard result.userID == userID,
+                                      result.role == Role.athlete.rawValue else { return }
+                                guidedTourRequest = GuidedTourRequest(
+                                    userID: result.userID,
+                                    role: .athlete,
+                                    givenName: onboardingGivenName
+                                )
+                                session.destination = result.destination
+                            }
+                        )
+                    } else {
+                        ProgressView("Cargando sesión…")
                     }
-                )
+                }
                 .transition(.opacity)
             } else if let destination = session.destination {
                 ProductView(
                     origin: session.origin,
                     store: session.store,
                     initialPath: destination,
+                    authenticatedUserID: session.stableUserID,
+                    authenticatedRole: session.role,
                     onDismiss: nil,
                     onSessionEnded: { Task { await session.endSession() } },
                     guidedTourRequest: guidedTourRequest,
-                    onGuidedTourFinished: { guidedTourRequest = nil }
+                    onGuidedTourFinished: { guidedTourRequest = nil },
+                    onSubscriptionFinished: { result in
+                        _ = session.applySubscriptionResult(result)
+                    }
                 )
                 .transition(.opacity)
             } else {
@@ -125,6 +155,8 @@ struct RootView: View {
                     origin: session.origin,
                     store: session.store,
                     initialPath: informationURL.path,
+                    authenticatedUserID: session.stableUserID,
+                    authenticatedRole: session.role,
                     onDismiss: { self.informationURL = nil },
                     onSessionEnded: { self.informationURL = nil; Task { await session.endSession() } },
                     guidedTourRequest: nil,
@@ -137,9 +169,23 @@ struct RootView: View {
         .task {
 #if DEBUG
             let arguments = ProcessInfo.processInfo.arguments
-            if arguments.contains("--capture-demo-tour") || arguments.contains("--preview-guided-onboarding") { return }
+            if arguments.contains("--capture-demo-tour") || arguments.contains("--preview-guided-onboarding") {
+                hasCompletedStartupBeat = true
+                hasCompletedStartup = true
+                return
+            }
 #endif
-            await session.restore()
+            async let restore: Void = session.restore()
+            if !reduceMotion {
+                try? await Task.sleep(for: .milliseconds(280))
+                guard !Task.isCancelled else { return }
+            }
+            hasCompletedStartupBeat = true
+            await restore
+            finishStartupIfReady()
+        }
+        .onChange(of: session.hasCompletedRestore) { _, _ in
+            finishStartupIfReady()
         }
 #if DEBUG
         .task {
@@ -157,6 +203,16 @@ struct RootView: View {
 #endif
     }
 
+    private func finishStartupIfReady() {
+        guard hasCompletedStartupBeat,
+              session.hasCompletedRestore,
+              !hasCompletedStartup else { return }
+
+        withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
+            hasCompletedStartup = true
+        }
+    }
+
     private var loginView: some View {
         NavigationStack {
             ScrollView {
@@ -164,82 +220,91 @@ struct RootView: View {
                     branding
                         .padding(.bottom, 30)
 
-                    loginSectionTitle("Tipo de cuenta")
-                    Picker("Tipo de cuenta", selection: $role) {
-                        ForEach(Role.allCases, id: \.self) { option in
-                            Text(option.title).tag(option)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .font(.headline)
-                    .padding(8)
-                    .background(loginSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    .accessibilityLabel("Tipo de cuenta")
-                    .disabled(session.busy)
-                    .onChange(of: role) { _, value in
-                        UserDefaults.standard.set(value.rawValue, forKey: "triwavex.login.role")
-                    }
-
-                    loginSectionTitle("Acceso")
-                    loginSurfaceGroup {
-                        TextField("Correo electrónico", text: $email)
-                            .textContentType(.username)
-                            .keyboardType(.emailAddress)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                            .submitLabel(.next)
-                            .focused($focusedField, equals: .email)
-                            .onSubmit { focusedField = .password }
-                            .accessibilityLabel("Correo electrónico")
-                            .frame(minHeight: 52)
-                            .font(.system(size: 18))
-                            .onChange(of: email) { _, value in
-                                UserDefaults.standard.set(value, forKey: "triwavex.login.email")
+                    if loginIntroStage >= 5 {
+                        loginSectionTitle("Tipo de cuenta")
+                            .transition(loginEntryTransition)
+                        Picker("Tipo de cuenta", selection: $role) {
+                            ForEach(Role.allCases, id: \.self) { option in
+                                Text(option.title).tag(option)
                             }
+                        }
+                        .pickerStyle(.segmented)
+                        .font(.headline)
+                        .padding(8)
+                        .background(loginSurface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .accessibilityLabel("Tipo de cuenta")
+                        .disabled(session.busy)
+                        .onChange(of: role) { _, value in
+                            UserDefaults.standard.set(value.rawValue, forKey: "triwavex.login.role")
+                        }
+                        .transition(loginEntryTransition)
+                    }
 
-                        Divider()
+                    if loginIntroStage >= 6 {
+                        loginSectionTitle("Acceso")
+                            .transition(loginEntryTransition)
+                        loginSurfaceGroup {
+                            TextField("Correo electrónico", text: $email)
+                                .textContentType(.username)
+                                .keyboardType(.emailAddress)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .submitLabel(.next)
+                                .focused($focusedField, equals: .email)
+                                .onSubmit { focusedField = .password }
+                                .accessibilityLabel("Correo electrónico")
+                                .frame(minHeight: 52)
+                                .font(.system(size: 18))
+                                .onChange(of: email) { _, value in
+                                    UserDefaults.standard.set(value, forKey: "triwavex.login.email")
+                                }
 
-                        SecureField("Contraseña", text: $password)
-                            .textContentType(.password)
-                            .submitLabel(.go)
-                            .focused($focusedField, equals: .password)
-                            .onSubmit { if canSubmit { login() } }
-                            .accessibilityLabel("Contraseña")
-                            .frame(minHeight: 52)
-                            .font(.system(size: 18))
-
-                        if let error = session.error {
                             Divider()
-                            Label(error, systemImage: "exclamationmark.triangle.fill")
-                                .font(.footnote.weight(.medium))
-                                .foregroundStyle(.red)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .accessibilityLabel("Error: \(error)")
+
+                            SecureField("Contraseña", text: $password)
+                                .textContentType(.password)
+                                .submitLabel(.go)
+                                .focused($focusedField, equals: .password)
+                                .onSubmit { if canSubmit { login() } }
+                                .accessibilityLabel("Contraseña")
+                                .frame(minHeight: 52)
+                                .font(.system(size: 18))
+
+                            if let error = session.error {
+                                Divider()
+                                Label(error, systemImage: "exclamationmark.triangle.fill")
+                                    .font(.footnote.weight(.medium))
+                                    .foregroundStyle(.red)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .accessibilityLabel("Error: \(error)")
+                            }
                         }
+                        .transition(loginEntryTransition)
                     }
 
-                    Button {
-                        login()
-                    } label: {
-                        HStack(spacing: 8) {
-                            if session.busy { ProgressView() }
-                            Text("Entrar como \(role.title.lowercased())")
-                        }
-                        .font(.system(size: 18, weight: .bold))
-                        .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .padding(.top, 14)
-                    .disabled(!canSubmit || session.busy)
-                    .accessibilityHint(session.busy ? "Iniciando sesión" : "Doble toque para iniciar sesión")
-
-                    Link(destination: session.origin.appendingPathComponent("forgot-password")) {
-                        Text("¿Has olvidado la contraseña?")
+                    if loginIntroStage >= 7 {
+                        Button {
+                            login()
+                        } label: {
+                            HStack(spacing: 8) {
+                                if session.busy { ProgressView() }
+                                Text("Entrar como \(role.title.lowercased())")
+                            }
+                            .font(.system(size: 18, weight: .bold))
                             .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
-                    }
-                    .font(.subheadline)
-                    .padding(.top, 8)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .padding(.top, 14)
+                        .disabled(!canSubmit || session.busy)
+                        .accessibilityHint(session.busy ? "Iniciando sesión" : "Doble toque para iniciar sesión")
+
+                        Link(destination: session.origin.appendingPathComponent("forgot-password")) {
+                            Text("¿Has olvidado la contraseña?")
+                                .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+                        }
+                        .font(.subheadline)
+                        .padding(.top, 8)
 
                     Text("Otra forma de entrar")
                         .font(.subheadline)
@@ -289,6 +354,8 @@ struct RootView: View {
                     .font(.footnote.weight(.semibold))
                     .padding(.horizontal, -8)
                     .padding(.top, 26)
+                    .transition(loginEntryTransition)
+                    }
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 54)
@@ -298,6 +365,7 @@ struct RootView: View {
             .scrollDismissesKeyboard(.interactively)
             .toolbar(.hidden, for: .navigationBar)
         }
+        .task { await playLoginIntro() }
     }
 
     private var loginSurface: Color {
@@ -323,19 +391,77 @@ struct RootView: View {
     }
 
     private var branding: some View {
-        VStack(spacing: 6) {
-            Text("TriWaveX")
-                .font(.system(size: 34, weight: .bold))
+        Group {
+            if loginIntroStage < 3 {
+                TypingText(
+                    text: loginIntroCopy[loginIntroStage],
+                    characterDelay: reduceMotion ? .zero : .milliseconds(20)
+                )
+                .font(.system(size: 23, weight: .semibold))
                 .foregroundStyle(.primary)
-
-            Text("Entrena con una dirección clara")
-                .font(.system(size: 17))
-                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+                .transition(.opacity)
+            } else if loginIntroStage == 3 {
+                Text("Para eso está…")
+                    .font(.system(size: 23, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .transition(.opacity)
+            } else {
+                VStack(spacing: 6) {
+                    Text("TriWaveX")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(.primary)
+                        .mask(alignment: .leading) {
+                            GeometryReader { proxy in
+                                Rectangle()
+                                    .scaleEffect(x: logoRevealProgress ? 1 : 0.001, y: 1, anchor: .leading)
+                                    .animation(TriWaveXMotion.entry(reduced: reduceMotion), value: logoRevealProgress)
+                                    .frame(width: proxy.size.width, height: proxy.size.height)
+                            }
+                        }
+
+                    Text("Entrena con una dirección clara")
+                        .font(.system(size: 17))
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .opacity(loginIntroStage >= 5 ? 1 : 0)
+                }
+                .transition(.opacity)
+            }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, minHeight: 76)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("TriWaveX. Entrena con una dirección clara")
+        .accessibilityLabel(loginIntroStage < 3 ? loginIntroCopy[loginIntroStage] : "TriWaveX. Entrena con una dirección clara")
+    }
+
+    private var loginIntroCopy: [String] {
+        [
+            "¿Pagar demasiado por entrenar?",
+            "¿Otra app difícil de manejar?",
+            "¿No sabes ni por dónde empezar?",
+        ]
+    }
+
+    private var loginEntryTransition: AnyTransition {
+        reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom))
+    }
+
+    private func playLoginIntro() async {
+        guard !isPlayingLoginIntro else { return }
+        isPlayingLoginIntro = true
+        loginIntroStage = 0
+        logoRevealProgress = false
+        defer { isPlayingLoginIntro = false }
+
+        let delays = [600, 600, 600, 300, 600, 250, 250]
+        for (index, delay) in delays.enumerated() {
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : delay))
+            guard !Task.isCancelled else { return }
+            withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
+                loginIntroStage = index + 1
+                if loginIntroStage == 4 { logoRevealProgress = true }
+            }
+        }
     }
 
     private var canSubmit: Bool {

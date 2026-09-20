@@ -2,6 +2,13 @@ import SwiftUI
 import WebKit
 import Observation
 
+struct NativeAccessResponse: Decodable, Equatable {
+    let destination: String
+    let userID: String
+    let role: String
+    let entitled: Bool
+}
+
 private enum NativeEntryError: LocalizedError {
     case invalidConfiguration
     case unauthorized
@@ -16,7 +23,7 @@ private enum NativeEntryError: LocalizedError {
     }
 }
 
-private struct NativeEntryTransport {
+struct NativeEntryTransport {
     let origin: URL
     let store: WKWebsiteDataStore
 
@@ -297,13 +304,14 @@ struct NativeRegistrationView: View {
 struct NativeOnboardingView: View {
     let origin: URL
     let store: WKWebsiteDataStore
+    let expectedUserID: String
     let givenName: String
-    let onFinished: (_ purchased: Bool) -> Void
+    let onFinished: (NativeSubscriptionResult) -> Void
     @State private var model: NativeOnboardingModel
     @State private var step = 0
 
-    init(origin: URL, store: WKWebsiteDataStore, givenName: String, onFinished: @escaping (_ purchased: Bool) -> Void) {
-        self.origin = origin; self.store = store; self.givenName = givenName; self.onFinished = onFinished
+    init(origin: URL, store: WKWebsiteDataStore, expectedUserID: String, givenName: String, onFinished: @escaping (NativeSubscriptionResult) -> Void) {
+        self.origin = origin; self.store = store; self.expectedUserID = expectedUserID; self.givenName = givenName; self.onFinished = onFinished
         _model = State(initialValue: NativeOnboardingModel(origin: origin, store: store))
         _step = State(initialValue: min(max(UserDefaults.standard.integer(forKey: "triwavex.onboarding.step"), 0), 2))
     }
@@ -313,9 +321,14 @@ struct NativeOnboardingView: View {
             Group {
                 if case .readyForPayment = model.state {
                     NativeSubscriptionStoreView(
+                        origin: origin,
+                        store: store,
+                        expectedUserID: expectedUserID,
                         role: "athlete",
-                        onFinished: { model.clearDraft(); onFinished(false) },
-                        onPurchased: { model.clearDraft(); onFinished(true) }
+                        onFinished: { result in
+                            model.clearDraft()
+                            onFinished(result)
+                        }
                     )
                 } else {
                     ScrollView {

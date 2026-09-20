@@ -23,11 +23,16 @@ private enum TriWaveXPalette {
 
 enum TriWaveXMotion {
     static let stateChange = Animation.easeOut(duration: 0.2)
+    static let entry = Animation.timingCurve(0.23, 1, 0.32, 1, duration: 0.28)
     static let selection = Animation.easeInOut(duration: 0.16)
     static let press = Animation.easeOut(duration: 0.14)
 
     static func stateChange(reduced: Bool) -> Animation? {
         reduced ? nil : stateChange
+    }
+
+    static func entry(reduced: Bool) -> Animation? {
+        reduced ? .easeOut(duration: 0.12) : entry
     }
 
     static func selection(reduced: Bool) -> Animation? {

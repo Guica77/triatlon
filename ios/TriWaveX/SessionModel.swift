@@ -13,6 +13,7 @@ final class SessionModel {
     private(set) var stableUserID: String?
     private(set) var role: String?
     private(set) var entitled = false
+    private(set) var hasCompletedRestore = false
     var busy = false
 
     var isAuthorized: Bool { entitled && destination != nil }
@@ -22,7 +23,8 @@ final class SessionModel {
     init(origin: URL) { self.origin = origin }
 
     func restore() async {
-        guard destination == nil, !busy else { return }
+        guard !hasCompletedRestore, destination == nil, !busy else { return }
+        defer { hasCompletedRestore = true }
         guard let cookie = await cookieHeader() else { return }
         busy = true
         defer { busy = false }
@@ -139,14 +141,22 @@ final class SessionModel {
             let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
             defer { session.invalidateAndCancel() }
             let (data, response) = try await session.data(for: request)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200,
+            guard let http = response as? HTTPURLResponse,
                   http.url.map({ Configuration.allows($0, origin: origin) }) == true else {
-                error = "No se ha podido iniciar sesión. Revisa tu correo y contraseña o inténtalo de nuevo."
+                error = "La respuesta del servidor no es válida. Inténtalo de nuevo."
                 return
             }
-            try await applyLoginResponse(data: data, response: http)
+            guard http.statusCode == 200 else {
+                error = Self.passwordServerError(statusCode: http.statusCode, data: data)
+                return
+            }
+            do {
+                try await applyLoginResponse(data: data, response: http)
+            } catch {
+                self.error = "El servidor ha devuelto una sesión no válida. Inténtalo de nuevo."
+            }
         } catch {
-            self.error = "No hemos podido conectar. Comprueba tu conexión e inténtalo de nuevo."
+            self.error = Self.connectionError(error, provider: "")
         }
     }
 
@@ -170,14 +180,22 @@ final class SessionModel {
             let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
             defer { session.invalidateAndCancel() }
             let (data, response) = try await session.data(for: request)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200,
+            guard let http = response as? HTTPURLResponse,
                   http.url.map({ Configuration.allows($0, origin: origin) }) == true else {
                 error = "No se ha podido iniciar sesión con Apple. Comprueba tu cuenta e inténtalo de nuevo."
                 return
             }
-            try await applyLoginResponse(data: data, response: http)
+            guard http.statusCode == 200 else {
+                error = Self.appleServerError(statusCode: http.statusCode, data: data)
+                return
+            }
+            do {
+                try await applyLoginResponse(data: data, response: http)
+            } catch {
+                self.error = "Apple ha devuelto una sesión no válida. Inténtalo de nuevo."
+            }
         } catch {
-            self.error = "No hemos podido conectar con Apple. Comprueba tu conexión e inténtalo de nuevo."
+            self.error = Self.connectionError(error, provider: " con Apple")
         }
     }
 
@@ -198,8 +216,65 @@ final class SessionModel {
             await store.httpCookieStore.setCookie(cookie)
             HTTPCookieStorage.shared.setCookie(cookie)
         }
+        guard applyAuthorization(result) else { return }
         stableUserID = userID
         destination = result.destination
+    }
+
+    private static func appleServerError(statusCode: Int, data: Data) -> String {
+        struct ErrorResponse: Decodable {
+            let error: String?
+        }
+
+        let serverMessage = (try? JSONDecoder().decode(ErrorResponse.self, from: data))?.error
+        switch statusCode {
+        case 400:
+            return serverMessage ?? "Apple no ha devuelto una credencial válida. Inténtalo de nuevo."
+        case 401:
+            return "Apple no ha podido verificar esta cuenta. Comprueba la configuración de Apple e inténtalo de nuevo."
+        case 503:
+            return "El servicio de Apple no está disponible ahora. Inténtalo de nuevo en unos minutos."
+        default:
+            return "No se ha podido iniciar sesión con Apple. Inténtalo de nuevo."
+        }
+    }
+
+    private static func passwordServerError(statusCode: Int, data: Data) -> String {
+        struct ErrorResponse: Decodable { let error: String? }
+        let serverMessage = (try? JSONDecoder().decode(ErrorResponse.self, from: data))?.error
+        switch statusCode {
+        case 400, 401:
+            return serverMessage ?? "Revisa tu correo, contraseña y confirmación de correo."
+        case 503:
+            return "El servicio de acceso no está disponible ahora. Inténtalo de nuevo en unos minutos."
+        default:
+            return "No se ha podido iniciar sesión. Inténtalo de nuevo."
+        }
+    }
+
+    private static func connectionError(_ error: Error, provider: String) -> String {
+        let urlError = error as? URLError
+        switch urlError?.code {
+        case .notConnectedToInternet, .networkConnectionLost:
+            return "No hay conexión a internet. Compruébala e inténtalo de nuevo."
+        case .timedOut:
+            return "La conexión ha tardado demasiado. Inténtalo de nuevo."
+        default:
+            return "No hemos podido conectar\(provider). Comprueba tu conexión e inténtalo de nuevo."
+        }
+    }
+
+    @discardableResult
+    func applySubscriptionResult(_ result: NativeSubscriptionResult) -> Bool {
+        guard stableUserID == result.userID,
+              result.accepted || result.duplicate,
+              result.entitled,
+              (result.role == "athlete" && ["/dashboard", "/onboarding"].contains(result.destination)) ||
+                (result.role == "coach" && result.destination == "/coach/dashboard") else { return false }
+        role = result.role
+        entitled = true
+        destination = result.destination
+        return true
     }
 
     private static func randomNonce(length: Int = 32) -> String {
@@ -236,7 +311,7 @@ final class SessionModel {
 }
 
 // Never forward a credential-bearing POST to a redirect destination.
-private final class NoRedirects: NSObject, URLSessionTaskDelegate {
+final class NoRedirects: NSObject, URLSessionTaskDelegate {
     nonisolated func urlSession(_ session: URLSession, task: URLSessionTask,
         willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest,
         completionHandler: @escaping (URLRequest?) -> Void) { completionHandler(nil) }
