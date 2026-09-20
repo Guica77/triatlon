@@ -400,31 +400,24 @@ struct RootView: View {
                     .multilineTextAlignment(.center)
                     .transition(.opacity)
             } else if loginIntroStage == 3 {
-                VStack(spacing: 12) {
-                    Text("Para eso está")
-                        .font(.system(size: 31, weight: .bold))
-                    Text("TriWaveX.")
-                        .font(.system(size: 38, weight: .black, design: .rounded))
-                    Capsule(style: .continuous)
-                        .fill(Color.triWaveXAqua)
-                        .frame(width: 54, height: 5)
-                }
-                .foregroundStyle(.primary)
+                Text("Para eso está…")
+                    .font(.system(size: 31, weight: .bold))
+                    .foregroundStyle(.primary)
                 .transition(.opacity)
             } else {
                 ZStack {
-                    Text("TriWaveX")
+                    triWaveXWordmark
                         .font(.system(size: 34, weight: .black, design: .rounded))
 
-                    if loginIntroStage >= 7 {
+                    if loginIntroStage < 7 {
                         Text("Entrena con una dirección clara")
                             .font(.system(size: 17))
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                             .offset(y: 31)
+                            .transition(.opacity)
                     }
                 }
-                .foregroundStyle(.black)
                 .frame(height: 76)
             }
         }
@@ -437,7 +430,14 @@ struct RootView: View {
             value: loginIntroStage
         )
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(loginIntroStage < 3 ? loginIntroCopy[loginIntroStage] : "TriWaveX. Entrena con una dirección clara")
+        .accessibilityLabel(loginIntroStage < 3 ? loginIntroCopy[loginIntroStage] : loginIntroStage == 3 ? "Para eso está" : "TriWaveX. Entrena con una dirección clara")
+    }
+
+    private var triWaveXWordmark: some View {
+        HStack(spacing: 0) {
+            Text("TriWave").foregroundStyle(Color.primary)
+            Text("X").foregroundStyle(Color.triWaveXAqua)
+        }
     }
 
     private var loginIntroCopy: [String] {
@@ -460,7 +460,7 @@ struct RootView: View {
         if hasSeenLoginIntro {
             liftsLoginTitle = true
             loginIntroStage = 4
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 700))
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_450))
             guard !Task.isCancelled else { return }
             withAnimation(reduceMotion ? .easeOut(duration: 0.12) : TriWaveXMotion.loginTitleLift) { loginIntroStage = 7 }
             for stage in 8...10 {
@@ -473,7 +473,7 @@ struct RootView: View {
 
         liftsLoginTitle = false
         loginIntroStage = 0
-        let delays = [2700, 2700, 2700, 600, 800, 350, 2050, 350, 350, 350]
+        let delays = [4600, 4600, 4600, 1800, 1700, 220, 700, 420, 350, 350]
         for (index, delay) in delays.enumerated() {
             try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : delay))
             guard !Task.isCancelled else { return }

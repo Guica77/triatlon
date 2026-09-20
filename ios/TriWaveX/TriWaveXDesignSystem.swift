@@ -26,7 +26,7 @@ enum TriWaveXMotion {
     static let entry = Animation.timingCurve(0.23, 1, 0.32, 1, duration: 0.28)
     static let selection = Animation.easeInOut(duration: 0.16)
     static let press = Animation.easeOut(duration: 0.14)
-    static let loginTitleLift = Animation.timingCurve(0.23, 1, 0.32, 1, duration: 0.85)
+    static let loginTitleLift = Animation.timingCurve(0.23, 1, 0.32, 1, duration: 1.35)
 
     static func stateChange(reduced: Bool) -> Animation? {
         reduced ? nil : stateChange
