@@ -40,10 +40,10 @@ begin
   end if;
   if p_plan not in ('athlete', 'coach') then raise exception 'invalid_app_store_plan'; end if;
   if p_status not in ('active', 'past_due', 'cancelled', 'expired') then raise exception 'invalid_app_store_status'; end if;
-  if p_provider_product_id <> case p_plan
+  if p_provider_product_id <> (case p_plan
     when 'athlete' then 'com.triwavex.athlete.monthly'
     when 'coach' then 'com.triwavex.coach.monthly'
-  end then raise exception 'app_store_product_plan_mismatch'; end if;
+  end) then raise exception 'app_store_product_plan_mismatch'; end if;
   if p_provider_event_type not in (
     'SUBSCRIBED', 'DID_RENEW', 'DID_FAIL_TO_RENEW', 'GRACE_PERIOD_EXPIRED',
     'EXPIRED', 'REFUND', 'REVOKE', 'REFUND_REVERSED', 'OFFER_REDEEMED',

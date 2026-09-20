@@ -9,4 +9,5 @@ create table if not exists public.billing_entitlements (
   updated_at timestamptz not null default now()
 );
 alter table public.billing_entitlements enable row level security;
+drop policy if exists "users read own billing entitlement" on public.billing_entitlements;
 create policy "users read own billing entitlement" on public.billing_entitlements for select to authenticated using ((select auth.uid()) = user_id);
