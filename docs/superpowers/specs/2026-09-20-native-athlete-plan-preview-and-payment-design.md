@@ -25,7 +25,7 @@ La vista previa no desbloquea el contenido completo hasta que se confirme la sus
 
 ## Pago de atleta
 
-La pantalla posterior muestra solo la suscripción `Atleta con IA`: precio vigente de App Store, prueba gratuita si procede, renovación mensual, cómo cancelar desde Apple y qué desbloquea al confirmar. No compara ni muestra el precio de entrenador en este recorrido. Apple mantiene la confirmación final del cobro.
+La pantalla posterior muestra solo la suscripción `Atleta con IA`: precio vigente de App Store, prueba gratuita si procede, renovación mensual, cómo cancelar desde Apple y qué desbloquea al confirmar. Cuando Apple confirme que la persona cumple los requisitos de la oferta, se destaca `7 días gratis, sin cobro hoy` y se indica que después se renovará al precio mensual vigente. No compara ni muestra el precio de entrenador en este recorrido. Apple mantiene la confirmación final del cobro.
 
 ## Errores y verificación
 
