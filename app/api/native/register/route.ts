@@ -33,6 +33,23 @@ function inputFrom(value: unknown): RegistrationInput | null {
   return { email, password, firstName, lastName }
 }
 
+function registrationErrorMessage(error: { message?: string; code?: string; status?: number }) {
+  const detail = `${error.code ?? ''} ${error.message ?? ''}`.toLowerCase()
+  if (detail.includes('already registered') || detail.includes('already been registered')) {
+    return 'Ya existe una cuenta con este correo. Entra o restablece la contraseña.'
+  }
+  if (detail.includes('email address is invalid') || detail.includes('invalid email')) {
+    return 'El correo no parece válido. Revísalo e inténtalo de nuevo.'
+  }
+  if (detail.includes('captcha')) {
+    return 'No hemos podido validar la solicitud. Inténtalo de nuevo en unos minutos.'
+  }
+  if (detail.includes('rate limit') || error.status === 429) {
+    return 'Has hecho varios intentos. Espera unos minutos e inténtalo de nuevo.'
+  }
+  return 'No se ha podido crear la cuenta. Inténtalo de nuevo en unos minutos.'
+}
+
 export async function POST(request: Request) {
   const origin = request.headers.get('origin')
   if (request.headers.get('x-triwavex-native') !== '1' ||
@@ -55,7 +72,10 @@ export async function POST(request: Request) {
       password: input.password,
       options: { data: { full_name: `${input.firstName} ${input.lastName}`.trim(), role: 'athlete' } },
     })
-    if (error) return reply({ error: 'No se ha podido crear la cuenta. Revisa el correo o inténtalo de nuevo.' }, 400)
+    if (error) {
+      console.error('Native registration rejected', { code: error.code, status: error.status })
+      return reply({ error: registrationErrorMessage(error) }, error.status === 429 ? 429 : 400)
+    }
     if (!data.user) return reply({ error: 'No se ha podido crear la cuenta.' }, 503)
 
     const { error: profileError } = await createAdminClient().from('profiles').upsert({
