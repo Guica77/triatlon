@@ -34,7 +34,7 @@ Antes de aplicarlas:
 
 1. Preparar copia recuperable de la base y ensayar ambas migraciones en un entorno de prueba equivalente. Revisar relaciones entrenador-atleta históricas y confirmar cuáles fueron autorizadas.
 2. Configurar `ADMIN_USER_IDS` con UUID reales. Mantenerlo vacío deniega administración.
-3. Configurar `TOKEN_ENCRYPTION_KEY` como 32 bytes aleatorios en hexadecimal, conservarla de forma segura y establecer `APPLE_CLIENT_ID` y `APPLE_CLIENT_SECRET` válidos. Renovar el secreto Apple según su caducidad. Nunca exponer estas variables como públicas.
+3. Configurar `TOKEN_ENCRYPTION_KEY` como 32 bytes aleatorios en hexadecimal, conservarla de forma segura y establecer `APPLE_CLIENT_ID=com.guillermohaya.triwavex`, junto con un `APPLE_CLIENT_SECRET` JWT válido generado desde Apple Developer. Renovar el secreto Apple según su caducidad. Nunca exponer estas variables como públicas.
 4. Establecer `NEXT_PUBLIC_SITE_URL`, callbacks autorizados, credenciales Strava y `SUPPORT_EMAIL` real en cada despliegue que corresponda.
 5. Coordinar una ventana de mantenimiento: aplicar ambas migraciones y desplegar inmediatamente la app actualizada. La versión anterior depende de permisos que se retiran; la nueva depende de tablas y funciones nuevas.
 6. Probar con dos atletas y un entrenador: separación de datos, invitación, edición de una sesión, bloqueo/denuncia, consentimiento, sincronización y eliminación. Verificar también acceso denegado sin sesión.

@@ -6,12 +6,24 @@
 	objectVersion = 71;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		B00000000000000000000008 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A00000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A00000000000000000000005;
+			remoteInfo = TriWaveX;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		A00000000000000000000007 /* TriWaveX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = TriWaveX.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B00000000000000000000007 /* TriWaveXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = TriWaveXTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A00000000000000000000006 /* TriWaveX */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = TriWaveX; sourceTree = "<group>"; };
+		B00000000000000000000006 /* TriWaveXTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = TriWaveXTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -22,14 +34,30 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B00000000000000000000012 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5F55A6AB305FD76C00886EE1 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				B00000000000000000000006 /* TriWaveXTests */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		A00000000000000000000003 = {
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000006 /* TriWaveX */,
 				A00000000000000000000004 /* Products */,
+				5F55A6AB305FD76C00886EE1 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -37,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				A00000000000000000000007 /* TriWaveX.app */,
+				B00000000000000000000007 /* TriWaveXTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -64,6 +93,27 @@
 			productReference = A00000000000000000000007 /* TriWaveX.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B00000000000000000000005 /* TriWaveXTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B00000000000000000000018 /* Build configuration list for PBXNativeTarget "TriWaveXTests" */;
+			buildPhases = (
+				B00000000000000000000011 /* Sources */,
+				B00000000000000000000012 /* Frameworks */,
+				B00000000000000000000013 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B00000000000000000000009 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B00000000000000000000006 /* TriWaveXTests */,
+			);
+			name = TriWaveXTests;
+			productName = TriWaveXTests;
+			productReference = B00000000000000000000007 /* TriWaveXTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -71,7 +121,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2660;
+				LastUpgradeCheck = 2700;
 			};
 			buildConfigurationList = A00000000000000000000002 /* Build configuration list for PBXProject "TriWaveX" */;
 			compatibilityVersion = "Xcode 16.0";
@@ -87,12 +137,20 @@
 			projectRoot = "";
 			targets = (
 				A00000000000000000000005 /* TriWaveX */,
+				B00000000000000000000005 /* TriWaveXTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		A00000000000000000000013 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B00000000000000000000013 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -109,7 +167,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B00000000000000000000011 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B00000000000000000000009 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A00000000000000000000005 /* TriWaveX */;
+			targetProxy = B00000000000000000000008 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A00000000000000000000010 /* Debug */ = {
@@ -237,6 +310,39 @@
 			};
 			name = Release;
 		};
+		B00000000000000000000016 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.guillermohaya.triwavex.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TriWaveX.app/TriWaveX";
+			};
+			name = Debug;
+		};
+		B00000000000000000000017 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.guillermohaya.triwavex.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TriWaveX.app/TriWaveX";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -254,6 +360,15 @@
 			buildConfigurations = (
 				A00000000000000000000014 /* Debug */,
 				A00000000000000000000015 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B00000000000000000000018 /* Build configuration list for PBXNativeTarget "TriWaveXTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B00000000000000000000016 /* Debug */,
+				B00000000000000000000017 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

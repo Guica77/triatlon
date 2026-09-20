@@ -24,6 +24,17 @@ describe('consent before third-party AI', () => {
     h.rows[0].granted=true; vi.stubEnv('ANTHROPIC_API_KEY','new-provider')
     expect((await authorizeAIRequest('a','a')).allowed).toBe(false)
   })
+  it('includes native providers in the consent version', () => {
+    vi.stubEnv('GEMINI_API_KEY','')
+    vi.stubEnv('COHERE_API_KEY','configured')
+    vi.stubEnv('CLOUDFLARE_API_TOKEN','configured')
+    const disclosure = aiDisclosure()
+    expect(disclosure.providers).toContain('Cohere')
+    expect(disclosure.providers).toContain('Cloudflare Workers AI')
+    expect(disclosure.version).toContain('Cohere')
+    expect(disclosure.version).toContain('Cloudflare Workers AI')
+  })
+
   it('denies a request when the server quota is exhausted', async () => {
     h.rows = [{ user_id:'a', version:aiDisclosure().version, granted:true }]
     h.slot.mockResolvedValue({ data:false })

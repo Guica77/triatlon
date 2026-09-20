@@ -88,6 +88,20 @@ When an integration is absent, `lib/ai-service.ts` is designed to report unavail
 
 `triatlon-landing/` is not a shared component package. Its root page renders `src/app/landing-client.tsx`, which composes the landing navbar, hero, feature bento, pricing calculator/cards, and footer. It has no Supabase dependency and should be developed, linted, built, and deployed independently from `triatlon-app/`.
 
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live in GitHub Issues for `Guica77/triatlon`, using the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Use the canonical labels `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repository uses a single-context layout with a root `CONTEXT.md` and `docs/adr/`. See `docs/agents/domain.md`.
+
 ## Project conventions and gotchas
 
 - Use the `@/*` alias, which resolves to the repository root, for internal imports. Match the surrounding TypeScript/React style; existing files use both semicolons and no-semicolon formatting depending on area.

@@ -2,6 +2,13 @@ import SwiftUI
 import WebKit
 import Observation
 
+struct NativeAccessResponse: Decodable, Equatable {
+    let destination: String
+    let userID: String
+    let role: String
+    let entitled: Bool
+}
+
 private enum NativeEntryError: LocalizedError {
     case invalidConfiguration
     case unauthorized
@@ -16,7 +23,7 @@ private enum NativeEntryError: LocalizedError {
     }
 }
 
-private struct NativeEntryTransport {
+struct NativeEntryTransport {
     let origin: URL
     let store: WKWebsiteDataStore
 
@@ -35,16 +42,21 @@ private struct NativeEntryTransport {
         request.httpBody = try JSONEncoder().encode(body)
         if let cookie = await cookieHeader(for: url) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
 
-        let (data, rawResponse) = try await URLSession(configuration: .ephemeral).data(for: request)
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpShouldSetCookies = false
+        let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
+        defer { session.invalidateAndCancel() }
+        let (data, rawResponse) = try await session.data(for: request)
         guard let http = rawResponse as? HTTPURLResponse,
               Configuration.allows(http.url ?? url, origin: origin) else { throw NativeEntryError.message("La respuesta del servidor no es válida.") }
-        await persistCookies(from: http, for: url)
         if http.statusCode == 401 { throw NativeEntryError.unauthorized }
         if !(200..<300).contains(http.statusCode) {
             let message = (try? JSONDecoder().decode(ErrorResponse.self, from: data).error) ?? "No se ha podido completar la operación."
             throw NativeEntryError.message(message)
         }
-        return try JSONDecoder().decode(Response.self, from: data)
+        let result = try JSONDecoder().decode(Response.self, from: data)
+        await persistCookies(from: http, for: url)
+        return result
     }
 
     private func cookieHeader(for url: URL) async -> String? {
@@ -79,6 +91,7 @@ private struct NativeEntryTransport {
         let destination: String
         let givenName: String
         let role: String
+        let userID: String
     }
 
     var firstName = ""
@@ -114,18 +127,19 @@ private struct NativeEntryTransport {
         guard canSubmit else { return nil }
         state = .saving
         struct Input: Encodable { let email, password, firstName, lastName, role: String }
-        struct Result: Decodable { let emailConfirmRequired: Bool; let destination: String? }
+        struct Result: Decodable { let emailConfirmRequired: Bool; let destination: String?; let userID: String }
         do {
             let result = try await transport.send("/api/native/register", body: Input(email: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password, firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines), lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines), role: role), response: Result.self)
             password = ""; passwordConfirmation = ""
             clearDraft()
             if result.emailConfirmRequired { state = .confirmationRequired(email); return nil }
-            guard let destination = result.destination else { state = .failed("No se ha podido iniciar la sesión."); return nil }
+            guard let destination = result.destination, !result.userID.isEmpty else { state = .failed("No se ha podido iniciar la sesión."); return nil }
             state = .idle
             return Outcome(
                 destination: destination,
                 givenName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-                role: role
+                role: role,
+                userID: result.userID
             )
         } catch { state = .failed(error.localizedDescription); return nil }
     }
@@ -201,7 +215,7 @@ struct NativeRegistrationView: View {
                     } label: {
                         if case .saving = model.state { ProgressView().tint(.white) } else { Text("Crear cuenta") }
                     }
-                    .buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity).disabled(!model.canSubmit || isSaving)
+                    .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua)).controlSize(.large).frame(maxWidth: .infinity).disabled(!model.canSubmit || isSaving)
 
                     Button("Ya tengo una cuenta", action: onCancel).buttonStyle(.borderless).frame(maxWidth: .infinity).padding(.top, 4)
                 }
@@ -290,13 +304,14 @@ struct NativeRegistrationView: View {
 struct NativeOnboardingView: View {
     let origin: URL
     let store: WKWebsiteDataStore
+    let expectedUserID: String
     let givenName: String
-    let onFinished: (_ purchased: Bool) -> Void
+    let onFinished: (NativeSubscriptionResult) -> Void
     @State private var model: NativeOnboardingModel
     @State private var step = 0
 
-    init(origin: URL, store: WKWebsiteDataStore, givenName: String, onFinished: @escaping (_ purchased: Bool) -> Void) {
-        self.origin = origin; self.store = store; self.givenName = givenName; self.onFinished = onFinished
+    init(origin: URL, store: WKWebsiteDataStore, expectedUserID: String, givenName: String, onFinished: @escaping (NativeSubscriptionResult) -> Void) {
+        self.origin = origin; self.store = store; self.expectedUserID = expectedUserID; self.givenName = givenName; self.onFinished = onFinished
         _model = State(initialValue: NativeOnboardingModel(origin: origin, store: store))
         _step = State(initialValue: min(max(UserDefaults.standard.integer(forKey: "triwavex.onboarding.step"), 0), 2))
     }
@@ -306,9 +321,14 @@ struct NativeOnboardingView: View {
             Group {
                 if case .readyForPayment = model.state {
                     NativeSubscriptionStoreView(
+                        origin: origin,
+                        store: store,
+                        expectedUserID: expectedUserID,
                         role: "athlete",
-                        onFinished: { model.clearDraft(); onFinished(false) },
-                        onPurchased: { model.clearDraft(); onFinished(true) }
+                        onFinished: { result in
+                            model.clearDraft()
+                            onFinished(result)
+                        }
                     )
                 } else {
                     ScrollView {

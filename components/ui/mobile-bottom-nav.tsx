@@ -65,7 +65,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Navegación principal"
-      className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border-default bg-surface-elevated/90 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-2 backdrop-blur-lg"
+      className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border-default/80 bg-surface-elevated/82 px-4 pb-[env(safe-area-inset-bottom,0px)] pt-2 shadow-[0_-8px_24px_rgba(0,0,0,0.18)] backdrop-blur-2xl"
     >
       <div className="mx-auto flex w-full max-w-md items-center justify-evenly">
         {navItems.map((item) => {
@@ -78,7 +78,7 @@ export function MobileBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="group relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-3 py-1.5"
+              className="group relative flex min-h-11 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-3 py-1.5 transition-[background-color,transform] duration-150 ease-out active:scale-[0.96] aria-[current=page]:bg-surface-hover/60"
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
             >

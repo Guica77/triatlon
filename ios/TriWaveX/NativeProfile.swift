@@ -98,12 +98,17 @@ struct NativeProfileClient {
 
 struct NativeProfileView: View {
     @Bindable var model: NativeProfileModel
+    let origin: URL
+    let store: WKWebsiteDataStore
+    let authenticatedUserID: String?
+    let authenticatedRole: String?
     let openDevices: () -> Void
     let openCoros: () -> Void
     let openStrava: () -> Void
     let openPlanEditor: () -> Void
     let openAccount: () -> Void
     let replayGuide: () -> Void
+    let onSubscriptionFinished: ((NativeSubscriptionResult) -> Void)?
     @State private var hasLoaded = false
     @State private var managingPlan = false
 
@@ -214,7 +219,14 @@ struct NativeProfileView: View {
             }
             Section("Cuenta") {
                 NavigationLink {
-                    SubscriptionManagementView(status: profile.athlete.subscriptionStatus)
+                    SubscriptionManagementView(
+                        origin: origin,
+                        store: store,
+                        userID: authenticatedUserID,
+                        role: authenticatedRole,
+                        status: profile.athlete.subscriptionStatus,
+                        onSubscriptionFinished: onSubscriptionFinished
+                    )
                 } label: {
                     Label("Suscripción y plan", systemImage: "creditcard")
                 }
@@ -449,7 +461,13 @@ struct NativeInjuryEditor: View {
 }
 
 struct SubscriptionManagementView: View {
+    let origin: URL
+    let store: WKWebsiteDataStore
+    let userID: String?
+    let role: String?
     let status: String?
+    let onSubscriptionFinished: ((NativeSubscriptionResult) -> Void)?
+    @Environment(\.dismiss) private var dismiss
     private let subscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
 
     private var statusLabel: String {
@@ -473,15 +491,32 @@ struct SubscriptionManagementView: View {
             }
 
             Section {
-                NavigationLink {
-                    NativeSubscriptionStoreView(role: "athlete")
-                } label: {
-                    planRow("Atleta", detail: "Entrenamiento personal y seguimiento", icon: "figure.run")
-                }
-                NavigationLink {
-                    NativeSubscriptionStoreView(role: "coach")
-                } label: {
-                    planRow("Entrenador", detail: "Gestión de hasta 10 atletas", icon: "person.2")
+                if let userID, !userID.isEmpty {
+                    NavigationLink {
+                        NativeSubscriptionStoreView(
+                            origin: origin,
+                            store: store,
+                            expectedUserID: userID,
+                            role: "athlete",
+                            onFinished: finishSubscription
+                        )
+                    } label: {
+                        planRow("Atleta", detail: "Entrenamiento personal y seguimiento", icon: "figure.run")
+                    }
+                    NavigationLink {
+                        NativeSubscriptionStoreView(
+                            origin: origin,
+                            store: store,
+                            expectedUserID: userID,
+                            role: "coach",
+                            onFinished: finishSubscription
+                        )
+                    } label: {
+                        planRow("Entrenador", detail: "Gestión de hasta 10 atletas", icon: "person.2")
+                    }
+                } else {
+                    Label("Inicia sesión para gestionar tu suscripción.", systemImage: "person.crop.circle.badge.exclamationmark")
+                        .foregroundStyle(.secondary)
                 }
             } header: {
                 Text("Opciones")
@@ -493,10 +528,18 @@ struct SubscriptionManagementView: View {
                 Link(destination: subscriptionsURL) {
                     Label("Gestionar o cancelar en App Store", systemImage: "arrow.up.right.square")
                 }
-                NavigationLink {
-                    NativeSubscriptionStoreView(role: status?.lowercased() == "coach" ? "coach" : "athlete")
-                } label: {
-                    Label("Restaurar compras", systemImage: "arrow.clockwise")
+                if let userID, !userID.isEmpty {
+                    NavigationLink {
+                        NativeSubscriptionStoreView(
+                            origin: origin,
+                            store: store,
+                            expectedUserID: userID,
+                            role: role == "coach" ? "coach" : "athlete",
+                            onFinished: finishSubscription
+                        )
+                    } label: {
+                        Label("Restaurar compras", systemImage: "arrow.clockwise")
+                    }
                 }
             } footer: {
                 Text("Las compras se asocian a tu Apple ID. Restaurar no genera un nuevo cargo.")
@@ -504,6 +547,13 @@ struct SubscriptionManagementView: View {
         }
         .navigationTitle("Suscripción y plan")
         .navigationBarTitleDisplayMode(.large)
+    }
+
+    private func finishSubscription(_ result: NativeSubscriptionResult) {
+        guard result.userID == userID,
+              result.role == (role == "coach" ? "coach" : "athlete") else { return }
+        onSubscriptionFinished?(result)
+        dismiss()
     }
 
     private func planRow(_ title: String, detail: String, icon: String) -> some View {

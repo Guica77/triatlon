@@ -10,14 +10,21 @@ final class SessionModel {
     let origin: URL
     let store = WKWebsiteDataStore.default()
     var destination: String?
+    private(set) var stableUserID: String?
+    private(set) var role: String?
+    private(set) var entitled = false
+    private(set) var hasCompletedRestore = false
     var busy = false
+
+    var isAuthorized: Bool { entitled && destination != nil }
     var error: String?
     private var appleNonce: String?
 
     init(origin: URL) { self.origin = origin }
 
     func restore() async {
-        guard destination == nil, !busy else { return }
+        guard !hasCompletedRestore, destination == nil, !busy else { return }
+        defer { hasCompletedRestore = true }
         guard let cookie = await cookieHeader() else { return }
         busy = true
         defer { busy = false }
@@ -28,12 +35,20 @@ final class SessionModel {
             request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             request.setValue(cookie, forHTTPHeaderField: "Cookie")
-            let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
-            guard let http = response as? HTTPURLResponse else { return }
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.httpShouldSetCookies = false
+            let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
+            defer { session.invalidateAndCancel() }
+            let (data, response) = try await session.data(for: request)
+            guard let http = response as? HTTPURLResponse,
+                  Configuration.allows(http.url ?? request.url ?? origin, origin: origin) else { return }
             if http.statusCode == 401 { return }
             guard http.statusCode == 200,
                   let result = try? JSONDecoder().decode(LoginResult.self, from: data),
-                  ["/dashboard", "/coach/dashboard", "/onboarding"].contains(result.destination) else { return }
+                  let userID = result.userID,
+                  !userID.isEmpty,
+                  applyAuthorization(result) else { return }
+            stableUserID = userID
             destination = result.destination
         } catch {
             // Session restoration is best effort; the normal login remains available.
@@ -42,11 +57,45 @@ final class SessionModel {
 
     func endSession() async {
         await store.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast)
+        for cookie in HTTPCookieStorage.shared.cookies(for: origin) ?? [] {
+            HTTPCookieStorage.shared.deleteCookie(cookie)
+        }
+        [
+            "pending", "destination", "givenName", "userID", "role",
+        ].forEach { UserDefaults.standard.removeObject(forKey: "triwavex.coachCheckout.\($0)") }
+        stableUserID = nil
+        role = nil
+        entitled = false
         destination = nil
         error = nil
     }
 
-    private struct LoginResult: Decodable { let destination: String }
+    func setStableUserID(_ userID: String) {
+        guard !userID.isEmpty else { return }
+        stableUserID = userID
+    }
+
+    private struct LoginResult: Decodable {
+        let destination: String
+        let userID: String?
+        let role: String
+        let entitled: Bool
+    }
+
+    @discardableResult
+    private func applyAuthorization(_ result: LoginResult) -> Bool {
+        guard result.role == "athlete" || result.role == "coach",
+              ["/dashboard", "/coach/dashboard", "/onboarding"].contains(result.destination),
+              result.entitled || result.destination == "/onboarding" else {
+            role = nil
+            entitled = false
+            error = "No se ha podido abrir tu perfil."
+            return false
+        }
+        role = result.role
+        entitled = result.entitled
+        return true
+    }
 
     func prepareAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
         let nonce = Self.randomNonce()
@@ -55,7 +104,7 @@ final class SessionModel {
         request.nonce = Self.sha256(nonce)
     }
 
-    func handleAppleCompletion(_ result: Result<ASAuthorization, Error>, role: String) async {
+    func handleAppleCompletion(_ result: Result<ASAuthorization, Error>) async {
         defer { appleNonce = nil }
 
         switch result {
@@ -71,7 +120,7 @@ final class SessionModel {
                 error = "Apple no ha devuelto una credencial válida. Inténtalo de nuevo."
                 return
             }
-            await signInWithApple(identityToken: identityToken, nonce: nonce, role: role)
+            await signInWithApple(identityToken: identityToken, nonce: nonce)
         }
     }
 
@@ -92,18 +141,26 @@ final class SessionModel {
             let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
             defer { session.invalidateAndCancel() }
             let (data, response) = try await session.data(for: request)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200,
+            guard let http = response as? HTTPURLResponse,
                   http.url.map({ Configuration.allows($0, origin: origin) }) == true else {
-                error = "No se ha podido iniciar sesión. Revisa tu correo y contraseña o inténtalo de nuevo."
+                error = "La respuesta del servidor no es válida. Inténtalo de nuevo."
                 return
             }
-            try await applyLoginResponse(data: data, response: http)
+            guard http.statusCode == 200 else {
+                error = Self.passwordServerError(statusCode: http.statusCode, data: data)
+                return
+            }
+            do {
+                try await applyLoginResponse(data: data, response: http)
+            } catch {
+                self.error = "El servidor ha devuelto una sesión no válida. Inténtalo de nuevo."
+            }
         } catch {
-            self.error = "No hemos podido conectar. Comprueba tu conexión e inténtalo de nuevo."
+            self.error = Self.connectionError(error, provider: "")
         }
     }
 
-    private func signInWithApple(identityToken: String, nonce: String, role: String) async {
+    private func signInWithApple(identityToken: String, nonce: String) async {
         guard !busy else { return }
         busy = true
         error = nil
@@ -117,27 +174,35 @@ final class SessionModel {
             request.httpBody = try JSONEncoder().encode([
                 "identityToken": identityToken,
                 "nonce": nonce,
-                "role": role,
             ])
             let configuration = URLSessionConfiguration.ephemeral
             configuration.httpShouldSetCookies = false
             let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
             defer { session.invalidateAndCancel() }
             let (data, response) = try await session.data(for: request)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200,
+            guard let http = response as? HTTPURLResponse,
                   http.url.map({ Configuration.allows($0, origin: origin) }) == true else {
                 error = "No se ha podido iniciar sesión con Apple. Comprueba tu cuenta e inténtalo de nuevo."
                 return
             }
-            try await applyLoginResponse(data: data, response: http)
+            guard http.statusCode == 200 else {
+                error = Self.appleServerError(statusCode: http.statusCode, data: data)
+                return
+            }
+            do {
+                try await applyLoginResponse(data: data, response: http)
+            } catch {
+                self.error = "Apple ha devuelto una sesión no válida. Inténtalo de nuevo."
+            }
         } catch {
-            self.error = "No hemos podido conectar con Apple. Comprueba tu conexión e inténtalo de nuevo."
+            self.error = Self.connectionError(error, provider: " con Apple")
         }
     }
 
     private func applyLoginResponse(data: Data, response: HTTPURLResponse) async throws {
         let result = try JSONDecoder().decode(LoginResult.self, from: data)
-        guard ["/dashboard", "/coach/dashboard", "/onboarding"].contains(result.destination) else {
+        guard let userID = result.userID, !userID.isEmpty,
+              ["/dashboard", "/coach/dashboard", "/onboarding"].contains(result.destination) else {
             error = "No se ha podido abrir tu perfil."
             return
         }
@@ -151,7 +216,65 @@ final class SessionModel {
             await store.httpCookieStore.setCookie(cookie)
             HTTPCookieStorage.shared.setCookie(cookie)
         }
+        guard applyAuthorization(result) else { return }
+        stableUserID = userID
         destination = result.destination
+    }
+
+    private static func appleServerError(statusCode: Int, data: Data) -> String {
+        struct ErrorResponse: Decodable {
+            let error: String?
+        }
+
+        let serverMessage = (try? JSONDecoder().decode(ErrorResponse.self, from: data))?.error
+        switch statusCode {
+        case 400:
+            return serverMessage ?? "Apple no ha devuelto una credencial válida. Inténtalo de nuevo."
+        case 401:
+            return "Apple no ha podido verificar esta cuenta. Comprueba la configuración de Apple e inténtalo de nuevo."
+        case 503:
+            return "El servicio de Apple no está disponible ahora. Inténtalo de nuevo en unos minutos."
+        default:
+            return "No se ha podido iniciar sesión con Apple. Inténtalo de nuevo."
+        }
+    }
+
+    private static func passwordServerError(statusCode: Int, data: Data) -> String {
+        struct ErrorResponse: Decodable { let error: String? }
+        let serverMessage = (try? JSONDecoder().decode(ErrorResponse.self, from: data))?.error
+        switch statusCode {
+        case 400, 401:
+            return serverMessage ?? "Revisa tu correo, contraseña y confirmación de correo."
+        case 503:
+            return "El servicio de acceso no está disponible ahora. Inténtalo de nuevo en unos minutos."
+        default:
+            return "No se ha podido iniciar sesión. Inténtalo de nuevo."
+        }
+    }
+
+    private static func connectionError(_ error: Error, provider: String) -> String {
+        let urlError = error as? URLError
+        switch urlError?.code {
+        case .notConnectedToInternet, .networkConnectionLost:
+            return "No hay conexión a internet. Compruébala e inténtalo de nuevo."
+        case .timedOut:
+            return "La conexión ha tardado demasiado. Inténtalo de nuevo."
+        default:
+            return "No hemos podido conectar\(provider). Comprueba tu conexión e inténtalo de nuevo."
+        }
+    }
+
+    @discardableResult
+    func applySubscriptionResult(_ result: NativeSubscriptionResult) -> Bool {
+        guard stableUserID == result.userID,
+              result.accepted || result.duplicate,
+              result.entitled,
+              (result.role == "athlete" && ["/dashboard", "/onboarding"].contains(result.destination)) ||
+                (result.role == "coach" && result.destination == "/coach/dashboard") else { return false }
+        role = result.role
+        entitled = true
+        destination = result.destination
+        return true
     }
 
     private static func randomNonce(length: Int = 32) -> String {
@@ -188,7 +311,7 @@ final class SessionModel {
 }
 
 // Never forward a credential-bearing POST to a redirect destination.
-private final class NoRedirects: NSObject, URLSessionTaskDelegate {
+final class NoRedirects: NSObject, URLSessionTaskDelegate {
     nonisolated func urlSession(_ session: URLSession, task: URLSessionTask,
         willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest,
         completionHandler: @escaping (URLRequest?) -> Void) { completionHandler(nil) }

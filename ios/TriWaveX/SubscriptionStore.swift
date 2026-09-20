@@ -1,6 +1,48 @@
+import Foundation
 import Observation
 import StoreKit
 import SwiftUI
+import WebKit
+
+struct NativeSubscriptionResult: Decodable, Equatable {
+    let accepted: Bool
+    let duplicate: Bool
+    let status: String
+    let destination: String
+    let userID: String
+    let role: String
+    let entitled: Bool
+    let transactionID: String
+
+    func authorizes(transactionID: String, expectedUserID: String, expectedRole: String) -> Bool {
+        let destinationMatchesRole = (role == "athlete" && ["/dashboard", "/onboarding"].contains(destination)) ||
+            (role == "coach" && destination == "/coach/dashboard")
+        return (accepted || duplicate) && entitled &&
+            self.transactionID == transactionID && userID == expectedUserID &&
+            role == expectedRole && destinationMatchesRole
+    }
+}
+
+struct SubscriptionFinishGate {
+    static func finishIfAuthorized(
+        _ result: NativeSubscriptionResult?,
+        transactionID: String,
+        expectedUserID: String,
+        expectedRole: String,
+        finish: () async -> Void
+    ) async -> Bool {
+        guard let result,
+              result.authorizes(
+                  transactionID: transactionID,
+                  expectedUserID: expectedUserID,
+                  expectedRole: expectedRole
+              ) else {
+            return false
+        }
+        await finish()
+        return true
+    }
+}
 
 @MainActor
 @Observable final class SubscriptionStore {
@@ -11,12 +53,21 @@ import SwiftUI
     private(set) var purchasedProductIDs = Set<String>()
     private(set) var introEligibleProductIDs = Set<String>()
     private let identifiers = ["com.triwavex.athlete.monthly", "com.triwavex.coach.monthly"]
+    private let transport: NativeEntryTransport
+    private let expectedUserID: String
+    private let expectedRole: String
+
+    init(origin: URL, store: WKWebsiteDataStore, expectedUserID: String, expectedRole: String) {
+        transport = NativeEntryTransport(origin: origin, store: store)
+        self.expectedUserID = expectedUserID
+        self.expectedRole = expectedRole
+    }
 
     func load() async {
         state = .loading
         do {
             products = try await Product.products(for: identifiers).sorted { $0.price < $1.price }
-            await refreshEntitlements()
+            await refreshLocalEntitlements()
             await refreshIntroEligibility()
             state = .idle
         } catch {
@@ -24,59 +75,99 @@ import SwiftUI
         }
     }
 
-    func purchase(_ product: Product) async -> Bool {
+    func purchase(_ product: Product) async -> NativeSubscriptionResult? {
         state = .purchasing
         do {
             switch try await product.purchase() {
             case .success(let verification):
                 guard case .verified(let transaction) = verification else {
                     state = .failed("Apple no ha podido verificar esta compra.")
-                    return false
+                    return nil
                 }
-                purchasedProductIDs.insert(transaction.productID)
-                await transaction.finish()
-                state = .idle
-                return true
+                return await reconcile(transaction, signedTransactionInfo: verification.jwsRepresentation)
             case .pending:
                 state = .failed("La compra está pendiente de aprobación. Tu acceso se activará cuando Apple la confirme.")
-                return false
+                return nil
             case .userCancelled:
                 state = .idle
-                return false
+                return nil
             @unknown default:
                 state = .failed("No se ha podido completar la compra.")
-                return false
+                return nil
             }
         } catch {
             state = .failed("No se ha completado la compra. Inténtalo de nuevo.")
-            return false
+            return nil
         }
     }
 
-    func restore(expectedProductID: String) async -> Bool {
+    func restore(expectedProductID: String) async -> NativeSubscriptionResult? {
         state = .restoring
         do {
             try await AppStore.sync()
-            await refreshEntitlements()
+            for await result in StoreKit.Transaction.currentEntitlements {
+                guard case .verified(let transaction) = result,
+                      transaction.productID == expectedProductID else { continue }
+                if let result = await reconcile(transaction, signedTransactionInfo: result.jwsRepresentation) { return result }
+            }
             state = .idle
-            return purchasedProductIDs.contains(expectedProductID)
+            return nil
         } catch {
             state = .failed("No se han podido restaurar tus compras. Comprueba tu conexión e inténtalo de nuevo.")
-            return false
+            return nil
         }
     }
 
     func observeTransactions() async {
-        for await result in Transaction.updates {
+        for await result in StoreKit.Transaction.updates {
             guard case .verified(let transaction) = result else { continue }
-            await refreshEntitlements()
-            await transaction.finish()
+            _ = await reconcile(transaction, signedTransactionInfo: result.jwsRepresentation)
         }
     }
 
-    private func refreshEntitlements() async {
+    private func reconcile(_ transaction: StoreKit.Transaction, signedTransactionInfo: String) async -> NativeSubscriptionResult? {
+        struct Input: Encodable {
+            let signedTransactionInfo: String
+            let productID: String
+            let transactionID: String
+            let originalTransactionID: String
+            let appAccountToken: String?
+            let eventType: String
+        }
+
+        let input = Input(
+            signedTransactionInfo: signedTransactionInfo,
+            productID: transaction.productID,
+            transactionID: String(transaction.id),
+            originalTransactionID: String(transaction.originalID),
+            appAccountToken: transaction.appAccountToken?.uuidString,
+            eventType: transaction.revocationDate == nil ? "SUBSCRIBED" : "REVOKE"
+        )
+
+        do {
+            let result = try await transport.send("/api/native/apple/transaction", body: input, response: NativeSubscriptionResult.self)
+            guard await SubscriptionFinishGate.finishIfAuthorized(
+                result,
+                transactionID: String(transaction.id),
+                expectedUserID: expectedUserID,
+                expectedRole: expectedRole,
+                finish: { await transaction.finish() }
+            ) else {
+                state = .failed("El servidor no ha autorizado esta suscripción.")
+                return nil
+            }
+            purchasedProductIDs.insert(transaction.productID)
+            state = .idle
+            return result
+        } catch {
+            state = .failed("No se ha podido confirmar la suscripción. Inténtalo de nuevo.")
+            return nil
+        }
+    }
+
+    private func refreshLocalEntitlements() async {
         var active = Set<String>()
-        for await result in Transaction.currentEntitlements {
+        for await result in StoreKit.Transaction.currentEntitlements {
             guard case .verified(let transaction) = result, transaction.revocationDate == nil else { continue }
             active.insert(transaction.productID)
         }
@@ -96,13 +187,14 @@ import SwiftUI
 }
 
 struct NativeSubscriptionStoreView: View {
+    let origin: URL
+    let websiteDataStore: WKWebsiteDataStore
+    let expectedUserID: String
     let role: String
-    let onFinished: () -> Void
-    let onPurchased: () -> Void
+    let onFinished: (NativeSubscriptionResult) -> Void
 
-    @State private var store = SubscriptionStore()
+    @State private var store: SubscriptionStore
     @State private var restoredMessage: String?
-    @State private var selectedRole: String
     @State private var showingPaymentReview = false
 
     private let privacyURL = URL(string: "https://app.triwavex.com/legal/privacidad")!
@@ -110,18 +202,20 @@ struct NativeSubscriptionStoreView: View {
     private let subscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
 
     private var productIdentifier: String {
-        selectedRole == "coach" ? "com.triwavex.coach.monthly" : "com.triwavex.athlete.monthly"
+        role == "coach" ? "com.triwavex.coach.monthly" : "com.triwavex.athlete.monthly"
     }
 
     private var selectedProduct: Product? {
         store.products.first { $0.id == productIdentifier }
     }
 
-    init(role: String = "athlete", onFinished: @escaping () -> Void = {}, onPurchased: (() -> Void)? = nil) {
+    init(origin: URL, store: WKWebsiteDataStore, expectedUserID: String, role: String, onFinished: @escaping (NativeSubscriptionResult) -> Void) {
+        self.origin = origin
+        self.websiteDataStore = store
+        self.expectedUserID = expectedUserID
         self.role = role
         self.onFinished = onFinished
-        self.onPurchased = onPurchased ?? onFinished
-        _selectedRole = State(initialValue: role)
+        _store = State(initialValue: SubscriptionStore(origin: origin, store: store, expectedUserID: expectedUserID, expectedRole: role))
     }
 
     var body: some View {
@@ -150,10 +244,10 @@ struct NativeSubscriptionStoreView: View {
         .task { await store.observeTransactions() }
         .sheet(isPresented: $showingPaymentReview) {
             if let product = selectedProduct {
-                NativePaymentReviewView(product: product, role: selectedRole, eligibleForIntro: store.introEligibleProductIDs.contains(product.id), isBusy: isBusy) {
+                NativePaymentReviewView(product: product, role: role, eligibleForIntro: store.introEligibleProductIDs.contains(product.id), isBusy: isBusy) {
                     showingPaymentReview = false
                     Task {
-                        if await store.purchase(product) { onPurchased() }
+                        if let result = await store.purchase(product) { onFinished(result) }
                     }
                 }
             }
@@ -170,14 +264,14 @@ struct NativeSubscriptionStoreView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: selectedRole == "coach" ? "person.2.badge.gearshape.fill" : "figure.run.circle.fill")
+            Image(systemName: role == "coach" ? "person.2.badge.gearshape.fill" : "figure.run.circle.fill")
                 .font(.system(size: 42, weight: .semibold))
                 .foregroundStyle(Color.triWaveXAqua)
                 .accessibilityHidden(true)
-            Text(selectedRole == "coach" ? "Entrena a tu equipo" : "Tu plan está listo")
+            Text(role == "coach" ? "Entrena a tu equipo" : "Tu plan está listo")
                 .font(.largeTitle.bold())
                 .tracking(-0.6)
-            Text(selectedRole == "coach"
+            Text(role == "coach"
                  ? "Organiza hasta 10 atletas, comparte sesiones y sigue su evolución desde un solo lugar."
                  : "Sigue tu semana, registra cada sesión y adapta el plan con tus datos reales.")
                 .foregroundStyle(.secondary)
@@ -188,26 +282,19 @@ struct NativeSubscriptionStoreView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Elige tu forma de entrenar")
                 .font(.title3.bold())
-            Picker("Tipo de cuenta", selection: $selectedRole) {
-                Text("Atleta").tag("athlete")
-                Text("Entrenador").tag("coach")
-            }
-            .pickerStyle(.segmented)
-            .accessibilityLabel("Tipo de suscripción")
-
             HStack(alignment: .top, spacing: 12) {
                 comparisonCard(
                     title: "Atleta con IA",
                     price: price(for: "com.triwavex.athlete.monthly"),
                     detail: "Planificación adaptativa y métricas para tu progreso.",
-                    selected: selectedRole == "athlete"
-                ) { selectedRole = "athlete" }
+                    selected: role == "athlete"
+                )
                 comparisonCard(
                     title: "Si eres entrenador",
                     price: price(for: "com.triwavex.coach.monthly"),
                     detail: "10 atletas incluidos. Desde el undécimo, añade bloques de hasta 5 atletas.",
-                    selected: selectedRole == "coach"
-                ) { selectedRole = "coach" }
+                    selected: role == "coach"
+                )
             }
             Text("La prueba gratuita y el importe exacto aparecen antes de confirmar. Los impuestos se muestran cuando corresponda.")
                 .font(.footnote)
@@ -215,24 +302,21 @@ struct NativeSubscriptionStoreView: View {
         }
     }
 
-    private func comparisonCard(title: String, price: String, detail: String, selected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
-                Text(price).font(.headline.bold()).foregroundStyle(.primary)
-                Text(detail).font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.leading)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(selected ? Color.triWaveXAqua : .clear, lineWidth: 2) }
+    private func comparisonCard(title: String, price: String, detail: String, selected: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+            Text(price).font(.headline.bold()).foregroundStyle(.primary)
+            Text(detail).font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.leading)
         }
-        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(selected ? Color.triWaveXAqua : Color.clear, lineWidth: 2) }
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private func price(for identifier: String) -> String {
-        store.products.first(where: { $0.id == identifier })?.displayPrice.map { "\($0)/mes" } ?? "Disponible en App Store"
+        store.products.first(where: { $0.id == identifier }).map { "\($0.displayPrice)/mes" } ?? "Disponible en App Store"
     }
 
     private func planCard(_ product: Product) -> some View {
@@ -240,7 +324,7 @@ struct NativeSubscriptionStoreView: View {
         return TriWaveXSurface {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(selectedRole == "coach" ? "Entrenador" : "Atleta").font(.title3.bold())
+                    Text(role == "coach" ? "Entrenador" : "Atleta").font(.title3.bold())
                     Spacer()
                     if eligible {
                         Text("7 días gratis")
@@ -252,10 +336,10 @@ struct NativeSubscriptionStoreView: View {
                 }
                 Text("\(product.displayPrice) al mes").font(.title2.bold().monospacedDigit())
                 Divider()
-                benefit("checkmark.circle.fill", selectedRole == "coach" ? "10 atletas incluidos" : "Plan adaptado a tu progreso")
+                benefit("checkmark.circle.fill", role == "coach" ? "10 atletas incluidos" : "Plan adaptado a tu progreso")
                 benefit("arrow.triangle.2.circlepath", "Renovación mensual hasta que canceles")
                 benefit("iphone.and.arrow.forward", "Disponible con tu Apple ID en tus dispositivos")
-                if selectedRole == "coach" {
+                if role == "coach" {
                     Text("Cada bloque adicional de 5 atletas cuesta 2,99 €/mes y se muestra antes de confirmar.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
@@ -271,7 +355,15 @@ struct NativeSubscriptionStoreView: View {
         let eligible = store.introEligibleProductIDs.contains(product.id)
         let alreadyPurchased = store.purchasedProductIDs.contains(product.id)
         return Button {
-            if alreadyPurchased { onPurchased() } else { showingPaymentReview = true }
+            if alreadyPurchased {
+                Task {
+                    if let result = await store.restore(expectedProductID: product.id) {
+                        onFinished(result)
+                    }
+                }
+            } else {
+                showingPaymentReview = true
+            }
         } label: {
             Text(alreadyPurchased ? "Continuar con mi suscripción" : "Revisar y continuar al pago")
         }
@@ -284,10 +376,9 @@ struct NativeSubscriptionStoreView: View {
         VStack(spacing: 4) {
             Button("Restaurar compras") {
                 Task {
-                    let restored = await store.restore(expectedProductID: productIdentifier)
-                    if restored {
+                    if let result = await store.restore(expectedProductID: productIdentifier) {
                         restoredMessage = "Tu suscripción está activa en este dispositivo."
-                        onPurchased()
+                        onFinished(result)
                     } else if case .idle = store.state {
                         restoredMessage = "No hemos encontrado una suscripción activa para este plan."
                     }
