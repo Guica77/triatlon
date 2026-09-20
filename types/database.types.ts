@@ -43,7 +43,16 @@ export type Database = {
         Row: {
           period_ends_at: string | null
           plan: string
+          provider_customer_reference: string | null
+          provider_environment: string | null
+          provider_expires_at: string | null
+          provider_product_id: string | null
           provider_reference: string | null
+          provider_revocation_at: string | null
+          provider_signed_date: string | null
+          provider_transaction_reference: string | null
+          provider_event_type: string | null
+          provider_grace_period_ends_at: string | null
           source: string
           status: string
           trial_ends_at: string | null
@@ -53,7 +62,16 @@ export type Database = {
         Insert: {
           period_ends_at?: string | null
           plan: string
+          provider_customer_reference?: string | null
+          provider_environment?: string | null
+          provider_expires_at?: string | null
+          provider_product_id?: string | null
           provider_reference?: string | null
+          provider_revocation_at?: string | null
+          provider_signed_date?: string | null
+          provider_transaction_reference?: string | null
+          provider_event_type?: string | null
+          provider_grace_period_ends_at?: string | null
           source: string
           status: string
           trial_ends_at?: string | null
@@ -63,7 +81,16 @@ export type Database = {
         Update: {
           period_ends_at?: string | null
           plan?: string
+          provider_customer_reference?: string | null
+          provider_environment?: string | null
+          provider_expires_at?: string | null
+          provider_product_id?: string | null
           provider_reference?: string | null
+          provider_revocation_at?: string | null
+          provider_signed_date?: string | null
+          provider_transaction_reference?: string | null
+          provider_event_type?: string | null
+          provider_grace_period_ends_at?: string | null
           source?: string
           status?: string
           trial_ends_at?: string | null
@@ -79,6 +106,65 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      billing_provider_transactions: {
+        Row: {
+          provider: string
+          transaction_reference: string
+          original_transaction_reference: string
+          user_id: string
+          provider_signed_date: string
+          event_type: string
+          created_at: string
+        }
+        Insert: {
+          provider: string
+          transaction_reference: string
+          original_transaction_reference: string
+          user_id: string
+          provider_signed_date: string
+          event_type: string
+          created_at?: string
+        }
+        Update: {
+          provider?: string
+          transaction_reference?: string
+          original_transaction_reference?: string
+          user_id?: string
+          provider_signed_date?: string
+          event_type?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_provider_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_webhook_events: {
+        Row: {
+          provider: string
+          event_id: string
+          event_type: string
+          processed_at: string
+        }
+        Insert: {
+          provider: string
+          event_id: string
+          event_type: string
+          processed_at?: string
+        }
+        Update: {
+          provider?: string
+          event_id?: string
+          event_type?: string
+          processed_at?: string
+        }
+        Relationships: []
       }
       chat_messages: {
         Row: {
@@ -1437,6 +1523,31 @@ export type Database = {
           source: string
           content: string
           similarity: number
+        }[]
+      }
+      reconcile_app_store_entitlement: {
+        Args: {
+          p_user_id: string
+          p_plan: string
+          p_status: string
+          p_period_ends_at: string | null
+          p_provider_reference: string
+          p_provider_transaction_reference: string
+          p_provider_customer_reference: string | null
+          p_provider_signed_date: string
+          p_provider_environment: string | null
+          p_provider_product_id: string | null
+          p_provider_expires_at: string | null
+          p_provider_revocation_at: string | null
+          p_provider_grace_period_ends_at: string | null
+          p_provider_event_type: string
+          p_active_plan_id?: string | null
+        }
+        Returns: {
+          accepted: boolean
+          duplicate: boolean
+          status: string
+          user_id: string
         }[]
       }
     }

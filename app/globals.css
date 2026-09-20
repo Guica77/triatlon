@@ -45,6 +45,21 @@
   --color-bg-hover: #E5E5EA;
   --color-bg-app: var(--color-bg-deep);
 
+  /* ── Dark material tokens — used by the authenticated product shell ── */
+  --color-bg-deep-dark: #0B1117;
+  --color-bg-elevated-dark: #111A21;
+  --color-bg-card-dark: #17242B;
+  --color-bg-hover-dark: #20303A;
+  --color-text-primary-dark: #F4F7F7;
+  --color-text-secondary-dark: #C0CDD0;
+  --color-text-muted-dark: #94A3A8;
+  --color-border-default-dark: #2A3942;
+  --color-border-subtle-dark: #1D2A32;
+  --color-border-card-dark: #2A3942;
+  --color-accent-dark: var(--color-lime-500);
+  --color-accent-subtle-dark: var(--color-lime-700);
+  --color-info-dark: var(--color-aqua-500);
+
   /* ── Surface variants ── */
   --color-surface-app: var(--color-bg-deep);
   --color-surface-elevated: var(--color-bg-elevated);
@@ -171,6 +186,15 @@
     transform: scale(0.97);
   }
 
+  /* Links and controls need a generous touch target without delaying taps. */
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+
   /* Shared Apple-like control geometry. Custom buttons keep their TriWaveX
      action colour, while rounded-full icon controls deliberately stay circular. */
   button:not([class*="rounded-full"]):not([class*="rounded-none"]) {
@@ -185,6 +209,53 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+}
+
+/* ── Authenticated product shell ──────────────────────────────────────── */
+.athlete-app-shell {
+  --color-bg-deep: var(--color-bg-deep-dark);
+  --color-bg-elevated: var(--color-bg-elevated-dark);
+  --color-bg-card: var(--color-bg-card-dark);
+  --color-bg-hover: var(--color-bg-hover-dark);
+  --color-bg-app: var(--color-bg-deep-dark);
+  --color-surface-app: var(--color-bg-deep-dark);
+  --color-surface-elevated: var(--color-bg-elevated-dark);
+  --color-surface-card: var(--color-bg-card-dark);
+  --color-surface-hover: var(--color-bg-hover-dark);
+  --color-text-primary: var(--color-text-primary-dark);
+  --color-text-secondary: var(--color-text-secondary-dark);
+  --color-text-muted: var(--color-text-muted-dark);
+  --color-text-inverse: var(--color-bg-deep-dark);
+  --color-border-default: var(--color-border-default-dark);
+  --color-border-subtle: var(--color-border-subtle-dark);
+  --color-border-card: var(--color-border-card-dark);
+  --color-accent: var(--color-accent-dark);
+  --color-accent-subtle: var(--color-accent-subtle-dark);
+  --color-info: var(--color-info-dark);
+  --color-background: var(--color-bg-deep-dark);
+  --color-foreground: var(--color-text-primary-dark);
+  --color-card: var(--color-bg-card-dark);
+  --color-card-foreground: var(--color-text-primary-dark);
+  --color-popover: var(--color-bg-elevated-dark);
+  --color-popover-foreground: var(--color-text-primary-dark);
+  --color-primary: var(--color-accent-dark);
+  --color-primary-foreground: var(--color-bg-deep-dark);
+  --color-secondary: var(--color-bg-hover-dark);
+  --color-secondary-foreground: var(--color-text-primary-dark);
+  --color-muted: var(--color-bg-hover-dark);
+  --color-muted-foreground: var(--color-text-muted-dark);
+  --color-accent-foreground: var(--color-accent-dark);
+  --color-ring: var(--color-accent-dark);
+  isolation: isolate;
+}
+
+.athlete-app-shell::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background: var(--color-bg-deep-dark);
 }
 
 /* ── Motion utilities (fade-in + slide-down toasts) ── */
@@ -243,10 +314,6 @@
 }
 
 /* ── Athlete Apple shell ─────────────────────────────────────────────── */
-.athlete-app-shell {
-  isolation: isolate;
-}
-
 .apple-athlete-content {
   width: min(100%, 72rem);
   margin-inline: auto;

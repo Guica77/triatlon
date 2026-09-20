@@ -7,6 +7,7 @@ enum GuidedOnboardingRole: String, Sendable {
 }
 
 struct GuidedTourRequest: Sendable {
+    let userID: String
     let role: GuidedOnboardingRole
     let givenName: String
 
@@ -96,9 +97,7 @@ struct GuidedTourRequest: Sendable {
     }
 
     private static func completionKey(for request: GuidedTourRequest, version: Int = 1) -> String {
-        let name = request.displayName?.lowercased() ?? "account"
-        let safeName = name.unicodeScalars.map { CharacterSet.alphanumerics.contains($0) ? Character(String($0)) : "-" }
-        return "triwavex.guided-onboarding.v\(version).\(request.role.rawValue).\(String(safeName))"
+        "triwavex.guided-onboarding.v\(version).\(request.role.rawValue).\(request.userID)"
     }
 
     private static func progressKey(for request: GuidedTourRequest, version: Int = 1) -> String {
@@ -176,7 +175,7 @@ struct GuidedOnboardingOverlay: View {
                             animateCursor()
                         }
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
                     .controlSize(.large)
                     .frame(maxWidth: .infinity)
                 }

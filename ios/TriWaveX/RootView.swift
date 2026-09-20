@@ -5,6 +5,8 @@ struct RootView: View {
     private struct CoachCheckout {
         let destination: String
         let givenName: String
+        let userID: String
+        let role: Role
     }
 
     private enum Role: String, CaseIterable {
@@ -42,7 +44,9 @@ struct RootView: View {
         if defaults.bool(forKey: "triwavex.coachCheckout.pending") {
             _coachCheckout = State(initialValue: CoachCheckout(
                 destination: defaults.string(forKey: "triwavex.coachCheckout.destination") ?? "/coach/dashboard",
-                givenName: defaults.string(forKey: "triwavex.coachCheckout.givenName") ?? ""
+                givenName: defaults.string(forKey: "triwavex.coachCheckout.givenName") ?? "",
+                userID: defaults.string(forKey: "triwavex.coachCheckout.userID") ?? "",
+                role: Role(rawValue: defaults.string(forKey: "triwavex.coachCheckout.role") ?? "coach") ?? .coach
             ))
         }
     }
@@ -58,8 +62,9 @@ struct RootView: View {
                     onRegistered: { outcome in
                         setRegistrationRole(nil)
                         onboardingGivenName = outcome.givenName
+                        session.setStableUserID(outcome.userID)
                         if outcome.role == Role.coach.rawValue {
-                            setCoachCheckout(CoachCheckout(destination: outcome.destination, givenName: outcome.givenName))
+                            setCoachCheckout(CoachCheckout(destination: outcome.destination, givenName: outcome.givenName, userID: outcome.userID, role: .coach))
                         } else {
                             session.destination = outcome.destination
                         }
@@ -71,11 +76,11 @@ struct RootView: View {
                     NativeSubscriptionStoreView(
                         role: Role.coach.rawValue,
                         onFinished: {
-                            setCoachCheckout(nil)
-                            session.destination = coachCheckout.destination
+                            // Closing or cancelling checkout never grants access.
+                            setCoachCheckout(coachCheckout)
                         },
                         onPurchased: {
-                            guidedTourRequest = GuidedTourRequest(role: .coach, givenName: coachCheckout.givenName)
+                            guidedTourRequest = GuidedTourRequest(userID: coachCheckout.userID, role: coachCheckout.role == .coach ? .coach : .athlete, givenName: coachCheckout.givenName)
                             setCoachCheckout(nil)
                             session.destination = coachCheckout.destination
                         }
@@ -88,9 +93,8 @@ struct RootView: View {
                     store: session.store,
                     givenName: onboardingGivenName,
                     onFinished: { purchased in
-                        if purchased {
-                            guidedTourRequest = GuidedTourRequest(role: .athlete, givenName: onboardingGivenName)
-                        }
+                        guard purchased, let userID = session.stableUserID else { return }
+                        guidedTourRequest = GuidedTourRequest(userID: userID, role: .athlete, givenName: onboardingGivenName)
                         session.destination = "/dashboard"
                     }
                 )
@@ -144,7 +148,7 @@ struct RootView: View {
                   session.destination == nil,
                   !session.busy else { return }
             if arguments.contains("--preview-guided-onboarding") {
-                guidedTourRequest = GuidedTourRequest(role: .athlete, givenName: "Guillermo")
+                guidedTourRequest = GuidedTourRequest(userID: "preview-user", role: .athlete, givenName: "Guillermo")
             }
             try? await Task.sleep(for: .seconds(3))
             guard !Task.isCancelled else { return }
@@ -247,7 +251,7 @@ struct RootView: View {
                     SignInWithAppleButton(.continue) { request in
                         session.prepareAppleRequest(request)
                     } onCompletion: { result in
-                        Task { await session.handleAppleCompletion(result, role: role.rawValue) }
+                        Task { await session.handleAppleCompletion(result) }
                     }
                     .signInWithAppleButtonStyle(.black)
                     .frame(maxWidth: .infinity)
@@ -369,8 +373,10 @@ struct RootView: View {
             defaults.set(true, forKey: "triwavex.coachCheckout.pending")
             defaults.set(value.destination, forKey: "triwavex.coachCheckout.destination")
             defaults.set(value.givenName, forKey: "triwavex.coachCheckout.givenName")
+            defaults.set(value.userID, forKey: "triwavex.coachCheckout.userID")
+            defaults.set(value.role.rawValue, forKey: "triwavex.coachCheckout.role")
         } else {
-            ["pending", "destination", "givenName"].forEach {
+            ["pending", "destination", "givenName", "userID", "role"].forEach {
                 defaults.removeObject(forKey: "triwavex.coachCheckout.\($0)")
             }
         }

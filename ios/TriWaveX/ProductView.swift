@@ -19,6 +19,7 @@ struct ProductView: View {
     let initialPath: String
     let onDismiss: (() -> Void)?
     let onSessionEnded: (() -> Void)?
+    let guidedTourRequest: GuidedTourRequest?
     let onGuidedTourFinished: () -> Void
     @State private var browser = BrowserModel()
     @State private var strava = StravaSessionModel()
@@ -60,6 +61,7 @@ struct ProductView: View {
         self.initialPath = initialPath
         self.onDismiss = onDismiss
         self.onSessionEnded = onSessionEnded
+        self.guidedTourRequest = guidedTourRequest
         self.onGuidedTourFinished = onGuidedTourFinished
         _athleteProgress = State(initialValue: AthleteProgressModel(client: AthleteProgressClient(origin: origin, store: store)))
         _nativePlan = State(initialValue: NativePlanModel(client: NativePlanClient(origin: origin, store: store)))
@@ -239,7 +241,8 @@ struct ProductView: View {
             let name: String
             if case .loaded(let profile) = nativeProfile.state { name = profile.athlete.firstName }
             else { name = "" }
-            let model = GuidedOnboardingModel(request: GuidedTourRequest(role: role, givenName: name))
+            guard let userID = guidedTourRequest?.userID, !userID.isEmpty else { return }
+            let model = GuidedOnboardingModel(request: GuidedTourRequest(userID: userID, role: role, givenName: name))
             model.restart()
             guidedOnboarding = model
         }

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { nativeAccessForUser } from '@/lib/native-access'
 
 const reply = (body: object, status = 200) => Response.json(body, {
   status, headers: { 'Cache-Control': 'no-store', 'Vary': 'Cookie' },
@@ -12,11 +13,8 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) return reply({ error: 'Sesión no disponible' }, 401)
-    const { data: profile, error: profileError } = await supabase.from('profiles')
-      .select('role, active_plan_id').eq('id', user.id).maybeSingle()
-    if (profileError) return reply({ error: 'No se ha podido cargar el perfil' }, 503)
-    const destination = profile?.role === 'coach' ? '/coach/dashboard' : profile?.active_plan_id ? '/dashboard' : '/onboarding'
-    return reply({ destination })
+    const access = await nativeAccessForUser(supabase, user.id)
+    return reply(access)
   } catch {
     return reply({ error: 'Servicio no disponible' }, 503)
   }
@@ -43,11 +41,8 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data, error } = await supabase.auth.signInWithPassword({ email: input.email.trim(), password: input.password })
     if (error || !data.user || !data.session) return reply({ error: 'Credenciales inválidas o correo no confirmado' }, 401)
-    const { data: profile, error: profileError } = await supabase.from('profiles')
-      .select('role, active_plan_id').eq('id', data.user.id).maybeSingle()
-    if (profileError) return reply({ error: 'No se ha podido cargar el perfil' }, 503)
-    const destination = profile?.role === 'coach' ? '/coach/dashboard' : profile?.active_plan_id ? '/dashboard' : '/onboarding'
-    return reply({ destination })
+    const access = await nativeAccessForUser(supabase, data.user.id)
+    return reply(access)
   } catch {
     return reply({ error: 'Servicio no disponible' }, 503)
   }

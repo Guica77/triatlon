@@ -78,7 +78,7 @@ export function DesktopSidebar() {
   return (
     <div
       className={cn(
-        'hidden sm:flex flex-col bg-surface-elevated shrink-0 transition-[width,background-color,border-color] duration-200 ease-out z-40 border-r border-border-subtle',
+        'hidden sm:flex flex-col bg-surface-elevated/92 backdrop-blur-xl shrink-0 transition-[width,background-color,border-color] duration-200 ease-out z-40 border-r border-border-subtle shadow-[8px_0_24px_rgba(0,0,0,0.12)]',
         isCollapsed ? 'w-[68px]' : 'w-56'
       )}
     >
@@ -108,7 +108,7 @@ export function DesktopSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'relative flex min-h-11 items-center gap-3 rounded-lg text-sm font-medium transition-[background-color,color,opacity] duration-150 ease-out',
+                'relative flex min-h-11 items-center gap-3 rounded-xl text-sm font-medium transition-[background-color,color,opacity,transform] duration-150 ease-out active:scale-[0.98]',
                 isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5',
                 isActive
                   ? 'bg-surface-hover/70 text-text-primary'
@@ -139,7 +139,7 @@ export function DesktopSidebar() {
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            'flex min-h-11 items-center gap-3 rounded-lg text-sm font-medium transition-[background-color,color,opacity] duration-150 ease-out w-full text-text-muted hover:text-text-secondary hover:bg-surface-hover/50',
+            'flex min-h-11 items-center gap-3 rounded-xl text-sm font-medium transition-[background-color,color,opacity,transform] duration-150 ease-out active:scale-[0.98] w-full text-text-muted hover:text-text-secondary hover:bg-surface-hover/50',
             isCollapsed ? 'px-3 py-2.5 justify-center' : 'px-3.5 py-2.5'
           )}
           title={isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
