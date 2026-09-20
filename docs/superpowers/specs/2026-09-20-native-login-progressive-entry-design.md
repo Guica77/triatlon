@@ -11,7 +11,7 @@ La secuencia se reproduce siempre que se muestra la pantalla de acceso y dura ap
 1. De 0,0 a 1,8 segundos, aparecen tres frases cortas, una detrás de otra, sobre los problemas que resuelve la aplicación:
    - «¿Pagar mucho por entrenar? Que el triatlón no sea solo para unos pocos.»
    - «¿Cansado de apps difíciles? Que entrenar no requiera aprender otra carrera.»
-   - «¿Un plan que no se adapta? Que el esfuerzo vaya por libre.»
+   - «¿No sabes ni por dónde empezar? Que alguien te marque el camino.»
 2. De 1,8 a 2,1 segundos, aparece el cierre: `Para eso está…`.
 3. De 2,1 a 2,7 segundos, la marca `TriWaveX` se revela de izquierda a derecha mediante una máscara, acompañada de una línea de acento azul discreta.
 4. De 2,7 a 3,5 segundos, se incorporan el lema, selector de cuenta, credenciales, acceso con Apple y enlaces. Cada bloque entra una vez, con un desfase corto, opacidad y un desplazamiento vertical mínimo.
