@@ -1,0 +1,93 @@
+{
+  "identifier" : "3EE08A0F-9D32-4FE7-A8CD-EC848810D9B1",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "A2CF9F8D",
+      "localizations" : [
+
+      ],
+      "name" : "TriWaveX Access",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "12.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "E0B04955",
+          "introductoryOffer" : {
+            "internalID" : "CB32D47A",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P7D"
+          },
+          "localizations" : [
+            {
+              "description" : "Plan personalizado y seguimiento de tus entrenamientos.",
+              "displayName" : "TriWaveX Atleta",
+              "locale" : "es_ES"
+            }
+          ],
+          "productID" : "com.triwavex.athlete.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Atleta mensual",
+          "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "24.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "C9FBC95A",
+          "introductoryOffer" : {
+            "internalID" : "AAE81449",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P7D"
+          },
+          "localizations" : [
+            {
+              "description" : "Organiza atletas y comparte sus entrenamientos.",
+              "displayName" : "TriWaveX Entrenador",
+              "locale" : "es_ES"
+            }
+          ],
+          "productID" : "com.triwavex.coach.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Entrenador mensual",
+          "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}

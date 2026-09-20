@@ -64,7 +64,8 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
-      allowLocationSimulation = "YES">
+      allowLocationSimulation = "YES"
+      storeKitConfigurationFileReference = "container:TriWaveX/StoreKitTesting.storekit">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
