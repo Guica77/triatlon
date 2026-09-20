@@ -6,15 +6,17 @@ Convertir cada apertura de la pantalla nativa de acceso en una secuencia de bien
 
 ## Secuencia
 
-La secuencia se reproduce siempre que se muestra la pantalla de acceso y dura aproximadamente 6 segundos:
+La secuencia completa se reproduce solo la primera vez que una persona alcanza la pantalla de acceso. En las aperturas posteriores se omiten las frases y dura aproximadamente 2 segundos:
 
-1. De 0,0 a 3,3 segundos, se escriben lentamente, carácter a carácter y en el centro de la pantalla, tres frases cortas sobre los problemas que resuelve la aplicación:
+1. De 0,0 a 4,5 segundos, se escriben y se borran lentamente, una a una y en el centro de la pantalla, tres frases cortas sobre los problemas que resuelve la aplicación:
    - «¿Pagar demasiado por entrenar?»
    - «¿Otra app difícil de manejar?»
    - «¿No sabes ni por dónde empezar?»
 2. A continuación aparece el cierre: `Para eso está…`.
-3. El símbolo de tres trazos de TriWaveX aparece centrado en blanco y negro, con `TriWaveX` grande encima, y se mantiene brevemente.
-4. El símbolo monocromo desaparece, pero el texto `TriWaveX` permanece centrado. Ese mismo texto sube lentamente desde esa posición hasta el encabezado de la pantalla de acceso. Solo al completar ese movimiento se incorporan el lema, selector de cuenta, credenciales, acceso con Apple y enlaces; cada bloque entra una vez, con un desfase corto, opacidad y un desplazamiento vertical mínimo.
+3. `TriWaveX` aparece centrado mediante un fundido, sin símbolo.
+4. El texto sube suavemente hasta su posición definitiva en el encabezado. Después se incorporan el lema, selector de cuenta, credenciales, acceso con Apple y enlaces; cada bloque entra una vez, con un desfase corto y opacidad.
+
+En aperturas posteriores, solo se muestra `TriWaveX` centrado; el texto sube suavemente hasta el encabezado y después aparecen los controles. La preferencia se guarda de forma local en el dispositivo.
 
 La entrada utiliza curvas existentes de TriWaveX, transforma y opacidad; no anima medidas ni posiciones de layout. La interacción queda disponible al terminar la secuencia.
 
