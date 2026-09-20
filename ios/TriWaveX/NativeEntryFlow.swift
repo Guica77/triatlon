@@ -244,9 +244,10 @@ struct NativeRegistrationView: View {
 
 @MainActor
 @Observable final class NativeOnboardingModel {
-    enum State { case editing, saving, failed(String), readyForPayment }
-    var goal = "Completar mi próximo triatlón"
+    enum State { case editing, saving, failed(String), preview(NativePlanPreview), readyForPayment }
+    var goal = "Mi próximo objetivo"
     var modality = "triatlon"
+    var targetRaceDistance = "half"
     var level = "intermedio"
     var weeklyHours = 7.0
     var wantsCoach = false
@@ -260,6 +261,7 @@ struct NativeRegistrationView: View {
         self.defaults = defaults
         goal = defaults.string(forKey: "triwavex.onboarding.goal") ?? goal
         modality = defaults.string(forKey: "triwavex.onboarding.modality") ?? modality
+        targetRaceDistance = defaults.string(forKey: "triwavex.onboarding.targetRaceDistance") ?? targetRaceDistance
         level = defaults.string(forKey: "triwavex.onboarding.level") ?? level
         if defaults.object(forKey: "triwavex.onboarding.weeklyHours") != nil {
             weeklyHours = defaults.double(forKey: "triwavex.onboarding.weeklyHours")
@@ -276,6 +278,7 @@ struct NativeRegistrationView: View {
     func persistDraft(step: Int) {
         defaults.set(goal, forKey: "triwavex.onboarding.goal")
         defaults.set(modality, forKey: "triwavex.onboarding.modality")
+        defaults.set(targetRaceDistance, forKey: "triwavex.onboarding.targetRaceDistance")
         defaults.set(level, forKey: "triwavex.onboarding.level")
         defaults.set(weeklyHours, forKey: "triwavex.onboarding.weeklyHours")
         defaults.set(wantsCoach, forKey: "triwavex.onboarding.wantsCoach")
@@ -284,21 +287,33 @@ struct NativeRegistrationView: View {
     }
 
     func clearDraft() {
-        ["goal", "modality", "level", "weeklyHours", "wantsCoach", "injuries", "step", "readyForPayment"].forEach {
+        ["goal", "modality", "targetRaceDistance", "level", "weeklyHours", "wantsCoach", "injuries", "step", "readyForPayment"].forEach {
             defaults.removeObject(forKey: "triwavex.onboarding.\($0)")
         }
     }
 
     func save() async {
         state = .saving
-        struct Input: Encodable { let goal, modality, level: String; let weeklyHours: Double; let wantsCoach: Bool; let previousInjuries: String }
-        struct Result: Decodable { let success: Bool }
+        struct Input: Encodable { let goal, modality, targetRaceDistance, level: String; let weeklyHours: Double; let wantsCoach: Bool; let previousInjuries: String }
+        struct Result: Decodable { let success: Bool; let preview: NativePlanPreview }
         do {
-            _ = try await transport.send("/api/native/onboarding", body: Input(goal: goal, modality: modality, level: level, weeklyHours: weeklyHours, wantsCoach: wantsCoach, previousInjuries: injuries), response: Result.self)
-            state = .readyForPayment
-            defaults.set(true, forKey: "triwavex.onboarding.readyForPayment")
+            let result = try await transport.send("/api/native/onboarding", body: Input(goal: goal, modality: modality, targetRaceDistance: targetRaceDistance, level: level, weeklyHours: weeklyHours, wantsCoach: wantsCoach, previousInjuries: injuries), response: Result.self)
+            state = .preview(result.preview)
         } catch { state = .failed(error.localizedDescription) }
     }
+
+    func continueToPayment() {
+        state = .readyForPayment
+        defaults.set(true, forKey: "triwavex.onboarding.readyForPayment")
+    }
+}
+
+struct NativePlanPreview: Decodable {
+    struct Session: Decodable { let day: String; let sport: String }
+    let name: String
+    let description: String?
+    let durationWeeks: Int?
+    let sessions: [Session]
 }
 
 struct NativeOnboardingView: View {
@@ -309,6 +324,8 @@ struct NativeOnboardingView: View {
     let onFinished: (NativeSubscriptionResult) -> Void
     @State private var model: NativeOnboardingModel
     @State private var step = 0
+    @State private var showingSportChoices = false
+    @State private var showingDistanceChoices = false
 
     init(origin: URL, store: WKWebsiteDataStore, expectedUserID: String, givenName: String, onFinished: @escaping (NativeSubscriptionResult) -> Void) {
         self.origin = origin; self.store = store; self.expectedUserID = expectedUserID; self.givenName = givenName; self.onFinished = onFinished
@@ -325,11 +342,14 @@ struct NativeOnboardingView: View {
                         store: store,
                         expectedUserID: expectedUserID,
                         role: "athlete",
+                        showPlanComparison: false,
                         onFinished: { result in
                             model.clearDraft()
                             onFinished(result)
                         }
                     )
+                } else if case .preview(let preview) = model.state {
+                    NativePlanPreviewView(preview: preview, onContinue: model.continueToPayment)
                 } else {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 22) {
@@ -353,10 +373,25 @@ struct NativeOnboardingView: View {
             .onChange(of: step) { _, value in model.persistDraft(step: value) }
             .onChange(of: model.goal) { _, _ in model.persistDraft(step: step) }
             .onChange(of: model.modality) { _, _ in model.persistDraft(step: step) }
+            .onChange(of: model.targetRaceDistance) { _, _ in model.persistDraft(step: step) }
             .onChange(of: model.level) { _, _ in model.persistDraft(step: step) }
             .onChange(of: model.weeklyHours) { _, _ in model.persistDraft(step: step) }
             .onChange(of: model.wantsCoach) { _, _ in model.persistDraft(step: step) }
             .onChange(of: model.injuries) { _, _ in model.persistDraft(step: step) }
+            .onAppear { ensureDistanceMatchesModality() }
+            .confirmationDialog("Elige deporte", isPresented: $showingSportChoices, titleVisibility: .visible) {
+                Button("Triatlón") { chooseModality("triatlon") }
+                Button("Carrera") { chooseModality("carrera") }
+                Button("Duatlón") { chooseModality("duatlon") }
+                Button("Acuatlón") { chooseModality("acuatlon") }
+                Button("Cancelar", role: .cancel) {}
+            }
+            .confirmationDialog("Elige distancia", isPresented: $showingDistanceChoices, titleVisibility: .visible) {
+                ForEach(distanceOptions, id: \.id) { option in
+                    Button(option.title) { model.targetRaceDistance = option.id }
+                }
+                Button("Cancelar", role: .cancel) {}
+            }
         }
     }
 
@@ -365,9 +400,9 @@ struct NativeOnboardingView: View {
     @ViewBuilder private var content: some View {
         if step == 0 {
             Text(onboardingQuestion).font(.largeTitle.bold())
-            Text("Usaremos esta información para prepararte un plan inicial.").foregroundStyle(.secondary)
-            TextField("Ejemplo: Mi primer 70.3", text: $model.goal).textFieldStyle(.roundedBorder).font(.title3)
-            Picker("Deporte", selection: $model.modality) { Text("Triatlón").tag("triatlon"); Text("Carrera").tag("carrera"); Text("Duatlón").tag("duatlon"); Text("Acuatlón").tag("acuatlon"); Text("Acuabike").tag("acuabike") }.pickerStyle(.navigationLink)
+            Text("Elige tu deporte y distancia. Con esto prepararemos un plan inicial que podrás ajustar después.").foregroundStyle(.secondary)
+            onboardingChoice(title: "Deporte", value: modalityTitle, icon: modalityIcon) { showingSportChoices = true }
+            onboardingChoice(title: "Distancia", value: distanceTitle, icon: "flag.checkered") { showingDistanceChoices = true }
             Picker("Experiencia", selection: $model.level) { Text("Principiante").tag("principiante"); Text("Intermedio").tag("intermedio"); Text("Avanzado").tag("avanzado") }.pickerStyle(.segmented)
         } else if step == 1 {
             Text("¿Cuánto tiempo tienes?").font(.largeTitle.bold())
@@ -377,7 +412,62 @@ struct NativeOnboardingView: View {
         } else {
             Text("Personaliza tu apoyo").font(.largeTitle.bold())
             Toggle("Quiero encontrar o conectar con un entrenador", isOn: $model.wantsCoach)
+            if model.wantsCoach {
+                Label("Te ayudaremos a encontrar o conectar con un entrenador después. Tu plan inicial y el precio de atleta no cambian.", systemImage: "person.2.fill")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .padding(12)
+                    .background(Color.triWaveXAqua.opacity(0.09), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            }
             VStack(alignment: .leading, spacing: 8) { Text("Lesiones o límites actuales (opcional)").font(.headline); TextEditor(text: $model.injuries).frame(minHeight: 110).padding(8).background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous)); Text("Solo lo usamos para ajustar el entrenamiento. No sustituye a un profesional sanitario.").font(.footnote).foregroundStyle(.secondary) }
+        }
+    }
+
+    private func onboardingChoice(title: String, value: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 13) {
+                Image(systemName: icon).font(.headline).frame(width: 28, height: 28).foregroundStyle(Color.triWaveXAqua)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                    Text(value).font(.headline).foregroundStyle(.primary)
+                }
+                Spacer()
+                Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold)).foregroundStyle(Color.triWaveXAqua)
+            }
+            .padding(15)
+            .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.triWaveXAqua.opacity(0.55), lineWidth: 1.5) }
+        }
+        .buttonStyle(.plain)
+        .accessibilityHint("Toca para elegir \(title.lowercased())")
+    }
+
+    private var modalityTitle: String {
+        switch model.modality { case "carrera": "Carrera"; case "duatlon": "Duatlón"; case "acuatlon": "Acuatlón"; default: "Triatlón" }
+    }
+
+    private var modalityIcon: String {
+        switch model.modality { case "carrera": "figure.run"; case "duatlon": "figure.run"; case "acuatlon": "figure.pool.swim"; default: "figure.triathlon" }
+    }
+
+    private var distanceOptions: [(id: String, title: String)] {
+        switch model.modality {
+        case "carrera": [("5k", "5 km"), ("10k", "10 km"), ("medio_maraton", "Media maratón"), ("maraton", "Maratón"), ("ultra", "Ultra")]
+        case "triatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "70.3"), ("full", "Larga distancia")]
+        default: [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "Media distancia")]
+        }
+    }
+
+    private var distanceTitle: String { distanceOptions.first(where: { $0.id == model.targetRaceDistance })?.title ?? distanceOptions[0].title }
+
+    private func chooseModality(_ value: String) {
+        model.modality = value
+        ensureDistanceMatchesModality()
+    }
+
+    private func ensureDistanceMatchesModality() {
+        if !distanceOptions.contains(where: { $0.id == model.targetRaceDistance }) {
+            model.targetRaceDistance = distanceOptions[0].id
         }
     }
 
@@ -401,4 +491,62 @@ struct NativeOnboardingView: View {
         }.padding(.top, 12)
     }
     private var isSaving: Bool { if case .saving = model.state { true } else { false } }
+}
+
+private struct NativePlanPreviewView: View {
+    let preview: NativePlanPreview
+    let onContinue: () -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 22) {
+                Label("Tu plan inicial", systemImage: "checkmark.seal.fill")
+                    .font(.headline)
+                    .foregroundStyle(Color.triWaveXAqua)
+                Text(preview.name).font(.largeTitle.bold())
+                if let description = preview.description, !description.isEmpty {
+                    Text(description).foregroundStyle(.secondary)
+                }
+                if let duration = preview.durationWeeks {
+                    Label("Plan de \(duration) semanas", systemImage: "calendar")
+                        .font(.subheadline.weight(.semibold))
+                }
+                TriWaveXSurface {
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("Tus días propuestos").font(.title3.bold())
+                        ForEach(preview.sessions, id: \.day) { session in
+                            HStack(spacing: 12) {
+                                Image(systemName: icon(for: session.sport))
+                                    .foregroundStyle(Color.triWaveXAqua)
+                                    .frame(width: 30, height: 30)
+                                    .background(Color.triWaveXAqua.opacity(0.12), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                                Text(session.day).font(.headline).frame(width: 32, alignment: .leading)
+                                Text(title(for: session.sport)).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+                Label("Podrás adaptar los días y la carga desde tu plan cuando actives el acceso.", systemImage: "slider.horizontal.3")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Button("Ver acceso y prueba gratuita", action: onContinue)
+                    .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(20)
+            .frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading)
+            .frame(maxWidth: .infinity)
+        }
+        .background(Color(uiColor: .systemGroupedBackground))
+        .navigationTitle("Tu plan")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func icon(for sport: String) -> String {
+        switch sport { case "natacion": "figure.pool.swim"; case "ciclismo": "bicycle"; case "carrera": "figure.run"; case "fuerza": "dumbbell"; default: "arrow.triangle.2.circlepath" }
+    }
+
+    private func title(for sport: String) -> String {
+        switch sport { case "natacion": "Natación"; case "ciclismo": "Ciclismo"; case "carrera": "Carrera"; case "fuerza": "Fuerza"; default: "Transición" }
+    }
 }

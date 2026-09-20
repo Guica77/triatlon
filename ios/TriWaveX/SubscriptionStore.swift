@@ -191,6 +191,7 @@ struct NativeSubscriptionStoreView: View {
     let websiteDataStore: WKWebsiteDataStore
     let expectedUserID: String
     let role: String
+    let showPlanComparison: Bool
     let onFinished: (NativeSubscriptionResult) -> Void
 
     @State private var store: SubscriptionStore
@@ -209,11 +210,12 @@ struct NativeSubscriptionStoreView: View {
         store.products.first { $0.id == productIdentifier }
     }
 
-    init(origin: URL, store: WKWebsiteDataStore, expectedUserID: String, role: String, onFinished: @escaping (NativeSubscriptionResult) -> Void) {
+    init(origin: URL, store: WKWebsiteDataStore, expectedUserID: String, role: String, showPlanComparison: Bool = true, onFinished: @escaping (NativeSubscriptionResult) -> Void) {
         self.origin = origin
         self.websiteDataStore = store
         self.expectedUserID = expectedUserID
         self.role = role
+        self.showPlanComparison = showPlanComparison
         self.onFinished = onFinished
         _store = State(initialValue: SubscriptionStore(origin: origin, store: store, expectedUserID: expectedUserID, expectedRole: role))
     }
@@ -222,7 +224,7 @@ struct NativeSubscriptionStoreView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 header
-                planComparison
+                if showPlanComparison { planComparison }
                 if let product = selectedProduct {
                     planCard(product)
                     purchaseButton(product)
@@ -461,6 +463,11 @@ private struct NativePaymentReviewView: View {
                     HStack { Text(role == "coach" ? "Entrenador" : "Atleta con IA"); Spacer(); Text("\(product.displayPrice)/mes").bold() }
                     if eligibleForIntro { Text("7 días gratis, sin cobro hoy.").foregroundStyle(.secondary) }
                     if role == "coach" { Text("Incluye 10 atletas. Cada bloque adicional de 5 atletas cuesta 2,99 €/mes.").font(.subheadline).foregroundStyle(.secondary) }
+                    if role != "coach" {
+                        Label("Desbloquea tu plan completo, los ajustes de carga y el seguimiento de cada sesión.", systemImage: "checkmark.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
                     Text("Apple mostrará el importe final y los impuestos antes de confirmar. Puedes cancelar desde Ajustes de tu Apple ID.").font(.footnote).foregroundStyle(.secondary)
                 }
                 .padding(16)
