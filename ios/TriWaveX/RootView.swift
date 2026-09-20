@@ -35,7 +35,6 @@ struct RootView: View {
     @State private var hasCompletedStartup = false
     @State private var hasCompletedStartupBeat = false
     @State private var loginIntroStage = 0
-    @State private var logoRevealProgress = false
     @State private var isPlayingLoginIntro = false
     @FocusState private var focusedField: FocusedField?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -220,7 +219,7 @@ struct RootView: View {
                     branding
                         .padding(.bottom, 30)
 
-                    if loginIntroStage >= 6 {
+                    if loginIntroStage >= 8 {
                         loginSectionTitle("Tipo de cuenta")
                             .transition(loginEntryTransition)
                         Picker("Tipo de cuenta", selection: $role) {
@@ -240,7 +239,7 @@ struct RootView: View {
                         .transition(loginEntryTransition)
                     }
 
-                    if loginIntroStage >= 7 {
+                    if loginIntroStage >= 9 {
                         loginSectionTitle("Acceso")
                             .transition(loginEntryTransition)
                         loginSurfaceGroup {
@@ -282,7 +281,7 @@ struct RootView: View {
                         .transition(loginEntryTransition)
                     }
 
-                    if loginIntroStage >= 8 {
+                    if loginIntroStage >= 10 {
                         Button {
                             login()
                         } label: {
@@ -407,31 +406,34 @@ struct RootView: View {
                     .foregroundStyle(.secondary)
                     .transition(.opacity)
             } else {
-                VStack(spacing: 6) {
+                ZStack {
                     Text("TriWaveX")
-                        .font(.system(size: 34, weight: .bold))
-                        .foregroundStyle(.primary)
-                        .mask(alignment: .leading) {
-                            GeometryReader { proxy in
-                                Rectangle()
-                                    .scaleEffect(x: logoRevealProgress ? 1 : 0.001, y: 1, anchor: .leading)
-                                    .animation(TriWaveXMotion.entry(reduced: reduceMotion), value: logoRevealProgress)
-                                    .frame(width: proxy.size.width, height: proxy.size.height)
-                            }
-                        }
+                        .font(.system(size: loginIntroStage < 7 ? 46 : 34, weight: .black, design: .rounded))
+                        .offset(y: loginIntroStage == 4 ? -46 : 0)
 
-                    Text("Entrena con una dirección clara")
-                        .font(.system(size: 17))
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .opacity(loginIntroStage >= 5 ? 1 : 0)
+                    if loginIntroStage >= 7 {
+                        Text("Entrena con una dirección clara")
+                            .font(.system(size: 17))
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .offset(y: 31)
+                    }
+
+                    if loginIntroStage == 4 {
+                        TriWaveXMark()
+                            .frame(width: 104, height: 84)
+                            .offset(y: 47)
+                            .transition(.opacity)
+                    }
                 }
-                .transition(.opacity)
+                .foregroundStyle(.black)
+                .frame(height: loginIntroStage < 7 ? 164 : 76)
+                .background(loginIntroStage < 7 ? .white : .clear, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 76)
-        .offset(y: loginIntroStage < 5 ? 250 : 0)
-        .animation(TriWaveXMotion.entry(reduced: reduceMotion), value: loginIntroStage)
+        .frame(maxWidth: .infinity, minHeight: loginIntroStage < 7 && loginIntroStage >= 4 ? 164 : 76)
+        .offset(y: loginIntroStage < 7 ? 250 : 0)
+        .animation(loginIntroStage == 7 ? TriWaveXMotion.loginLogoLift : TriWaveXMotion.entry(reduced: reduceMotion), value: loginIntroStage)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(loginIntroStage < 3 ? loginIntroCopy[loginIntroStage] : "TriWaveX. Entrena con una dirección clara")
     }
@@ -452,16 +454,14 @@ struct RootView: View {
         guard !isPlayingLoginIntro else { return }
         isPlayingLoginIntro = true
         loginIntroStage = 0
-        logoRevealProgress = false
         defer { isPlayingLoginIntro = false }
 
-        let delays = [1100, 1100, 1100, 500, 900, 550, 300, 300]
+        let delays = [1200, 1200, 1200, 600, 1200, 450, 1050, 350, 350, 350]
         for (index, delay) in delays.enumerated() {
             try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : delay))
             guard !Task.isCancelled else { return }
             withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
                 loginIntroStage = index + 1
-                if loginIntroStage == 4 { logoRevealProgress = true }
             }
         }
     }

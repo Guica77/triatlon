@@ -13,8 +13,8 @@ La secuencia se reproduce siempre que se muestra la pantalla de acceso y dura ap
    - «¿Otra app difícil de manejar?»
    - «¿No sabes ni por dónde empezar?»
 2. A continuación aparece el cierre: `Para eso está…`.
-3. La marca `TriWaveX` se revela de izquierda a derecha en el centro de la pantalla y se mantiene brevemente.
-4. La misma marca se desplaza hasta el encabezado de la pantalla de acceso. Solo al completar ese movimiento se incorporan el lema, selector de cuenta, credenciales, acceso con Apple y enlaces; cada bloque entra una vez, con un desfase corto, opacidad y un desplazamiento vertical mínimo.
+3. El símbolo de tres trazos de TriWaveX aparece centrado en blanco y negro, con `TriWaveX` grande encima, y se mantiene brevemente.
+4. El símbolo monocromo desaparece, pero el texto `TriWaveX` permanece centrado. Ese mismo texto sube lentamente desde esa posición hasta el encabezado de la pantalla de acceso. Solo al completar ese movimiento se incorporan el lema, selector de cuenta, credenciales, acceso con Apple y enlaces; cada bloque entra una vez, con un desfase corto, opacidad y un desplazamiento vertical mínimo.
 
 La entrada utiliza curvas existentes de TriWaveX, transforma y opacidad; no anima medidas ni posiciones de layout. La interacción queda disponible al terminar la secuencia.
 
