@@ -419,6 +419,7 @@ struct RootView: View {
                     }
                 }
                 .frame(height: 76)
+                .scaleEffect(firstIntroWordmarkScale)
             }
         }
         .frame(maxWidth: .infinity, minHeight: 76)
@@ -438,6 +439,13 @@ struct RootView: View {
             Text("TriWave").foregroundStyle(Color.primary)
             Text("X").foregroundStyle(Color.triWaveXAqua)
         }
+    }
+
+    private var firstIntroWordmarkScale: CGFloat {
+        guard !hasSeenLoginIntro, (4..<7).contains(loginIntroStage), !reduceMotion else {
+            return 1
+        }
+        return 1.24
     }
 
     private var loginIntroCopy: [String] {

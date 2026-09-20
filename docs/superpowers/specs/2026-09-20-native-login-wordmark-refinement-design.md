@@ -9,9 +9,9 @@ Dar más presencia a TriWaveX al terminar el preonboarding y al volver a la pant
 Después de las tres preguntas existentes —escritas, mantenidas y borradas a un ritmo más lento para que se lean con calma— la secuencia será:
 
 1. Mostrar `Para eso está…` centrado durante una pausa de lectura ligeramente más larga que la actual.
-2. Fundir esa frase y revelar `TriWaveX` centrado con el subtítulo `Entrena con una dirección clara` debajo.
+2. Fundir esa frase y revelar `TriWaveX` centrado, a un tamaño más expresivo, con el subtítulo `Entrena con una dirección clara` debajo.
 3. Mantener la composición brevemente.
-4. Fundir el subtítulo, conservar el wordmark y elevarlo con suavidad hasta la posición del encabezado actual.
+4. Fundir el subtítulo al comenzar el movimiento, conservar el wordmark y elevarlo con suavidad mientras reduce hasta el tamaño exacto del encabezado actual.
 5. Revelar el login existente sin modificar su estructura.
 
 No habrá halo, símbolo, fondo azul ni una animación repetitiva. `TriWave` conserva el color principal y solo la `X` usa el azul de TriWaveX.
