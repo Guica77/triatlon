@@ -78,6 +78,17 @@ final class SubscriptionFinishGateTests: XCTestCase {
         await assertDoesNotFinish(nil)
     }
 
+    func testCheckoutUsesTheSignedInAccountAsAppleAccountToken() {
+        XCTAssertEqual(
+            SubscriptionAccountToken.uuid(for: "11111111-1111-4111-8111-111111111111"),
+            UUID(uuidString: "11111111-1111-4111-8111-111111111111")
+        )
+    }
+
+    func testCheckoutRejectsAnInvalidAccountIdentifier() {
+        XCTAssertNil(SubscriptionAccountToken.uuid(for: "not-a-user-id"))
+    }
+
     private func assertDoesNotFinish(
         _ result: NativeSubscriptionResult?,
         file: StaticString = #filePath,

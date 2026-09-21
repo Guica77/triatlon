@@ -4,6 +4,12 @@ import StoreKit
 import SwiftUI
 import WebKit
 
+enum SubscriptionAccountToken {
+    nonisolated static func uuid(for userID: String) -> UUID? {
+        UUID(uuidString: userID)
+    }
+}
+
 struct NativeSubscriptionResult: Decodable, Equatable {
     let accepted: Bool
     let duplicate: Bool
@@ -77,8 +83,12 @@ struct SubscriptionFinishGate {
 
     func purchase(_ product: Product) async -> NativeSubscriptionResult? {
         state = .purchasing
+        guard let accountToken = SubscriptionAccountToken.uuid(for: expectedUserID) else {
+            state = .failed("No se ha podido asociar esta compra a tu cuenta.")
+            return nil
+        }
         do {
-            switch try await product.purchase() {
+            switch try await product.purchase(options: [.appAccountToken(accountToken)]) {
             case .success(let verification):
                 guard case .verified(let transaction) = verification else {
                     state = .failed("Apple no ha podido verificar esta compra.")
