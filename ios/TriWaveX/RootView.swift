@@ -405,20 +405,9 @@ struct RootView: View {
                     .foregroundStyle(.primary)
                 .transition(.opacity)
             } else {
-                ZStack {
-                    triWaveXWordmark
-                        .font(.system(size: 34, weight: .black, design: .rounded))
-
-                    if loginIntroStage < 7 {
-                        Text("Entrena con una dirección clara")
-                            .font(.system(size: 17))
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                            .offset(y: 31)
-                            .transition(.opacity)
-                    }
-                }
-                .frame(height: 76)
+                triWaveXWordmark
+                    .font(.system(size: 34, weight: .black, design: .rounded))
+                    .frame(height: 76)
                 .scaleEffect(firstIntroWordmarkScale)
             }
         }
@@ -442,10 +431,10 @@ struct RootView: View {
     }
 
     private var firstIntroWordmarkScale: CGFloat {
-        guard !hasSeenLoginIntro, (4..<7).contains(loginIntroStage), !reduceMotion else {
+        guard (4..<7).contains(loginIntroStage), !reduceMotion else {
             return 1
         }
-        return 1.24
+        return 1.58
     }
 
     private var loginIntroCopy: [String] {
@@ -468,7 +457,7 @@ struct RootView: View {
         if hasSeenLoginIntro {
             liftsLoginTitle = true
             loginIntroStage = 4
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_450))
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_650))
             guard !Task.isCancelled else { return }
             withAnimation(reduceMotion ? .easeOut(duration: 0.12) : TriWaveXMotion.loginTitleLift) { loginIntroStage = 7 }
             for stage in 8...10 {
@@ -481,14 +470,24 @@ struct RootView: View {
 
         liftsLoginTitle = false
         loginIntroStage = 0
-        let delays = [4600, 4600, 4600, 1800, 1700, 220, 700, 420, 350, 350]
-        for (index, delay) in delays.enumerated() {
+        let phraseDelays = [4600, 4600, 4600, 1800]
+        for (index, delay) in phraseDelays.enumerated() {
             try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : delay))
             guard !Task.isCancelled else { return }
             withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
                 loginIntroStage = index + 1
                 if loginIntroStage == 4 { liftsLoginTitle = true }
             }
+        }
+        try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_900))
+        guard !Task.isCancelled else { return }
+        withAnimation(reduceMotion ? .easeOut(duration: 0.12) : TriWaveXMotion.loginTitleLift) {
+            loginIntroStage = 7
+        }
+        for stage in 8...10 {
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 320))
+            guard !Task.isCancelled else { return }
+            withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) { loginIntroStage = stage }
         }
         hasSeenLoginIntro = true
     }
