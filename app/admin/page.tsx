@@ -58,7 +58,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-bg-app">
-      <Link href="/admin/reports" className="underline">Revisar denuncias del chat</Link>
+      <div className="flex gap-4 px-4 pt-3 text-sm font-semibold text-swim"><Link href="/admin/discounts">Gestionar descuentos</Link><Link href="/admin/reports">Revisar denuncias del chat</Link></div>
       {/* Admin header — standalone, no app chrome */}
       <header className="sticky top-0 z-50 border-b border-border-default bg-bg-elevated/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
