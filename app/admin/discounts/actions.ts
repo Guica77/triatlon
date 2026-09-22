@@ -62,7 +62,41 @@ export async function updateDiscountCampaignStatus(form: FormData) {
   const status = formText(form, 'status', 16)
   if (!/^[0-9a-f-]{36}$/i.test(id) || !STATUSES.has(status)) throw new Error('Solicitud inválida')
   const db = createAdminClient() as any
+  if (status === 'active') {
+    const { data: campaign, error: readError } = await db
+      .from('admin_discount_campaigns')
+      .select('app_store_offer_reference')
+      .eq('id', id)
+      .maybeSingle()
+    if (readError || !campaign?.app_store_offer_reference?.trim()) {
+      throw new Error('Añade primero la referencia de la oferta de App Store Connect')
+    }
+  }
   const { error } = await db.from('admin_discount_campaigns').update({ status, updated_at: new Date().toISOString() }).eq('id', id)
   if (error) throw new Error('No se pudo actualizar la campaña')
+  revalidatePath('/admin/discounts')
+}
+
+export async function createBaseDiscountCampaigns() {
+  if (!(await checkAdminAccess())) throw new Error('No autorizado')
+  const { createClient } = await import('@/lib/supabase/server')
+  const sessionClient = await createClient()
+  const { data: { user } } = await sessionClient.auth.getUser()
+  if (!user) throw new Error('No autorizado')
+
+  const db = createAdminClient() as any
+  const startsAt = new Date().toISOString()
+  const rows = [25, 50, 100].map((discount) => ({
+    title: `Oferta base ${discount}%`,
+    code: `TRIWAVE${discount}`,
+    membership: 'athlete',
+    discount_percent: discount,
+    max_redemptions: 1000,
+    starts_at: startsAt,
+    status: 'draft',
+    created_by: user.id,
+  }))
+  const { error } = await db.from('admin_discount_campaigns').upsert(rows, { onConflict: 'code', ignoreDuplicates: true })
+  if (error) throw new Error('No se pudieron preparar las campañas')
   revalidatePath('/admin/discounts')
 }

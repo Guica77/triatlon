@@ -4,7 +4,7 @@ import { TicketPercent, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkAdminAccess } from '@/app/admin/actions'
-import { createDiscountCampaign, updateDiscountCampaignStatus } from './actions'
+import { createBaseDiscountCampaigns, createDiscountCampaign, updateDiscountCampaignStatus } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,8 +36,8 @@ export default async function AdminDiscountsPage() {
     </header>
     <main className="mx-auto grid max-w-5xl gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_360px]">
       <section className="space-y-4">
-        <div className="rounded-2xl border border-border-default bg-bg-card p-5"><div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-bike" /><div><h1 className="text-xl font-bold">Campañas privadas</h1><p className="mt-1 text-sm text-text-muted">Crea y controla códigos. Para aplicarlos en iPhone, crea la oferta equivalente en App Store Connect y anota su referencia aquí.</p></div></div></div>
-        {campaigns.length === 0 ? <div className="rounded-2xl border border-dashed border-border-default p-8 text-center text-sm text-text-muted">Aún no hay campañas creadas.</div> : campaigns.map((campaign) => {
+        <div className="rounded-2xl border border-border-default bg-bg-card p-5"><div className="flex items-start gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 text-bike" /><div className="min-w-0 flex-1"><h1 className="text-xl font-bold">Campañas privadas</h1><p className="mt-1 text-sm text-text-muted">Crea y controla códigos. Para aplicarlos en iPhone, crea la oferta equivalente en App Store Connect y anota su referencia aquí.</p><form action={createBaseDiscountCampaigns} className="mt-4"><button className="rounded-lg border border-border-default px-3 py-2 text-sm font-bold text-text-primary">Preparar 25%, 50% y 100%</button></form></div></div></div>
+        {campaigns.length === 0 ? <div className="rounded-2xl border border-dashed border-border-default p-8 text-center text-sm text-text-muted">Aún no hay campañas creadas. Prepara las tres campañas base y después vincula cada una a su oferta de Apple.</div> : campaigns.map((campaign) => {
           const expired = campaign.ends_at && new Date(campaign.ends_at) < now
           return <article key={campaign.id} className="rounded-2xl border border-border-default bg-bg-card p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><p className="font-bold">{campaign.title}</p><p className="mt-1 font-mono text-sm text-swim">{campaign.code}</p></div><span className="rounded-full bg-bg-hover px-3 py-1 text-xs font-bold">{expired ? 'caducada' : campaign.status}</span></div><dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-4"><div><dt className="text-text-muted">Plan</dt><dd className="font-semibold">{campaign.membership === 'athlete' ? 'Atleta' : 'Entrenador'}</dd></div><div><dt className="text-text-muted">Descuento</dt><dd className="font-semibold">{campaign.discount_percent}%</dd></div><div><dt className="text-text-muted">Usos</dt><dd className="font-semibold">{campaign.redemption_count} / {campaign.max_redemptions}</dd></div><div><dt className="text-text-muted">Apple</dt><dd className="font-semibold">{campaign.app_store_offer_reference || 'Pendiente'}</dd></div></dl><form action={updateDiscountCampaignStatus} className="mt-4 flex gap-2"><input type="hidden" name="id" value={campaign.id} /><select name="status" defaultValue={campaign.status} className={inputClass}><option value="draft">Borrador</option><option value="active">Activa</option><option value="paused">Pausada</option><option value="expired">Caducada</option></select><button className="rounded-lg bg-text-primary px-4 py-2 text-sm font-bold text-bg-app">Guardar</button></form></article>
         })}
