@@ -129,7 +129,7 @@ struct NativeProfileView: View {
                 case .loaded(let profile): profileContent(profile)
                 }
             }
-            .navigationTitle("Perfil")
+            .navigationTitle("More")
             .navigationBarTitleDisplayMode(.large)
             .task { guard !hasLoaded else { return }; hasLoaded = true; await model.load() }
             .refreshable { await model.load() }
@@ -143,6 +143,8 @@ struct NativeProfileView: View {
                     Text(String(profile.athlete.firstName.prefix(1)).uppercased()).font(.title2.bold()).foregroundStyle(.white).frame(width: 54, height: 54).background(Color.triWaveXAqua, in: Circle())
                     VStack(alignment: .leading, spacing: 3) { Text([profile.athlete.firstName, profile.athlete.lastName].compactMap { $0 }.joined(separator: " ")).font(.headline); Text(profile.athlete.level ?? "Triatleta").font(.subheadline).foregroundStyle(.secondary) }
                 }.padding(.vertical, 5)
+            } header: {
+                Text("Perfil")
             }
             Section("Preparación de hoy") {
                 if let recovery = profile.recovery { HStack { metric("Readiness", value: recovery.readiness.map { "\(Int($0))" } ?? "—"); Spacer(); metric("HRV", value: recovery.hrv.map { "\(Int($0)) ms" } ?? "—"); Spacer(); metric("Sueño", value: recovery.sleepHours.map { String(format: "%.1f h", $0) } ?? "—") } }
@@ -244,6 +246,16 @@ struct NativeProfileView: View {
                 } label: {
                     Label("Guía rápida", systemImage: "questionmark.circle")
                 }
+                NavigationLink {
+                    NativeFeedbackView(origin: origin, store: store)
+                } label: {
+                    Label("Enviar feedback", systemImage: "bubble.left.and.bubble.right")
+                }
+                NavigationLink {
+                    TriWaveXSupportView()
+                } label: {
+                    Label("Soporte, reembolsos y cancelación", systemImage: "lifepreserver")
+                }
             }
         }
         .listStyle(.insetGrouped)
@@ -261,6 +273,130 @@ struct NativeProfileView: View {
 
     private func metric(_ label: String, value: String) -> some View { VStack(alignment: .leading, spacing: 2) { Text(value).font(.headline.monospacedDigit()); Text(label).font(.caption).foregroundStyle(.secondary) } }
     private func connectionRow(_ name: String, connected: Bool, icon: String) -> some View { HStack { Label(name, systemImage: icon); Spacer(); Text(connected ? "Conectado" : "Disponible").font(.caption.weight(.semibold)).foregroundStyle(connected ? .green : .secondary) } }
+}
+
+private struct NativeFeedbackView: View {
+    enum Kind: String, CaseIterable, Identifiable {
+        case idea = "Idea"
+        case issue = "Problema"
+        case improvement = "Mejorar una función"
+        var id: String { rawValue }
+        var symbol: String {
+            switch self {
+            case .idea: "lightbulb"
+            case .issue: "exclamationmark.bubble"
+            case .improvement: "sparkles"
+            }
+        }
+    }
+
+    let origin: URL
+    let store: WKWebsiteDataStore
+    @State private var kind: Kind = .idea
+    @State private var rating = 5
+    @State private var message = ""
+    @State private var sending = false
+    @State private var result: String?
+
+    var body: some View {
+        Form {
+            Section("¿Qué quieres contarnos?") {
+                Picker("Tipo", selection: $kind) {
+                    ForEach(Kind.allCases) { option in
+                        Label(option.rawValue, systemImage: option.symbol).tag(option)
+                    }
+                }
+                .pickerStyle(.inline)
+            }
+            Section("Tu valoración") {
+                Stepper("\(rating) de 5", value: $rating, in: 1...5)
+            }
+            Section("Mensaje") {
+                TextEditor(text: $message)
+                    .frame(minHeight: 140)
+                    .accessibilityLabel("Describe tu feedback")
+                Text("No adjuntamos entrenamientos, salud, ubicación ni mensajes privados. Comparte solo lo que quieras.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            Section {
+                Button {
+                    Task { await send() }
+                } label: {
+                    if sending { HStack { Spacer(); ProgressView(); Text("Enviando…"); Spacer() } }
+                    else { Label("Enviar feedback", systemImage: "paperplane.fill") }
+                }
+                .disabled(sending || message.trimmingCharacters(in: .whitespacesAndNewlines).count < 4)
+            }
+            if let result {
+                Section { Text(result).foregroundStyle(result.hasPrefix("Gracias") ? .green : .red) }
+            }
+        }
+        .navigationTitle("Feedback")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func send() async {
+        sending = true
+        defer { sending = false }
+        do {
+            try await NativeFeedbackClient(origin: origin, store: store).submit(kind: kind.rawValue, rating: rating, message: message)
+            message = ""
+            result = "Gracias. Tu feedback ya está en manos del equipo."
+        } catch {
+            result = "No se ha podido enviar ahora. Inténtalo de nuevo."
+        }
+    }
+}
+
+private struct NativeFeedbackClient {
+    let origin: URL
+    let store: WKWebsiteDataStore
+
+    func submit(kind: String, rating: Int, message: String) async throws {
+        guard Configuration.allows(origin, origin: origin),
+              let url = URL(string: "/api/native/feedback", relativeTo: origin)?.absoluteURL else { throw URLError(.badURL) }
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 30
+        request.httpShouldHandleCookies = false
+        request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["kind": kind, "rating": rating, "message": message])
+        let cookies = await withCheckedContinuation { continuation in store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) } }
+        if !cookies.isEmpty { request.setValue(cookies.map { "\($0.name)=\($0.value)" }.joined(separator: "; "), forHTTPHeaderField: "Cookie") }
+        let (_, response) = try await URLSession(configuration: .ephemeral).data(for: request)
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else { throw URLError(.badServerResponse) }
+    }
+}
+
+private struct TriWaveXSupportView: View {
+    private let subscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
+    private let refundURL = URL(string: "https://reportaproblem.apple.com/")!
+
+    var body: some View {
+        List {
+            Section {
+                Link("Gestionar o cancelar en App Store", destination: subscriptionsURL)
+                Link("Solicitar un reembolso a Apple", destination: refundURL)
+            } header: {
+                Text("Compras y cancelación")
+            } footer: {
+                Text("Las compras se cobran y se reembolsan mediante Apple. Eliminar TriWaveX no cancela una suscripción activa: hazlo primero desde el enlace de App Store.")
+            }
+            Section("Soporte") {
+                Link("Escribir a soporte", destination: URL(string: "mailto:soporte@triwavex.com?subject=Ayuda%20TriWaveX")!)
+                NavigationLink { TriWaveXQuickHelpView() } label: { Text("Guía rápida") }
+            }
+            Section("Seguridad y privacidad") {
+                Text("Face ID protege el acceso local en este iPhone. Tus datos deportivos se usan para preparar tu entrenamiento.")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .navigationTitle("Soporte")
+        .navigationBarTitleDisplayMode(.inline)
+    }
 }
 
 private struct TriWaveXQuickHelpView: View {

@@ -26,7 +26,7 @@ struct GuidedTourRequest: Sendable {
     let request: GuidedTourRequest
 
     private let defaults: UserDefaults
-    private let version = 1
+    private let version = 2
 
     init(request: GuidedTourRequest, defaults: UserDefaults = .standard) {
         self.request = request
@@ -42,11 +42,11 @@ struct GuidedTourRequest: Sendable {
     var title: String {
         let name = request.displayName.map { "\($0), " } ?? ""
         switch (request.role, step) {
-        case (.athlete, 0): return "\(name)aquí empieza tu día"
-        case (.athlete, 1): return "Tu semana y tu apoyo"
-        case (.athlete, 2): return "\(name)ya estás listo"
+        case (.athlete, 0): return "\(name)este es tu día"
+        case (.athlete, 1): return "Tu plan se adapta contigo"
+        case (.athlete, 2): return "\(name)tu espacio, a tu manera"
         case (.coach, 0): return "\(name)este es tu equipo"
-        case (.coach, 1): return "Invita a tu primer atleta"
+        case (.coach, 1): return "Solicitudes, planes y conversación"
         case (.coach, 2): return "\(name)tu espacio está preparado"
         default: return "Descubre TriWaveX"
         }
@@ -54,12 +54,12 @@ struct GuidedTourRequest: Sendable {
 
     var message: String {
         switch (request.role, step) {
-        case (.athlete, 0): return "En Hoy encontrarás la sesión y la prioridad de cada jornada."
-        case (.athlete, 1): return "Consulta tu Plan y abre Chat cuando necesites ayuda de tu entrenador o de la IA."
-        case (.athlete, 2): return "Abre tu primera sesión. Te acompañaremos sin interrumpir tu entrenamiento."
+        case (.athlete, 0): return "En Hoy verás la sesión, la prioridad y el margen para mover entrenamientos cuando la vida cambie."
+        case (.athlete, 1): return "Tu plan combina tus horas disponibles, tu objetivo y tus datos reales. En Chat puedes pedir ayuda o hablar con tu entrenador."
+        case (.athlete, 2): return "En More tienes perfil, seguridad, privacidad, soporte y feedback. Abre tu primera sesión cuando quieras."
         case (.coach, 0): return "Consulta el estado de tus atletas desde un único lugar."
-        case (.coach, 1): return "Añade un atleta cuando quieras; la invitación solo se envía cuando tú confirmas."
-        case (.coach, 2): return "Revisa planes y usa Chat para acompañar a tu equipo."
+        case (.coach, 1): return "Cada solicitud debe ser clara para ambos: objetivo, disponibilidad y mensaje. Acepta o declina antes de compartir el plan."
+        case (.coach, 2): return "Revisa planes, explica cada ajuste y usa Chat para acompañar a tu equipo sin perder el contexto."
         default: return ""
         }
     }
@@ -68,7 +68,7 @@ struct GuidedTourRequest: Sendable {
         switch (request.role, step) {
         case (.athlete, 0): "house.fill"
         case (.athlete, 1): "calendar.badge.clock"
-        case (.athlete, 2): "figure.run"
+        case (.athlete, 2): "ellipsis.circle"
         case (.coach, 0): "person.2.fill"
         case (.coach, 1): "person.badge.plus"
         case (.coach, 2): "checkmark.seal.fill"
@@ -96,11 +96,11 @@ struct GuidedTourRequest: Sendable {
         isPresented = false
     }
 
-    private static func completionKey(for request: GuidedTourRequest, version: Int = 1) -> String {
+    private static func completionKey(for request: GuidedTourRequest, version: Int = 2) -> String {
         "triwavex.guided-onboarding.v\(version).\(request.role.rawValue).\(request.userID)"
     }
 
-    private static func progressKey(for request: GuidedTourRequest, version: Int = 1) -> String {
+    private static func progressKey(for request: GuidedTourRequest, version: Int = 2) -> String {
         completionKey(for: request, version: version) + ".step"
     }
 }

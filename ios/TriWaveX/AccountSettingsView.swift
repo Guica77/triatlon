@@ -31,12 +31,12 @@ struct AccountSettingsView: View {
             Section("Sesión") { Button("Cerrar sesión", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) { showSignOut = true }.disabled(model.loading) }
             Section("Zona de riesgo") {
                 if let date = model.scheduledFor { Text("Tu cuenta se eliminará el \(formatted(date)).").foregroundStyle(.secondary); Button("Cancelar eliminación") { Task { _ = await model.perform("cancelDeletion") } }.disabled(model.loading) }
-                else { Button("Eliminar cuenta", systemImage: "trash", role: .destructive) { showDelete = true }.disabled(model.loading); Text("Tu perfil, entrenamientos y chats se eliminarán dentro de 30 días. Podrás cancelar la solicitud antes de esa fecha.").font(.footnote).foregroundStyle(.secondary) }
+                else { Button("Eliminar cuenta", systemImage: "trash", role: .destructive) { showDelete = true }.disabled(model.loading); Text("Tu perfil, entrenamientos y chats se eliminarán dentro de 30 días. Podrás cancelar la solicitud antes de esa fecha. Si tienes una suscripción de Apple, elimínala o gestiónala también en Ajustes de tu Apple ID: borrar la cuenta no la cancela.").font(.footnote).foregroundStyle(.secondary) }
             }
             if let message = model.message { Text(message).foregroundStyle(.red).font(.footnote) }
         }.navigationTitle("Cuenta").task { await model.load() }
         .confirmationDialog("¿Cerrar sesión?", isPresented: $showSignOut, titleVisibility: .visible) { Button("Cerrar sesión", role: .destructive) { Task { if await model.perform("signout") { onSessionEnded() } } }; Button("Cancelar", role: .cancel) {} } message: { Text("Tus datos y entrenamientos se conservarán.") }
-        .alert("¿Programar eliminación?", isPresented: $showDelete) { TextField("Escribe ELIMINAR", text: $confirmation); Button("Programar", role: .destructive) { Task { if await model.perform("scheduleDeletion") { onSessionEnded() } } }.disabled(confirmation != "ELIMINAR"); Button("Cancelar", role: .cancel) {} } message: { Text("La cuenta se eliminará dentro de 30 días. Puedes cancelar la solicitud antes de esa fecha.") }
+        .alert("¿Programar eliminación?", isPresented: $showDelete) { TextField("Escribe ELIMINAR", text: $confirmation); Button("Programar", role: .destructive) { Task { if await model.perform("scheduleDeletion") { onSessionEnded() } } }.disabled(confirmation != "ELIMINAR"); Button("Cancelar", role: .cancel) {} } message: { Text("La cuenta se eliminará dentro de 30 días. Puedes cancelar la solicitud antes de esa fecha. Esta acción no cancela compras o suscripciones de Apple.") }
     }
     private func formatted(_ value: String) -> String { guard let date = ISO8601DateFormatter().date(from: value) else { return "30 días" }; return date.formatted(date: .long, time: .omitted) }
 }
