@@ -44,9 +44,14 @@ struct RootView: View {
     init(origin: URL) {
         _session = State(initialValue: SessionModel(origin: origin))
         let defaults = UserDefaults.standard
+        let hasSeenIntro = defaults.bool(forKey: "triwavex.login-intro.seen.v1")
         _email = State(initialValue: defaults.string(forKey: "triwavex.login.email") ?? "")
         _role = State(initialValue: Role(rawValue: defaults.string(forKey: "triwavex.login.role") ?? "") ?? .athlete)
         _registrationRole = State(initialValue: Role(rawValue: defaults.string(forKey: "triwavex.registration.activeRole") ?? ""))
+        // Returning users must never render a single frame of the first-run
+        // phrase sequence before the compact wordmark takes over.
+        _loginIntroStage = State(initialValue: hasSeenIntro ? 4 : 0)
+        _liftsLoginTitle = State(initialValue: hasSeenIntro)
         if defaults.bool(forKey: "triwavex.coachCheckout.pending") {
             _coachCheckout = State(initialValue: CoachCheckout(
                 destination: defaults.string(forKey: "triwavex.coachCheckout.destination") ?? "/coach/dashboard",
