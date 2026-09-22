@@ -35,6 +35,8 @@
     <array><string>strava</string></array>
 	<key>NSHealthShareUsageDescription</key>
 	<string>TriWaveX lee sueño, VFC, frecuencia en reposo y entrenamientos para mostrar tu recuperación y entrenar con tus datos reales.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>TriWaveX guarda tus entrenamientos y métricas de actividad en Salud para mantener tu historial sincronizado y adaptar tu plan.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>TriWaveX usa Face ID solo para proteger el acceso local a tu cuenta en este iPhone.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
