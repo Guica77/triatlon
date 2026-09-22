@@ -237,9 +237,16 @@ final class NativePlanModel {
 }
 
 struct NativePlanView: View {
+    private enum CalendarDisplay: String, CaseIterable, Identifiable {
+        case week = "Semana"
+        case month = "Mes"
+        var id: Self { self }
+    }
+
     @Bindable var model: NativePlanModel
     @State private var selectedDate = Date()
     @State private var weekStart = Calendar.current.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
+    @State private var display: CalendarDisplay = .week
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -283,8 +290,18 @@ struct NativePlanView: View {
         ScrollView {
             LazyVStack(spacing: 16) {
                 planHeader(plan)
-                weekPicker
-                dayPicker(plan)
+                Picker("Calendario", selection: $display) {
+                    ForEach(CalendarDisplay.allCases) { value in Text(value.rawValue).tag(value) }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityHint("Cambia entre la vista semanal y mensual")
+                if display == .week {
+                    weekPicker
+                    dayPicker(plan)
+                } else {
+                    monthPicker
+                    monthGrid(plan)
+                }
                 workoutsSection(plan)
                 if let message = model.error { Label(message, systemImage: "exclamationmark.triangle.fill").font(.footnote).foregroundStyle(.red).frame(maxWidth: .infinity, alignment: .leading) }
             }
@@ -331,6 +348,56 @@ struct NativePlanView: View {
         }
     }
 
+    private var monthPicker: some View {
+        HStack {
+            Button { changeMonth(-1) } label: { Image(systemName: "chevron.left").frame(width: 44, height: 44) }
+            Spacer()
+            Button(selectedDate.formatted(.dateTime.month(.wide).year())) {
+                withAnimation(TriWaveXMotion.selection(reduced: reduceMotion)) { selectedDate = Date() }
+            }
+            .font(.subheadline.weight(.semibold))
+            Spacer()
+            Button { changeMonth(1) } label: { Image(systemName: "chevron.right").frame(width: 44, height: 44) }
+        }
+    }
+
+    private func monthGrid(_ plan: NativePlan) -> some View {
+        let columns = Array(repeating: GridItem(.flexible(), spacing: 5), count: 7)
+        return VStack(spacing: 8) {
+            LazyVGrid(columns: columns, spacing: 6) {
+                ForEach(Calendar.current.veryShortWeekdaySymbols, id: \.self) { weekday in
+                    Text(weekday).font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
+                }
+                ForEach(monthDates, id: \.self) { date in
+                    let isCurrentMonth = Calendar.current.isDate(date, equalTo: selectedDate, toGranularity: .month)
+                    let selected = Calendar.current.isDate(date, inSameDayAs: selectedDate)
+                    let sessions = workouts(on: date, in: plan)
+                    Button {
+                        withAnimation(TriWaveXMotion.selection(reduced: reduceMotion)) { selectedDate = date }
+                    } label: {
+                        VStack(spacing: 3) {
+                            Text(date.formatted(.dateTime.day()))
+                                .font(.subheadline.weight(selected ? .bold : .medium))
+                            HStack(spacing: 2) {
+                                ForEach(Array(sessions.prefix(3).enumerated()), id: \.offset) { _, workout in
+                                    Circle().fill(sportColor(workout.sport)).frame(width: 4, height: 4)
+                                }
+                            }
+                            .frame(height: 5)
+                        }
+                        .foregroundStyle(monthForegroundStyle(selected: selected, isCurrentMonth: isCurrentMonth))
+                        .frame(maxWidth: .infinity, minHeight: 43)
+                        .background(selected ? Color.triWaveXAqua : Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(monthAccessibilityLabel(for: date, workouts: sessions))
+                }
+            }
+            Text("Los puntos indican tus sesiones por deporte. Toca un día para ver o adaptar el entrenamiento.")
+                .font(.footnote).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
     @ViewBuilder private func workoutsSection(_ plan: NativePlan) -> some View {
         let dayWorkouts = workouts(on: selectedDate, in: plan)
         VStack(alignment: .leading, spacing: 10) {
@@ -362,8 +429,24 @@ struct NativePlanView: View {
     }
 
     private var weekDates: [Date] { (0..<7).compactMap { Calendar.current.date(byAdding: .day, value: $0, to: weekStart) } }
+    private var monthDates: [Date] {
+        let calendar = Calendar.current
+        guard let interval = calendar.dateInterval(of: .month, for: selectedDate),
+              let grid = calendar.dateInterval(of: .weekOfYear, for: interval.start) else { return [] }
+        return (0..<42).compactMap { calendar.date(byAdding: .day, value: $0, to: grid.start) }
+    }
     private func workouts(on date: Date, in plan: NativePlan) -> [NativePlan.Workout] { let key = Self.dayFormatter.string(from: date); return plan.workouts.filter { $0.date == key } }
     private func changeWeek(_ offset: Int) { withAnimation(TriWaveXMotion.selection(reduced: reduceMotion)) { weekStart = Calendar.current.date(byAdding: .day, value: offset * 7, to: weekStart) ?? weekStart; selectedDate = weekStart } }
+    private func changeMonth(_ offset: Int) { withAnimation(TriWaveXMotion.selection(reduced: reduceMotion)) { selectedDate = Calendar.current.date(byAdding: .month, value: offset, to: selectedDate) ?? selectedDate } }
+    private func monthAccessibilityLabel(for date: Date, workouts: [NativePlan.Workout]) -> String {
+        let sports = workouts.map(\.sport).joined(separator: ", ")
+        return workouts.isEmpty ? date.formatted(date: .complete, time: .omitted) : "\(date.formatted(date: .complete, time: .omitted)), \(workouts.count) sesiones: \(sports)"
+    }
+    private func monthForegroundStyle(selected: Bool, isCurrentMonth: Bool) -> AnyShapeStyle {
+        if selected { return AnyShapeStyle(Color.white) }
+        if isCurrentMonth { return AnyShapeStyle(Color.primary) }
+        return AnyShapeStyle(.tertiary)
+    }
     private static let dayFormatter: DateFormatter = { let value = DateFormatter(); value.calendar = Calendar(identifier: .gregorian); value.locale = Locale(identifier: "en_US_POSIX"); value.dateFormat = "yyyy-MM-dd"; return value }()
     private func sportIcon(_ sport: String) -> String { switch sport { case "natacion": "figure.pool.swim"; case "ciclismo": "bicycle"; case "carrera": "figure.run"; case "fuerza": "dumbbell"; default: "figure.mixed.cardio" } }
     private func sportColor(_ sport: String) -> Color { switch sport { case "natacion": .triWaveXSwim; case "ciclismo": .triWaveXBike; case "carrera": .green; case "fuerza": .purple; default: .secondary } }

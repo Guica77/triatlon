@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import StoreKit
 import SwiftUI
+import UIKit
 import WebKit
 
 enum SubscriptionAccountToken {
@@ -483,14 +484,99 @@ private struct NativePaymentReviewView: View {
                 .padding(16)
                 .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 Spacer()
-                Button(action: onConfirm) { Label(eligibleForIntro ? "Empezar 7 días gratis" : "Confirmar suscripción", systemImage: "lock.fill") }
-                    .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
-                    .disabled(isBusy)
+                SlideToConfirm(
+                    title: eligibleForIntro ? "Desliza para empezar 7 días gratis" : "Desliza para confirmar",
+                    isDisabled: isBusy,
+                    onConfirmed: onConfirm
+                )
             }
             .padding(20)
             .navigationTitle("Confirmar pago")
             .navigationBarTitleDisplayMode(.inline)
         }
         .presentationDetents([.medium, .large])
+    }
+}
+
+private struct SlideToConfirm: View {
+    let title: String
+    let isDisabled: Bool
+    let onConfirmed: () -> Void
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var offset: CGFloat = 0
+    @State private var hasConfirmed = false
+
+    var body: some View {
+        GeometryReader { proxy in
+            let knobSize: CGFloat = 52
+            let horizontalPadding: CGFloat = 6
+            let maximumOffset = max(0, proxy.size.width - knobSize - horizontalPadding * 2)
+
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color(uiColor: .tertiarySystemFill))
+
+                Text(hasConfirmed || isDisabled ? "Preparando confirmación de Apple…" : title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 56)
+                    .lineLimit(1)
+
+                Circle()
+                    .fill(isDisabled || hasConfirmed ? Color.secondary : Color.triWaveXAqua)
+                    .frame(width: knobSize, height: knobSize)
+                    .overlay {
+                        Image(systemName: hasConfirmed ? "checkmark" : "chevron.right")
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(.white)
+                    }
+                    .offset(x: horizontalPadding + offset)
+                    .shadow(color: .black.opacity(0.16), radius: 6, y: 3)
+            }
+            .contentShape(Capsule())
+            .gesture(
+                DragGesture(minimumDistance: 2)
+                    .onChanged { value in
+                        guard !isDisabled, !hasConfirmed else { return }
+                        offset = min(max(0, value.translation.width), maximumOffset)
+                    }
+                    .onEnded { _ in
+                        guard !isDisabled, !hasConfirmed else { return }
+                        if maximumOffset > 0, offset >= maximumOffset * 0.82 {
+                            complete(maximumOffset: maximumOffset)
+                        } else {
+                            withAnimation(reduceMotion ? .linear(duration: 0.1) : .spring(response: 0.34, dampingFraction: 0.78)) {
+                                offset = 0
+                            }
+                        }
+                    }
+            )
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(title)
+            .accessibilityHint("Desliza hasta el final o usa la acción Confirmar. Apple mostrará la confirmación final.")
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction(named: Text("Confirmar")) {
+                guard !isDisabled, !hasConfirmed else { return }
+                complete(maximumOffset: maximumOffset)
+            }
+        }
+        .frame(height: 64)
+        .opacity(isDisabled && !hasConfirmed ? 0.72 : 1)
+        .onChange(of: isDisabled) { _, busy in
+            guard !busy else { return }
+            hasConfirmed = false
+            offset = 0
+        }
+    }
+
+    private func complete(maximumOffset: CGFloat) {
+        withAnimation(reduceMotion ? .linear(duration: 0.1) : .easeOut(duration: 0.18)) {
+            offset = maximumOffset
+            hasConfirmed = true
+        }
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        onConfirmed()
     }
 }
