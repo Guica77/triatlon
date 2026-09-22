@@ -97,6 +97,7 @@ struct NativeProfileClient {
 }
 
 struct NativeProfileView: View {
+    @Environment(AppLock.self) private var appLock
     @Bindable var model: NativeProfileModel
     let origin: URL
     let store: WKWebsiteDataStore
@@ -213,6 +214,8 @@ struct NativeProfileView: View {
                 Text("Dispositivos y conexiones")
             } footer: { Text("COROS abre un consentimiento seguro. Suunto está en revisión y permite usar Strava mientras tanto. Garmin y Polar muestran el estado de sus conexiones. Las marcas sin acceso directo usan Strava, Salud o archivos FIT/GPX.") }
             Section("Preferencias") {
+                Toggle("Pedir Face ID al abrir", isOn: Binding(get: { appLock.isEnabled }, set: { appLock.isEnabled = $0 }))
+                    .accessibilityHint("Protege la app localmente con Face ID o el código del iPhone")
                 NavigationLink { ProfileDetailView(title: "Notificaciones", rows: [("Estado", "Gestiona los permisos desde Ajustes del iPhone")]) } label: { Label("Notificaciones", systemImage: "bell") }
                 NavigationLink { ProfileDetailView(title: "Clima", rows: [("Tiempo local", "Disponible al preparar entrenamientos exteriores")]) } label: { Label("Clima", systemImage: "cloud.sun") }
                 NavigationLink { ProfileDetailView(title: "Privacidad", rows: [("Tus datos", "Solo se usan para personalizar tu entrenamiento")]) } label: { Label("Privacidad", systemImage: "hand.raised") }

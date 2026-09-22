@@ -2,9 +2,15 @@ import SwiftUI
 
 @main
 struct TriWaveXApp: App {
+    @State private var appLock = AppLock()
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
             configuredRootView
+                .environment(appLock)
+                .overlay { if appLock.isLocked { AppLockOverlay(lock: appLock).zIndex(100) } }
+                .onChange(of: scenePhase) { _, phase in if phase != .active { appLock.lockIfNeeded() } }
         }
     }
 
