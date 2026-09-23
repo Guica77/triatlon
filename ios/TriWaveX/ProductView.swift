@@ -34,9 +34,11 @@ struct ProductView: View {
     @State private var nativePlanEnabled = true
     @State private var nativeProfileEnabled = true
     @State private var nativeChatEnabled = true
+    @State private var nativeTrainingRequested: Bool
     @State private var webPathOverride: String?
     @State private var athleteProgress: AthleteProgressModel
     @State private var nativePlan: NativePlanModel
+    @State private var coachDashboard: NativeCoachDashboardModel
     @State private var nativeProfile: NativeProfileModel
     @State private var selectedTab: AppTab
     @State private var guidedOnboarding: GuidedOnboardingModel?
@@ -75,8 +77,10 @@ struct ProductView: View {
         self.onSubscriptionFinished = onSubscriptionFinished
         _athleteProgress = State(initialValue: AthleteProgressModel(client: AthleteProgressClient(origin: origin, store: store)))
         _nativePlan = State(initialValue: NativePlanModel(client: NativePlanClient(origin: origin, store: store)))
+        _coachDashboard = State(initialValue: NativeCoachDashboardModel(origin: origin, store: store))
         _nativeProfile = State(initialValue: NativeProfileModel(client: NativeProfileClient(origin: origin, store: store)))
         _selectedTab = State(initialValue: Self.tab(for: initialPath, isCoach: initialPath.hasPrefix("/coach/")))
+        _nativeTrainingRequested = State(initialValue: initialPath == "/dashboard" || initialPath == "/coach/dashboard")
         _guidedOnboarding = State(initialValue: guidedTourRequest.map { GuidedOnboardingModel(request: $0) })
     }
 
@@ -152,6 +156,12 @@ struct ProductView: View {
                     .allowsHitTesting(!showingNativeSurface && hasPresentedInitialContent)
                 if showingNativePlan {
                     NativePlanView(model: nativePlan)
+                }
+                if showingNativeTraining {
+                    NativeTodayView(model: nativePlan, openPlan: { selectedTab = .plan })
+                }
+                if showingNativeCoachDashboard {
+                    NativeCoachDashboardView(model: coachDashboard, openAthlete: openCoachAthlete)
                 }
                 if showingNativeProgress {
                     AthleteProgressView(model: athleteProgress, onFallback: openWebProgress)
@@ -295,7 +305,7 @@ struct ProductView: View {
 
     private var shouldShowTabBar: Bool {
         guard onDismiss == nil else { return false }
-        return showingNativePlan || showingNativeProgress || showingNativeProfile || showingNativeChat || browser.showsAppNavigation ||
+        return showingNativeTraining || showingNativeCoachDashboard || showingNativePlan || showingNativeProgress || showingNativeProfile || showingNativeChat || browser.showsAppNavigation ||
             (!browser.hasCompletedInitialLoad && isMainNavigationPath(initialPath))
     }
 
@@ -348,12 +358,20 @@ struct ProductView: View {
         nativeProgressEnabled && selectedTab == .progress && !isCoach
     }
 
+    private var showingNativeTraining: Bool {
+        nativeTrainingRequested && selectedTab == .training && !isCoach
+    }
+
+    private var showingNativeCoachDashboard: Bool {
+        nativeTrainingRequested && selectedTab == .training && isCoach
+    }
+
     private var showingNativePlan: Bool {
         nativePlanEnabled && selectedTab == .plan && !isCoach
     }
 
     private var showingNativeSurface: Bool {
-        showingNativePlan || showingNativeProgress || showingNativeProfile || showingNativeChat
+        showingNativeTraining || showingNativeCoachDashboard || showingNativePlan || showingNativeProgress || showingNativeProfile || showingNativeChat
     }
 
     private var showingNativeProfile: Bool {
@@ -374,6 +392,16 @@ struct ProductView: View {
     }
 
     private func selectTab(path: String) {
+        if path == "/dashboard" && !isCoach {
+            nativeTrainingRequested = true
+            webPathOverride = "/dashboard"
+            return
+        }
+        if path == "/coach/dashboard" && isCoach {
+            nativeTrainingRequested = true
+            webPathOverride = path
+            return
+        }
         if path == "/plan" && !isCoach {
             webPathOverride = "/plan"
             nativePlanEnabled = true
@@ -401,8 +429,20 @@ struct ProductView: View {
         nativeProgressEnabled = false
         nativeProfileEnabled = false
         nativeChatEnabled = false
+        nativeTrainingRequested = false
         browser.currentPath = path
         let request = URLRequest(url: origin.appendingPathComponent(String(path.dropFirst())))
+        browser.lastRequest = request
+        browser.webView?.load(request)
+    }
+
+    private func openCoachAthlete(_ athleteID: String) {
+        guard UUID(uuidString: athleteID) != nil else { return }
+        nativeTrainingRequested = false
+        webPathOverride = "/coach/athlete/\(athleteID)"
+        browser.currentPath = webPathOverride ?? "/coach/dashboard"
+        guard let url = URL(string: browser.currentPath, relativeTo: origin)?.absoluteURL else { return }
+        let request = URLRequest(url: url)
         browser.lastRequest = request
         browser.webView?.load(request)
     }

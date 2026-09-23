@@ -1,5 +1,7 @@
 import AuthenticationServices
 import SwiftUI
+import GoogleSignInSwift
+import UIKit
 
 struct RootView: View {
     private struct CoachCheckout {
@@ -85,6 +87,13 @@ struct RootView: View {
                             } else {
                                 NativeAthleteDraft.clear()
                             }
+                        }
+                    },
+                    onContinueWithGoogle: {
+                        googleSignIn(role: .athlete) {
+                            isShowingAthleteOnboarding = false
+                            if session.destination == "/onboarding" { onboardingGivenName = "" }
+                            else { NativeAthleteDraft.clear() }
                         }
                     },
                     onCancel: { isShowingAthleteOnboarding = false }
@@ -405,6 +414,17 @@ struct RootView: View {
                     .accessibilityHint("Usa tu cuenta de Apple para iniciar sesión como \(role.title.lowercased())")
                     .opacity(session.busy ? 0.7 : 1)
 
+                    GoogleSignInButton(
+                        scheme: .light,
+                        style: .wide,
+                        state: session.busy ? .disabled : .normal
+                    ) {
+                        googleSignIn(role: role)
+                    }
+                    .frame(height: 50)
+                    .disabled(session.busy)
+                    .accessibilityHint("Usa Google para iniciar sesión como \(role.title.lowercased())")
+
                     VStack(spacing: 8) {
                         if !email.isEmpty {
                             Label("Continuamos donde lo dejaste", systemImage: "arrow.counterclockwise.circle.fill")
@@ -454,6 +474,23 @@ struct RootView: View {
 
     private var loginSurface: Color {
         Color(uiColor: .secondarySystemGroupedBackground)
+    }
+
+    private func googleSignIn(role: Role, onAuthenticated: @escaping () -> Void = {}) {
+        guard let scene = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first(where: { $0.activationState == .foregroundActive }),
+              let root = scene.windows.first(where: \.isKeyWindow)?.rootViewController else {
+            session.error = "No se ha podido abrir la ventana segura de Google. Inténtalo de nuevo."
+            return
+        }
+        var presenter = root
+        while let presented = presenter.presentedViewController { presenter = presented }
+        Task {
+            await session.signInWithGoogle(presenting: presenter, expectedRole: role.rawValue)
+            guard session.destination != nil else { return }
+            onAuthenticated()
+        }
     }
 
     private func loginSectionTitle(_ title: String) -> some View {

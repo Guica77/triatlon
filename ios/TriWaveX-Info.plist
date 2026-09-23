@@ -22,6 +22,10 @@
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>TriWaveXSiteURL</key>
     <string>$(TRIWAVEX_SITE_URL)</string>
+    <key>GIDClientID</key>
+    <string>$(GOOGLE_IOS_CLIENT_ID)</string>
+    <key>GIDServerClientID</key>
+    <string>$(GOOGLE_SERVER_CLIENT_ID)</string>
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
@@ -29,6 +33,12 @@
             <string>com.guillermohaya.triwavex.oauth</string>
             <key>CFBundleURLSchemes</key>
             <array><string>triwavex</string></array>
+        </dict>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.googleusercontent.apps.triwavex</string>
+            <key>CFBundleURLSchemes</key>
+            <array><string>$(GOOGLE_IOS_REVERSED_CLIENT_ID)</string></array>
         </dict>
     </array>
     <key>LSApplicationQueriesSchemes</key>

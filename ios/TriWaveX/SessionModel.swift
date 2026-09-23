@@ -1,8 +1,10 @@
 import AuthenticationServices
 import CryptoKit
 import Foundation
+import GoogleSignIn
 import Observation
 import Security
+import UIKit
 import WebKit
 
 @Observable
@@ -56,6 +58,7 @@ final class SessionModel {
     }
 
     func endSession() async {
+        GIDSignIn.sharedInstance.signOut()
         await store.removeData(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), modifiedSince: .distantPast)
         for cookie in HTTPCookieStorage.shared.cookies(for: origin) ?? [] {
             HTTPCookieStorage.shared.deleteCookie(cookie)
@@ -198,6 +201,65 @@ final class SessionModel {
             }
         } catch {
             self.error = Self.connectionError(error, provider: " con Apple")
+        }
+    }
+
+    func signInWithGoogle(presenting viewController: UIViewController, expectedRole: String) async {
+        guard !busy else { return }
+        guard let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String,
+              !clientID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !clientID.contains("$") else {
+            error = "Google Sign-In necesita el Client ID de iOS en la configuración de Xcode."
+            return
+        }
+        guard let serverClientID = Bundle.main.object(forInfoDictionaryKey: "GIDServerClientID") as? String,
+              !serverClientID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !serverClientID.contains("$") else {
+            error = "Google Sign-In necesita también el Client ID web para verificar el acceso."
+            return
+        }
+        busy = true
+        error = nil
+        defer { busy = false }
+
+        do {
+            GIDSignIn.sharedInstance.configuration = GIDConfiguration(
+                clientID: clientID,
+                serverClientID: serverClientID
+            )
+            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: viewController)
+            guard let identityToken = result.user.idToken?.tokenString, !identityToken.isEmpty else {
+                error = "Google no ha devuelto una credencial válida. Inténtalo de nuevo."
+                return
+            }
+            var request = URLRequest(url: origin.appendingPathComponent("api/native/google/session"))
+            request.httpMethod = "POST"
+            request.timeoutInterval = 30
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
+            request.httpBody = try JSONEncoder().encode(["identityToken": identityToken, "role": expectedRole])
+            let configuration = URLSessionConfiguration.ephemeral
+            configuration.httpShouldSetCookies = false
+            let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
+            defer { session.invalidateAndCancel() }
+            let (data, response) = try await session.data(for: request)
+            guard let http = response as? HTTPURLResponse,
+                  http.url.map({ Configuration.allows($0, origin: origin) }) == true else {
+                error = "La respuesta de Google no es válida. Inténtalo de nuevo."
+                return
+            }
+            guard http.statusCode == 200 else {
+                error = "No se ha podido verificar la cuenta de Google. Revisa la configuración e inténtalo de nuevo."
+                return
+            }
+            do {
+                try await applyLoginResponse(data: data, response: http, expectedRole: expectedRole)
+            } catch {
+                self.error = "Google ha devuelto una sesión no válida. Inténtalo de nuevo."
+            }
+        } catch {
+            if (error as? GIDSignInError)?.code == .canceled { return }
+            self.error = "No se ha podido iniciar sesión con Google. Inténtalo de nuevo."
         }
     }
 

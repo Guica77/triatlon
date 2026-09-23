@@ -2,6 +2,7 @@ import SwiftUI
 import WebKit
 import Observation
 import AuthenticationServices
+import GoogleSignInSwift
 
 enum NativeAthleteDraft {
     static let prefix = "triwavex.onboarding."
@@ -68,6 +69,7 @@ struct NativeAthleteOnboardingView: View {
     let onCreateAccount: () -> Void
     let onContinueWithApple: (ASAuthorizationAppleIDRequest) -> Void
     let onAppleCompletion: (Result<ASAuthorization, Error>) -> Void
+    let onContinueWithGoogle: () -> Void
     let onCancel: () -> Void
     @State private var preferences: AthletePreferences
     @State private var step: Int
@@ -79,10 +81,12 @@ struct NativeAthleteOnboardingView: View {
     init(onCreateAccount: @escaping () -> Void,
          onContinueWithApple: @escaping (ASAuthorizationAppleIDRequest) -> Void = { _ in },
          onAppleCompletion: @escaping (Result<ASAuthorization, Error>) -> Void = { _ in },
+         onContinueWithGoogle: @escaping () -> Void = {},
          onCancel: @escaping () -> Void) {
         self.onCreateAccount = onCreateAccount
         self.onContinueWithApple = onContinueWithApple
         self.onAppleCompletion = onAppleCompletion
+        self.onContinueWithGoogle = onContinueWithGoogle
         self.onCancel = onCancel
         NativeAthleteDraft.removeExpired()
         let defaults = UserDefaults.standard
@@ -163,6 +167,8 @@ struct NativeAthleteOnboardingView: View {
                             .font(.footnote).foregroundStyle(.secondary)
                         SignInWithAppleButton(.continue, onRequest: onContinueWithApple, onCompletion: onAppleCompletion)
                             .signInWithAppleButtonStyle(.black).frame(height: 50)
+                        GoogleSignInButton(scheme: .light, style: .wide, action: onContinueWithGoogle)
+                            .frame(height: 50)
                         Button("Crear cuenta con correo", action: onCreateAccount)
                             .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua)).controlSize(.large).frame(maxWidth: .infinity)
                     }

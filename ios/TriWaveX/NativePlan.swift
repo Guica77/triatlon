@@ -236,6 +236,146 @@ final class NativePlanModel {
     }
 }
 
+struct NativeTodayView: View {
+    @Bindable var model: NativePlanModel
+    let openPlan: () -> Void
+
+    private var todaysWorkouts: [NativePlan.Workout] {
+        let formatter = DateFormatter()
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current
+        formatter.dateFormat = "yyyy-MM-dd"
+        let today = formatter.string(from: Date())
+        return (model.plan?.workouts ?? []).filter { $0.date == today }.sorted { $0.slot < $1.slot }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let plan = model.plan {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 20) {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(Locale(identifier: "es_ES"))))
+                                    .font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
+                                Text("Hola, \(plan.athleteName)")
+                                    .font(.largeTitle.bold()).foregroundStyle(.primary)
+                                Text(plan.planName)
+                                    .font(.subheadline).foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            HStack(spacing: 12) {
+                                Image(systemName: "figure.run").font(.title2).foregroundStyle(.white)
+                                    .frame(width: 48, height: 48).background(Color.triWaveXAqua, in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(todaysWorkouts.isEmpty ? "Día de recuperación" : "Tu entrenamiento de hoy")
+                                        .font(.headline)
+                                    Text(todaysWorkouts.isEmpty ? "No tienes sesiones programadas. Descansa o disfruta del día." : "\(todaysWorkouts.count) sesión\(todaysWorkouts.count == 1 ? "" : "es") en tu plan")
+                                        .font(.footnote).foregroundStyle(.secondary)
+                                }
+                                Spacer(minLength: 0)
+                            }
+                            .padding(16)
+                            .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+
+                            if !todaysWorkouts.isEmpty {
+                                VStack(spacing: 12) {
+                                    ForEach(todaysWorkouts) { workout in
+                                        workoutCard(workout)
+                                    }
+                                }
+                            }
+
+                            if let error = model.error {
+                                Label(error, systemImage: "exclamationmark.triangle.fill")
+                                    .font(.footnote).foregroundStyle(.red)
+                            }
+                            Button(action: openPlan) {
+                                Label("Ver semana completa", systemImage: "calendar")
+                                    .font(.headline).frame(maxWidth: .infinity).padding(.vertical, 15)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(Color.triWaveXAqua)
+                        }
+                        .padding(20)
+                    }
+                    .refreshable { await model.load(force: true) }
+                } else if model.loading {
+                    ProgressView("Cargando tu entrenamiento…").frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    ContentUnavailableView {
+                        Label("Entrenamiento no disponible", systemImage: "figure.run")
+                    } description: {
+                        Text(model.error ?? "Comprueba tu conexión e inténtalo de nuevo.")
+                    } actions: {
+                        Button("Reintentar") { Task { await model.load(force: true) } }
+                    }
+                }
+            }
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("Hoy")
+            .navigationBarTitleDisplayMode(.inline)
+            .task { await model.load() }
+        }
+    }
+
+    private func workoutCard(_ workout: NativePlan.Workout) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: icon(for: workout.sport))
+                    .font(.headline).foregroundStyle(Color.triWaveXAqua)
+                    .frame(width: 42, height: 42).background(Color.triWaveXAqua.opacity(0.12), in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(workout.title).font(.headline)
+                    Text("\(workout.sport) · \(workout.durationMinutes) min · \(workout.slot)")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
+                statusMark(workout.status)
+            }
+            if let detail = workout.detail, !detail.isEmpty {
+                Text(detail).font(.subheadline).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if workout.status != "completed" {
+                Button {
+                    Task { _ = await model.updateStatus(workout, status: "completed") }
+                } label: {
+                    if model.savingIDs.contains(workout.id) {
+                        ProgressView().frame(maxWidth: .infinity).padding(.vertical, 5)
+                    } else {
+                        Label("Marcar como completado", systemImage: "checkmark.circle")
+                            .frame(maxWidth: .infinity).padding(.vertical, 5)
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(model.savingIDs.contains(workout.id))
+            } else {
+                Label("Entrenamiento completado", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline.weight(.medium)).foregroundStyle(.green)
+            }
+        }
+        .padding(16)
+        .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+    }
+
+    @ViewBuilder private func statusMark(_ status: String) -> some View {
+        if status == "completed" {
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green).accessibilityLabel("Completado")
+        } else {
+            Image(systemName: "circle").foregroundStyle(.secondary).accessibilityLabel("Pendiente")
+        }
+    }
+
+    private func icon(for sport: String) -> String {
+        let value = sport.lowercased()
+        if value.contains("nat") || value.contains("swim") { return "figure.pool.swim" }
+        if value.contains("bic") || value.contains("cycl") { return "bicycle" }
+        if value.contains("fuer") || value.contains("gym") { return "dumbbell" }
+        return "figure.run"
+    }
+}
+
 struct NativePlanView: View {
     private enum CalendarDisplay: String, CaseIterable, Identifiable {
         case week = "Semana"
