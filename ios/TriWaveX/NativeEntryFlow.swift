@@ -1,6 +1,266 @@
 import SwiftUI
 import WebKit
 import Observation
+import AuthenticationServices
+
+enum NativeAthleteDraft {
+    static let prefix = "triwavex.onboarding."
+    static let expiryKey = "triwavex.onboarding.expiresAt"
+    static let preAuthStepKey = "triwavex.onboarding.preAuthStep"
+    static let lifetime: TimeInterval = 30 * 24 * 60 * 60
+
+    static func removeExpired(from defaults: UserDefaults = .standard) {
+        // Purge the legacy sensitive draft introduced by older builds; health
+        // answers are now transient until they are submitted after consent.
+        defaults.removeObject(forKey: prefix + "injuries")
+        guard let expiry = defaults.object(forKey: expiryKey) as? Date else {
+            let hasUnboundedDraft = defaults.object(forKey: preAuthStepKey) != nil ||
+                ["goal", "modality", "targetRaceDistance", "level", "weeklyHours", "targetRaceDate"].contains {
+                    defaults.object(forKey: prefix + $0) != nil
+                }
+            if hasUnboundedDraft { clear(from: defaults) }
+            return
+        }
+        if expiry < Date() { clear(from: defaults) }
+    }
+
+    fileprivate static func save(_ values: AthletePreferences, step: Int, to defaults: UserDefaults = .standard) {
+        defaults.set(values.goal, forKey: prefix + "goal")
+        defaults.set(values.modality, forKey: prefix + "modality")
+        defaults.set(values.distance, forKey: prefix + "targetRaceDistance")
+        defaults.set(values.level, forKey: prefix + "level")
+        defaults.set(values.weeklyHours, forKey: prefix + "weeklyHours")
+        defaults.set(values.raceDate.map(dayString) ?? "", forKey: prefix + "targetRaceDate")
+        defaults.set(step, forKey: preAuthStepKey)
+        defaults.set(Date().addingTimeInterval(lifetime), forKey: expiryKey)
+    }
+
+    static func clear(from defaults: UserDefaults = .standard) {
+        ["goal", "modality", "targetRaceDistance", "level", "weeklyHours", "wantsCoach", "injuries", "step", "readyForPayment", "targetRaceDate"].forEach {
+            defaults.removeObject(forKey: prefix + $0)
+        }
+        defaults.removeObject(forKey: preAuthStepKey)
+        defaults.removeObject(forKey: expiryKey)
+    }
+
+    static func dayString(_ date: Date) -> String {
+        let parts = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        return String(format: "%04d-%02d-%02d", parts.year ?? 2000, parts.month ?? 1, parts.day ?? 1)
+    }
+
+    static func dayDate(_ value: String) -> Date? {
+        let parts = value.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        return Calendar.current.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2], hour: 12))
+    }
+}
+
+private struct AthletePreferences {
+    var goal = "Mi próximo objetivo"
+    var modality = "triatlon"
+    var distance = "half"
+    var level = "intermedio"
+    var weeklyHours = 7.0
+    var raceDate: Date?
+}
+
+struct NativeAthleteOnboardingView: View {
+    let onCreateAccount: () -> Void
+    let onContinueWithApple: (ASAuthorizationAppleIDRequest) -> Void
+    let onAppleCompletion: (Result<ASAuthorization, Error>) -> Void
+    let onCancel: () -> Void
+    @State private var preferences: AthletePreferences
+    @State private var step: Int
+    @State private var showingSportChoices = false
+    @State private var showingDistanceChoices = false
+    @State private var hasRaceDate = true
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    init(onCreateAccount: @escaping () -> Void,
+         onContinueWithApple: @escaping (ASAuthorizationAppleIDRequest) -> Void = { _ in },
+         onAppleCompletion: @escaping (Result<ASAuthorization, Error>) -> Void = { _ in },
+         onCancel: @escaping () -> Void) {
+        self.onCreateAccount = onCreateAccount
+        self.onContinueWithApple = onContinueWithApple
+        self.onAppleCompletion = onAppleCompletion
+        self.onCancel = onCancel
+        NativeAthleteDraft.removeExpired()
+        let defaults = UserDefaults.standard
+        var initial = AthletePreferences()
+        initial.goal = defaults.string(forKey: NativeAthleteDraft.prefix + "goal") ?? initial.goal
+        initial.modality = defaults.string(forKey: NativeAthleteDraft.prefix + "modality") ?? initial.modality
+        initial.distance = defaults.string(forKey: NativeAthleteDraft.prefix + "targetRaceDistance") ?? initial.distance
+        initial.level = defaults.string(forKey: NativeAthleteDraft.prefix + "level") ?? initial.level
+        if defaults.object(forKey: NativeAthleteDraft.prefix + "weeklyHours") != nil {
+            initial.weeklyHours = defaults.double(forKey: NativeAthleteDraft.prefix + "weeklyHours")
+        }
+        if let rawDate = defaults.string(forKey: NativeAthleteDraft.prefix + "targetRaceDate"), !rawDate.isEmpty {
+            initial.raceDate = NativeAthleteDraft.dayDate(rawDate)
+        }
+        _preferences = State(initialValue: initial)
+        _step = State(initialValue: min(max(defaults.integer(forKey: NativeAthleteDraft.preAuthStepKey), 0), 2))
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    ProgressView(value: Double(step + 1), total: 3).tint(Color.triWaveXAqua)
+                        .accessibilityLabel("Paso \(step + 1) de 3")
+                    if step == 0 {
+                        Label("Bienvenido a TriWaveX", systemImage: "figure.triathlon")
+                            .font(.headline).foregroundStyle(Color.triWaveXAqua)
+                        Text("Entrena con una dirección clara").font(.largeTitle.bold())
+                        Text("Cuéntanos qué quieres preparar y te mostraremos una primera orientación antes de crear tu cuenta.")
+                            .foregroundStyle(.secondary)
+                        TriWaveXSurface {
+                            Label("Un plan adaptado a tu objetivo y al tiempo que tienes", systemImage: "calendar.badge.clock")
+                                .font(.headline)
+                        }
+                    } else if step == 1 {
+                        Text("¿Qué quieres conseguir?").font(.largeTitle.bold())
+                        TextField("Tu objetivo", text: $preferences.goal)
+                            .padding(14).background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        choice(title: "Deporte", value: modalityTitle, icon: modalityIcon) { showingSportChoices = true }
+                        choice(title: "Distancia", value: distanceTitle, icon: "flag.checkered") { showingDistanceChoices = true }
+                        Picker("Experiencia", selection: $preferences.level) {
+                            Text("Principiante").tag("principiante")
+                            Text("Intermedio").tag("intermedio")
+                            Text("Avanzado").tag("avanzado")
+                        }.pickerStyle(.segmented)
+                        Toggle("Ya tengo fecha de competición", isOn: $hasRaceDate)
+                        if hasRaceDate {
+                            DatePicker("Fecha de la carrera", selection: raceDateBinding, in: Date()..., displayedComponents: .date)
+                        } else {
+                            Label("Aún no tengo fecha · crearé un plan flexible", systemImage: "arrow.left.arrow.right")
+                                .font(.footnote).foregroundStyle(.secondary)
+                        }
+                        Text("¿Cuánto tiempo puedes entrenar?").font(.headline)
+                        Text("\(Int(preferences.weeklyHours)) horas a la semana").font(.title2.weight(.semibold)).foregroundStyle(Color.triWaveXAqua)
+                        Slider(value: $preferences.weeklyHours, in: 2...20, step: 1).tint(Color.triWaveXAqua)
+                    } else {
+                        Label("Una primera orientación", systemImage: "checkmark.seal.fill")
+                            .font(.headline).foregroundStyle(Color.triWaveXAqua)
+                        Text(modalityTitle + " · " + distanceTitle).font(.largeTitle.bold())
+                        Text("\(Int(preferences.weeklyHours)) horas disponibles cada semana")
+                            .foregroundStyle(.secondary)
+                        Label(raceDateSummary, systemImage: "calendar")
+                            .font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
+                        TriWaveXSurface {
+                            VStack(alignment: .leading, spacing: 14) {
+                                Text("Una semana posible").font(.title3.bold())
+                                ForEach(suggestedSessions, id: \.day) { session in
+                                    HStack(spacing: 12) {
+                                        Image(systemName: session.icon).foregroundStyle(Color.triWaveXAqua)
+                                            .frame(width: 30, height: 30).background(Color.triWaveXAqua.opacity(0.12), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                                        Text(session.day).font(.headline).frame(width: 36, alignment: .leading)
+                                        Text(session.title).foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                        }
+                        Text("Es solo una muestra orientativa, todavía no es un plan generado ni guardado. Después de crear tu cuenta podrás completar tu perfil y ajustar tus días.")
+                            .font(.footnote).foregroundStyle(.secondary)
+                        SignInWithAppleButton(.continue, onRequest: onContinueWithApple, onCompletion: onAppleCompletion)
+                            .signInWithAppleButtonStyle(.black).frame(height: 50)
+                        Button("Crear cuenta con correo", action: onCreateAccount)
+                            .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua)).controlSize(.large).frame(maxWidth: .infinity)
+                    }
+                    actions
+                }
+                .padding(20).frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading).frame(maxWidth: .infinity)
+            }
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("TriWaveX").navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .topBarLeading) { Button("Cancelar", action: cancelAndClear) } }
+            .onChange(of: preferences.goal) { _, _ in persist() }
+            .onChange(of: preferences.modality) { _, _ in ensureDistanceMatchesModality(); persist() }
+            .onChange(of: preferences.distance) { _, _ in persist() }
+            .onChange(of: preferences.level) { _, _ in persist() }
+            .onChange(of: preferences.weeklyHours) { _, _ in persist() }
+            .onChange(of: preferences.raceDate) { _, _ in persist() }
+            .onChange(of: hasRaceDate) { _, value in
+                if !value { preferences.raceDate = nil }
+                else if preferences.raceDate == nil { preferences.raceDate = Calendar.current.date(byAdding: .month, value: 6, to: Date()) }
+                persist()
+            }
+            .confirmationDialog("Elige deporte", isPresented: $showingSportChoices, titleVisibility: .visible) {
+                Button("Triatlón") { preferences.modality = "triatlon" }
+                Button("Carrera") { preferences.modality = "carrera" }
+                Button("Duatlón") { preferences.modality = "duatlon" }
+                Button("Acuatlón") { preferences.modality = "acuatlon" }
+                Button("Cancelar", role: .cancel) {}
+            }
+            .confirmationDialog("Elige distancia", isPresented: $showingDistanceChoices, titleVisibility: .visible) {
+                ForEach(distanceOptions, id: \.id) { option in Button(option.title) { preferences.distance = option.id } }
+                Button("Cancelar", role: .cancel) {}
+            }
+        }
+        .onAppear {
+            let storedDate = UserDefaults.standard.string(forKey: NativeAthleteDraft.prefix + "targetRaceDate")
+            hasRaceDate = storedDate.map { !$0.isEmpty } ?? false
+            persist()
+        }
+    }
+
+    private var actions: some View {
+        VStack(spacing: 10) {
+            if step < 2 {
+                Button(step == 0 ? "Personalizar mi plan" : "Ver una propuesta") {
+                    withAnimation(TriWaveXMotion.stateChange(reduced: reduceMotion)) { step += 1 }
+                    persist()
+                }
+                .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua)).controlSize(.large).frame(maxWidth: .infinity)
+                .disabled(step == 1 && preferences.goal.trimmingCharacters(in: .whitespacesAndNewlines).count < 2)
+            } else if step > 0 {
+                Button("Atrás") { withAnimation { step -= 1 }; persist() }.buttonStyle(.borderless)
+            }
+        }.padding(.top, 6)
+    }
+
+    private var raceDateBinding: Binding<Date> {
+        Binding(get: { preferences.raceDate ?? Calendar.current.date(byAdding: .month, value: 6, to: Date()) ?? Date() }, set: { preferences.raceDate = $0 })
+    }
+    private var distanceOptions: [(id: String, title: String)] {
+        switch preferences.modality {
+        case "carrera": [("5k", "5 km"), ("10k", "10 km"), ("medio_maraton", "Media maratón"), ("maraton", "Maratón"), ("ultra", "Ultra")]
+        case "triatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "70.3"), ("full", "Larga distancia")]
+        default: [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "Media distancia")]
+        }
+    }
+    private var distanceTitle: String { distanceOptions.first(where: { $0.id == preferences.distance })?.title ?? distanceOptions[0].title }
+    private var raceDateSummary: String {
+        guard hasRaceDate, let date = preferences.raceDate else { return "Plan flexible · aún sin fecha de competición" }
+        return "Carrera el \(date.formatted(date: .long, time: .omitted))"
+    }
+    private var modalityTitle: String { switch preferences.modality { case "carrera": "Carrera"; case "duatlon": "Duatlón"; case "acuatlon": "Acuatlón"; default: "Triatlón" } }
+    private var modalityIcon: String { switch preferences.modality { case "carrera", "duatlon": "figure.run"; case "acuatlon": "figure.pool.swim"; default: "figure.triathlon" } }
+    private var suggestedSessions: [(day: String, title: String, icon: String)] {
+        let all: [(day: String, title: String, icon: String)] = switch preferences.modality {
+        case "carrera": [("Mar", "Carrera suave", "figure.run"), ("Jue", "Ritmo y técnica", "figure.run"), ("Sáb", "Fuerza", "dumbbell"), ("Dom", "Rodaje largo", "figure.run")]
+        case "duatlon": [("Mar", "Carrera", "figure.run"), ("Jue", "Bicicleta", "bicycle"), ("Sáb", "Carrera y técnica", "figure.run"), ("Dom", "Fuerza", "dumbbell")]
+        case "acuatlon": [("Mar", "Natación", "figure.pool.swim"), ("Jue", "Carrera", "figure.run"), ("Sáb", "Natación técnica", "figure.pool.swim"), ("Dom", "Fuerza", "dumbbell")]
+        default: [("Lun", "Natación", "figure.pool.swim"), ("Mié", "Bicicleta", "bicycle"), ("Vie", "Carrera", "figure.run"), ("Dom", "Fuerza y movilidad", "dumbbell")]
+        }
+        return preferences.weeklyHours <= 6 ? Array(all.prefix(3)) : all
+    }
+    private func choice(title: String, value: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 13) {
+                Image(systemName: icon).font(.headline).frame(width: 28, height: 28).foregroundStyle(Color.triWaveXAqua)
+                VStack(alignment: .leading, spacing: 2) { Text(title).font(.caption.weight(.semibold)).foregroundStyle(.secondary); Text(value).font(.headline).foregroundStyle(.primary) }
+                Spacer(); Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold)).foregroundStyle(Color.triWaveXAqua)
+            }.padding(15).background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.triWaveXAqua.opacity(0.55), lineWidth: 1.5) }
+        }.buttonStyle(.plain)
+    }
+    private func persist() { NativeAthleteDraft.save(preferences, step: step) }
+    private func cancelAndClear() { NativeAthleteDraft.clear(); onCancel() }
+    private func ensureDistanceMatchesModality() {
+        guard !distanceOptions.contains(where: { $0.id == preferences.distance }) else { return }
+        preferences.distance = distanceOptions[0].id
+    }
+}
 
 struct NativeAccessResponse: Decodable, Equatable {
     let destination: String
@@ -127,18 +387,22 @@ struct NativeEntryTransport {
         guard canSubmit else { return nil }
         state = .saving
         struct Input: Encodable { let email, password, firstName, lastName, role: String }
-        struct Result: Decodable { let emailConfirmRequired: Bool; let destination: String?; let userID: String }
+        struct Result: Decodable { let emailConfirmRequired: Bool; let destination: String?; let userID: String; let role: String? }
         do {
             let result = try await transport.send("/api/native/register", body: Input(email: email.trimmingCharacters(in: .whitespacesAndNewlines), password: password, firstName: firstName.trimmingCharacters(in: .whitespacesAndNewlines), lastName: lastName.trimmingCharacters(in: .whitespacesAndNewlines), role: role), response: Result.self)
             password = ""; passwordConfirmation = ""
             clearDraft()
             if result.emailConfirmRequired { state = .confirmationRequired(email); return nil }
-            guard let destination = result.destination, !result.userID.isEmpty else { state = .failed("No se ha podido iniciar la sesión."); return nil }
+            guard let destination = result.destination, !result.userID.isEmpty,
+                  let responseRole = result.role, responseRole == role else {
+                state = .failed("El tipo de cuenta recibido no coincide. Contacta con soporte antes de volver a intentarlo.")
+                return nil
+            }
             state = .idle
             return Outcome(
                 destination: destination,
                 givenName: firstName.trimmingCharacters(in: .whitespacesAndNewlines),
-                role: role,
+                role: responseRole,
                 userID: result.userID
             )
         } catch { state = .failed(error.localizedDescription); return nil }
@@ -248,10 +512,12 @@ struct NativeRegistrationView: View {
     var goal = "Mi próximo objetivo"
     var modality = "triatlon"
     var targetRaceDistance = "half"
+    var targetRaceDate: Date?
     var level = "intermedio"
     var weeklyHours = 7.0
     var wantsCoach = false
     var injuries = ""
+    var healthDataConsent = false
     var state: State = .editing
     private let transport: NativeEntryTransport
     private let defaults: UserDefaults
@@ -259,20 +525,25 @@ struct NativeRegistrationView: View {
     init(origin: URL, store: WKWebsiteDataStore, defaults: UserDefaults = .standard) {
         transport = NativeEntryTransport(origin: origin, store: store)
         self.defaults = defaults
+        NativeAthleteDraft.removeExpired(from: defaults)
         goal = defaults.string(forKey: "triwavex.onboarding.goal") ?? goal
         modality = defaults.string(forKey: "triwavex.onboarding.modality") ?? modality
         targetRaceDistance = defaults.string(forKey: "triwavex.onboarding.targetRaceDistance") ?? targetRaceDistance
+        if let rawDate = defaults.string(forKey: "triwavex.onboarding.targetRaceDate"), !rawDate.isEmpty {
+            targetRaceDate = NativeAthleteDraft.dayDate(rawDate)
+        }
         level = defaults.string(forKey: "triwavex.onboarding.level") ?? level
         if defaults.object(forKey: "triwavex.onboarding.weeklyHours") != nil {
             weeklyHours = defaults.double(forKey: "triwavex.onboarding.weeklyHours")
         }
         wantsCoach = defaults.bool(forKey: "triwavex.onboarding.wantsCoach")
-        injuries = defaults.string(forKey: "triwavex.onboarding.injuries") ?? ""
         if defaults.bool(forKey: "triwavex.onboarding.readyForPayment") { state = .readyForPayment }
     }
 
     var hasDraft: Bool {
-        defaults.object(forKey: "triwavex.onboarding.step") != nil || defaults.bool(forKey: "triwavex.onboarding.readyForPayment")
+        defaults.object(forKey: "triwavex.onboarding.step") != nil ||
+            defaults.object(forKey: NativeAthleteDraft.expiryKey) != nil ||
+            defaults.bool(forKey: "triwavex.onboarding.readyForPayment")
     }
 
     func persistDraft(step: Int) {
@@ -282,22 +553,19 @@ struct NativeRegistrationView: View {
         defaults.set(level, forKey: "triwavex.onboarding.level")
         defaults.set(weeklyHours, forKey: "triwavex.onboarding.weeklyHours")
         defaults.set(wantsCoach, forKey: "triwavex.onboarding.wantsCoach")
-        defaults.set(injuries, forKey: "triwavex.onboarding.injuries")
         defaults.set(step, forKey: "triwavex.onboarding.step")
     }
 
     func clearDraft() {
-        ["goal", "modality", "targetRaceDistance", "level", "weeklyHours", "wantsCoach", "injuries", "step", "readyForPayment"].forEach {
-            defaults.removeObject(forKey: "triwavex.onboarding.\($0)")
-        }
+        NativeAthleteDraft.clear(from: defaults)
     }
 
     func save() async {
         state = .saving
-        struct Input: Encodable { let goal, modality, targetRaceDistance, level: String; let weeklyHours: Double; let wantsCoach: Bool; let previousInjuries: String }
+        struct Input: Encodable { let goal, modality, targetRaceDistance, level: String; let targetRaceDate: String?; let weeklyHours: Double; let wantsCoach: Bool; let previousInjuries: String; let healthDataConsent: Bool }
         struct Result: Decodable { let success: Bool; let preview: NativePlanPreview }
         do {
-            let result = try await transport.send("/api/native/onboarding", body: Input(goal: goal, modality: modality, targetRaceDistance: targetRaceDistance, level: level, weeklyHours: weeklyHours, wantsCoach: wantsCoach, previousInjuries: injuries), response: Result.self)
+            let result = try await transport.send("/api/native/onboarding", body: Input(goal: goal, modality: modality, targetRaceDistance: targetRaceDistance, level: level, targetRaceDate: targetRaceDate.map(Self.dayString), weeklyHours: weeklyHours, wantsCoach: wantsCoach, previousInjuries: injuries, healthDataConsent: healthDataConsent), response: Result.self)
             state = .preview(result.preview)
         } catch { state = .failed(error.localizedDescription) }
     }
@@ -305,6 +573,10 @@ struct NativeRegistrationView: View {
     func continueToPayment() {
         state = .readyForPayment
         defaults.set(true, forKey: "triwavex.onboarding.readyForPayment")
+    }
+
+    private static func dayString(_ date: Date) -> String {
+        NativeAthleteDraft.dayString(date)
     }
 }
 
@@ -377,7 +649,6 @@ struct NativeOnboardingView: View {
             .onChange(of: model.level) { _, _ in model.persistDraft(step: step) }
             .onChange(of: model.weeklyHours) { _, _ in model.persistDraft(step: step) }
             .onChange(of: model.wantsCoach) { _, _ in model.persistDraft(step: step) }
-            .onChange(of: model.injuries) { _, _ in model.persistDraft(step: step) }
             .onAppear { ensureDistanceMatchesModality() }
             .confirmationDialog("Elige deporte", isPresented: $showingSportChoices, titleVisibility: .visible) {
                 Button("Triatlón") { chooseModality("triatlon") }
@@ -420,6 +691,10 @@ struct NativeOnboardingView: View {
                     .background(Color.triWaveXAqua.opacity(0.09), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
             VStack(alignment: .leading, spacing: 8) { Text("Lesiones o límites actuales (opcional)").font(.headline); TextEditor(text: $model.injuries).frame(minHeight: 110).padding(8).background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous)); Text("Solo lo usamos para ajustar el entrenamiento. No sustituye a un profesional sanitario.").font(.footnote).foregroundStyle(.secondary) }
+            Toggle("Consiento que TriWaveX use estos datos de salud para adaptar mi entrenamiento", isOn: $model.healthDataConsent)
+                .font(.footnote)
+            Text("Puedes dejarlo en blanco si prefieres no compartir esta información. Tu consentimiento se guardará junto con el perfil.")
+                .font(.footnote).foregroundStyle(.secondary)
         }
     }
 
@@ -486,7 +761,8 @@ struct NativeOnboardingView: View {
             Button {
                 if step < 2 { withAnimation { step += 1 } } else { Task { await model.save() } }
             } label: { if case .saving = model.state { ProgressView().tint(.white) } else { Text(step == 2 ? "Ver mi plan" : "Continuar") } }
-                .buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity).disabled(isSaving || model.goal.trimmingCharacters(in: .whitespacesAndNewlines).count < 2)
+                .buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity)
+                .disabled(isSaving || model.goal.trimmingCharacters(in: .whitespacesAndNewlines).count < 2 || (!model.injuries.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !model.healthDataConsent))
             if step > 0 { Button("Atrás") { withAnimation { step -= 1 } }.buttonStyle(.borderless) }
         }.padding(.top, 12)
     }

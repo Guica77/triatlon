@@ -63,6 +63,7 @@ final class SessionModel {
         [
             "pending", "destination", "givenName", "userID", "role",
         ].forEach { UserDefaults.standard.removeObject(forKey: "triwavex.coachCheckout.\($0)") }
+        NativeAthleteDraft.clear()
         stableUserID = nil
         role = nil
         entitled = false
@@ -104,7 +105,7 @@ final class SessionModel {
         request.nonce = Self.sha256(nonce)
     }
 
-    func handleAppleCompletion(_ result: Result<ASAuthorization, Error>) async {
+    func handleAppleCompletion(_ result: Result<ASAuthorization, Error>, expectedRole: String = "athlete") async {
         defer { appleNonce = nil }
 
         switch result {
@@ -120,11 +121,11 @@ final class SessionModel {
                 error = "Apple no ha devuelto una credencial válida. Inténtalo de nuevo."
                 return
             }
-            await signInWithApple(identityToken: identityToken, nonce: nonce)
+            await signInWithApple(identityToken: identityToken, nonce: nonce, expectedRole: expectedRole)
         }
     }
 
-    func login(email: String, password: String) async {
+    func login(email: String, password: String, expectedRole: String) async {
         guard !busy else { return }
         busy = true
         error = nil
@@ -151,7 +152,7 @@ final class SessionModel {
                 return
             }
             do {
-                try await applyLoginResponse(data: data, response: http)
+                try await applyLoginResponse(data: data, response: http, expectedRole: expectedRole)
             } catch {
                 self.error = "El servidor ha devuelto una sesión no válida. Inténtalo de nuevo."
             }
@@ -160,7 +161,7 @@ final class SessionModel {
         }
     }
 
-    private func signInWithApple(identityToken: String, nonce: String) async {
+    private func signInWithApple(identityToken: String, nonce: String, expectedRole: String) async {
         guard !busy else { return }
         busy = true
         error = nil
@@ -174,6 +175,7 @@ final class SessionModel {
             request.httpBody = try JSONEncoder().encode([
                 "identityToken": identityToken,
                 "nonce": nonce,
+                "role": expectedRole,
             ])
             let configuration = URLSessionConfiguration.ephemeral
             configuration.httpShouldSetCookies = false
@@ -190,7 +192,7 @@ final class SessionModel {
                 return
             }
             do {
-                try await applyLoginResponse(data: data, response: http)
+                try await applyLoginResponse(data: data, response: http, expectedRole: expectedRole)
             } catch {
                 self.error = "Apple ha devuelto una sesión no válida. Inténtalo de nuevo."
             }
@@ -199,11 +201,16 @@ final class SessionModel {
         }
     }
 
-    private func applyLoginResponse(data: Data, response: HTTPURLResponse) async throws {
+    private func applyLoginResponse(data: Data, response: HTTPURLResponse, expectedRole: String? = nil) async throws {
         let result = try JSONDecoder().decode(LoginResult.self, from: data)
         guard let userID = result.userID, !userID.isEmpty,
               ["/dashboard", "/coach/dashboard", "/onboarding"].contains(result.destination) else {
             error = "No se ha podido abrir tu perfil."
+            return
+        }
+        if let expectedRole, result.role != expectedRole {
+            let accountType = result.role == "coach" ? "entrenador" : "atleta"
+            error = "Esta cuenta está registrada como \(accountType). Cambia el tipo de cuenta para entrar."
             return
         }
         let fields = response.allHeaderFields.reduce(into: [String: String]()) { output, entry in

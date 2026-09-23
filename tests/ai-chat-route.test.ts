@@ -9,7 +9,10 @@ const h = vi.hoisted(() => ({
   embed: vi.fn(),
   stream: vi.fn(),
 }))
-vi.mock('@/lib/ai-privacy', () => ({ authorizeAIRequest: async () => ({ allowed: h.consent, code: 'AI_CONSENT_REQUIRED' }) }))
+vi.mock('@/lib/ai-privacy', () => ({
+  authorizeAIRequest: async () => ({ allowed: h.consent, code: 'AI_CONSENT_REQUIRED' }),
+  aiDisclosure: () => ({ providers: ['Test AI'], models: ['Test AI · test-model'], version: 'test' }),
+}))
 vi.mock('@/lib/supabase/server', () => ({ createClient: async () => ({
   auth: { getUser: async () => ({ data: { user: h.user }, error: null }) },
   from: () => {

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { generateAIEmbedding } from '@/lib/ai-service'
+import { hasAIConsent } from '@/lib/ai-privacy'
 
 const CATEGORIES = new Set(['natacion', 'ciclismo', 'carrera', 'fuerza', 'recuperacion', 'nutricion', 'material', 'competicion', 'planificacion'])
 const TYPES = new Set(['document', 'video', 'link'])
@@ -31,7 +32,11 @@ export async function saveTriathlonResource(input: {
     if (!roster.data) return { error: 'Solo puedes compartir recursos con atletas de tu equipo activo.' }
   }
 
-  const embedding = await generateAIEmbedding(`${title}\n${content}`)
+  // Embedding sends the resource text to an external AI provider. Keep the
+  // library usable without consent, but never create that third-party request
+  // unless both the owner and the athlete (when shared) have opted in.
+  const embeddingAllowed = await hasAIConsent(user.id, athleteId || user.id)
+  const embedding = embeddingAllowed ? await generateAIEmbedding(`${title}\n${content}`) : null
   const db = supabase as any
   const { error } = await db.from('triathlon_resources').insert({
     owner_id: user.id, athlete_id: athleteId, visibility: input.visibility, resource_type: input.resourceType,
@@ -39,7 +44,12 @@ export async function saveTriathlonResource(input: {
   })
   if (error) return { error: 'No se ha podido guardar el recurso. Comprueba que la biblioteca está activada.' }
   revalidatePath('/biblioteca')
-  return { success: true }
+  return {
+    success: true,
+    notice: embeddingAllowed
+      ? null
+      : 'Guardado sin indexación semántica: no se ha enviado el contenido a un proveedor de IA. Puedes activar el permiso en Ajustes.',
+  }
 }
 
 export async function archiveTriathlonResource(resourceId: string) {

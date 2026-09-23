@@ -64,6 +64,7 @@ Known environmental boundary: this workspace currently cannot reach CoreSimulato
 
 ## Acceptance criteria
 
+- At cold launch, show one deterministic current TriWaveX startup/login state while restoring the session; a returning user never sees the first-run phrase sequence or an obsolete login/onboarding surface for even one frame. Hide cached web content until the requested route is current, and verify first launch, returning launch, slow/offline restore, logout/re-login and Reduce Motion.
 - The athlete and coach primary home screens render in SwiftUI and use live, authorized app data; they contain no hard-coded preview plans or silent fallback that looks like success.
 - Load preference survives relaunch/account sign-in and has a safe, reviewable application path.
 - Apple/Google/email login and onboarding exits preserve a coherent destination and recoverable state; AI and health consent are separate, explicit and revocable where applicable.

@@ -12,6 +12,7 @@ type RegistrationInput = {
   password: string
   firstName: string
   lastName: string
+  role: 'athlete' | 'coach'
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -24,13 +25,14 @@ function inputFrom(value: unknown): RegistrationInput | null {
   const password = typeof value.password === 'string' ? value.password : null
   const firstName = typeof value.firstName === 'string' ? value.firstName.trim() : null
   const lastName = typeof value.lastName === 'string' ? value.lastName.trim() : null
-  if (!email || !password || !firstName || !lastName) return null
+  const role = value.role === undefined ? 'athlete' : value.role
+  if (!email || !password || !firstName || !lastName || (role !== 'athlete' && role !== 'coach')) return null
   const emailParts = email.split('@')
   const validEmail = emailParts.length === 2 && emailParts[0].length > 0 &&
     emailParts[1].includes('.') && !/\s/.test(email)
   if (!validEmail || password.length < 8 || password.length > 128 ||
       firstName.length > 80 || lastName.length > 80) return null
-  return { email, password, firstName, lastName }
+  return { email, password, firstName, lastName, role }
 }
 
 function registrationErrorMessage(error: { message?: string; code?: string; status?: number }) {
@@ -70,7 +72,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase.auth.signUp({
       email: input.email,
       password: input.password,
-      options: { data: { full_name: `${input.firstName} ${input.lastName}`.trim(), role: 'athlete' } },
+      options: { data: { full_name: `${input.firstName} ${input.lastName}`.trim(), role: input.role } },
     })
     if (error) {
       console.error('Native registration rejected', { code: error.code, status: error.status })
@@ -84,11 +86,11 @@ export async function POST(request: Request) {
       last_name: input.lastName,
       email: input.email,
       level: 'intermedio',
-      role: 'athlete',
+      role: input.role,
     }, { onConflict: 'id' })
     if (profileError) return reply({ error: 'No se ha podido preparar tu perfil. Inténtalo de nuevo.' }, 503)
 
-    if (!data.session) return reply({ emailConfirmRequired: true, userID: data.user.id })
+    if (!data.session) return reply({ emailConfirmRequired: true, userID: data.user.id, role: input.role })
     const access = await nativeAccessForUser(supabase, data.user.id)
     return reply({
       emailConfirmRequired: false,

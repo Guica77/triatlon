@@ -39,6 +39,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_feedback: {
+        Row: {
+          comments: string | null
+          created_at: string
+          days_used: number
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          days_used: number
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          days_used?: number
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_entitlements: {
         Row: {
           period_ends_at: string | null
@@ -539,6 +574,7 @@ export type Database = {
           current_run_time: string | null
           current_weight: number | null
           previous_injuries: string | null
+          health_data_consent_at: string | null
           first_login_at: string | null
         }
         Insert: {
@@ -599,6 +635,7 @@ export type Database = {
           current_run_time?: string | null
           current_weight?: number | null
           previous_injuries?: string | null
+          health_data_consent_at?: string | null
           first_login_at?: string | null
         }
         Update: {
@@ -659,6 +696,7 @@ export type Database = {
           current_run_time?: string | null
           current_weight?: number | null
           previous_injuries?: string | null
+          health_data_consent_at?: string | null
           first_login_at?: string | null
         }
         Relationships: [

@@ -6,8 +6,8 @@ import { ArrowRight, Check, LoaderCircle, LockKeyhole, Settings2, X } from 'luci
 type Plan = 'athlete' | 'coach';
 
 const plans: Array<{ id: Plan; name: string; price: string; description: string; features: string[] }> = [
-  { id: 'athlete', name: 'Atleta', price: '5 €/mes', description: 'Tu entrenamiento, progreso y recuperación en un solo lugar.', features: ['Plan personal', 'Seguimiento de sesiones', 'Orientación con IA'] },
-  { id: 'coach', name: 'Entrenador', price: '30 €/mes', description: 'Organiza tu equipo y acompaña a cada atleta con claridad.', features: ['10 atletas incluidos', 'Planificación compartida', 'Progreso y chat', 'Cada bloque adicional de 5: 2,99 €/mes'] },
+  { id: 'athlete', name: 'Atleta', price: '5,99 €/mes', description: 'Tu entrenamiento, progreso y recuperación en un solo lugar.', features: ['Plan personal', 'Seguimiento de sesiones', 'Orientación con IA'] },
+  { id: 'coach', name: 'Entrenador', price: '29,99 €/mes', description: 'Organiza tu equipo y acompaña a cada atleta con claridad.', features: ['10 atletas incluidos', 'Planificación compartida', 'Progreso y chat', 'Cada bloque adicional de 5: 2,99 €/mes'] },
 ];
 
 export function CheckoutPlanButtons({ canManage = false }: { canManage?: boolean }) {

@@ -15,7 +15,9 @@ import { DeleteAccountCard } from '@/components/settings/delete-account-card';
 import { WorkoutAIFeedback } from '@/components/dashboard/workout-ai-feedback';
 import { NotificationTestCard } from '@/components/settings/notification-test-card';
 import { AccountSessionCard } from '@/components/settings/account-session-card';
-import { ArrowLeft, ChevronRight, CircleAlert, HeartPulse, Route, Watch, MessageCircle, ShieldCheck, Bell, CloudSun, FileDown, HelpCircle, LogOut, BookOpen } from 'lucide-react';
+import { AIConsentCard } from '@/components/settings/ai-consent-card';
+import { aiDisclosure } from '@/lib/ai-privacy';
+import { ArrowLeft, ChevronRight, CircleAlert, HeartPulse, Route, Watch, MessageCircle, ShieldCheck, Bell, CloudSun, FileDown, HelpCircle, LogOut, BookOpen, Percent } from 'lucide-react';
 
 function SettingsRow({ href, label, detail, pending, icon: Icon }: { href: string; label: string; detail?: string; pending?: boolean; icon?: typeof HeartPulse }) {
   return (
@@ -39,7 +41,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   }
 
   // Obtener perfil y dispositivos conectados en paralelo
-  const [profileRes, devicesRes, entitlementRes] = await Promise.all([
+  const [profileRes, devicesRes, entitlementRes, aiConsentRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('*, training_plans(name)')
@@ -53,12 +55,19 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
       .from('billing_entitlements')
       .select('source,status,trial_ends_at,period_ends_at')
       .eq('user_id', user.id)
-      .maybeSingle()
+      .maybeSingle(),
+    (supabase as any)
+      .from('ai_consents')
+      .select('version,granted')
+      .eq('user_id', user.id)
+      .maybeSingle(),
   ]);
 
   const profile = profileRes.data;
   const devices = devicesRes.data;
   const entitlement = entitlementRes.data;
+  const disclosure = aiDisclosure();
+  const aiConsentGranted = aiConsentRes.data?.version === disclosure.version && aiConsentRes.data.granted;
 
   if (!profile) {
     redirect('/onboarding');
@@ -93,7 +102,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
           </div>
           <p className="px-2 text-xs leading-relaxed text-text-muted">La prueba gratuita solo se aplica una vez por cuenta. En iPhone, las compras digitales se realizan y restauran desde App Store; en la web, Stripe gestiona el pago seguro y puede mostrar Apple Pay cuando está disponible.</p>
         </section>
-      : section === 'privacidad' ? <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default"><SettingsRow href="/privacidad" label="Privacidad y permisos" icon={ShieldCheck} /><SettingsRow href="/soporte" label="Ayuda y soporte" icon={HelpCircle} /></div>
+      : section === 'privacidad' ? <div className="space-y-4"><AIConsentCard models={disclosure.models} version={disclosure.version} granted={aiConsentGranted} /><div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default"><SettingsRow href="/legal/privacidad" label="Política de privacidad" icon={ShieldCheck} /><SettingsRow href="/soporte" label="Ayuda y soporte" icon={HelpCircle} /></div></div>
       : <div className="rounded-2xl border border-border-default bg-surface-card p-5"><CloudSun className="h-6 w-6 text-accent" /><h2 className="mt-3 font-semibold text-text-primary">Clima y ajustes</h2><p className="mt-1 text-sm leading-relaxed text-text-secondary">El tiempo se consulta en vivo desde la tarjeta de cada sesión exterior. Al tocarlo puedes ver previsión, humedad, viento y aceptar una propuesta de ajuste.</p></div>;
     const titles: Record<string, string> = { fisiologia: 'Fisiología y zonas', plan: 'Plan de entrenamiento', lesiones: 'Lesiones e historial', orientacion: 'Orientación del entrenamiento', dispositivos: 'Dispositivos conectados', notificaciones: 'Notificaciones', exportar: 'Exportar datos', privacidad: 'Privacidad y ayuda', cuenta: 'Cuenta y suscripción', suscripcion: 'Suscripción', clima: 'Clima y ajustes' };
     return <div className="min-h-screen bg-bg-app"><main className="apple-athlete-content mx-auto max-w-2xl px-4 pb-24 pt-5 sm:px-6"><Link href="/settings" className="mb-5 inline-flex min-h-10 items-center gap-1 text-sm font-medium text-accent"><ArrowLeft className="h-4 w-4" />Perfil</Link><h1 className="mb-5 text-2xl font-semibold tracking-tight text-text-primary">{titles[section] || 'Ajustes'}</h1>{detail}</main></div>;
@@ -164,6 +173,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
         <section className="space-y-2">
           <p className="px-1 text-xs font-medium uppercase tracking-wide text-text-secondary">Datos y cuenta</p>
           <div className="overflow-hidden rounded-2xl border border-border-default bg-surface-card divide-y divide-border-default">
+            {profile.role === 'athlete' ? <SettingsRow href="/descuento-carrera" label="Descuento por carrera" detail="Solicitar 25%" icon={Percent} /> : null}
             <SettingsRow href="/settings?section=exportar" label="Exportar datos" icon={FileDown} />
             <SettingsRow href="/settings?section=privacidad" label="Privacidad y ayuda" icon={ShieldCheck} />
             <SettingsRow href="/settings?section=cuenta" label="Cuenta y suscripción" icon={LogOut} />

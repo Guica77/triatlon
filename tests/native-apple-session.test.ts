@@ -44,11 +44,11 @@ it('verifies the Apple ID token with its matching nonce and returns server-owned
   expect(eq).toHaveBeenCalledWith('id', 'apple-user')
 })
 
-it('ignores a client-selected coach role and creates new Apple profiles as athletes', async () => {
+it('creates a new Apple profile with the requested supported role', async () => {
   maybeSingle.mockReset()
   maybeSingle
     .mockResolvedValueOnce({ data: null, error: null })
-    .mockResolvedValueOnce({ data: { role: 'athlete', active_plan_id: null }, error: null })
+    .mockResolvedValueOnce({ data: { role: 'coach', active_plan_id: null }, error: null })
     .mockResolvedValueOnce({ data: null, error: null })
 
   const response = await POST(request(JSON.stringify({
@@ -59,10 +59,10 @@ it('ignores a client-selected coach role and creates new Apple profiles as athle
   expect(await response.json()).toEqual({
     destination: '/onboarding',
     userID: 'apple-user',
-    role: 'athlete',
+    role: 'coach',
     entitled: false,
   })
-  expect(insert).toHaveBeenCalledWith(expect.objectContaining({ id: 'apple-user', role: 'athlete' }))
+  expect(insert).toHaveBeenCalledWith(expect.objectContaining({ id: 'apple-user', role: 'coach' }))
 })
 
 it('preserves an existing persisted coach role only when the server entitlement authorizes it', async () => {

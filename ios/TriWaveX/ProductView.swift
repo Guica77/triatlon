@@ -491,9 +491,7 @@ private struct TriWaveXLaunchScreen: View {
 
             VStack(spacing: 18) {
                 VStack(spacing: 7) {
-                    Text("TriWaveX")
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color.triWaveXTextPrimary)
+                    TriWaveXWordmark(font: .system(size: 30, weight: .bold, design: .rounded))
                     Capsule(style: .continuous)
                         .fill(Color.triWaveXAqua)
                         .frame(width: 44, height: 4)

@@ -1,4 +1,4 @@
-import { Environment, InAppOwnershipType, SignedDataVerifier } from '@apple/app-store-server-library'
+import { AppStoreServerAPIClient, Environment, InAppOwnershipType, OfferType, SignedDataVerifier } from '@apple/app-store-server-library'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { classifyAppleEvent, planForAppleProduct } from '@/lib/apple-event'
@@ -7,11 +7,6 @@ import { nativeAccessForUser } from '@/lib/native-access'
 import { selectTrainingPlan } from '@/lib/training-plan-selection'
 
 export const runtime = 'nodejs'
-
-const PRODUCTS = {
-  athlete: 'com.triwavex.athlete.monthly',
-  coach: 'com.triwavex.coach.monthly',
-} as const
 
 const EVENT_TYPES = new Set([
   'SUBSCRIBED',
@@ -63,6 +58,22 @@ function verifier() {
   )
 }
 
+function appStoreServerAPIClient(environment: Environment) {
+  const issuerID = process.env.APPLE_SERVER_API_ISSUER_ID?.trim()
+  const keyID = process.env.APPLE_SERVER_API_KEY_ID?.trim()
+  const encodedPrivateKey = process.env.APPLE_SERVER_API_PRIVATE_KEY_BASE64?.trim()
+  const bundleID = process.env.APPLE_BUNDLE_ID?.trim()
+  if (!issuerID || !keyID || !encodedPrivateKey || !bundleID) return null
+
+  try {
+    const privateKey = Buffer.from(encodedPrivateKey, 'base64').toString('utf8')
+    if (!privateKey.includes('BEGIN PRIVATE KEY')) return null
+    return new AppStoreServerAPIClient(privateKey, keyID, issuerID, bundleID, environment)
+  } catch {
+    return null
+  }
+}
+
 function isTransactionReference(value: string) {
   return /^[A-Za-z0-9._-]{1,256}$/.test(value)
 }
@@ -88,7 +99,7 @@ function inputFrom(value: unknown): TransactionInput | null {
     signedTransactionInfo.length > 128_000 ||
     (signedRenewalInfo !== undefined && (typeof signedRenewalInfo !== 'string' || signedRenewalInfo.length < 32 || signedRenewalInfo.length > 128_000)) ||
     typeof productID !== 'string' ||
-    !Object.values(PRODUCTS).includes(productID as typeof PRODUCTS[keyof typeof PRODUCTS]) ||
+    planForAppleProduct(productID) === null ||
     typeof transactionID !== 'string' ||
     !isTransactionReference(transactionID) ||
     typeof originalTransactionID !== 'string' ||
@@ -147,7 +158,7 @@ export async function POST(request: Request) {
     if (profileError) return reply({ error: 'No se ha podido cargar tu perfil.' }, 503)
 
     const role = profile?.role === 'coach' ? 'coach' : 'athlete'
-    if (input.productID !== PRODUCTS[role]) return reply({ error: 'El producto no corresponde a tu cuenta.' }, 403)
+    if (planForAppleProduct(input.productID) !== role) return reply({ error: 'El producto no corresponde a tu cuenta.' }, 403)
 
     let transaction
     try {
@@ -184,11 +195,26 @@ export async function POST(request: Request) {
     if (!purchaseDate || !signedDate || (!expirationDate && !['REFUND', 'REVOKE'].includes(input.eventType)) || (expirationDate && expirationDate <= purchaseDate && !['REFUND', 'REVOKE'].includes(input.eventType))) {
       return reply({ error: 'La transacción no tiene fechas válidas.' }, 409)
     }
-    if (transaction.appAccountToken?.toLowerCase() !== user.id.toLowerCase()) {
-      return reply({ error: 'La transacción no pertenece a esta cuenta.' }, 403)
-    }
+    const transactionAccountToken = transaction.appAccountToken?.toLowerCase()
     if (input.appAccountToken && input.appAccountToken.toLowerCase() !== user.id.toLowerCase()) {
       return reply({ error: 'La cuenta de Apple no coincide.' }, 403)
+    }
+
+    if (transactionAccountToken && transactionAccountToken !== user.id.toLowerCase()) {
+      return reply({ error: 'La transacción ya está asociada a otra cuenta.' }, 403)
+    }
+
+    if (!transactionAccountToken) {
+      const isOfferCodeRedemption = input.eventType === 'OFFER_REDEEMED' && transaction.offerType === OfferType.OFFER_CODE
+      if (!isOfferCodeRedemption) return reply({ error: 'La transacción no pertenece a esta cuenta.' }, 403)
+
+      const serverAPI = appStoreServerAPIClient(expectedEnvironment)
+      if (!serverAPI) return reply({ error: 'Falta configurar la clave de App Store Server API para asociar códigos de oferta.' }, 503)
+      try {
+        await serverAPI.setAppAccountToken(transaction.originalTransactionId!, { appAccountToken: user.id })
+      } catch {
+        return reply({ error: 'Apple no ha podido asociar este código a tu cuenta. No vuelvas a canjearlo; contacta con soporte.' }, 503)
+      }
     }
 
     const event = classifyAppleEvent({

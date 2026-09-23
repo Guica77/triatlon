@@ -24,6 +24,9 @@ export async function POST(request: Request) {
         !input.identityToken || !input.nonce || input.identityToken.length > 12288 || input.nonce.length > 256) {
       return reply({ error: 'Credencial de Apple inválida' }, 400)
     }
+    const requestedRole = 'role' in input && (input.role === 'coach' || input.role === 'athlete')
+      ? input.role
+      : 'athlete'
     const supabase = await createClient()
     const { data, error } = await supabase.auth.signInWithIdToken({
       provider: 'apple', token: input.identityToken, nonce: input.nonce,
@@ -41,7 +44,7 @@ export async function POST(request: Request) {
         email: data.user.email || '',
         first_name: name.firstName,
         last_name: name.lastName,
-        role: 'athlete',
+        role: requestedRole,
         level: 'intermedio',
       })
       if (createProfileError) return reply({ error: 'No se ha podido preparar el perfil' }, 503)

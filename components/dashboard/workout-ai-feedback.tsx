@@ -1,9 +1,11 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { Bot, Sparkles, Loader2, AlertCircle, RefreshCw, Activity, MessageSquare, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { parseAIResponse } from '@/lib/ai-response';
+import { setAIConsent } from '@/app/(app)/settings/privacy-actions';
 
 interface WorkoutAIFeedbackProps {
   aiConfigured: boolean;
@@ -31,6 +33,9 @@ export function WorkoutAIFeedback({
   const [error, setError] = React.useState<string | null>(null);
   const [question, setQuestion] = React.useState('');
   const [showChatInput, setShowChatInput] = React.useState(false);
+  const [aiDisclosure, setAiDisclosure] = React.useState<{ providers: string[]; models: string[]; version: string } | null>(null);
+  const [consentBusy, setConsentBusy] = React.useState(false);
+  const [pendingQuestion, setPendingQuestion] = React.useState<string | undefined>();
   const aiAvailable = aiConfigured;
 
   const buildWorkoutContext = React.useCallback(() => {
@@ -61,6 +66,9 @@ export function WorkoutAIFeedback({
         const errData = await res.json().catch(() => ({}));
         if (errData.fallback) {
           setFeedback(getFallbackAnalysis());
+        } else if (errData.code === 'AI_CONSENT_REQUIRED' && errData.aiDisclosure?.version) {
+          setPendingQuestion(customQuestion);
+          setAiDisclosure(errData.aiDisclosure);
         } else {
           setError(errData.error || 'No se pudo obtener el análisis. Inténtalo de nuevo.');
         }
@@ -77,6 +85,27 @@ export function WorkoutAIFeedback({
     }
   }, [buildWorkoutContext]);
 
+  const decideAIConsent = async (granted: boolean) => {
+    if (!aiDisclosure || consentBusy) return;
+    setConsentBusy(true);
+    try {
+      const result = await setAIConsent(granted, aiDisclosure.version);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      const questionToRetry = pendingQuestion;
+      setAiDisclosure(null);
+      setPendingQuestion(undefined);
+      if (granted) await requestAnalysis(questionToRetry);
+      else setError('No has dado permiso. Tu consulta no se enviará a proveedores de IA. Puedes cambiar de opinión en Perfil → Privacidad y ayuda.');
+    } catch {
+      setError('No se pudo guardar tu decisión. Inténtalo de nuevo.');
+    } finally {
+      setConsentBusy(false);
+    }
+  };
+
   const handleSendQuestion = () => {
     if (!question.trim()) return;
     requestAnalysis(question.trim());
@@ -87,6 +116,27 @@ export function WorkoutAIFeedback({
     <div
       className="bg-bg-card border border-border-default rounded-2xl p-5"
     >
+      {aiDisclosure ? (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-black/55 p-4" role="presentation">
+          <section role="dialog" aria-modal="true" aria-labelledby="ai-consent-title" className="max-h-[min(88dvh,720px)] w-full max-w-lg overflow-y-auto rounded-[28px] border border-border-default bg-surface-card p-6 shadow-2xl sm:p-8">
+            <div className="mb-5 flex size-12 items-center justify-center rounded-2xl bg-accent/10 text-accent"><Sparkles className="size-6" aria-hidden="true" /></div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Decisión opcional</p>
+            <h2 id="ai-consent-title" className="mt-2 text-2xl font-semibold tracking-tight text-text-primary">¿Enviar tus datos al asistente de IA?</h2>
+            <p className="mt-3 text-sm leading-6 text-text-secondary">Para responder, TriWaveX enviará tu consulta y el contexto deportivo pertinente de tu cuenta —que puede incluir entrenamientos, recuperación, lesiones y preferencias de nutrición— a:</p>
+            <ul className="mt-3 space-y-2 rounded-2xl bg-surface-hover p-4 text-sm font-semibold text-text-primary">
+              {aiDisclosure.models.map((model) => <li key={model} className="flex items-center gap-2"><span className="size-1.5 rounded-full bg-accent" />{model}</li>)}
+            </ul>
+            <p className="mt-3 text-xs leading-5 text-text-muted">El tratamiento ocurre en la infraestructura del proveedor indicado; puede ser fuera del Espacio Económico Europeo. La región y las condiciones contractuales dependen de la configuración de producción y deben verificarse antes de distribuir la app.</p>
+            <p className="mt-3 text-xs leading-5 text-text-muted">El proveedor activo puede cambiar según la configuración del servicio; si cambia, volveremos a pedir permiso. Si no aceptas, el asistente no enviará datos a esos proveedores y podrás seguir usando el resto de TriWaveX. Retirar el permiso después impide nuevos envíos, pero no borra automáticamente lo ya recibido por el proveedor. Las respuestas pueden ser inexactas y no son consejo médico.</p>
+            <p className="mt-3 text-xs leading-5 text-text-muted">Si la solicitud se refiere a otra persona atleta, también hará falta su consentimiento por separado.</p>
+            <Link href="/legal/privacidad" className="mt-3 inline-flex min-h-10 items-center text-sm font-semibold text-accent underline underline-offset-4">Leer política de privacidad</Link>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <button type="button" disabled={consentBusy} onClick={() => void decideAIConsent(false)} className="min-h-12 rounded-full border border-border-default px-5 text-sm font-semibold text-text-primary transition-colors hover:bg-surface-hover disabled:opacity-60">Ahora no</button>
+              <button type="button" disabled={consentBusy || !aiDisclosure.providers.length} onClick={() => void decideAIConsent(true)} className="min-h-12 rounded-full bg-accent px-5 text-sm font-semibold text-white transition-[filter,transform] hover:brightness-95 active:scale-[.98] disabled:opacity-60">{consentBusy ? 'Guardando…' : 'Permitir y continuar'}</button>
+            </div>
+          </section>
+        </div>
+      ) : null}
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">

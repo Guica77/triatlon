@@ -28,6 +28,7 @@ struct RootView: View {
     @State private var password = ""
     @State private var informationURL: URL?
     @State private var registrationRole: Role?
+    @State private var isShowingAthleteOnboarding = false
     @State private var role: Role = .athlete
     @State private var onboardingGivenName = ""
     @State private var coachCheckout: CoachCheckout?
@@ -67,12 +68,41 @@ struct RootView: View {
             if !hasCompletedStartup {
                 TriWaveXStartupView(isRestoringSession: !session.hasCompletedRestore)
                     .transition(.opacity)
+            } else if isShowingAthleteOnboarding {
+                NativeAthleteOnboardingView(
+                    onCreateAccount: {
+                        isShowingAthleteOnboarding = false
+                        setRegistrationRole(.athlete)
+                    },
+                    onContinueWithApple: { request in session.prepareAppleRequest(request) },
+                    onAppleCompletion: { result in
+                        Task {
+                            await session.handleAppleCompletion(result, expectedRole: Role.athlete.rawValue)
+                            guard session.destination != nil else { return }
+                            isShowingAthleteOnboarding = false
+                            if session.destination == "/onboarding" {
+                                onboardingGivenName = ""
+                            } else {
+                                NativeAthleteDraft.clear()
+                            }
+                        }
+                    },
+                    onCancel: { isShowingAthleteOnboarding = false }
+                )
+                .transition(.opacity)
             } else if let registrationRole {
                 NativeRegistrationView(
                     role: registrationRole.rawValue,
                     origin: session.origin,
                     store: session.store,
-                    onCancel: { setRegistrationRole(nil) },
+                    onCancel: {
+                        if registrationRole == .athlete {
+                            setRegistrationRole(nil)
+                            isShowingAthleteOnboarding = true
+                        } else {
+                            setRegistrationRole(nil)
+                        }
+                    },
                     onRegistered: { outcome in
                         setRegistrationRole(nil)
                         onboardingGivenName = outcome.givenName
@@ -101,6 +131,27 @@ struct RootView: View {
                                 givenName: coachCheckout.givenName
                             )
                             setCoachCheckout(nil)
+                            session.destination = result.destination
+                        }
+                    )
+                }
+                .transition(.opacity)
+            } else if session.destination == "/onboarding", session.role == Role.coach.rawValue,
+                      let userID = session.stableUserID {
+                NavigationStack {
+                    NativeSubscriptionStoreView(
+                        origin: session.origin,
+                        store: session.store,
+                        expectedUserID: userID,
+                        role: Role.coach.rawValue,
+                        onFinished: { result in
+                            guard result.userID == userID,
+                                  result.role == Role.coach.rawValue else { return }
+                            guidedTourRequest = GuidedTourRequest(
+                                userID: result.userID,
+                                role: .coach,
+                                givenName: onboardingGivenName
+                            )
                             session.destination = result.destination
                         }
                     )
@@ -172,6 +223,20 @@ struct RootView: View {
         }
         .tint(.triWaveXAqua)
         .animation(TriWaveXMotion.stateChange(reduced: reduceMotion), value: session.destination)
+        .task(id: "\(session.stableUserID ?? "")|\(session.role ?? "")") {
+            guard let userID = session.stableUserID,
+                  let role = session.role else { return }
+            let transactionStore = SubscriptionStore(
+                origin: session.origin,
+                store: session.store,
+                expectedUserID: userID,
+                expectedRole: role
+            )
+            await transactionStore.observeTransactions { authorization in
+                guard let authorization else { return }
+                _ = session.applySubscriptionResult(authorization)
+            }
+        }
         .task {
 #if DEBUG
             let arguments = ProcessInfo.processInfo.arguments
@@ -204,7 +269,7 @@ struct RootView: View {
             }
             try? await Task.sleep(for: .seconds(3))
             guard !Task.isCancelled else { return }
-            await session.login(email: "demo@triatlonpro.com", password: "demo123456")
+            await session.login(email: "demo@triatlonpro.com", password: "demo123456", expectedRole: Role.athlete.rawValue)
         }
 #endif
     }
@@ -247,8 +312,17 @@ struct RootView: View {
                     }
 
                     if loginIntroStage >= 9 {
-                        loginSectionTitle("Acceso")
+                        loginSectionTitle(role == .coach ? "Acceso de entrenador" : "Acceso de atleta")
                             .transition(loginEntryTransition)
+                        if role == .coach {
+                            Label("Gestiona tus atletas, planes y comunicación desde tu espacio de entrenador.", systemImage: "person.2.fill")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.horizontal, 8)
+                                .padding(.bottom, 12)
+                                .transition(loginEntryTransition)
+                        }
                         loginSurfaceGroup {
                             TextField("Correo electrónico", text: $email)
                                 .textContentType(.username)
@@ -294,7 +368,7 @@ struct RootView: View {
                         } label: {
                             HStack(spacing: 8) {
                                 if session.busy { ProgressView() }
-                                Text("Entrar como \(role.title.lowercased())")
+                                Text(role == .coach ? "Entrar en mi espacio de entrenador" : "Entrar como atleta")
                             }
                             .font(.system(size: 18, weight: .bold))
                             .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
@@ -322,13 +396,13 @@ struct RootView: View {
                     SignInWithAppleButton(.continue) { request in
                         session.prepareAppleRequest(request)
                     } onCompletion: { result in
-                        Task { await session.handleAppleCompletion(result) }
+                        Task { await session.handleAppleCompletion(result, expectedRole: role.rawValue) }
                     }
                     .signInWithAppleButtonStyle(.black)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
                     .disabled(session.busy)
-                    .accessibilityHint("Usa tu cuenta de Apple para iniciar sesión")
+                    .accessibilityHint("Usa tu cuenta de Apple para iniciar sesión como \(role.title.lowercased())")
                     .opacity(session.busy ? 0.7 : 1)
 
                     VStack(spacing: 8) {
@@ -337,10 +411,14 @@ struct RootView: View {
                                 .font(.footnote.weight(.semibold))
                                 .foregroundStyle(.tint)
                         }
-                        Text("¿Nuevo en TriWaveX?")
+                        Text(role == .coach ? "¿Aún no tienes cuenta de entrenador?" : "¿Nuevo en TriWaveX?")
                             .foregroundStyle(.secondary)
-                        Button("Crear cuenta") {
-                            setRegistrationRole(role)
+                        Button(role == .coach ? "Crear cuenta de entrenador" : "Crear cuenta de atleta") {
+                            if role == .athlete {
+                                isShowingAthleteOnboarding = true
+                            } else {
+                                setRegistrationRole(role)
+                            }
                         }
                     }
                     .font(.subheadline)
@@ -411,7 +489,6 @@ struct RootView: View {
                 .transition(.opacity)
             } else {
                 triWaveXWordmark
-                    .font(.system(size: 34, weight: .black, design: .rounded))
                     .frame(height: 76)
                 .scaleEffect(firstIntroWordmarkScale)
             }
@@ -429,10 +506,7 @@ struct RootView: View {
     }
 
     private var triWaveXWordmark: some View {
-        HStack(spacing: 0) {
-            Text("TriWave").foregroundStyle(Color.primary)
-            Text("X").foregroundStyle(Color.triWaveXAqua)
-        }
+        TriWaveXWordmark(font: .system(size: 34, weight: .black, design: .rounded))
     }
 
     private var firstIntroWordmarkScale: CGFloat {
@@ -507,7 +581,8 @@ struct RootView: View {
         Task {
             await session.login(
                 email: email.trimmingCharacters(in: .whitespacesAndNewlines),
-                password: password
+                password: password,
+                expectedRole: role.rawValue
             )
             if session.destination != nil {
                 password = ""

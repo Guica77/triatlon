@@ -12,6 +12,12 @@ function isRaceDistance(value: unknown): value is RaceDistance {
   return typeof value === 'string' && RACE_DISTANCES.includes(value as RaceDistance)
 }
 
+function isISODate(value: unknown): value is string {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const timestamp = Date.parse(`${value}T00:00:00Z`)
+  return Number.isFinite(timestamp) && new Date(timestamp).toISOString().slice(0, 10) === value
+}
+
 const reply = (body: object, status = 200) => Response.json(body, {
   status,
   headers: { 'Cache-Control': 'no-store', 'Vary': 'Cookie' },
@@ -20,11 +26,13 @@ const reply = (body: object, status = 200) => Response.json(body, {
 type OnboardingInput = {
   goal: string
   targetRaceDistance: RaceDistance
+  targetRaceDate: string | null
   modality: 'triatlon' | 'carrera' | 'duatlon' | 'acuatlon'
   level: 'principiante' | 'intermedio' | 'avanzado'
   weeklyHours: number
   wantsCoach: boolean
   previousInjuries?: string
+  healthDataConsent: boolean
 }
 
 function inputFrom(value: unknown): OnboardingInput | null {
@@ -34,9 +42,16 @@ function inputFrom(value: unknown): OnboardingInput | null {
   const modality = ['triatlon', 'carrera', 'duatlon', 'acuatlon'].includes(raw.modality as string) ? raw.modality as OnboardingInput['modality'] : null
   const level = ['principiante', 'intermedio', 'avanzado'].includes(raw.level as string) ? raw.level as OnboardingInput['level'] : null
   const weeklyHours = typeof raw.weeklyHours === 'number' ? raw.weeklyHours : NaN
-  if (!targetRaceDistance || !modality || !level || typeof raw.goal !== 'string' || raw.goal.trim().length < 2 || raw.goal.trim().length > 120 || !Number.isFinite(weeklyHours) || weeklyHours < 2 || weeklyHours > 30 || typeof raw.wantsCoach !== 'boolean') return null
+  const targetRaceDate = raw.targetRaceDate === null || raw.targetRaceDate === undefined || raw.targetRaceDate === ''
+    ? null
+    : isISODate(raw.targetRaceDate)
+      ? raw.targetRaceDate
+      : undefined
+  const healthDataConsent = raw.healthDataConsent === true
+  if (!targetRaceDistance || !modality || !level || targetRaceDate === undefined || (targetRaceDate !== null && targetRaceDate < new Date().toISOString().slice(0, 10)) || typeof raw.goal !== 'string' || raw.goal.trim().length < 2 || raw.goal.trim().length > 120 || !Number.isFinite(weeklyHours) || weeklyHours < 2 || weeklyHours > 30 || typeof raw.wantsCoach !== 'boolean' || typeof raw.healthDataConsent !== 'boolean') return null
   const injuries = typeof raw.previousInjuries === 'string' ? raw.previousInjuries.trim().slice(0, 1000) : undefined
-  return { goal: raw.goal.trim(), targetRaceDistance, modality, level, weeklyHours, wantsCoach: raw.wantsCoach, previousInjuries: injuries }
+  if (injuries && !healthDataConsent) return null
+  return { goal: raw.goal.trim(), targetRaceDistance, targetRaceDate, modality, level, weeklyHours, wantsCoach: raw.wantsCoach, previousInjuries: injuries, healthDataConsent }
 }
 
 function suggestedSessions(modality: OnboardingInput['modality'], weeklyHours: number) {
@@ -78,6 +93,7 @@ export async function POST(request: Request) {
       level: input.level,
       active_plan_id: selectedPlan.id,
       target_race_name: input.goal,
+      target_race_date: input.targetRaceDate,
       target_race_distance: input.targetRaceDistance,
       target_race_modality: input.modality,
       baseline_training_hours: weeklyBand,
@@ -85,6 +101,7 @@ export async function POST(request: Request) {
       bike_weekly_hours: input.modality === 'carrera' || input.modality === 'acuatlon' ? 0 : Math.max(1, Math.round(input.weeklyHours * 0.45)),
       run_weekly_hours: Math.max(1, Math.round(input.weeklyHours * 0.35)),
       previous_injuries: input.previousInjuries || null,
+      health_data_consent_at: input.healthDataConsent ? new Date().toISOString() : null,
     }).eq('id', user.id)
     if (profileError) return reply({ error: 'No se ha podido guardar tu perfil.' }, 503)
 

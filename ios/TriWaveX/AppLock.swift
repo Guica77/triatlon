@@ -18,6 +18,13 @@ final class AppLock {
         }
     }
 
+    init() {
+        // The in-memory lock state is lost when iOS terminates the process.
+        // Restore it from the user's preference so a cold launch cannot skip
+        // authentication after Face ID has been enabled.
+        isLocked = UserDefaults.standard.bool(forKey: enabledKey)
+    }
+
     func lockIfNeeded() {
         guard isEnabled else { return }
         isLocked = true

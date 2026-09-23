@@ -16,9 +16,7 @@ struct TriWaveXStartupView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 14) {
-                Text("TriWaveX")
-                    .font(.system(size: 34, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color.triWaveXTextPrimary)
+                TriWaveXWordmark()
 
                 Text("Entrena con una dirección clara")
                     .font(.body)

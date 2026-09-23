@@ -10,6 +10,19 @@ export const APPLE_PRODUCTS = {
   coach: 'com.triwavex.coach.monthly',
 } as const
 
+export const APPLE_PRODUCT_IDS = [
+  APPLE_PRODUCTS.athlete,
+  ...[10, 15, 20, 25, 30, 35, 40, 45, 50].map((capacity) => capacity === 10 ? APPLE_PRODUCTS.coach : `${APPLE_PRODUCTS.coach}.${capacity}`),
+] as const
+
+export const APPLE_COACH_CAPACITIES = [10, 15, 20, 25, 30, 35, 40, 45, 50] as const
+
+export function coachCapacityForAppleProduct(productID: string): number | null {
+  if (productID === APPLE_PRODUCTS.coach) return 10
+  const match = /^com\.triwavex\.coach\.monthly\.(15|20|25|30|35|40|45|50)$/.exec(productID)
+  return match ? Number(match[1]) : null
+}
+
 export type ApplePlan = keyof typeof APPLE_PRODUCTS
 type AppleStatus = 'active' | 'past_due' | 'cancelled' | 'expired'
 
@@ -129,6 +142,6 @@ export function classifyAppleEvent(input: {
 
 export function planForAppleProduct(productID: string): ApplePlan | null {
   if (productID === APPLE_PRODUCTS.athlete) return 'athlete'
-  if (productID === APPLE_PRODUCTS.coach) return 'coach'
+  if (coachCapacityForAppleProduct(productID) !== null) return 'coach'
   return null
 }

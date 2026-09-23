@@ -59,7 +59,13 @@ struct SubscriptionFinishGate {
     private(set) var products: [Product] = []
     private(set) var purchasedProductIDs = Set<String>()
     private(set) var introEligibleProductIDs = Set<String>()
-    private let identifiers = ["com.triwavex.athlete.monthly", "com.triwavex.coach.monthly"]
+    var purchasedCoachCapacity: Int? {
+        purchasedProductIDs.compactMap { id in
+            guard id.hasPrefix("com.triwavex.coach.monthly") else { return nil }
+            return coachCapacity(for: id)
+        }.max()
+    }
+    private let identifiers = ["com.triwavex.athlete.monthly", "com.triwavex.coach.monthly"] + [15, 20, 25, 30, 35, 40, 45, 50].map { "com.triwavex.coach.monthly.\($0)" }
     private let transport: NativeEntryTransport
     private let expectedUserID: String
     private let expectedRole: String
@@ -129,11 +135,22 @@ struct SubscriptionFinishGate {
         }
     }
 
-    func observeTransactions() async {
+    func observeTransactions(onOfferCodeProcessed: @escaping (NativeSubscriptionResult?) -> Void) async {
         for await result in StoreKit.Transaction.updates {
             guard case .verified(let transaction) = result else { continue }
-            _ = await reconcile(transaction, signedTransactionInfo: result.jwsRepresentation)
+            let authorized = await reconcile(transaction, signedTransactionInfo: result.jwsRepresentation)
+            if isOfferCodeTransaction(transaction) {
+                onOfferCodeProcessed(authorized)
+            }
         }
+    }
+
+    private func isOfferCodeTransaction(_ transaction: StoreKit.Transaction) -> Bool {
+        if #available(iOS 17.2, *) {
+            return transaction.offer?.type == .code
+        }
+        // `offerType` is the StoreKit 2 compatibility API for iOS 15–17.1.
+        return transaction.offerType == .code
     }
 
     private func reconcile(_ transaction: StoreKit.Transaction, signedTransactionInfo: String) async -> NativeSubscriptionResult? {
@@ -152,7 +169,9 @@ struct SubscriptionFinishGate {
             transactionID: String(transaction.id),
             originalTransactionID: String(transaction.originalID),
             appAccountToken: transaction.appAccountToken?.uuidString,
-            eventType: transaction.revocationDate == nil ? "SUBSCRIBED" : "REVOKE"
+            eventType: transaction.revocationDate != nil
+                ? "REVOKE"
+                : (isOfferCodeTransaction(transaction) ? "OFFER_REDEEMED" : "SUBSCRIBED")
         )
 
         do {
@@ -208,13 +227,16 @@ struct NativeSubscriptionStoreView: View {
     @State private var store: SubscriptionStore
     @State private var restoredMessage: String?
     @State private var showingPaymentReview = false
+    @State private var showingOfferCodeRedemption = false
+    @State private var selectedCoachCapacity = 10
 
     private let privacyURL = URL(string: "https://app.triwavex.com/legal/privacidad")!
     private let termsURL = URL(string: "https://app.triwavex.com/legal/terminos")!
     private let subscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
 
     private var productIdentifier: String {
-        role == "coach" ? "com.triwavex.coach.monthly" : "com.triwavex.athlete.monthly"
+        guard role == "coach" else { return "com.triwavex.athlete.monthly" }
+        return selectedCoachCapacity == 10 ? "com.triwavex.coach.monthly" : "com.triwavex.coach.monthly.\(selectedCoachCapacity)"
     }
 
     private var selectedProduct: Product? {
@@ -236,6 +258,7 @@ struct NativeSubscriptionStoreView: View {
             VStack(alignment: .leading, spacing: 22) {
                 header
                 if showPlanComparison { planComparison }
+                if role == "coach" { coachCapacityPicker }
                 if let product = selectedProduct {
                     planCard(product)
                     purchaseButton(product)
@@ -253,8 +276,22 @@ struct NativeSubscriptionStoreView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("Suscripción")
         .overlay { if isBusy { loadingOverlay } }
-        .task { await store.load() }
-        .task { await store.observeTransactions() }
+        .task {
+            await store.load()
+            if role == "coach", let purchased = store.purchasedCoachCapacity {
+                selectedCoachCapacity = purchased
+            }
+        }
+        .task {
+            await store.observeTransactions { authorization in
+                if let authorization {
+                    restoredMessage = "Código aplicado y suscripción confirmada por Apple."
+                    onFinished(authorization)
+                } else {
+                    restoredMessage = failureMessage ?? "Apple aceptó el código, pero no se pudo asociar al plan de esta cuenta. Contacta con soporte antes de volver a canjearlo."
+                }
+            }
+        }
         .sheet(isPresented: $showingPaymentReview) {
             if let product = selectedProduct {
                 NativePaymentReviewView(product: product, role: role, eligibleForIntro: store.introEligibleProductIDs.contains(product.id), isBusy: isBusy) {
@@ -265,13 +302,21 @@ struct NativeSubscriptionStoreView: View {
                 }
             }
         }
-        .alert("Compras restauradas", isPresented: Binding(
+        .alert("Suscripción", isPresented: Binding(
             get: { restoredMessage != nil },
             set: { if !$0 { restoredMessage = nil } }
         )) {
             Button("Aceptar") { restoredMessage = nil }
         } message: {
             Text(restoredMessage ?? "")
+        }
+        .offerCodeRedemption(isPresented: $showingOfferCodeRedemption) { result in
+            switch result {
+            case .success:
+                break // Transaction.updates performs the same server reconciliation as purchases.
+            case .failure:
+                restoredMessage = "No se ha podido canjear el código. Comprueba que sigue activo y corresponde a este plan."
+            }
         }
     }
 
@@ -285,10 +330,31 @@ struct NativeSubscriptionStoreView: View {
                 .font(.largeTitle.bold())
                 .tracking(-0.6)
             Text(role == "coach"
-                 ? "Organiza hasta 10 atletas, comparte sesiones y sigue su evolución desde un solo lugar."
+                 ? "Elige cuántos atletas activos quieres acompañar. Puedes cambiar de capacidad desde tu suscripción de Apple."
                  : "Sigue tu semana, registra cada sesión y adapta el plan con tus datos reales.")
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private var coachCapacityPicker: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Plazas para atletas").font(.headline)
+            Picker("Capacidad del entrenador", selection: $selectedCoachCapacity) {
+                ForEach([10, 15, 20, 25, 30, 35, 40, 45, 50], id: \.self) { capacity in
+                    let id = capacity == 10 ? "com.triwavex.coach.monthly" : "com.triwavex.coach.monthly.\(capacity)"
+                    let available = store.products.contains(where: { $0.id == id })
+                    Text(available ? "Hasta \(capacity) atletas · \(price(for: id))" : "Hasta \(capacity) atletas · Pendiente en App Store")
+                        .tag(capacity)
+                        .disabled(!available)
+                }
+            }
+            .pickerStyle(.menu)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            Text("Incluye 10 plazas por 29,99 €/mes; cada bloque adicional de hasta 5 plazas suma 2,99 €/mes. Se conserva el precio localizado que muestra Apple para el tramo elegido.")
+                .font(.footnote).foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private var planComparison: some View {
@@ -349,10 +415,11 @@ struct NativeSubscriptionStoreView: View {
                 }
                 Text("\(product.displayPrice) al mes").font(.title2.bold().monospacedDigit())
                 Divider()
-                benefit("checkmark.circle.fill", role == "coach" ? "10 atletas incluidos" : "Plan adaptado a tu progreso")
+                benefit("checkmark.circle.fill", role == "coach" ? "Hasta \(selectedCoachCapacity) atletas activos" : "Plan adaptado a tu progreso")
                 benefit("arrow.triangle.2.circlepath", "Renovación mensual hasta que canceles")
                 benefit("iphone.and.arrow.forward", "Disponible con tu Apple ID en tus dispositivos")
                 if role == "coach" {
+                    benefit("person.2.fill", "Capacidad seleccionada: hasta \(selectedCoachCapacity) atletas activos")
                     Text("Cada bloque adicional de 5 atletas cuesta 2,99 €/mes y se muestra antes de confirmar.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
@@ -387,6 +454,15 @@ struct NativeSubscriptionStoreView: View {
 
     private var supportActions: some View {
         VStack(spacing: 4) {
+            Button("Canjear código de oferta de Apple") {
+                showingOfferCodeRedemption = true
+            }
+            .buttonStyle(TriWaveXTextButtonStyle(tint: .triWaveXAqua))
+            .disabled(isBusy)
+            Text("Los descuentos deben estar creados en App Store Connect.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
             Button("Restaurar compras") {
                 Task {
                     if let result = await store.restore(expectedProductID: productIdentifier) {
@@ -473,7 +549,7 @@ private struct NativePaymentReviewView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack { Text(role == "coach" ? "Entrenador" : "Atleta con IA"); Spacer(); Text("\(product.displayPrice)/mes").bold() }
                     if eligibleForIntro { Text("7 días gratis, sin cobro hoy.").foregroundStyle(.secondary) }
-                    if role == "coach" { Text("Incluye 10 atletas. Cada bloque adicional de 5 atletas cuesta 2,99 €/mes.").font(.subheadline).foregroundStyle(.secondary) }
+                    if role == "coach" { Text("Incluye capacidad para hasta \(coachCapacity(for: product.id)) atletas activos. Apple confirma el precio mensual exacto antes del pago.").font(.subheadline).foregroundStyle(.secondary) }
                     if role != "coach" {
                         Label("Desbloquea tu plan completo, los ajustes de carga y el seguimiento de cada sesión.", systemImage: "checkmark.circle.fill")
                             .font(.subheadline)
@@ -496,6 +572,11 @@ private struct NativePaymentReviewView: View {
         }
         .presentationDetents([.medium, .large])
     }
+}
+
+private func coachCapacity(for productID: String) -> Int {
+    guard productID.hasPrefix("com.triwavex.coach.monthly.") else { return 10 }
+    return Int(productID.split(separator: ".").last ?? "10") ?? 10
 }
 
 private struct SlideToConfirm: View {

@@ -14,6 +14,7 @@ export function ResourceLibrary({ resources, athletes, isCoach }: { resources: R
   const [open, setOpen] = React.useState(false)
   const [pending, setPending] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [notice, setNotice] = React.useState<string | null>(null)
   const [filter, setFilter] = React.useState<'all' | Resource['resource_type']>('all')
   const shown = resources.filter(resource => filter === 'all' || resource.resource_type === filter)
 
@@ -24,7 +25,7 @@ export function ResourceLibrary({ resources, athletes, isCoach }: { resources: R
       visibility: String(formData.get('visibility') || ''), content: String(formData.get('content') || ''), sourceUrl: String(formData.get('sourceUrl') || ''), athleteId: String(formData.get('athleteId') || '') || undefined,
     })
     setPending(false)
-    if (result.error) setError(result.error); else setOpen(false)
+    if (result.error) setError(result.error); else { setOpen(false); setNotice(result.notice || null) }
   }
 
   return <div className="min-h-screen bg-bg-app pb-24">
@@ -33,6 +34,7 @@ export function ResourceLibrary({ resources, athletes, isCoach }: { resources: R
         <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Tu conocimiento</p><h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-primary">Biblioteca</h1><p className="mt-2 max-w-md text-sm leading-relaxed text-text-secondary">Material de triatlón que la IA puede usar solo en el contexto autorizado.</p></div>
         <button onClick={() => setOpen(true)} className="flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-accent px-4 text-sm font-semibold text-white shadow-sm"><Plus className="h-4 w-4" />Añadir</button>
       </header>
+      {notice && <p role="status" className="mt-4 rounded-2xl border border-border-default bg-surface-card px-4 py-3 text-sm leading-relaxed text-text-secondary">{notice}</p>}
       <div className="mt-6 rounded-2xl border border-border-default bg-surface-card p-4"><div className="flex gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-green-600"/><p className="text-sm leading-relaxed text-text-secondary"><strong className="text-text-primary">Privacidad primero.</strong> Tus recursos privados no se comparten. Solo entra contenido de preparación de triatlón, recuperación y rendimiento.</p></div></div>
       <div className="mt-6 flex gap-2 overflow-x-auto pb-1">{([['all','Todo'],['document','Documentos'],['video','Vídeos'],['link','Enlaces']] as const).map(([key,label]) => <button key={key} onClick={() => setFilter(key)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${filter === key ? 'bg-text-primary text-white' : 'bg-surface-card text-text-secondary ring-1 ring-border-default'}`}>{label}</button>)}</div>
       <section className="mt-5 overflow-hidden rounded-2xl border border-border-default bg-surface-card">{shown.length ? shown.map((resource, index) => <ResourceRow key={resource.id} resource={resource} divider={index > 0} own={resource.owner_id === '' || true} />) : <div className="px-5 py-12 text-center"><BookOpen className="mx-auto h-7 w-7 text-text-muted"/><p className="mt-3 font-medium text-text-primary">Tu biblioteca está lista</p><p className="mt-1 text-sm text-text-secondary">Añade un documento, vídeo o enlace de triatlón.</p></div>}</section>

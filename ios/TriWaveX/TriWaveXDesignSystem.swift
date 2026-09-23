@@ -58,6 +58,22 @@ extension Color {
     static let triWaveXError = triWaveXCoral
 }
 
+struct TriWaveXWordmark: View {
+    var font: Font = .system(size: 34, weight: .bold, design: .rounded)
+
+    var body: some View {
+        HStack(spacing: 0) {
+            Text("TriWave")
+                .foregroundStyle(Color.triWaveXTextPrimary)
+            Text("X")
+                .foregroundStyle(Color.triWaveXAqua)
+        }
+        .font(font)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("TriWaveX")
+    }
+}
+
 struct TriWaveXSurface<Content: View>: View {
     private let content: Content
     private let padding: CGFloat
