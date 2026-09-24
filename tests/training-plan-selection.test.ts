@@ -9,7 +9,9 @@ const plans = [
   { id: '10k-intermedio', distance: '10 km', level: 'intermedio' },
   { id: 'half-marathon-intermedio', distance: 'Media Maratón', level: 'intermedio' },
   { id: 'marathon-intermedio', distance: 'Maratón', level: 'intermedio' },
-  { id: 'ultra-intermedio', distance: 'Ultra Trail', level: 'intermedio' },
+  { id: 'ultra-intermedio', distance: 'Ultra asfalto', level: 'intermedio' },
+  { id: 'trail-intermedio', distance: 'Trail', level: 'intermedio' },
+  { id: 'ultra-trail-intermedio', distance: 'Ultra Trail', level: 'intermedio' },
 ]
 
 describe('selectTrainingPlan', () => {
@@ -19,6 +21,8 @@ describe('selectTrainingPlan', () => {
     ['medio_maraton', 'half-marathon-intermedio'],
     ['maraton', 'marathon-intermedio'],
     ['ultra', 'ultra-intermedio'],
+    ['trail', 'trail-intermedio'],
+    ['ultra_trail', 'ultra-trail-intermedio'],
   ])('selects the requested running distance: %s', (distance, expectedId) => {
     expect(selectTrainingPlan(plans, distance, 'intermedio')?.id).toBe(expectedId)
   })
@@ -34,5 +38,11 @@ describe('selectTrainingPlan', () => {
 
   it('does not select the first plan when no distance matches', () => {
     expect(selectTrainingPlan(plans, 'unknown-distance', 'intermedio')).toBeNull()
+  })
+
+  it('keeps ultra road, trail, and ultra trail as distinct goals', () => {
+    expect(selectTrainingPlan(plans, 'ultra', 'intermedio')?.id).toBe('ultra-intermedio')
+    expect(selectTrainingPlan(plans, 'trail', 'intermedio')?.id).toBe('trail-intermedio')
+    expect(selectTrainingPlan(plans, 'ultra_trail', 'intermedio')?.id).toBe('ultra-trail-intermedio')
   })
 })

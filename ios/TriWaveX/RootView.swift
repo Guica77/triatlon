@@ -145,6 +145,22 @@ struct RootView: View {
                     )
                 }
                 .transition(.opacity)
+            } else if session.destination == "/checkout", let userID = session.stableUserID {
+                NavigationStack {
+                    NativeSubscriptionStoreView(
+                        origin: session.origin,
+                        store: session.store,
+                        expectedUserID: userID,
+                        role: Role.athlete.rawValue,
+                        showPlanComparison: false,
+                        onFinished: { result in
+                            guard result.userID == userID, result.role == Role.athlete.rawValue else { return }
+                            guidedTourRequest = GuidedTourRequest(userID: result.userID, role: .athlete, givenName: onboardingGivenName)
+                            session.destination = result.destination
+                        }
+                    )
+                }
+                .transition(.opacity)
             } else if session.destination == "/onboarding", session.role == Role.coach.rawValue,
                       let userID = session.stableUserID {
                 NavigationStack {
@@ -512,25 +528,31 @@ struct RootView: View {
     }
 
     private var branding: some View {
-        Group {
-            if loginIntroStage < 3 {
-                TypingCycleText(text: loginIntroCopy[loginIntroStage])
-                    .font(.system(size: 31, weight: .bold))
-                    .foregroundStyle(.primary)
-                    .multilineTextAlignment(.center)
-                    .transition(.opacity)
-            } else if loginIntroStage == 3 {
-                Text("Para eso está…")
-                    .font(.system(size: 31, weight: .bold))
-                    .foregroundStyle(.primary)
-                .transition(.opacity)
-            } else {
-                triWaveXWordmark
-                    .frame(height: 76)
-                .scaleEffect(firstIntroWordmarkScale)
+        VStack(spacing: 16) {
+            Group {
+                if loginIntroStage < 3 {
+                    TypingCycleText(text: loginIntroCopy[loginIntroStage])
+                        .font(.system(size: 31, weight: .bold))
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.center)
+                        .transition(.opacity)
+                } else if loginIntroStage == 3 {
+                    Text("Para eso está…")
+                        .font(.system(size: 31, weight: .bold))
+                        .foregroundStyle(.primary)
+                        .transition(.opacity)
+                } else {
+                    triWaveXWordmark
+                        .frame(height: 76)
+                        .scaleEffect(firstIntroWordmarkScale)
+                }
             }
+            .frame(maxWidth: .infinity, minHeight: 76)
+
+            loginIntroProgress
+                .opacity(loginIntroStage < 8 ? 1 : 0)
         }
-        .frame(maxWidth: .infinity, minHeight: 76)
+        .frame(maxWidth: .infinity)
         .offset(y: !reduceMotion && (loginIntroStage < 4 || liftsLoginTitle && loginIntroStage < 7) ? 250 : 0)
         .animation(
             liftsLoginTitle && !reduceMotion && loginIntroStage == 7
@@ -538,8 +560,21 @@ struct RootView: View {
                 : TriWaveXMotion.entry(reduced: reduceMotion),
             value: loginIntroStage
         )
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
         .accessibilityLabel(loginIntroStage < 3 ? loginIntroCopy[loginIntroStage] : loginIntroStage == 3 ? "Para eso está" : "TriWaveX. Entrena con una dirección clara")
+    }
+
+    private var loginIntroProgress: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<3, id: \.self) { step in
+                Circle()
+                    .fill(step <= min(loginIntroStage, 2) ? Color.triWaveXAqua : Color(uiColor: .tertiaryLabel))
+                    .frame(width: 6, height: 6)
+                    .scaleEffect(step == min(loginIntroStage, 2) ? 1.18 : 1)
+            }
+        }
+        .animation(TriWaveXMotion.selection(reduced: reduceMotion), value: loginIntroStage)
+        .accessibilityHidden(true)
     }
 
     private var triWaveXWordmark: some View {
@@ -573,39 +608,52 @@ struct RootView: View {
         if hasSeenLoginIntro {
             liftsLoginTitle = true
             loginIntroStage = 4
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_650))
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 900))
             guard !Task.isCancelled else { return }
             withAnimation(reduceMotion ? .easeOut(duration: 0.12) : TriWaveXMotion.loginTitleLift) { loginIntroStage = 7 }
-            for stage in 8...10 {
-                try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 300))
-                guard !Task.isCancelled else { return }
-                withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) { loginIntroStage = stage }
-            }
+            await revealLoginControlsAfterLift()
             return
         }
 
         liftsLoginTitle = false
         loginIntroStage = 0
-        let phraseDelays = [4600, 4600, 4600, 1800]
-        for (index, delay) in phraseDelays.enumerated() {
+        for (index, phrase) in loginIntroCopy.enumerated() {
+            // Match the transition to the type-and-erase cycle, with only a short reading beat afterward.
+            let delay = TypingCycleText.cycleDurationMilliseconds(forCharacterCount: phrase.count) + 240
             try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : delay))
             guard !Task.isCancelled else { return }
             withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
                 loginIntroStage = index + 1
-                if loginIntroStage == 4 { liftsLoginTitle = true }
             }
         }
-        try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_900))
+        try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_100))
+        guard !Task.isCancelled else { return }
+        withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
+            loginIntroStage = 4
+            liftsLoginTitle = true
+        }
+        try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_450))
         guard !Task.isCancelled else { return }
         withAnimation(reduceMotion ? .easeOut(duration: 0.12) : TriWaveXMotion.loginTitleLift) {
             loginIntroStage = 7
         }
-        for stage in 8...10 {
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 320))
+        await revealLoginControlsAfterLift()
+        guard !Task.isCancelled else { return }
+        hasSeenLoginIntro = true
+    }
+
+    private func revealLoginControlsAfterLift() async {
+        try? await Task.sleep(for: .milliseconds(
+            reduceMotion ? 80 : TriWaveXMotion.loginTitleLiftDurationMilliseconds
+        ))
+        guard !Task.isCancelled else { return }
+        withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) { loginIntroStage = 8 }
+
+        for stage in 9...10 {
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 220))
             guard !Task.isCancelled else { return }
             withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) { loginIntroStage = stage }
         }
-        hasSeenLoginIntro = true
     }
 
     private var canSubmit: Bool {

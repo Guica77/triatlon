@@ -4,7 +4,7 @@ import type { Database } from '@/types/database.types'
 export type NativeAccessRole = 'athlete' | 'coach'
 
 export type NativeAccess = {
-  destination: '/dashboard' | '/coach/dashboard' | '/onboarding'
+  destination: '/dashboard' | '/coach/dashboard' | '/onboarding' | '/checkout'
   userID: string
   role: NativeAccessRole
   entitled: boolean
@@ -42,7 +42,14 @@ export async function nativeAccessForUser(
     inGracePeriod
   )
 
-  if (!entitled) return { destination: '/onboarding', userID, role, entitled: false }
+  if (!entitled) {
+    // A saved athlete plan means onboarding is complete: resume at purchase
+    // instead of making the athlete enter the same goal again after sign-in.
+    if (role === 'athlete' && profile?.active_plan_id) {
+      return { destination: '/checkout', userID, role, entitled: false }
+    }
+    return { destination: '/onboarding', userID, role, entitled: false }
+  }
   if (role === 'coach') return { destination: '/coach/dashboard', userID, role, entitled: true }
   return { destination: '/dashboard', userID, role, entitled: true }
 }

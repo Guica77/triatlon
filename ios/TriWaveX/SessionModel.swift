@@ -89,8 +89,8 @@ final class SessionModel {
     @discardableResult
     private func applyAuthorization(_ result: LoginResult) -> Bool {
         guard result.role == "athlete" || result.role == "coach",
-              ["/dashboard", "/coach/dashboard", "/onboarding"].contains(result.destination),
-              result.entitled || result.destination == "/onboarding" else {
+              ["/dashboard", "/coach/dashboard", "/onboarding", "/checkout"].contains(result.destination),
+              result.entitled || result.destination == "/onboarding" || result.destination == "/checkout" else {
             role = nil
             entitled = false
             error = "No se ha podido abrir tu perfil."
@@ -249,7 +249,7 @@ final class SessionModel {
                 return
             }
             guard http.statusCode == 200 else {
-                error = "No se ha podido verificar la cuenta de Google. Revisa la configuración e inténtalo de nuevo."
+                error = "Google no se ha podido verificar. Comprueba que el proveedor Google de Supabase usa el Client ID web y el secret del mismo proyecto que la app iOS."
                 return
             }
             do {
@@ -266,7 +266,7 @@ final class SessionModel {
     private func applyLoginResponse(data: Data, response: HTTPURLResponse, expectedRole: String? = nil) async throws {
         let result = try JSONDecoder().decode(LoginResult.self, from: data)
         guard let userID = result.userID, !userID.isEmpty,
-              ["/dashboard", "/coach/dashboard", "/onboarding"].contains(result.destination) else {
+              ["/dashboard", "/coach/dashboard", "/onboarding", "/checkout"].contains(result.destination) else {
             error = "No se ha podido abrir tu perfil."
             return
         }

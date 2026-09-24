@@ -159,7 +159,9 @@ export function StepGoal(props: StepGoalProps) {
                     <option value="10k">10K</option>
                     <option value="medio_maraton">Media Maratón (21K)</option>
                     <option value="maraton">Maratón (42K)</option>
-                    <option value="ultra">Ultra Maratón</option>
+                    <option value="trail">Trail</option>
+                    <option value="ultra">Ultra en asfalto</option>
+                    <option value="ultra_trail">Ultra Trail</option>
                   </>
                 ) : (
                   <>

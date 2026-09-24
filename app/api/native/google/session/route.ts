@@ -32,7 +32,9 @@ export async function POST(request: Request) {
     const { data, error } = await supabase.auth.signInWithIdToken({
       provider: 'google', token: input.identityToken,
     })
-    if (error || !data.user || !data.session) return reply({ error: 'No se ha podido verificar Google' }, 401)
+    if (error || !data.user || !data.session) return reply({
+      error: 'Google no se ha podido verificar. Comprueba en Supabase que el Client ID web y el secret sean del mismo proyecto de Google que la app iOS.',
+    }, 401)
 
     const { data: existingProfile, error: profileError } = await supabase.from('profiles')
       .select('id').eq('id', data.user.id).maybeSingle()

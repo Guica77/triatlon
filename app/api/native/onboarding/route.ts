@@ -3,7 +3,7 @@ import { nativeAccessForUser } from '@/lib/native-access'
 import { selectTrainingPlan } from '@/lib/training-plan-selection'
 
 const RACE_DISTANCES = [
-  'sprint', 'olimpico', 'half', 'full', '5k', '10k', 'medio_maraton', 'maraton', 'ultra',
+  'sprint', 'olimpico', 'half', 'full', '5k', '10k', 'medio_maraton', 'maraton', 'ultra', 'trail', 'ultra_trail',
 ] as const
 
 type RaceDistance = typeof RACE_DISTANCES[number]
@@ -54,14 +54,42 @@ function inputFrom(value: unknown): OnboardingInput | null {
   return { goal: raw.goal.trim(), targetRaceDistance, targetRaceDate, modality, level, weeklyHours, wantsCoach: raw.wantsCoach, previousInjuries: injuries, healthDataConsent }
 }
 
-function suggestedSessions(modality: OnboardingInput['modality'], weeklyHours: number) {
-  const schedule = {
-    triatlon: [{ day: 'Lun', sport: 'natacion' }, { day: 'Mié', sport: 'ciclismo' }, { day: 'Vie', sport: 'carrera' }, { day: 'Dom', sport: 'transicion' }],
-    carrera: [{ day: 'Mar', sport: 'carrera' }, { day: 'Jue', sport: 'carrera' }, { day: 'Sáb', sport: 'carrera' }, { day: 'Dom', sport: 'fuerza' }],
-    duatlon: [{ day: 'Mar', sport: 'carrera' }, { day: 'Jue', sport: 'ciclismo' }, { day: 'Sáb', sport: 'carrera' }, { day: 'Dom', sport: 'transicion' }],
-    acuatlon: [{ day: 'Mar', sport: 'natacion' }, { day: 'Jue', sport: 'carrera' }, { day: 'Sáb', sport: 'natacion' }, { day: 'Dom', sport: 'transicion' }],
-  }[modality]
-  return weeklyHours <= 6 ? schedule.slice(0, 3) : schedule
+type TrainingSession = {
+  id: string
+  week_number: number
+  day_name: string
+  sport_type: string
+}
+
+function sessionsForModality(sessions: TrainingSession[], modality: OnboardingInput['modality']) {
+  return sessions.filter((session) => {
+    const sport = session.sport_type.toLocaleLowerCase('es')
+    if (modality === 'carrera' && (
+      sport.includes('natacion') || sport.includes('swim') || sport.includes('ciclismo') ||
+      sport.includes('bike') || sport.includes('transicion') || sport.includes('brick')
+    )) return false
+    if (modality === 'duatlon' && (sport.includes('natacion') || sport.includes('swim'))) return false
+    if (modality === 'acuatlon' && (sport.includes('ciclismo') || sport.includes('bike'))) return false
+    return true
+  })
+}
+
+function mondayOfCurrentWeekUTC() {
+  const now = new Date()
+  const mondayOffset = (now.getUTCDay() + 6) % 7
+  const daysUntilNextTrainingWeek = mondayOffset === 0 ? 0 : 7 - mondayOffset
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + daysUntilNextTrainingWeek))
+}
+
+function scheduledDateForSession(startOfWeek: Date, session: TrainingSession) {
+  const days: Record<string, number> = {
+    lunes: 0, martes: 1, miercoles: 2, jueves: 3,
+    viernes: 4, sabado: 5, domingo: 6,
+  }
+  const day = days[session.day_name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es')] ?? 0
+  const date = new Date(startOfWeek)
+  date.setUTCDate(date.getUTCDate() + (Math.max(1, session.week_number) - 1) * 7 + day)
+  return date.toISOString().slice(0, 10)
 }
 
 export async function POST(request: Request) {
@@ -88,8 +116,39 @@ export async function POST(request: Request) {
     const selectedPlan = selectTrainingPlan(plans, input.targetRaceDistance, input.level)
     if (!selectedPlan) return reply({ error: 'No hay un plan compatible disponible todavía.' }, 409)
 
+    const { data: rawSessions, error: sessionsError } = await supabase
+      .from('training_sessions')
+      .select('id, week_number, day_name, sport_type')
+      .eq('plan_id', selectedPlan.id)
+      .order('week_number', { ascending: true })
+    if (sessionsError) return reply({ error: 'No se han podido cargar las sesiones del plan.' }, 503)
+    const sessions = sessionsForModality((rawSessions || []) as TrainingSession[], input.modality)
+    if (!sessions.length) return reply({ error: 'Esta plantilla aún no tiene entrenamientos compatibles.' }, 409)
+
     const weeklyBand = input.weeklyHours <= 6 ? '4-6h' : input.weeklyHours <= 11 ? '7-10h' : '12+h'
-    const { error: profileError } = await supabase.from('profiles').update({
+    const today = new Date().toISOString().slice(0, 10)
+    const { data: previousWorkouts, error: previousWorkoutsError } = await supabase
+      .from('user_workouts')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('status', 'pending')
+      .gte('scheduled_date', today)
+    if (previousWorkoutsError) return reply({ error: 'No se ha podido preparar tu calendario.' }, 503)
+
+    const weekStart = mondayOfCurrentWeekUTC()
+    const workoutInserts = sessions.map((session) => ({
+      user_id: user.id,
+      session_id: session.id,
+      scheduled_date: scheduledDateForSession(weekStart, session),
+      status: 'pending',
+    }))
+    const { data: insertedWorkouts, error: workoutsError } = await supabase
+      .from('user_workouts')
+      .insert(workoutInserts)
+      .select('id')
+    if (workoutsError || !insertedWorkouts?.length) return reply({ error: 'No se han podido guardar los entrenamientos en tu calendario.' }, 503)
+
+    const { data: updatedProfiles, error: profileError } = await supabase.from('profiles').update({
       level: input.level,
       active_plan_id: selectedPlan.id,
       target_race_name: input.goal,
@@ -102,8 +161,17 @@ export async function POST(request: Request) {
       run_weekly_hours: Math.max(1, Math.round(input.weeklyHours * 0.35)),
       previous_injuries: input.previousInjuries || null,
       health_data_consent_at: input.healthDataConsent ? new Date().toISOString() : null,
-    }).eq('id', user.id)
-    if (profileError) return reply({ error: 'No se ha podido guardar tu perfil.' }, 503)
+    }).eq('id', user.id).select('id')
+    if (profileError || !updatedProfiles?.length) {
+      await supabase.from('user_workouts').delete().eq('user_id', user.id).in('id', insertedWorkouts.map((workout) => workout.id))
+      return reply({ error: 'No se ha podido guardar tu perfil y el plan. Comprueba tu conexión e inténtalo de nuevo.' }, 503)
+    }
+
+    const previousIDs = (previousWorkouts || []).map((workout: { id: string }) => workout.id)
+    if (previousIDs.length) {
+      const { error: cleanupError } = await supabase.from('user_workouts').delete().eq('user_id', user.id).in('id', previousIDs)
+      if (cleanupError) console.warn('No se pudieron retirar todos los entrenamientos pendientes sustituidos durante el onboarding')
+    }
 
     const access = await nativeAccessForUser(supabase, user.id)
     return reply({
@@ -112,7 +180,9 @@ export async function POST(request: Request) {
         name: selectedPlan.name,
         description: selectedPlan.description,
         durationWeeks: selectedPlan.duration_weeks,
-        sessions: suggestedSessions(input.modality, input.weeklyHours),
+        sessions: sessions
+          .filter((session) => session.week_number === 1)
+          .map((session) => ({ day: session.day_name.slice(0, 3), sport: session.sport_type })),
       },
       ...access,
     })

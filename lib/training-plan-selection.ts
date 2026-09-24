@@ -13,13 +13,17 @@ const DISTANCE_ALIASES: Record<string, string[]> = {
   '10k': ['10k', '10 km', 'diez km'],
   'medio maraton': ['medio maraton', 'media maraton', 'half marathon', '21k', '21 km'],
   maraton: ['maraton', 'marathon', '42k', '42 km'],
-  ultra: ['ultra'],
+  ultra: ['ultra', 'ultra asfalto', 'ultra en asfalto', 'ultra carrera'],
+  trail: ['trail', 'trail running'],
+  'ultra trail': ['ultra trail', 'ultra trail running'],
 }
 
 const DISTANCE_EXCLUSIONS: Record<string, string[]> = {
   half: ['media maraton', 'medio maraton', 'half marathon'],
   full: ['full marathon'],
   maraton: ['media maraton', 'medio maraton', 'half marathon'],
+  ultra: ['ultra trail'],
+  trail: ['ultra trail'],
 }
 
 function normalize(value: string): string {

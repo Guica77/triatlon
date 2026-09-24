@@ -229,7 +229,7 @@ struct NativeAthleteOnboardingView: View {
     }
     private var distanceOptions: [(id: String, title: String)] {
         switch preferences.modality {
-        case "carrera": [("5k", "5 km"), ("10k", "10 km"), ("medio_maraton", "Media maratón"), ("maraton", "Maratón"), ("ultra", "Ultra")]
+        case "carrera": [("5k", "5 km"), ("10k", "10 km"), ("medio_maraton", "Media maratón"), ("maraton", "Maratón"), ("trail", "Trail"), ("ultra", "Ultra en asfalto"), ("ultra_trail", "Ultra Trail")]
         case "triatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "70.3"), ("full", "Larga distancia")]
         default: [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "Media distancia")]
         }
@@ -608,7 +608,12 @@ struct NativeOnboardingView: View {
     init(origin: URL, store: WKWebsiteDataStore, expectedUserID: String, givenName: String, onFinished: @escaping (NativeSubscriptionResult) -> Void) {
         self.origin = origin; self.store = store; self.expectedUserID = expectedUserID; self.givenName = givenName; self.onFinished = onFinished
         _model = State(initialValue: NativeOnboardingModel(origin: origin, store: store))
-        _step = State(initialValue: min(max(UserDefaults.standard.integer(forKey: "triwavex.onboarding.step"), 0), 2))
+        let defaults = UserDefaults.standard
+        let savedStep = min(max(defaults.integer(forKey: "triwavex.onboarding.step"), 0), 2)
+        let completedPreAuthDraft = defaults.integer(forKey: NativeAthleteDraft.preAuthStepKey) >= 2
+        // The pre-sign-in flow already collects goal, sport, distance, level,
+        // date and weekly time. Continue at the only new post-auth step.
+        _step = State(initialValue: completedPreAuthDraft ? 2 : savedStep)
     }
 
     var body: some View {
@@ -733,7 +738,7 @@ struct NativeOnboardingView: View {
 
     private var distanceOptions: [(id: String, title: String)] {
         switch model.modality {
-        case "carrera": [("5k", "5 km"), ("10k", "10 km"), ("medio_maraton", "Media maratón"), ("maraton", "Maratón"), ("ultra", "Ultra")]
+        case "carrera": [("5k", "5 km"), ("10k", "10 km"), ("medio_maraton", "Media maratón"), ("maraton", "Maratón"), ("trail", "Trail"), ("ultra", "Ultra en asfalto"), ("ultra_trail", "Ultra Trail")]
         case "triatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "70.3"), ("full", "Larga distancia")]
         default: [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "Media distancia")]
         }
@@ -766,9 +771,26 @@ struct NativeOnboardingView: View {
             if case .failed(let message) = model.state { Label(message, systemImage: "exclamationmark.triangle.fill").font(.footnote).foregroundStyle(.red) }
             Button {
                 if step < 2 { withAnimation { step += 1 } } else { Task { await model.save() } }
-            } label: { if case .saving = model.state { ProgressView().tint(.white) } else { Text(step == 2 ? "Ver mi plan" : "Continuar") } }
+            } label: {
+                if isSaving {
+                    HStack(spacing: 10) {
+                        ProgressView().tint(.white)
+                        Text("Guardando tu plan…")
+                    }
+                } else {
+                    Text(step == 2 ? "Ver mi plan" : "Continuar")
+                }
+            }
                 .buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity)
                 .disabled(isSaving || model.goal.trimmingCharacters(in: .whitespacesAndNewlines).count < 2 || (!model.injuries.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !model.healthDataConsent))
+                .accessibilityLabel(isSaving ? "Guardando tu plan y preparando tus entrenamientos" : step == 2 ? "Ver mi plan" : "Continuar")
+            if isSaving {
+                Label("Estamos creando las sesiones de tu calendario. Esto puede tardar unos segundos.", systemImage: "calendar.badge.clock")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
             if step > 0 { Button("Atrás") { withAnimation { step -= 1 } }.buttonStyle(.borderless) }
         }.padding(.top, 12)
     }
