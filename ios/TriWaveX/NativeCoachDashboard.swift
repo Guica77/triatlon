@@ -51,14 +51,18 @@ struct NativeCoachEarnings: Decodable, Sendable {
 final class NativeCoachEarningsModel {
     private let transport: NativeEntryTransport
     private(set) var earnings: NativeCoachEarnings?
+    private let isPreviewOnly: Bool
     var loading = false
     var error: String?
 
-    init(origin: URL, store: WKWebsiteDataStore) {
+    init(origin: URL, store: WKWebsiteDataStore, previewEarnings: NativeCoachEarnings? = nil) {
         transport = NativeEntryTransport(origin: origin, store: store)
+        earnings = previewEarnings
+        isPreviewOnly = previewEarnings != nil
     }
 
     func load(force: Bool = false) async {
+        guard !isPreviewOnly else { return }
         guard !loading, force || earnings == nil else { return }
         loading = true
         error = nil
@@ -79,13 +83,17 @@ final class NativeCoachDashboardModel {
     var dashboard: NativeCoachDashboard?
     var loading = false
     var error: String?
+    let isPreviewOnly: Bool
 
-    init(origin: URL, store: WKWebsiteDataStore) {
+    init(origin: URL, store: WKWebsiteDataStore, previewDashboard: NativeCoachDashboard? = nil) {
         self.origin = origin
         self.store = store
+        dashboard = previewDashboard
+        isPreviewOnly = previewDashboard != nil
     }
 
     func load(force: Bool = false) async {
+        guard !isPreviewOnly else { return }
         guard !loading, force || dashboard == nil else { return }
         loading = true
         error = nil
@@ -207,7 +215,7 @@ struct NativeCoachDashboardView: View {
                                 VStack(alignment: .leading, spacing: 12) {
                                     Text("Atletas").font(.title3.bold())
                                     ForEach(dashboard.athletes) { athlete in
-                                        Button { openAthlete(athlete.id) } label: { athleteCard(athlete) }
+                                        Button { if !model.isPreviewOnly { openAthlete(athlete.id) } } label: { athleteCard(athlete) }
                                             .buttonStyle(.plain)
                                     }
                                 }
@@ -218,7 +226,7 @@ struct NativeCoachDashboardView: View {
                         }
                         .padding(20)
                     }
-                    .refreshable { await model.load(force: true) }
+                    .refreshable { if !model.isPreviewOnly { await model.load(force: true) } }
                 } else if model.loading {
                     ProgressView("Cargando tu equipo…").frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {

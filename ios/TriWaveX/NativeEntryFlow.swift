@@ -76,6 +76,27 @@ struct NativeAppIntroductionView: View {
     let onContinue: (AccountRole) -> Void
     let onSignIn: (AccountRole) -> Void
     @State private var role: AccountRole
+    @State private var page = 0
+
+    private var slides: [(String, String, IntroPreviewKind)] {
+        role == .athlete
+            ? [
+                ("Un plan con contexto", "Tu objetivo, deporte, experiencia y tiempo disponible se convierten en una preparación hecha para ti.", .plan),
+                ("Sigue tu progreso", "Consulta tus sesiones, carga semanal y evolución desde un mismo lugar.", .progress),
+                ("Habla con tu entrenador", "Chat reúne la conversación y el feedback de tu preparación.", .chat),
+                ("Ajustes y tu cuenta", "En More están Preferencias, Cuenta y Ayuda: privacidad, Face ID, seguridad y soporte.", .profile),
+                ("Cambia tu plan cuando quieras", "Desde Gestionar mi plan puedes editar sesiones, cambiar el objetivo o ajustar la carga sin repetir el cuestionario.", .planManagement),
+                ("Atleta con IA o entrenador", "Elige Atleta con IA para una planificación adaptativa, o Entrenador para gestionar tu equipo. Puedes cambiar de opción en Suscripción y plan.", .planChoice),
+                ("Suscripción y cancelación", "Consulta tus opciones, cambia de plan o abre App Store para gestionar o cancelar. Apple muestra el precio antes de confirmar.", .subscription),
+            ]
+            : [
+                ("Tu equipo, de un vistazo", "Consulta tus atletas activos y el estado de su seguimiento.", .coach),
+                ("Planes y comunicación", "Revisa el trabajo de tu equipo y habla con cada atleta desde el chat.", .chat),
+                ("Cambia entre atleta y entrenador", "Desde Suscripción y plan puedes elegir Atleta con IA o Entrenador. Si eres entrenador, también eliges la capacidad de atletas.", .planChoice),
+                ("Ajustes y tu cuenta", "En More encuentras Preferencias, Cuenta, capacidad y Ayuda para tu equipo.", .profile),
+                ("Gestiona tu suscripción", "Revisa la capacidad de atletas, cambia de plan o gestiona y cancela desde App Store.", .subscription),
+            ]
+    }
 
     init(initialRole: String, onContinue: @escaping (AccountRole) -> Void, onSignIn: @escaping (AccountRole) -> Void) {
         self.onContinue = onContinue
@@ -85,94 +106,67 @@ struct NativeAppIntroductionView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    TriWaveXWordmark(font: .system(size: 30, weight: .black, design: .rounded))
-                        .frame(maxWidth: .infinity)
-                        .padding(.bottom, 4)
-
-                    Label("Antes de empezar", systemImage: "sparkles")
-                        .font(.headline)
-                        .foregroundStyle(Color.triWaveXAqua)
-                    Text(role == .coach ? "Acompaña mejor a tu equipo" : "Entrena con una dirección clara")
-                        .font(.largeTitle.bold())
-                        .tracking(-0.5)
-                    Text(role == .coach
-                         ? "Organiza tus atletas, comparte sus sesiones y mantén el seguimiento y la comunicación en un mismo lugar."
-                         : "TriWaveX te ayuda a organizar tu preparación, seguir tus sesiones y entender cómo avanzas hacia tu objetivo.")
+            VStack(spacing: 0) {
+                HStack {
+                    TriWaveXWordmark(font: .system(size: 25, weight: .black, design: .rounded))
+                    Spacer()
+                    Text("\(page + 1) / \(slides.count)")
+                        .font(.caption.weight(.semibold).monospacedDigit())
                         .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Picker("Tipo de cuenta", selection: $role) {
-                        ForEach(AccountRole.allCases, id: \.self) { option in
-                            Text(option.title).tag(option)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                    .onChange(of: role) { _, value in
-                        UserDefaults.standard.set(value.rawValue, forKey: "triwavex.login.role")
-                    }
-
-                    VStack(spacing: 10) {
-                        feature(
-                            icon: role == .coach ? "person.2.fill" : "calendar.badge.clock",
-                            title: role == .coach ? "Tu equipo, de un vistazo" : "Un plan con contexto",
-                            detail: role == .coach
-                                ? "Consulta a tus atletas activos y el estado de su seguimiento."
-                                : "Empieza con tu objetivo, deporte, experiencia y tiempo disponible."
-                        )
-                        feature(
-                            icon: role == .coach ? "bubble.left.and.bubble.right.fill" : "chart.xyaxis.line",
-                            title: role == .coach ? "Planes y comunicación" : "Sigue tu progreso",
-                            detail: role == .coach
-                                ? "Prepara sesiones, habla con cada atleta y revisa su feedback."
-                                : "Consulta tus sesiones y revisa cómo evoluciona tu preparación."
-                        )
-                        if role == .athlete {
-                            feature(
-                                icon: "person.2.fill",
-                                title: "¿Quieres entrenar con un coach?",
-                                detail: "Indícalo en el cuestionario inicial y te mostraremos los pasos disponibles para tu cuenta."
-                            )
-                        }
-                        feature(
-                            icon: "creditcard.fill",
-                            title: role == .coach ? "Capacidad y suscripción" : "Precio y suscripción",
-                            detail: "Antes de confirmar, Apple muestra el precio y la renovación. Puedes gestionar o cancelar la suscripción desde tu cuenta de Apple. Los códigos de oferta válidos se canjean al elegir el plan."
-                        )
-                        feature(
-                            icon: "slider.horizontal.3",
-                            title: role == .coach ? "Tu cuenta y ayuda" : "Tu cuenta y privacidad",
-                            detail: role == .coach
-                                ? "Gestiona tus preferencias, consulta ayuda y envía feedback al equipo."
-                                : "Revisa tus preferencias de privacidad y envía feedback al equipo. Tú decides qué datos opcionales compartir."
-                        )
-                        feature(
-                            icon: "faceid",
-                            title: "Protege el acceso con Face ID",
-                            detail: "Después de iniciar sesión puedes activarlo en Perfil → Preferencias. Es opcional, protege este iPhone y también permite usar su código."
-                        )
-                    }
-
-                    Text("Esta explicación va antes de iniciar sesión o crear la cuenta. Crear la cuenta no inicia ningún cobro. Después completarás el alta correspondiente a tu perfil y verás el plan, precio y condiciones de Apple antes de confirmar una suscripción.")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Button("Continuar como \(role.title.lowercased())") {
-                        onContinue(role)
-                    }
-                    .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
-                    .controlSize(.large)
-
-                    Button("Ya tengo cuenta · Iniciar sesión") {
-                        onSignIn(role)
-                    }
-                    .buttonStyle(TriWaveXSecondaryButtonStyle())
                 }
-                .padding(20)
-                .frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading)
-                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20).padding(.top, 8)
+
+                Picker("Tipo de cuenta", selection: $role) {
+                    ForEach(AccountRole.allCases, id: \.self) { option in Text(option.title).tag(option) }
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal, 20).padding(.top, 16)
+                .onChange(of: role) { _, value in
+                    page = 0
+                    UserDefaults.standard.set(value.rawValue, forKey: "triwavex.login.role")
+                }
+
+                TabView(selection: $page) {
+                    ForEach(slides.indices, id: \.self) { index in
+                        let slide = slides[index]
+                        IntroPreviewScreen(title: slide.0, detail: slide.1, kind: slide.2, role: role) { destination in
+                            guard let nextPage = slides.firstIndex(where: { $0.2 == destination }) else { return }
+                            withAnimation(.easeInOut(duration: 0.2)) { page = nextPage }
+                        }
+                            .tag(index).padding(.horizontal, 20)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .accessibilityLabel("Presentación de TriWaveX")
+                .frame(maxHeight: .infinity)
+
+                HStack(spacing: 7) {
+                    ForEach(slides.indices, id: \.self) { index in
+                        Capsule().fill(index == page ? Color.triWaveXAqua : Color.secondary.opacity(0.22))
+                            .frame(width: index == page ? 24 : 7, height: 7)
+                    }
+                    Spacer()
+                    if page > 0 {
+                        Button("Anterior") { withAnimation(.easeInOut(duration: 0.22)) { page -= 1 } }
+                            .font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                            .frame(minHeight: 44)
+                    }
+                    Button("Saltar") { onContinue(role) }
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                        .frame(minHeight: 44).accessibilityHint("Continúa al cuestionario")
+                }
+                .padding(.horizontal, 24).padding(.bottom, 8)
+
+                Button(page == slides.count - 1 ? "Continuar con el cuestionario" : "Siguiente") {
+                    if page < slides.count - 1 { withAnimation(.easeInOut(duration: 0.22)) { page += 1 } }
+                    else { onContinue(role) }
+                }
+                .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
+                .controlSize(.large).padding(.horizontal, 20)
+
+                Button("Ya tengo cuenta · Iniciar sesión") { onSignIn(role) }
+                    .buttonStyle(TriWaveXSecondaryButtonStyle())
+                    .padding(.horizontal, 20).padding(.top, 4).padding(.bottom, 8)
             }
             .background(Color(uiColor: .systemGroupedBackground))
             .navigationTitle("TriWaveX")
@@ -181,21 +175,476 @@ struct NativeAppIntroductionView: View {
         .tint(.triWaveXAqua)
     }
 
-    private func feature(icon: String, title: String, detail: String) -> some View {
-        TriWaveXSurface(padding: 14) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: icon)
-                    .font(.headline)
-                    .foregroundStyle(Color.triWaveXAqua)
-                    .frame(width: 28, height: 30)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title).font(.subheadline.weight(.semibold))
-                    Text(detail).font(.footnote).foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+}
+
+private enum IntroPreviewKind: Equatable {
+    case plan
+    case progress
+    case coach
+    case coachPlan
+    case chat
+    case profile
+    case planManagement
+    case planChoice
+    case subscription
+}
+
+private struct IntroPreviewScreen: View {
+    let title: String
+    let detail: String
+    let kind: IntroPreviewKind
+    let role: NativeAppIntroductionView.AccountRole
+    let selectPage: (IntroPreviewKind) -> Void
+    @State private var demoModels = IntroDemoModels()
+
+    var body: some View {
+        Group {
+            if let realScreen {
+                VStack(alignment: .leading, spacing: 8) {
+                    VStack(spacing: 0) {
+                        realScreen
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color(uiColor: .systemGroupedBackground))
+                        appTabBar
+                    }
+                    .background(Color(uiColor: .systemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("PANTALLA REAL · DATOS DE DEMOSTRACIÓN")
+                            .font(.caption2.weight(.bold)).tracking(0.6).foregroundStyle(Color.triWaveXAqua)
+                        Text(title).font(.title3.bold()).tracking(-0.2)
+                        Text(detail).font(.subheadline).foregroundStyle(.secondary).lineSpacing(1)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.horizontal, 4)
                 }
-                Spacer(minLength: 0)
+                .padding(.top, 8)
+            } else {
+                VStack(alignment: .leading, spacing: 12) {
+            VStack(spacing: 0) {
+                HStack(spacing: 4) {
+                    RoundedRectangle(cornerRadius: 2).fill(Color.primary).frame(width: 24, height: 3)
+                    Spacer()
+                    Image(systemName: "airpodspro").font(.system(size: 9)).foregroundStyle(.secondary)
+                    Circle().fill(Color.green).frame(width: 5, height: 5)
+                    Image(systemName: "wifi").font(.system(size: 9)).foregroundStyle(.secondary)
+                    Image(systemName: "battery.75percent").font(.system(size: 9)).foregroundStyle(.secondary)
+                }.padding(.horizontal, 12).padding(.top, 7).padding(.bottom, 3)
+                HStack {
+                    TriWaveXWordmark(font: .system(size: 15, weight: .black, design: .rounded))
+                    Spacer()
+                    Image(systemName: "bell.badge").font(.system(size: 12)).foregroundStyle(Color.triWaveXAqua)
+                }
+                .padding(.horizontal, 12).padding(.vertical, 8)
+                HStack {
+                    Text(screenTitle).font(.system(size: 14, weight: .bold))
+                    Spacer()
+                    if kind == .profile { Image(systemName: "gearshape").font(.system(size: 11)).foregroundStyle(.secondary) }
+                }
+                .padding(.horizontal, 12).padding(.bottom, 6)
+                Divider()
+                ScrollView {
+                    Group {
+                        switch kind {
+                        case .plan, .progress, .profile, .coach, .chat: EmptyView()
+                        case .coachPlan: coachPlanContent
+                        case .planManagement: privacyContent
+                        case .planChoice: planChoiceContent
+                        case .subscription: subscriptionContent
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .padding(10)
+                }
+                Divider()
+                HStack(spacing: 0) {
+                    tab("Hoy", icon: "house", selected: kind == .plan || kind == .coach)
+                    if role == .athlete {
+                        tab("Plan", icon: "calendar", selected: kind == .coachPlan)
+                        tab("Progreso", icon: "chart.bar.xaxis", selected: kind == .progress)
+                    }
+                    tab("Chat", icon: "bubble.left.and.bubble.right", selected: false)
+                    tab("More", icon: "ellipsis.circle", selected: kind == .profile || kind == .planManagement || kind == .planChoice || kind == .subscription)
+                }
+                .padding(.top, 5).padding(.bottom, 4)
+            }
+            .frame(maxWidth: 300).frame(height: 380)
+            .background(Color(uiColor: .systemGroupedBackground), in: RoundedRectangle(cornerRadius: 30, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.primary.opacity(0.18), lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 30, style: .continuous))
+            .shadow(color: .black.opacity(0.10), radius: 22, y: 9)
+            .frame(maxWidth: .infinity)
+
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 6) {
+                    Text(kind == .plan || kind == .progress ? "ATLETA" : role == .coach ? "ENTRENADOR" : "TRIWAVEX")
+                        .font(.caption2.weight(.bold)).tracking(0.8).foregroundStyle(Color.triWaveXAqua)
+                    Text("·")
+                    Text("Vista previa").font(.caption2).foregroundStyle(.secondary)
+                }
+                Text(title).font(.title2.bold()).tracking(-0.3)
+                Text(detail).font(.subheadline).foregroundStyle(.secondary)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 8)
+            Spacer(minLength: 0)
+        }
+                .padding(.top, 16)
             }
         }
+    }
+
+    private var realScreen: AnyView? {
+        switch kind {
+        case .plan:
+            AnyView(NativeTodayView(model: demoModels.plan, openPlan: {}))
+        case .progress:
+            AnyView(AthleteProgressView(model: demoModels.progress, onFallback: {}))
+        case .profile:
+            AnyView(profileDemo)
+        case .coach:
+            AnyView(NativeCoachDashboardView(model: demoModels.coach, earningsModel: demoModels.earnings, openAthlete: { _ in }))
+        case .chat:
+            AnyView(NativeChatView(origin: demoModels.origin, store: demoModels.store, previewConversation: true))
+        case .coachPlan:
+            AnyView(NativePlanView(model: demoModels.plan, isDemo: true))
+        case .planManagement:
+            AnyView(NativePlanManagementSheet(
+                goal: demoModels.profilePreview.goal,
+                physiology: demoModels.profilePreview.physiology,
+                saveGoal: { _ in false },
+                openSessions: {}
+            ))
+        case .planChoice, .subscription:
+            AnyView(SubscriptionManagementView(
+                origin: demoModels.origin,
+                store: demoModels.store,
+                userID: nil,
+                role: role.rawValue,
+                status: "active",
+                onSubscriptionFinished: nil,
+                isDemo: true
+            ))
+        default:
+            nil
+        }
+    }
+
+    private var appTabBar: some View {
+        HStack(spacing: 0) {
+            appTab("Hoy", icon: "house", kind: role == .coach ? .coach : .plan, selected: kind == .plan || kind == .coach)
+            if role == .athlete {
+                appTab("Plan", icon: "calendar", kind: .coachPlan, selected: kind == .coachPlan)
+                appTab("Progreso", icon: "chart.bar.xaxis", kind: .progress, selected: kind == .progress)
+            }
+            appTab("Chat", icon: "bubble.left.and.bubble.right", kind: .chat, selected: kind == .chat)
+            appTab("More", icon: "ellipsis.circle", kind: .profile, selected: kind == .profile || kind == .planManagement || kind == .planChoice || kind == .subscription)
+        }
+        .padding(.top, 5)
+        .padding(.bottom, 4)
+        .background(.bar)
+        .overlay(alignment: .top) { Divider() }
+    }
+
+    private func appTab(_ title: String, icon: String, kind destination: IntroPreviewKind, selected: Bool) -> some View {
+        Button { selectPage(destination) } label: {
+            VStack(spacing: 3) {
+                Image(systemName: icon).font(.system(size: 18, weight: selected ? .semibold : .regular))
+                Text(title).font(.caption2.weight(selected ? .semibold : .regular))
+            }
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .foregroundStyle(selected ? Color.triWaveXAqua : Color.secondary)
+        }
+        .buttonStyle(.plain)
+        .disabled(!hasSlide(destination))
+    }
+
+    private func hasSlide(_ destination: IntroPreviewKind) -> Bool {
+        switch destination {
+        case .plan: role == .athlete
+        case .progress: role == .athlete
+        case .coach: true
+        case .chat: true
+        case .coachPlan, .profile, .planManagement, .planChoice, .subscription: true
+        }
+    }
+
+    private var screenTitle: String {
+        switch kind {
+        case .plan: "Hoy"
+        case .progress: "Progreso"
+        case .coach: "Tu equipo"
+        case .coachPlan: "Planes"
+        case .chat: "Mensajes"
+        case .profile: "More"
+        case .planManagement: "Gestionar mi plan"
+        case .planChoice: "Elige tu forma de entrenar"
+        case .subscription: "Suscripción y plan"
+        }
+    }
+
+    private var planContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("VISTA PREVIA · DATOS DE EJEMPLO").font(.system(size: 8, weight: .bold)).tracking(0.45).foregroundStyle(.secondary)
+            Text("Hola, Guillermo").font(.title3.bold())
+            Text("Tu preparación para el próximo objetivo").font(.caption).foregroundStyle(.secondary)
+            HStack(spacing: 10) {
+                Image(systemName: "figure.run").font(.title3).foregroundStyle(.white).frame(width: 42, height: 42).background(Color.triWaveXAqua, in: RoundedRectangle(cornerRadius: 13))
+                VStack(alignment: .leading, spacing: 3) { Text("Tu entrenamiento de hoy").font(.caption.weight(.semibold)); Text("2 sesiones en tu plan").font(.caption2).foregroundStyle(.secondary) }
+                Spacer(minLength: 0)
+            }
+            .padding(11).background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 15))
+            previewCard(icon: "figure.pool.swim", title: "Natación · Técnica", subtitle: "07:30 · 45 min", color: .triWaveXAqua)
+            previewCard(icon: "figure.run", title: "Carrera · Ritmo suave", subtitle: "18:00 · 40 min", color: .triWaveXCoral)
+            previewButton("Ver semana completa", icon: "calendar")
+        }
+    }
+
+    private var progressContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("ENTRENAMIENTO DE HOY").font(.caption2.weight(.bold)).tracking(0.4).foregroundStyle(.secondary)
+            Label("Planificado", systemImage: "calendar").font(.caption).foregroundStyle(.secondary)
+            previewCard(icon: "figure.pool.swim", title: "Natación", subtitle: "45 min · Técnica", color: .triWaveXAqua)
+            Text("RECUPERACIÓN").font(.caption2.weight(.bold)).tracking(0.4).foregroundStyle(.secondary)
+            HStack(spacing: 6) {
+                metric("Preparación", value: "82")
+                metric("HRV", value: "58 ms")
+                metric("Sueño", value: "7,5 h")
+            }
+            Text("ESTA SEMANA").font(.caption2.weight(.bold)).tracking(0.4).foregroundStyle(.secondary)
+            HStack { Text("Completado"); Spacer(); Text("4/6 sesiones").fontWeight(.semibold) }.font(.caption)
+            ProgressView(value: 0.67).tint(.triWaveXAqua)
+            HStack { Text("Carga · 286 TSS"); Spacer(); Text("5 h 20 min") }.font(.caption2).foregroundStyle(.secondary)
+        }
+    }
+
+    private func metric(_ title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title).font(.system(size: 8)).foregroundStyle(.secondary)
+            Text(value).font(.system(size: 10, weight: .semibold).monospacedDigit())
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(7).background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 9))
+    }
+
+    private var coachContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("SOLICITUDES Y MENSAJES").font(.caption2.weight(.bold)).tracking(0.5).foregroundStyle(.secondary)
+            previewCard(icon: "person.crop.circle.fill", title: "María G.", subtitle: "Preparación · Media distancia", color: .triWaveXAqua)
+            previewCard(icon: "person.crop.circle.fill", title: "Luis R.", subtitle: "3 sesiones esta semana", color: .triWaveXBike)
+            Label("Tienes un mensaje nuevo", systemImage: "bubble.left.fill")
+                .font(.footnote.weight(.medium)).foregroundStyle(Color.triWaveXAqua)
+                .padding(10).frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.triWaveXAqua.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+            previewButton("Abrir equipo", icon: "arrow.right")
+        }
+    }
+
+    private var coachPlanContent: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("PLAN DE MARÍA").font(.caption2.weight(.bold)).tracking(0.5).foregroundStyle(.secondary)
+            HStack {
+                Text("Esta semana").font(.subheadline.weight(.semibold))
+                Spacer()
+                Text("5 sesiones").font(.caption).foregroundStyle(.secondary)
+            }
+            previewCard(icon: "figure.pool.swim", title: "Natación · Técnica", subtitle: "Lunes · 45 min", color: .triWaveXAqua)
+            previewCard(icon: "bicycle", title: "Bici · Resistencia", subtitle: "Miércoles · 90 min", color: .triWaveXBike)
+            previewCard(icon: "figure.run", title: "Carrera · Tempo", subtitle: "Viernes · 50 min", color: .triWaveXCoral)
+            previewButton("Revisar plan", icon: "arrow.right")
+        }
+    }
+
+    private var accountContent: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 9) {
+                Text("G").font(.subheadline.bold()).foregroundStyle(.white).frame(width: 34, height: 34).background(Color.triWaveXAqua, in: Circle())
+                VStack(alignment: .leading, spacing: 1) { Text("Guillermo").font(.caption.weight(.semibold)); Text("Atleta · Triatleta").font(.system(size: 9)).foregroundStyle(.secondary) }
+                Spacer()
+            }.padding(7).background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 10))
+            settingsSection("MI PREPARACIÓN", rows: [("Gestionar mi plan", "slider.horizontal.3")])
+            settingsSection("PREFERENCIAS", rows: [("Pedir Face ID al abrir", "faceid"), ("Notificaciones", "bell"), ("Clima", "cloud.sun"), ("Privacidad", "hand.raised")])
+            settingsSection("CUENTA", rows: [("Suscripción y plan", "creditcard"), ("Descuento por carrera", "medal.star"), ("Cuenta y seguridad", "person.crop.circle")])
+            settingsSection("AYUDA", rows: [("Descubrir TriWaveX", "sparkles"), ("Guía rápida", "questionmark.circle")])
+        }
+    }
+
+    private var profileDemo: some View {
+        NativeProfileView(
+            model: demoModels.profile,
+            origin: demoModels.origin,
+            store: demoModels.store,
+            authenticatedUserID: nil,
+            authenticatedRole: role.rawValue,
+            openDevices: {}, openCoros: {}, openStrava: {}, openPlanEditor: {}, openAccount: {}, replayGuide: {},
+            onSubscriptionFinished: nil,
+            isDemo: true
+        )
+        .environment(demoModels.appLock)
+    }
+
+    private func settingsSection(_ title: String, rows: [(String, String)]) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title).font(.system(size: 8, weight: .bold)).tracking(0.4).foregroundStyle(.secondary)
+            VStack(spacing: 0) {
+                ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
+                    HStack(spacing: 7) {
+                        Image(systemName: row.1).foregroundStyle(Color.triWaveXAqua).frame(width: 14)
+                        Text(row.0).font(.system(size: 9, weight: .medium))
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.system(size: 7, weight: .bold)).foregroundStyle(.tertiary)
+                    }.padding(.horizontal, 7).frame(height: 23)
+                    if index < rows.count - 1 { Divider().padding(.leading, 27) }
+                }
+            }.background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 9))
+        }
+    }
+
+    private var privacyContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("MI PREPARACIÓN").font(.caption2.weight(.bold)).tracking(0.5).foregroundStyle(.secondary)
+            settingsRow("Editar sesiones", icon: "calendar.badge.pencil")
+            settingsRow("Cambiar objetivo", icon: "flag.checkered")
+            settingsRow("Subir carga", icon: "chart.line.uptrend.xyaxis")
+            settingsRow("Lesiones e historial", icon: "cross.case")
+            Label("Los cambios se revisan antes de guardarlos. Si entrenas con coach, conserva el control del plan.", systemImage: "info.circle")
+                .font(.caption2).foregroundStyle(.secondary)
+                .padding(9).frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 11))
+        }
+    }
+
+    private var subscriptionContent: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("OPCIONES").font(.caption2.weight(.bold)).tracking(0.5).foregroundStyle(.secondary)
+            settingsRow("Atleta", icon: "figure.run", value: "Ver plan")
+            settingsRow("Entrenador", icon: "person.2", value: "Ver plan")
+            Text("App Store mostrará el precio vigente y cualquier prueba disponible antes de confirmar.")
+                .font(.caption2).foregroundStyle(.secondary)
+            settingsRow("Gestionar o cancelar en App Store", icon: "arrow.up.right.square")
+            settingsRow("Restaurar compras", icon: "arrow.clockwise")
+        }
+    }
+
+    private var planChoiceContent: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            Text("ELIGE TU FORMA DE ENTRENAR").font(.caption2.weight(.bold)).tracking(0.4).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 5) {
+                HStack { Label("Atleta con IA", systemImage: "figure.run.circle.fill").font(.subheadline.weight(.semibold)); Spacer(); Image(systemName: "checkmark.circle.fill").foregroundStyle(Color.triWaveXAqua) }
+                Text("Planificación adaptativa y métricas para tu progreso.").font(.caption).foregroundStyle(.secondary)
+            }
+            .padding(12).frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.triWaveXAqua, lineWidth: 2))
+            VStack(alignment: .leading, spacing: 5) {
+                Label("Entrenador", systemImage: "person.2.badge.gearshape.fill").font(.subheadline.weight(.semibold))
+                Text("10 atletas incluidos. Añade bloques de hasta 5 atletas.").font(.caption).foregroundStyle(.secondary)
+            }
+            .padding(12).frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 14))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.triWaveXBorder, lineWidth: 1))
+            Text("El precio localizado y cualquier prueba se muestran antes de confirmar.")
+                .font(.caption2).foregroundStyle(.secondary)
+        }
+    }
+
+    private func previewCard(icon: String, title: String, subtitle: String, color: Color) -> some View {
+        HStack(spacing: 9) {
+            Image(systemName: icon).font(.headline).foregroundStyle(color)
+                .frame(width: 34, height: 34).background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.caption.weight(.semibold))
+                Text(subtitle).font(.caption2).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+            Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+        }
+        .padding(9).background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func previewButton(_ title: String, icon: String) -> some View {
+        Label(title, systemImage: icon).font(.caption.weight(.semibold))
+            .foregroundStyle(.black.opacity(0.9)).frame(maxWidth: .infinity, minHeight: 36)
+            .background(Color.triWaveXAqua, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    private func settingsRow(_ title: String, icon: String, value: String? = nil) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon).foregroundStyle(Color.triWaveXAqua).frame(width: 20)
+            Text(title).font(.caption.weight(.medium))
+            Spacer()
+            if let value { Text(value).font(.caption2).foregroundStyle(.secondary) }
+            Image(systemName: "chevron.right").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+        }
+        .padding(9).background(Color(uiColor: .systemBackground), in: RoundedRectangle(cornerRadius: 11))
+    }
+
+    private func tab(_ title: String, icon: String, selected: Bool) -> some View {
+        VStack(spacing: 3) {
+            Image(systemName: icon).font(.system(size: 13, weight: selected ? .semibold : .regular))
+            Text(title).font(.system(size: 8, weight: selected ? .semibold : .regular))
+        }
+        .foregroundStyle(selected ? Color.triWaveXAqua : Color.secondary)
+        .frame(maxWidth: .infinity)
+    }
+}
+
+@MainActor
+private final class IntroDemoModels {
+    let origin = URL(string: "https://triwavex.com")!
+    let store = WKWebsiteDataStore.nonPersistent()
+    let appLock = AppLock()
+    let plan: NativePlanModel
+    let progress: AthleteProgressModel
+    let profile: NativeProfileModel
+    let profilePreview: NativeProfile
+    let coach: NativeCoachDashboardModel
+    let earnings: NativeCoachEarningsModel
+
+    init() {
+        let now = Date()
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = .current
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.calendar = calendar
+        dateFormatter.timeZone = .current
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        let today = dateFormatter.string(from: now)
+        let previewPlan = NativePlan(
+            athleteName: "Guillermo",
+            planName: "Preparación · Triatlón",
+            readOnly: false,
+            workouts: [
+                .init(id: "demo-swim", date: today, slot: "07:30", status: "planned", sport: "Natación", durationMinutes: 45, title: "Técnica y eficiencia", detail: "Trabajo aeróbico suave y técnica de crol.", lastChange: nil),
+                .init(id: "demo-run", date: today, slot: "18:00", status: "planned", sport: "Carrera", durationMinutes: 40, title: "Rodaje suave", detail: "Ritmo cómodo · zona 2.", lastChange: nil),
+            ],
+            generatedAt: now
+        )
+        plan = NativePlanModel(client: NativePlanClient(origin: origin, store: store), previewPlan: previewPlan)
+        let todayWorkout = AthleteProgress.TodayWorkout(id: "demo-swim", date: today, sport: "Natación", durationMinutes: 45, description: "Técnica y eficiencia", status: "planned", completed: false)
+        let recovery = AthleteProgress.Recovery(date: today, readinessScore: 82, hrv: 58, sleepHours: 7.5, fatigueRating: 2)
+        let week = AthleteProgress.Week(startDate: today, endDate: today, plannedSessions: 6, completedSessions: 4, completionPercent: 67, totalTss: 286, totalMinutes: 320)
+        let distance = AthleteProgress.Distance(swim: 4.2, bike: 72, run: 18)
+        let summary = AthleteProgress.Summary(completedSessions: 24, totalTss: 1120, totalMinutes: 1260, distanceKm: distance, tssBySport: .init(swim: 210, bike: 640, run: 270), streakWeeks: 4)
+        let sampleProgress = AthleteProgress(athlete: .init(firstName: "Guillermo"), recovery: recovery, todayWorkout: todayWorkout, week: week, summary: summary, state: .ready, generatedAt: now)
+        progress = AthleteProgressModel(client: AthleteProgressClient(origin: origin, store: store), previewProgress: sampleProgress)
+        let sampleProfile = NativeProfile(
+            athlete: .init(firstName: "Guillermo", lastName: nil, level: "Triatleta", subscriptionStatus: "active"),
+            goal: .init(name: "Triatlón · Media distancia", date: nil),
+            physiology: .init(ftp: 220, swimPace: "1:55/100 m", runPace: "5:10/km", baselineHours: "7", injuries: nil),
+            recovery: .init(readiness: 82, hrv: 58, sleepHours: 7.5, fatigue: 2),
+            connections: .init(strava: true, garmin: true, polar: false, coros: false, suunto: false, amazfit: false)
+        )
+        profilePreview = sampleProfile
+        profile = NativeProfileModel(client: NativeProfileClient(origin: origin, store: store), previewProfile: sampleProfile)
+        let dashboard = NativeCoachDashboard(coachName: "Guillermo", athletes: [
+            .init(id: "demo-athlete-1", name: "María G.", planName: "Media distancia", groupName: nil, todayWorkout: .init(sport: "Natación", title: "Técnica", durationMinutes: 45, status: "planned"), completedThisWeek: 4, totalThisWeek: 6),
+            .init(id: "demo-athlete-2", name: "Luis R.", planName: "Triatlón olímpico", groupName: nil, todayWorkout: .init(sport: "Carrera", title: "Rodaje suave", durationMinutes: 40, status: "completed"), completedThisWeek: 3, totalThisWeek: 5),
+        ])
+        coach = NativeCoachDashboardModel(origin: origin, store: store, previewDashboard: dashboard)
+        earnings = NativeCoachEarningsModel(origin: origin, store: store, previewEarnings: .init(pendingAppleReportCount: 0, pendingRefundAdjustmentCount: 0, reconciledBalances: [], entries: []))
     }
 }
 

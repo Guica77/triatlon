@@ -39,25 +39,23 @@ struct RootView: View {
     @State private var hasCompletedStartup = false
     @State private var hasCompletedStartupBeat = false
     @State private var loginIntroStage = 0
-    @State private var isPlayingLoginIntro = false
     @State private var liftsLoginTitle = false
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @AppStorage("triwavex.login-intro.seen.v1") private var hasSeenLoginIntro = false
-    @AppStorage("triwavex.app-overview.seen.v3") private var hasSeenAppOverview = false
+    @AppStorage("triwavex.app-overview.seen.v4") private var hasSeenAppOverview = false
     @FocusState private var focusedField: FocusedField?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(origin: URL) {
         _session = State(initialValue: SessionModel(origin: origin))
         let defaults = UserDefaults.standard
-        let hasSeenIntro = defaults.bool(forKey: "triwavex.login-intro.seen.v1")
         _email = State(initialValue: defaults.string(forKey: "triwavex.login.email") ?? "")
         _role = State(initialValue: Role(rawValue: defaults.string(forKey: "triwavex.login.role") ?? "") ?? .athlete)
         _registrationRole = State(initialValue: Role(rawValue: defaults.string(forKey: "triwavex.registration.activeRole") ?? ""))
-        // Returning users must never render a single frame of the first-run
-        // phrase sequence before the compact wordmark takes over.
-        _loginIntroStage = State(initialValue: hasSeenIntro ? 10 : 0)
-        _liftsLoginTitle = State(initialValue: hasSeenIntro)
+        // Keep sign-in controls available immediately; the product overview
+        // now carries the first-run introduction instead of a timed login reel.
+        _loginIntroStage = State(initialValue: 10)
+        _liftsLoginTitle = State(initialValue: true)
         if defaults.bool(forKey: "triwavex.coachCheckout.pending") {
             _coachCheckout = State(initialValue: CoachCheckout(
                 destination: defaults.string(forKey: "triwavex.coachCheckout.destination") ?? "/coach/dashboard",
@@ -304,6 +302,12 @@ struct RootView: View {
             }
 #endif
             async let restore: Void = session.restore()
+            if !hasSeenAppOverview {
+                hasCompletedStartupBeat = true
+                hasCompletedStartup = true
+                await restore
+                return
+            }
             if !reduceMotion {
                 try? await Task.sleep(for: .milliseconds(280))
                 guard !Task.isCancelled else { return }
@@ -637,55 +641,9 @@ struct RootView: View {
     }
 
     private func playLoginIntro() async {
-        guard !isPlayingLoginIntro else { return }
-        isPlayingLoginIntro = true
-        defer { isPlayingLoginIntro = false }
-
-        if hasSeenLoginIntro {
-            liftsLoginTitle = true
-            loginIntroStage = 10
-            return
-        }
-
-        liftsLoginTitle = false
-        loginIntroStage = 0
-        for (index, phrase) in loginIntroCopy.enumerated() {
-            // Match the transition to the type-and-erase cycle, with only a short reading beat afterward.
-            let delay = TypingCycleText.cycleDurationMilliseconds(forCharacterCount: phrase.count) + 240
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : delay))
-            guard !Task.isCancelled else { return }
-            withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
-                loginIntroStage = index + 1
-            }
-        }
-        try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_100))
-        guard !Task.isCancelled else { return }
-        withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
-            loginIntroStage = 4
-            liftsLoginTitle = true
-        }
-        try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 1_450))
-        guard !Task.isCancelled else { return }
-        withAnimation(reduceMotion ? .easeOut(duration: 0.12) : TriWaveXMotion.loginTitleLift) {
-            loginIntroStage = 7
-        }
-        await revealLoginControlsAfterLift()
-        guard !Task.isCancelled else { return }
         hasSeenLoginIntro = true
-    }
-
-    private func revealLoginControlsAfterLift() async {
-        try? await Task.sleep(for: .milliseconds(
-            reduceMotion ? 80 : TriWaveXMotion.loginTitleLiftDurationMilliseconds
-        ))
-        guard !Task.isCancelled else { return }
-        withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) { loginIntroStage = 8 }
-
-        for stage in 9...10 {
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 220))
-            guard !Task.isCancelled else { return }
-            withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) { loginIntroStage = stage }
-        }
+        liftsLoginTitle = true
+        loginIntroStage = 10
     }
 
     private var canSubmit: Bool {

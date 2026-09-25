@@ -12,13 +12,17 @@ final class AthleteProgressModel {
     }
 
     private let client: AthleteProgressClient
+    private let previewProgress: AthleteProgress?
     var state: State = .idle
 
-    init(client: AthleteProgressClient) {
+    init(client: AthleteProgressClient, previewProgress: AthleteProgress? = nil) {
         self.client = client
+        self.previewProgress = previewProgress
+        if let previewProgress { state = .loaded(previewProgress) }
     }
 
     func load() async {
+        if let previewProgress { state = .loaded(previewProgress); return }
         guard !isLoading else { return }
         state = .loading
         do {

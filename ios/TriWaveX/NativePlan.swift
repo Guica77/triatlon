@@ -157,6 +157,7 @@ struct NativePlanClient {
 @Observable @MainActor
 final class NativePlanModel {
     private let client: NativePlanClient
+    let isPreviewOnly: Bool
     var plan: NativePlan?
     var loading = false
     var savingIDs = Set<String>()
@@ -165,9 +166,14 @@ final class NativePlanModel {
     var proposal: PlanProposal?
     var resolvingProposal = false
 
-    init(client: NativePlanClient) { self.client = client }
+    init(client: NativePlanClient, previewPlan: NativePlan? = nil) {
+        self.client = client
+        isPreviewOnly = previewPlan != nil
+        plan = previewPlan
+    }
 
     func load(force: Bool = false) async {
+        guard !isPreviewOnly else { return }
         guard !loading, force || plan == nil else { return }
         loading = true; error = nil
         defer { loading = false }
@@ -176,6 +182,7 @@ final class NativePlanModel {
     }
 
     func updateStatus(_ workout: NativePlan.Workout, status: String) async -> Bool {
+        guard !isPreviewOnly else { return false }
         guard !savingIDs.contains(workout.id), var current = plan,
               let index = current.workouts.firstIndex(where: { $0.id == workout.id }) else { return false }
         let original = current.workouts[index]
@@ -384,6 +391,7 @@ struct NativePlanView: View {
     }
 
     @Bindable var model: NativePlanModel
+    var isDemo = false
     @State private var selectedDate = Date()
     @State private var weekStart = Calendar.current.dateInterval(of: .weekOfYear, for: Date())?.start ?? Date()
     @State private var display: CalendarDisplay = .week
@@ -407,7 +415,7 @@ struct NativePlanView: View {
             .navigationTitle("Plan")
             .navigationBarTitleDisplayMode(.large)
             .task { await model.load() }
-            .refreshable { await model.load(force: true) }
+            .refreshable { if !isDemo { await model.load(force: true) } }
             .sheet(item: $model.proposal) { proposal in
                 PlanProposalSheet(
                     proposal: proposal,

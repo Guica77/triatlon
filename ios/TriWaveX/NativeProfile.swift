@@ -7,16 +7,23 @@ import WebKit
 final class NativeProfileModel {
     enum State { case idle, loading, loaded(NativeProfile), failed(String) }
     private let client: NativeProfileClient
+    let isPreviewOnly: Bool
     var state: State = .idle
 
-    init(client: NativeProfileClient) { self.client = client }
+    init(client: NativeProfileClient, previewProfile: NativeProfile? = nil) {
+        self.client = client
+        isPreviewOnly = previewProfile != nil
+        if let previewProfile { state = .loaded(previewProfile) }
+    }
     func load() async {
+        guard !isPreviewOnly else { return }
         guard !isLoading else { return }
         state = .loading
         do { state = .loaded(try await client.fetch()) }
         catch { state = .failed("No se ha podido cargar tu perfil. Inténtalo de nuevo.") }
     }
     func save(_ values: [String: Any]) async -> Bool {
+        guard !isPreviewOnly else { return false }
         guard !isLoading else { return false }
         state = .loading
         do { try await client.update(values); state = .loaded(try await client.fetch()); return true }
@@ -110,6 +117,7 @@ struct NativeProfileView: View {
     let openAccount: () -> Void
     let replayGuide: () -> Void
     let onSubscriptionFinished: ((NativeSubscriptionResult) -> Void)?
+    var isDemo = false
     @State private var hasLoaded = false
     @State private var managingPlan = false
 
@@ -131,7 +139,7 @@ struct NativeProfileView: View {
             }
             .navigationTitle("More")
             .navigationBarTitleDisplayMode(.large)
-            .task { guard !hasLoaded else { return }; hasLoaded = true; await model.load() }
+            .task { guard !hasLoaded else { return }; hasLoaded = true; if !isDemo { await model.load() } }
             .refreshable { await model.load() }
         }
     }
@@ -218,6 +226,7 @@ struct NativeProfileView: View {
             Section("Preferencias") {
                 Toggle("Pedir Face ID al abrir", isOn: Binding(get: { appLock.isEnabled }, set: { appLock.isEnabled = $0 }))
                     .accessibilityHint("Protege la app localmente con Face ID o el código del iPhone")
+                    .disabled(isDemo)
                 NavigationLink { ProfileDetailView(title: "Notificaciones", rows: [("Estado", "Gestiona los permisos desde Ajustes del iPhone")]) } label: { Label("Notificaciones", systemImage: "bell") }
                 NavigationLink { ProfileDetailView(title: "Clima", rows: [("Tiempo local", "Disponible al preparar entrenamientos exteriores")]) } label: { Label("Clima", systemImage: "cloud.sun") }
                 NavigationLink { ProfileDetailView(title: "Privacidad", rows: [("Tus datos", "Solo se usan para personalizar tu entrenamiento")]) } label: { Label("Privacidad", systemImage: "hand.raised") }
@@ -230,7 +239,8 @@ struct NativeProfileView: View {
                         userID: authenticatedUserID,
                         role: authenticatedRole,
                         status: profile.athlete.subscriptionStatus,
-                        onSubscriptionFinished: onSubscriptionFinished
+                        onSubscriptionFinished: onSubscriptionFinished,
+                        isDemo: isDemo
                     )
                 } label: {
                     Label("Suscripción y plan", systemImage: "creditcard")
@@ -618,6 +628,7 @@ struct SubscriptionManagementView: View {
     let role: String?
     let status: String?
     let onSubscriptionFinished: ((NativeSubscriptionResult) -> Void)?
+    var isDemo = false
     @Environment(\.dismiss) private var dismiss
     private let subscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
 
@@ -665,6 +676,9 @@ struct SubscriptionManagementView: View {
                     } label: {
                         planRow("Entrenador", detail: "Gestión de hasta 10 atletas", icon: "person.2")
                     }
+                } else if isDemo {
+                    Label { VStack(alignment: .leading) { Text("Atleta con IA"); Text("Planificación adaptativa y seguimiento").font(.footnote).foregroundStyle(.secondary) } } icon: { Image(systemName: "figure.run").foregroundStyle(Color.triWaveXAqua) }
+                    Label { VStack(alignment: .leading) { Text("Entrenador"); Text("Gestiona tu equipo y capacidad de atletas").font(.footnote).foregroundStyle(.secondary) } } icon: { Image(systemName: "person.2").foregroundStyle(Color.triWaveXAqua) }
                 } else {
                     Label("Inicia sesión para gestionar tu suscripción.", systemImage: "person.crop.circle.badge.exclamationmark")
                         .foregroundStyle(.secondary)

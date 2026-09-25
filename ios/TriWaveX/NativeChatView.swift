@@ -25,6 +25,7 @@ struct NativeChatMessage: Identifiable, Decodable, Hashable {
 final class NativeChatModel {
     private let origin: URL
     private let store: WKWebsiteDataStore
+    let isPreviewOnly: Bool
     var participants: [NativeChatParticipant] = []
     var selected: NativeChatParticipant?
     var messages: [NativeChatMessage] = []
@@ -33,9 +34,19 @@ final class NativeChatModel {
     var sending = false
     var error: String?
 
-    init(origin: URL, store: WKWebsiteDataStore) { self.origin = origin; self.store = store }
+    init(origin: URL, store: WKWebsiteDataStore, previewParticipants: [NativeChatParticipant]? = nil, previewMessages: [NativeChatMessage] = []) {
+        self.origin = origin
+        self.store = store
+        isPreviewOnly = previewParticipants != nil
+        if let previewParticipants {
+            participants = previewParticipants
+            selected = previewParticipants.first
+            messages = previewMessages
+        }
+    }
 
     func load() async {
+        guard !isPreviewOnly else { return }
         loading = true; error = nil
         defer { loading = false }
         do {
@@ -48,15 +59,18 @@ final class NativeChatModel {
     }
 
     func select(_ participant: NativeChatParticipant) async {
+        guard !isPreviewOnly else { selected = participant; return }
         selected = participant
         await loadMessages(for: participant)
     }
 
     func refresh() async {
+        guard !isPreviewOnly else { return }
         if let selected { await loadMessages(for: selected, showSpinner: false) }
     }
 
     func send() async {
+        guard !isPreviewOnly else { return }
         guard let selected, !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !sending else { return }
         let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
         messageText = ""; sending = true
@@ -114,7 +128,14 @@ struct NativeChatView: View {
     @State private var model: NativeChatModel
     @FocusState private var composerFocused: Bool
 
-    init(origin: URL, store: WKWebsiteDataStore) { _model = State(initialValue: NativeChatModel(origin: origin, store: store)) }
+    init(origin: URL, store: WKWebsiteDataStore, previewConversation: Bool = false) {
+        let participants: [NativeChatParticipant]? = previewConversation ? [NativeChatParticipant(id: "demo-coach", first_name: "Ana", last_name: "Coach", role: "coach")] : nil
+        let messages = previewConversation ? [
+            NativeChatMessage(id: "demo-message-1", sender_id: "demo-coach", receiver_id: "demo-athlete", message: "¡Hola! He revisado tu semana. ¿Cómo te has encontrado en los entrenamientos?", created_at: ISO8601DateFormatter().string(from: .now.addingTimeInterval(-3600))),
+            NativeChatMessage(id: "demo-message-2", sender_id: "demo-athlete", receiver_id: "demo-coach", message: "Bien, aunque la sesión de carrera me ha costado un poco.", created_at: ISO8601DateFormatter().string(from: .now.addingTimeInterval(-3300))),
+        ] : []
+        _model = State(initialValue: NativeChatModel(origin: origin, store: store, previewParticipants: participants, previewMessages: messages))
+    }
 
     var body: some View {
         NavigationStack {
@@ -133,6 +154,7 @@ struct NativeChatView: View {
         }
         .task { await model.load() }
         .task {
+            guard !model.isPreviewOnly else { return }
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(15))
                 if !Task.isCancelled { await model.refresh() }
