@@ -137,7 +137,9 @@ struct SubscriptionFinishGate {
             await refreshIntroEligibility()
             state = .idle
         } catch {
-            state = .failed("No se han podido consultar las opciones de App Store.")
+            // Keep actionable server and network errors visible. The old generic
+            // message made a missing/unauthorized catalogue look like a StoreKit issue.
+            state = .failed(error.localizedDescription)
         }
     }
 
