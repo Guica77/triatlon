@@ -39,6 +39,7 @@ struct ProductView: View {
     @State private var athleteProgress: AthleteProgressModel
     @State private var nativePlan: NativePlanModel
     @State private var coachDashboard: NativeCoachDashboardModel
+    @State private var coachEarnings: NativeCoachEarningsModel
     @State private var nativeProfile: NativeProfileModel
     @State private var selectedTab: AppTab
     @State private var guidedOnboarding: GuidedOnboardingModel?
@@ -72,16 +73,30 @@ struct ProductView: View {
         self.authenticatedRole = authenticatedRole
         self.onDismiss = onDismiss
         self.onSessionEnded = onSessionEnded
-        self.guidedTourRequest = guidedTourRequest
+        let resolvedTourRequest: GuidedTourRequest? = {
+            if let guidedTourRequest { return guidedTourRequest }
+            guard let authenticatedUserID, !authenticatedUserID.isEmpty,
+                  let authenticatedRole else { return nil }
+            let role: GuidedOnboardingRole
+            switch authenticatedRole {
+            case "athlete": role = .athlete
+            case "coach": role = .coach
+            default: return nil
+            }
+            let request = GuidedTourRequest(userID: authenticatedUserID, role: role, givenName: "")
+            return GuidedOnboardingModel.hasCompleted(request) ? nil : request
+        }()
+        self.guidedTourRequest = resolvedTourRequest
         self.onGuidedTourFinished = onGuidedTourFinished
         self.onSubscriptionFinished = onSubscriptionFinished
         _athleteProgress = State(initialValue: AthleteProgressModel(client: AthleteProgressClient(origin: origin, store: store)))
         _nativePlan = State(initialValue: NativePlanModel(client: NativePlanClient(origin: origin, store: store)))
         _coachDashboard = State(initialValue: NativeCoachDashboardModel(origin: origin, store: store))
+        _coachEarnings = State(initialValue: NativeCoachEarningsModel(origin: origin, store: store))
         _nativeProfile = State(initialValue: NativeProfileModel(client: NativeProfileClient(origin: origin, store: store)))
         _selectedTab = State(initialValue: Self.tab(for: initialPath, isCoach: initialPath.hasPrefix("/coach/")))
         _nativeTrainingRequested = State(initialValue: initialPath == "/dashboard" || initialPath == "/coach/dashboard")
-        _guidedOnboarding = State(initialValue: guidedTourRequest.map { GuidedOnboardingModel(request: $0) })
+        _guidedOnboarding = State(initialValue: resolvedTourRequest.map { GuidedOnboardingModel(request: $0) })
     }
 
     private static func tab(for path: String, isCoach: Bool) -> AppTab {
@@ -161,7 +176,7 @@ struct ProductView: View {
                     NativeTodayView(model: nativePlan, openPlan: { selectedTab = .plan })
                 }
                 if showingNativeCoachDashboard {
-                    NativeCoachDashboardView(model: coachDashboard, openAthlete: openCoachAthlete)
+                    NativeCoachDashboardView(model: coachDashboard, earningsModel: coachEarnings, openAthlete: openCoachAthlete)
                 }
                 if showingNativeProgress {
                     AthleteProgressView(model: athleteProgress, onFallback: openWebProgress)

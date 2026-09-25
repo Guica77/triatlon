@@ -21,19 +21,23 @@ struct GuidedTourRequest: Sendable {
 
 @MainActor
 @Observable final class GuidedOnboardingModel {
+    private static let currentVersion = 3
     private(set) var step = 0
     private(set) var isPresented: Bool
     let request: GuidedTourRequest
 
     private let defaults: UserDefaults
-    private let version = 2
 
     init(request: GuidedTourRequest, defaults: UserDefaults = .standard) {
         self.request = request
         self.defaults = defaults
-        let completed = defaults.bool(forKey: Self.completionKey(for: request))
-        step = min(max(defaults.integer(forKey: Self.progressKey(for: request)), 0), 2)
+        let completed = defaults.bool(forKey: Self.completionKey(for: request, version: Self.currentVersion))
+        step = min(max(defaults.integer(forKey: Self.progressKey(for: request, version: Self.currentVersion)), 0), 2)
         isPresented = !completed
+    }
+
+    static func hasCompleted(_ request: GuidedTourRequest, defaults: UserDefaults = .standard) -> Bool {
+        defaults.bool(forKey: completionKey(for: request, version: currentVersion))
     }
 
     var progress: Double { Double(step + 1) / 3 }
@@ -82,8 +86,6 @@ struct GuidedTourRequest: Sendable {
         defaults.set(step, forKey: Self.progressKey(for: request))
     }
 
-    func skip() { finish() }
-
     func restart() {
         step = 0
         defaults.set(0, forKey: Self.progressKey(for: request))
@@ -91,16 +93,16 @@ struct GuidedTourRequest: Sendable {
     }
 
     func finish() {
-        defaults.set(true, forKey: Self.completionKey(for: request, version: version))
-        defaults.removeObject(forKey: Self.progressKey(for: request, version: version))
+        defaults.set(true, forKey: Self.completionKey(for: request, version: Self.currentVersion))
+        defaults.removeObject(forKey: Self.progressKey(for: request, version: Self.currentVersion))
         isPresented = false
     }
 
-    private static func completionKey(for request: GuidedTourRequest, version: Int = 2) -> String {
+    private static func completionKey(for request: GuidedTourRequest, version: Int = currentVersion) -> String {
         "triwavex.guided-onboarding.v\(version).\(request.role.rawValue).\(request.userID)"
     }
 
-    private static func progressKey(for request: GuidedTourRequest, version: Int = 2) -> String {
+    private static func progressKey(for request: GuidedTourRequest, version: Int = currentVersion) -> String {
         completionKey(for: request, version: version) + ".step"
     }
 }
@@ -132,8 +134,6 @@ struct GuidedOnboardingOverlay: View {
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.tint)
                         Spacer()
-                        Button("Saltar") { finish(skipped: true) }
-                            .font(.subheadline.weight(.semibold))
                     }
 
                     if model.step > 0 {
@@ -166,7 +166,7 @@ struct GuidedOnboardingOverlay: View {
                     .accessibilityLabel("Paso \(model.step + 1) de 3")
 
                     Button(model.isLastStep ? finalButtonTitle : "Continuar") {
-                        if model.isLastStep { finish(skipped: false) }
+                        if model.isLastStep { finish() }
                         else {
                             withAnimation(reduceMotion ? .linear(duration: 0.1) : .spring(response: 0.42, dampingFraction: 0.84)) {
                                 model.advance()
@@ -218,8 +218,8 @@ struct GuidedOnboardingOverlay: View {
         }
     }
 
-    private func finish(skipped: Bool) {
-        if skipped { model.skip() } else { model.finish() }
+    private func finish() {
+        model.finish()
         onFinished()
     }
 }

@@ -65,11 +65,216 @@ private struct AthletePreferences {
     var raceDate: Date?
 }
 
+struct NativeAppIntroductionView: View {
+    enum AccountRole: String, CaseIterable {
+        case athlete
+        case coach
+
+        var title: String { self == .athlete ? "Atleta" : "Entrenador" }
+    }
+
+    let onContinue: (AccountRole) -> Void
+    let onSignIn: (AccountRole) -> Void
+    @State private var role: AccountRole
+
+    init(initialRole: String, onContinue: @escaping (AccountRole) -> Void, onSignIn: @escaping (AccountRole) -> Void) {
+        self.onContinue = onContinue
+        self.onSignIn = onSignIn
+        _role = State(initialValue: AccountRole(rawValue: initialRole) ?? .athlete)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    TriWaveXWordmark(font: .system(size: 30, weight: .black, design: .rounded))
+                        .frame(maxWidth: .infinity)
+                        .padding(.bottom, 4)
+
+                    Label("Antes de empezar", systemImage: "sparkles")
+                        .font(.headline)
+                        .foregroundStyle(Color.triWaveXAqua)
+                    Text(role == .coach ? "Acompaña mejor a tu equipo" : "Entrena con una dirección clara")
+                        .font(.largeTitle.bold())
+                        .tracking(-0.5)
+                    Text(role == .coach
+                         ? "Organiza tus atletas, comparte sus sesiones y mantén el seguimiento y la comunicación en un mismo lugar."
+                         : "TriWaveX te ayuda a organizar tu preparación, seguir tus sesiones y entender cómo avanzas hacia tu objetivo.")
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Picker("Tipo de cuenta", selection: $role) {
+                        ForEach(AccountRole.allCases, id: \.self) { option in
+                            Text(option.title).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: role) { _, value in
+                        UserDefaults.standard.set(value.rawValue, forKey: "triwavex.login.role")
+                    }
+
+                    VStack(spacing: 10) {
+                        feature(
+                            icon: role == .coach ? "person.2.fill" : "calendar.badge.clock",
+                            title: role == .coach ? "Tu equipo, de un vistazo" : "Un plan con contexto",
+                            detail: role == .coach
+                                ? "Consulta a tus atletas activos y el estado de su seguimiento."
+                                : "Empieza con tu objetivo, deporte, experiencia y tiempo disponible."
+                        )
+                        feature(
+                            icon: role == .coach ? "bubble.left.and.bubble.right.fill" : "chart.xyaxis.line",
+                            title: role == .coach ? "Planes y comunicación" : "Sigue tu progreso",
+                            detail: role == .coach
+                                ? "Prepara sesiones, habla con cada atleta y revisa su feedback."
+                                : "Consulta tus sesiones y revisa cómo evoluciona tu preparación."
+                        )
+                        if role == .athlete {
+                            feature(
+                                icon: "person.2.fill",
+                                title: "¿Quieres entrenar con un coach?",
+                                detail: "Indícalo en el cuestionario inicial y te mostraremos los pasos disponibles para tu cuenta."
+                            )
+                        }
+                        feature(
+                            icon: "creditcard.fill",
+                            title: role == .coach ? "Capacidad y suscripción" : "Precio y suscripción",
+                            detail: "Antes de confirmar, Apple muestra el precio y la renovación. Puedes gestionar o cancelar la suscripción desde tu cuenta de Apple. Los códigos de oferta válidos se canjean al elegir el plan."
+                        )
+                        feature(
+                            icon: "slider.horizontal.3",
+                            title: role == .coach ? "Tu cuenta y ayuda" : "Tu cuenta y privacidad",
+                            detail: role == .coach
+                                ? "Gestiona tus preferencias, consulta ayuda y envía feedback al equipo."
+                                : "Revisa tus preferencias de privacidad y envía feedback al equipo. Tú decides qué datos opcionales compartir."
+                        )
+                        feature(
+                            icon: "faceid",
+                            title: "Protege el acceso con Face ID",
+                            detail: "Después de iniciar sesión puedes activarlo en Perfil → Preferencias. Es opcional, protege este iPhone y también permite usar su código."
+                        )
+                    }
+
+                    Text("Esta explicación va antes de iniciar sesión o crear la cuenta. Crear la cuenta no inicia ningún cobro. Después completarás el alta correspondiente a tu perfil y verás el plan, precio y condiciones de Apple antes de confirmar una suscripción.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Button("Continuar como \(role.title.lowercased())") {
+                        onContinue(role)
+                    }
+                    .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
+                    .controlSize(.large)
+
+                    Button("Ya tengo cuenta · Iniciar sesión") {
+                        onSignIn(role)
+                    }
+                    .buttonStyle(TriWaveXSecondaryButtonStyle())
+                }
+                .padding(20)
+                .frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading)
+                .frame(maxWidth: .infinity)
+            }
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("TriWaveX")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .tint(.triWaveXAqua)
+    }
+
+    private func feature(icon: String, title: String, detail: String) -> some View {
+        TriWaveXSurface(padding: 14) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: icon)
+                    .font(.headline)
+                    .foregroundStyle(Color.triWaveXAqua)
+                    .frame(width: 28, height: 30)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title).font(.subheadline.weight(.semibold))
+                    Text(detail).font(.footnote).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+        }
+    }
+}
+
+struct NativeCoachIntroductionView: View {
+    let onCreateAccount: () -> Void
+    let onSignIn: () -> Void
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    ProgressView(value: 1, total: 1)
+                        .tint(Color.triWaveXAqua)
+                        .accessibilityLabel("Introducción para entrenadores")
+                    Label("Espacio de entrenador", systemImage: "person.2.badge.gearshape.fill")
+                        .font(.headline)
+                        .foregroundStyle(Color.triWaveXAqua)
+                    Text("Tu equipo, mejor acompañado")
+                        .font(.largeTitle.bold())
+                        .tracking(-0.5)
+                    Text("Gestiona el trabajo de tus atletas y mantén su seguimiento en un mismo espacio.")
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    VStack(spacing: 10) {
+                        feature(icon: "calendar", title: "Planes claros", detail: "Prepara y comparte el trabajo que corresponde a cada atleta.")
+                        feature(icon: "person.2.fill", title: "Seguimiento del equipo", detail: "Ten a mano tus atletas activos y el contexto de su entrenamiento.")
+                        feature(icon: "bubble.left.and.bubble.right.fill", title: "Comunicación y feedback", detail: "Recoge comentarios y úsalos para orientar los siguientes ajustes.")
+                    }
+
+                    Label("Después de crear tu cuenta podrás elegir la capacidad de atletas. Apple mostrará el precio y la renovación antes de confirmar; no se cobra al crear la cuenta.", systemImage: "lock.shield")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(14)
+                        .background(Color.triWaveXAqua.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+
+                    Button("Crear cuenta de entrenador", action: onCreateAccount)
+                        .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
+                        .controlSize(.large)
+                    Button("Ya tengo cuenta · Iniciar sesión", action: onSignIn)
+                        .buttonStyle(TriWaveXSecondaryButtonStyle())
+                }
+                .padding(20)
+                .frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading)
+                .frame(maxWidth: .infinity)
+            }
+            .background(Color(uiColor: .systemGroupedBackground))
+            .navigationTitle("TriWaveX")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .tint(.triWaveXAqua)
+    }
+
+    private func feature(icon: String, title: String, detail: String) -> some View {
+        TriWaveXSurface(padding: 14) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: icon)
+                    .font(.headline)
+                    .foregroundStyle(Color.triWaveXAqua)
+                    .frame(width: 28, height: 30)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title).font(.subheadline.weight(.semibold))
+                    Text(detail).font(.footnote).foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+        }
+    }
+}
+
 struct NativeAthleteOnboardingView: View {
     let onCreateAccount: () -> Void
     let onContinueWithApple: (ASAuthorizationAppleIDRequest) -> Void
     let onAppleCompletion: (Result<ASAuthorization, Error>) -> Void
     let onContinueWithGoogle: () -> Void
+    let appleError: String?
+    let isSigningIn: Bool
     let onCancel: () -> Void
     @State private var preferences: AthletePreferences
     @State private var step: Int
@@ -82,11 +287,15 @@ struct NativeAthleteOnboardingView: View {
          onContinueWithApple: @escaping (ASAuthorizationAppleIDRequest) -> Void = { _ in },
          onAppleCompletion: @escaping (Result<ASAuthorization, Error>) -> Void = { _ in },
          onContinueWithGoogle: @escaping () -> Void = {},
+         appleError: String? = nil,
+         isSigningIn: Bool = false,
          onCancel: @escaping () -> Void) {
         self.onCreateAccount = onCreateAccount
         self.onContinueWithApple = onContinueWithApple
         self.onAppleCompletion = onAppleCompletion
         self.onContinueWithGoogle = onContinueWithGoogle
+        self.appleError = appleError
+        self.isSigningIn = isSigningIn
         self.onCancel = onCancel
         NativeAthleteDraft.removeExpired()
         let defaults = UserDefaults.standard
@@ -165,10 +374,26 @@ struct NativeAthleteOnboardingView: View {
                         }
                         Text("Es solo una muestra orientativa, todavía no es un plan generado ni guardado. Después de crear tu cuenta podrás completar tu perfil y ajustar tus días.")
                             .font(.footnote).foregroundStyle(.secondary)
+                        Label("Después de crear la cuenta podrás revisar el plan y el precio de Apple. No se cobrará nada hasta que confirmes.", systemImage: "creditcard")
+                            .font(.footnote.weight(.medium))
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                         SignInWithAppleButton(.continue, onRequest: onContinueWithApple, onCompletion: onAppleCompletion)
                             .signInWithAppleButtonStyle(.black).frame(height: 50)
+                            .disabled(isSigningIn)
                         GoogleSignInButton(scheme: .light, style: .wide, action: onContinueWithGoogle)
                             .frame(height: 50)
+                            .disabled(isSigningIn)
+                        if let appleError {
+                            Label(appleError, systemImage: "exclamationmark.triangle.fill")
+                                .font(.footnote.weight(.medium))
+                                .foregroundStyle(.red)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color.red.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .accessibilityLabel("Error de inicio de sesión: \(appleError)")
+                        }
                         Button("Crear cuenta con correo", action: onCreateAccount)
                             .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua)).controlSize(.large).frame(maxWidth: .infinity)
                     }
@@ -292,6 +517,38 @@ private enum NativeEntryError: LocalizedError {
 struct NativeEntryTransport {
     let origin: URL
     let store: WKWebsiteDataStore
+
+    func get<Response: Decodable>(_ path: String, response: Response.Type) async throws -> Response {
+        guard Configuration.allows(origin, origin: origin),
+              let url = URL(string: path, relativeTo: origin)?.absoluteURL,
+              Configuration.allows(url, origin: origin) else { throw NativeEntryError.invalidConfiguration }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 30
+        request.httpShouldHandleCookies = false
+        request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        if let cookie = await cookieHeader(for: url) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
+
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.httpShouldSetCookies = false
+        let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
+        defer { session.invalidateAndCancel() }
+        let (data, rawResponse) = try await session.data(for: request)
+        guard let http = rawResponse as? HTTPURLResponse,
+              Configuration.allows(http.url ?? url, origin: origin) else {
+            throw NativeEntryError.message("La respuesta del servidor no es válida.")
+        }
+        if http.statusCode == 401 { throw NativeEntryError.unauthorized }
+        if !(200..<300).contains(http.statusCode) {
+            let message = (try? JSONDecoder().decode(ErrorResponse.self, from: data).error) ?? "No se ha podido cargar la información."
+            throw NativeEntryError.message(message)
+        }
+        let result = try JSONDecoder().decode(Response.self, from: data)
+        await persistCookies(from: http, for: url)
+        return result
+    }
 
     func send<T: Encodable, Response: Decodable>(_ path: String, body: T, response: Response.Type) async throws -> Response {
         guard Configuration.allows(origin, origin: origin),

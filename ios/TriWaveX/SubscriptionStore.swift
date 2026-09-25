@@ -30,6 +30,16 @@ struct NativeSubscriptionResult: Decodable, Equatable {
     }
 }
 
+private struct NativeAppleProductCatalog: Decodable {
+    struct Entry: Decodable {
+        let productID: String
+        let role: String
+        let capacity: Int?
+    }
+
+    let products: [Entry]
+}
+
 struct SubscriptionFinishGate {
     static func finishIfAuthorized(
         _ result: NativeSubscriptionResult?,
@@ -59,16 +69,31 @@ struct SubscriptionFinishGate {
     private(set) var products: [Product] = []
     private(set) var purchasedProductIDs = Set<String>()
     private(set) var introEligibleProductIDs = Set<String>()
+    var coachCapacityOptions: [Int] {
+        products.compactMap { Self.coachCapacity(forProductID: $0.id) }.sorted()
+    }
     var purchasedCoachCapacity: Int? {
         purchasedProductIDs.compactMap { id in
-            guard id.hasPrefix("com.triwavex.coach.monthly") else { return nil }
-            return coachCapacity(for: id)
+            Self.coachCapacity(forProductID: id)
         }.max()
     }
-    private let identifiers = ["com.triwavex.athlete.monthly", "com.triwavex.coach.monthly"] + [15, 20, 25, 30, 35, 40, 45, 50].map { "com.triwavex.coach.monthly.\($0)" }
     private let transport: NativeEntryTransport
     private let expectedUserID: String
     private let expectedRole: String
+
+    nonisolated static func coachCapacity(forProductID productID: String) -> Int? {
+        let baseID = "com.triwavex.coach.monthly"
+        if productID == baseID { return 10 }
+        let prefix = baseID + "."
+        guard productID.hasPrefix(prefix) else { return nil }
+        let suffix = String(productID.dropFirst(prefix.count))
+        guard let capacity = Int(suffix),
+              String(capacity) == suffix,
+              capacity >= 15,
+              capacity <= Int(Int32.max),
+              (capacity - 10).isMultiple(of: 5) else { return nil }
+        return capacity
+    }
 
     init(origin: URL, store: WKWebsiteDataStore, expectedUserID: String, expectedRole: String) {
         transport = NativeEntryTransport(origin: origin, store: store)
@@ -79,7 +104,35 @@ struct SubscriptionFinishGate {
     func load() async {
         state = .loading
         do {
-            products = try await Product.products(for: identifiers).sorted { $0.price < $1.price }
+            let catalog: NativeAppleProductCatalog = try await transport.get(
+                "/api/native/apple/catalog",
+                response: NativeAppleProductCatalog.self
+            )
+            let allowedEntries = catalog.products.filter { $0.role == expectedRole }
+            let identifiers = Array(Set(allowedEntries.map(\.productID))).sorted()
+            guard !identifiers.isEmpty else {
+                products = []
+                state = .failed("Todavía no hay productos de Apple configurados para este tipo de cuenta.")
+                return
+            }
+            let allowedIDs = Set(identifiers)
+            let appleProducts = try await Product.products(for: identifiers)
+                .filter { allowedIDs.contains($0.id) }
+            let loadedProducts: [Product]
+            if expectedRole == "coach" {
+                loadedProducts = appleProducts.sorted {
+                    (Self.coachCapacity(forProductID: $0.id) ?? Int.max) <
+                        (Self.coachCapacity(forProductID: $1.id) ?? Int.max)
+                }
+            } else {
+                loadedProducts = appleProducts.sorted { $0.price < $1.price }
+            }
+            guard !loadedProducts.isEmpty else {
+                products = []
+                state = .failed("Apple no ha devuelto ningún plan. Comprueba que los productos estén creados, enviados para revisión o disponibles en App Store Connect y que los acuerdos de pago estén activos.")
+                return
+            }
+            products = loadedProducts
             await refreshLocalEntitlements()
             await refreshIntroEligibility()
             state = .idle
@@ -278,8 +331,8 @@ struct NativeSubscriptionStoreView: View {
         .overlay { if isBusy { loadingOverlay } }
         .task {
             await store.load()
-            if role == "coach", let purchased = store.purchasedCoachCapacity {
-                selectedCoachCapacity = purchased
+            if role == "coach" {
+                selectedCoachCapacity = store.purchasedCoachCapacity ?? store.coachCapacityOptions.first ?? 10
             }
         }
         .task {
@@ -340,17 +393,15 @@ struct NativeSubscriptionStoreView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Plazas para atletas").font(.headline)
             Picker("Capacidad del entrenador", selection: $selectedCoachCapacity) {
-                ForEach([10, 15, 20, 25, 30, 35, 40, 45, 50], id: \.self) { capacity in
+                ForEach(store.coachCapacityOptions, id: \.self) { capacity in
                     let id = capacity == 10 ? "com.triwavex.coach.monthly" : "com.triwavex.coach.monthly.\(capacity)"
-                    let available = store.products.contains(where: { $0.id == id })
-                    Text(available ? "Hasta \(capacity) atletas · \(price(for: id))" : "Hasta \(capacity) atletas · Pendiente en App Store")
+                    Text("Hasta \(capacity) atletas · \(price(for: id))")
                         .tag(capacity)
-                        .disabled(!available)
                 }
             }
             .pickerStyle(.menu)
             .frame(maxWidth: .infinity, alignment: .leading)
-            Text("Incluye 10 plazas por 29,99 €/mes; cada bloque adicional de hasta 5 plazas suma 2,99 €/mes. Se conserva el precio localizado que muestra Apple para el tramo elegido.")
+            Text("Incluye 10 plazas en el plan base; cada tramo configurado añade capacidad para hasta 5 atletas. Solo aparecen planes disponibles en Apple y el precio localizado lo confirma App Store.")
                 .font(.footnote).foregroundStyle(.secondary)
         }
         .padding(16)
@@ -497,7 +548,7 @@ struct NativeSubscriptionStoreView: View {
         ContentUnavailableView {
             Label("Plan no disponible", systemImage: "creditcard.trianglebadge.exclamationmark")
         } description: {
-            Text(failureMessage ?? "Vuelve a intentarlo cuando tengas conexión con App Store.")
+            Text(failureMessage ?? "Apple no ha encontrado el producto \(productIdentifier). Comprueba que esté creado y disponible en App Store Connect para esta app.")
         } actions: {
             Button("Reintentar") { Task { await store.load() } }
         }
@@ -549,7 +600,7 @@ private struct NativePaymentReviewView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack { Text(role == "coach" ? "Entrenador" : "Atleta con IA"); Spacer(); Text("\(product.displayPrice)/mes").bold() }
                     if eligibleForIntro { Text("7 días gratis, sin cobro hoy.").foregroundStyle(.secondary) }
-                    if role == "coach" { Text("Incluye capacidad para hasta \(coachCapacity(for: product.id)) atletas activos. Apple confirma el precio mensual exacto antes del pago.").font(.subheadline).foregroundStyle(.secondary) }
+                    if role == "coach" { Text("Incluye capacidad para hasta \(SubscriptionStore.coachCapacity(forProductID: product.id) ?? 10) atletas activos. Apple confirma el precio mensual exacto antes del pago.").font(.subheadline).foregroundStyle(.secondary) }
                     if role != "coach" {
                         Label("Desbloquea tu plan completo, los ajustes de carga y el seguimiento de cada sesión.", systemImage: "checkmark.circle.fill")
                             .font(.subheadline)
@@ -572,11 +623,6 @@ private struct NativePaymentReviewView: View {
         }
         .presentationDetents([.medium, .large])
     }
-}
-
-private func coachCapacity(for productID: String) -> Int {
-    guard productID.hasPrefix("com.triwavex.coach.monthly.") else { return 10 }
-    return Int(productID.split(separator: ".").last ?? "10") ?? 10
 }
 
 private struct SlideToConfirm: View {

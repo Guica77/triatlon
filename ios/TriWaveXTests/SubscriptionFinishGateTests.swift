@@ -89,6 +89,20 @@ final class SubscriptionFinishGateTests: XCTestCase {
         XCTAssertNil(SubscriptionAccountToken.uuid(for: "not-a-user-id"))
     }
 
+    func testCoachCapacityAcceptsConfiguredFiveSeatStepsBeyondFifty() {
+        XCTAssertEqual(SubscriptionStore.coachCapacity(forProductID: "com.triwavex.coach.monthly"), 10)
+        XCTAssertEqual(SubscriptionStore.coachCapacity(forProductID: "com.triwavex.coach.monthly.55"), 55)
+        XCTAssertEqual(SubscriptionStore.coachCapacity(forProductID: "com.triwavex.coach.monthly.100"), 100)
+    }
+
+    func testCoachCapacityRejectsNonCanonicalOrInvalidTiers() {
+        XCTAssertNil(SubscriptionStore.coachCapacity(forProductID: "com.triwavex.coach.monthly.11"))
+        XCTAssertNil(SubscriptionStore.coachCapacity(forProductID: "com.triwavex.coach.monthly.56"))
+        XCTAssertNil(SubscriptionStore.coachCapacity(forProductID: "com.triwavex.coach.monthly.015"))
+        XCTAssertNil(SubscriptionStore.coachCapacity(forProductID: "com.triwavex.coach.monthly.2147483650"))
+        XCTAssertNil(SubscriptionStore.coachCapacity(forProductID: "com.triwavex.athlete.monthly"))
+    }
+
     private func assertDoesNotFinish(
         _ result: NativeSubscriptionResult?,
         file: StaticString = #filePath,

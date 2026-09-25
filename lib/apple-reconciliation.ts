@@ -37,5 +37,25 @@ export async function reconcileAppleEvent(
   if (error) throw error
   const result = Array.isArray(data) ? data[0] : data
   if (!result) throw new Error('empty_app_store_reconciliation_result')
+
+  if (planForAppleProduct(event.providerProductId) === 'athlete' && event.periodStartedAt) {
+    const { error: accountingError } = await (admin as any).rpc('record_apple_subscription_period', {
+      p_transaction_id: event.providerTransactionReference,
+      p_original_transaction_id: event.providerReference,
+      p_athlete_id: userID,
+      p_product_id: event.providerProductId,
+      p_period_started_at: event.periodStartedAt,
+      p_period_ends_at: event.providerExpiresAt,
+      p_customer_price_milli: event.customerPriceMilli,
+      p_customer_currency: event.customerCurrency,
+      p_storefront: event.storefront,
+      p_offer_type: event.offerType,
+      p_event_type: event.providerEventType,
+      p_event_signed_at: event.providerSignedDate,
+      p_revocation_percentage_milli: event.revocationPercentageMilli,
+    })
+    if (accountingError) throw accountingError
+  }
+
   return result as ReconciliationResult
 }

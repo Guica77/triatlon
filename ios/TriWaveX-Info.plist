@@ -2,63 +2,69 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleDevelopmentRegion</key>
-    <string>es</string>
-    <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-    <key>CFBundleDisplayName</key>
-    <string>TriWaveX</string>
-    <key>CFBundleExecutable</key>
-    <string>$(EXECUTABLE_NAME)</string>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
-    <key>CFBundleName</key>
-    <string>$(PRODUCT_NAME)</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleShortVersionString</key>
-    <string>$(MARKETING_VERSION)</string>
-    <key>CFBundleVersion</key>
-    <string>$(CURRENT_PROJECT_VERSION)</string>
-    <key>TriWaveXSiteURL</key>
-    <string>$(TRIWAVEX_SITE_URL)</string>
-    <key>GIDClientID</key>
-    <string>$(GOOGLE_IOS_CLIENT_ID)</string>
-    <key>GIDServerClientID</key>
-    <string>$(GOOGLE_SERVER_CLIENT_ID)</string>
-    <key>CFBundleURLTypes</key>
-    <array>
-        <dict>
-            <key>CFBundleURLName</key>
-            <string>com.guillermohaya.triwavex.oauth</string>
-            <key>CFBundleURLSchemes</key>
-            <array><string>triwavex</string></array>
-        </dict>
-        <dict>
-            <key>CFBundleURLName</key>
-            <string>com.googleusercontent.apps.triwavex</string>
-            <key>CFBundleURLSchemes</key>
-            <array><string>$(GOOGLE_IOS_REVERSED_CLIENT_ID)</string></array>
-        </dict>
-    </array>
-    <key>LSApplicationQueriesSchemes</key>
-    <array><string>strava</string></array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>es</string>
+	<key>CFBundleDisplayName</key>
+	<string>TriWaveX</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.guillermohaya.triwavex.oauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>triwavex</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.googleusercontent.apps.triwavex</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(GOOGLE_IOS_REVERSED_CLIENT_ID)</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>GIDClientID</key>
+	<string>$(GOOGLE_IOS_CLIENT_ID)</string>
+	<key>GIDServerClientID</key>
+	<string>$(GOOGLE_SERVER_CLIENT_ID)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>strava</string>
+	</array>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>TriWaveX usa Bluetooth para conectar tu pulsómetro durante un entrenamiento.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>TriWaveX usa Face ID solo para proteger el acceso local a tu cuenta en este iPhone.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>TriWaveX lee sueño, VFC, frecuencia en reposo y entrenamientos para mostrar tu recuperación y entrenar con tus datos reales.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>TriWaveX guarda tus entrenamientos y métricas de actividad en Salud para mantener tu historial sincronizado y adaptar tu plan.</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>TriWaveX usa Face ID solo para proteger el acceso local a tu cuenta en este iPhone.</string>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>TriWaveX usa Bluetooth para conectar tu pulsómetro durante un entrenamiento.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>TriWaveX usa tu ubicación mientras preparas un entrenamiento exterior para ofrecerte el tiempo local y avisos de seguridad.</string>
-    <key>UILaunchScreen</key>
-    <dict/>
+	<key>TriWaveXSiteURL</key>
+	<string>$(TRIWAVEX_SITE_URL)</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
 	</array>
+	<key>UILaunchScreen</key>
+	<dict/>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

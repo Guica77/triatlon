@@ -82,6 +82,85 @@
           "winbackOffers" : [
 
           ]
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "displayPrice" : "32.98",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "D1000001",
+          "introductoryOffer" : { "internalID" : "D2000001", "numberOfPeriods" : 1, "paymentMode" : "free", "subscriptionPeriod" : "P7D" },
+          "localizations" : [{ "description" : "Organiza hasta 15 atletas y comparte sus entrenamientos.", "displayName" : "TriWaveX Entrenador 15", "locale" : "es_ES" }],
+          "productID" : "com.triwavex.coach.monthly.15",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Entrenador hasta 15 mensual",
+          "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [], "codeOffers" : [], "displayPrice" : "35.97", "familyShareable" : false,
+          "groupNumber" : 4, "internalID" : "D1000002",
+          "introductoryOffer" : { "internalID" : "D2000002", "numberOfPeriods" : 1, "paymentMode" : "free", "subscriptionPeriod" : "P7D" },
+          "localizations" : [{ "description" : "Organiza hasta 20 atletas y comparte sus entrenamientos.", "displayName" : "TriWaveX Entrenador 20", "locale" : "es_ES" }],
+          "productID" : "com.triwavex.coach.monthly.20", "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Entrenador hasta 20 mensual", "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription", "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [], "codeOffers" : [], "displayPrice" : "38.96", "familyShareable" : false,
+          "groupNumber" : 5, "internalID" : "D1000003",
+          "introductoryOffer" : { "internalID" : "D2000003", "numberOfPeriods" : 1, "paymentMode" : "free", "subscriptionPeriod" : "P7D" },
+          "localizations" : [{ "description" : "Organiza hasta 25 atletas y comparte sus entrenamientos.", "displayName" : "TriWaveX Entrenador 25", "locale" : "es_ES" }],
+          "productID" : "com.triwavex.coach.monthly.25", "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Entrenador hasta 25 mensual", "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription", "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [], "codeOffers" : [], "displayPrice" : "41.95", "familyShareable" : false,
+          "groupNumber" : 6, "internalID" : "D1000004",
+          "introductoryOffer" : { "internalID" : "D2000004", "numberOfPeriods" : 1, "paymentMode" : "free", "subscriptionPeriod" : "P7D" },
+          "localizations" : [{ "description" : "Organiza hasta 30 atletas y comparte sus entrenamientos.", "displayName" : "TriWaveX Entrenador 30", "locale" : "es_ES" }],
+          "productID" : "com.triwavex.coach.monthly.30", "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Entrenador hasta 30 mensual", "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription", "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [], "codeOffers" : [], "displayPrice" : "44.94", "familyShareable" : false,
+          "groupNumber" : 7, "internalID" : "D1000005",
+          "introductoryOffer" : { "internalID" : "D2000005", "numberOfPeriods" : 1, "paymentMode" : "free", "subscriptionPeriod" : "P7D" },
+          "localizations" : [{ "description" : "Organiza hasta 35 atletas y comparte sus entrenamientos.", "displayName" : "TriWaveX Entrenador 35", "locale" : "es_ES" }],
+          "productID" : "com.triwavex.coach.monthly.35", "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Entrenador hasta 35 mensual", "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription", "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [], "codeOffers" : [], "displayPrice" : "47.93", "familyShareable" : false,
+          "groupNumber" : 8, "internalID" : "D1000006",
+          "introductoryOffer" : { "internalID" : "D2000006", "numberOfPeriods" : 1, "paymentMode" : "free", "subscriptionPeriod" : "P7D" },
+          "localizations" : [{ "description" : "Organiza hasta 40 atletas y comparte sus entrenamientos.", "displayName" : "TriWaveX Entrenador 40", "locale" : "es_ES" }],
+          "productID" : "com.triwavex.coach.monthly.40", "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Entrenador hasta 40 mensual", "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription", "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [], "codeOffers" : [], "displayPrice" : "50.92", "familyShareable" : false,
+          "groupNumber" : 9, "internalID" : "D1000007",
+          "introductoryOffer" : { "internalID" : "D2000007", "numberOfPeriods" : 1, "paymentMode" : "free", "subscriptionPeriod" : "P7D" },
+          "localizations" : [{ "description" : "Organiza hasta 45 atletas y comparte sus entrenamientos.", "displayName" : "TriWaveX Entrenador 45", "locale" : "es_ES" }],
+          "productID" : "com.triwavex.coach.monthly.45", "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Entrenador hasta 45 mensual", "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription", "winbackOffers" : []
+        },
+        {
+          "adHocOffers" : [], "codeOffers" : [], "displayPrice" : "53.91", "familyShareable" : false,
+          "groupNumber" : 10, "internalID" : "D1000008",
+          "introductoryOffer" : { "internalID" : "D2000008", "numberOfPeriods" : 1, "paymentMode" : "free", "subscriptionPeriod" : "P7D" },
+          "localizations" : [{ "description" : "Organiza hasta 50 atletas y comparte sus entrenamientos.", "displayName" : "TriWaveX Entrenador 50", "locale" : "es_ES" }],
+          "productID" : "com.triwavex.coach.monthly.50", "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "TriWaveX Entrenador hasta 50 mensual", "subscriptionGroupID" : "A2CF9F8D",
+          "type" : "RecurringSubscription", "winbackOffers" : []
         }
       ]
     }

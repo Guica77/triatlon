@@ -235,6 +235,18 @@ struct NativeProfileView: View {
                 } label: {
                     Label("Suscripción y plan", systemImage: "creditcard")
                 }
+                if authenticatedRole == "athlete", let authenticatedUserID {
+                    NavigationLink {
+                        NativeRaceDiscountView(
+                            origin: origin,
+                            websiteDataStore: store,
+                            expectedUserID: authenticatedUserID,
+                            onSubscriptionFinished: onSubscriptionFinished
+                        )
+                    } label: {
+                        Label("Descuento por carrera", systemImage: "medal.star")
+                    }
+                }
                 Button(action: openAccount) { Label("Cuenta y seguridad", systemImage: "person.crop.circle").foregroundStyle(.primary) }
             }
             Section("Ayuda") {

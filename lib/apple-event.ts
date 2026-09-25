@@ -10,17 +10,20 @@ export const APPLE_PRODUCTS = {
   coach: 'com.triwavex.coach.monthly',
 } as const
 
-export const APPLE_PRODUCT_IDS = [
-  APPLE_PRODUCTS.athlete,
-  ...[10, 15, 20, 25, 30, 35, 40, 45, 50].map((capacity) => capacity === 10 ? APPLE_PRODUCTS.coach : `${APPLE_PRODUCTS.coach}.${capacity}`),
-] as const
-
-export const APPLE_COACH_CAPACITIES = [10, 15, 20, 25, 30, 35, 40, 45, 50] as const
-
 export function coachCapacityForAppleProduct(productID: string): number | null {
   if (productID === APPLE_PRODUCTS.coach) return 10
-  const match = /^com\.triwavex\.coach\.monthly\.(15|20|25|30|35|40|45|50)$/.exec(productID)
-  return match ? Number(match[1]) : null
+  const match = /^com\.triwavex\.coach\.monthly\.(\d{2,10})$/.exec(productID)
+  if (!match) return null
+
+  const capacity = Number(match[1])
+  if (
+    !Number.isSafeInteger(capacity) ||
+    capacity < 15 ||
+    capacity > 2_147_483_647 ||
+    (capacity - 10) % 5 !== 0
+  ) return null
+
+  return capacity
 }
 
 export type ApplePlan = keyof typeof APPLE_PRODUCTS
@@ -39,6 +42,12 @@ export type ClassifiedAppleEvent = {
   providerTransactionReference: string
   providerCustomerReference: string | null
   providerSignedDate: string
+  periodStartedAt: string | null
+  customerPriceMilli: number | null
+  customerCurrency: string | null
+  storefront: string | null
+  offerType: number | null
+  revocationPercentageMilli: number | null
 }
 
 function appleDate(value: number | undefined): Date | null {
@@ -82,6 +91,7 @@ export function classifyAppleEvent(input: {
   const providerTransactionReference = transaction.transactionId
   const signedDate = appleDate(input.notificationSignedDate) ?? appleDate(transaction.signedDate) ?? appleDate(renewal?.signedDate)
   const expiresAt = appleDate(transaction.expiresDate)
+  const periodStartedAt = appleDate(transaction.purchaseDate)
   const transactionProduct = planForAppleProduct(transaction.productId || '')
   const renewalProduct = renewal?.productId || renewal?.autoRenewProductId
   const renewalPlan = renewalProduct ? planForAppleProduct(renewalProduct) : transactionProduct
@@ -137,6 +147,24 @@ export function classifyAppleEvent(input: {
     providerTransactionReference,
     providerCustomerReference: transaction.appAccountToken ?? renewal?.appAccountToken ?? null,
     providerSignedDate: signedDate.toISOString(),
+    periodStartedAt: periodStartedAt?.toISOString() ?? null,
+    customerPriceMilli: typeof transaction.price === 'number' && Number.isSafeInteger(transaction.price) && transaction.price >= 0
+      ? transaction.price
+      : null,
+    customerCurrency: typeof transaction.currency === 'string' && /^[A-Z]{3}$/.test(transaction.currency)
+      ? transaction.currency
+      : null,
+    storefront: typeof transaction.storefront === 'string' && transaction.storefront.length <= 64
+      ? transaction.storefront
+      : null,
+    offerType: typeof transaction.offerType === 'number' && Number.isSafeInteger(transaction.offerType)
+      ? transaction.offerType
+      : null,
+    revocationPercentageMilli: typeof transaction.revocationPercentage === 'number' &&
+      Number.isSafeInteger(transaction.revocationPercentage) &&
+      transaction.revocationPercentage >= 0 && transaction.revocationPercentage <= 100_000
+      ? transaction.revocationPercentage
+      : null,
   }
 }
 

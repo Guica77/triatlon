@@ -3,12 +3,18 @@ import CryptoKit
 import Foundation
 import GoogleSignIn
 import Observation
+import OSLog
 import Security
 import UIKit
 import WebKit
 
 @Observable
 final class SessionModel {
+    private static let googleLogger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "TriWaveX",
+        category: "Authentication"
+    )
+
     let origin: URL
     let store = WKWebsiteDataStore.default()
     var destination: String?
@@ -102,6 +108,7 @@ final class SessionModel {
     }
 
     func prepareAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
+        error = nil
         let nonce = Self.randomNonce()
         appleNonce = nonce
         request.requestedScopes = [.fullName, .email]
@@ -117,11 +124,18 @@ final class SessionModel {
         case .failure:
             error = "No se ha podido iniciar sesión con Apple. Inténtalo de nuevo."
         case .success(let authorization):
-            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-                  let tokenData = credential.identityToken,
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+                error = "Apple no ha devuelto una credencial de inicio de sesión válida."
+                return
+            }
+            guard let tokenData = credential.identityToken,
                   let identityToken = String(data: tokenData, encoding: .utf8),
-                  let nonce = appleNonce else {
-                error = "Apple no ha devuelto una credencial válida. Inténtalo de nuevo."
+                  !identityToken.isEmpty else {
+                error = "Apple no ha devuelto el token de identidad. Comprueba que has iniciado sesión con tu cuenta de Apple en este iPhone y vuelve a intentarlo."
+                return
+            }
+            guard let nonce = appleNonce else {
+                error = "Se ha perdido la verificación segura de Apple. Vuelve a tocar el botón e inténtalo de nuevo."
                 return
             }
             await signInWithApple(identityToken: identityToken, nonce: nonce, expectedRole: expectedRole)
@@ -229,7 +243,8 @@ final class SessionModel {
             )
             let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: viewController)
             guard let identityToken = result.user.idToken?.tokenString, !identityToken.isEmpty else {
-                error = "Google no ha devuelto una credencial válida. Inténtalo de nuevo."
+                Self.googleLogger.error("Google completed without returning an ID token")
+                error = "Google abrió la cuenta, pero no devolvió el token de acceso. Revisa el Client ID web e iOS configurados en la app y vuelve a intentarlo."
                 return
             }
             var request = URLRequest(url: origin.appendingPathComponent("api/native/google/session"))
@@ -245,20 +260,25 @@ final class SessionModel {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse,
                   http.url.map({ Configuration.allows($0, origin: origin) }) == true else {
+                Self.googleLogger.error("Native Google endpoint returned an invalid or cross-origin response")
                 error = "La respuesta de Google no es válida. Inténtalo de nuevo."
                 return
             }
             guard http.statusCode == 200 else {
-                error = "Google no se ha podido verificar. Comprueba que el proveedor Google de Supabase usa el Client ID web y el secret del mismo proyecto que la app iOS."
+                Self.googleLogger.error("Supabase rejected native Google sign-in with HTTP status \(http.statusCode, privacy: .public)")
+                error = "Google abrió la cuenta, pero Supabase no la aceptó. En Supabase, guarda primero el Client ID web y después el de iOS (ambos del mismo proyecto); el secret debe corresponder al Client ID web."
                 return
             }
             do {
                 try await applyLoginResponse(data: data, response: http, expectedRole: expectedRole)
             } catch {
+                Self.googleLogger.error("Native Google response could not establish a session")
                 self.error = "Google ha devuelto una sesión no válida. Inténtalo de nuevo."
             }
         } catch {
             if (error as? GIDSignInError)?.code == .canceled { return }
+            let signInError = error as NSError
+            Self.googleLogger.error("Google SDK sign-in failed in \(signInError.domain, privacy: .public), code \(signInError.code, privacy: .public)")
             self.error = "No se ha podido iniciar sesión con Google. Inténtalo de nuevo."
         }
     }

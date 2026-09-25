@@ -31,6 +31,7 @@ struct RootView: View {
     @State private var informationURL: URL?
     @State private var registrationRole: Role?
     @State private var isShowingAthleteOnboarding = false
+    @State private var isShowingCoachIntroduction = false
     @State private var role: Role = .athlete
     @State private var onboardingGivenName = ""
     @State private var coachCheckout: CoachCheckout?
@@ -40,7 +41,9 @@ struct RootView: View {
     @State private var loginIntroStage = 0
     @State private var isPlayingLoginIntro = false
     @State private var liftsLoginTitle = false
+    @Environment(\.verticalSizeClass) private var verticalSizeClass
     @AppStorage("triwavex.login-intro.seen.v1") private var hasSeenLoginIntro = false
+    @AppStorage("triwavex.app-overview.seen.v3") private var hasSeenAppOverview = false
     @FocusState private var focusedField: FocusedField?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -53,7 +56,7 @@ struct RootView: View {
         _registrationRole = State(initialValue: Role(rawValue: defaults.string(forKey: "triwavex.registration.activeRole") ?? ""))
         // Returning users must never render a single frame of the first-run
         // phrase sequence before the compact wordmark takes over.
-        _loginIntroStage = State(initialValue: hasSeenIntro ? 4 : 0)
+        _loginIntroStage = State(initialValue: hasSeenIntro ? 10 : 0)
         _liftsLoginTitle = State(initialValue: hasSeenIntro)
         if defaults.bool(forKey: "triwavex.coachCheckout.pending") {
             _coachCheckout = State(initialValue: CoachCheckout(
@@ -70,6 +73,17 @@ struct RootView: View {
             if !hasCompletedStartup {
                 TriWaveXStartupView(isRestoringSession: !session.hasCompletedRestore)
                     .transition(.opacity)
+            } else if session.destination == nil, !hasSeenAppOverview {
+                NativeAppIntroductionView(
+                    initialRole: role.rawValue,
+                    onContinue: { selectedRole in
+                        finishAppIntroduction(for: selectedRole, continueToAccountSetup: true)
+                    },
+                    onSignIn: { selectedRole in
+                        finishAppIntroduction(for: selectedRole, continueToAccountSetup: false)
+                    }
+                )
+                .transition(.opacity)
             } else if isShowingAthleteOnboarding {
                 NativeAthleteOnboardingView(
                     onCreateAccount: {
@@ -96,7 +110,22 @@ struct RootView: View {
                             else { NativeAthleteDraft.clear() }
                         }
                     },
+                    appleError: session.error,
+                    isSigningIn: session.busy,
                     onCancel: { isShowingAthleteOnboarding = false }
+                )
+                .transition(.opacity)
+            } else if isShowingCoachIntroduction {
+                NativeCoachIntroductionView(
+                    onCreateAccount: {
+                        isShowingCoachIntroduction = false
+                        setRegistrationRole(.coach)
+                    },
+                    onSignIn: {
+                        isShowingCoachIntroduction = false
+                        role = .coach
+                        UserDefaults.standard.set(Role.coach.rawValue, forKey: "triwavex.login.role")
+                    }
                 )
                 .transition(.opacity)
             } else if let registrationRole {
@@ -266,6 +295,9 @@ struct RootView: View {
 #if DEBUG
             let arguments = ProcessInfo.processInfo.arguments
             if arguments.contains("--capture-demo-tour") || arguments.contains("--preview-guided-onboarding") {
+                hasSeenAppOverview = true
+                hasSeenLoginIntro = true
+                loginIntroStage = 10
                 hasCompletedStartupBeat = true
                 hasCompletedStartup = true
                 return
@@ -310,11 +342,12 @@ struct RootView: View {
     }
 
     private var loginView: some View {
-        NavigationStack {
+        let compactHeight = verticalSizeClass == .compact
+        return NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     branding
-                        .padding(.bottom, 30)
+                        .padding(.bottom, compactHeight ? 8 : 12)
 
                     if loginIntroStage >= 8 {
                         loginSectionTitle("Tipo de cuenta")
@@ -415,8 +448,8 @@ struct RootView: View {
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 24)
-                        .padding(.bottom, 12)
+                        .padding(.top, compactHeight ? 10 : 14)
+                        .padding(.bottom, 6)
 
                     SignInWithAppleButton(.continue) { request in
                         session.prepareAppleRequest(request)
@@ -450,16 +483,16 @@ struct RootView: View {
                         Text(role == .coach ? "¿Aún no tienes cuenta de entrenador?" : "¿Nuevo en TriWaveX?")
                             .foregroundStyle(.secondary)
                         Button(role == .coach ? "Crear cuenta de entrenador" : "Crear cuenta de atleta") {
-                            if role == .athlete {
-                                isShowingAthleteOnboarding = true
-                            } else {
-                                setRegistrationRole(role)
-                            }
+                        if role == .athlete {
+                            isShowingAthleteOnboarding = true
+                        } else {
+                            isShowingCoachIntroduction = true
+                        }
                         }
                     }
                     .font(.subheadline)
                     .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
-                    .padding(.top, 28)
+                    .padding(.top, 12)
                     .accessibilityHint("Abre el registro de \(role.title.lowercased())")
 
                     HStack {
@@ -473,16 +506,19 @@ struct RootView: View {
                     }
                     .font(.footnote.weight(.semibold))
                     .padding(.horizontal, -8)
-                    .padding(.top, 26)
+                    .padding(.top, 16)
                     .transition(loginEntryTransition)
                     }
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 54)
-                .padding(.bottom, 32)
+                .padding(.top, compactHeight ? 8 : 16)
+                .padding(.bottom, compactHeight ? 10 : 16)
+                .frame(maxWidth: 520)
+                .frame(maxWidth: .infinity)
             }
             .background(Color(uiColor: .systemGroupedBackground))
             .scrollDismissesKeyboard(.interactively)
+            .scrollIndicators(.hidden)
             .toolbar(.hidden, for: .navigationBar)
         }
         .task { await playLoginIntro() }
@@ -511,10 +547,10 @@ struct RootView: View {
 
     private func loginSectionTitle(_ title: String) -> some View {
         Text(title)
-            .font(.system(size: 21, weight: .bold))
+            .font(.system(size: 18, weight: .bold))
             .foregroundStyle(.secondary)
-            .padding(.top, 18)
-            .padding(.bottom, 8)
+            .padding(.top, verticalSizeClass == .compact ? 10 : 14)
+            .padding(.bottom, 6)
             .padding(.horizontal, 8)
     }
 
@@ -528,7 +564,7 @@ struct RootView: View {
     }
 
     private var branding: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: verticalSizeClass == .compact ? 8 : 12) {
             Group {
                 if loginIntroStage < 3 {
                     TypingCycleText(text: loginIntroCopy[loginIntroStage])
@@ -543,17 +579,17 @@ struct RootView: View {
                         .transition(.opacity)
                 } else {
                     triWaveXWordmark
-                        .frame(height: 76)
+                        .frame(height: verticalSizeClass == .compact ? 54 : 64)
                         .scaleEffect(firstIntroWordmarkScale)
                 }
             }
-            .frame(maxWidth: .infinity, minHeight: 76)
+            .frame(maxWidth: .infinity, minHeight: verticalSizeClass == .compact ? 54 : 64)
 
             loginIntroProgress
                 .opacity(loginIntroStage < 8 ? 1 : 0)
         }
         .frame(maxWidth: .infinity)
-        .offset(y: !reduceMotion && (loginIntroStage < 4 || liftsLoginTitle && loginIntroStage < 7) ? 250 : 0)
+        .offset(y: !reduceMotion && verticalSizeClass != .compact && (loginIntroStage < 4 || liftsLoginTitle && loginIntroStage < 7) ? 250 : 0)
         .animation(
             liftsLoginTitle && !reduceMotion && loginIntroStage == 7
                 ? TriWaveXMotion.loginTitleLift
@@ -607,11 +643,7 @@ struct RootView: View {
 
         if hasSeenLoginIntro {
             liftsLoginTitle = true
-            loginIntroStage = 4
-            try? await Task.sleep(for: .milliseconds(reduceMotion ? 80 : 900))
-            guard !Task.isCancelled else { return }
-            withAnimation(reduceMotion ? .easeOut(duration: 0.12) : TriWaveXMotion.loginTitleLift) { loginIntroStage = 7 }
-            await revealLoginControlsAfterLift()
+            loginIntroStage = 10
             return
         }
 
@@ -682,6 +714,28 @@ struct RootView: View {
             UserDefaults.standard.set(value.rawValue, forKey: "triwavex.registration.activeRole")
         } else {
             UserDefaults.standard.removeObject(forKey: "triwavex.registration.activeRole")
+        }
+    }
+
+    private func finishAppIntroduction(
+        for selectedRole: NativeAppIntroductionView.AccountRole,
+        continueToAccountSetup: Bool
+    ) {
+        let selected: Role = selectedRole == .coach ? .coach : .athlete
+        role = selected
+        UserDefaults.standard.set(selected.rawValue, forKey: "triwavex.login.role")
+        hasSeenAppOverview = true
+        hasSeenLoginIntro = true
+        loginIntroStage = 10
+        liftsLoginTitle = true
+
+        if continueToAccountSetup, selected == .athlete {
+            setRegistrationRole(nil)
+            isShowingAthleteOnboarding = true
+        } else if continueToAccountSetup {
+            isShowingCoachIntroduction = true
+        } else {
+            setRegistrationRole(nil)
         }
     }
 
