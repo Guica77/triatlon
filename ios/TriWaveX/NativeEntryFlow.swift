@@ -913,7 +913,7 @@ struct NativeAthleteOnboardingView: View {
         switch preferences.modality {
         case "carrera": [("5k", "5 km"), ("10k", "10 km"), ("medio_maraton", "Media maratón"), ("maraton", "Maratón"), ("trail", "Trail"), ("ultra", "Ultra en asfalto"), ("ultra_trail", "Ultra Trail")]
         case "triatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "70.3"), ("full", "Larga distancia")]
-        default: [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "Media distancia")]
+        case "duatlon", "acuatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "Media distancia")]
         }
     }
     private var distanceTitle: String { distanceOptions.first(where: { $0.id == preferences.distance })?.title ?? distanceOptions[0].title }
@@ -1454,7 +1454,7 @@ struct NativeOnboardingView: View {
         switch model.modality {
         case "carrera": [("5k", "5 km"), ("10k", "10 km"), ("medio_maraton", "Media maratón"), ("maraton", "Maratón"), ("trail", "Trail"), ("ultra", "Ultra en asfalto"), ("ultra_trail", "Ultra Trail")]
         case "triatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "70.3"), ("full", "Larga distancia")]
-        default: [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "Media distancia")]
+        case "duatlon", "acuatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "Media distancia")]
         }
     }
 
