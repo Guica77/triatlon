@@ -928,6 +928,7 @@ struct NativeAthleteOnboardingView: View {
         case "carrera": [("Mar", "Carrera suave", "figure.run"), ("Jue", "Ritmo y técnica", "figure.run"), ("Sáb", "Fuerza", "dumbbell"), ("Dom", "Rodaje largo", "figure.run")]
         case "duatlon": [("Mar", "Carrera", "figure.run"), ("Jue", "Bicicleta", "bicycle"), ("Sáb", "Carrera y técnica", "figure.run"), ("Dom", "Fuerza", "dumbbell")]
         case "acuatlon": [("Mar", "Natación", "figure.pool.swim"), ("Jue", "Carrera", "figure.run"), ("Sáb", "Natación técnica", "figure.pool.swim"), ("Dom", "Fuerza", "dumbbell")]
+        case "triatlon": [("Lun", "Natación", "figure.pool.swim"), ("Mié", "Bicicleta", "bicycle"), ("Vie", "Carrera", "figure.run"), ("Dom", "Fuerza y movilidad", "dumbbell")]
         default: [("Lun", "Natación", "figure.pool.swim"), ("Mié", "Bicicleta", "bicycle"), ("Vie", "Carrera", "figure.run"), ("Dom", "Fuerza y movilidad", "dumbbell")]
         }
         return preferences.weeklyHours <= 6 ? Array(all.prefix(3)) : all
@@ -1455,6 +1456,7 @@ struct NativeOnboardingView: View {
         case "carrera": [("5k", "5 km"), ("10k", "10 km"), ("medio_maraton", "Media maratón"), ("maraton", "Maratón"), ("trail", "Trail"), ("ultra", "Ultra en asfalto"), ("ultra_trail", "Ultra Trail")]
         case "triatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "70.3"), ("full", "Larga distancia")]
         case "duatlon", "acuatlon": [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "Media distancia")]
+        default: [("sprint", "Sprint"), ("olimpico", "Olímpico"), ("half", "70.3"), ("full", "Larga distancia")]
         }
     }
 
