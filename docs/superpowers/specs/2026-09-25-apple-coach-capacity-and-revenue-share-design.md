@@ -35,7 +35,9 @@ Apple documents multiseat auto-renewable subscriptions as not yet available to A
 
 ### Attribution
 
-When the server validates an athlete’s Apple transaction, it resolves the TriWaveX user from the signed transaction’s app account token when present, or from a securely verified server-side association to the original transaction where Apple’s flow does not provide that token. It then records an immutable billing-period attribution snapshot:
+Coach assignment history is required because Apple renewal notifications can arrive after the athlete changes coach, while the current profile stores only the present coach and old relationship rows may be deleted. Maintain a temporal assignment history with `valid_from` and `valid_to` intervals in the same database transaction as every coach assignment, change, and disconnection. Create a new record per assignment; when it ends, close its `valid_to` once without rewriting closed history. Backfill only relationships that can be established from existing active relationship rows and their creation timestamps. Do not infer deleted historical assignments.
+
+When the server validates an athlete’s Apple transaction, it resolves the TriWaveX user from the signed transaction’s app account token when present, or from a securely verified server-side association to the original transaction where Apple’s flow does not provide that token. It uses Apple’s signed billing-period start to find the coach assignment valid at that instant, even if the notification arrives later, and then records an immutable billing-period attribution snapshot:
 
 - original Apple transaction and renewal-period identifiers;
 - athlete account and verified athlete product;
@@ -44,6 +46,8 @@ When the server validates an athlete’s Apple transaction, it resolves the TriW
 - idempotency key and processing/reconciliation state.
 
 The app cannot write the coach attribution, share percentage, Apple net proceeds, or ledger status. A renewal creates a new attribution snapshot using the coach assignment at that renewal period’s start; it does not rewrite a previous period.
+
+If the billing-period start predates available assignment history or the interval data is missing or contradictory, keep the transaction unreconciled and the share unassigned until an authorized review can verify it. Never substitute the current coach or guess. New periods beginning after the history migration can be attributed from the verified interval history.
 
 ### Net proceeds and reconciliation
 
@@ -70,7 +74,7 @@ Only an authorized administrator can inspect the full ledger and record a real, 
 - Keep Apple API credentials server-side only. Never expose service-role credentials or Apple private keys in the app or browser.
 - Apply row-level security to ledger tables. Coaches can read only ledger rows attributed to their own coach ID; athletes cannot read coach earnings; administrator access is narrowly authorized. Client roles cannot insert, update, or delete earnings, reconciliation, or payout records.
 - Store only the data necessary to verify, reconcile, display, and audit the share. Do not expose another athlete’s identity or payment details in coach earnings history.
-- Reassignment, cancellation, refund, appeal, and support records must preserve historical attribution and the original Apple transaction link.
+- Reassignment, disconnection, cancellation, refund, appeal, and support records must preserve historical attribution and the original Apple transaction link. A coach assignment update and its history interval are atomic.
 
 ## Store presentation and discounts
 
@@ -94,7 +98,7 @@ The athlete-facing store does not disclose the internal 50/50 accounting split. 
 - Formula tests for 10, 15, 20, 50, 55, and 60 seats and a high tier beyond 50; reject invalid/non-five-block catalog capacities and integer overflow.
 - Catalog tests proving only enabled, StoreKit-returned product IDs appear and server-side product mapping—not client input—grants capacity.
 - Database tests for atomic acceptance at each configured tier, concurrent final-seat acceptance, pending applications not consuming a slot, downgrade over-capacity behavior, and no roster eviction.
-- Revenue attribution tests: active coach at period start, reassignment mid-period, no coach, free trial, paid discount, canceled renewal, refund, chargeback, duplicate notification, and unknown transaction.
+- Revenue attribution tests: active coach at period start, notification delayed until after reassignment, disconnection, no coach, history gap, free trial, paid discount, canceled renewal, refund, chargeback, duplicate notification, and unknown transaction.
 - Reconciliation tests for Apple report cohorts by fiscal month/product/storefront, proportional allocation, rounding residual handling, FX/tax/commission adjustments, idempotent imports, and a report mismatch that remains pending rather than guessing.
 - RLS tests ensuring a coach sees only their own ledger and cannot write amounts or statuses; a different coach and an athlete cannot inspect earnings.
 - StoreKit Sandbox tests for configured coach tiers, price display, upgrade/downgrade, restore, expiry, refund/revocation, and matching server entitlements.
