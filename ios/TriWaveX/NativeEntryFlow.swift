@@ -334,8 +334,6 @@ private struct IntroPreviewScreen: View {
                 onSubscriptionFinished: nil,
                 isDemo: true
             ))
-        default:
-            nil
         }
     }
 
