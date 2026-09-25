@@ -19,10 +19,10 @@ enum NativeAthleteDraft {
                 ["goal", "modality", "targetRaceDistance", "level", "weeklyHours", "targetRaceDate"].contains {
                     defaults.object(forKey: prefix + $0) != nil
                 }
-            if hasUnboundedDraft { clear(from: defaults) }
+            if hasUnboundedDraft { clearPreAuthDraft(from: defaults) }
             return
         }
-        if expiry < Date() { clear(from: defaults) }
+        if expiry < Date() { clearPreAuthDraft(from: defaults) }
     }
 
     fileprivate static func save(_ values: AthletePreferences, step: Int, to defaults: UserDefaults = .standard) {
@@ -38,6 +38,14 @@ enum NativeAthleteDraft {
 
     static func clear(from defaults: UserDefaults = .standard) {
         ["goal", "modality", "targetRaceDistance", "level", "weeklyHours", "wantsCoach", "injuries", "step", "readyForPayment", "targetRaceDate"].forEach {
+            defaults.removeObject(forKey: prefix + $0)
+        }
+        defaults.removeObject(forKey: preAuthStepKey)
+        defaults.removeObject(forKey: expiryKey)
+    }
+
+    private static func clearPreAuthDraft(from defaults: UserDefaults) {
+        ["goal", "modality", "targetRaceDistance", "level", "weeklyHours", "targetRaceDate"].forEach {
             defaults.removeObject(forKey: prefix + $0)
         }
         defaults.removeObject(forKey: preAuthStepKey)

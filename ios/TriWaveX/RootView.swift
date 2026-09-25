@@ -688,9 +688,14 @@ struct RootView: View {
         liftsLoginTitle = true
 
         if continueToAccountSetup, selected == .athlete {
+            // Persist the completed introduction before switching branches so
+            // the questionnaire is the next screen and stays the next screen
+            // if the app is interrupted while the transition is in flight.
+            hasSeenAppOverview = true
             setRegistrationRole(nil)
             isShowingAthleteOnboarding = true
         } else if continueToAccountSetup {
+            hasSeenAppOverview = true
             isShowingCoachIntroduction = true
         } else {
             setRegistrationRole(nil)
