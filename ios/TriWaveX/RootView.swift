@@ -71,17 +71,6 @@ struct RootView: View {
             if !hasCompletedStartup {
                 TriWaveXStartupView(isRestoringSession: !session.hasCompletedRestore)
                     .transition(.opacity)
-            } else if session.destination == nil, !hasSeenAppOverview {
-                NativeAppIntroductionView(
-                    initialRole: role.rawValue,
-                    onContinue: { selectedRole in
-                        finishAppIntroduction(for: selectedRole, continueToAccountSetup: true)
-                    },
-                    onSignIn: { selectedRole in
-                        finishAppIntroduction(for: selectedRole, continueToAccountSetup: false)
-                    }
-                )
-                .transition(.opacity)
             } else if isShowingAthleteOnboarding {
                 NativeAthleteOnboardingView(
                     onCreateAccount: {
@@ -111,6 +100,17 @@ struct RootView: View {
                     appleError: session.error,
                     isSigningIn: session.busy,
                     onCancel: { isShowingAthleteOnboarding = false }
+                )
+                .transition(.opacity)
+            } else if session.destination == nil, !hasSeenAppOverview {
+                NativeAppIntroductionView(
+                    initialRole: role.rawValue,
+                    onContinue: { selectedRole in
+                        finishAppIntroduction(for: selectedRole, continueToAccountSetup: true)
+                    },
+                    onSignIn: { selectedRole in
+                        finishAppIntroduction(for: selectedRole, continueToAccountSetup: false)
+                    }
                 )
                 .transition(.opacity)
             } else if isShowingCoachIntroduction {
