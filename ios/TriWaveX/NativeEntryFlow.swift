@@ -216,6 +216,11 @@ private struct IntroPreviewScreen: View {
                             .background(Color(uiColor: .systemGroupedBackground))
                         appTabBar
                     }
+                    // These are illustrative screens embedded inside the
+                    // onboarding pager. In particular, the subscription List
+                    // must not intercept taps intended for the pager controls.
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
                     .background(Color(uiColor: .systemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                     VStack(alignment: .leading, spacing: 4) {
