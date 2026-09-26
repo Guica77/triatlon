@@ -136,7 +136,7 @@ struct NativeAppIntroductionView: View {
                 }
 
                 TabView(selection: $page) {
-                    ForEach(slides.indices, id: \.self) { index in
+                    ForEach(0..<slides.count, id: \.self) { index in
                         let slide = slides[index]
                         IntroPreviewScreen(title: slide.0, detail: slide.1, kind: slide.2, role: role, demoModels: demoModels) { destination in
                             guard let nextPage = slides.firstIndex(where: { $0.2 == destination }) else { return }
@@ -150,7 +150,7 @@ struct NativeAppIntroductionView: View {
                 .frame(maxHeight: .infinity)
 
                 HStack(spacing: 7) {
-                    ForEach(slides.indices, id: \.self) { index in
+                    ForEach(0..<slides.count, id: \.self) { index in
                         Capsule().fill(index == page ? Color.triWaveXAqua : Color.secondary.opacity(0.22))
                             .frame(width: index == page ? 24 : 7, height: 7)
                     }
