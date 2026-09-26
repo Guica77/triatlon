@@ -680,6 +680,14 @@ struct RootView: View {
         continueToAccountSetup: Bool
     ) {
         let selected: Role = selectedRole == .coach ? .coach : .athlete
+
+        // Select the destination first so the last introduction page is
+        // replaced immediately. The remaining values are persisted in the
+        // same SwiftUI update after the route has been selected.
+        if continueToAccountSetup, selected == .athlete {
+            isShowingAthleteOnboarding = true
+        }
+
         role = selected
         UserDefaults.standard.set(selected.rawValue, forKey: "triwavex.login.role")
         hasSeenAppOverview = true
@@ -693,7 +701,6 @@ struct RootView: View {
             // if the app is interrupted while the transition is in flight.
             hasSeenAppOverview = true
             setRegistrationRole(nil)
-            isShowingAthleteOnboarding = true
         } else if continueToAccountSetup {
             hasSeenAppOverview = true
             isShowingCoachIntroduction = true

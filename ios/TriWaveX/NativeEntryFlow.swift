@@ -85,7 +85,7 @@ struct NativeAppIntroductionView: View {
     let onSignIn: (AccountRole) -> Void
     @State private var role: AccountRole
     @State private var page = 0
-    @State private var demoModels = IntroDemoModels()
+    private let demoModels = IntroDemoModels.shared
 
     private var slides: [(String, String, IntroPreviewKind)] {
         role == .athlete
@@ -330,7 +330,7 @@ private struct IntroPreviewScreen: View {
                 saveGoal: { _ in false },
                 openSessions: {}
             ))
-        case .planChoice, .subscription:
+        case .planChoice:
             AnyView(SubscriptionManagementView(
                 origin: demoModels.origin,
                 store: demoModels.store,
@@ -340,6 +340,11 @@ private struct IntroPreviewScreen: View {
                 onSubscriptionFinished: nil,
                 isDemo: true
             ))
+        // Keep the final introduction page lightweight. The live subscription
+        // List is illustrative only and can make the pager expensive to tear
+        // down exactly when the user continues into onboarding.
+        case .subscription:
+            nil
         }
     }
 
@@ -604,6 +609,8 @@ private struct IntroPreviewScreen: View {
 
 @MainActor
 private final class IntroDemoModels {
+    static let shared = IntroDemoModels()
+
     let origin = URL(string: "https://triwavex.com")!
     let store = WKWebsiteDataStore.nonPersistent()
     let appLock = AppLock()
