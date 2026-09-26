@@ -85,6 +85,7 @@ struct NativeAppIntroductionView: View {
     let onSignIn: (AccountRole) -> Void
     @State private var role: AccountRole
     @State private var page = 0
+    @State private var demoModels = IntroDemoModels()
 
     private var slides: [(String, String, IntroPreviewKind)] {
         role == .athlete
@@ -137,7 +138,7 @@ struct NativeAppIntroductionView: View {
                 TabView(selection: $page) {
                     ForEach(slides.indices, id: \.self) { index in
                         let slide = slides[index]
-                        IntroPreviewScreen(title: slide.0, detail: slide.1, kind: slide.2, role: role) { destination in
+                        IntroPreviewScreen(title: slide.0, detail: slide.1, kind: slide.2, role: role, demoModels: demoModels) { destination in
                             guard let nextPage = slides.firstIndex(where: { $0.2 == destination }) else { return }
                             withAnimation(.easeInOut(duration: 0.2)) { page = nextPage }
                         }
@@ -202,8 +203,8 @@ private struct IntroPreviewScreen: View {
     let detail: String
     let kind: IntroPreviewKind
     let role: NativeAppIntroductionView.AccountRole
+    let demoModels: IntroDemoModels
     let selectPage: (IntroPreviewKind) -> Void
-    @State private var demoModels = IntroDemoModels()
 
     var body: some View {
         Group {
