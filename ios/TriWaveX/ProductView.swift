@@ -43,6 +43,8 @@ struct ProductView: View {
     @State private var nativeProfile: NativeProfileModel
     @State private var selectedTab: AppTab
     @State private var guidedOnboarding: GuidedOnboardingModel?
+    @State private var aiConsent: NativeAIConsentModel
+    @State private var showingAIConsentPrompt = false
     @State private var hasPresentedInitialContent = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -94,6 +96,7 @@ struct ProductView: View {
         _coachDashboard = State(initialValue: NativeCoachDashboardModel(origin: origin, store: store))
         _coachEarnings = State(initialValue: NativeCoachEarningsModel(origin: origin, store: store))
         _nativeProfile = State(initialValue: NativeProfileModel(client: NativeProfileClient(origin: origin, store: store)))
+        _aiConsent = State(initialValue: NativeAIConsentModel(client: NativeAIConsentClient(origin: origin, store: store), userID: authenticatedUserID))
         _selectedTab = State(initialValue: Self.tab(for: initialPath, isCoach: initialPath.hasPrefix("/coach/")))
         _nativeTrainingRequested = State(initialValue: initialPath == "/dashboard" || initialPath == "/coach/dashboard")
         _guidedOnboarding = State(initialValue: resolvedTourRequest.map { GuidedOnboardingModel(request: $0) })
@@ -194,7 +197,8 @@ struct ProductView: View {
                         openPlanEditor: { selectedTab = .plan },
                         openAccount: { showingAccount = true },
                         replayGuide: replayGuidedTour,
-                        onSubscriptionFinished: onSubscriptionFinished
+                        onSubscriptionFinished: onSubscriptionFinished,
+                        aiConsent: aiConsent
                     )
                 }
                 if showingNativeChat { NativeChatView(origin: origin, store: store) }
@@ -258,6 +262,16 @@ struct ProductView: View {
             DeviceSettingsView(health: health, bluetooth: bluetooth, onHealthSnapshot: syncHealth)
                 .presentationDetents([.medium, .large])
         }
+        .sheet(isPresented: $showingAIConsentPrompt) {
+            NavigationStack { NativeAIConsentView(model: aiConsent, origin: origin, isPrompt: true) }
+                .interactiveDismissDisabled(aiConsent.saving)
+                .onDisappear { aiConsent.markAsked() }
+        }
+        .task(id: authenticatedUserID) { await promptForAIConsentIfNeeded() }
+        .onChange(of: guidedOnboarding?.isPresented == true) { _, isTouring in
+            guard !isTouring else { return }
+            Task { await promptForAIConsentIfNeeded() }
+        }
         .sheet(isPresented: $showingAccount) {
             NavigationStack { AccountSettingsView(model: AccountSettingsModel(origin: origin, store: store), onSessionEnded: { showingAccount = false; onSessionEnded?() }) }
         }
@@ -282,6 +296,16 @@ struct ProductView: View {
         withAnimation(TriWaveXMotion.stateChange(reduced: reduceMotion)) {
             selectedTab = nextTab
         }
+    }
+
+    /// Asks once, after the guided tour, whether AI may use the athlete's data.
+    private func promptForAIConsentIfNeeded() async {
+        guard authenticatedUserID?.isEmpty == false,
+              guidedOnboarding?.isPresented != true,
+              !showingAIConsentPrompt else { return }
+        await aiConsent.load()
+        guard !Task.isCancelled, guidedOnboarding?.isPresented != true, aiConsent.shouldPrompt else { return }
+        showingAIConsentPrompt = true
     }
 
     private func replayGuidedTour() {

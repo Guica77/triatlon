@@ -348,6 +348,19 @@ struct RootView: View {
                     branding
                         .padding(.bottom, compactHeight ? 8 : 12)
 
+                    if session.restoreFailedOffline {
+                        Button {
+                            Task { await session.retryRestore() }
+                        } label: {
+                            Label("Reintentar y recuperar mi sesión", systemImage: "arrow.clockwise")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(session.busy)
+                        .padding(.bottom, 8)
+                    }
+
                     if loginIntroStage >= 8 {
                         loginSectionTitle("Tipo de cuenta")
                             .transition(loginEntryTransition)
@@ -474,11 +487,6 @@ struct RootView: View {
                     .accessibilityHint("Usa Google para iniciar sesión como \(role.title.lowercased())")
 
                     VStack(spacing: 8) {
-                        if !email.isEmpty {
-                            Label("Continuamos donde lo dejaste", systemImage: "arrow.counterclockwise.circle.fill")
-                                .font(.footnote.weight(.semibold))
-                                .foregroundStyle(.tint)
-                        }
                         Text(role == .coach ? "¿Aún no tienes cuenta de entrenador?" : "¿Nuevo en TriWaveX?")
                             .foregroundStyle(.secondary)
                         Button(role == .coach ? "Crear cuenta de entrenador" : "Crear cuenta de atleta") {

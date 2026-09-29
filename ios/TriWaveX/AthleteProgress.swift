@@ -142,7 +142,7 @@ struct AthleteProgressClient {
     init(origin: URL, store: WKWebsiteDataStore, session: URLSession? = nil) {
         self.origin = origin
         self.store = store
-        self.session = session ?? URLSession(configuration: .ephemeral)
+        self.session = session ?? NativeCookieJar.makeSession()
     }
 
     func fetch() async throws -> AthleteProgress {
@@ -158,12 +158,13 @@ struct AthleteProgressClient {
         request.httpShouldHandleCookies = false
         request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        if let cookieHeader = await cookieHeader(for: url) {
+        if let cookieHeader = await NativeCookieJar.header(for: url, in: store) {
             request.setValue(cookieHeader, forHTTPHeaderField: "Cookie")
         }
 
         do {
             let (data, response) = try await session.data(for: request)
+            if let http = response as? HTTPURLResponse { await NativeCookieJar.persist(from: http, for: url, in: store) }
             guard let http = response as? HTTPURLResponse,
                   Configuration.allows(http.url ?? url, origin: origin),
                   http.value(forHTTPHeaderField: "Content-Type")?.lowercased().contains("application/json") == true else {
@@ -195,69 +196,4 @@ struct AthleteProgressClient {
         }
     }
 
-    private func cookieHeader(for requestURL: URL) async -> String? {
-        guard let requestHost = requestURL.host?.lowercased(),
-              let requestScheme = requestURL.scheme?.lowercased() else {
-            return nil
-        }
-
-        let cookies = await withCheckedContinuation { continuation in
-            store.httpCookieStore.getAllCookies { cookies in
-                continuation.resume(returning: cookies)
-            }
-        }
-        let now = Date()
-        var seen = Set<String>()
-        let matchingCookies = cookies
-            .filter { cookie in
-                guard cookie.expiresDate.map({ $0 > now }) ?? true,
-                      !cookie.isSecure || requestScheme == "https",
-                      cookieDomainMatches(cookie.domain, requestHost: requestHost),
-                      cookiePathMatches(cookie.path, requestPath: requestURL.path),
-                      cookie.name.allSatisfy({ $0 != ";" && $0 != "\r" && $0 != "\n" }),
-                      cookie.value.allSatisfy({ $0 != ";" && $0 != "\r" && $0 != "\n" }) else {
-                    return false
-                }
-
-                let identity = "\(cookie.name)\u{0}\(cookie.domain.lowercased())\u{0}\(cookie.path)"
-                return seen.insert(identity).inserted
-            }
-            .sorted {
-                let leftPath = $0.path.isEmpty ? "/" : $0.path
-                let rightPath = $1.path.isEmpty ? "/" : $1.path
-                if leftPath.count != rightPath.count {
-                    return leftPath.count > rightPath.count
-                }
-                if $0.domain.count != $1.domain.count {
-                    return $0.domain.count > $1.domain.count
-                }
-                return $0.name < $1.name
-            }
-
-        guard !matchingCookies.isEmpty else { return nil }
-        return matchingCookies.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
-    }
-
-    private func cookieDomainMatches(_ cookieDomain: String, requestHost: String) -> Bool {
-        let domain = cookieDomain.lowercased()
-        guard !domain.isEmpty, !domain.contains("/"), !domain.contains("\r"), !domain.contains("\n") else {
-            return false
-        }
-
-        if domain.hasPrefix(".") {
-            let parentDomain = String(domain.dropFirst())
-            return !parentDomain.isEmpty && (requestHost == parentDomain || requestHost.hasSuffix(".\(parentDomain)"))
-        }
-
-        return requestHost == domain
-    }
-
-    private func cookiePathMatches(_ cookiePath: String, requestPath: String) -> Bool {
-        let path = cookiePath.isEmpty ? "/" : cookiePath
-        let requestPath = requestPath.isEmpty ? "/" : requestPath
-        guard path.hasPrefix("/") else { return false }
-        guard requestPath == path || requestPath.hasPrefix(path) else { return false }
-        guard path != "/", !path.hasSuffix("/"), requestPath.count > path.count else { return true }
-        return requestPath.dropFirst(path.count).first == "/"
-    }
 }

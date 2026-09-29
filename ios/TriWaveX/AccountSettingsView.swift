@@ -14,10 +14,12 @@ final class AccountSettingsModel {
         guard Configuration.allows(origin, origin: origin), let url = URL(string: "/api/native/account", relativeTo: origin)?.absoluteURL else { throw URLError(.badURL) }
         var request = URLRequest(url: url); request.httpMethod = action == nil ? "GET" : "POST"; request.timeoutInterval = 30; request.httpShouldHandleCookies = false; request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native"); request.setValue("application/json", forHTTPHeaderField: "Accept")
         if let action { request.setValue("application/json", forHTTPHeaderField: "Content-Type"); request.httpBody = try JSONEncoder().encode(["action": action]) }
-        let cookies = await withCheckedContinuation { continuation in store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) } }
-        if !cookies.isEmpty { request.setValue(cookies.map { "\($0.name)=\($0.value)" }.joined(separator: "; "), forHTTPHeaderField: "Cookie") }
-        let (data, response) = try await URLSession(configuration: .ephemeral).data(for: request)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { throw URLError(.badServerResponse) }
+        if let cookies = await NativeCookieJar.header(for: url, in: store) { request.setValue(cookies, forHTTPHeaderField: "Cookie") }
+        let session = NativeCookieJar.makeSession(); defer { session.finishTasksAndInvalidate() }
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        await NativeCookieJar.persist(from: http, for: url, in: store)
+        guard http.statusCode == 200 else { throw URLError(.badServerResponse) }
         return try JSONDecoder().decode(Result.self, from: data)
     }
 }

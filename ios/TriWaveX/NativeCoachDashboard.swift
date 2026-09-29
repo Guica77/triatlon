@@ -79,7 +79,7 @@ final class NativeCoachEarningsModel {
 final class NativeCoachDashboardModel {
     private let origin: URL
     private let store: WKWebsiteDataStore
-    private let session = URLSession(configuration: .ephemeral)
+    private let session = NativeCookieJar.makeSession()
     var dashboard: NativeCoachDashboard?
     var loading = false
     var error: String?
@@ -126,8 +126,9 @@ final class NativeCoachDashboardModel {
             request.httpMethod = "GET"
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
-            if let cookie = await cookieHeader(for: url) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
+            if let cookie = await NativeCookieJar.header(for: url, in: store) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
             let (data, response) = try await session.data(for: request)
+            if let http = response as? HTTPURLResponse { await NativeCookieJar.persist(from: http, for: url, in: store) }
             guard let http = response as? HTTPURLResponse,
                   Configuration.allows(http.url ?? url, origin: origin),
                   http.value(forHTTPHeaderField: "Content-Type")?.lowercased().contains("application/json") == true else {
@@ -144,19 +145,6 @@ final class NativeCoachDashboardModel {
         }
     }
 
-    private func cookieHeader(for url: URL) async -> String? {
-        guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return nil }
-        let cookies = await withCheckedContinuation { continuation in
-            store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) }
-        }
-        let now = Date()
-        let matching = cookies.filter { cookie in
-            let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
-            return (cookie.expiresDate.map { $0 > now } ?? true) && (!cookie.isSecure || scheme == "https") &&
-                (host == domain || host.hasSuffix(".\(domain)")) && !cookie.name.contains(";") && !cookie.value.contains(";")
-        }
-        return matching.isEmpty ? nil : matching.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
-    }
 }
 
 private enum NativeCoachError: LocalizedError {

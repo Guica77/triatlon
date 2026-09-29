@@ -104,23 +104,14 @@ final class NativeChatModel {
         request.httpMethod = method; request.timeoutInterval = 20; request.httpShouldHandleCookies = false
         request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
         if let body { request.setValue("application/json", forHTTPHeaderField: "Content-Type"); request.httpBody = body }
-        if let cookie = await cookieHeader(for: url) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
-        let (data, response) = try await URLSession.shared.data(for: request)
+        if let cookie = await NativeCookieJar.header(for: url.absoluteURL, in: store) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
+        let session = NativeCookieJar.makeSession(); defer { session.finishTasksAndInvalidate() }
+        let (data, response) = try await session.data(for: request)
+        if let http = response as? HTTPURLResponse { await NativeCookieJar.persist(from: http, for: url.absoluteURL, in: store) }
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw ChatError.message("No se ha podido conectar con el chat.") }
         return try JSONDecoder().decode(Response.self, from: data)
     }
 
-    private func cookieHeader(for url: URL) async -> String? {
-        guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return nil }
-        let cookies = await withCheckedContinuation { continuation in store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) } }
-        let now = Date()
-        let matching = cookies.filter { cookie in
-            let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
-            return (cookie.expiresDate.map { $0 > now } ?? true) && (!cookie.isSecure || scheme == "https") &&
-                (host == domain || host.hasSuffix(".\(domain)")) && !cookie.name.contains(";") && !cookie.value.contains(";")
-        }
-        return matching.isEmpty ? nil : matching.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
-    }
 
     private struct ParticipantsResponse: Decodable { let data: [NativeChatParticipant]?; let error: String? }
     private struct MessagesResponse: Decodable { let data: [NativeChatMessage]?; let error: String? }

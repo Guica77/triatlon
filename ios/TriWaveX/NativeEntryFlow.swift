@@ -1297,6 +1297,7 @@ struct NativeRegistrationView: View {
         defaults.set(level, forKey: "triwavex.onboarding.level")
         defaults.set(weeklyHours, forKey: "triwavex.onboarding.weeklyHours")
         defaults.set(wantsCoach, forKey: "triwavex.onboarding.wantsCoach")
+        defaults.set(targetRaceDate.map(Self.dayString) ?? "", forKey: "triwavex.onboarding.targetRaceDate")
         defaults.set(step, forKey: "triwavex.onboarding.step")
     }
 
@@ -1380,7 +1381,7 @@ struct NativeOnboardingView: View {
                             }
                             progress
                             content
-                            Label("Guardado", systemImage: "checkmark.circle.fill")
+                            Label("Tus respuestas se guardan en este iPhone mientras avanzas", systemImage: "checkmark.circle.fill")
                                 .font(.caption).foregroundStyle(.secondary)
                             actions
                         }
@@ -1398,6 +1399,7 @@ struct NativeOnboardingView: View {
             .onChange(of: model.level) { _, _ in model.persistDraft(step: step) }
             .onChange(of: model.weeklyHours) { _, _ in model.persistDraft(step: step) }
             .onChange(of: model.wantsCoach) { _, _ in model.persistDraft(step: step) }
+            .onChange(of: model.targetRaceDate) { _, _ in model.persistDraft(step: step) }
             .onAppear { ensureDistanceMatchesModality() }
             .confirmationDialog("Elige deporte", isPresented: $showingSportChoices, titleVisibility: .visible) {
                 Button("Triatlón") { chooseModality("triatlon") }

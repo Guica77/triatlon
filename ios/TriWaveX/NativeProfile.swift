@@ -22,12 +22,25 @@ final class NativeProfileModel {
         do { state = .loaded(try await client.fetch()) }
         catch { state = .failed("No se ha podido cargar tu perfil. Inténtalo de nuevo.") }
     }
+    private(set) var isSaving = false
+    private(set) var lastSaveError: String?
+
+    /// Saves without leaving the loaded state, so the open editor (and the
+    /// user's input) stays on screen if the request fails.
     func save(_ values: [String: Any]) async -> Bool {
         guard !isPreviewOnly else { return false }
-        guard !isLoading else { return false }
-        state = .loading
-        do { try await client.update(values); state = .loaded(try await client.fetch()); return true }
-        catch { state = .failed("No se han podido guardar los cambios. Inténtalo de nuevo."); return false }
+        guard !isLoading, !isSaving else { return false }
+        isSaving = true
+        lastSaveError = nil
+        defer { isSaving = false }
+        do { try await client.update(values) }
+        catch {
+            lastSaveError = (error as? NativeProfileError)?.errorDescription ?? "No se han podido guardar los cambios. Revisa tu conexión e inténtalo de nuevo."
+            return false
+        }
+        // The change is stored; a failed refresh must not report it as lost.
+        if let refreshed = try? await client.fetch() { state = .loaded(refreshed) }
+        return true
     }
     private var isLoading: Bool { if case .loading = state { return true }; return false }
 }
@@ -45,6 +58,18 @@ struct NativeProfile: Decodable, Sendable {
     struct Connections: Decodable, Sendable { let strava: Bool; let garmin: Bool; let polar: Bool; let coros: Bool; let suunto: Bool; let amazfit: Bool }
 }
 
+enum NativeProfileError: LocalizedError {
+    case unauthorized
+    case message(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .unauthorized: "Tu sesión ha caducado. Vuelve a iniciar sesión para guardar los cambios."
+        case .message(let value): value
+        }
+    }
+}
+
 struct NativeProfileClient {
     let origin: URL
     let store: WKWebsiteDataStore
@@ -53,7 +78,7 @@ struct NativeProfileClient {
     init(origin: URL, store: WKWebsiteDataStore, session: URLSession? = nil) {
         self.origin = origin
         self.store = store
-        self.session = session ?? URLSession(configuration: .ephemeral)
+        self.session = session ?? NativeCookieJar.makeSession()
     }
 
     func fetch() async throws -> NativeProfile {
@@ -66,8 +91,9 @@ struct NativeProfileClient {
         request.httpShouldHandleCookies = false
         request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        if let cookies = await cookieHeader(for: url) { request.setValue(cookies, forHTTPHeaderField: "Cookie") }
+        if let cookies = await NativeCookieJar.header(for: url, in: store) { request.setValue(cookies, forHTTPHeaderField: "Cookie") }
         let (data, response) = try await session.data(for: request)
+        if let http = response as? HTTPURLResponse { await NativeCookieJar.persist(from: http, for: url, in: store) }
         guard let http = response as? HTTPURLResponse,
               http.statusCode == 200,
               Configuration.allows(http.url ?? url, origin: origin),
@@ -81,25 +107,17 @@ struct NativeProfileClient {
         request.httpMethod = "PATCH"; request.timeoutInterval = 30; request.httpShouldHandleCookies = false
         request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native"); request.setValue("application/json", forHTTPHeaderField: "Accept"); request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: values)
-        if let cookies = await cookieHeader(for: url) { request.setValue(cookies, forHTTPHeaderField: "Cookie") }
-        let (_, response) = try await session.data(for: request)
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { throw URLError(.badServerResponse) }
-    }
-
-    private func cookieHeader(for url: URL) async -> String? {
-        guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return nil }
-        let cookies = await withCheckedContinuation { continuation in store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) } }
-        let now = Date()
-        let matching = cookies.filter { cookie in
-            let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
-            let path = cookie.path.isEmpty ? "/" : cookie.path
-            return (cookie.expiresDate.map { $0 > now } ?? true) &&
-                (!cookie.isSecure || scheme == "https") &&
-                (host == domain || host.hasSuffix(".\(domain)")) &&
-                (url.path == path || url.path.hasPrefix(path.hasSuffix("/") ? path : path + "/")) &&
-                !cookie.name.contains(";") && !cookie.value.contains(";")
+        if let cookies = await NativeCookieJar.header(for: url, in: store) { request.setValue(cookies, forHTTPHeaderField: "Cookie") }
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        await NativeCookieJar.persist(from: http, for: url, in: store)
+        guard http.statusCode == 200 else {
+            if http.statusCode == 401 { throw NativeProfileError.unauthorized }
+            if let message = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String, !message.isEmpty {
+                throw NativeProfileError.message(message)
+            }
+            throw URLError(.badServerResponse)
         }
-        return matching.isEmpty ? nil : matching.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
     }
 }
 
@@ -118,6 +136,7 @@ struct NativeProfileView: View {
     let replayGuide: () -> Void
     let onSubscriptionFinished: ((NativeSubscriptionResult) -> Void)?
     var isDemo = false
+    var aiConsent: NativeAIConsentModel?
     @State private var hasLoaded = false
     @State private var managingPlan = false
 
@@ -176,8 +195,8 @@ struct NativeProfileView: View {
                         }
                     }
                     .accessibilityHint("Edita sesiones, objetivo o carga sin repetir el onboarding")
-                    NavigationLink { NativePhysiologyEditor(physiology: profile.physiology, save: { values in await model.save(values) }) } label: { Label("Fisiología", systemImage: "heart.text.square") }
-                    NavigationLink { NativeInjuryEditor(injuries: profile.physiology.injuries, save: { values in await model.save(values) }) } label: { Label("Lesiones", systemImage: "cross.case") }
+                    NavigationLink { NativePhysiologyEditor(physiology: profile.physiology, save: { values in await model.save(values) }, saveError: { model.lastSaveError }) } label: { Label("Fisiología", systemImage: "heart.text.square") }
+                    NavigationLink { NativeInjuryEditor(injuries: profile.physiology.injuries, save: { values in await model.save(values) }, saveError: { model.lastSaveError }) } label: { Label("Lesiones", systemImage: "cross.case") }
                 }
                 Section {
                     Button(action: openDevices) { Label("Apple Health, Watch y sensores", systemImage: "applewatch").foregroundStyle(.primary) }
@@ -234,7 +253,9 @@ struct NativeProfileView: View {
                     .disabled(isDemo)
                 NavigationLink { ProfileDetailView(title: "Notificaciones", rows: [("Estado", "Gestiona los permisos desde Ajustes del iPhone")]) } label: { Label("Notificaciones", systemImage: "bell") }
                 NavigationLink { ProfileDetailView(title: "Clima", rows: [("Tiempo local", "Disponible al preparar entrenamientos exteriores")]) } label: { Label("Clima", systemImage: "cloud.sun") }
-                NavigationLink { ProfileDetailView(title: "Privacidad", rows: [("Tus datos", "Solo se usan para personalizar tu entrenamiento")]) } label: { Label("Privacidad", systemImage: "hand.raised") }
+                if let aiConsent {
+                    NavigationLink { NativeAIConsentView(model: aiConsent, origin: origin) } label: { Label("Datos e IA", systemImage: "sparkles") }
+                }
             }
             Section("Cuenta") {
                 NavigationLink {
@@ -391,10 +412,13 @@ private struct NativeFeedbackClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: ["kind": kind, "rating": rating, "message": message])
-        let cookies = await withCheckedContinuation { continuation in store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) } }
-        if !cookies.isEmpty { request.setValue(cookies.map { "\($0.name)=\($0.value)" }.joined(separator: "; "), forHTTPHeaderField: "Cookie") }
-        let (_, response) = try await URLSession(configuration: .ephemeral).data(for: request)
-        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else { throw URLError(.badServerResponse) }
+        if let cookies = await NativeCookieJar.header(for: url, in: store) { request.setValue(cookies, forHTTPHeaderField: "Cookie") }
+        let session = NativeCookieJar.makeSession()
+        defer { session.finishTasksAndInvalidate() }
+        let (_, response) = try await session.data(for: request)
+        guard let response = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        await NativeCookieJar.persist(from: response, for: url, in: store)
+        guard response.statusCode == 200 else { throw URLError(.badServerResponse) }
     }
 }
 
@@ -577,6 +601,7 @@ struct NativeLoadAdjustmentSheet: View {
 struct NativePhysiologyEditor: View {
     let physiology: NativeProfile.Physiology
     let save: ([String: Any]) async -> Bool
+    var saveError: () -> String? = { nil }
     @State private var ftp: String
     @State private var swimPace: String
     @State private var runPace: String
@@ -585,8 +610,8 @@ struct NativePhysiologyEditor: View {
     @State private var error: String?
     @Environment(\.dismiss) private var dismiss
 
-    init(physiology: NativeProfile.Physiology, save: @escaping ([String: Any]) async -> Bool) {
-        self.physiology = physiology; self.save = save
+    init(physiology: NativeProfile.Physiology, save: @escaping ([String: Any]) async -> Bool, saveError: @escaping () -> String? = { nil }) {
+        self.physiology = physiology; self.save = save; self.saveError = saveError
         _ftp = State(initialValue: physiology.ftp.map { String(Int($0)) } ?? "")
         _swimPace = State(initialValue: physiology.swimPace ?? "")
         _runPace = State(initialValue: physiology.runPace ?? "")
@@ -614,13 +639,14 @@ struct NativePhysiologyEditor: View {
         saving = true; error = nil
         let didSave = await save(["kind": "physiology", "ftp": parsedFTP ?? NSNull(), "swimPace": swimPace, "runPace": runPace, "baselineHours": baselineHours])
         saving = false
-        if didSave { dismiss() } else { error = "No se han podido guardar los cambios." }
+        if didSave { dismiss() } else { error = saveError() ?? "No se han podido guardar los cambios." }
     }
 }
 
 struct NativeInjuryEditor: View {
     let injuries: String?
     let save: ([String: Any]) async -> Bool
+    var saveError: () -> String? = { nil }
     /// Only a sheet needs Cancel; a pushed editor already has Back.
     var showsCancel = false
     @State private var value: String
@@ -628,7 +654,7 @@ struct NativeInjuryEditor: View {
     @State private var error: String?
     @Environment(\.dismiss) private var dismiss
 
-    init(injuries: String?, showsCancel: Bool = false, save: @escaping ([String: Any]) async -> Bool) { self.injuries = injuries; self.showsCancel = showsCancel; self.save = save; _value = State(initialValue: injuries ?? "") }
+    init(injuries: String?, showsCancel: Bool = false, save: @escaping ([String: Any]) async -> Bool, saveError: @escaping () -> String? = { nil }) { self.injuries = injuries; self.showsCancel = showsCancel; self.save = save; self.saveError = saveError; _value = State(initialValue: injuries ?? "") }
 
     var body: some View {
         Form {
@@ -645,7 +671,7 @@ struct NativeInjuryEditor: View {
     private func submit() async {
         guard value.count <= 1_500 else { error = "El historial no puede superar 1.500 caracteres."; return }
         saving = true; error = nil; let didSave = await save(["kind": "injuries", "injuries": value]); saving = false
-        if didSave { dismiss() } else { error = "No se han podido guardar los cambios." }
+        if didSave { dismiss() } else { error = saveError() ?? "No se han podido guardar los cambios." }
     }
 }
 

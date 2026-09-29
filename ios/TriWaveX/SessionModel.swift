@@ -30,37 +30,70 @@ final class SessionModel {
 
     init(origin: URL) { self.origin = origin }
 
+    /// True when a saved session exists but the server could not be reached.
+    private(set) var restoreFailedOffline = false
+
     func restore() async {
         guard !hasCompletedRestore, destination == nil, !busy else { return }
         defer { hasCompletedRestore = true }
-        guard let cookie = await cookieHeader() else { return }
+        await restoreSavedSession()
+    }
+
+    /// Retries a restore that failed for connectivity reasons.
+    func retryRestore() async {
+        guard restoreFailedOffline, destination == nil, !busy else { return }
+        error = nil
+        await restoreSavedSession()
+    }
+
+    private enum RestoreOutcome { case restored, signedOut, unreachable }
+
+    private func restoreSavedSession() async {
+        let url = origin.appendingPathComponent("api/native/session")
+        guard await NativeCookieJar.header(for: url, in: store) != nil else { return }
         busy = true
         defer { busy = false }
-        do {
-            var request = URLRequest(url: origin.appendingPathComponent("api/native/session"))
-            request.httpMethod = "GET"
-            request.timeoutInterval = 15
-            request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
-            request.setValue("application/json", forHTTPHeaderField: "Accept")
-            request.setValue(cookie, forHTTPHeaderField: "Cookie")
-            let configuration = URLSessionConfiguration.ephemeral
-            configuration.httpShouldSetCookies = false
-            let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
-            defer { session.invalidateAndCancel() }
-            let (data, response) = try await session.data(for: request)
-            guard let http = response as? HTTPURLResponse,
-                  Configuration.allows(http.url ?? request.url ?? origin, origin: origin) else { return }
-            if http.statusCode == 401 { return }
-            guard http.statusCode == 200,
-                  let result = try? JSONDecoder().decode(LoginResult.self, from: data),
-                  let userID = result.userID,
-                  !userID.isEmpty,
-                  applyAuthorization(result) else { return }
-            stableUserID = userID
-            destination = result.destination
-        } catch {
-            // Session restoration is best effort; the normal login remains available.
+        // A transient network error must not look like a sign-out: retry
+        // briefly, then offer an explicit retry instead of the login form.
+        for attempt in 0..<3 {
+            switch await attemptRestore(url: url) {
+            case .restored, .signedOut:
+                restoreFailedOffline = false
+                return
+            case .unreachable:
+                guard attempt < 2 else { break }
+                try? await Task.sleep(for: .milliseconds(600 * (attempt + 1)))
+            }
         }
+        restoreFailedOffline = true
+        error = "No hemos podido conectar para recuperar tu sesión. Tus datos están a salvo; comprueba la conexión y vuelve a intentarlo."
+    }
+
+    private func attemptRestore(url: URL) async -> RestoreOutcome {
+        guard let cookie = await NativeCookieJar.header(for: url, in: store) else { return .signedOut }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 15
+        request.httpShouldHandleCookies = false
+        request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue(cookie, forHTTPHeaderField: "Cookie")
+        let session = NativeCookieJar.makeSession()
+        defer { session.finishTasksAndInvalidate() }
+        guard let (data, response) = try? await session.data(for: request),
+              let http = response as? HTTPURLResponse else { return .unreachable }
+        guard Configuration.allows(http.url ?? url, origin: origin) else { return .signedOut }
+        await NativeCookieJar.persist(from: http, for: url, in: store)
+        if http.statusCode == 401 || http.statusCode == 403 { return .signedOut }
+        if http.statusCode >= 500 { return .unreachable }
+        guard http.statusCode == 200,
+              let result = try? JSONDecoder().decode(LoginResult.self, from: data),
+              let userID = result.userID,
+              !userID.isEmpty,
+              applyAuthorization(result) else { return .signedOut }
+        stableUserID = userID
+        destination = result.destination
+        return .restored
     }
 
     func endSession() async {
@@ -78,6 +111,7 @@ final class SessionModel {
         entitled = false
         destination = nil
         error = nil
+        restoreFailedOffline = false
     }
 
     func setStableUserID(_ userID: String) {
@@ -375,22 +409,6 @@ final class SessionModel {
             if random < 64 { result.append(alphabet[Int(random)]); remaining -= 1 }
         }
         return result
-    }
-
-    private func cookieHeader() async -> String? {
-        let cookies = await withCheckedContinuation { continuation in
-            store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) }
-        }
-        let host = origin.host?.lowercased() ?? ""
-        let now = Date()
-        let matching = cookies.filter { cookie in
-            let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
-            return (cookie.expiresDate.map { $0 > now } ?? true) &&
-                (!cookie.isSecure || origin.scheme == "https") &&
-                (host == domain || host.hasSuffix(".\(domain)")) &&
-                !cookie.name.contains(";") && !cookie.value.contains(";")
-        }
-        return matching.isEmpty ? nil : matching.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
     }
 
     private static func sha256(_ value: String) -> String {

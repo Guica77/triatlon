@@ -74,7 +74,7 @@ struct NativePlanClient {
     init(origin: URL, store: WKWebsiteDataStore, session: URLSession? = nil) {
         self.origin = origin
         self.store = store
-        self.session = session ?? URLSession(configuration: .ephemeral)
+        self.session = session ?? NativeCookieJar.makeSession()
     }
 
     func fetch() async throws -> NativePlan {
@@ -125,8 +125,9 @@ struct NativePlanClient {
         request.setValue("1", forHTTPHeaderField: "X-TriWaveX-Native")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         if body != nil { request.setValue("application/json", forHTTPHeaderField: "Content-Type") }
-        if let cookie = await cookieHeader(for: url) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
+        if let cookie = await NativeCookieJar.header(for: url, in: store) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
         let (data, response) = try await session.data(for: request)
+        if let http = response as? HTTPURLResponse { await NativeCookieJar.persist(from: http, for: url, in: store) }
         guard let http = response as? HTTPURLResponse,
               Configuration.allows(http.url ?? url, origin: origin),
               http.value(forHTTPHeaderField: "Content-Type")?.lowercased().contains("application/json") == true else {
@@ -141,17 +142,6 @@ struct NativePlanClient {
         return .unavailable
     }
 
-    private func cookieHeader(for url: URL) async -> String? {
-        guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return nil }
-        let cookies = await withCheckedContinuation { continuation in store.httpCookieStore.getAllCookies { continuation.resume(returning: $0) } }
-        let now = Date()
-        let matching = cookies.filter { cookie in
-            let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
-            return (cookie.expiresDate.map { $0 > now } ?? true) && (!cookie.isSecure || scheme == "https") &&
-                (host == domain || host.hasSuffix(".\(domain)")) && !cookie.name.contains(";") && !cookie.value.contains(";")
-        }
-        return matching.isEmpty ? nil : matching.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
-    }
 }
 
 @Observable @MainActor
