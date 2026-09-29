@@ -70,7 +70,8 @@ struct RootView: View {
         Group {
             if !hasCompletedStartup {
                 TriWaveXStartupView(isRestoringSession: !session.hasCompletedRestore)
-                    .transition(.opacity)
+                    .transition(.asymmetric(insertion: .identity, removal: .opacity.combined(with: .scale(scale: 1.06))))
+                    .zIndex(1)
             } else if isShowingAthleteOnboarding {
                 NativeAthleteOnboardingView(
                     onCreateAccount: {
@@ -260,16 +261,11 @@ struct RootView: View {
             )
         ) {
             if let informationURL {
-                ProductView(
-                    origin: session.origin,
+                InformationView(
+                    url: informationURL,
+                    title: informationURL.lastPathComponent == "soporte" ? "Soporte" : "Privacidad",
                     store: session.store,
-                    initialPath: informationURL.path,
-                    authenticatedUserID: session.stableUserID,
-                    authenticatedRole: session.role,
-                    onDismiss: { self.informationURL = nil },
-                    onSessionEnded: { self.informationURL = nil; Task { await session.endSession() } },
-                    guidedTourRequest: nil,
-                    onGuidedTourFinished: {}
+                    onDismiss: { self.informationURL = nil }
                 )
             }
         }
@@ -302,17 +298,16 @@ struct RootView: View {
             }
 #endif
             async let restore: Void = session.restore()
+            // Let the brand intro finish drawing before handing over.
+            try? await Task.sleep(for: .milliseconds(reduceMotion ? 350 : 1_350))
+            guard !Task.isCancelled else { return }
+            hasCompletedStartupBeat = true
             if !hasSeenAppOverview {
-                hasCompletedStartupBeat = true
-                hasCompletedStartup = true
+                // First run shows the overview without waiting on the session.
+                withAnimation(TriWaveXMotion.startupExit(reduced: reduceMotion)) { hasCompletedStartup = true }
                 await restore
                 return
             }
-            if !reduceMotion {
-                try? await Task.sleep(for: .milliseconds(280))
-                guard !Task.isCancelled else { return }
-            }
-            hasCompletedStartupBeat = true
             await restore
             finishStartupIfReady()
         }
@@ -340,7 +335,7 @@ struct RootView: View {
               session.hasCompletedRestore,
               !hasCompletedStartup else { return }
 
-        withAnimation(TriWaveXMotion.entry(reduced: reduceMotion)) {
+        withAnimation(TriWaveXMotion.startupExit(reduced: reduceMotion)) {
             hasCompletedStartup = true
         }
     }

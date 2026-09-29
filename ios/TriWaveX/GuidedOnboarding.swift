@@ -60,7 +60,7 @@ struct GuidedTourRequest: Sendable {
         switch (request.role, step) {
         case (.athlete, 0): return "En Hoy verás la sesión, la prioridad y el margen para mover entrenamientos cuando la vida cambie."
         case (.athlete, 1): return "Tu plan combina tus horas disponibles, tu objetivo y tus datos reales. En Chat puedes pedir ayuda o hablar con tu entrenador."
-        case (.athlete, 2): return "En More tienes perfil, seguridad, privacidad, soporte y feedback. Abre tu primera sesión cuando quieras."
+        case (.athlete, 2): return "En Más tienes perfil, seguridad, privacidad, soporte y feedback. Abre tu primera sesión cuando quieras."
         case (.coach, 0): return "Consulta el estado de tus atletas desde un único lugar."
         case (.coach, 1): return "Cada solicitud debe ser clara para ambos: objetivo, disponibilidad y mensaje. Acepta o declina antes de compartir el plan."
         case (.coach, 2): return "Revisa planes, explica cada ajuste y usa Chat para acompañar a tu equipo sin perder el contexto."

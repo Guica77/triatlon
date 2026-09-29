@@ -337,7 +337,7 @@ struct ProductView: View {
                 tabButton(.progress, title: "Progreso", systemImage: "chart.bar.xaxis")
             }
             tabButton(.chat, title: "Chat", systemImage: "bubble.left.and.bubble.right")
-            tabButton(.profile, title: "More", systemImage: "ellipsis.circle")
+            tabButton(.profile, title: "Más", systemImage: "ellipsis.circle")
         }
         .padding(.top, 8)
         .padding(.bottom, 6)

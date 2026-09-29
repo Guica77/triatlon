@@ -39,6 +39,10 @@ enum TriWaveXMotion {
         reduced ? nil : stateChange
     }
 
+    static func startupExit(reduced: Bool) -> Animation {
+        reduced ? .easeOut(duration: 0.2) : .timingCurve(0.4, 0, 0.2, 1, duration: 0.55)
+    }
+
     static func entry(reduced: Bool) -> Animation? {
         reduced ? .easeOut(duration: 0.12) : entry
     }

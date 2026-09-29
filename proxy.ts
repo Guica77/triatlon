@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { browserRedirect, isCoachOnlyHost, isNativeClient } from '@/lib/web-access'
 
 export async function proxy(request: NextRequest) {
   const host = request.headers.get('host')?.split(':')[0]?.toLowerCase()
@@ -12,6 +13,13 @@ export async function proxy(request: NextRequest) {
     url.pathname = '/admin'
     url.search = ''
     return NextResponse.redirect(url)
+  }
+
+  // Browsers get the coach web; the iOS app keeps every path on any host
+  // except the coach host, which is coach-only for every client.
+  if (isCoachOnlyHost(host) || !isNativeClient(request.headers.get('user-agent'), request.headers.get('x-triwavex-native'))) {
+    const target = browserRedirect(host, request.nextUrl.pathname, request.nextUrl.searchParams)
+    if (target) return NextResponse.redirect(new URL(target, request.url))
   }
 
   // Refrescar y persistir la sesión en cada request para que no se pierda (remember me)

@@ -3,6 +3,7 @@ import { rememberAppleToken } from '@/lib/auth/apple-revocation'
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
+import { COACH_ONLY_EXIT_PATH, isCoachOnlyHost } from '@/lib/web-access'
 import { oauthDisplayName, parseOAuthRole, safeOAuthNext } from '@/lib/auth/oauth'
 
 export async function GET(request: Request) {
@@ -71,6 +72,11 @@ export async function GET(request: Request) {
       const { data: profile, error: profileReadError } = await supabase.from('profiles').select('role, active_plan_id, coach_id').eq('id', user.id).maybeSingle()
       if (profileReadError || !profile) return profileFailure()
       
+      // The coach host is coach-only: other accounts are signed out there.
+      if (isCoachOnlyHost(new URL(request.url).host) && profile.role !== 'coach') {
+        return NextResponse.redirect(new URL(COACH_ONLY_EXIT_PATH, origin))
+      }
+
       let finalNext = next;
       if (!profile) {
         // Si no tiene perfil (usuario completamente nuevo por OAuth), redirigir directamente a onboarding

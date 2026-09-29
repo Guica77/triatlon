@@ -278,7 +278,7 @@ struct NativeTodayView: View {
                                 VStack(alignment: .leading, spacing: 3) {
                                     Text(todaysWorkouts.isEmpty ? "Día de recuperación" : "Tu entrenamiento de hoy")
                                         .font(.headline)
-                                    Text(todaysWorkouts.isEmpty ? "No tienes sesiones programadas. Descansa o disfruta del día." : "\(todaysWorkouts.count) sesión\(todaysWorkouts.count == 1 ? "" : "es") en tu plan")
+                                    Text(todaysWorkouts.isEmpty ? "No tienes sesiones programadas. Descansa o disfruta del día." : "\(todaysWorkouts.count) \(todaysWorkouts.count == 1 ? "sesión" : "sesiones") en tu plan")
                                         .font(.footnote).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 0)

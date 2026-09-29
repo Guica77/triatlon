@@ -33,6 +33,8 @@ final class NativeChatModel {
     var loading = false
     var sending = false
     var error: String?
+    /// Set when the conversation list could not load, so the screen offers a retry.
+    var loadFailed = false
 
     init(origin: URL, store: WKWebsiteDataStore, previewParticipants: [NativeChatParticipant]? = nil, previewMessages: [NativeChatMessage] = []) {
         self.origin = origin
@@ -47,7 +49,7 @@ final class NativeChatModel {
 
     func load() async {
         guard !isPreviewOnly else { return }
-        loading = true; error = nil
+        loading = true; error = nil; loadFailed = false
         defer { loading = false }
         do {
             let response: ParticipantsResponse = try await request("api/native/chat/participants")
@@ -55,7 +57,9 @@ final class NativeChatModel {
             participants = rows
             if selected == nil { selected = rows.first }
             if let selected { await loadMessages(for: selected) }
-        } catch { self.error = error.localizedDescription }
+        } catch {
+            if participants.isEmpty { loadFailed = true } else { self.error = error.localizedDescription }
+        }
     }
 
     func select(_ participant: NativeChatParticipant) async {
@@ -66,7 +70,8 @@ final class NativeChatModel {
 
     func refresh() async {
         guard !isPreviewOnly else { return }
-        if let selected { await loadMessages(for: selected, showSpinner: false) }
+        // Background refresh stays silent: the next poll retries on its own.
+        if let selected { await loadMessages(for: selected, showSpinner: false, reportsErrors: false) }
     }
 
     func send() async {
@@ -83,14 +88,14 @@ final class NativeChatModel {
         } catch { messageText = text; self.error = error.localizedDescription }
     }
 
-    private func loadMessages(for participant: NativeChatParticipant, showSpinner: Bool = true) async {
+    private func loadMessages(for participant: NativeChatParticipant, showSpinner: Bool = true, reportsErrors: Bool = true) async {
         if showSpinner { loading = true }; defer { if showSpinner { loading = false } }
         do {
             let response: MessagesResponse = try await request("api/native/chat/messages?participantId=\(participant.id)")
             guard let rows = response.data else { throw ChatError.message(response.error ?? "No se ha podido cargar la conversación.") }
             guard selected?.id == participant.id else { return }
             messages = rows
-        } catch { if selected?.id == participant.id { self.error = error.localizedDescription } }
+        } catch { if reportsErrors, selected?.id == participant.id { self.error = error.localizedDescription } }
     }
 
     private func request<Response: Decodable>(_ path: String, method: String = "GET", body: Data? = nil) async throws -> Response {
@@ -128,8 +133,13 @@ struct NativeChatView: View {
     @State private var model: NativeChatModel
     @FocusState private var composerFocused: Bool
 
-    init(origin: URL, store: WKWebsiteDataStore, previewConversation: Bool = false) {
-        let participants: [NativeChatParticipant]? = previewConversation ? [NativeChatParticipant(id: "demo-coach", first_name: "Ana", last_name: "Coach", role: "coach")] : nil
+    init(origin: URL, store: WKWebsiteDataStore, previewConversation: Bool = false, previewAsCoach: Bool = false) {
+        // The demo shows the conversation from the viewer's side: a coach talks
+        // to an athlete, an athlete talks to their coach.
+        let counterpart = previewAsCoach
+            ? NativeChatParticipant(id: "demo-athlete", first_name: "María", last_name: "G.", role: "athlete")
+            : NativeChatParticipant(id: "demo-coach", first_name: "Ana", last_name: "Coach", role: "coach")
+        let participants: [NativeChatParticipant]? = previewConversation ? [counterpart] : nil
         let messages = previewConversation ? [
             NativeChatMessage(id: "demo-message-1", sender_id: "demo-coach", receiver_id: "demo-athlete", message: "¡Hola! He revisado tu semana. ¿Cómo te has encontrado en los entrenamientos?", created_at: ISO8601DateFormatter().string(from: .now.addingTimeInterval(-3600))),
             NativeChatMessage(id: "demo-message-2", sender_id: "demo-athlete", receiver_id: "demo-coach", message: "Bien, aunque la sesión de carrera me ha costado un poco.", created_at: ISO8601DateFormatter().string(from: .now.addingTimeInterval(-3300))),
@@ -142,6 +152,14 @@ struct NativeChatView: View {
             Group {
                 if model.loading && model.participants.isEmpty {
                     ProgressView("Cargando mensajes…")
+                } else if model.loadFailed {
+                    ContentUnavailableView {
+                        Label("No se ha podido cargar el chat", systemImage: "wifi.slash")
+                    } description: {
+                        Text("Comprueba tu conexión e inténtalo de nuevo.")
+                    } actions: {
+                        Button("Reintentar") { Task { await model.load() } }
+                    }
                 } else if model.participants.isEmpty {
                     ContentUnavailableView("Sin conversaciones", systemImage: "bubble.left.and.bubble.right", description: Text("Cuando tengas un entrenador o atleta vinculado, aparecerá aquí."))
                 } else {
@@ -150,7 +168,7 @@ struct NativeChatView: View {
             }
             .navigationTitle(model.selected?.name ?? "Mensajes")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Task { await model.refresh() } } label: { Image(systemName: "arrow.clockwise") } } }
+            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Task { await model.load() } } label: { Image(systemName: "arrow.clockwise") }.accessibilityLabel("Actualizar").disabled(model.loading) } }
         }
         .task { await model.load() }
         .task {

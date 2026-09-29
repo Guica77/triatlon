@@ -13,6 +13,7 @@ const {
   nativeAccessForUser,
   classifyAppleEvent,
   selectTrainingPlan,
+  verifierEnvironments,
 } = vi.hoisted(() => ({
   verifyAndDecodeTransaction: vi.fn(),
   verifyAndDecodeRenewalInfo: vi.fn(),
@@ -25,6 +26,7 @@ const {
   nativeAccessForUser: vi.fn(),
   classifyAppleEvent: vi.fn(),
   selectTrainingPlan: vi.fn(),
+  verifierEnvironments: [] as string[],
 }))
 
 vi.mock('@apple/app-store-server-library', () => ({
@@ -36,6 +38,7 @@ vi.mock('@apple/app-store-server-library', () => ({
     setAppAccountToken = setAppAccountToken
   },
   SignedDataVerifier: class {
+    constructor(_roots: unknown, _online: unknown, environment: string) { verifierEnvironments.push(environment) }
     verifyAndDecodeTransaction = verifyAndDecodeTransaction
     verifyAndDecodeRenewalInfo = verifyAndDecodeRenewalInfo
   },
@@ -105,6 +108,7 @@ const validBody = (overrides: Record<string, unknown> = {}) => ({
 
 beforeEach(() => {
   vi.clearAllMocks()
+  verifierEnvironments.length = 0
   delete process.env.APPLE_SERVER_API_ISSUER_ID
   delete process.env.APPLE_SERVER_API_KEY_ID
   delete process.env.APPLE_SERVER_API_PRIVATE_KEY_BASE64
@@ -151,6 +155,37 @@ it('does not accept a transaction when Apple verification fails', async () => {
   expect(response.status).toBe(400)
   expect(await response.text()).not.toContain('private Apple certificate detail')
   expect(reconcileAppleEvent).not.toHaveBeenCalled()
+})
+
+it('accepts App Review and TestFlight sandbox purchases on a production server', async () => {
+  process.env.APPLE_NOTIFICATION_ENV = 'production'
+  verifyAndDecodeTransaction.mockRejectedValueOnce(new Error('signed for sandbox'))
+
+  const response = await POST(request(validBody()))
+
+  expect(response.status).toBe(200)
+  expect(verifierEnvironments).toEqual(['Production', 'Sandbox'])
+  expect(verifyAndDecodeTransaction).toHaveBeenCalledTimes(2)
+  expect(reconcileAppleEvent).toHaveBeenCalled()
+})
+
+it('rejects a transaction whose environment differs from the verifier that accepted it', async () => {
+  process.env.APPLE_NOTIFICATION_ENV = 'production'
+
+  const response = await POST(request(validBody()))
+
+  expect(response.status).toBe(409)
+  expect(reconcileAppleEvent).not.toHaveBeenCalled()
+})
+
+it('never accepts production-signed data on a sandbox server', async () => {
+  verifyAndDecodeTransaction.mockRejectedValueOnce(new Error('signed for production'))
+
+  const response = await POST(request(validBody()))
+
+  expect(response.status).toBe(400)
+  expect(verifierEnvironments).toEqual(['Sandbox'])
+  expect(verifyAndDecodeTransaction).toHaveBeenCalledTimes(1)
 })
 
 it('rejects a product that does not match the server-owned account role', async () => {

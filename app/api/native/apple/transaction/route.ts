@@ -1,4 +1,5 @@
-import { AppStoreServerAPIClient, Environment, InAppOwnershipType, OfferType, SignedDataVerifier } from '@apple/app-store-server-library'
+import { AppStoreServerAPIClient, Environment, InAppOwnershipType, OfferType } from '@apple/app-store-server-library'
+import { appleVerifiers, verifyInAnyEnvironment } from '@/lib/apple-verification'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { classifyAppleEvent, planForAppleProduct } from '@/lib/apple-event'
@@ -36,27 +37,6 @@ const reply = (body: object, status = 200) => Response.json(body, {
   status,
   headers: { 'Cache-Control': 'no-store', Vary: 'Cookie' },
 })
-
-function verifier() {
-  const roots = process.env.APPLE_ROOT_CERTS_BASE64
-    ?.split(',')
-    .map((value) => Buffer.from(value.trim(), 'base64'))
-    .filter((value) => value.length > 0)
-  const bundleID = process.env.APPLE_BUNDLE_ID?.trim()
-  const appAppleID = Number(process.env.APPLE_APP_ID)
-
-  if (!roots?.length || !bundleID || !Number.isSafeInteger(appAppleID) || appAppleID <= 0) return null
-
-  return new SignedDataVerifier(
-    roots,
-    true,
-    process.env.APPLE_NOTIFICATION_ENV === 'production'
-      ? Environment.PRODUCTION
-      : Environment.SANDBOX,
-    bundleID,
-    appAppleID,
-  )
-}
 
 function appStoreServerAPIClient(environment: Environment) {
   const issuerID = process.env.APPLE_SERVER_API_ISSUER_ID?.trim()
@@ -143,8 +123,8 @@ export async function POST(request: Request) {
     const input = inputFrom(value)
     if (!input) return reply({ error: 'Transacción de Apple inválida.' }, 400)
 
-    const verify = verifier()
-    if (!verify) return reply({ error: 'La validación de compras no está configurada.' }, 503)
+    const verifiers = appleVerifiers()
+    if (!verifiers) return reply({ error: 'La validación de compras no está configurada.' }, 503)
 
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -160,25 +140,21 @@ export async function POST(request: Request) {
     const role = profile?.role === 'coach' ? 'coach' : 'athlete'
     if (planForAppleProduct(input.productID) !== role) return reply({ error: 'El producto no corresponde a tu cuenta.' }, 403)
 
-    let transaction
-    try {
-      transaction = await verify.verifyAndDecodeTransaction(input.signedTransactionInfo)
-    } catch {
-      return reply({ error: 'Apple no ha podido validar esta transacción.' }, 400)
-    }
+    // Production also accepts Sandbox: App Review and TestFlight buy there.
+    const decoded = await verifyInAnyEnvironment(verifiers, (verifier) => verifier.verifyAndDecodeTransaction(input.signedTransactionInfo))
+    if (!decoded) return reply({ error: 'Apple no ha podido validar esta transacción.' }, 400)
+    const { value: transaction, verified } = decoded
 
     let renewal = null
     if (input.signedRenewalInfo) {
       try {
-        renewal = await verify.verifyAndDecodeRenewalInfo(input.signedRenewalInfo)
+        renewal = await verified.verifier.verifyAndDecodeRenewalInfo(input.signedRenewalInfo)
       } catch {
         return reply({ error: 'Apple no ha podido validar la renovación.' }, 400)
       }
     }
 
-    const expectedEnvironment = process.env.APPLE_NOTIFICATION_ENV === 'production'
-      ? Environment.PRODUCTION
-      : Environment.SANDBOX
+    const expectedEnvironment = verified.environment
     if (
       transaction.bundleId !== process.env.APPLE_BUNDLE_ID?.trim() ||
       transaction.environment !== expectedEnvironment ||

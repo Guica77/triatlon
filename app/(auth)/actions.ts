@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { headers, cookies } from 'next/headers';
+import { COACH_ONLY_MESSAGE } from '@/lib/web-access';
 
 const getDynamicBaseUrl = async () => {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '');
@@ -158,6 +159,17 @@ export async function loginCoach(formData: FormData) {
 
   if (error) {
     return { error: 'Credenciales inválidas o correo no confirmado.' };
+  }
+
+  // The coach entrance only admits coach accounts.
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+    const role = profile?.role ?? user.user_metadata?.role;
+    if (role !== 'coach') {
+      await supabase.auth.signOut();
+      return { error: COACH_ONLY_MESSAGE };
+    }
   }
 
   return { success: true };

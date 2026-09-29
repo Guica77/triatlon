@@ -6,14 +6,32 @@ import { NotificationProvider } from "@/components/providers/notification-provid
 import { ToastProvider } from "@/components/providers/toast-provider";
 import { PageTransition } from "@/components/providers/page-transition";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { ATHLETE_WEB_PATH, COACH_ONLY_EXIT_PATH, canUseProduct, isCoachOnlyHost, isNativeClient } from "@/lib/web-access";
 
 export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const userAgent = (await headers()).get('user-agent') ?? '';
-  const isNativeApp = userAgent.includes('TriWaveXNative/');
+  const requestHeaders = await headers();
+  const userAgent = requestHeaders.get('user-agent') ?? '';
+  const isNativeApp = isNativeClient(userAgent, requestHeaders.get('x-triwavex-native'));
+
+  // In a browser the product is for coaches; athletes are sent to the iOS app.
+  // The coach host admits only coaches, even from the app.
+  const host = requestHeaders.get('host');
+  const coachOnly = isCoachOnlyHost(host);
+  if (!isNativeApp || coachOnly) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+      const allowed = canUseProduct({ host, role: profile?.role, native: isNativeApp, athleteWebEnabled: process.env.ATHLETE_WEB_ACCESS === '1' });
+      if (!allowed) redirect(coachOnly ? COACH_ONLY_EXIT_PATH : ATHLETE_WEB_PATH);
+    }
+  }
 
   return (
     <NotificationProvider>

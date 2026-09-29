@@ -34,6 +34,7 @@ struct DeviceSettingsView: View {
     let onHealthSnapshot: (HealthSnapshot) -> Void
     @State private var location = TrainingLocationService()
     @State private var weather = TrainingWeatherService()
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
@@ -72,6 +73,7 @@ struct DeviceSettingsView: View {
             }
             .navigationTitle("Dispositivos")
             .navigationBarTitleDisplayMode(.large)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Cerrar") { dismiss() } } }
         }
     }
 

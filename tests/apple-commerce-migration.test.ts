@@ -9,6 +9,10 @@ const ADMIN = '44444444-4444-4444-8444-444444444444'
 let db: PGlite
 
 const migration = (path: string) => readFileSync(path, 'utf8')
+// The assignment trigger records a coach switch at now(), so the billing
+// periods around it must be relative to the clock rather than fixed dates.
+const HOUR = 3_600_000
+const hoursFromNow = (hours: number) => new Date(Date.now() + hours * HOUR).toISOString()
 
 async function callPeriod(transactionID: string, startsAt: string) {
   const { rows } = await db.query<{ record_apple_subscription_period: string }>(`
@@ -115,12 +119,12 @@ describe('Apple coach capacity, assignment history and audited report reconcilia
 
   it('keeps a delayed Apple period attributed to the coach assigned when that paid period began', async () => {
     await db.query("select set_config('request.jwt.claim.role','service_role',false)")
-    expect(await callPeriod('apple-tx-before-switch', '2026-09-24T10:00:00Z')).toBe('awaiting_apple_report')
+    expect(await callPeriod('apple-tx-before-switch', hoursFromNow(-48))).toBe('awaiting_apple_report')
     await db.exec(`
       update coach_athletes set status='pending' where athlete_id='${ATHLETE}' and coach_id='${COACH_A}';
       update profiles set coach_id=null where id='${ATHLETE}';
       insert into coach_athletes(coach_id,athlete_id,status,created_at)
-        values ('${COACH_B}','${ATHLETE}','active','2026-09-25T18:00:00Z');
+        values ('${COACH_B}','${ATHLETE}','active','${hoursFromNow(-1)}');
       update profiles set coach_id='${COACH_B}' where id='${ATHLETE}';
     `)
     const attributed = await db.query<{ coach_id_at_period_start: string }>(
@@ -130,12 +134,12 @@ describe('Apple coach capacity, assignment history and audited report reconcilia
 
     // A notification arriving now but carrying an earlier signed billing period
     // must still resolve against the closed, historical interval.
-    expect(await callPeriod('apple-tx-delayed-after-switch', '2026-09-24T12:00:00Z')).toBe('awaiting_apple_report')
+    expect(await callPeriod('apple-tx-delayed-after-switch', hoursFromNow(-46))).toBe('awaiting_apple_report')
     const delayed = await db.query<{ coach_id_at_period_start: string }>(
       "select coach_id_at_period_start from private.apple_subscription_periods where transaction_id='apple-tx-delayed-after-switch'"
     )
     expect(delayed.rows[0].coach_id_at_period_start).toBe(COACH_A)
-    const nextPeriod = await callPeriod('apple-tx-after-switch', '2026-09-26T10:00:00Z')
+    const nextPeriod = await callPeriod('apple-tx-after-switch', hoursFromNow(1))
     expect(nextPeriod).toBe('awaiting_apple_report')
     const current = await db.query<{ coach_id_at_period_start: string }>(
       "select coach_id_at_period_start from private.apple_subscription_periods where transaction_id='apple-tx-after-switch'"

@@ -6,6 +6,9 @@ import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { loginAthlete, loginCoach, getOAuthUrl } from '../actions';
+import { COACH_ONLY_MESSAGE, isCoachOnlyHost } from '@/lib/web-access';
+
+const noSubscription = () => () => {};
 import {
   Eye, EyeOff, Loader2, CheckCircle, AlertCircle, Mail,
   Waves, Bike, ArrowRight,
@@ -36,12 +39,14 @@ function UnifiedLoginForm() {
   const { start: startWelcome } = useAuthenticatedWelcome();
   const submitting = React.useRef(false);
   const searchParams = useSearchParams();
-  const [role, setRole] = React.useState<Role>(
+  const [selectedRole, setRole] = React.useState<Role>(
     searchParams.get('role') === 'coach' ? 'coach' : 'athlete'
   );
   const [error, setError] = React.useState<string | null>(
     searchParams.get('error') === 'ProfileSetupError'
       ? 'No se pudo preparar tu perfil. Vuelve a entrar con el mismo proveedor y el rol elegido.'
+      : searchParams.get('error') === 'CoachOnly'
+        ? COACH_ONLY_MESSAGE
       : searchParams.get('error') === 'AuthCallbackError'
         ? 'No se pudo completar el acceso. Inténtalo de nuevo.'
         : null
@@ -51,6 +56,12 @@ function UnifiedLoginForm() {
   const [email, setEmail] = React.useState('');
   const [emailError, setEmailError] = React.useState<string | null>(null);
   const reduceMotion = useReducedMotion();
+  const coachOnlyHost = React.useSyncExternalStore(
+    noSubscription,
+    () => isCoachOnlyHost(window.location.hostname),
+    () => false,
+  );
+  const role = coachOnlyHost ? 'coach' : selectedRole;
   const canHover = React.useSyncExternalStore(
     React.useCallback((onStoreChange) => {
       const mediaQuery = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -127,8 +138,8 @@ function UnifiedLoginForm() {
           </div>
         )}
 
-        {/* Role Toggle — with smooth micro-interaction */}
-        <div className="relative grid grid-cols-2 gap-1 rounded-[18px] border border-white/10 bg-surface-hover/70 p-1.5">
+        {/* Role Toggle — with smooth micro-interaction; the coach host is coach-only */}
+        {!coachOnlyHost && <div className="relative grid grid-cols-2 gap-1 rounded-[18px] border border-white/10 bg-surface-hover/70 p-1.5">
           {(['athlete', 'coach'] as const).map(r => {
             const Icon = ROLE_CONFIG[r].icon;
             const isActive = role === r;
@@ -155,7 +166,7 @@ function UnifiedLoginForm() {
               </button>
             );
           })}
-        </div>
+        </div>}
 
         {/* Form */}
         <AnimatePresence mode="wait">

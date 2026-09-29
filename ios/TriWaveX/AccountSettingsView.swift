@@ -7,8 +7,8 @@ final class AccountSettingsModel {
     let origin: URL; let store: WKWebsiteDataStore
     var scheduledFor: String?; var loading = false; var message: String?
     init(origin: URL, store: WKWebsiteDataStore) { self.origin = origin; self.store = store }
-    func load() async { guard !loading else { return }; loading = true; defer { loading = false }; do { scheduledFor = try await request(action: nil).deletionScheduledFor } catch { message = "No se ha podido cargar tu cuenta." } }
-    func perform(_ action: String) async -> Bool { guard !loading else { return false }; loading = true; defer { loading = false }; do { let result = try await request(action: action); scheduledFor = result.deletionScheduledFor; return true } catch { message = "No se ha podido completar la acción. Inténtalo de nuevo."; return false } }
+    func load() async { guard !loading else { return }; loading = true; message = nil; defer { loading = false }; do { scheduledFor = try await request(action: nil).deletionScheduledFor } catch { message = "No se ha podido cargar tu cuenta." } }
+    func perform(_ action: String) async -> Bool { guard !loading else { return false }; loading = true; message = nil; defer { loading = false }; do { let result = try await request(action: action); scheduledFor = result.deletionScheduledFor; return true } catch { message = "No se ha podido completar la acción. Inténtalo de nuevo."; return false } }
     private struct Result: Decodable { let deletionScheduledFor: String? }
     private func request(action: String?) async throws -> Result {
         guard Configuration.allows(origin, origin: origin), let url = URL(string: "/api/native/account", relativeTo: origin)?.absoluteURL else { throw URLError(.badURL) }
@@ -25,6 +25,7 @@ final class AccountSettingsModel {
 struct AccountSettingsView: View {
     @Bindable var model: AccountSettingsModel
     let onSessionEnded: () -> Void
+    @Environment(\.dismiss) private var dismiss
     @State private var showSignOut = false; @State private var showDelete = false; @State private var confirmation = ""
     var body: some View {
         List {
@@ -34,7 +35,14 @@ struct AccountSettingsView: View {
                 else { Button("Eliminar cuenta", systemImage: "trash", role: .destructive) { showDelete = true }.disabled(model.loading); Text("Tu perfil, entrenamientos y chats se eliminarán dentro de 30 días. Podrás cancelar la solicitud antes de esa fecha. Si tienes una suscripción de Apple, elimínala o gestiónala también en Ajustes de tu Apple ID: borrar la cuenta no la cancela.").font(.footnote).foregroundStyle(.secondary) }
             }
             if let message = model.message { Text(message).foregroundStyle(.red).font(.footnote) }
-        }.navigationTitle("Cuenta").task { await model.load() }
+        }
+        .navigationTitle("Cuenta")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) { Button("Cerrar") { dismiss() } }
+            if model.loading { ToolbarItem(placement: .topBarLeading) { ProgressView() } }
+        }
+        .task { await model.load() }
         .confirmationDialog("¿Cerrar sesión?", isPresented: $showSignOut, titleVisibility: .visible) { Button("Cerrar sesión", role: .destructive) { Task { if await model.perform("signout") { onSessionEnded() } } }; Button("Cancelar", role: .cancel) {} } message: { Text("Tus datos y entrenamientos se conservarán.") }
         .alert("¿Programar eliminación?", isPresented: $showDelete) { TextField("Escribe ELIMINAR", text: $confirmation); Button("Programar", role: .destructive) { Task { if await model.perform("scheduleDeletion") { onSessionEnded() } } }.disabled(confirmation != "ELIMINAR"); Button("Cancelar", role: .cancel) {} } message: { Text("La cuenta se eliminará dentro de 30 días. Puedes cancelar la solicitud antes de esa fecha. Esta acción no cancela compras o suscripciones de Apple.") }
     }

@@ -168,7 +168,7 @@ struct SubscriptionFinishGate {
                 return nil
             }
         } catch {
-            state = .failed("No se ha completado la compra. Inténtalo de nuevo.")
+            state = .failed("No se ha completado la compra: \(error.localizedDescription)")
             return nil
         }
     }
@@ -245,7 +245,10 @@ struct SubscriptionFinishGate {
             state = .idle
             return result
         } catch {
-            state = .failed("No se ha podido confirmar la suscripción. Inténtalo de nuevo.")
+            // Show the server's reason (e.g. expired session, product not for
+            // this account) so a failed confirmation is actionable.
+            let reason = (error as? LocalizedError)?.errorDescription ?? "Inténtalo de nuevo."
+            state = .failed("No se ha podido confirmar la suscripción: \(reason)")
             return nil
         }
     }
@@ -590,6 +593,7 @@ private struct NativePaymentReviewView: View {
     let eligibleForIntro: Bool
     let isBusy: Bool
     let onConfirm: () -> Void
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
@@ -622,6 +626,7 @@ private struct NativePaymentReviewView: View {
             .padding(20)
             .navigationTitle("Confirmar pago")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(isBusy) } }
         }
         .presentationDetents([.medium, .large])
     }

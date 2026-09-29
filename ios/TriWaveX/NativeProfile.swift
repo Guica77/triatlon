@@ -137,92 +137,97 @@ struct NativeProfileView: View {
                 case .loaded(let profile): profileContent(profile)
                 }
             }
-            .navigationTitle("More")
+            .navigationTitle("Más")
             .navigationBarTitleDisplayMode(.large)
             .task { guard !hasLoaded else { return }; hasLoaded = true; if !isDemo { await model.load() } }
             .refreshable { await model.load() }
         }
     }
 
+    private var isCoach: Bool { authenticatedRole == "coach" }
+
     private func profileContent(_ profile: NativeProfile) -> some View {
         List {
             Section {
                 HStack(spacing: 14) {
                     Text(String(profile.athlete.firstName.prefix(1)).uppercased()).font(.title2.bold()).foregroundStyle(.white).frame(width: 54, height: 54).background(Color.triWaveXAqua, in: Circle())
-                    VStack(alignment: .leading, spacing: 3) { Text([profile.athlete.firstName, profile.athlete.lastName].compactMap { $0 }.joined(separator: " ")).font(.headline); Text(profile.athlete.level ?? "Triatleta").font(.subheadline).foregroundStyle(.secondary) }
+                    VStack(alignment: .leading, spacing: 3) { Text([profile.athlete.firstName, profile.athlete.lastName].compactMap { $0 }.joined(separator: " ")).font(.headline); Text(isCoach ? "Entrenador" : profile.athlete.level ?? "Triatleta").font(.subheadline).foregroundStyle(.secondary) }
                 }.padding(.vertical, 5)
             } header: {
                 Text("Perfil")
             }
-            Section("Preparación de hoy") {
-                if let recovery = profile.recovery { HStack { metric("Readiness", value: recovery.readiness.map { "\(Int($0))" } ?? "—"); Spacer(); metric("HRV", value: recovery.hrv.map { "\(Int($0)) ms" } ?? "—"); Spacer(); metric("Sueño", value: recovery.sleepHours.map { String(format: "%.1f h", $0) } ?? "—") } }
-                else { Label("Aún no hay datos de recuperación", systemImage: "heart.text.square").foregroundStyle(.secondary) }
-            }
-            Section("Mi preparación") {
-                Button { managingPlan = true } label: {
-                    HStack {
-                        Label("Gestionar mi plan", systemImage: "slider.horizontal.3")
-                        Spacer()
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text(profile.goal.name ?? "Abrir plan").lineLimit(1)
-                            Text(profile.goal.date ?? "Toca para reorganizar").font(.caption2)
-                        }
-                        .foregroundStyle(.secondary)
-                        Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.tertiary)
-                    }
+            // Readiness, training setup and devices only apply to athletes.
+            if !isCoach {
+                Section("Preparación de hoy") {
+                    if let recovery = profile.recovery { HStack { metric("Readiness", value: recovery.readiness.map { "\(Int($0))" } ?? "—"); Spacer(); metric("HRV", value: recovery.hrv.map { "\(Int($0)) ms" } ?? "—"); Spacer(); metric("Sueño", value: recovery.sleepHours.map { String(format: "%.1f h", $0) } ?? "—") } }
+                    else { Label("Aún no hay datos de recuperación", systemImage: "heart.text.square").foregroundStyle(.secondary) }
                 }
-                .accessibilityHint("Edita sesiones, objetivo o carga sin repetir el onboarding")
-                NavigationLink { NativePhysiologyEditor(physiology: profile.physiology, save: { values in await model.save(values) }) } label: { Label("Fisiología", systemImage: "heart.text.square") }
-                NavigationLink { NativeInjuryEditor(injuries: profile.physiology.injuries, save: { values in await model.save(values) }) } label: { Label("Lesiones", systemImage: "cross.case") }
-            }
-            Section {
-                Button(action: openDevices) { Label("Apple Health, Watch y sensores", systemImage: "applewatch").foregroundStyle(.primary) }
-                connectionRow("Strava", connected: profile.connections.strava, icon: "figure.run")
-                connectionRow("Garmin", connected: profile.connections.garmin, icon: "watchface.applewatch.case")
-                Button(action: openCoros) {
-                    HStack {
-                        Label("COROS", systemImage: "timer")
-                        Spacer()
-                        Text(profile.connections.coros ? "Conectado" : "Conectar")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(profile.connections.coros ? .green : Color.triWaveXAqua)
-                    }
-                }
-                connectionRow("Polar", connected: profile.connections.polar, icon: "heart.circle")
-                if profile.connections.suunto {
-                    connectionRow("Suunto", connected: true, icon: "mountain.2")
-                } else {
-                    Button(action: openStrava) {
+                Section("Mi preparación") {
+                    Button { managingPlan = true } label: {
                         HStack {
-                            Label("Suunto", systemImage: "mountain.2")
+                            Label("Gestionar mi plan", systemImage: "slider.horizontal.3")
                             Spacer()
                             VStack(alignment: .trailing, spacing: 2) {
-                                Text("Solicitud enviada").font(.caption.weight(.semibold)).foregroundStyle(.orange)
-                                Text("Conectar con Strava").font(.caption2).foregroundStyle(.tint)
+                                Text(profile.goal.name ?? "Abrir plan").lineLimit(1)
+                                Text(profile.goal.date ?? "Toca para reorganizar").font(.caption2)
                             }
+                            .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(.tertiary)
                         }
                     }
-                    .accessibilityLabel("Suunto: solicitud enviada. Conectar Strava mientras tanto")
+                    .accessibilityHint("Edita sesiones, objetivo o carga sin repetir el onboarding")
+                    NavigationLink { NativePhysiologyEditor(physiology: profile.physiology, save: { values in await model.save(values) }) } label: { Label("Fisiología", systemImage: "heart.text.square") }
+                    NavigationLink { NativeInjuryEditor(injuries: profile.physiology.injuries, save: { values in await model.save(values) }) } label: { Label("Lesiones", systemImage: "cross.case") }
                 }
-                if profile.connections.amazfit {
-                    connectionRow("Amazfit", connected: true, icon: "watchface.applewatch.case")
-                } else {
-                    Link(destination: URL(string: "mailto:developer@zepp.com?subject=TriWaveX%20%E2%80%94%20Amazfit%2FZepp%20partner%20API%20request")!) {
+                Section {
+                    Button(action: openDevices) { Label("Apple Health, Watch y sensores", systemImage: "applewatch").foregroundStyle(.primary) }
+                    connectionRow("Strava", connected: profile.connections.strava, icon: "figure.run")
+                    connectionRow("Garmin", connected: profile.connections.garmin, icon: "watchface.applewatch.case")
+                    Button(action: openCoros) {
                         HStack {
-                            Label("Amazfit / Zepp", systemImage: "watchface.applewatch.case")
+                            Label("COROS", systemImage: "timer")
                             Spacer()
-                            VStack(alignment: .trailing, spacing: 2) {
-                                Text("Solicitud requerida").font(.caption.weight(.semibold)).foregroundStyle(.orange)
-                                Text("Contactar Zepp Health").font(.caption2).foregroundStyle(.tint)
-                            }
+                            Text(profile.connections.coros ? "Conectado" : "Conectar")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(profile.connections.coros ? .green : Color.triWaveXAqua)
                         }
                     }
-                    .accessibilityLabel("Amazfit y Zepp: solicitar acceso de partner")
-                }
-                Label("Importar archivo FIT o GPX", systemImage: "square.and.arrow.down").foregroundStyle(.secondary)
-            } header: {
-                Text("Dispositivos y conexiones")
-            } footer: { Text("COROS abre un consentimiento seguro. Suunto está en revisión y permite usar Strava mientras tanto. Garmin y Polar muestran el estado de sus conexiones. Las marcas sin acceso directo usan Strava, Salud o archivos FIT/GPX.") }
+                    connectionRow("Polar", connected: profile.connections.polar, icon: "heart.circle")
+                    if profile.connections.suunto {
+                        connectionRow("Suunto", connected: true, icon: "mountain.2")
+                    } else {
+                        Button(action: openStrava) {
+                            HStack {
+                                Label("Suunto", systemImage: "mountain.2")
+                                Spacer()
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text("Solicitud enviada").font(.caption.weight(.semibold)).foregroundStyle(.orange)
+                                    Text("Conectar con Strava").font(.caption2).foregroundStyle(.tint)
+                                }
+                            }
+                        }
+                        .accessibilityLabel("Suunto: solicitud enviada. Conectar Strava mientras tanto")
+                    }
+                    if profile.connections.amazfit {
+                        connectionRow("Amazfit", connected: true, icon: "watchface.applewatch.case")
+                    } else {
+                        Link(destination: URL(string: "mailto:developer@zepp.com?subject=TriWaveX%20%E2%80%94%20Amazfit%2FZepp%20partner%20API%20request")!) {
+                            HStack {
+                                Label("Amazfit / Zepp", systemImage: "watchface.applewatch.case")
+                                Spacer()
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text("Solicitud requerida").font(.caption.weight(.semibold)).foregroundStyle(.orange)
+                                    Text("Contactar Zepp Health").font(.caption2).foregroundStyle(.tint)
+                                }
+                            }
+                        }
+                        .accessibilityLabel("Amazfit y Zepp: solicitar acceso de partner")
+                    }
+                    Label("Importar archivo FIT o GPX", systemImage: "square.and.arrow.down").foregroundStyle(.secondary)
+                } header: {
+                    Text("Dispositivos y conexiones")
+                } footer: { Text("COROS abre un consentimiento seguro. Suunto está en revisión y permite usar Strava mientras tanto. Garmin y Polar muestran el estado de sus conexiones. Las marcas sin acceso directo usan Strava, Salud o archivos FIT/GPX.") }
+            }
             Section("Preferencias") {
                 Toggle("Pedir Face ID al abrir", isOn: Binding(get: { appLock.isEnabled }, set: { appLock.isEnabled = $0 }))
                     .accessibilityHint("Protege la app localmente con Face ID o el código del iPhone")
@@ -274,7 +279,7 @@ struct NativeProfileView: View {
                     Label("Enviar feedback", systemImage: "bubble.left.and.bubble.right")
                 }
                 NavigationLink {
-                    TriWaveXSupportView()
+                    TriWaveXSupportView(origin: origin, store: store)
                 } label: {
                     Label("Soporte, reembolsos y cancelación", systemImage: "lifepreserver")
                 }
@@ -394,6 +399,9 @@ private struct NativeFeedbackClient {
 }
 
 private struct TriWaveXSupportView: View {
+    let origin: URL
+    let store: WKWebsiteDataStore
+    @State private var legalPage: LegalPage?
     private let subscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
     private let refundURL = URL(string: "https://reportaproblem.apple.com/")!
 
@@ -411,6 +419,11 @@ private struct TriWaveXSupportView: View {
                 Link("Escribir a soporte", destination: URL(string: "mailto:soporte@triwavex.com?subject=Ayuda%20TriWaveX")!)
                 NavigationLink { TriWaveXQuickHelpView() } label: { Text("Guía rápida") }
             }
+            Section("Legal") {
+                ForEach(LegalPage.allCases) { page in
+                    Button(page.title) { legalPage = page }
+                }
+            }
             Section("Seguridad y privacidad") {
                 Text("Face ID protege el acceso local en este iPhone. Tus datos deportivos se usan para preparar tu entrenamiento.")
                     .foregroundStyle(.secondary)
@@ -418,6 +431,16 @@ private struct TriWaveXSupportView: View {
         }
         .navigationTitle("Soporte")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(item: $legalPage) { page in
+            InformationView(url: origin.appendingPathComponent(page.path), title: page.title, store: store, onDismiss: { legalPage = nil })
+        }
+    }
+
+    enum LegalPage: String, CaseIterable, Identifiable {
+        case privacy, terms
+        var id: String { rawValue }
+        var title: String { self == .privacy ? "Política de privacidad" : "Términos de uso" }
+        var path: String { self == .privacy ? "legal/privacidad" : "legal/terminos" }
     }
 }
 
@@ -473,7 +496,7 @@ struct NativePlanManagementSheet: View {
                 }
                 Section {
                     Button { openSessions() } label: {
-                        Label("Editar sesiones", systemImage: "calendar.badge.pencil")
+                        Label("Editar sesiones", systemImage: "pencil.and.list.clipboard")
                     }
                     Button { showingGoal = true } label: {
                         LabeledContent { Text(goal.name ?? "Definir objetivo").foregroundStyle(.secondary).lineLimit(1) } label: { Label("Cambiar objetivo", systemImage: "flag.checkered") }
@@ -495,7 +518,7 @@ struct NativePlanManagementSheet: View {
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cerrar") { dismiss() } } }
             .sheet(isPresented: $showingGoal) { NativeGoalEditor(goal: goal, save: saveGoal) }
             .sheet(isPresented: $showingLoad) { NativeLoadAdjustmentSheet() }
-            .sheet(isPresented: $showingInjuries) { NavigationStack { NativeInjuryEditor(injuries: physiology.injuries, save: saveGoal) } }
+            .sheet(isPresented: $showingInjuries) { NavigationStack { NativeInjuryEditor(injuries: physiology.injuries, showsCancel: true, save: saveGoal) } }
         }
     }
 }
@@ -598,12 +621,14 @@ struct NativePhysiologyEditor: View {
 struct NativeInjuryEditor: View {
     let injuries: String?
     let save: ([String: Any]) async -> Bool
+    /// Only a sheet needs Cancel; a pushed editor already has Back.
+    var showsCancel = false
     @State private var value: String
     @State private var saving = false
     @State private var error: String?
     @Environment(\.dismiss) private var dismiss
 
-    init(injuries: String?, save: @escaping ([String: Any]) async -> Bool) { self.injuries = injuries; self.save = save; _value = State(initialValue: injuries ?? "") }
+    init(injuries: String?, showsCancel: Bool = false, save: @escaping ([String: Any]) async -> Bool) { self.injuries = injuries; self.showsCancel = showsCancel; self.save = save; _value = State(initialValue: injuries ?? "") }
 
     var body: some View {
         Form {
@@ -611,7 +636,10 @@ struct NativeInjuryEditor: View {
             if let error { Section { Text(error).foregroundStyle(.red) } }
         }
         .navigationTitle("Lesiones e historial").navigationBarTitleDisplayMode(.inline)
-        .toolbar { ToolbarItem(placement: .confirmationAction) { Button(saving ? "Guardando…" : "Guardar") { Task { await submit() } }.disabled(saving) } }
+        .toolbar {
+            if showsCancel { ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() } } }
+            ToolbarItem(placement: .confirmationAction) { Button(saving ? "Guardando…" : "Guardar") { Task { await submit() } }.disabled(saving) }
+        }
     }
 
     private func submit() async {
@@ -631,6 +659,8 @@ struct SubscriptionManagementView: View {
     var isDemo = false
     @Environment(\.dismiss) private var dismiss
     private let subscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
+
+    private var accountRole: String { role == "coach" ? "coach" : "athlete" }
 
     private var statusLabel: String {
         switch status?.lowercased() {
@@ -654,31 +684,31 @@ struct SubscriptionManagementView: View {
 
             Section {
                 if let userID, !userID.isEmpty {
+                    // The server only sells and validates products for the
+                    // account's own role, so offering the other plan here
+                    // always ended in an empty store.
                     NavigationLink {
                         NativeSubscriptionStoreView(
                             origin: origin,
                             store: store,
                             expectedUserID: userID,
-                            role: "athlete",
+                            role: accountRole,
                             onFinished: finishSubscription
                         )
                     } label: {
-                        planRow("Atleta", detail: "Entrenamiento personal y seguimiento", icon: "figure.run")
-                    }
-                    NavigationLink {
-                        NativeSubscriptionStoreView(
-                            origin: origin,
-                            store: store,
-                            expectedUserID: userID,
-                            role: "coach",
-                            onFinished: finishSubscription
-                        )
-                    } label: {
-                        planRow("Entrenador", detail: "Gestión de hasta 10 atletas", icon: "person.2")
+                        if accountRole == "coach" {
+                            planRow("Entrenador", detail: "Gestiona tu equipo y capacidad de atletas", icon: "person.2")
+                        } else {
+                            planRow("Atleta con IA", detail: "Planificación adaptativa y seguimiento", icon: "figure.run")
+                        }
                     }
                 } else if isDemo {
-                    Label { VStack(alignment: .leading) { Text("Atleta con IA"); Text("Planificación adaptativa y seguimiento").font(.footnote).foregroundStyle(.secondary) } } icon: { Image(systemName: "figure.run").foregroundStyle(Color.triWaveXAqua) }
-                    Label { VStack(alignment: .leading) { Text("Entrenador"); Text("Gestiona tu equipo y capacidad de atletas").font(.footnote).foregroundStyle(.secondary) } } icon: { Image(systemName: "person.2").foregroundStyle(Color.triWaveXAqua) }
+                    // Mirror the live screen: only the plan for this role.
+                    if accountRole == "coach" {
+                        Label { VStack(alignment: .leading) { Text("Entrenador"); Text("Gestiona tu equipo y capacidad de atletas").font(.footnote).foregroundStyle(.secondary) } } icon: { Image(systemName: "person.2").foregroundStyle(Color.triWaveXAqua) }
+                    } else {
+                        Label { VStack(alignment: .leading) { Text("Atleta con IA"); Text("Planificación adaptativa y seguimiento").font(.footnote).foregroundStyle(.secondary) } } icon: { Image(systemName: "figure.run").foregroundStyle(Color.triWaveXAqua) }
+                    }
                 } else {
                     Label("Inicia sesión para gestionar tu suscripción.", systemImage: "person.crop.circle.badge.exclamationmark")
                         .foregroundStyle(.secondary)
@@ -699,7 +729,7 @@ struct SubscriptionManagementView: View {
                             origin: origin,
                             store: store,
                             expectedUserID: userID,
-                            role: role == "coach" ? "coach" : "athlete",
+                            role: accountRole,
                             onFinished: finishSubscription
                         )
                     } label: {

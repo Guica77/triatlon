@@ -1,4 +1,5 @@
-import { Environment, InAppOwnershipType, SignedDataVerifier } from '@apple/app-store-server-library'
+import { InAppOwnershipType } from '@apple/app-store-server-library'
+import { appleVerifiers, verifyInAnyEnvironment } from '@/lib/apple-verification'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { classifyAppleEvent } from '@/lib/apple-event'
 import { reconcileAppleEvent } from '@/lib/apple-reconciliation'
@@ -9,25 +10,6 @@ const reply = (body: object, status = 200) => Response.json(body, {
   status,
   headers: { 'Cache-Control': 'no-store' },
 })
-
-function verifier() {
-  const roots = process.env.APPLE_ROOT_CERTS_BASE64
-    ?.split(',')
-    .map((value) => Buffer.from(value.trim(), 'base64'))
-    .filter((value) => value.length > 0)
-  const bundleID = process.env.APPLE_BUNDLE_ID?.trim()
-  const appAppleID = Number(process.env.APPLE_APP_ID)
-
-  if (!roots?.length || !bundleID || !Number.isSafeInteger(appAppleID) || appAppleID <= 0) return null
-
-  return new SignedDataVerifier(
-    roots,
-    true,
-    process.env.APPLE_NOTIFICATION_ENV === 'production' ? Environment.PRODUCTION : Environment.SANDBOX,
-    bundleID,
-    appAppleID,
-  )
-}
 
 function isUUID(value: string | undefined): value is string {
   return Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))
@@ -90,15 +72,15 @@ export async function POST(request: Request) {
     return reply({ error: 'signedPayload requerido.' }, 400)
   }
 
-  const verify = verifier()
-  if (!verify) return reply({ error: 'Notificaciones de Apple no configuradas.' }, 503)
+  const verifiers = appleVerifiers()
+  if (!verifiers) return reply({ error: 'Notificaciones de Apple no configuradas.' }, 503)
 
-  let notification
-  try {
-    notification = await verify.verifyAndDecodeNotification(input.signedPayload)
-  } catch {
-    return reply({ error: 'Notificación de Apple no válida.' }, 400)
-  }
+  // Production also accepts Sandbox: App Review and TestFlight buy there.
+  const signedPayload = input.signedPayload
+  const decoded = await verifyInAnyEnvironment(verifiers, (verifier) => verifier.verifyAndDecodeNotification(signedPayload))
+  if (!decoded) return reply({ error: 'Notificación de Apple no válida.' }, 400)
+  const { value: notification, verified } = decoded
+  const verify = verified.verifier
 
   const admin = createAdminClient()
   const eventID = notification.notificationUUID || `${notification.signedDate || Date.now()}:${notification.notificationType || 'unknown'}`
@@ -112,9 +94,7 @@ export async function POST(request: Request) {
   if (insertError) return reply({ error: 'No se pudo registrar la notificación.' }, 503)
 
   const data = notification.data
-  const expectedEnvironment = process.env.APPLE_NOTIFICATION_ENV === 'production'
-    ? Environment.PRODUCTION
-    : Environment.SANDBOX
+  const expectedEnvironment = verified.environment
   if (
     !data ||
     data.bundleId !== process.env.APPLE_BUNDLE_ID?.trim() ||
