@@ -79,6 +79,7 @@ private struct AthletePreferences {
 }
 
 struct NativeAppIntroductionView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     enum AccountRole: String, CaseIterable {
         case athlete
         case coach
@@ -148,7 +149,7 @@ struct NativeAppIntroductionView: View {
                         let slide = slides[index]
                         IntroPreviewScreen(title: slide.0, detail: slide.1, kind: slide.2, role: role, demoModels: demoModels) { destination in
                             guard let nextPage = slides.firstIndex(where: { $0.2 == destination }) else { return }
-                            withAnimation(.easeInOut(duration: 0.2)) { page = nextPage }
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { page = nextPage }
                         }
                             .tag(index).padding(.horizontal, 20)
                     }
@@ -164,7 +165,7 @@ struct NativeAppIntroductionView: View {
                     }
                     Spacer()
                     if page > 0 {
-                        Button("Anterior") { withAnimation(.easeInOut(duration: 0.22)) { page -= 1 } }
+                        Button("Anterior") { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.22)) { page -= 1 } }
                             .font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
                             .frame(minHeight: 44)
                     }
@@ -175,7 +176,7 @@ struct NativeAppIntroductionView: View {
                 .padding(.horizontal, 24).padding(.bottom, 8)
 
                 Button(page == slides.count - 1 ? "Continuar con el cuestionario" : "Siguiente") {
-                    if page < slides.count - 1 { withAnimation(.easeInOut(duration: 0.22)) { page += 1 } }
+                    if page < slides.count - 1 { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.22)) { page += 1 } }
                     else { onContinue(role) }
                 }
                 .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
