@@ -31,7 +31,8 @@ final class TrainingLocationService: NSObject, CLLocationManagerDelegate {
 struct DeviceSettingsView: View {
     @Bindable var health: HealthKitService
     @Bindable var bluetooth: BluetoothHeartRateService
-    let onHealthSnapshot: (HealthSnapshot) -> Void
+    let onHealthSnapshot: (HealthSnapshot) async -> String
+    @State private var healthSyncMessage: String?
     @State private var location = TrainingLocationService()
     @State private var weather = TrainingWeatherService()
     @Environment(\.dismiss) private var dismiss
@@ -39,13 +40,18 @@ struct DeviceSettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("Salud y recuperación") {
+                Section {
                     deviceRow("Salud", detail: healthDetail, systemImage: "heart.fill", tint: .red) {
-                        Task { await health.requestAccess(); if let snapshot = health.latestSnapshot, snapshot.hasRecoveryMetrics { onHealthSnapshot(snapshot) } }
+                        Task { await health.requestAccess(); await syncIfReady() }
                     }
                     deviceRow("Apple Watch", detail: appleWatchDetail, systemImage: "applewatch", tint: .blue) {
-                        Task { await health.refresh(); if let snapshot = health.latestSnapshot, snapshot.hasRecoveryMetrics { onHealthSnapshot(snapshot) } }
+                        Task { await health.refresh(); await syncIfReady() }
                     }
+                } header: {
+                    Text("Salud y recuperación")
+                } footer: {
+                    if let healthSyncMessage { Text(healthSyncMessage) }
+                    else if health.state == .unavailableData { Text("Necesitamos sueño, VFC y frecuencia en reposo de las últimas 48 horas. Revisa los permisos en Ajustes › Salud › Acceso a datos.") }
                 }
 
                 Section {
@@ -77,6 +83,12 @@ struct DeviceSettingsView: View {
         }
     }
 
+    private func syncIfReady() async {
+        guard let snapshot = health.latestSnapshot, snapshot.hasRecoveryMetrics else { healthSyncMessage = nil; return }
+        healthSyncMessage = "Guardando…"
+        healthSyncMessage = await onHealthSnapshot(snapshot)
+    }
+
     private func deviceRow(_ title: String, detail: String, systemImage: String, tint: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Label {
@@ -106,7 +118,7 @@ struct DeviceSettingsView: View {
             if let heartRate = bluetooth.heartRate { return "\(heartRate) lpm · \(name)" }
             return "Conectado · \(name)"
         }
-        return bluetooth.state == .scanning ? "Buscando…" : "Conectar banda Bluetooth"
+        switch bluetooth.state { case .scanning: return "Buscando… acerca la banda y humedécela"; case .unavailable: return "Activa Bluetooth y permite el acceso en Ajustes"; case .failed: return "No se ha encontrado ninguna banda. Toca para reintentar"; default: return "Conectar banda Bluetooth" }
     }
     private var locationDetail: String { location.hasLocation ? "Usar mi ubicación" : "Permitir al usar la app" }
 }

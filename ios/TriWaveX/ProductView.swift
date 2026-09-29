@@ -516,16 +516,14 @@ struct ProductView: View {
         }
     }
 
-    private func syncHealth(_ snapshot: HealthSnapshot) {
-        guard let webView = browser.webView,
-              let data = try? JSONSerialization.data(withJSONObject: [
-                "date": String(ISO8601DateFormatter().string(from: snapshot.date).prefix(10)),
-                "sleepHours": snapshot.sleepHours!,
-                "hrv": snapshot.hrv!,
-                "restingHeartRate": snapshot.restingHeartRate!,
-              ]), let body = String(data: data, encoding: .utf8) else { return }
-        let script = "fetch('/api/native/health/sync', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-TriWaveX-Native': '1' }, body: JSON.stringify(\(body)) })"
-        webView.evaluateJavaScript(script) { _, _ in webView.reload() }
+    private func syncHealth(_ snapshot: HealthSnapshot) async -> String {
+        do {
+            try await NativeHealthSyncClient(origin: origin, store: store).sync(snapshot)
+            browser.webView?.reload()
+            return "Recuperación de hoy guardada."
+        } catch {
+            return (error as? LocalizedError)?.errorDescription ?? "No se han podido guardar los datos de Salud. Inténtalo de nuevo."
+        }
     }
 
     private func completeStrava(_ callback: URL, in webView: WKWebView) {
