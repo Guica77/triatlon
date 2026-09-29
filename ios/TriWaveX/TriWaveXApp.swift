@@ -10,7 +10,9 @@ struct TriWaveXApp: App {
             configuredRootView
                 .environment(appLock)
                 .overlay { if appLock.isLocked { AppLockOverlay(lock: appLock).zIndex(100) } }
-                .onChange(of: scenePhase) { _, phase in if phase != .active { appLock.lockIfNeeded() } }
+                // Only on background: payment sheets, Control Center and the Face ID
+                // prompt itself make the scene inactive and must not re-lock the app.
+                .onChange(of: scenePhase) { _, phase in if phase == .background { appLock.lockIfNeeded() } }
         }
     }
 

@@ -173,10 +173,12 @@ struct SubscriptionFinishGate {
         }
     }
 
-    func restore(expectedProductID: String) async -> NativeSubscriptionResult? {
+    /// `syncWithAppStore` asks for the Apple ID password; only an explicit
+    /// "Restaurar compras" should do that, not continuing a known subscription.
+    func restore(expectedProductID: String, syncWithAppStore: Bool = true) async -> NativeSubscriptionResult? {
         state = .restoring
         do {
-            try await AppStore.sync()
+            if syncWithAppStore { try await AppStore.sync() }
             for await result in StoreKit.Transaction.currentEntitlements {
                 guard case .verified(let transaction) = result,
                       transaction.productID == expectedProductID else { continue }
@@ -271,6 +273,21 @@ struct SubscriptionFinishGate {
             eligible.insert(product.id)
         }
         introEligibleProductIDs = eligible
+    }
+}
+
+extension Product {
+    /// Free-trial length as App Store Connect defines it, e.g. "7 días gratis".
+    var freeTrialLabel: String? {
+        guard let offer = subscription?.introductoryOffer, offer.paymentMode == .freeTrial else { return nil }
+        let value = offer.period.value * offer.periodCount
+        switch offer.period.unit {
+        case .day: return value == 1 ? "1 día gratis" : "\(value) días gratis"
+        case .week: return value == 1 ? "1 semana gratis" : "\(value) semanas gratis"
+        case .month: return value == 1 ? "1 mes gratis" : "\(value) meses gratis"
+        case .year: return value == 1 ? "1 año gratis" : "\(value) años gratis"
+        @unknown default: return "Prueba gratuita"
+        }
     }
 }
 
@@ -461,8 +478,8 @@ struct NativeSubscriptionStoreView: View {
                 HStack(alignment: .firstTextBaseline) {
                     Text(role == "coach" ? "Entrenador" : "Atleta").font(.title3.bold())
                     Spacer()
-                    if eligible {
-                        Text("7 días gratis")
+                    if eligible, let trial = product.freeTrialLabel {
+                        Text(trial)
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(Color.triWaveXAqua)
                             .padding(.horizontal, 10).padding(.vertical, 5)
@@ -476,7 +493,7 @@ struct NativeSubscriptionStoreView: View {
                 benefit("iphone.and.arrow.forward", "Disponible con tu Apple ID en tus dispositivos")
                 if role == "coach" {
                     benefit("person.2.fill", "Capacidad seleccionada: hasta \(selectedCoachCapacity) atletas activos")
-                    Text("Cada bloque adicional de 5 atletas cuesta 2,99 €/mes y se muestra antes de confirmar.")
+                    Text("Cada bloque adicional de 5 atletas se suma al precio mensual que Apple muestra antes de confirmar.")
                         .font(.footnote).foregroundStyle(.secondary)
                 }
             }
@@ -493,7 +510,7 @@ struct NativeSubscriptionStoreView: View {
         return Button {
             if alreadyPurchased {
                 Task {
-                    if let result = await store.restore(expectedProductID: product.id) {
+                    if let result = await store.restore(expectedProductID: product.id, syncWithAppStore: false) {
                         onFinished(result)
                     }
                 }
@@ -605,7 +622,7 @@ private struct NativePaymentReviewView: View {
                     .font(.largeTitle.bold())
                 VStack(alignment: .leading, spacing: 10) {
                     HStack { Text(role == "coach" ? "Entrenador" : "Atleta con IA"); Spacer(); Text("\(product.displayPrice)/mes").bold() }
-                    if eligibleForIntro { Text("7 días gratis, sin cobro hoy.").foregroundStyle(.secondary) }
+                    if eligibleForIntro, let trial = product.freeTrialLabel { Text("\(trial), sin cobro hoy.").foregroundStyle(.secondary) }
                     if role == "coach" { Text("Incluye capacidad para hasta \(SubscriptionStore.coachCapacity(forProductID: product.id) ?? 10) atletas activos. Apple confirma el precio mensual exacto antes del pago.").font(.subheadline).foregroundStyle(.secondary) }
                     if role != "coach" {
                         Label("Desbloquea tu plan completo, los ajustes de carga y el seguimiento de cada sesión.", systemImage: "checkmark.circle.fill")
@@ -618,7 +635,7 @@ private struct NativePaymentReviewView: View {
                 .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 Spacer()
                 SlideToConfirm(
-                    title: eligibleForIntro ? "Desliza para empezar 7 días gratis" : "Desliza para confirmar",
+                    title: eligibleForIntro ? "Desliza para empezar la prueba gratis" : "Desliza para confirmar",
                     isDisabled: isBusy,
                     onConfirmed: onConfirm
                 )

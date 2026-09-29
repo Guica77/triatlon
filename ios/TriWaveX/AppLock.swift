@@ -5,16 +5,16 @@ import SwiftUI
 
 @MainActor @Observable
 final class AppLock {
-    private let enabledKey = "triwavex.app-lock.enabled"
+    private static let enabledKey = "triwavex.app-lock.enabled"
     var isLocked = false
     var isAuthenticating = false
     var errorMessage: String?
 
+    // Stored (not computed from UserDefaults) so SwiftUI observes the toggle.
     var isEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: enabledKey) }
-        set {
-            UserDefaults.standard.set(newValue, forKey: enabledKey)
-            if !newValue { isLocked = false; errorMessage = nil }
+        didSet {
+            UserDefaults.standard.set(isEnabled, forKey: Self.enabledKey)
+            if !isEnabled { isLocked = false; errorMessage = nil }
         }
     }
 
@@ -22,7 +22,9 @@ final class AppLock {
         // The in-memory lock state is lost when iOS terminates the process.
         // Restore it from the user's preference so a cold launch cannot skip
         // authentication after Face ID has been enabled.
-        isLocked = UserDefaults.standard.bool(forKey: enabledKey)
+        let enabled = UserDefaults.standard.bool(forKey: Self.enabledKey)
+        isEnabled = enabled
+        isLocked = enabled
     }
 
     func lockIfNeeded() {
@@ -38,6 +40,12 @@ final class AppLock {
         let context = LAContext()
         var evaluationError: NSError?
         guard context.canEvaluatePolicy(.deviceOwnerAuthentication, error: &evaluationError) else {
+            // Without a device passcode there is nothing to verify against;
+            // keeping the lock would shut the athlete out of their data forever.
+            if evaluationError?.code == LAError.passcodeNotSet.rawValue {
+                isEnabled = false
+                return
+            }
             errorMessage = "No se puede verificar la identidad en este iPhone."
             return
         }
