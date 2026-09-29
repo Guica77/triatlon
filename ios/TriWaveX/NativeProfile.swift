@@ -508,7 +508,6 @@ struct NativePlanManagementSheet: View {
     let openSessions: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var showingGoal = false
-    @State private var showingLoad = false
     @State private var showingInjuries = false
 
     var body: some View {
@@ -525,8 +524,9 @@ struct NativePlanManagementSheet: View {
                     Button { showingGoal = true } label: {
                         LabeledContent { Text(goal.name ?? "Definir objetivo").foregroundStyle(.secondary).lineLimit(1) } label: { Label("Cambiar objetivo", systemImage: "flag.checkered") }
                     }
-                    Button { showingLoad = true } label: {
-                        Label("Subir carga", systemImage: "chart.line.uptrend.xyaxis")
+                    // Same as the web: load changes go through the per-session editor, which previews the impact before saving.
+                    Button { openSessions() } label: {
+                        LabeledContent { Text("Por sesión").foregroundStyle(.secondary) } label: { Label("Subir carga", systemImage: "chart.line.uptrend.xyaxis") }
                     }
                     Button { showingInjuries = true } label: {
                         LabeledContent { Text(physiology.injuries?.isEmpty == false ? "Revisar historial" : "Sin datos").foregroundStyle(.secondary) } label: { Label("Lesiones e historial", systemImage: "cross.case") }
@@ -541,7 +541,6 @@ struct NativePlanManagementSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cerrar") { dismiss() } } }
             .sheet(isPresented: $showingGoal) { NativeGoalEditor(goal: goal, save: saveGoal) }
-            .sheet(isPresented: $showingLoad) { NativeLoadAdjustmentSheet() }
             .sheet(isPresented: $showingInjuries) { NavigationStack { NativeInjuryEditor(injuries: physiology.injuries, showsCancel: true, save: saveGoal) } }
         }
     }
@@ -578,23 +577,6 @@ struct NativeGoalEditor: View {
         saving = true; error = nil
         let didSave = await save(["kind": "goal", "name": name, "date": NativePlanViewDayParser.string(date)])
         saving = false; if didSave { dismiss() } else { error = "No se ha podido guardar el objetivo." }
-    }
-}
-
-struct NativeLoadAdjustmentSheet: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var scope = "Semana completa"
-    @State private var level = "Suave"
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Qué quieres reforzar") { Picker("Alcance", selection: $scope) { Text("Semana completa").tag("Semana completa"); Text("Natación").tag("Natación"); Text("Bici").tag("Bici"); Text("Carrera").tag("Carrera") }; Picker("Progresión", selection: $level) { Text("Suave · hasta 5 %").tag("Suave"); Text("Media · hasta 10 %").tag("Media") } }
-                Section("Antes de aplicar") { Label("Comprobaremos recuperación, adherencia, dolor o lesión y el límite del 10 %.", systemImage: "checkmark.shield") }
-                Section { Label("Para ajustar minutos concretos, elige una sesión desde «Editar sesiones». La vista previa se mostrará antes de guardar.", systemImage: "info.circle") .font(.footnote).foregroundStyle(.secondary) }
-            }
-            .navigationTitle("Subir carga").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cerrar") { dismiss() } } }
-        }
     }
 }
 
