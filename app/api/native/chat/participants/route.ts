@@ -12,15 +12,18 @@ export async function GET(request: Request) {
   const { data: profile } = await supabase.from('profiles').select('role, coach_id').eq('id', user.id).single()
   if (!profile) return reply({ error: 'Perfil no encontrado' }, 404)
   const admin = createAdminClient()
+  // Only the caller's own blocks (RLS), so the app can offer "Desbloquear".
+  const { data: blocks } = await (supabase as any).from('chat_blocks').select('blocked_id').eq('blocker_id', user.id)
+  const blockedIds: string[] = (blocks || []).map((row: { blocked_id: string }) => row.blocked_id)
 
   if (profile.role === 'coach') {
     const { data: links, error } = await supabase.from('coach_athletes').select('athlete_id').eq('coach_id', user.id)
     if (error) return reply({ error: 'No se han podido cargar los atletas' }, 503)
     const ids = (links || []).map(link => link.athlete_id)
-    if (!ids.length) return reply({ data: [], role: 'coach' })
+    if (!ids.length) return reply({ data: [], role: 'coach', blockedIds })
     const { data, error: profilesError } = await admin.from('profiles').select('id, first_name, last_name, role').in('id', ids)
     if (profilesError) return reply({ error: 'No se han podido cargar los atletas' }, 503)
-    return reply({ data: data || [], role: 'coach' })
+    return reply({ data: data || [], role: 'coach', blockedIds })
   }
 
   let coachId = profile.coach_id
@@ -28,8 +31,8 @@ export async function GET(request: Request) {
     const { data: link } = await supabase.from('coach_athletes').select('coach_id').eq('athlete_id', user.id).maybeSingle()
     coachId = link?.coach_id || null
   }
-  if (!coachId) return reply({ data: [], role: 'athlete' })
+  if (!coachId) return reply({ data: [], role: 'athlete', blockedIds })
   const { data: coach, error } = await admin.from('profiles').select('id, first_name, last_name, role').eq('id', coachId).single()
   if (error) return reply({ error: 'No se ha podido cargar el entrenador' }, 503)
-  return reply({ data: [coach], role: 'athlete' })
+  return reply({ data: [coach], role: 'athlete', blockedIds })
 }

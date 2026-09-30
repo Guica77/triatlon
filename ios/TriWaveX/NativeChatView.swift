@@ -48,6 +48,9 @@ final class NativeChatModel {
     var error: String?
     /// Set when the conversation list could not load, so the screen offers a retry.
     var loadFailed = false
+    /// Contacts this user has blocked: neither side can send while it lasts.
+    var blockedIDs: Set<String> = []
+    var notice: String?
     /// Reused while retrying the same text: the server dedupes by this id, so a
     /// send whose response was lost is not stored twice.
     private var pendingSend: (text: String, id: String)?
@@ -71,6 +74,7 @@ final class NativeChatModel {
             let response: ParticipantsResponse = try await request("api/native/chat/participants")
             guard let rows = response.data else { throw ChatError.message(response.error ?? "No se han podido cargar las conversaciones.") }
             participants = rows
+            blockedIDs = Set(response.blockedIds ?? [])
             if selected == nil { selected = rows.first }
             if let selected { await loadMessages(for: selected) }
         } catch {
@@ -107,6 +111,32 @@ final class NativeChatModel {
         } catch { messageText = text; self.error = error.localizedDescription }
     }
 
+    /// App Review 1.2: incoming messages can be reported for moderation.
+    /// Returns an error message, shown inside the report sheet, or nil when sent.
+    func report(_ message: NativeChatMessage, reason: String) async -> String? {
+        guard !isPreviewOnly else { return nil }
+        do {
+            let body = try JSONEncoder().encode(SafetyInput(action: "report", messageId: message.id, participantId: nil, reason: reason))
+            let _: SafetyResponse = try await request("api/native/chat/safety", method: "POST", body: body)
+            notice = "Denuncia enviada. La revisaremos lo antes posible."
+            return nil
+        } catch {
+            return error.localizedDescription
+        }
+    }
+
+    func setBlocked(_ participant: NativeChatParticipant, _ blocked: Bool) async {
+        guard !isPreviewOnly else { return }
+        do {
+            let body = try JSONEncoder().encode(SafetyInput(action: blocked ? "block" : "unblock", messageId: nil, participantId: participant.id, reason: nil))
+            let _: SafetyResponse = try await request("api/native/chat/safety", method: "POST", body: body)
+            if blocked { blockedIDs.insert(participant.id) } else { blockedIDs.remove(participant.id) }
+            notice = blocked ? "Has bloqueado a \(participant.name). Ninguno de los dos podrá enviar mensajes." : "Has desbloqueado a \(participant.name)."
+        } catch {
+            self.error = error.localizedDescription
+        }
+    }
+
     private func loadMessages(for participant: NativeChatParticipant, showSpinner: Bool = true, reportsErrors: Bool = true) async {
         if showSpinner { loading = true }; defer { if showSpinner { loading = false } }
         do {
@@ -137,7 +167,9 @@ final class NativeChatModel {
     }
 
 
-    private struct ParticipantsResponse: Decodable { let data: [NativeChatParticipant]?; let error: String? }
+    private struct ParticipantsResponse: Decodable { let data: [NativeChatParticipant]?; let error: String?; let blockedIds: [String]? }
+    private struct SafetyInput: Encodable { let action: String; let messageId: String?; let participantId: String?; let reason: String? }
+    private struct SafetyResponse: Decodable { let success: Bool? }
     private struct MessagesResponse: Decodable { let data: [NativeChatMessage]?; let error: String? }
     private struct MessageResponse: Decodable { let data: NativeChatMessage?; let error: String? }
     private struct SendInput: Encodable { let participantId: String; let message: String; let clientMessageId: String }
@@ -147,6 +179,11 @@ final class NativeChatModel {
 struct NativeChatView: View {
     @State private var model: NativeChatModel
     @FocusState private var composerFocused: Bool
+    @State private var reporting: NativeChatMessage?
+    @State private var reportReason = ""
+    @State private var sendingReport = false
+    @State private var reportError: String?
+    @State private var confirmingBlock = false
 
     init(origin: URL, store: WKWebsiteDataStore, previewConversation: Bool = false, previewAsCoach: Bool = false) {
         // The demo shows the conversation from the viewer's side: a coach talks
@@ -183,7 +220,27 @@ struct NativeChatView: View {
             }
             .navigationTitle(model.selected?.name ?? "Mensajes")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .topBarTrailing) { Button { Task { await model.load() } } label: { Image(systemName: "arrow.clockwise") }.accessibilityLabel("Actualizar").disabled(model.loading) } }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) { Button { Task { await model.load() } } label: { Image(systemName: "arrow.clockwise") }.accessibilityLabel("Actualizar").disabled(model.loading) }
+                if let selected = model.selected, !model.isPreviewOnly {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Menu {
+                            if model.blockedIDs.contains(selected.id) {
+                                Button("Desbloquear a \(selected.name)", systemImage: "hand.raised.slash") { Task { await model.setBlocked(selected, false) } }
+                            } else {
+                                Button("Bloquear a \(selected.name)", systemImage: "hand.raised", role: .destructive) { confirmingBlock = true }
+                            }
+                        } label: { Image(systemName: "ellipsis.circle") }
+                        .accessibilityLabel("Opciones de la conversación")
+                    }
+                }
+            }
+            .confirmationDialog("¿Bloquear a \(model.selected?.name ?? "este contacto")?", isPresented: $confirmingBlock, titleVisibility: .visible) {
+                Button("Bloquear", role: .destructive) { if let selected = model.selected { Task { await model.setBlocked(selected, true) } } }
+            } message: {
+                Text("Ninguno de los dos podrá enviar mensajes hasta que lo desbloquees. Para denunciar un mensaje concreto, mantenlo pulsado.")
+            }
+            .sheet(item: $reporting) { message in reportSheet(message) }
         }
         .task { await model.load() }
         .task {
@@ -194,6 +251,7 @@ struct NativeChatView: View {
             }
         }
         .alert("Chat", isPresented: Binding(get: { model.error != nil }, set: { if !$0 { model.error = nil } })) { Button("Aceptar", role: .cancel) { model.error = nil } } message: { Text(model.error ?? "") }
+        .alert("Chat", isPresented: Binding(get: { model.notice != nil }, set: { if !$0 { model.notice = nil } })) { Button("Aceptar", role: .cancel) { model.notice = nil } } message: { Text(model.notice ?? "") }
     }
 
     private var conversation: some View {
@@ -221,6 +279,13 @@ struct NativeChatView: View {
                 .onChange(of: model.messages.last?.id) { _, id in if let id { withAnimation { proxy.scrollTo(id, anchor: .bottom) } } }
             }
             Divider()
+            if let selected = model.selected, model.blockedIDs.contains(selected.id) {
+                VStack(spacing: 8) {
+                    Text("Has bloqueado a \(selected.name).").font(.footnote).foregroundStyle(.secondary)
+                    Button("Desbloquear") { Task { await model.setBlocked(selected, false) } }.font(.footnote.weight(.semibold))
+                }
+                .frame(maxWidth: .infinity).padding(.vertical, 12).background(.bar)
+            } else {
             HStack(alignment: .bottom, spacing: 10) {
                 TextField("Mensaje", text: $model.messageText, axis: .vertical)
                     .lineLimit(1...5).focused($composerFocused).padding(.horizontal, 12).padding(.vertical, 9)
@@ -230,7 +295,44 @@ struct NativeChatView: View {
                     .accessibilityLabel("Enviar mensaje")
             }
             .padding(.horizontal, 12).padding(.vertical, 10).background(.bar)
+            }
         }
+    }
+
+    private func reportSheet(_ message: NativeChatMessage) -> some View {
+        let reason = reportReason.trimmingCharacters(in: .whitespacesAndNewlines)
+        return NavigationStack {
+            Form {
+                Section {
+                    Text(message.message).foregroundStyle(.secondary).lineLimit(4)
+                } header: { Text("Mensaje") }
+                Section {
+                    TextField("Explica qué ocurre", text: $reportReason, axis: .vertical).lineLimit(3...6)
+                } header: { Text("Motivo") } footer: {
+                    Text("Nuestro equipo revisará el mensaje. Si alguien te molesta, también puedes bloquearlo desde el menú de la conversación.")
+                }
+                if let reportError {
+                    Section { Label(reportError, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red) }
+                }
+            }
+            .navigationTitle("Denunciar mensaje")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { reporting = nil } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Enviar") {
+                        sendingReport = true
+                        Task {
+                            reportError = await model.report(message, reason: reason)
+                            sendingReport = false
+                            if reportError == nil { reporting = nil; reportReason = "" }
+                        }
+                    }
+                    .disabled(reason.count < 5 || reportReason.count > 1000 || sendingReport)
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
     }
 
     private func messageBubble(_ item: NativeChatMessage, incoming: Bool) -> some View {
@@ -239,6 +341,11 @@ struct NativeChatView: View {
                 .foregroundStyle(incoming ? Color.primary : Color.white)
                 .background(incoming ? Color(uiColor: .secondarySystemBackground) : Color.accentColor, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
             Text(NativeChatMessage.timestamp(item.created_at)).font(.caption2).foregroundStyle(.secondary)
+        }
+        .contextMenu {
+            if incoming && !model.isPreviewOnly {
+                Button("Denunciar mensaje", systemImage: "exclamationmark.bubble", role: .destructive) { reportReason = ""; reportError = nil; reporting = item }
+            }
         }
     }
 }
