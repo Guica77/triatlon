@@ -58,12 +58,12 @@ struct GuidedTourRequest: Sendable {
 
     var message: String {
         switch (request.role, step) {
-        case (.athlete, 0): return "En Hoy verás la sesión, la prioridad y el margen para mover entrenamientos cuando la vida cambie."
-        case (.athlete, 1): return "Tu plan combina tus horas disponibles, tu objetivo y tus datos reales. En Chat puedes pedir ayuda o hablar con tu entrenador."
-        case (.athlete, 2): return "En Más tienes perfil, seguridad, privacidad, soporte y feedback. Abre tu primera sesión cuando quieras."
+        case (.athlete, 0): return "Tu sesión del día y cómo moverla si lo necesitas."
+        case (.athlete, 1): return "Se ajusta a tu tiempo y tus datos. Dudas, en Chat."
+        case (.athlete, 2): return "Perfil, privacidad y soporte, en Más."
         case (.coach, 0): return "Consulta el estado de tus atletas desde un único lugar."
-        case (.coach, 1): return "Cada solicitud debe ser clara para ambos: objetivo, disponibilidad y mensaje. Acepta o declina antes de compartir el plan."
-        case (.coach, 2): return "Revisa planes, explica cada ajuste y usa Chat para acompañar a tu equipo sin perder el contexto."
+        case (.coach, 1): return "Acepta o declina solicitudes antes de compartir un plan."
+        case (.coach, 2): return "Revisa planes y acompaña a tu equipo por Chat."
         default: return ""
         }
     }
@@ -134,12 +134,6 @@ struct GuidedOnboardingOverlay: View {
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.tint)
                         Spacer()
-                    }
-
-                    if model.step > 0 {
-                        Label("Continuamos donde lo dejaste", systemImage: "arrow.counterclockwise.circle.fill")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
                     }
 
                     Text(model.title)

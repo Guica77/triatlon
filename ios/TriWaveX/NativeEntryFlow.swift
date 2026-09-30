@@ -802,13 +802,8 @@ struct NativeAthleteOnboardingView: View {
                         Label("Bienvenido a TriWaveX", systemImage: "figure.mixed.cardio")
                             .font(.headline).foregroundStyle(Color.triWaveXAqua)
                         Text("Entrena con una dirección clara").font(.largeTitle.bold())
-                        Text("Cuéntanos qué quieres preparar y te mostraremos una primera orientación antes de crear tu cuenta.")
+                        Text("Dinos tu objetivo y te enseñamos una semana de ejemplo.")
                             .foregroundStyle(.secondary)
-                        TriWaveXSurface {
-                            Label("Un plan adaptado a tu objetivo y al tiempo que tienes", systemImage: "calendar.badge.clock")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
                     } else if step == 1 {
                         Text("¿Qué quieres conseguir?").font(.largeTitle.bold())
                         TextField("Tu objetivo", text: $preferences.goal)
@@ -852,9 +847,7 @@ struct NativeAthleteOnboardingView: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        Text("Es solo una muestra orientativa, todavía no es un plan generado ni guardado. Después de crear tu cuenta podrás completar tu perfil y ajustar tus días.")
-                            .font(.footnote).foregroundStyle(.secondary)
-                        Label("Después de crear la cuenta podrás revisar el plan y el precio de Apple. No se cobrará nada hasta que confirmes.", systemImage: "creditcard")
+                        Label("Es un ejemplo. No se cobra nada hasta que confirmes.", systemImage: "creditcard")
                             .font(.footnote.weight(.medium))
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -1376,14 +1369,8 @@ struct NativeOnboardingView: View {
                 } else {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 22) {
-                            if model.hasDraft {
-                                Label("Continuamos donde lo dejaste", systemImage: "arrow.counterclockwise.circle.fill")
-                                    .font(.footnote.weight(.semibold)).foregroundStyle(.tint)
-                            }
                             progress
                             content
-                            Label("Tus respuestas se guardan en este iPhone mientras avanzas", systemImage: "checkmark.circle.fill")
-                                .font(.caption).foregroundStyle(.secondary)
                             actions
                         }
                         .padding(20).frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading).frame(maxWidth: .infinity)
@@ -1423,30 +1410,27 @@ struct NativeOnboardingView: View {
     @ViewBuilder private var content: some View {
         if step == 0 {
             Text(onboardingQuestion).font(.largeTitle.bold())
-            Text("Elige tu deporte y distancia. Con esto prepararemos un plan inicial que podrás ajustar después.").foregroundStyle(.secondary)
-            onboardingChoice(title: "Deporte", value: modalityTitle, icon: modalityIcon) { showingSportChoices = true }
+                        onboardingChoice(title: "Deporte", value: modalityTitle, icon: modalityIcon) { showingSportChoices = true }
             onboardingChoice(title: "Distancia", value: distanceTitle, icon: "flag.checkered") { showingDistanceChoices = true }
             Picker("Experiencia", selection: $model.level) { Text("Principiante").tag("principiante"); Text("Intermedio").tag("intermedio"); Text("Avanzado").tag("avanzado") }.pickerStyle(.segmented)
         } else if step == 1 {
             Text("¿Cuánto tiempo tienes?").font(.largeTitle.bold())
             Text("\(Int(model.weeklyHours)) horas a la semana").font(.title2.weight(.semibold)).foregroundStyle(Color.triWaveXAqua)
             Slider(value: $model.weeklyHours, in: 2...20, step: 1).tint(Color.triWaveXAqua)
-            Text("Podrás cambiarlo cuando quieras. Es mejor empezar con un plan que puedas sostener.").foregroundStyle(.secondary)
+            Text("Mejor poco y constante. Puedes cambiarlo luego.").foregroundStyle(.secondary)
         } else {
-            Text("Personaliza tu apoyo").font(.largeTitle.bold())
-            Toggle("Quiero encontrar o conectar con un entrenador", isOn: $model.wantsCoach)
+            Text("Último detalle").font(.largeTitle.bold())
+            Toggle("Quiero un entrenador", isOn: $model.wantsCoach)
             if model.wantsCoach {
-                Label("Te ayudaremos a encontrar o conectar con un entrenador después. Tu plan inicial y el precio de atleta no cambian.", systemImage: "person.2.fill")
+                Label("Te conectamos después. Tu precio no cambia.", systemImage: "person.2.fill")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .padding(12)
                     .background(Color.triWaveXAqua.opacity(0.09), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
-            VStack(alignment: .leading, spacing: 8) { Text("Lesiones o límites actuales (opcional)").font(.headline); TextEditor(text: $model.injuries).frame(minHeight: 110).padding(8).background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous)); Text("Solo lo usamos para ajustar el entrenamiento. No sustituye a un profesional sanitario.").font(.footnote).foregroundStyle(.secondary) }
-            Toggle("Consiento que TriWaveX use estos datos de salud para adaptar mi entrenamiento", isOn: $model.healthDataConsent)
+            VStack(alignment: .leading, spacing: 8) { Text("Lesiones o límites (opcional)").font(.headline); TextEditor(text: $model.injuries).frame(minHeight: 110).padding(8).background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous)); Text("No sustituye a un profesional sanitario.").font(.footnote).foregroundStyle(.secondary) }
+            Toggle("Consiento que TriWaveX use estos datos de salud para adaptar mi plan", isOn: $model.healthDataConsent)
                 .font(.footnote)
-            Text("Puedes dejarlo en blanco si prefieres no compartir esta información. Tu consentimiento se guardará junto con el perfil.")
-                .font(.footnote).foregroundStyle(.secondary)
         }
     }
 
