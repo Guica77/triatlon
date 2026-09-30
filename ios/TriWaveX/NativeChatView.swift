@@ -19,6 +19,19 @@ struct NativeChatMessage: Identifiable, Decodable, Hashable {
     let receiver_id: String
     let message: String
     let created_at: String
+
+    /// Supabase sends microseconds ("…:00.123456+00:00"), which a plain
+    /// ISO8601DateFormatter rejects; every message then showed the current time.
+    nonisolated static func date(_ value: String) -> Date? {
+        NativeDate.parse(value)
+    }
+
+    nonisolated static func timestamp(_ value: String, now: Date = .now, calendar: Calendar = .current) -> String {
+        guard let date = date(value) else { return "" }
+        let time = DateFormatter.localizedString(from: date, dateStyle: .none, timeStyle: .short)
+        if calendar.isDate(date, inSameDayAs: now) { return time }
+        return DateFormatter.localizedString(from: date, dateStyle: .short, timeStyle: .none) + " · " + time
+    }
 }
 
 @MainActor @Observable
@@ -35,6 +48,9 @@ final class NativeChatModel {
     var error: String?
     /// Set when the conversation list could not load, so the screen offers a retry.
     var loadFailed = false
+    /// Reused while retrying the same text: the server dedupes by this id, so a
+    /// send whose response was lost is not stored twice.
+    private var pendingSend: (text: String, id: String)?
 
     init(origin: URL, store: WKWebsiteDataStore, previewParticipants: [NativeChatParticipant]? = nil, previewMessages: [NativeChatMessage] = []) {
         self.origin = origin
@@ -78,12 +94,15 @@ final class NativeChatModel {
         guard !isPreviewOnly else { return }
         guard let selected, !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !sending else { return }
         let text = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let clientID = pendingSend?.text == text ? pendingSend!.id : UUID().uuidString
+        pendingSend = (text, clientID)
         messageText = ""; sending = true
         defer { sending = false }
         do {
-            let body = try JSONEncoder().encode(SendInput(participantId: selected.id, message: text, clientMessageId: UUID().uuidString))
+            let body = try JSONEncoder().encode(SendInput(participantId: selected.id, message: text, clientMessageId: clientID))
             let response: MessageResponse = try await request("api/native/chat/messages", method: "POST", body: body)
             guard let saved = response.data else { throw ChatError.message(response.error ?? "No se ha podido enviar el mensaje.") }
+            pendingSend = nil
             if !messages.contains(where: { $0.id == saved.id }) { messages.append(saved) }
         } catch { messageText = text; self.error = error.localizedDescription }
     }
@@ -108,7 +127,12 @@ final class NativeChatModel {
         let session = NativeCookieJar.makeSession(); defer { session.finishTasksAndInvalidate() }
         let (data, response) = try await session.data(for: request)
         if let http = response as? HTTPURLResponse { await NativeCookieJar.persist(from: http, for: url.absoluteURL, in: store) }
-        guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else { throw ChatError.message("No se ha podido conectar con el chat.") }
+        guard let http = response as? HTTPURLResponse else { throw ChatError.message("No se ha podido conectar con el chat.") }
+        guard (200..<300).contains(http.statusCode) else {
+            if http.statusCode == 401 { throw ChatError.message("Tu sesión ha caducado. Vuelve a iniciar sesión.") }
+            let message = (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["error"] as? String
+            throw ChatError.message(message ?? "No se ha podido conectar con el chat.")
+        }
         return try JSONDecoder().decode(Response.self, from: data)
     }
 
@@ -214,7 +238,7 @@ struct NativeChatView: View {
             Text(item.message).textSelection(.enabled).padding(.horizontal, 12).padding(.vertical, 9)
                 .foregroundStyle(incoming ? Color.primary : Color.white)
                 .background(incoming ? Color(uiColor: .secondarySystemBackground) : Color.accentColor, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            Text(DateFormatter.localizedString(from: ISO8601DateFormatter().date(from: item.created_at) ?? .now, dateStyle: .none, timeStyle: .short)).font(.caption2).foregroundStyle(.secondary)
+            Text(NativeChatMessage.timestamp(item.created_at)).font(.caption2).foregroundStyle(.secondary)
         }
     }
 }

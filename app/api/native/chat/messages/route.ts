@@ -17,9 +17,10 @@ export async function GET(request: Request) {
   if (!user) return reply({ error: 'No autorizado' }, 401)
   const { data, error } = await supabase.from('chat_messages').select('*')
     .or(`and(sender_id.eq.${user.id},receiver_id.eq.${participantId}),and(sender_id.eq.${participantId},receiver_id.eq.${user.id})`)
-    .order('created_at', { ascending: true }).order('id', { ascending: true }).limit(100)
+    // Newest 100, returned oldest-first: ascending + limit hid every new message once a chat passed 100.
+    .order('created_at', { ascending: false }).order('id', { ascending: false }).limit(100)
   if (error) return reply({ error: 'No se ha podido cargar la conversación' }, 503)
-  return reply({ data: data || [] })
+  return reply({ data: (data || []).reverse() })
 }
 
 export async function POST(request: Request) {
