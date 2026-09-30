@@ -19,7 +19,7 @@ struct AthleteProgressView: View {
         .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .tint(.triWaveXAqua)
         .task {
-            await model.load()
+            await model.refresh()
         }
     }
 
@@ -140,7 +140,13 @@ struct AthleteProgressView: View {
             }
 
             Section {
-                Text("Actualizado ahora · Datos de tu cuenta")
+                if let refreshError = model.refreshError {
+                    Label(refreshError.localizedDescription, systemImage: "exclamationmark.triangle.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .listRowBackground(Color.clear)
+                }
+                Text("Actualizado \(progress.generatedAt.formatted(date: .omitted, time: .shortened)) · Datos de tu cuenta")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)

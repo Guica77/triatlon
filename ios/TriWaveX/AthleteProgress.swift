@@ -14,6 +14,9 @@ final class AthleteProgressModel {
     private let client: AthleteProgressClient
     private let previewProgress: AthleteProgress?
     var state: State = .idle
+    /// A failed pull-to-refresh keeps the loaded data on screen.
+    private(set) var refreshError: AthleteProgressError?
+    private var refreshing = false
 
     init(client: AthleteProgressClient, previewProgress: AthleteProgress? = nil) {
         self.client = client
@@ -25,6 +28,7 @@ final class AthleteProgressModel {
         if let previewProgress { state = .loaded(previewProgress); return }
         guard !isLoading else { return }
         state = .loading
+        refreshError = nil
         do {
             state = .loaded(try await client.fetch())
         } catch let error as AthleteProgressError {
@@ -35,8 +39,16 @@ final class AthleteProgressModel {
     }
 
     func refresh() async {
-        guard !isLoading else { return }
-        await load()
+        guard case .loaded = state else { await load(); return }
+        guard previewProgress == nil, !refreshing else { return }
+        refreshing = true
+        defer { refreshing = false }
+        do {
+            state = .loaded(try await client.fetch())
+            refreshError = nil
+        } catch {
+            refreshError = error as? AthleteProgressError ?? .unavailable
+        }
     }
 
     private var isLoading: Bool {
@@ -174,9 +186,7 @@ struct AthleteProgressClient {
             switch http.statusCode {
             case 200:
                 do {
-                    let decoder = JSONDecoder()
-                    decoder.dateDecodingStrategy = .iso8601
-                    return try decoder.decode(AthleteProgress.self, from: data)
+                    return try NativeDate.decoder().decode(AthleteProgress.self, from: data)
                 } catch {
                     throw AthleteProgressError.invalidResponse
                 }

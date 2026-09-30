@@ -61,13 +61,14 @@ private struct NativeRaceDiscountProof {
         state = .submitting
         do {
             try await client.submit(raceName: raceName, raceDate: raceDate, proof: proof)
-            state = .loaded(try await client.fetch())
-            return true
         } catch {
             state = .loaded(previousRequest)
             submissionError = error.localizedDescription
             return false
         }
+        // The request is stored; a failed refresh must not invite a duplicate submission.
+        state = .loaded((try? await client.fetch()) ?? previousRequest)
+        return true
     }
 }
 
@@ -116,46 +117,21 @@ private struct NativeRaceDiscountClient {
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         if let contentType { request.setValue(contentType, forHTTPHeaderField: "Content-Type") }
         request.httpBody = body
-        if let cookie = await cookieHeader(for: url) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
+        if let cookie = await NativeCookieJar.header(for: url, in: websiteDataStore) { request.setValue(cookie, forHTTPHeaderField: "Cookie") }
 
-        let configuration = URLSessionConfiguration.ephemeral
-        configuration.httpShouldSetCookies = false
-        let session = URLSession(configuration: configuration, delegate: NoRedirects(), delegateQueue: nil)
-        defer { session.invalidateAndCancel() }
+        let session = NativeCookieJar.makeSession()
+        defer { session.finishTasksAndInvalidate() }
         let (data, response) = try await session.data(for: request)
+        if let http = response as? HTTPURLResponse { await NativeCookieJar.persist(from: http, for: url, in: websiteDataStore) }
         guard let http = response as? HTTPURLResponse,
               Configuration.allows(http.url ?? url, origin: origin) else { throw ClientError.invalidURL }
         guard (200..<300).contains(http.statusCode) else {
             let message = (try? JSONDecoder().decode(NativeRaceDiscountError.self, from: data).error)
                 ?? "No se ha podido completar la solicitud. Inténtalo de nuevo."
+            if http.statusCode == 401 { throw ClientError.request("Tu sesión ha caducado. Vuelve a iniciar sesión.") }
             throw ClientError.request(message)
         }
-        await persistCookies(from: http, for: url)
         return (data, http)
-    }
-
-    private func cookieHeader(for url: URL) async -> String? {
-        guard let host = url.host?.lowercased(), let scheme = url.scheme?.lowercased() else { return nil }
-        let cookies = await withCheckedContinuation { continuation in
-            websiteDataStore.httpCookieStore.getAllCookies { continuation.resume(returning: $0) }
-        }
-        let now = Date()
-        let matching = cookies.filter { cookie in
-            let domain = cookie.domain.trimmingCharacters(in: CharacterSet(charactersIn: ".")).lowercased()
-            return (cookie.expiresDate.map { $0 > now } ?? true) && (!cookie.isSecure || scheme == "https") &&
-                (host == domain || host.hasSuffix(".\(domain)")) && !cookie.name.contains(";") && !cookie.value.contains(";")
-        }
-        return matching.isEmpty ? nil : matching.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
-    }
-
-    private func persistCookies(from response: HTTPURLResponse, for url: URL) async {
-        let fields = response.allHeaderFields.reduce(into: [String: String]()) { result, item in
-            if let key = item.key as? String, let value = item.value as? String { result[key] = value }
-        }
-        for cookie in HTTPCookie.cookies(withResponseHeaderFields: fields, for: url) {
-            await websiteDataStore.httpCookieStore.setCookie(cookie)
-            HTTPCookieStorage.shared.setCookie(cookie)
-        }
     }
 
     private func appendField(_ name: String, value: String, boundary: String, to data: inout Data) {
@@ -166,7 +142,8 @@ private struct NativeRaceDiscountClient {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        // The picker's day is local; UTC shifted it by one day around midnight.
+        formatter.timeZone = .current
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter.string(from: date)
     }

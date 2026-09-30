@@ -336,7 +336,7 @@ struct NativeCoachEarningsView: View {
                                         Text(date(entry.periodStartedAt)).font(.subheadline.weight(.semibold))
                                         Text(statusText(entry.status)).font(.caption).foregroundStyle(.secondary)
                                         ForEach(entry.amounts) { amount in
-                                            Text(currency(Decimal(string: amount.amount) ?? 0, code: amount.currency))
+                                            Text(currency(amount.amount, code: amount.currency))
                                                 .font(.subheadline.bold())
                                         }
                                     }
@@ -401,8 +401,7 @@ struct NativeCoachEarningsView: View {
     }
 
     private func date(_ value: String) -> String {
-        let formatter = ISO8601DateFormatter()
-        guard let parsed = formatter.date(from: value) else { return value }
+        guard let parsed = NativeDate.parse(value) else { return "—" }
         return parsed.formatted(date: .abbreviated, time: .omitted)
     }
 

@@ -80,8 +80,7 @@ struct NativePlanClient {
     func fetch() async throws -> NativePlan {
         let (data, response) = try await request(method: "GET", body: nil)
         guard response.statusCode == 200 else { throw mapError(response, data: data) }
-        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(NativePlan.self, from: data)
+        return try NativeDate.decoder().decode(NativePlan.self, from: data)
     }
 
     func updateStatus(id: String, status: String) async throws -> PlanChange {
