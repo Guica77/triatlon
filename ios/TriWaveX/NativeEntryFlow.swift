@@ -166,12 +166,11 @@ struct NativeAppIntroductionView: View {
                     Spacer()
                     if page > 0 {
                         Button("Anterior") { withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.22)) { page -= 1 } }
-                            .font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
-                            .frame(minHeight: 44)
+                            .buttonStyle(TriWaveXTextButtonStyle(tint: .secondary))
                     }
                     Button("Saltar") { onContinue(role) }
-                        .font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
-                        .frame(minHeight: 44).accessibilityHint("Continúa al cuestionario")
+                        .buttonStyle(TriWaveXTextButtonStyle(tint: .secondary))
+                        .accessibilityHint("Continúa al cuestionario")
                 }
                 .padding(.horizontal, 24).padding(.bottom, 8)
 
@@ -905,9 +904,7 @@ struct NativeAthleteOnboardingView: View {
             }
             if step > 0 {
                 Button("Atrás") { withAnimation { step -= 1 }; persist() }
-                    .buttonStyle(TriWaveXTextButtonStyle(tint: .secondary))
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
+                    .buttonStyle(TriWaveXTextButtonStyle(tint: .secondary, fullWidth: true))
             }
         }.padding(.top, 6)
     }
@@ -1538,9 +1535,7 @@ struct NativeOnboardingView: View {
             }
             if step > 0 {
                 Button("Atrás") { withAnimation { step -= 1 } }
-                    .buttonStyle(TriWaveXTextButtonStyle(tint: .secondary))
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
+                    .buttonStyle(TriWaveXTextButtonStyle(tint: .secondary, fullWidth: true))
             }
         }.padding(.top, 12)
     }

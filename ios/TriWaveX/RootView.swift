@@ -489,18 +489,18 @@ struct RootView: View {
                     VStack(spacing: 8) {
                         Text(role == .coach ? "¿Aún no tienes cuenta de entrenador?" : "¿Nuevo en TriWaveX?")
                             .foregroundStyle(.secondary)
+                            .font(.subheadline)
                         Button(role == .coach ? "Crear cuenta de entrenador" : "Crear cuenta de atleta") {
-                        if role == .athlete {
-                            isShowingAthleteOnboarding = true
-                        } else {
-                            isShowingCoachIntroduction = true
+                            if role == .athlete {
+                                isShowingAthleteOnboarding = true
+                            } else {
+                                isShowingCoachIntroduction = true
+                            }
                         }
-                        }
+                        .buttonStyle(TriWaveXSecondaryButtonStyle())
+                        .accessibilityHint("Abre el registro de \(role.title.lowercased())")
                     }
-                    .font(.subheadline)
-                    .frame(maxWidth: .infinity, minHeight: TriWaveXMetrics.minimumTouchTarget)
                     .padding(.top, 12)
-                    .accessibilityHint("Abre el registro de \(role.title.lowercased())")
 
                     HStack {
                         Button("Privacidad") {
@@ -511,7 +511,7 @@ struct RootView: View {
                             informationURL = session.origin.appendingPathComponent("soporte")
                         }
                     }
-                    .font(.footnote.weight(.semibold))
+                    .buttonStyle(TriWaveXTextButtonStyle(tint: .triWaveXAqua))
                     .padding(.horizontal, -8)
                     .padding(.top, 16)
                     .transition(loginEntryTransition)

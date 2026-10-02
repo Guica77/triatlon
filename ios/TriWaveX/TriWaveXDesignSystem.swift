@@ -197,6 +197,7 @@ struct TriWaveXSelectionButtonStyle: ButtonStyle {
 struct TriWaveXTextButtonStyle: ButtonStyle {
     typealias Body = AnyView
     let tint: Color
+    var fullWidth = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @preconcurrency @MainActor @ViewBuilder
@@ -206,7 +207,10 @@ struct TriWaveXTextButtonStyle: ButtonStyle {
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(tint.opacity(configuration.isPressed ? 0.64 : 1))
                 .padding(.vertical, 6)
-                .frame(minHeight: TriWaveXMetrics.minimumTouchTarget)
+                .padding(.horizontal, 8)
+                .frame(maxWidth: fullWidth ? .infinity : nil, minHeight: TriWaveXMetrics.minimumTouchTarget)
+                // The whole padded frame is tappable, not just the glyphs.
+                .contentShape(Rectangle())
                 .scaleEffect(reduceMotion || !configuration.isPressed ? 1 : 0.98)
                 .animation(reduceMotion ? nil : .easeOut(duration: 0.14), value: configuration.isPressed)
         )
