@@ -759,6 +759,8 @@ struct NativeAthleteOnboardingView: View {
     @State private var showingSportChoices = false
     @State private var showingDistanceChoices = false
     @State private var hasRaceDate = true
+    @State private var showingSignUp = false
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(onCreateAccount: @escaping () -> Void,
@@ -799,8 +801,8 @@ struct NativeAthleteOnboardingView: View {
                     ProgressView(value: Double(step + 1), total: 3).tint(Color.triWaveXAqua)
                         .accessibilityLabel("Paso \(step + 1) de 3")
                     if step == 0 {
-                        Label("Bienvenido a TriWaveX", systemImage: "figure.mixed.cardio")
-                            .font(.headline).foregroundStyle(Color.triWaveXAqua)
+                        Text("Bienvenido a TriWaveX")
+                            .font(.headline).foregroundStyle(.secondary)
                         Text("Entrena con una dirección clara").font(.largeTitle.bold())
                         Text("Dinos tu objetivo y te enseñamos una semana de ejemplo.")
                             .foregroundStyle(.secondary)
@@ -823,11 +825,11 @@ struct NativeAthleteOnboardingView: View {
                                 .font(.footnote).foregroundStyle(.secondary)
                         }
                         Text("¿Cuánto tiempo puedes entrenar?").font(.headline)
-                        Text("\(Int(preferences.weeklyHours)) horas a la semana").font(.title2.weight(.semibold)).foregroundStyle(Color.triWaveXAqua)
+                        Text("\(Int(preferences.weeklyHours)) horas a la semana").font(.title2.weight(.semibold))
                         Slider(value: $preferences.weeklyHours, in: 2...20, step: 1).tint(Color.triWaveXAqua)
                     } else {
-                        Label("Una primera orientación", systemImage: "checkmark.seal.fill")
-                            .font(.headline).foregroundStyle(Color.triWaveXAqua)
+                        Text("Tu semana de ejemplo")
+                            .font(.headline).foregroundStyle(.secondary)
                         Text(modalityTitle + " · " + distanceTitle).font(.largeTitle.bold())
                         Text("\(Int(preferences.weeklyHours)) horas disponibles cada semana")
                             .foregroundStyle(.secondary)
@@ -835,11 +837,10 @@ struct NativeAthleteOnboardingView: View {
                             .font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
                         TriWaveXSurface {
                             VStack(alignment: .leading, spacing: 14) {
-                                Text("Una semana posible").font(.title3.bold())
                                 ForEach(suggestedSessions, id: \.day) { session in
                                     HStack(spacing: 12) {
-                                        Image(systemName: session.icon).foregroundStyle(Color.triWaveXAqua)
-                                            .frame(width: 30, height: 30).background(Color.triWaveXAqua.opacity(0.12), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                                        Image(systemName: session.icon).foregroundStyle(.secondary)
+                                            .frame(width: 30, height: 30)
                                         Text(session.day).font(.headline).lineLimit(1).fixedSize().frame(minWidth: 40, alignment: .leading)
                                         Text(session.title).foregroundStyle(.secondary)
                                     }
@@ -847,28 +848,8 @@ struct NativeAthleteOnboardingView: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        Label("Es un ejemplo. No se cobra nada hasta que confirmes.", systemImage: "creditcard")
-                            .font(.footnote.weight(.medium))
-                            .foregroundStyle(.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        SignInWithAppleButton(.continue, onRequest: onContinueWithApple, onCompletion: onAppleCompletion)
-                            .signInWithAppleButtonStyle(.black).frame(height: 50)
-                            .disabled(isSigningIn)
-                        GoogleSignInButton(scheme: .light, style: .wide, action: onContinueWithGoogle)
-                            .frame(height: 50)
-                            .disabled(isSigningIn)
-                        if let appleError {
-                            Label(appleError, systemImage: "exclamationmark.triangle.fill")
-                                .font(.footnote.weight(.medium))
-                                .foregroundStyle(.red)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .padding(12)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color.red.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                .accessibilityLabel("Error de inicio de sesión: \(appleError)")
-                        }
-                        Button("Crear cuenta con correo", action: onCreateAccount)
-                            .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua)).controlSize(.large).frame(maxWidth: .infinity)
+                        Text("Es un ejemplo: lo ajustaremos contigo.")
+                            .font(.footnote).foregroundStyle(.secondary)
                     }
                     actions
                 }
@@ -877,6 +858,8 @@ struct NativeAthleteOnboardingView: View {
             .background(Color(uiColor: .systemGroupedBackground))
             .navigationTitle("TriWaveX").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarLeading) { Button("Cancelar", action: cancelAndClear) } }
+            .scrollDismissesKeyboard(.immediately)
+            .navigationDestination(isPresented: $showingSignUp) { signUpOptions }
             .onChange(of: preferences.goal) { _, _ in persist() }
             .onChange(of: preferences.modality) { _, _ in ensureDistanceMatchesModality(); persist() }
             .onChange(of: preferences.distance) { _, _ in persist() }
@@ -916,8 +899,15 @@ struct NativeAthleteOnboardingView: View {
                 }
                 .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua)).controlSize(.large).frame(maxWidth: .infinity)
                 .disabled(step == 1 && preferences.goal.trimmingCharacters(in: .whitespacesAndNewlines).count < 2)
-            } else if step > 0 {
-                Button("Atrás") { withAnimation { step -= 1 }; persist() }.buttonStyle(.borderless)
+            } else {
+                Button("Crear mi cuenta") { showingSignUp = true }
+                    .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
+            }
+            if step > 0 {
+                Button("Atrás") { withAnimation { step -= 1 }; persist() }
+                    .buttonStyle(TriWaveXTextButtonStyle(tint: .secondary))
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
             }
         }.padding(.top, 6)
     }
@@ -953,12 +943,42 @@ struct NativeAthleteOnboardingView: View {
     private func choice(title: String, value: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 13) {
-                Image(systemName: icon).font(.headline).frame(width: 28, height: 28).foregroundStyle(Color.triWaveXAqua)
+                Image(systemName: icon).font(.headline).frame(width: 28, height: 28).foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 2) { Text(title).font(.caption.weight(.semibold)).foregroundStyle(.secondary); Text(value).font(.headline).foregroundStyle(.primary) }
-                Spacer(); Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold)).foregroundStyle(Color.triWaveXAqua)
+                Spacer(); Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold)).foregroundStyle(.tertiary)
             }.padding(15).background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.triWaveXAqua.opacity(0.55), lineWidth: 1.5) }
+                .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }.buttonStyle(.plain)
+    }
+    private var signUpOptions: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Crea tu cuenta").font(.largeTitle.bold())
+                Text("Guardaremos tu plan en ella.").foregroundStyle(.secondary).padding(.bottom, 10)
+                SignInWithAppleButton(.continue, onRequest: onContinueWithApple, onCompletion: onAppleCompletion)
+                    .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black).frame(height: 50)
+                    .disabled(isSigningIn)
+                GoogleSignInButton(scheme: .light, style: .wide, action: onContinueWithGoogle)
+                    .frame(height: 50)
+                    .disabled(isSigningIn)
+                Button("Continuar con correo", action: onCreateAccount)
+                    .buttonStyle(TriWaveXSecondaryButtonStyle())
+                    .disabled(isSigningIn)
+                if isSigningIn { ProgressView().frame(maxWidth: .infinity) }
+                if let appleError {
+                    Label(appleError, systemImage: "exclamationmark.triangle.fill")
+                        .font(.footnote.weight(.medium))
+                        .foregroundStyle(.red)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .accessibilityLabel("Error de inicio de sesión: \(appleError)")
+                }
+                Label("No se cobra nada hasta que confirmes.", systemImage: "creditcard")
+                    .font(.footnote).foregroundStyle(.secondary).padding(.top, 6)
+            }
+            .padding(20).frame(maxWidth: TriWaveXMetrics.contentMaximumWidth, alignment: .leading).frame(maxWidth: .infinity)
+        }
+        .background(Color(uiColor: .systemGroupedBackground))
+        .navigationBarTitleDisplayMode(.inline)
     }
     private func persist() { NativeAthleteDraft.save(preferences, step: step) }
     private func cancelAndClear() { NativeAthleteDraft.clear(); onCancel() }
@@ -1415,7 +1435,7 @@ struct NativeOnboardingView: View {
             Picker("Experiencia", selection: $model.level) { Text("Principiante").tag("principiante"); Text("Intermedio").tag("intermedio"); Text("Avanzado").tag("avanzado") }.pickerStyle(.segmented)
         } else if step == 1 {
             Text("¿Cuánto tiempo tienes?").font(.largeTitle.bold())
-            Text("\(Int(model.weeklyHours)) horas a la semana").font(.title2.weight(.semibold)).foregroundStyle(Color.triWaveXAqua)
+            Text("\(Int(model.weeklyHours)) horas a la semana").font(.title2.weight(.semibold))
             Slider(value: $model.weeklyHours, in: 2...20, step: 1).tint(Color.triWaveXAqua)
             Text("Mejor poco y constante. Puedes cambiarlo luego.").foregroundStyle(.secondary)
         } else {
@@ -1425,8 +1445,7 @@ struct NativeOnboardingView: View {
                 Label("Te conectamos después. Tu precio no cambia.", systemImage: "person.2.fill")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                    .padding(12)
-                    .background(Color.triWaveXAqua.opacity(0.09), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
             }
             VStack(alignment: .leading, spacing: 8) { Text("Lesiones o límites (opcional)").font(.headline); TextEditor(text: $model.injuries).frame(minHeight: 110).padding(8).background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 14, style: .continuous)); Text("No sustituye a un profesional sanitario.").font(.footnote).foregroundStyle(.secondary) }
             Toggle("Consiento que TriWaveX use estos datos de salud para adaptar mi plan", isOn: $model.healthDataConsent)
@@ -1437,17 +1456,17 @@ struct NativeOnboardingView: View {
     private func onboardingChoice(title: String, value: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 13) {
-                Image(systemName: icon).font(.headline).frame(width: 28, height: 28).foregroundStyle(Color.triWaveXAqua)
+                Image(systemName: icon).font(.headline).frame(width: 28, height: 28).foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                     Text(value).font(.headline).foregroundStyle(.primary)
                 }
                 Spacer()
-                Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold)).foregroundStyle(Color.triWaveXAqua)
+                Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.bold)).foregroundStyle(.tertiary)
             }
             .padding(15)
             .background(Color.triWaveXSurface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay { RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.triWaveXAqua.opacity(0.55), lineWidth: 1.5) }
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityHint("Toca para elegir \(title.lowercased())")
@@ -1507,7 +1526,7 @@ struct NativeOnboardingView: View {
                     Text(step == 2 ? "Ver mi plan" : "Continuar")
                 }
             }
-                .buttonStyle(.borderedProminent).controlSize(.large).frame(maxWidth: .infinity)
+                .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
                 .disabled(isSaving || model.goal.trimmingCharacters(in: .whitespacesAndNewlines).count < 2 || (!model.injuries.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !model.healthDataConsent))
                 .accessibilityLabel(isSaving ? "Guardando tu plan y preparando tus entrenamientos" : step == 2 ? "Ver mi plan" : "Continuar")
             if isSaving {
@@ -1517,7 +1536,12 @@ struct NativeOnboardingView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            if step > 0 { Button("Atrás") { withAnimation { step -= 1 } }.buttonStyle(.borderless) }
+            if step > 0 {
+                Button("Atrás") { withAnimation { step -= 1 } }
+                    .buttonStyle(TriWaveXTextButtonStyle(tint: .secondary))
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+            }
         }.padding(.top, 12)
     }
     private var isSaving: Bool { if case .saving = model.state { true } else { false } }
@@ -1530,9 +1554,9 @@ private struct NativePlanPreviewView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 22) {
-                Label("Tu plan inicial", systemImage: "checkmark.seal.fill")
+                Text("Tu plan inicial")
                     .font(.headline)
-                    .foregroundStyle(Color.triWaveXAqua)
+                    .foregroundStyle(.secondary)
                 Text(preview.name).font(.largeTitle.bold())
                 if let description = preview.description, !description.isEmpty {
                     Text(description).foregroundStyle(.secondary)
@@ -1547,16 +1571,15 @@ private struct NativePlanPreviewView: View {
                         ForEach(preview.sessions, id: \.day) { session in
                             HStack(spacing: 12) {
                                 Image(systemName: icon(for: session.sport))
-                                    .foregroundStyle(Color.triWaveXAqua)
+                                    .foregroundStyle(.secondary)
                                     .frame(width: 30, height: 30)
-                                    .background(Color.triWaveXAqua.opacity(0.12), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
                                 Text(session.day).font(.headline).frame(width: 32, alignment: .leading)
                                 Text(title(for: session.sport)).foregroundStyle(.secondary)
                             }
                         }
                     }
                 }
-                Label("Podrás adaptar los días y la carga desde tu plan cuando actives el acceso.", systemImage: "slider.horizontal.3")
+                Text("Podrás ajustar días y carga cuando quieras.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 Button("Ver acceso y prueba gratuita", action: onContinue)
