@@ -1577,7 +1577,7 @@ private struct NativePlanPreviewView: View {
                 Text("Podrás ajustar días y carga cuando quieras.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                Button("Ver acceso y prueba gratuita", action: onContinue)
+                Button("Continuar", action: onContinue)
                     .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
                     .frame(maxWidth: .infinity)
             }

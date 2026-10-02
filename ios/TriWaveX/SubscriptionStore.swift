@@ -112,7 +112,7 @@ struct SubscriptionFinishGate {
             let identifiers = Array(Set(allowedEntries.map(\.productID))).sorted()
             guard !identifiers.isEmpty else {
                 products = []
-                state = .failed("Todavía no hay productos de Apple configurados para este tipo de cuenta.")
+                state = .failed("Los planes no están disponibles ahora mismo. Inténtalo de nuevo en unos minutos.")
                 return
             }
             let allowedIDs = Set(identifiers)
@@ -129,7 +129,7 @@ struct SubscriptionFinishGate {
             }
             guard !loadedProducts.isEmpty else {
                 products = []
-                state = .failed("Apple no ha devuelto ningún plan. Comprueba que los productos estén creados, enviados para revisión o disponibles en App Store Connect y que los acuerdos de pago estén activos.")
+                state = .failed("Los planes no están disponibles ahora mismo. Inténtalo de nuevo en unos minutos.")
                 return
             }
             products = loadedProducts
@@ -301,7 +301,6 @@ struct NativeSubscriptionStoreView: View {
 
     @State private var store: SubscriptionStore
     @State private var restoredMessage: String?
-    @State private var showingPaymentReview = false
     @State private var showingOfferCodeRedemption = false
     @State private var selectedCoachCapacity = 10
 
@@ -367,16 +366,6 @@ struct NativeSubscriptionStoreView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingPaymentReview) {
-            if let product = selectedProduct {
-                NativePaymentReviewView(product: product, role: role, eligibleForIntro: store.introEligibleProductIDs.contains(product.id), isBusy: isBusy) {
-                    showingPaymentReview = false
-                    Task {
-                        if let result = await store.purchase(product) { onFinished(result) }
-                    }
-                }
-            }
-        }
         .alert("Suscripción", isPresented: Binding(
             get: { restoredMessage != nil },
             set: { if !$0 { restoredMessage = nil } }
@@ -396,17 +385,13 @@ struct NativeSubscriptionStoreView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: role == "coach" ? "person.2.badge.gearshape.fill" : "figure.run.circle.fill")
-                .font(.system(size: 42, weight: .semibold))
-                .foregroundStyle(Color.triWaveXAqua)
-                .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 8) {
             Text(role == "coach" ? "Entrena a tu equipo" : "Tu plan está listo")
                 .font(.largeTitle.bold())
                 .tracking(-0.6)
             Text(role == "coach"
-                 ? "Elige cuántos atletas activos quieres acompañar. Puedes cambiar de capacidad desde tu suscripción de Apple."
-                 : "Sigue tu semana, registra cada sesión y adapta el plan con tus datos reales.")
+                 ? "Elige cuántos atletas quieres acompañar."
+                 : "Activa tu acceso para empezar a entrenar.")
                 .foregroundStyle(.secondary)
         }
     }
@@ -423,7 +408,7 @@ struct NativeSubscriptionStoreView: View {
             }
             .pickerStyle(.menu)
             .frame(maxWidth: .infinity, alignment: .leading)
-            Text("Incluye 10 plazas en el plan base; cada tramo configurado añade capacidad para hasta 5 atletas. Solo aparecen planes disponibles en Apple y el precio localizado lo confirma App Store.")
+            Text("El plan base incluye 10 atletas. Puedes cambiarlo cuando quieras.")
                 .font(.footnote).foregroundStyle(.secondary)
         }
         .padding(16)
@@ -448,9 +433,6 @@ struct NativeSubscriptionStoreView: View {
                     selected: role == "coach"
                 )
             }
-            Text("La prueba gratuita y el importe exacto aparecen antes de confirmar. Los impuestos se muestran cuando corresponda.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
         }
     }
 
@@ -488,54 +470,52 @@ struct NativeSubscriptionStoreView: View {
                 }
                 Text("\(product.displayPrice) al mes").font(.title2.bold().monospacedDigit())
                 Divider()
-                benefit("checkmark.circle.fill", role == "coach" ? "Hasta \(selectedCoachCapacity) atletas activos" : "Plan adaptado a tu progreso")
-                benefit("arrow.triangle.2.circlepath", "Renovación mensual hasta que canceles")
-                benefit("iphone.and.arrow.forward", "Disponible con tu Apple ID en tus dispositivos")
-                if role == "coach" {
-                    benefit("person.2.fill", "Capacidad seleccionada: hasta \(selectedCoachCapacity) atletas activos")
-                    Text("Cada bloque adicional de 5 atletas se suma al precio mensual que Apple muestra antes de confirmar.")
-                        .font(.footnote).foregroundStyle(.secondary)
-                }
+                benefit("checkmark.circle", role == "coach" ? "Hasta \(selectedCoachCapacity) atletas activos" : "Plan que se adapta a tu progreso")
+                benefit("checkmark.circle", role == "coach" ? "Planes, chat y seguimiento de tu equipo" : "Seguimiento de cada sesión")
+                benefit("checkmark.circle", "Cancela cuando quieras")
             }
         }
     }
 
     private func benefit(_ systemImage: String, _ text: String) -> some View {
-        Label(text, systemImage: systemImage).font(.subheadline).symbolRenderingMode(.hierarchical)
+        Label(text, systemImage: systemImage).font(.subheadline)
     }
 
     private func purchaseButton(_ product: Product) -> some View {
         let eligible = store.introEligibleProductIDs.contains(product.id)
         let alreadyPurchased = store.purchasedProductIDs.contains(product.id)
-        return Button {
-            if alreadyPurchased {
+        let trial = eligible ? product.freeTrialLabel : nil
+        return VStack(spacing: 8) {
+            Button {
                 Task {
-                    if let result = await store.restore(expectedProductID: product.id, syncWithAppStore: false) {
-                        onFinished(result)
-                    }
+                    let result = alreadyPurchased
+                        ? await store.restore(expectedProductID: product.id, syncWithAppStore: false)
+                        : await store.purchase(product)
+                    if let result { onFinished(result) }
                 }
-            } else {
-                showingPaymentReview = true
+            } label: {
+                Text(alreadyPurchased ? "Continuar con mi suscripción" : trial != nil ? "Empezar prueba gratis" : "Suscribirme")
             }
-        } label: {
-            Text(alreadyPurchased ? "Continuar con mi suscripción" : "Revisar y continuar al pago")
+            .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
+            .disabled(isBusy)
+            if !alreadyPurchased {
+                Text(trial.map { "\($0), sin cobro hoy. Después, \(product.displayPrice) al mes." } ?? "\(product.displayPrice) al mes. Apple te pedirá confirmación.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+            }
         }
-        .buttonStyle(TriWaveXPrimaryButtonStyle(tint: .triWaveXAqua))
-        .disabled(isBusy)
         .accessibilityHint(eligible ? "Apple mostrará la confirmación. No se cobra durante la prueba gratuita." : "Apple mostrará el precio antes de confirmar.")
     }
 
     private var supportActions: some View {
         VStack(spacing: 4) {
-            Button("Canjear código de oferta de Apple") {
+            Button("Canjear código") {
                 showingOfferCodeRedemption = true
             }
             .buttonStyle(TriWaveXTextButtonStyle(tint: .triWaveXAqua))
             .disabled(isBusy)
-            Text("Los descuentos deben estar creados en App Store Connect.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
             Button("Restaurar compras") {
                 Task {
                     if let result = await store.restore(expectedProductID: productIdentifier) {
@@ -570,7 +550,7 @@ struct NativeSubscriptionStoreView: View {
         ContentUnavailableView {
             Label("Plan no disponible", systemImage: "creditcard.trianglebadge.exclamationmark")
         } description: {
-            Text(failureMessage ?? "Apple no ha encontrado el producto \(productIdentifier). Comprueba que esté creado y disponible en App Store Connect para esta app.")
+            Text(failureMessage ?? "Los planes no están disponibles ahora mismo. Inténtalo de nuevo en unos minutos.")
         } actions: {
             Button("Reintentar") { Task { await store.load() } }
         }
@@ -601,133 +581,5 @@ struct NativeSubscriptionStoreView: View {
     private var failureMessage: String? {
         if case .failed(let message) = store.state { return message }
         return nil
-    }
-}
-
-private struct NativePaymentReviewView: View {
-    let product: Product
-    let role: String
-    let eligibleForIntro: Bool
-    let isBusy: Bool
-    let onConfirm: () -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                Label("Pago seguro con Apple", systemImage: "lock.shield.fill")
-                    .font(.headline)
-                    .foregroundStyle(Color.triWaveXAqua)
-                Text("Revisa tu suscripción")
-                    .font(.largeTitle.bold())
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack { Text(role == "coach" ? "Entrenador" : "Atleta con IA"); Spacer(); Text("\(product.displayPrice)/mes").bold() }
-                    if eligibleForIntro, let trial = product.freeTrialLabel { Text("\(trial), sin cobro hoy.").foregroundStyle(.secondary) }
-                    if role == "coach" { Text("Incluye capacidad para hasta \(SubscriptionStore.coachCapacity(forProductID: product.id) ?? 10) atletas activos. Apple confirma el precio mensual exacto antes del pago.").font(.subheadline).foregroundStyle(.secondary) }
-                    if role != "coach" {
-                        Label("Desbloquea tu plan completo, los ajustes de carga y el seguimiento de cada sesión.", systemImage: "checkmark.circle.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Text("Apple mostrará el importe final y los impuestos antes de confirmar. Puedes cancelar desde Ajustes de tu Apple ID.").font(.footnote).foregroundStyle(.secondary)
-                }
-                .padding(16)
-                .background(Color(uiColor: .secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                Spacer()
-                SlideToConfirm(
-                    title: eligibleForIntro ? "Desliza para empezar la prueba gratis" : "Desliza para confirmar",
-                    isDisabled: isBusy,
-                    onConfirmed: onConfirm
-                )
-            }
-            .padding(20)
-            .navigationTitle("Confirmar pago")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancelar") { dismiss() }.disabled(isBusy) } }
-        }
-        .presentationDetents([.medium, .large])
-    }
-}
-
-private struct SlideToConfirm: View {
-    let title: String
-    let isDisabled: Bool
-    let onConfirmed: () -> Void
-
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var offset: CGFloat = 0
-    @State private var hasConfirmed = false
-
-    var body: some View {
-        GeometryReader { proxy in
-            let knobSize: CGFloat = 52
-            let horizontalPadding: CGFloat = 6
-            let maximumOffset = max(0, proxy.size.width - knobSize - horizontalPadding * 2)
-
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(Color(uiColor: .tertiarySystemFill))
-
-                Text(hasConfirmed || isDisabled ? "Preparando confirmación de Apple…" : title)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 56)
-                    .lineLimit(1)
-
-                Circle()
-                    .fill(isDisabled || hasConfirmed ? Color.secondary : Color.triWaveXAqua)
-                    .frame(width: knobSize, height: knobSize)
-                    .overlay {
-                        Image(systemName: hasConfirmed ? "checkmark" : "chevron.right")
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(.white)
-                    }
-                    .offset(x: horizontalPadding + offset)
-                    .shadow(color: .black.opacity(0.16), radius: 6, y: 3)
-            }
-            .contentShape(Capsule())
-            .gesture(
-                DragGesture(minimumDistance: 2)
-                    .onChanged { value in
-                        guard !isDisabled, !hasConfirmed else { return }
-                        offset = min(max(0, value.translation.width), maximumOffset)
-                    }
-                    .onEnded { _ in
-                        guard !isDisabled, !hasConfirmed else { return }
-                        if maximumOffset > 0, offset >= maximumOffset * 0.82 {
-                            complete(maximumOffset: maximumOffset)
-                        } else {
-                            withAnimation(reduceMotion ? .linear(duration: 0.1) : .spring(response: 0.34, dampingFraction: 0.78)) {
-                                offset = 0
-                            }
-                        }
-                    }
-            )
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel(title)
-            .accessibilityHint("Desliza hasta el final o usa la acción Confirmar. Apple mostrará la confirmación final.")
-            .accessibilityAddTraits(.isButton)
-            .accessibilityAction(named: Text("Confirmar")) {
-                guard !isDisabled, !hasConfirmed else { return }
-                complete(maximumOffset: maximumOffset)
-            }
-        }
-        .frame(height: 64)
-        .opacity(isDisabled && !hasConfirmed ? 0.72 : 1)
-        .onChange(of: isDisabled) { _, busy in
-            guard !busy else { return }
-            hasConfirmed = false
-            offset = 0
-        }
-    }
-
-    private func complete(maximumOffset: CGFloat) {
-        withAnimation(reduceMotion ? .linear(duration: 0.1) : .easeOut(duration: 0.18)) {
-            offset = maximumOffset
-            hasConfirmed = true
-        }
-        UINotificationFeedbackGenerator().notificationOccurred(.success)
-        onConfirmed()
     }
 }
